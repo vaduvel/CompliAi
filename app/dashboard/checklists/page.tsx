@@ -3,13 +3,14 @@
 import { useState } from "react"
 
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
 
-export default function ChecklistsPage() {
+export default function RemediationPage() {
   const cockpit = useCockpit()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
 
@@ -23,6 +24,8 @@ export default function ChecklistsPage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="dovada" />
 
       <RemediationBoard
         tasks={cockpit.tasks}

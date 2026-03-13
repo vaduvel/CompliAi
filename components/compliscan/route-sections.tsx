@@ -994,7 +994,7 @@ export function ScanWorkspace({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-[28px] leading-tight">Scan wizard</CardTitle>
+        <CardTitle className="text-[28px] leading-tight">Flux scanare</CardTitle>
         <p className="text-sm text-[var(--color-on-surface-muted)]">
           {isTextMode
             ? "Lipeste textul integral sau un extras relevant. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura fara sa mai incarci un fisier."
@@ -1153,9 +1153,9 @@ export function ScanWorkspace({
             </div>
 
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              <p className="font-medium text-[var(--color-on-surface)]">Status scan</p>
+              <p className="font-medium text-[var(--color-on-surface)]">Status flux</p>
               <p className="mt-2">
-                {scanInfo || "In asteptare. Incarca documentul si apasa pe butonul de start."}
+                {scanInfo || "In asteptare. Incarca sursa si porneste fluxul."}
               </p>
               <p className="mt-3 text-xs text-[var(--color-muted)]">
                 Total documente scanate: {scannedDocuments}
@@ -1475,7 +1475,7 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
           href="/dashboard/rapoarte"
           className="text-sm text-[var(--color-primary)] hover:underline"
         >
-          Rezolva in plan de remediere →
+          Rezolva in Remediere →
         </Link>
       </div>
       {tasks.map((task) => (

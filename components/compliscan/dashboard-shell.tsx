@@ -11,7 +11,6 @@ import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
 import {
   dashboardPrimaryNavItems,
-  dashboardSecondaryNavSections,
   isNavItemActive,
   mobileNavItems,
 } from "@/components/compliscan/navigation"
@@ -108,40 +107,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </nav>
             </div>
 
-            <div className="mt-6 space-y-5">
-              {dashboardSecondaryNavSections.map((section) => (
-                <div key={section.id}>
-                  <p className="px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                    {section.label}
-                  </p>
-                  <nav className="mt-2 space-y-1">
-                    {section.items.map((item) => {
-                      const active = isNavItemActive(pathname, item)
-                      return (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          className={`group ring-focus flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition ${
-                            active
-                              ? "bg-[var(--color-surface-hover)] text-[var(--text-primary)]"
-                              : "text-[var(--color-on-surface-muted)] hover:bg-[var(--color-surface-hover)]"
-                          }`}
-                        >
-                          <item.icon
-                            className={`size-4 transition-colors ${
-                              active
-                                ? "text-[var(--text-primary)]"
-                                : "text-[var(--icon-secondary)] group-hover:text-[var(--text-secondary)]"
-                            }`}
-                            strokeWidth={2.15}
-                          />
-                          <span>{item.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </nav>
-                </div>
-              ))}
+            <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-4 text-xs text-[var(--color-muted)]">
+              Sub-sectiunile apar ca tabs in fiecare pagina pentru a pastra fluxul clar.
             </div>
           </div>
 

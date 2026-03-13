@@ -1,6 +1,6 @@
 # CompliScan - Status Arhitectura
 
-Data actualizarii: 2026-03-12
+Data actualizarii: 2026-03-13
 
 ## Verdict scurt
 
@@ -45,6 +45,7 @@ Ultimul punct inchis in implementare:
 - taxonomie unica de principii in model si UI
 - drift-ul genereaza acum task-uri de remediere dedicate
 - navigatie primara grupata pe `Scanare / Control / Dovada`
+- sub-sectiunile sunt acum tabs per pilon, nu produse separate in sidebar
 - drift-ul este urcat in dashboard ca semnal operational principal
 - `AI Compliance Pack` comun peste documente, manifests si `compliscan.yaml`
 - `AI Compliance Pack v2` cu:
@@ -94,7 +95,7 @@ Ultimul punct inchis in implementare:
   - Dashboard
   - Alerte
   - Scanări
-  - Rapoarte
+  - Audit si export
   - Auditor Vault
 - `drift escalation matrix` este acum operațional:
   - lifecycle clar: `open / acknowledged / in_progress / resolved / waived`
@@ -186,7 +187,7 @@ Ultimul punct inchis in implementare:
   - ce surse intră în scope
   - presiunea curentă din findings și drift
 - severitate drift configurabilă la nivel de workspace
-- plan de remediere separat intre:
+- remediere separata intre:
   - remedieri rapide
   - remedieri structurale
 - `AIDiscoveryPanel` arată acum doar detectiile active:
@@ -198,6 +199,7 @@ Ultimul punct inchis in implementare:
   - decizii executive recomandate
   - carduri de blocaje / review / gap-uri de familie
   - trimiteri mai clare către `Annex IV lite`
+- QA riguroasa + dry run (auth, manifest, baseline, compliscan.yaml, drift lifecycle, exporturi audit)
   - memo executiv de deschidere
   - register cu owneri, acțiuni și deadline-uri
 - polish final pentru stakeholder non-tehnic în dosarele externe:
@@ -207,19 +209,20 @@ Ultimul punct inchis in implementare:
   - rezumat managerial per sistem în `Annex IV lite`
   - bundle / README cu ordine recomandată de citire
 - sprint de QA + UX cleanup pe fluxurile cu cea mai mare densitate:
-  - `Scanari` separa mai clar `flux activ` de `ultimul rezultat`
-  - `AIDiscoveryPanel` comprima mesajele de drift si pastreaza pagina ca work queue
-  - `Auditor Vault` porneste mai clar printr-un rezumat rapid si reduce numarul de trasee individuale afisate initial
+  - `Scanari` separa mai clar `flux activ` de `ultimul rezultat` (done)
+  - `AIDiscoveryPanel` comprima mesajele de drift si pastreaza pagina ca work queue (done)
+  - `Auditor Vault` porneste mai clar printr-un rezumat rapid si reduce numarul de trasee individuale afisate initial (done)
 - micro-copy + empty states cleanup:
-  - `Scanari` foloseste copy mai clar pe wizard si pe starea curenta
-  - `Sisteme` spune mai bine ce lipseste si ce se intampla cand nu exista inventory sau drift
-  - `Auditor Vault` explica mai clar ce lipseste cand nu exista snapshot, dovada, trasee sau jurnal
+  - `Scanari` foloseste copy mai clar pe flux si pe starea curenta (done)
+  - `Sisteme` spune mai bine ce lipseste si ce se intampla cand nu exista inventory sau drift (done)
+  - `Audit si dovezi` explica mai clar ce lipseste cand nu exista snapshot, dovada, trasee sau jurnal (done)
 - naming consistency pass pe suprafata vizibila:
-  - subtitle de brand aliniat la produsul actual
-  - `Flux scanare` in loc de `Wizard scanare`
-  - `Remediere` in loc de `Plan de remediere` pe suprafetele principale
-  - `Audit si export` in loc de `Rapoarte` pe suprafetele operationale
-- cleanup minim si pe componente legacy ramase, ca sa nu mai pastram naming-ul vechi in codul secundar
+  - subtitle de brand aliniat la produsul actual (done)
+  - `Flux scanare` in loc de `Wizard scanare` (done)
+  - `Remediere` in loc de `Plan de remediere` pe suprafetele principale (done)
+  - `Audit si export` in loc de `Rapoarte` pe suprafetele operationale (done)
+- cleanup minim si pe componente legacy ramase, ca sa nu mai pastram naming-ul vechi in codul secundar (done)
+  - componentele interne nu mai folosesc nume vechi precum `Wizard`, `ChecklistsPage` sau `RapoartePage`
 - `lint` si `build` trec
 
 ## Ce avem deja bine
@@ -288,16 +291,16 @@ Navigatia principala a fost deja grupata sub cei 3 piloni, dar inca exista short
 
 - Documente
 - Sisteme AI
-- Checklists
+- Remediere
 - Alerte
-- Rapoarte
+- Audit si export
 - Setari
 
 Asta este mult mai bine pentru user, dar mai trebuie armonizate:
 
 - titlurile unor pagini
 - copy-ul dintre piloni si shortcut-uri
-- relatia dintre `Checklists`, `Rapoarte` si `Auditor Vault`
+- relatia dintre `Remediere`, `Audit si export` si `Audit si dovezi`
 
 ### 2. Severitate si principii
 
@@ -377,7 +380,7 @@ Avem acum:
   - timeline
 - varianta client-facing, printabila, pentru PDF din browser
 - traceability matrix in JSON și în varianta client-facing
-- pozitionare mai clara in `Rapoarte` si `Auditor Vault`
+- pozitionare mai clara in `Audit si export` si `Audit si dovezi`
 
 Ce mai ramane:
 

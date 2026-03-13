@@ -198,8 +198,10 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
     auditPack.evidenceLedger.length === 0
       ? emptyState("Nu exista inca dovezi atasate in acest pachet.")
       : auditPack.evidenceLedger
-          .map(
-            (entry) => `<article class="card inset">
+          .map((entry) => {
+            const evidenceFile = formatEvidenceFile(entry)
+
+            return `<article class="card inset">
               <div class="row-between">
                 <div>
                   <h4>${escapeHtml(entry.title)}</h4>
@@ -212,12 +214,12 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
               <p class="muted">${escapeHtml(entry.validationMessage ?? "Fara mesaj suplimentar.")}</p>
               <dl class="meta-grid">
                 <div><dt>Tip dovada</dt><dd>${escapeHtml(entry.evidence?.kind ?? "n/a")}</dd></div>
-                <div><dt>Fisier</dt><dd>${escapeHtml(entry.evidence?.fileName ?? "neatasat")}</dd></div>
+                <div><dt>Fisier</dt><dd>${evidenceFile}</dd></div>
                 <div><dt>Actualizat</dt><dd>${escapeHtml(formatDateTime(entry.updatedAtISO))}</dd></div>
                 <div><dt>Document</dt><dd>${escapeHtml(entry.sourceDocument ?? "n/a")}</dd></div>
               </dl>
             </article>`
-          )
+          })
           .join("")
 
   const driftCards =
@@ -551,7 +553,7 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
           </article>
           <article class="card inset">
             <h3>Bundle ZIP</h3>
-            <p class="muted">Include acest dosar, pack-ul JSON, matrix-ul de trasabilitate si fișierele de dovadă disponibile în bundle.</p>
+            <p class="muted">Include README.txt cu ordinea recomandată de citire, plus pack-ul JSON, matrix-ul de trasabilitate si fișierele de dovadă disponibile în bundle.</p>
           </article>
         </div>
       </section>
@@ -1166,6 +1168,9 @@ function buildExternalUseGuidance(auditPack: AuditPackV2) {
     items.push("Nu prezenta sistemele încă detectate sau doar inferate ca adevăr operațional; confirmă-le în pack înainte.")
   }
 
+  items.push(
+    "Nu trimite extern: fișierele JSON brute (audit-pack-v2-1, traceability, evidence ledger) și dovezile brute, decât la cerere explicită."
+  )
   items.push("Ordinea bună de folosire este: Audit Pack client-facing → Annex IV lite → ZIP doar la cerere.")
 
   return items
@@ -1178,6 +1183,15 @@ function buildStatusLegend() {
     "Bundle ready: familia de controale are dovadă suficientă și reutilizabilă.",
     "SLA depășit: drift-ul nu mai este doar tehnic; este o responsabilitate întârziată care trebuie asumată de owner.",
   ])
+}
+
+function formatEvidenceFile(entry: AuditPackV2["evidenceLedger"][number]) {
+  const fileName = entry.evidence?.fileName ?? "neatasat"
+  const publicPath = entry.evidence?.publicPath
+  if (!publicPath) {
+    return escapeHtml(fileName)
+  }
+  return `<a class="inline-link" href="${escapeHtml(publicPath)}">${escapeHtml(fileName)}</a>`
 }
 
 function formatSystemGroupLabel(value: string) {

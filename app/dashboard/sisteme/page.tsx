@@ -13,6 +13,7 @@ import {
   AICompliancePackEntriesCard,
   AICompliancePackSummaryCard,
 } from "@/components/compliscan/ai-compliance-pack-card"
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import type { AICompliancePackEntry } from "@/lib/compliance/ai-compliance-pack"
 import { AIInventoryPanel } from "@/components/compliscan/ai-inventory-panel"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
@@ -50,11 +51,13 @@ export default function SistemePage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Sisteme"
+        title="Control sisteme AI"
         description="Detectie automata, confirmare umana, inventar AI si drift fata de baseline"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="control" />
 
       <SystemsGuideCard />
 
@@ -64,7 +67,7 @@ export default function SistemePage() {
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">Panou de control inventar AI</CardTitle>
+          <CardTitle className="text-xl">Stare inventar AI</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
           <MetricTile
@@ -135,7 +138,7 @@ export default function SistemePage() {
               <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
                 {validatedBaseline
                   ? "Drift-ul activ este comparat cu snapshot-ul validat uman."
-                  : "Momentan drift-ul compara cu ultimul snapshot disponibil. Pentru comparatii curate, valideaza unul din Setari."}
+                  : "Momentan drift-ul compara cu ultimul snapshot disponibil. Pentru comparatii curate, valideaza un baseline din Setari."}
               </p>
             </div>
 
@@ -252,7 +255,7 @@ export default function SistemePage() {
           <CardContent className="space-y-4 pt-6">
             {recentDrifts.length === 0 && (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--status-success-text)]">
-                Nu exista drift deschis pe inventarul AI in acest moment. Asta inseamna ca inventarul confirmat este stabil fata de baseline-ul curent.
+                Nu exista drift deschis pe inventarul AI in acest moment. Inventarul confirmat este stabil fata de baseline-ul curent.
               </div>
             )}
             {recentDrifts.map((drift) => (
@@ -297,7 +300,7 @@ export default function SistemePage() {
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">Utilitare operationale</CardTitle>
+          <CardTitle className="text-xl">Utilitare operatiuni</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <EFacturaValidatorCard
@@ -375,7 +378,7 @@ function MetricTile({
 }) {
   return (
     <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-      <p className="text-sm text-[var(--color-muted)]">{label}</p>
+      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
       <p className={`mt-2 text-3xl font-semibold ${tone}`}>{value}</p>
       <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">{hint}</p>
     </div>
@@ -466,7 +469,7 @@ function ControlPackageHighlightsCard({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-xl">Control package highlights</CardTitle>
+        <CardTitle className="text-xl">Pachete de control dominante</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {highlights.length === 0 && (

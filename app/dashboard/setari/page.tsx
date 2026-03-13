@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FileCode2, KeyRound, ShieldCheck, Trash2 } from "lucide-react"
 
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -75,6 +76,8 @@ export default function SetariPage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="control" />
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader>

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react"
 
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import {
   AICompliancePackEntriesCard,
@@ -70,14 +71,27 @@ export default function AuditorVaultPage() {
     cockpit.data.state.taskState,
     cockpit.data.state.events
   )
+  const auditReadiness =
+    validatedBaseline && activeDrifts.length === 0 && evidenceMissingTasks.length === 0
+      ? "audit_ready"
+      : "review_required"
 
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Auditor Vault"
+        title="Audit si dovezi"
         description="Dovezi, mapare legala, snapshot, pack de sisteme si drift intr-o singura vedere audit-ready"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
+      />
+
+      <PillarTabs sectionId="dovada" />
+
+      <VaultRapidSummaryCard
+        auditReadiness={auditReadiness}
+        baselineReady={Boolean(validatedBaseline)}
+        activeDrifts={activeDrifts.length}
+        evidenceGaps={evidenceMissingTasks.length}
       />
 
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -95,7 +109,7 @@ export default function AuditorVaultPage() {
             className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
           >
             <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
-              Deschide Audit Pack PDF
+              Deschide Audit Pack client-facing
               <Download className="size-4" strokeWidth={2.25} />
             </a>
           </Button>
@@ -272,6 +286,69 @@ function VaultQuickActionsCard() {
   )
 }
 
+function VaultRapidSummaryCard({
+  auditReadiness,
+  baselineReady,
+  activeDrifts,
+  evidenceGaps,
+}: {
+  auditReadiness: "audit_ready" | "review_required"
+  baselineReady: boolean
+  activeDrifts: number
+  evidenceGaps: number
+}) {
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <CardContent className="grid gap-3 p-5 md:grid-cols-4">
+        <RapidSummaryItem
+          label="Audit readiness"
+          value={auditReadiness === "audit_ready" ? "audit ready" : "review required"}
+          tone={auditReadiness === "audit_ready" ? "text-[var(--status-success-text)]" : "text-[var(--color-warning)]"}
+          hint={auditReadiness === "audit_ready" ? "Poți pregăti distribuirea externă." : "Mai sunt pași de validare înainte de audit."}
+        />
+        <RapidSummaryItem
+          label="Baseline"
+          value={baselineReady ? "validat" : "lipsește"}
+          tone={baselineReady ? "text-[var(--status-success-text)]" : "text-[var(--color-warning)]"}
+          hint={baselineReady ? "Comparația are punct de referință stabil." : "Confirmă un snapshot ca baseline."}
+        />
+        <RapidSummaryItem
+          label="Drift activ"
+          value={String(activeDrifts)}
+          tone={activeDrifts > 0 ? "text-[var(--color-error)]" : "text-[var(--status-success-text)]"}
+          hint={activeDrifts > 0 ? "Schimbări care cer explicație." : "Nu există drift deschis."}
+        />
+        <RapidSummaryItem
+          label="Gap dovadă"
+          value={String(evidenceGaps)}
+          tone={evidenceGaps > 0 ? "text-[var(--color-warning)]" : "text-[var(--status-success-text)]"}
+          hint={evidenceGaps > 0 ? "Controale fără dovadă validată." : "Dovezile sunt acoperite."}
+        />
+      </CardContent>
+    </Card>
+  )
+}
+
+function RapidSummaryItem({
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  label: string
+  value: string
+  hint: string
+  tone: string
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
+      <p className={`mt-2 text-sm font-semibold ${tone}`}>{value}</p>
+      <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">{hint}</p>
+    </div>
+  )
+}
+
 function VaultMetric({
   label,
   value,
@@ -315,7 +392,7 @@ function EvidenceLedgerCard({
           <div className="mt-4 space-y-3">
             {evidenceReadyTasks.length === 0 && (
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Încă nu există task-uri cu dovadă validată. Începe din Checklists, atașează o dovadă și rulează `Mark as fixed & rescan`, apoi revino aici.
+                Încă nu există task-uri cu dovadă validată. Începe din Remediere, atașează o dovadă și rulează `Mark as fixed & rescan`, apoi revino aici.
               </p>
             )}
             {evidenceReadyTasks.slice(0, 6).map((task) => (
@@ -793,12 +870,12 @@ function TraceabilityMatrixCard({
             </div>
           </div>
         )}
-        {records.length > 5 && (
+        {records.length > 3 && (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-sm text-[var(--color-on-surface-muted)]">
-            Afisam primele 5 trasee de control ca sa ramana pagina usor de citit. Pentru restul, confirma mai intai pe familie sau pe articol si apoi revino pe controalele individuale.
+            Afisam primele 3 trasee de control ca sa ramana pagina usor de citit. Pentru restul, confirma mai intai pe familie sau pe articol si apoi revino pe controalele individuale.
           </div>
         )}
-        {records.slice(0, 5).map((record) => (
+        {records.slice(0, 3).map((record) => (
           <div
             key={record.id}
             className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"

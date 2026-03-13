@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { ExportCenter } from "@/components/compliscan/export-center"
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
@@ -29,7 +30,7 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
 
-export default function RapoartePage() {
+export default function AuditExportPage() {
   const cockpit = useCockpit()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null)
@@ -48,10 +49,12 @@ export default function RapoartePage() {
     <div className="space-y-8">
       <PageHeader
         title="Audit si export"
-        description="Snapshot exportabil, baseline pentru drift si plan de remediere gata de livrat"
+        description="Snapshot exportabil, baseline pentru drift si remediere gata de livrat"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="dovada" />
 
       <ReportsGuideCard />
 
@@ -111,7 +114,7 @@ function ReportsGuideCard() {
     {
       title: "1. Validezi task-urile critice",
       detail:
-        "Planul de remediere rămâne sursa de lucru. Atașezi dovada direct din card și folosești Mark as fixed & rescan ca să închizi task-ul pe bune.",
+        "Remedierea rămâne sursa de lucru. Atașezi dovada direct din card și folosești Mark as fixed & rescan ca să închizi task-ul pe bune.",
     },
     {
       title: "2. Verifici snapshot-ul și baseline-ul",
@@ -322,7 +325,7 @@ function ExportArtifactsCard() {
       icon: FileSearch,
       title: "Raport PDF",
       detail:
-        "Rezumat pentru stakeholderi: scor, alerte, progres și plan de remediere într-un format ușor de distribuit.",
+        "Rezumat pentru stakeholderi: scor, alerte, progres și remediere într-un format ușor de distribuit.",
     },
     {
       icon: FileCode2,

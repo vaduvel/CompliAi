@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import {
   LatestDocumentSection,
   LoadingScreen,
@@ -131,6 +132,8 @@ export default function ScanariPage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="scanare" />
 
       <SourceModeGuide sourceType={sourceType} />
 

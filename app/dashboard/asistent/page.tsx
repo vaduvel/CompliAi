@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Loader2, Send, Sparkles } from "lucide-react"
 
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 import { Button } from "@/components/ui/button"
@@ -79,6 +80,8 @@ export default function AsistentPage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="dovada" />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="flex-1 overflow-y-auto p-5 space-y-4">

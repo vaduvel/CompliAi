@@ -151,9 +151,9 @@ Modulele principale sunt:
 - Scanari
 - Documente
 - Sisteme AI
-- Checklists
+- Remediere
 - Alerte
-- Rapoarte
+- Audit si export
 - Setari
 
 ## Limitari

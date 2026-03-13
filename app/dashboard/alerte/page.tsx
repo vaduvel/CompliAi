@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { AlertsList, EmptyStateCard, LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,6 +60,8 @@ export default function AlertePage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="control" />
 
       {openDrifts.length > 0 && (
         <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">

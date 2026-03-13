@@ -2,7 +2,7 @@
 
 Acest document transforma roadmap-ul de produs in task-uri tehnice concrete.
 
-## Status real - 2026-03-12
+## Status real - 2026-03-13
 
 Checkpoint-ul curent din implementare:
 
@@ -42,7 +42,7 @@ Checkpoint-ul curent din implementare:
   - next action
   - evidence required
   - law reference
-- [x] drift UX unificat în Dashboard / Alerte / Scanări / Rapoarte / Auditor Vault
+- [x] drift UX unificat în Dashboard / Alerte / Scanări / Audit si export / Audit si dovezi
 - [x] `drift escalation matrix` operațional:
   - lifecycle `open / acknowledged / in_progress / resolved / waived`
   - owner + SLA + deadline
@@ -77,6 +77,8 @@ Checkpoint-ul curent din implementare:
   - `Audit si export`
   - subtitle de brand aliniat cu pozitionarea curenta
 - [x] cleanup minim pe componente legacy pentru etichetele vechi ramase in cod
+  - tipuri si componente interne curate (`InventoryFlowStep`, `RemediationPage`, `AuditExportPage`)
+- [x] QA riguroasa + dry run (auth, manifest, baseline, compliscan.yaml, drift lifecycle, exporturi audit)
 
 Observatie:
 
@@ -103,7 +105,9 @@ Produsul trebuie sa fie usor de inteles in 30 de secunde.
   - ce fac acum
   - ce se intampla dupa
 - [x] drift surface in dashboard ca element vizibil de zi cu zi
-- [ ] reducere sectiuni care par produse separate (partial)
+- [x] reducere sectiuni care par produse separate:
+  - nav secundar mutat in tabs per pilon
+  - sidebar ramane doar pe fluxul principal
 
 ### Livrabil tehnic
 

@@ -404,18 +404,19 @@ export function AIDiscoveryPanel({
                       ))}
                     </div>
                     {relatedDrifts.length > 0 && (
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-sm text-[var(--color-on-surface-muted)]">
-                        <div className="flex flex-wrap items-center gap-2">
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
                           <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
                             {relatedDrifts.length} drift activ
                           </Badge>
-                          <span className="text-xs text-[var(--color-muted)]">
-                            Semnalul ramane urmarit central in inventar si in panoul de drift.
-                          </span>
+                          <span>Detalii in Control / Drift.</span>
+                          <a
+                            className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                            href="/dashboard/alerte"
+                          >
+                            Deschide panoul
+                          </a>
                         </div>
-                        <p className="mt-2 text-xs text-[var(--color-muted)]">
-                          Ultimul semnal: {relatedDrifts[0]?.summary}
-                        </p>
                       </div>
                     )}
                     {isEditing && (

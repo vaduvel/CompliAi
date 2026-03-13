@@ -1,5 +1,6 @@
 "use client"
 
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LatestDocumentSection, LoadingScreen, PageHeader, RecentScansCard } from "@/components/compliscan/route-sections"
 import { buildScanInsights, useCockpit } from "@/components/compliscan/use-cockpit"
 
@@ -32,6 +33,8 @@ export default function DocumentePage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
+
+      <PillarTabs sectionId="scanare" />
 
       <LatestDocumentSection
         latestScan={latestDocumentScan}

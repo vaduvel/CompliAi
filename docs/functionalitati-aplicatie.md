@@ -102,7 +102,7 @@ Tipuri de schimbari urmarite:
 
 Astfel, echipa vede nu doar ce exista acum, ci si ce s-a schimbat fata de o stare considerata valida.
 
-### 6. Findings, alerte si plan de remediere
+### 6. Findings, alerte si remediere
 
 Pentru fiecare analiza, aplicatia poate genera:
 
@@ -112,9 +112,9 @@ Pentru fiecare analiza, aplicatia poate genera:
 - recomandari de actiune
 - sugestii de dovezi necesare
 
-Aceste rezultate ajuta echipa sa transforme o analiza intr-un plan de lucru clar.
+Aceste rezultate ajuta echipa sa transforme o analiza intr-un flux de lucru clar.
 
-### 7. Rapoarte si export
+### 7. Audit si export
 
 Aplicatia poate exporta:
 
@@ -152,9 +152,9 @@ Aplicatia este organizata in urmatoarele zone principale:
 - `Scanari` - scan document, text sau manifest
 - `Documente` - rezultate pentru documente scanate
 - `Sisteme AI` - inventar, detectii si baseline
-- `Checklists` - semnale si verificari operationale
+- `Remediere` - task-uri actionabile si dovezi
 - `Alerte` - risc activ si drift deschis
-- `Rapoarte` - exporturi si snapshot-uri
+- `Audit si export` - exporturi, snapshot-uri si dosar client-facing
 - `Setari` - reset, configurare si control workspace
 
 ## Limitari actuale

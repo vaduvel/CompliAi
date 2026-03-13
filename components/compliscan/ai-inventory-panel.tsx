@@ -26,7 +26,7 @@ type AIInventoryPanelProps = {
   onRemove: (id: string) => Promise<void>
 }
 
-type WizardStep = 1 | 2 | 3 | 4
+type InventoryFlowStep = 1 | 2 | 3 | 4
 
 const PURPOSE_OPTIONS: Array<{
   value: AISystemPurpose
@@ -108,7 +108,7 @@ function riskTone(level: AISystemRecord["riskLevel"]) {
   }
 }
 
-const STEP_LABELS: Record<WizardStep, string> = {
+const STEP_LABELS: Record<InventoryFlowStep, string> = {
   1: "Informatii de baza",
   2: "Scop principal",
   3: "Factori de risc",
@@ -116,7 +116,7 @@ const STEP_LABELS: Record<WizardStep, string> = {
 }
 
 export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInventoryPanelProps) {
-  const [step, setStep] = useState<WizardStep>(1)
+  const [step, setStep] = useState<InventoryFlowStep>(1)
   const [name, setName] = useState("")
   const [vendor, setVendor] = useState("")
   const [modelType, setModelType] = useState("")
@@ -178,17 +178,17 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(340px,0.82fr)_minmax(0,1.18fr)]">
-      {/* WIZARD */}
+      {/* INVENTORY FLOW */}
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="border-b border-[var(--color-border)] pb-5">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-xl">AI inventory wizard</CardTitle>
+            <CardTitle className="text-xl">Flux inventar AI</CardTitle>
             <span className="text-xs text-[var(--color-muted)]">
               {step} / 4 — {STEP_LABELS[step]}
             </span>
           </div>
           <div className="mt-3 flex gap-1.5">
-            {([1, 2, 3, 4] as WizardStep[]).map((s) => (
+            {([1, 2, 3, 4] as InventoryFlowStep[]).map((s) => (
               <div
                 key={s}
                 className={`h-1 flex-1 rounded-full transition-all ${
@@ -374,7 +374,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           <div className="flex gap-3 pt-1">
             {step > 1 && (
               <Button
-                onClick={() => setStep((s) => (s - 1) as WizardStep)}
+                onClick={() => setStep((s) => (s - 1) as InventoryFlowStep)}
                 variant="outline"
                 className="h-11 flex-1 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
               >
@@ -385,7 +385,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
             {step < 4 ? (
               <Button
-                onClick={() => setStep((s) => (s + 1) as WizardStep)}
+                onClick={() => setStep((s) => (s + 1) as InventoryFlowStep)}
                 disabled={!canGoNext}
                 className="h-11 flex-1 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
               >
@@ -421,7 +421,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           <CardContent className="space-y-4 pt-6">
             {systems.length === 0 && (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-                Inca nu exista sisteme AI inventariate. Wizard-ul de mai sus este primul pas real
+                Inca nu exista sisteme AI inventariate. Fluxul de mai sus este primul pas real
                 catre clasificare AI Act.
               </div>
             )}
