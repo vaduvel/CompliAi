@@ -1,0 +1,22 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="compliscanGradient" x1="26" y1="20" x2="226" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3727F7" />
+      <stop offset="0.55" stop-color="#3745FB" />
+      <stop offset="1" stop-color="#2B6AFF" />
+    </linearGradient>
+    <radialGradient id="compliscanShine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 86) rotate(90) scale(126)">
+      <stop offset="0" stop-color="white" stop-opacity="0.26" />
+      <stop offset="1" stop-color="white" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect x="8" y="8" width="240" height="240" rx="34" fill="url(#compliscanGradient)" />
+  <rect x="8" y="8" width="240" height="240" rx="34" fill="url(#compliscanShine)" />
+
+  <path d="M 68.864 57.524 A 92 92 0 0 1 159.466 41.548 L 147.837 73.498 A 58 58 0 0 0 90.718 83.569 Z" fill="#F8FAFF" />
+  <path d="M 176.753 49.98 A 92 92 0 0 1 209.231 84.809 L 179.211 100.771 A 58 58 0 0 0 158.735 78.813 Z" fill="#F8FAFF" />
+  <path d="M 217.267 150.257 A 92 92 0 0 1 191.909 194.179 L 168.29 169.722 A 58 58 0 0 0 184.277 142.031 Z" fill="#F8FAFF" />
+  <path d="M 176.753 206.02 A 92 92 0 0 1 68.864 198.476 L 90.718 172.431 A 58 58 0 0 0 158.735 177.187 Z" fill="#F8FAFF" />
+  <path d="M 57.524 187.136 A 92 92 0 0 1 55.503 71.359 L 82.295 92.292 A 58 58 0 0 0 83.569 165.282 Z" fill="#F8FAFF" />
+</svg>

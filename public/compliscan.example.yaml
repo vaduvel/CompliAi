@@ -1,0 +1,26 @@
+version: "1.0"
+system_id: "agent-suport-clienti-v2"
+name: "Chatbot Recomandari Stil"
+
+specs:
+  provider: "openai"
+  model: "gpt-4o"
+  capability: ["text-generation", "recommendation"]
+  temperature_limit: 0.7
+  filters_enabled: true
+
+governance:
+  risk_class: "limited"
+  data_residency: "eu-central-1"
+  personal_data_processed: true
+  retention_days: 30
+
+human_oversight:
+  required: true
+  review_method: "sampling-audit"
+  reviewer_role: "marketing-ops"
+  alert_on_failure: true
+
+mapping:
+  regulations: ["GDPR", "EU-AI-ACT"]
+  articles: ["Art. 50", "Art. 13", "Art. 6", "Art. 7"]

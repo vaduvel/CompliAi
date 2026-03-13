@@ -1,0 +1,709 @@
+import type {
+  AISystemRecord,
+  ComplianceAlert,
+  ComplianceDriftRecord,
+  ComplianceEvent,
+  ComplianceState,
+  DashboardSummary,
+  DetectedAISystemRecord,
+  EFacturaValidationRecord,
+  PersistedTaskState,
+  ScanExtractionStatus,
+  ScanFinding,
+  ScanRecord,
+} from "@/lib/compliance/types"
+import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
+import { applyTaskResolutionToAlerts, getResolvedFindingIds } from "@/lib/compliance/task-resolution"
+import {
+  inferPrinciplesFromCategory,
+  normalizeCompliancePrinciples,
+  normalizeComplianceSeverity,
+  severityToAlertBuckets,
+  severityToLegacyRisk,
+} from "@/lib/compliance/constitution"
+import {
+  isDriftLifecycleOpen,
+  normalizeDriftLifecycleStatus,
+} from "@/lib/compliance/drift-lifecycle"
+
+export const initialComplianceState: ComplianceState = {
+  highRisk: 0,
+  lowRisk: 0,
+  gdprProgress: 0,
+  efacturaSyncedAtISO: "",
+  efacturaConnected: false,
+  efacturaSignalsCount: 0,
+  scannedDocuments: 0,
+  alerts: [],
+  findings: [],
+  scans: [],
+  chat: [],
+  taskState: {},
+  aiComplianceFieldOverrides: {},
+  traceabilityReviews: {},
+  aiSystems: [],
+  detectedAISystems: [],
+  efacturaValidations: [],
+  driftRecords: [],
+  driftSettings: {
+    severityOverrides: {},
+  },
+  snapshotHistory: [],
+  validatedBaselineSnapshotId: undefined,
+  events: [],
+}
+
+export function normalizeComplianceState(state: ComplianceState): ComplianceState {
+  const findings = (state.findings ?? [])
+    .filter((finding) => !isLegacyInformationalFinding(finding))
+    .map(normalizeFinding)
+  const rawAlerts = (state.alerts ?? []).filter(
+    (alert) => !(alert.id === "a1" || alert.id === "a2")
+  ).map(normalizeAlert)
+  const scans = (state.scans ?? []).map(normalizeScanRecord)
+  const taskState = normalizeTaskState(state.taskState)
+  const aiComplianceFieldOverrides = normalizeAIComplianceFieldOverrides(
+    state.aiComplianceFieldOverrides
+  )
+  const traceabilityReviews = normalizeTraceabilityReviews(state.traceabilityReviews)
+  const aiSystems = normalizeAISystems(state.aiSystems)
+  const detectedAISystems = normalizeDetectedAISystems(state.detectedAISystems)
+  const efacturaValidations = normalizeEFacturaValidations(state.efacturaValidations)
+  const driftRecords = normalizeDriftRecords(state.driftRecords)
+  const driftSettings = normalizeDriftSettings(state.driftSettings)
+  const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
+  const events = normalizeEvents(state.events)
+  const resolvedFindingIds = getResolvedFindingIds({
+    ...state,
+    alerts: rawAlerts,
+    findings,
+    scans,
+    taskState,
+    aiComplianceFieldOverrides,
+    traceabilityReviews,
+    aiSystems,
+    detectedAISystems,
+    efacturaValidations,
+    driftRecords,
+    driftSettings,
+    snapshotHistory,
+    events,
+  })
+  const alerts = applyTaskResolutionToAlerts({
+    ...state,
+    alerts: rawAlerts,
+    findings,
+    scans,
+    taskState,
+    aiComplianceFieldOverrides,
+    traceabilityReviews,
+    aiSystems,
+    detectedAISystems,
+    efacturaValidations,
+    driftRecords,
+    driftSettings,
+    snapshotHistory,
+    events,
+  })
+
+  const unresolvedFindings = findings.filter((finding) => !resolvedFindingIds.has(finding.id))
+  const highRisk = unresolvedFindings.filter(
+    (finding) => finding.severity === "critical" || finding.severity === "high"
+  ).length
+  const lowRisk = unresolvedFindings.filter(
+    (finding) => finding.severity === "medium" || finding.severity === "low"
+  ).length
+  const efacturaSignalsCount = unresolvedFindings.filter(
+    (finding) => finding.category === "E_FACTURA"
+  ).length
+  const scannedDocuments = scans.length
+
+  const openAlerts = alerts.filter((alert) => alert.open)
+  const redAlerts = openAlerts.filter((alert) => severityToAlertBuckets(alert.severity).red).length
+  const yellowAlerts = openAlerts.filter((alert) => severityToAlertBuckets(alert.severity).yellow).length
+
+  let gdprProgress = 0
+  if (scannedDocuments > 0 || findings.length > 0 || alerts.length > 0) {
+    gdprProgress = clamp(100 - redAlerts * 20 - yellowAlerts * 8, 0, 100)
+  }
+
+  const efacturaSyncedAtISO = isValidIso(state.efacturaSyncedAtISO)
+    ? state.efacturaSyncedAtISO
+    : ""
+
+  return {
+    ...state,
+    highRisk,
+    lowRisk,
+    scannedDocuments,
+    gdprProgress,
+    efacturaConnected: Boolean(state.efacturaConnected),
+    efacturaSignalsCount,
+    efacturaSyncedAtISO,
+    taskState,
+    aiComplianceFieldOverrides,
+    traceabilityReviews,
+    aiSystems,
+    detectedAISystems,
+    efacturaValidations,
+    driftRecords,
+    snapshotHistory,
+    validatedBaselineSnapshotId:
+      typeof state.validatedBaselineSnapshotId === "string" &&
+      snapshotHistory.some((snapshot) => snapshot.snapshotId === state.validatedBaselineSnapshotId)
+        ? state.validatedBaselineSnapshotId
+        : undefined,
+    events,
+  }
+}
+
+function normalizeDriftSettings(value: ComplianceState["driftSettings"] | undefined) {
+  if (!value || typeof value !== "object") {
+    return {
+      severityOverrides: {},
+    }
+  }
+
+  const rawOverrides =
+    value.severityOverrides && typeof value.severityOverrides === "object"
+      ? value.severityOverrides
+      : {}
+
+  return {
+    severityOverrides: Object.fromEntries(
+      Object.entries(rawOverrides).flatMap(([change, severity]) =>
+        severity === "critical" ||
+        severity === "high" ||
+        severity === "medium" ||
+        severity === "low"
+          ? [[change, severity]]
+          : []
+      )
+    ),
+  }
+}
+
+function isLegacyInformationalFinding(finding: ScanFinding) {
+  return (
+    finding.provenance?.ruleId === "GEN-001" &&
+    finding.title === "Scanare completă, risc redus"
+  )
+}
+
+export function computeDashboardSummary(state: ComplianceState): DashboardSummary {
+  const hasEvidence =
+    state.scannedDocuments > 0 ||
+    state.findings.length > 0 ||
+    state.alerts.length > 0 ||
+    state.aiSystems.length > 0 ||
+    state.detectedAISystems.length > 0
+  if (!hasEvidence) {
+    return {
+      score: 0,
+      riskLabel: "Risc Mediu",
+      riskColor: "#A1A1AA",
+      redAlerts: 0,
+      yellowAlerts: 0,
+      openAlerts: 0,
+    }
+  }
+
+  const openAlerts = state.alerts.filter((a) => a.open)
+  const openDrifts = state.driftRecords.filter((drift) => drift.open)
+  const driftRedAlerts = openDrifts.filter(
+    (drift) => drift.severity === "critical" || drift.severity === "high"
+  ).length
+  const driftYellowAlerts = openDrifts.filter((drift) => drift.severity === "medium").length
+  const redAlerts =
+    openAlerts.filter((a) => severityToAlertBuckets(a.severity).red).length + driftRedAlerts
+  const yellowAlerts =
+    openAlerts.filter((a) => severityToAlertBuckets(a.severity).yellow).length + driftYellowAlerts
+  const alertPenalty = redAlerts * 12 + yellowAlerts * 5
+  const riskPenalty = state.highRisk * 8 + state.lowRisk * 2
+  const score = clamp(100 - alertPenalty - riskPenalty, 0, 100)
+
+  if (score >= 90) {
+    return {
+      score,
+      riskLabel: "Risc Scăzut",
+      riskColor: "#22C55E",
+      redAlerts,
+      yellowAlerts,
+      openAlerts: openAlerts.length,
+    }
+  }
+  if (score >= 75) {
+    return {
+      score,
+      riskLabel: "Risc Mediu",
+      riskColor: "#EAB308",
+      redAlerts,
+      yellowAlerts,
+      openAlerts: openAlerts.length,
+    }
+  }
+  return {
+    score,
+    riskLabel: "Risc Ridicat",
+    riskColor: "#EF4444",
+    redAlerts,
+    yellowAlerts,
+    openAlerts: openAlerts.length,
+  }
+}
+
+export function formatRelativeRomanian(isoDate: string) {
+  if (!isValidIso(isoDate)) return "necunoscut"
+  const now = Date.now()
+  const then = new Date(isoDate).getTime()
+  const diffMinutes = Math.max(0, Math.round((now - then) / 60000))
+  if (diffMinutes < 1) return "acum"
+  if (diffMinutes < 60) return `acum ${diffMinutes} min`
+  const hours = Math.round(diffMinutes / 60)
+  if (hours < 24) return `acum ${hours} h`
+  const days = Math.round(hours / 24)
+  return `acum ${days} zile`
+}
+
+export function simulateFindings(
+  documentName: string,
+  content: string,
+  nowISO: string,
+  scanId?: string,
+  options?: {
+    manifestSignals?: string[]
+  }
+): {
+  findings: ScanFinding[]
+  alerts: ComplianceAlert[]
+  highRiskDelta: number
+  lowRiskDelta: number
+} {
+  const sourceText = `${documentName} ${content}`
+  const text = sourceText.toLowerCase()
+  const manifestSignals = new Set(
+    (options?.manifestSignals ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean)
+  )
+  const findings: ScanFinding[] = []
+  const alerts: ComplianceAlert[] = []
+
+  let highRiskDelta = 0
+  let lowRiskDelta = 0
+
+  for (const rule of COMPLIANCE_RULE_LIBRARY) {
+    const match = findFirstRuleMatch(text, sourceText, rule.keywords, rule.manifestKeys, manifestSignals)
+    if (!match) continue
+
+    if (rule.category === "EU_AI_ACT") {
+      highRiskDelta += 1
+      lowRiskDelta = 0
+    }
+
+    const findingId = uid("finding")
+    findings.push({
+      id: findingId,
+      title: rule.title,
+      detail: rule.detail,
+      category: rule.category,
+      severity: rule.severity,
+      risk: severityToLegacyRisk(rule.severity),
+      principles: rule.principles,
+      createdAtISO: nowISO,
+      sourceDocument: documentName,
+      scanId,
+      legalReference: rule.legalReference,
+      impactSummary: rule.impactSummary,
+      remediationHint: rule.remediationHint,
+      legalMappings: rule.legalMappings,
+      ownerSuggestion: rule.ownerSuggestion,
+      evidenceRequired: rule.evidenceRequired,
+      evidenceTypes: rule.evidenceTypes,
+      rescanHint: rule.rescanHint,
+      readyTextLabel: rule.readyTextLabel,
+      readyText: rule.readyText,
+      provenance: {
+        ruleId: rule.ruleId,
+        matchedKeyword: match.keyword,
+        excerpt: match.excerpt,
+        startChar: match.startChar,
+        endChar: match.endChar,
+      },
+    })
+
+    if (rule.alertMessage && rule.alertSeverity) {
+      alerts.push({
+        id: uid("alert"),
+        message: rule.alertMessage,
+        severity: rule.alertSeverity,
+        open: true,
+        sourceDocument: documentName,
+        createdAtISO: nowISO,
+        scanId,
+        findingId,
+      })
+    }
+  }
+
+  return { findings, alerts, highRiskDelta, lowRiskDelta }
+}
+
+function findFirstRuleMatch(
+  text: string,
+  sourceText: string,
+  keywords: string[],
+  manifestKeys: string[] | undefined,
+  manifestSignals: Set<string>
+) {
+  for (const keyword of keywords) {
+    const startChar = text.indexOf(keyword)
+    if (startChar === -1) continue
+
+    return {
+      keyword,
+      startChar,
+      endChar: startChar + keyword.length,
+      excerpt: buildExcerpt(sourceText, startChar, startChar + keyword.length),
+    }
+  }
+
+  for (const manifestKey of manifestKeys ?? []) {
+    const normalized = manifestKey.toLowerCase()
+    if (!manifestSignals.has(normalized)) continue
+
+    const startChar = text.indexOf(normalized)
+    if (startChar !== -1) {
+      return {
+        keyword: manifestKey,
+        startChar,
+        endChar: startChar + normalized.length,
+        excerpt: buildExcerpt(sourceText, startChar, startChar + normalized.length),
+      }
+    }
+
+    return {
+      keyword: manifestKey,
+      startChar: undefined,
+      endChar: undefined,
+      excerpt: `Semnal tehnic detectat in manifest/config: ${manifestKey}`,
+    }
+  }
+
+  return null
+}
+
+function buildExcerpt(text: string, startChar: number, endChar: number) {
+  const padding = 64
+  const start = Math.max(0, startChar - padding)
+  const end = Math.min(text.length, endChar + padding)
+  return text.slice(start, end).replace(/\s+/g, " ").trim()
+}
+
+function normalizeAlert(alert: ComplianceAlert): ComplianceAlert {
+  const severity = normalizeComplianceSeverity(alert.severity, "medium")
+
+  return {
+    ...alert,
+    severity,
+  }
+}
+
+function normalizeFinding(finding: ScanFinding): ScanFinding {
+  const rule = finding.provenance?.ruleId
+    ? COMPLIANCE_RULE_LIBRARY.find((item) => item.ruleId === finding.provenance?.ruleId)
+    : undefined
+  const severity = normalizeComplianceSeverity(
+    finding.severity || (finding.risk === "high" ? "high" : "low"),
+    rule?.severity || "medium"
+  )
+  const principles = normalizeCompliancePrinciples(
+    finding.principles,
+    rule?.principles || inferPrinciplesFromCategory(finding.category)
+  )
+
+  return {
+    ...finding,
+    severity,
+    risk: severityToLegacyRisk(severity),
+    principles,
+  }
+}
+
+function uid(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function isValidIso(value?: string) {
+  if (!value) return false
+  const timestamp = new Date(value).getTime()
+  return Number.isFinite(timestamp)
+}
+
+function isTaskEvidenceKind(value: unknown) {
+  return (
+    value === "screenshot" ||
+    value === "policy_text" ||
+    value === "log_export" ||
+    value === "yaml_evidence" ||
+    value === "document_bundle" ||
+    value === "other"
+  )
+}
+
+function normalizeTaskState(
+  value: ComplianceState["taskState"] | undefined
+): Record<string, PersistedTaskState> {
+  if (!value || typeof value !== "object") return {}
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([taskId, entry]) => {
+      if (!entry || typeof entry !== "object") return []
+
+      const status = entry.status === "done" ? "done" : "todo"
+      const updatedAtISO = isValidIso(entry.updatedAtISO) ? entry.updatedAtISO : new Date(0).toISOString()
+      const attachedEvidence =
+        typeof entry.attachedEvidence === "string" && entry.attachedEvidence.trim()
+          ? entry.attachedEvidence.trim()
+          : undefined
+      const attachedEvidenceMeta =
+        entry.attachedEvidenceMeta &&
+        typeof entry.attachedEvidenceMeta === "object" &&
+        typeof entry.attachedEvidenceMeta.fileName === "string" &&
+        entry.attachedEvidenceMeta.fileName.trim()
+          ? {
+              id:
+                typeof entry.attachedEvidenceMeta.id === "string" &&
+                entry.attachedEvidenceMeta.id.trim()
+                  ? entry.attachedEvidenceMeta.id
+                  : `evidence-${taskId}`,
+              fileName: entry.attachedEvidenceMeta.fileName.trim(),
+              mimeType:
+                typeof entry.attachedEvidenceMeta.mimeType === "string" &&
+                entry.attachedEvidenceMeta.mimeType.trim()
+                  ? entry.attachedEvidenceMeta.mimeType
+                  : "application/octet-stream",
+              sizeBytes:
+                typeof entry.attachedEvidenceMeta.sizeBytes === "number"
+                  ? entry.attachedEvidenceMeta.sizeBytes
+                  : 0,
+              uploadedAtISO: isValidIso(entry.attachedEvidenceMeta.uploadedAtISO)
+                ? entry.attachedEvidenceMeta.uploadedAtISO
+                : updatedAtISO,
+              kind: isTaskEvidenceKind(entry.attachedEvidenceMeta.kind)
+                ? entry.attachedEvidenceMeta.kind
+                : "other",
+              publicPath:
+                typeof entry.attachedEvidenceMeta.publicPath === "string" &&
+                entry.attachedEvidenceMeta.publicPath.trim()
+                  ? entry.attachedEvidenceMeta.publicPath
+                  : undefined,
+            }
+          : undefined
+      const validationStatus =
+        entry.validationStatus === "passed" ||
+        entry.validationStatus === "failed" ||
+        entry.validationStatus === "needs_review"
+          ? entry.validationStatus
+          : "idle"
+      const validationMessage =
+        typeof entry.validationMessage === "string" && entry.validationMessage.trim()
+          ? entry.validationMessage.trim()
+          : undefined
+      const validatedAtISO = isValidIso(entry.validatedAtISO) ? entry.validatedAtISO : undefined
+      const lastRescanAtISO = isValidIso(entry.lastRescanAtISO) ? entry.lastRescanAtISO : undefined
+
+      return [[
+        taskId,
+        {
+          status,
+          attachedEvidence,
+          attachedEvidenceMeta,
+          updatedAtISO,
+          validationStatus,
+          validationMessage,
+          validatedAtISO,
+          lastRescanAtISO,
+        } satisfies PersistedTaskState,
+      ]]
+    })
+  )
+}
+
+function normalizeAIComplianceFieldOverrides(
+  value: ComplianceState["aiComplianceFieldOverrides"] | undefined
+): ComplianceState["aiComplianceFieldOverrides"] {
+  if (!value || typeof value !== "object") return {}
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([systemId, overrides]) => {
+      if (!systemId.trim() || !overrides || typeof overrides !== "object") return []
+
+      const normalizedOverrides = Object.fromEntries(
+        Object.entries(overrides).flatMap(([field, entry]) => {
+          if (!field.trim() || !entry || typeof entry !== "object") return []
+
+          return [[
+            field,
+            {
+              value:
+                typeof entry.value === "string"
+                  ? entry.value.trim() || null
+                  : entry.value === null
+                    ? null
+                    : null,
+              confirmedByUser: Boolean(entry.confirmedByUser),
+              updatedAtISO: isValidIso(entry.updatedAtISO)
+                ? entry.updatedAtISO
+                : new Date(0).toISOString(),
+            },
+          ]]
+        })
+      )
+
+      if (Object.keys(normalizedOverrides).length === 0) return []
+      return [[systemId, normalizedOverrides]]
+    })
+  )
+}
+
+function normalizeTraceabilityReviews(
+  value: ComplianceState["traceabilityReviews"] | undefined
+): ComplianceState["traceabilityReviews"] {
+  if (!value || typeof value !== "object") return {}
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([traceId, entry]) => {
+      if (!traceId.trim() || !entry || typeof entry !== "object") return []
+
+      return [[
+        traceId,
+        {
+          confirmedByUser: Boolean(entry.confirmedByUser),
+          note:
+            typeof entry.note === "string" ? entry.note.trim() || null : null,
+          updatedAtISO: isValidIso(entry.updatedAtISO)
+            ? entry.updatedAtISO
+            : new Date(0).toISOString(),
+        },
+      ]]
+    })
+  )
+}
+
+function normalizeAISystems(value: ComplianceState["aiSystems"] | undefined): AISystemRecord[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (item) =>
+      Boolean(item?.id) &&
+      Boolean(item?.name) &&
+      Boolean(item?.purpose) &&
+      Boolean(item?.riskLevel) &&
+      Array.isArray(item?.recommendedActions)
+  )
+}
+
+function normalizeDetectedAISystems(
+  value: ComplianceState["detectedAISystems"] | undefined
+): DetectedAISystemRecord[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (item) =>
+      Boolean(item?.id) &&
+      Boolean(item?.name) &&
+      Boolean(item?.purpose) &&
+      Boolean(item?.riskLevel) &&
+      Array.isArray(item?.recommendedActions) &&
+      Array.isArray(item?.frameworks) &&
+      Array.isArray(item?.evidence) &&
+      Boolean(item?.detectionStatus) &&
+      Boolean(item?.confidence)
+  )
+}
+
+function normalizeEFacturaValidations(
+  value: ComplianceState["efacturaValidations"] | undefined
+): EFacturaValidationRecord[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (item) =>
+      Boolean(item?.id) &&
+      Boolean(item?.documentName) &&
+      Array.isArray(item?.errors) &&
+      Array.isArray(item?.warnings)
+  )
+}
+
+function normalizeEvents(value: ComplianceState["events"] | undefined): ComplianceEvent[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (item) =>
+      Boolean(item?.id) &&
+      Boolean(item?.type) &&
+      Boolean(item?.entityType) &&
+      Boolean(item?.entityId) &&
+      Boolean(item?.createdAtISO)
+  )
+}
+
+function normalizeDriftRecords(
+  value: ComplianceState["driftRecords"] | undefined
+): ComplianceDriftRecord[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .filter(
+      (item) =>
+        Boolean(item?.id) &&
+        Boolean(item?.snapshotId) &&
+        Boolean(item?.type) &&
+        Boolean(item?.change) &&
+        Boolean(item?.severity) &&
+        Boolean(item?.detectedAtISO)
+    )
+    .map((item) => {
+      const lifecycleStatus = normalizeDriftLifecycleStatus(
+        item.lifecycleStatus,
+        item.open !== false
+      )
+
+      return {
+        ...item,
+        lifecycleStatus,
+        open: isDriftLifecycleOpen(lifecycleStatus),
+      }
+    })
+}
+
+function normalizeSnapshotHistory(
+  value: ComplianceState["snapshotHistory"] | undefined
+): ComplianceState["snapshotHistory"] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
+    (item) =>
+      item?.version === "1.0" &&
+      Boolean(item?.snapshotId) &&
+      Boolean(item?.generatedAt) &&
+      Array.isArray(item?.sources) &&
+      Array.isArray(item?.systems) &&
+      Array.isArray(item?.findings) &&
+      Array.isArray(item?.drift)
+  )
+}
+
+export function normalizeScanRecord(scan: ScanRecord): ScanRecord {
+  const extractionStatus: ScanExtractionStatus =
+    scan.extractionStatus === "needs_review" ? "needs_review" : "completed"
+
+  return {
+    ...scan,
+    sourceKind:
+      scan.sourceKind === "manifest" || scan.sourceKind === "yaml"
+        ? scan.sourceKind
+        : "document",
+    extractionStatus,
+    analysisStatus: scan.analysisStatus === "completed" ? "completed" : "pending",
+    reviewRequired: Boolean(scan.reviewRequired),
+  }
+}

@@ -1,0 +1,372 @@
+"use client"
+
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { FileCode2, KeyRound, ShieldCheck, Trash2 } from "lucide-react"
+
+import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useCockpit } from "@/components/compliscan/use-cockpit"
+
+type RepoSyncStatus = {
+  headerName: string
+  requiresKey: boolean
+  localAllowedWithoutKey: boolean
+  genericEndpoint: string
+  githubEndpoint: string
+  gitlabEndpoint: string
+  curlExample: string
+} | null
+
+const DRIFT_OVERRIDE_OPTIONS = [
+  { value: "default", label: "Default policy" },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "critical", label: "Critical" },
+] as const
+
+const DRIFT_OVERRIDE_FIELDS = [
+  { change: "model_changed", label: "Model changed" },
+  { change: "provider_changed", label: "Provider changed" },
+  { change: "human_review_removed", label: "Human review removed" },
+  { change: "personal_data_detected", label: "Personal data detected" },
+  { change: "data_residency_changed", label: "Data residency changed" },
+] as const
+
+export default function SetariPage() {
+  const cockpit = useCockpit()
+  const [repoSyncStatus, setRepoSyncStatus] = useState<RepoSyncStatus>(null)
+  const [driftOverrides, setDriftOverrides] = useState<Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>>({})
+
+  useEffect(() => {
+    void fetch("/api/integrations/repo-sync/status")
+      .then((response) => response.json())
+      .then((payload: RepoSyncStatus) => setRepoSyncStatus(payload))
+      .catch(() => null)
+  }, [])
+
+  useEffect(() => {
+    if (!cockpit.data) return
+
+    const nextOverrides = Object.fromEntries(
+      DRIFT_OVERRIDE_FIELDS.map((item) => [
+        item.change,
+        cockpit.data?.state.driftSettings?.severityOverrides?.[item.change] ?? "default",
+      ])
+    ) as Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>
+    setDriftOverrides(nextOverrides)
+  }, [cockpit.data])
+
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+
+  const activeSnapshot = cockpit.data.state.snapshotHistory[0]
+  const validatedBaseline = cockpit.data.state.snapshotHistory.find(
+    (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
+  )
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Setari"
+        description="Configuratia workspace-ului activ"
+        score={cockpit.data.summary.score}
+        riskLabel={cockpit.data.summary.riskLabel}
+      />
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <CardTitle className="text-xl">Setari workspace</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <p className="text-sm text-[var(--color-muted)]">Workspace activ</p>
+            <p className="mt-2 text-lg font-semibold">
+              {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <p className="text-sm text-[var(--color-muted)]">Motor OCR</p>
+            <p className="mt-2 text-lg font-semibold">Google Vision API</p>
+          </div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <p className="text-sm text-[var(--color-muted)]">Scor de risc curent</p>
+            <p className="mt-2 text-lg font-semibold">{cockpit.data.summary.score}%</p>
+          </div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <p className="text-sm text-[var(--color-muted)]">Ultimul scan</p>
+            <p className="mt-2 text-lg font-semibold">{cockpit.lastScanLabel}</p>
+          </div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 md:col-span-2">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm text-[var(--color-muted)]">Baseline validat pentru drift</p>
+                <p className="mt-2 text-lg font-semibold">
+                  {validatedBaseline
+                    ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
+                    : "Inca nu exista baseline validat"}
+                </p>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                  {validatedBaseline
+                    ? "Drift-ul compara starea curenta cu acest snapshot pana il schimbi sau il elimini."
+                    : activeSnapshot
+                      ? "Poti valida snapshot-ul curent ca baseline stabil pentru comparatiile viitoare."
+                      : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="secondary"
+                  disabled={cockpit.busy || !activeSnapshot}
+                  className="h-11 rounded-xl px-5"
+                  onClick={() => void cockpit.setValidatedBaseline()}
+                >
+                  Valideaza snapshot-ul curent
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={cockpit.busy || !validatedBaseline}
+                  className="h-11 rounded-xl px-5"
+                  onClick={() => void cockpit.clearValidatedBaseline()}
+                >
+                  Elimina baseline-ul
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Repo sync pentru engineering</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Endpoint-uri dedicate pentru `compliscan.yaml` si manifests relevante. Folosesti CI sync, nu scan complet de repository.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="h-11 rounded-xl px-5">
+              <Link href="/ghid-engineering-compliscan.md" target="_blank">
+                Deschide ghidul de engineering
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <SettingsTile
+              icon={ShieldCheck}
+              label="Status"
+              value={
+                repoSyncStatus
+                  ? repoSyncStatus.requiresKey
+                    ? "Protejat cu cheie"
+                    : repoSyncStatus.localAllowedWithoutKey
+                      ? "Local fara cheie"
+                      : "Disponibil"
+                  : "Se incarca"
+              }
+            />
+            <SettingsTile
+              icon={KeyRound}
+              label="Header"
+              value={repoSyncStatus?.headerName || "x-compliscan-sync-key"}
+            />
+            <SettingsTile
+              icon={FileCode2}
+              label="GitHub adapter"
+              value={repoSyncStatus ? "/api/integrations/repo-sync/github" : "Se incarca"}
+            />
+            <SettingsTile
+              icon={FileCode2}
+              label="GitLab adapter"
+              value={repoSyncStatus ? "/api/integrations/repo-sync/gitlab" : "Se incarca"}
+            />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                Endpoint-uri disponibile
+              </p>
+              <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                <EndpointRow
+                  label="Generic"
+                  value={repoSyncStatus?.genericEndpoint || "Se incarca"}
+                  badge="manual / generic"
+                />
+                <EndpointRow
+                  label="GitHub"
+                  value={repoSyncStatus?.githubEndpoint || "Se incarca"}
+                  badge="adapter dedicat"
+                />
+                <EndpointRow
+                  label="GitLab"
+                  value={repoSyncStatus?.gitlabEndpoint || "Se incarca"}
+                  badge="adapter dedicat"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                Exemplu rapid de curl
+              </p>
+              <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-xs leading-6 text-[var(--color-on-surface)]">
+                {repoSyncStatus?.curlExample ||
+                  'curl -X POST http://localhost:3001/api/integrations/repo-sync \\\n  -H "Content-Type: application/json" \\\n  -H "x-compliscan-sync-key: ${COMPLISCAN_SYNC_KEY}" \\\n  -d @repo-sync.json'}
+              </pre>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="font-medium text-[var(--color-on-surface)]">Cum il folosesti</p>
+            <ul className="mt-3 space-y-2">
+              <li>Trimiti doar `compliscan.yaml` si manifests relevante din CI.</li>
+              <li>CompliScan genereaza scan-uri, findings, sisteme detectate si drift fata de baseline.</li>
+              <li>Dupa primul sync, validezi snapshot-ul bun ca baseline si confirmi sistemele AI reale.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Drift severity policy</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Override-uri de workspace pentru drift-urile care contează cel mai mult. Politica implicită rămâne activă pentru tot ce nu configurezi aici.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              disabled={cockpit.busy}
+              className="h-11 rounded-xl px-5"
+              onClick={() => void cockpit.updateDriftSeverityOverrides(driftOverrides)}
+            >
+              Salvează severitatea drift
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          {DRIFT_OVERRIDE_FIELDS.map((item) => (
+            <label
+              key={item.change}
+              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            >
+              <span className="text-sm font-medium text-[var(--color-on-surface)]">{item.label}</span>
+              <select
+                className="mt-3 h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                value={driftOverrides[item.change] ?? "default"}
+                onChange={(event) =>
+                  setDriftOverrides((current) => ({
+                    ...current,
+                    [item.change]: event.target.value as (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"],
+                  }))
+                }
+              >
+                {DRIFT_OVERRIDE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs text-[var(--color-muted)]">
+                Schimbi doar severitatea. Impactul, dovada cerută și acțiunea recomandată rămân unificate în politica de drift.
+              </p>
+            </label>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-error)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <CardTitle className="text-xl text-[var(--color-error)]">Reset demo workspace</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+            Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, alerte,
+            task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                Vrei sa vezi exact experienta unui utilizator nou?
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">
+                Dupa reset, dashboard-ul revine la starea initiala de onboarding.
+              </p>
+            </div>
+
+            <Button
+              variant="destructive"
+              disabled={cockpit.busy}
+              className="h-11 rounded-xl px-5"
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    "Resetezi complet workspace-ul curent? Toate scanarile si task-urile salvate vor fi sterse."
+                  )
+                ) {
+                  return
+                }
+
+                void cockpit.resetWorkspaceState()
+              }}
+            >
+              <Trash2 className="size-4" strokeWidth={2.25} />
+              Sterge scanarile si reseteaza workspace-ul
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function SettingsTile({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof FileCode2
+  label: string
+  value: string
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+      <div className="flex items-center gap-2 text-[var(--color-muted)]">
+        <Icon className="size-4" strokeWidth={2.25} />
+        <p className="text-sm">{label}</p>
+      </div>
+      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{value}</p>
+    </div>
+  )
+}
+
+function EndpointRow({
+  label,
+  value,
+  badge,
+}: {
+  label: string
+  value: string
+  badge: string
+}) {
+  return (
+    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-[var(--color-on-surface)]">{label}</span>
+        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+          {badge}
+        </Badge>
+      </div>
+      <p className="mt-2 break-all text-xs text-[var(--color-on-surface-muted)]">{value}</p>
+    </div>
+  )
+}
