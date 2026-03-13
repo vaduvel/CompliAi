@@ -167,9 +167,9 @@ export function RiskHeader({
   workspace,
 }: RiskHeaderProps) {
   const activeWorkspace = workspace ?? {
-    orgId: "org-demo-ion-popescu",
+    orgId: "org-local-workspace",
     orgName: "Magazin Online S.R.L.",
-    workspaceLabel: "Workspace activ",
+    workspaceLabel: "Workspace local",
     workspaceOwner: "Ion Popescu",
     workspaceInitials: "IP",
   }

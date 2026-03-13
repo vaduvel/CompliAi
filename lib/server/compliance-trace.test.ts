@@ -1,0 +1,131 @@
+import { describe, expect, it } from "vitest"
+
+import { buildComplianceTraceRecords } from "@/lib/server/compliance-trace"
+import type { ComplianceState, RemediationAction } from "@/lib/compliance/types"
+
+function createState(): ComplianceState {
+  return {
+    highRisk: 0,
+    lowRisk: 0,
+    gdprProgress: 0,
+    efacturaSyncedAtISO: "",
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 0,
+    alerts: [],
+    findings: [],
+    scans: [],
+    chat: [],
+    taskState: {},
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events: [],
+  }
+}
+
+function createTask(): RemediationAction {
+  return {
+    id: "task-1",
+    title: "Controleaza bannerul de consimtamant",
+    priority: "P1",
+    severity: "high",
+    summary: "Tracking fara claritate suficienta.",
+    why: "Trebuie blocat tracking-ul pana la accept explicit.",
+    evidence: "Screenshot si log de consimtamant.",
+    owner: "Marketing Ops",
+    dueDateISO: "2026-03-20T10:00:00.000Z",
+    readyTextLabel: "Text recomandat",
+    readyText: "Acest site foloseste cookie-uri numai dupa consimtamant.",
+    category: "gdpr_tracking",
+    validationKind: "tracking-consent",
+    remediationMode: "rapid",
+    relatedFindingIds: ["finding-1"],
+    relatedDriftIds: [],
+    lawReference: "GDPR Art. 7",
+    sourceDocument: "policy.pdf",
+    evidenceTypes: ["screenshot"],
+    principles: ["privacy_data_governance"],
+  }
+}
+
+describe("lib/server/compliance-trace", () => {
+  it("nu marcheaza controlul ca validat daca dovada atasata este slaba", () => {
+    const state = createState()
+    state.taskState["rem-task-1"] = {
+      status: "todo",
+      updatedAtISO: "2026-03-13T12:00:00.000Z",
+      validationStatus: "passed",
+      validationBasis: "direct_signal",
+      validationConfidence: "high",
+      attachedEvidenceMeta: {
+        id: "evidence-1",
+        fileName: "proof.txt",
+        mimeType: "application/octet-stream",
+        sizeBytes: 64,
+        uploadedAtISO: "2026-03-13T10:00:00.000Z",
+        kind: "other",
+        quality: {
+          status: "weak",
+          summary: "Dovada cere review: tip generic de dovadă, MIME neclar.",
+          reasonCodes: ["generic_kind", "unknown_mime"],
+          checkedAtISO: "2026-03-13T10:00:00.000Z",
+        },
+      },
+    }
+
+    const [record] = buildComplianceTraceRecords({
+      state,
+      remediationPlan: [createTask()],
+      snapshot: null,
+    })
+
+    expect(record.traceStatus).toBe("action_required")
+    expect(record.bundleCoverageStatus).toBe("partial")
+    expect(record.evidence.quality?.status).toBe("weak")
+    expect(record.evidence.validationBasis).toBe("direct_signal")
+    expect(record.nextStep).toContain("Dovada cere review")
+  })
+
+  it("marcheaza controlul ca validat doar cand dovada este suficienta si validarea a trecut", () => {
+    const state = createState()
+    state.taskState["rem-task-1"] = {
+      status: "todo",
+      updatedAtISO: "2026-03-13T12:00:00.000Z",
+      validationStatus: "passed",
+      validationBasis: "direct_signal",
+      validationConfidence: "high",
+      attachedEvidenceMeta: {
+        id: "evidence-1",
+        fileName: "consent-banner-proof.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 48_000,
+        uploadedAtISO: "2026-03-13T10:00:00.000Z",
+        kind: "document_bundle",
+        quality: {
+          status: "sufficient",
+          summary: "Dovada pare suficientă pentru tipul selectat și poate intra în pachetul de audit.",
+          reasonCodes: [],
+          checkedAtISO: "2026-03-13T10:00:00.000Z",
+        },
+      },
+    }
+
+    const [record] = buildComplianceTraceRecords({
+      state,
+      remediationPlan: [createTask()],
+      snapshot: null,
+    })
+
+    expect(record.traceStatus).toBe("validated")
+    expect(record.bundleCoverageStatus).toBe("covered")
+    expect(record.evidence.quality?.status).toBe("sufficient")
+    expect(record.evidence.validationConfidence).toBe("high")
+  })
+})

@@ -1,0 +1,2 @@
+Acest flux folosește scoring automat pentru eligibilitate și decizie automată asupra solicitărilor.
+Rezultatul poate influența accesul utilizatorului la servicii și necesită validare umană înainte de decizia finală.

@@ -1,4 +1,5 @@
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
+import { buildFindingTaskId, getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { getControlFamily } from "@/lib/compliance/control-families"
 import { getTaskResolutionTargets, getResolvedFindingIds } from "@/lib/compliance/task-resolution"
@@ -131,8 +132,11 @@ function buildTraceRecordFromRemediation({
     evidence: {
       attached: Boolean(taskState?.attachedEvidenceMeta),
       validationStatus: taskState?.validationStatus ?? "idle",
+      validationBasis: taskState?.validationBasis ?? null,
+      validationConfidence: taskState?.validationConfidence ?? null,
       fileName: taskState?.attachedEvidenceMeta?.fileName ?? null,
       kind: taskState?.attachedEvidenceMeta?.kind ?? null,
+      quality: taskState?.attachedEvidenceMeta?.quality ?? null,
       updatedAtISO: taskState?.updatedAtISO ?? null,
     },
     evidenceRequired: remediation.evidence,
@@ -159,7 +163,9 @@ function buildTraceRecordFromRemediation({
         },
     traceStatus: deriveTraceStatus(taskState?.attachedEvidenceMeta, taskState?.validationStatus),
     nextStep:
-      taskState?.validationStatus === "failed" || taskState?.validationStatus === "needs_review"
+      taskState?.attachedEvidenceMeta?.quality?.status === "weak"
+        ? taskState.attachedEvidenceMeta.quality.summary
+        : taskState?.validationStatus === "failed" || taskState?.validationStatus === "needs_review"
         ? taskState.validationMessage || remediation.fixPreview || remediation.evidence
         : !taskState?.attachedEvidenceMeta
           ? remediation.evidence
@@ -180,8 +186,8 @@ function buildTraceRecordFromFinding({
   scanById: Map<string, ComplianceState["scans"][number]>
   scanKindByDocument: Map<string, ComplianceState["scans"][number]["sourceKind"]>
 }): ComplianceTraceRecord {
-  const entryId = `finding-${finding.id}`
-  const taskState = state.taskState[entryId]
+  const entryId = buildFindingTaskId(finding.id)
+  const taskState = getTaskStateByTaskId(state.taskState, entryId)
   const targets = getTaskResolutionTargets(state, entryId)
   const sourceKind =
     (finding.scanId ? scanById.get(finding.scanId)?.sourceKind : undefined) ??
@@ -221,8 +227,11 @@ function buildTraceRecordFromFinding({
     evidence: {
       attached: Boolean(taskState?.attachedEvidenceMeta),
       validationStatus: taskState?.validationStatus ?? "idle",
+      validationBasis: taskState?.validationBasis ?? null,
+      validationConfidence: taskState?.validationConfidence ?? null,
       fileName: taskState?.attachedEvidenceMeta?.fileName ?? null,
       kind: taskState?.attachedEvidenceMeta?.kind ?? null,
+      quality: taskState?.attachedEvidenceMeta?.quality ?? null,
       updatedAtISO: taskState?.updatedAtISO ?? null,
     },
     evidenceRequired: finding.evidenceRequired ?? null,
@@ -249,7 +258,9 @@ function buildTraceRecordFromFinding({
         },
     traceStatus: deriveTraceStatus(taskState?.attachedEvidenceMeta, taskState?.validationStatus),
     nextStep:
-      taskState?.validationStatus === "failed" || taskState?.validationStatus === "needs_review"
+      taskState?.attachedEvidenceMeta?.quality?.status === "weak"
+        ? taskState.attachedEvidenceMeta.quality.summary
+        : taskState?.validationStatus === "failed" || taskState?.validationStatus === "needs_review"
         ? taskState.validationMessage || finding.remediationHint || finding.evidenceRequired || finding.detail
         : !taskState?.attachedEvidenceMeta
           ? finding.evidenceRequired || finding.detail
@@ -261,7 +272,7 @@ function deriveTraceStatus(
   evidence: ComplianceState["taskState"][string]["attachedEvidenceMeta"] | undefined,
   validationStatus: ComplianceState["taskState"][string]["validationStatus"] | undefined
 ): ComplianceTraceRecord["traceStatus"] {
-  if (evidence && validationStatus === "passed") return "validated"
+  if (evidence && validationStatus === "passed" && evidence.quality?.status !== "weak") return "validated"
   if (!evidence) return "evidence_required"
   return "action_required"
 }
@@ -270,7 +281,7 @@ function deriveBundleCoverageStatus(
   evidence: ComplianceState["taskState"][string]["attachedEvidenceMeta"] | undefined,
   validationStatus: ComplianceState["taskState"][string]["validationStatus"] | undefined
 ): ComplianceTraceRecord["bundleCoverageStatus"] {
-  if (evidence && validationStatus === "passed") return "covered"
+  if (evidence && validationStatus === "passed" && evidence.quality?.status !== "weak") return "covered"
   if (evidence) return "partial"
   return "missing"
 }

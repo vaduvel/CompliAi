@@ -1,0 +1,2 @@
+Datele clienților sunt procesate în us-east-1 și pot fi transferate în afara UE pentru suport operațional.
+Fluxul include email, profil și mesaje ale utilizatorilor.

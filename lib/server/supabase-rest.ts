@@ -30,11 +30,13 @@ export async function supabaseInsert<TBody extends object, TResult>(
 export async function supabaseUpsert<TBody extends object, TResult>(
   table: string,
   body: TBody | TBody[],
-  schema = "compliscan"
+  schema = "compliscan",
+  queryString?: string
 ): Promise<TResult[]> {
   return request<TResult[]>("POST", table, {
     body,
     schema,
+    queryString,
     prefer: "resolution=merge-duplicates,return=representation",
   })
 }
@@ -97,4 +99,3 @@ async function request<T>(
 
   return (await res.json()) as T
 }
-

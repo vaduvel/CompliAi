@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import {
   confirmDetectedSystem,
   findDetectedSystem,
@@ -48,6 +49,7 @@ export async function PATCH(
   }
 
   const nowISO = new Date().toISOString()
+  const actor = await resolveOptionalEventActor(request)
 
   try {
     const nextState = await mutateState((current) => {
@@ -74,7 +76,7 @@ export async function PATCH(
                 riskLevel: edited.riskLevel,
                 confidence: edited.confidence,
               },
-            }),
+            }, actor),
           ]),
         }
       }
@@ -103,7 +105,7 @@ export async function PATCH(
               metadata: {
                 riskLevel: aiSystem.riskLevel,
               },
-            }),
+            }, actor),
           ]),
         }
       }
@@ -134,10 +136,10 @@ export async function PATCH(
               body.action === "review"
                 ? `Sistem detectat marcat ca revizuit: ${candidate.name}.`
                 : body.action === "reject"
-                  ? `Sistem detectat respins: ${candidate.name}.`
-                  : `Sistem detectat repus in lucru: ${candidate.name}.`,
+                ? `Sistem detectat respins: ${candidate.name}.`
+                : `Sistem detectat repus in lucru: ${candidate.name}.`,
             createdAtISO: nowISO,
-          }),
+          }, actor),
         ]),
       }
     })

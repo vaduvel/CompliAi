@@ -1,7 +1,9 @@
 import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
+import { buildAuditQualityGates } from "@/lib/compliance/audit-quality-gates"
 import { toAuditPackWorkspace } from "@/lib/compliance/audit-pack"
 import { getControlFamily, getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import { normalizeDriftLifecycleStatus } from "@/lib/compliance/drift-lifecycle"
+import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
 import type {
   ComplianceState,
   RemediationAction,
@@ -32,6 +34,7 @@ export function buildAuditPack({
   const activeDrifts = state.driftRecords.filter((item) => item.open)
   const controlsMatrix = buildControlsMatrix(state, remediationPlan)
   const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
+  const auditQualityGates = buildAuditQualityGates({ state, remediationPlan, nowISO: generatedAt })
   const validationLog = buildValidationLog(controlsMatrix)
   const traceabilityMatrix = buildComplianceTraceRecords({
     state,
@@ -53,7 +56,12 @@ export function buildAuditPack({
     executiveSummary: {
       complianceScore: snapshot?.summary.complianceScore ?? null,
       riskLabel: snapshot?.summary.riskLabel ?? null,
-      auditReadiness: deriveAuditReadiness(compliancePack, activeDrifts, missingEvidenceItems),
+      auditReadiness: deriveAuditReadiness(
+        compliancePack,
+        activeDrifts,
+        missingEvidenceItems,
+        auditQualityGates
+      ),
       baselineStatus: validatedBaseline ? "validated" : "missing",
       systemsInScope: compliancePack.entries.length,
       sourcesInScope: snapshot?.sources.length ?? 0,
@@ -62,17 +70,22 @@ export function buildAuditPack({
       remediationOpen: openControls,
       validatedEvidenceItems,
       missingEvidenceItems,
+      auditQualityDecision: auditQualityGates.decision,
+      blockedQualityGates: auditQualityGates.blockedCount,
+      reviewQualityGates: auditQualityGates.reviewCount,
       topBlockers: buildTopBlockers({
         validatedBaseline,
         compliancePack,
         activeDrifts,
         missingEvidenceItems,
+        auditQualityGates,
       }),
       nextActions: buildNextActions({
         validatedBaseline,
         compliancePack,
         activeDrifts,
         missingEvidenceItems,
+        auditQualityGates,
       }),
     },
     bundleEvidenceSummary: buildBundleEvidenceSummary(compliancePack, controlsMatrix),
@@ -140,6 +153,7 @@ export function buildAuditPack({
     })),
     controlsMatrix,
     evidenceLedger,
+    auditQualityGates,
     driftRegister: activeDrifts.map((drift) => ({
       id: drift.id,
       type: drift.type,
@@ -188,6 +202,10 @@ export function buildAuditPack({
         entityId: event.entityId,
         type: event.type,
         message: event.message,
+        actorId: event.actorId,
+        actorLabel: event.actorLabel,
+        actorRole: event.actorRole,
+        actorSource: event.actorSource,
         metadata: event.metadata ?? null,
       })),
     traceabilityMatrix,
@@ -356,6 +374,7 @@ function buildControlsMatrix(state: ComplianceState, remediationPlan: Remediatio
       relatedFindingIds: task.relatedFindingIds ?? [],
       relatedDriftIds: task.relatedDriftIds ?? [],
       attachedEvidence: taskState?.attachedEvidenceMeta ?? null,
+      evidenceQuality: taskState?.attachedEvidenceMeta?.quality ?? null,
       lastRescanAtISO: taskState?.lastRescanAtISO ?? null,
       validatedAtISO: taskState?.validatedAtISO ?? null,
     }
@@ -369,7 +388,7 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
       const remediation = remediationPlan.find((item) => `rem-${item.id}` === taskId)
       const finding =
         taskId.startsWith("finding-")
-          ? state.findings.find((item) => item.id === taskId.replace("finding-", ""))
+          ? state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
           : undefined
 
       return {
@@ -381,6 +400,7 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
         validationMessage: taskState.validationMessage ?? null,
         updatedAtISO: taskState.updatedAtISO,
         evidence: taskState.attachedEvidenceMeta ?? null,
+        evidenceQuality: taskState.attachedEvidenceMeta?.quality ?? null,
         sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || null,
       }
     })
@@ -419,13 +439,15 @@ function buildValidationLog(
 function deriveAuditReadiness(
   compliancePack: AICompliancePack,
   activeDrifts: ComplianceState["driftRecords"],
-  missingEvidenceItems: number
+  missingEvidenceItems: number,
+  auditQualityGates: AuditPackV2["auditQualityGates"]
 ): AuditPackV2["executiveSummary"]["auditReadiness"] {
   const activeDriftCount = activeDrifts.length
   const blockingDrifts = activeDrifts.filter((drift) => drift.blocksAudit).length
   const breachedDrifts = activeDrifts.filter((drift) => Boolean(drift.escalationBreachedAtISO)).length
 
   if (
+    auditQualityGates.decision === "pass" &&
     compliancePack.summary.reviewRequiredEntries === 0 &&
     compliancePack.summary.openFindings === 0 &&
     activeDriftCount === 0 &&
@@ -444,17 +466,21 @@ function buildTopBlockers({
   compliancePack,
   activeDrifts,
   missingEvidenceItems,
+  auditQualityGates,
 }: {
   validatedBaseline: CompliScanSnapshot | null
   compliancePack: AICompliancePack
   activeDrifts: ComplianceState["driftRecords"]
   missingEvidenceItems: number
+  auditQualityGates: AuditPackV2["auditQualityGates"]
 }) {
   const blockers: string[] = []
   const auditBlockingDrifts = activeDrifts.filter((drift) => drift.blocksAudit)
   const baselineBlockingDrifts = activeDrifts.filter((drift) => drift.blocksBaseline)
   const humanApprovalDrifts = activeDrifts.filter((drift) => drift.requiresHumanApproval)
   const breachedDrifts = activeDrifts.filter((drift) => Boolean(drift.escalationBreachedAtISO))
+  const blockedQualityItems = auditQualityGates.items.filter((item) => item.decision === "blocked")
+  const reviewQualityItems = auditQualityGates.items.filter((item) => item.decision === "review")
 
   if (!validatedBaseline) blockers.push("Nu exista baseline validat pentru comparatie auditabila.")
   if (auditBlockingDrifts.length > 0) {
@@ -472,6 +498,16 @@ function buildTopBlockers({
     blockers.push(`${humanApprovalDrifts.length} drift-uri cer aprobare umana explicita inainte de inchidere.`)
   }
   if (missingEvidenceItems > 0) blockers.push(`${missingEvidenceItems} controale nu au dovada validata.`)
+  if (blockedQualityItems.length > 0) {
+    blockers.push(
+      `${blockedQualityItems.length} controale sunt blocate de quality gates (dovada lipsa sau drift nerezolvat).`
+    )
+  }
+  if (reviewQualityItems.length > 0) {
+    blockers.push(
+      `${reviewQualityItems.length} controale cer review suplimentar pentru calitatea sau actualitatea dovezii.`
+    )
+  }
   if (compliancePack.summary.openFindings > 0) {
     blockers.push(`${compliancePack.summary.openFindings} findings raman deschise in sfera auditului.`)
   }
@@ -489,11 +525,13 @@ function buildNextActions({
   compliancePack,
   activeDrifts,
   missingEvidenceItems,
+  auditQualityGates,
 }: {
   validatedBaseline: CompliScanSnapshot | null
   compliancePack: AICompliancePack
   activeDrifts: ComplianceState["driftRecords"]
   missingEvidenceItems: number
+  auditQualityGates: AuditPackV2["auditQualityGates"]
 }) {
   const actions: string[] = []
   const auditBlockingDrifts = activeDrifts.filter((drift) => drift.blocksAudit)
@@ -501,6 +539,9 @@ function buildNextActions({
   const urgentDrift = [...activeDrifts].sort((left, right) =>
     (left.escalationDueAtISO ?? "").localeCompare(right.escalationDueAtISO ?? "")
   )[0]
+  const weakEvidenceItems = auditQualityGates.items.filter((item) => item.code === "weak_evidence")
+  const staleEvidenceItems = auditQualityGates.items.filter((item) => item.code === "stale_evidence")
+  const inferredOnlyItems = auditQualityGates.items.filter((item) => item.code === "inferred_only_finding")
 
   if (!validatedBaseline) actions.push("Valideaza snapshot-ul curent ca baseline pentru comparatii viitoare.")
   if (auditBlockingDrifts.length > 0) {
@@ -515,6 +556,15 @@ function buildNextActions({
     actions.push("Preia sau escaladeaza drift-urile cu SLA depasit si noteaza explicit owner-ul responsabil in audit trail.")
   }
   if (missingEvidenceItems > 0) actions.push("Completeaza dovezile lipsa si ruleaza rescan pe task-urile deschise.")
+  if (weakEvidenceItems.length > 0) {
+    actions.push("Inlocuieste dovezile slabe cu capturi, loguri sau bundle-uri mai specifice inainte de export.")
+  }
+  if (staleEvidenceItems.length > 0) {
+    actions.push("Revalideaza dovezile vechi sau afectate de drift si incarca variante actualizate.")
+  }
+  if (inferredOnlyItems.length > 0) {
+    actions.push("Adauga confirmare umana sau dovada directa pentru controalele bazate doar pe semnale inferate.")
+  }
   if (compliancePack.summary.reviewRequiredEntries > 0) {
     actions.push("Confirma sau respinge sistemele aflate in review pentru a stabiliza inventarul AI.")
   }

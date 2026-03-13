@@ -3,6 +3,7 @@ import {
   getAnnexRefsForTaskLike,
   getAnnexRefsForTraceRecord,
 } from "@/lib/compliance/annex-lite-linking"
+import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
 
 type ClientAuditPackDocument = {
@@ -323,7 +324,13 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
               <td>${entry.linkedFindingIds.length} findings / ${entry.linkedDriftIds.length} drift</td>
               <td><span class="chip ${validationClass(entry.evidence.validationStatus)}">${escapeHtml(
                 entry.traceStatus
-              )}</span></td>
+              )}</span>${
+                entry.evidence.quality
+                  ? `<div class="muted small" style="margin-top:6px;">calitate dovadă: ${escapeHtml(
+                      entry.evidence.quality.status
+                    )} · ${escapeHtml(entry.evidence.quality.summary)}</div>`
+                  : ""
+              }</td>
               <td>${escapeHtml(entry.nextStep)}${
                 entry.review.confirmedByUser
                   ? `<div class="muted small" style="margin-top:6px;">confirmat pentru audit${
@@ -1187,11 +1194,11 @@ function buildStatusLegend() {
 
 function formatEvidenceFile(entry: AuditPackV2["evidenceLedger"][number]) {
   const fileName = entry.evidence?.fileName ?? "neatasat"
-  const publicPath = entry.evidence?.publicPath
-  if (!publicPath) {
+  const evidenceHref = resolveEvidenceHref(entry.evidence)
+  if (!evidenceHref) {
     return escapeHtml(fileName)
   }
-  return `<a class="inline-link" href="${escapeHtml(publicPath)}">${escapeHtml(fileName)}</a>`
+  return `<a class="inline-link" href="${escapeHtml(evidenceHref)}">${escapeHtml(fileName)}</a>`
 }
 
 function formatSystemGroupLabel(value: string) {

@@ -3,11 +3,24 @@ import type { NextRequest } from "next/server"
 
 const SESSION_COOKIE = "compliscan_session"
 
+function getSessionSecret() {
+  const explicit = process.env.COMPLISCAN_SESSION_SECRET?.trim()
+  if (explicit) return explicit
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "COMPLISCAN_SESSION_SECRET lipseste. Configureaza secretul de sesiune in productie."
+    )
+  }
+
+  return "dev-secret-change-me-in-production"
+}
+
 async function verifyToken(
   token: string
 ): Promise<{ userId: string; orgId: string; email: string; orgName: string } | null> {
   try {
-    const secret = process.env.COMPLISCAN_SESSION_SECRET || "dev-secret-change-me-in-production"
+    const secret = getSessionSecret()
     const dotIndex = token.lastIndexOf(".")
     if (dotIndex === -1) return null
     const encoded = token.slice(0, dotIndex)

@@ -38,6 +38,11 @@ import {
   getFindingRemediationRecipe,
   inferRemediationModeFromFinding,
 } from "@/lib/compliance/remediation-recipes"
+import {
+  buildFindingTaskId,
+  getTaskStateByTaskId,
+  resolveFindingIdFromTaskId,
+} from "@/lib/compliance/task-ids"
 
 export type DashboardPayload = {
   state: ComplianceState
@@ -59,6 +64,8 @@ type TaskUpdateFeedback = {
   scoreDelta: number
   validationStatus?: TaskValidationStatus
   validationMessage?: string
+  validationConfidence?: "high" | "medium" | "low"
+  validationBasis?: "direct_signal" | "inferred_signal" | "operational_state"
 }
 
 type TaskUpdateResponse = DashboardPayload & {
@@ -368,8 +375,8 @@ export function useCockpit() {
       ],
       { type: "text/plain;charset=utf-8" }
     )
-    downloadBlob(blob, "compliscan-checklist-demo.txt")
-    toast.success("Checklist exportat (demo)")
+    downloadBlob(blob, "compliscan-checklist-local.txt")
+    toast.success("Checklist exportat")
   }
 
   async function handleExportCompliScan(format: "json" | "yaml") {
@@ -958,13 +965,13 @@ export function useCockpit() {
       ],
       { type: "text/plain;charset=utf-8" }
     )
-    downloadBlob(blob, `${sanitizeFileName(task.title)}-demo.txt`)
-    toast.success("Export generat (demo)")
+    downloadBlob(blob, `${sanitizeFileName(task.title)}.txt`)
+    toast.success("Export generat")
   }
 
   function handleSandbox() {
-    toast.info("Simulare sandbox pornita", {
-      description: "Flux demo. Nu exista apeluri reale catre ANAF sau sisteme externe.",
+    toast.info("Simulare locala pornita", {
+      description: "Flux local de test. Nu exista apeluri reale catre ANAF sau sisteme externe.",
     })
   }
 
@@ -1164,7 +1171,7 @@ export function buildCockpitTasks(data: DashboardPayload): CockpitTask[] {
       )
 
   return [...remediationTasks, ...evidenceTasks]
-    .map((task) => applyPersistedTaskState(task, data.state.taskState[task.id]))
+    .map((task) => applyPersistedTaskState(task, getTaskStateByTaskId(data.state.taskState, task.id)))
     .sort(compareTasks)
 }
 
@@ -1175,7 +1182,8 @@ function getResolvedFindingIdsFromPayload(data: DashboardPayload) {
     if (taskState?.status !== "done") continue
 
     if (taskId.startsWith("finding-")) {
-      resolved.add(taskId.replace("finding-", ""))
+      const findingId = resolveFindingIdFromTaskId(taskId)
+      if (findingId) resolved.add(findingId)
       continue
     }
 
@@ -1232,11 +1240,13 @@ function convertRemediationTask(item: RemediationAction): CockpitTask {
 function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): CockpitTask {
   const severity = alert?.severity || finding.severity
   const priority: TaskPriority = severityToTaskPriority(severity)
-  const confidence: TaskConfidence = severityToTaskConfidence(severity)
+  const confidence: TaskConfidence = mapFindingConfidenceToTaskConfidence(
+    finding.verdictConfidence
+  )
   const recipe = getFindingRemediationRecipe(finding.provenance?.ruleId)
 
   return {
-    id: `finding-${finding.id}`,
+    id: buildFindingTaskId(finding.id),
     title: finding.title,
     priority,
     severity,
@@ -1296,10 +1306,21 @@ function applyPersistedTaskState(
         : undefined),
     validationStatus: persistedState.validationStatus ?? "idle",
     validationMessage: persistedState.validationMessage,
+    validationConfidence: persistedState.validationConfidence,
+    validationBasis: persistedState.validationBasis,
     validatedAtLabel: persistedState.validatedAtISO
       ? formatRelativeRomanian(persistedState.validatedAtISO)
       : undefined,
   }
+}
+
+function mapFindingConfidenceToTaskConfidence(
+  confidence?: ScanFinding["verdictConfidence"]
+): TaskConfidence {
+  if (confidence === "high") return "high"
+  if (confidence === "medium") return "med"
+  if (confidence === "low") return "low"
+  return "med"
 }
 
 function buildFindingSummary(finding: ScanFinding) {

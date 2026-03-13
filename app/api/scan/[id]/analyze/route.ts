@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 
+import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 import { analyzeExtractedScan } from "@/lib/server/scan-workflow"
-
-type AnalyzePayload = {
-  reviewedContent?: string
-}
+import { asTrimmedString, requirePlainObject, RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(
   request: Request,
@@ -14,10 +13,12 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params
-    const body = (await request.json()) as AnalyzePayload
+    const body = requirePlainObject(await request.json())
+    const reviewedContent = asTrimmedString(body.reviewedContent, 50_000)
+    const actor = await resolveOptionalEventActor(request)
 
     const nextState = await mutateState((current) =>
-      analyzeExtractedScan(current, id, body.reviewedContent)
+      analyzeExtractedScan(current, id, reviewedContent, actor)
     )
 
     return NextResponse.json({
@@ -28,23 +29,25 @@ export async function POST(
     const message = error instanceof Error ? error.message : "Eroare la analiza."
 
     if (message === "SCAN_NOT_FOUND") {
-      return NextResponse.json({ error: "Scan-ul nu exista." }, { status: 404 })
+      return jsonError("Scan-ul nu exista.", 404, "SCAN_NOT_FOUND")
     }
 
     if (message === "SCAN_ALREADY_ANALYZED") {
-      return NextResponse.json(
-        { error: "Acest scan a fost deja analizat." },
-        { status: 409 }
-      )
+      return jsonError("Acest scan a fost deja analizat.", 409, "SCAN_ALREADY_ANALYZED")
     }
 
     if (message === "SCAN_EMPTY_CONTENT") {
-      return NextResponse.json(
-        { error: "Textul revizuit este gol. Corecteaza continutul inainte de analiza." },
-        { status: 422 }
+      return jsonError(
+        "Textul revizuit este gol. Corecteaza continutul inainte de analiza.",
+        422,
+        "SCAN_EMPTY_CONTENT"
       )
     }
 
-    return NextResponse.json({ error: message }, { status: 400 })
+    if (error instanceof RequestValidationError) {
+      return jsonError(message, error.status, error.code)
+    }
+
+    return jsonError(message, 400, "SCAN_ANALYZE_FAILED")
   }
 }

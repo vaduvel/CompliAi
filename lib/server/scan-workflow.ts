@@ -1,4 +1,8 @@
-import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import {
+  appendComplianceEvents,
+  createComplianceEvent,
+  type ComplianceEventActorInput,
+} from "@/lib/compliance/events"
 import { normalizeScanRecord, simulateFindings } from "@/lib/compliance/engine"
 import type {
   ComplianceState,
@@ -10,6 +14,12 @@ import {
   extractTextWithVision,
   hasVisionConfig,
 } from "@/lib/server/google-vision"
+import {
+  asTrimmedString,
+  ensureBase64Like,
+  estimateBase64Size,
+  RequestValidationError,
+} from "@/lib/server/request-validation"
 
 export type ScanInputPayload = {
   clientId?: string
@@ -24,6 +34,63 @@ export type ExtractionResult = {
   ocrUsed: boolean
   ocrWarning: string | null
   extractedTextPreview: string
+}
+
+const MAX_DOCUMENT_NAME_LENGTH = 180
+const MAX_CLIENT_ID_LENGTH = 120
+const MAX_MANUAL_CONTENT_LENGTH = 50_000
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+const MAX_PDF_BYTES = 10 * 1024 * 1024
+
+export function validateScanInputPayload(payload: unknown): ScanInputPayload {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new RequestValidationError("Payload-ul de scanare trebuie sa fie un obiect JSON valid.")
+  }
+
+  const body = payload as Record<string, unknown>
+  const documentName = asTrimmedString(body.documentName, MAX_DOCUMENT_NAME_LENGTH)
+  const clientId = asTrimmedString(body.clientId, MAX_CLIENT_ID_LENGTH)
+  const content = asTrimmedString(body.content, MAX_MANUAL_CONTENT_LENGTH)
+  const imageBase64 = asTrimmedString(body.imageBase64, 20_000_000)
+  const pdfBase64 = asTrimmedString(body.pdfBase64, 20_000_000)
+
+  if (!content && !imageBase64 && !pdfBase64) {
+    throw new RequestValidationError("Adauga text manual sau incarca un fisier inainte de scanare.")
+  }
+
+  if (imageBase64 && pdfBase64) {
+    throw new RequestValidationError(
+      "Trimite ori imagine, ori PDF la acelasi request. Nu ambele simultan."
+    )
+  }
+
+  if (content && content.length > MAX_MANUAL_CONTENT_LENGTH) {
+    throw new RequestValidationError(
+      `Textul manual este prea lung. Limita curenta este ${MAX_MANUAL_CONTENT_LENGTH} caractere.`
+    )
+  }
+
+  if (imageBase64) {
+    ensureBase64Like(imageBase64, "Imaginea incarcata nu are format base64 valid.")
+    if (estimateBase64Size(imageBase64) > MAX_IMAGE_BYTES) {
+      throw new RequestValidationError("Imaginea este prea mare. Limita curenta este 10 MB.")
+    }
+  }
+
+  if (pdfBase64) {
+    ensureBase64Like(pdfBase64, "PDF-ul incarcat nu are format base64 valid.")
+    if (estimateBase64Size(pdfBase64) > MAX_PDF_BYTES) {
+      throw new RequestValidationError("PDF-ul este prea mare. Limita curenta este 10 MB.")
+    }
+  }
+
+  return {
+    clientId,
+    documentName,
+    content,
+    imageBase64,
+    pdfBase64,
+  }
 }
 
 async function extractScanText(body: ScanInputPayload) {
@@ -83,7 +150,8 @@ async function extractScanText(body: ScanInputPayload) {
 
 export async function createExtractedScan(
   current: ComplianceState,
-  body: ScanInputPayload
+  body: ScanInputPayload,
+  actor?: ComplianceEventActorInput
 ): Promise<{ nextState: ComplianceState; result: ExtractionResult }> {
   const nowISO = new Date().toISOString()
   const extracted = await extractScanText(body)
@@ -133,7 +201,7 @@ export async function createExtractedScan(
           extractionMethod: scan.extractionMethod ?? "manual",
           reviewRequired: scan.reviewRequired ?? false,
         },
-      }),
+      }, actor),
     ]),
   }
 
@@ -151,7 +219,8 @@ export async function createExtractedScan(
 export function analyzeExtractedScan(
   current: ComplianceState,
   scanId: string,
-  reviewText: string | undefined
+  reviewText: string | undefined,
+  actor?: ComplianceEventActorInput
 ) {
   const nowISO = new Date().toISOString()
   const scan = current.scans.find((item) => item.id === scanId)
@@ -183,7 +252,7 @@ export function analyzeExtractedScan(
         findingsCount: result.findings.length,
         alertsCount: result.alerts.length,
       },
-    }),
+    }, actor),
     ...result.findings.map((finding) =>
       createComplianceEvent({
         type: "finding.generated",
@@ -197,7 +266,7 @@ export function analyzeExtractedScan(
           risk: finding.risk,
           ruleId: finding.provenance?.ruleId || "n/a",
         },
-      })
+      }, actor)
     ),
     ...result.alerts.map((alert) =>
       createComplianceEvent({
@@ -210,7 +279,7 @@ export function analyzeExtractedScan(
           severity: alert.severity,
           scanId,
         },
-      })
+      }, actor)
     ),
   ]
 

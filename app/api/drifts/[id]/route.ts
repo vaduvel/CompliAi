@@ -2,16 +2,14 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { ComplianceDriftLifecycleStatus } from "@/lib/compliance/types"
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, requireRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
+import { normalizeOptionalNote, RequestValidationError, requirePlainObject } from "@/lib/server/request-validation"
 
 type DriftAction = "acknowledge" | "start" | "resolve" | "waive" | "reopen"
-
-type DriftPatchPayload = {
-  action?: DriftAction
-  note?: string | null
-}
 
 function isDriftAction(value: unknown): value is DriftAction {
   return (
@@ -27,24 +25,49 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params
-  const body = (await request.json()) as DriftPatchPayload
-
-  if (!isDriftAction(body.action)) {
-    return NextResponse.json({ error: "Actiune de drift invalida." }, { status: 400 })
-  }
-  const action = body.action
-
-  const actor = (await getOrgContext()).workspaceOwner || "owner neidentificat"
-  const nowISO = new Date().toISOString()
-
   try {
+    const { id } = await context.params
+    if (!id?.trim()) {
+      return jsonError("ID-ul drift-ului este obligatoriu.", 400, "DRIFT_ID_REQUIRED")
+    }
+
+    const body = requirePlainObject(await request.json())
+    if (!isDriftAction(body.action)) {
+      return jsonError("Actiune de drift invalida.", 400, "INVALID_DRIFT_ACTION")
+    }
+
+    const action = body.action
+    const session = requireRole(
+      request,
+      action === "waive" ? ["owner", "compliance"] : ["owner", "compliance", "reviewer"],
+      action === "waive" ? "waive pe drift" : "actualizarea lifecycle-ului de drift"
+    )
+    const actor = eventActorFromSession(session)
+    const actorLabel = formatEventActorLabel(actor)
+    const nowISO = new Date().toISOString()
+
     const nextState = await mutateState((current) => {
       const drift = current.driftRecords.find((item) => item.id === id)
       if (!drift) throw new Error("DRIFT_NOT_FOUND")
 
+      if (!canApplyDriftAction(drift.lifecycleStatus ?? "open", action)) {
+        throw new RequestValidationError(
+          `Actiunea ${action} nu este permisa din starea curenta a drift-ului.`,
+          409,
+          "INVALID_DRIFT_TRANSITION"
+        )
+      }
+
       const nextLifecycle = nextDriftLifecycleStatus(action)
-      const note = typeof body.note === "string" ? body.note.trim() || null : null
+      const note = normalizeOptionalNote(body.note, 500)
+
+      if (action === "waive" && !note) {
+        throw new RequestValidationError(
+          "Pentru waive trebuie sa adaugi o justificare scurta.",
+          400,
+          "WAIVE_NOTE_REQUIRED"
+        )
+      }
 
       const driftRecords = current.driftRecords.map((item) => {
         if (item.id !== id) return item
@@ -59,7 +82,7 @@ export async function PATCH(
               : item.acknowledgedAtISO,
           acknowledgedBy:
             action === "acknowledge" || action === "start"
-              ? item.acknowledgedBy ?? actor
+              ? item.acknowledgedBy ?? actorLabel
               : item.acknowledgedBy,
           inProgressAtISO:
             action === "start" ? nowISO : action === "reopen" ? undefined : item.inProgressAtISO,
@@ -85,14 +108,14 @@ export async function PATCH(
             type: `drift.${action}`,
             entityType: "drift",
             entityId: id,
-            message: buildDriftActionMessage(action, drift.summary, actor, note),
+            message: buildDriftActionMessage(action, drift.summary, actorLabel, note),
             createdAtISO: nowISO,
             metadata: {
               lifecycleStatus: nextLifecycle,
-              actor,
+              actor: actorLabel,
               note: note || "",
             },
-          }),
+          }, actor),
         ]),
       }
     })
@@ -102,13 +125,18 @@ export async function PATCH(
       message: buildActionToast(action),
     })
   } catch (error) {
-    if (error instanceof Error && error.message === "DRIFT_NOT_FOUND") {
-      return NextResponse.json({ error: "Drift-ul nu exista." }, { status: 404 })
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
     }
 
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Eroare la actualizarea drift-ului." },
-      { status: 400 }
+    if (error instanceof Error && error.message === "DRIFT_NOT_FOUND") {
+      return jsonError("Drift-ul nu exista.", 404, "DRIFT_NOT_FOUND")
+    }
+
+    return jsonError(
+      error instanceof Error ? error.message : "Eroare la actualizarea drift-ului.",
+      error instanceof RequestValidationError ? error.status : 400,
+      error instanceof RequestValidationError ? error.code : "DRIFT_PATCH_FAILED"
     )
   }
 }
@@ -148,4 +176,27 @@ function buildDriftActionMessage(
     return `${actor} a marcat drift-ul ca waived: ${summary}.${note ? ` Motiv: ${note}` : ""}`
   }
   return `${actor} a redeschis drift-ul: ${summary}.`
+}
+
+function canApplyDriftAction(
+  currentStatus: ComplianceDriftLifecycleStatus,
+  action: DriftAction
+) {
+  if (currentStatus === "open") {
+    return action === "acknowledge" || action === "start" || action === "resolve" || action === "waive"
+  }
+
+  if (currentStatus === "acknowledged") {
+    return action === "start" || action === "resolve" || action === "waive" || action === "reopen"
+  }
+
+  if (currentStatus === "in_progress") {
+    return action === "resolve" || action === "waive" || action === "reopen"
+  }
+
+  if (currentStatus === "resolved" || currentStatus === "waived") {
+    return action === "reopen"
+  }
+
+  return false
 }

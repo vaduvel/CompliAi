@@ -84,6 +84,387 @@ Observatie:
 
 - documentul acesta a fost actualizat dupa starea reala a codului
 - unde un item nu este complet, dar exista implementare serioasa, este marcat ca `partial`
+- sprinturile de maturizare active sunt definite separat in `public/sprinturi-maturizare-compliscan.md`
+- verdictul strict de maturitate este documentat in `public/raport-maturitate-compliscan.md`
+- riscurile existențiale sunt documentate in:
+  - `public/risk-register-brutal.md`
+  - `public/risk-register-operational.md`
+
+## Sesiune de maturizare activa
+
+Sprint activ:
+
+- `Sprint 6 - Audit defensibility`
+
+Fronturile active acum:
+
+- [x] auth cu roluri minime in modelul de sesiune
+- [x] restrictii pe actiuni sensibile in API
+- [x] actor identity real in audit/event log pentru actiunile sensibile
+- [x] compatibilitate intre modelul nou de roluri si store-ul local actual
+- [x] fundatie pentru membership / org model real
+- [x] membership multi-org si administrare explicita minima membri/roluri
+- [x] API minim pentru listare membri si schimbare rol
+- [x] UI minim in `Setari` pentru lista membri si schimbare rol de catre owner
+- [x] protectie backend pentru ultimul `owner` activ
+- [x] audit trail pentru schimbarea rolurilor
+- [x] membership multi-org minim:
+  - listare membership-uri pentru userul curent
+  - switch de organizatie activa din sesiune
+- [x] stabilizare controlata pentru firul paralel `Agent Evidence OS`, fara sa rupa runtime-ul principal
+- [ ] invitare / administrare membri peste workspace-ul local
+- [x] tenancy citit din DB ca sursa primara in backend `supabase`:
+  - `organizations`
+  - `memberships`
+  - `profiles`
+- [x] scrieri sensibile de tenancy tratate cloud-first in backend `supabase`:
+  - `register`
+  - `link identity`
+  - `role update`
+- [x] operatiile de tenancy esueaza explicit cand sincronizarea cloud nu reuseste in backend `supabase`
+- [x] `org_state` in backend `supabase`:
+  - citire primara din `public.org_state`
+  - initializare directa in `public.org_state` cand snapshot-ul lipseste
+  - fara fallback operational implicit la `compliscan.app_state`
+- [~] storage privat real in `Supabase Storage`
+  - backend-ul `supabase` / `hybrid` poate urca deja evidence nou in bucket privat
+  - metadata-ul dovezii poate fi sincronizat acum si in `public.evidence_objects`
+  - route-ul de acces si `Audit Pack` bundle pot consuma acum registrul `public.evidence_objects`
+  - mai ramane mutarea finala a traseului operational complet pe cloud
+- [x] signed URL sau stream controlat pentru evidence cloud
+  - route-ul controlat exista acum:
+    - `GET /api/tasks/[id]/evidence/[evidenceId]`
+  - `delivery=redirect` emite redirect securizat pentru `supabase_private`
+  - `download=1` forteaza descarcare explicita
+- [x] RLS real pe tenancy si evidence objects
+  - fundatia SQL este acum intarita:
+    - helper-ele de membership lookup sunt `SECURITY DEFINER`
+    - este evitata recursia RLS pe `memberships`
+    - exista politici de `insert/update/delete` pe `org_state`, `evidence_objects` si `storage.objects`
+  - exista acum si endpoint de verificare operationala:
+    - `GET /api/integrations/supabase/status`
+    - vizibil si in `Setari`
+  - exista si runbook de verificare manuala:
+    - `public/supabase-rls-verification-runbook.md`
+  - verificarea operationala live in proiectul Supabase real trece prin:
+    - `npm run verify:supabase:rls`
+- [~] registru operational evidence in DB
+  - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
+  - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud
+  - mai ramane extinderea consumului in UI / traceability / views specializate
+- [~] source of truth cloud pentru tenancy
+  - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
+  - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB
+  - fallback-ul local este acum controlat explicit prin:
+    - `COMPLISCAN_ALLOW_LOCAL_FALLBACK`
+  - in productie, traseul cloud poate fi fortat fara degradare tacuta
+
+Verdict Sprint 4:
+
+- [x] Sprint 4 poate fi considerat inchis operational
+- [ ] invitare / administrare membri ramane backlog secundar, nu blocaj pentru Sprint 5
+
+Sprint 2 inchis operational:
+
+- `vitest` este configurat si ruleaza local prin `npm test`
+- exista teste unitare pentru:
+  - `request-validation`
+  - `scan-workflow`
+  - `repo-sync`
+  - `drift-lifecycle`
+  - `drift-policy`
+  - `task-validation`
+- exista route tests pentru:
+  - `POST /api/scan`
+  - `PATCH /api/ai-systems/detected/[id]`
+  - `PATCH /api/drifts/[id]`
+  - `POST /api/scan/[id]/analyze`
+  - `POST /api/scan/extract`
+  - `POST /api/integrations/repo-sync`
+  - `POST /api/integrations/repo-sync/github`
+  - `POST /api/integrations/repo-sync/gitlab`
+  - `POST /api/state/baseline`
+  - `POST /api/auth/login`
+  - `POST /api/auth/register`
+  - `GET /api/auth/me`
+- exista fixture-uri oficiale in `tests/fixtures` pentru:
+  - document text
+  - manifest `package.json`
+  - manifest `requirements.txt`
+  - `compliscan.yaml`
+- exista fixtures OCR in `tests/fixtures` pentru:
+  - PDF base64 minimal
+  - imagine base64 minimală
+- exista fixtures `expected findings` pentru:
+  - document tracking
+  - `compliscan.yaml`
+- exista teste cu fixtures pentru parserul YAML si manifest autodiscovery
+- exista teste de stabilitate pe semnalele-cheie pentru:
+  - `simulateFindings`
+  - `manifest autodiscovery`
+- exista primul test de integrare reala pentru `repo-sync-executor`
+- exista test de integrare reala si pentru fluxul document-first:
+  - `document -> extract -> analyze`
+- exista teste de fallback OCR pentru:
+  - `pdfBase64`
+  - `imageBase64`
+- exista route tests pentru exporturile cheie:
+  - `GET /api/exports/audit-pack`
+  - `GET /api/exports/compliscan`
+- exista route tests pentru:
+  - `POST /api/tasks/[id]/evidence`
+  - `POST /api/scan`
+- exista smoke flow minim pentru:
+  - `login -> session -> scan -> export -> logout`
+- suita curenta are:
+  - `27` fisiere de test
+  - `85` teste verzi
+- `npm run lint` trece dupa adaugarea testelor
+- logul de executie continua in `public/log-sprinturi-maturizare.md`
+
+Sprint 3 pornit:
+
+- [x] strat separat de `signal detection`
+- [x] provenance extins pe findings cu:
+  - `signalSource`
+  - `verdictBasis`
+  - `signalConfidence`
+- [x] confidence model minim pe findings:
+  - `verdictConfidence`
+  - `verdictConfidenceReason`
+- [~] rescan validation mai explicabila:
+  - `validationConfidence`
+  - `validationBasis`
+  - mesaj contextual pentru baza validarii
+  - afisare in `TaskCard` si `Validation ledger`
+  - prefix de outcome:
+    - `Confirmare puternica`
+    - `Confirmare partiala`
+    - `Confirmare operationala`
+- [~] verdict explicabil si in rezultate:
+  - afisare in `Ultimul document analizat`
+  - afisare in `Findings generate din YAML`
+- [x] normalizare task IDs pentru findings + compatibilitate pe chei vechi din `taskState`
+- [x] `simulateFindings(...)` refolosit peste semnalele detectate
+- [x] teste pentru:
+  - semnal direct din keyword
+  - semnal inferat din manifest
+  - propagarea provenance-ului in findings
+- [x] teste pentru confidence si reason pe findings
+- [~] fixtures extinse pentru verdict:
+  - tracking
+  - `compliscan.yaml`
+  - high-risk scoring
+  - data residency / transfer
+- suita curenta dupa pornirea Sprintului 4 are:
+  - `32` fisiere de test
+  - `108` teste verzi
+
+Sprint 4 pornit:
+
+- [x] `UserRole` introdus in auth:
+  - `owner`
+  - `compliance`
+  - `reviewer`
+  - `viewer`
+- [x] sesiunea include acum `role`
+- [x] compatibilitate pentru useri si sesiuni legacy prin fallback controlat la `owner`
+- [x] guard-uri de rol pe:
+  - `GET /api/exports/compliscan`
+  - `GET /api/exports/audit-pack`
+  - `GET /api/exports/audit-pack/client`
+  - `GET /api/exports/audit-pack/bundle`
+  - `GET /api/exports/annex-lite/client`
+  - `PATCH /api/drifts/[id]`
+  - `PATCH /api/tasks/[id]`
+  - `POST /api/tasks/[id]/evidence`
+  - `POST /api/state/baseline`
+  - `POST /api/state/drift-settings`
+  - `POST /api/state/reset`
+- [x] regula de permisiune pentru drift:
+  - `waive` doar pentru `owner` / `compliance`
+  - tranzitiile standard pentru `owner` / `compliance` / `reviewer`
+- [x] actor identity real in audit trail:
+  - helper comun pentru actor de tip `session / workspace / system`
+  - actor propagat in evenimente pentru:
+    - drift lifecycle
+    - task update + rescan
+    - evidence upload
+    - baseline / reset
+    - traceability review
+    - family evidence reuse
+    - AI systems create / confirm / edit / review / reject
+    - pack field overrides
+    - scan create / analyze
+    - e-Factura validate / sync
+    - alert resolve
+  - timeline-ul din `Auditor Vault` si `Activitate recenta` afiseaza acum actorul
+- [x] teste noi pentru deny-path si actiuni sensibile:
+  - `PATCH /api/tasks/[id]`
+  - `POST /api/state/reset`
+  - `POST /api/state/drift-settings`
+- [x] `npm run build` trece dupa pachetul Sprint 4, inclusiv dupa fixul de tip ramas din `engine.ts`
+- [x] membership real intre user si organizatie:
+  - persistenta separata in `users / orgs / memberships`
+  - migrare compatibila din `users.json` legacy
+  - sesiune cu `membershipId`
+- [x] teste dedicate pentru noul model de auth:
+  - persistenta separata la `register`
+  - migrare legacy
+  - rezolvare membership nou
+  - token legacy fara rol
+  - `requireRole` deny path
+- [x] keepalive operational pentru Supabase Storage:
+  - bucket `compliscan-heartbeat`
+  - endpoint `GET/POST /api/integrations/supabase/keepalive`
+  - cheie dedicata sau fallback la `COMPLISCAN_RESET_KEY`
+- [x] API membri / roluri:
+  - `GET /api/auth/members`
+  - `PATCH /api/auth/members/[membershipId]`
+- [x] API membership-uri / switch org:
+  - `GET /api/auth/memberships`
+  - `POST /api/auth/switch-org`
+- [x] UI minim pentru membri si roluri in `Setari`
+- [x] org switcher minim in `DashboardShell`
+- [x] protectie `LAST_OWNER_REQUIRED` pentru retrogradarea ultimului owner
+- [x] schimbarea rolului lasa eveniment in audit trail
+- [~] persistența `app_state` direct in Supabase:
+  - schema `compliscan` nu este inca expusa in PostgREST
+- [x] suita curenta dupa pachetul de membri / roluri are:
+  - `38` fisiere de test
+  - `130` teste verzi
+
+Sprint 5 trebuie sa atace direct riscurile:
+
+- [~] mutare useri spre `Supabase Auth`
+  - backend auth comutabil exista acum:
+    - `local`
+    - `supabase`
+    - `hybrid`
+  - login/register pot folosi acum `Supabase Auth`
+  - exista si legare a userului local existent la identitatea externa
+  - mai ramane mutarea completa a sesiunii si a source-of-truth-ului de identitate
+- [~] `organizations` + `memberships` in DB, nu doar local
+  - exista acum mirror controlat spre Supabase pentru:
+    - `organizations`
+    - `profiles`
+    - `memberships`
+  - sync-ul se leaga de:
+    - `register`
+    - `link identity`
+    - `role update`
+  - mai ramane mutarea citirii si a source-of-truth-ului final in DB
+- [~] `org_state` in DB ca traseu real de productie
+  - exista helper dedicat pentru `public.org_state`
+  - in backend `supabase`, `public.org_state` poate fi citit ca sursa primara
+  - in backend `hybrid`, `public.org_state` este oglindit la scriere, dar local ramane sursa principala
+- `compliscan.app_state` ramane fallback legacy pana la mutarea finala a source-of-truth-ului
+- `Agent Evidence OS` este acum stabilizat minimal:
+  - tipuri reale in `lib/compliance/agent-os.ts`
+  - endpoint-uri corecte in `/api/agent/run` si `/api/agent/commit`
+  - `Scanari` foloseste un singur hook coerent pentru agent flow
+  - workspace-ul agentilor nu mai blocheaza `test + lint + build`
+- [ ] RLS minim pentru datele multi-org
+- [~] dovezi mutate din `public/evidence-uploads` in storage privat
+  - upload-urile noi sunt acum in `.data/evidence-uploads`
+  - accesul se face prin route controlat
+  - backend-ul `supabase` / `hybrid` poate urca deja evidence nou in bucket privat
+- [x] acces prin signed URLs sau route controlat
+  - route-ul controlat exista acum:
+    - `GET /api/tasks/[id]/evidence/[evidenceId]`
+  - `delivery=redirect` emite redirect securizat pentru `supabase_private`
+  - `download=1` forteaza descarcare explicita
+- [ ] clarificare finala pentru `app_state` cloud ca source of truth
+- [x] consum operational mai larg pentru `public.evidence_objects`
+  - `DashboardPayload` hidrateaza metadata din registrul cloud
+  - `family-evidence` reutilizeaza acum dovada din starea hidratata, nu doar din state local brut
+- [x] inchidere formala Sprint 5
+  - checklist-ul este in `public/sprint-5-closure-checklist.md`
+  - exista acum si verificare live directa:
+    - `npm run verify:supabase:sprint5`
+  - exista si panou operational in `Setari` care afiseaza:
+    - schema lipsa
+    - bucket lipsa
+    - blocajele reale ramase
+  - verdictul live actual este documentat in:
+    - `public/supabase-live-verification-2026-03-13.md`
+  - infrastructura live de baza este acum prezenta:
+    - tabelele Sprint 5 raspund `200`
+    - bucket-ul privat raspunde `200`
+  - exporturile si Auditor Vault au acum acoperire automata pentru dovezi din registrul cloud:
+    - `lib/server/dashboard-response.test.ts`
+    - `app/api/exports/audit-pack/client/route.test.ts`
+    - `app/api/exports/audit-pack/bundle/route.test.ts`
+  - exista acum si preflight strict pentru mediul `supabase`:
+    - `npm run verify:supabase:strict`
+    - verdict curent:
+      - infrastructura live este buna
+      - `.env.local` este acum pe traseu strict:
+        - `COMPLISCAN_AUTH_BACKEND=supabase`
+        - `COMPLISCAN_DATA_BACKEND=supabase`
+        - `COMPLISCAN_ALLOW_LOCAL_FALLBACK=false`
+  - mai ramane:
+    - verificarea manuala RLS
+- [x] suita curenta dupa stabilizarea pachetului Sprint 5:
+  - `50` fisiere de test
+  - `177` teste verzi
+
+Sprint 6 trebuie sa atace direct riscurile:
+
+- [x] evidence quality checks
+  - `TaskEvidenceAttachment` retine acum evaluarea:
+    - `sufficient`
+    - `weak`
+  - evaluarea este scrisa si in `public.evidence_objects`
+- [x] fixtures reale pentru verdicturi grele
+- [x] test fixture-driven pentru `Audit Pack` pe caz high-risk fara dovezi
+- [x] quality gates pentru `Audit Pack`
+  - `missing_evidence`
+  - `pending_validation`
+  - `weak_evidence`
+  - `stale_evidence`
+  - `unresolved_drift`
+  - `inferred_only_finding`
+  - `auditReadiness` tine acum cont si de aceste gates
+- [x] reguli mai defensive pentru `family reuse`
+  - reuse blocat pentru dovada sursa `weak`
+  - reuse blocat cand sursa ramane validata doar pe `inferred_signal`
+  - reuse blocat pe target-uri care au drift deschis
+- [~] clarificare și mai strictă între:
+  - `semnal`
+  - `inferență`
+  - `verdict`
+  - `confirmare umană`
+  - actualizare:
+    - Sprint 5 este inchis operational
+    - Sprint 6 expune acum explicit cand dovada este slaba sau cand controlul ramane bazat doar pe inferenta
+- [x] traceability mai strict pentru dovada si control
+  - `ComplianceTraceRecord` include acum:
+    - `evidence.quality`
+    - `evidence.validationBasis`
+    - `evidence.validationConfidence`
+  - un control cu `validationStatus=passed`, dar dovada `weak`, nu mai apare `validated`
+  - `bundleCoverageStatus` cade la `partial` daca dovada este slaba
+  - `nextStep` foloseste sumarul de calitate al dovezii cand acesta este motivul real de blocaj
+- [x] vizibilitate mai buna in UI / export pentru traceability
+  - `Auditor Vault` afiseaza:
+    - calitatea dovezii
+    - baza validarii
+    - increderea validarii
+  - `Audit Pack` client-facing afiseaza acum si sumarul de calitate al dovezii in traceability matrix
+- [x] documentatie Sprint 6:
+  - `public/evidence-quality-spec.md`
+  - `public/sprint-6-audit-quality-gates.md`
+  - `public/triere-rapoarte-gemini.md`
+- [x] fixtures Sprint 6:
+  - `tests/fixtures/documents/recruitment-high-risk-bundle.txt`
+  - `tests/fixtures/yaml/compliscan-recruitment-high-risk.yaml`
+  - `tests/fixtures/expected-findings/recruitment-high-risk-bundle.json`
+  - `tests/fixtures/expected-findings/compliscan-recruitment-high-risk.json`
+- [x] suita curenta dupa pornirea Sprint 6:
+  - `58` fisiere de test
+  - `206` teste verzi
+- [~] UI de administrare roluri / membri
 
 ## Epic 1 - Claritate produs si navigatie
 
@@ -113,6 +494,44 @@ Produsul trebuie sa fie usor de inteles in 30 de secunde.
 
 - layout si route structure curate
 - componente shared pentru guide cards / action cards / status cards
+
+## Sprint 2 - Test harness activ
+
+Status:
+
+- `done`
+
+Progres:
+
+- [x] alegem runner-ul de test (`vitest`)
+- [x] scripturi de test in `package.json`
+- [x] configurare alias pentru runner
+- [x] primele unit tests pentru:
+  - `request-validation`
+  - `scan-workflow`
+  - `repo-sync`
+  - `drift-lifecycle`
+- [x] unit tests pentru:
+  - `drift-policy`
+  - `task-validation`
+- [x] route tests pentru endpoint-urile critice:
+  - `PATCH /api/drifts/[id]`
+  - `PATCH /api/ai-systems/detected/[id]`
+  - `POST /api/scan/[id]/analyze`
+  - `POST /api/scan/extract`
+  - `POST /api/integrations/repo-sync`
+  - `POST /api/integrations/repo-sync/github`
+  - `POST /api/integrations/repo-sync/gitlab`
+  - `POST /api/state/baseline`
+  - `POST /api/auth/login`
+  - `POST /api/auth/register`
+  - `GET /api/auth/me`
+  - `POST /api/tasks/[id]/evidence`
+- [x] exporturile cheie au route tests:
+  - `GET /api/exports/audit-pack`
+  - `GET /api/exports/compliscan`
+- [x] fixture-uri oficiale pentru scan / manifests / YAML
+- [x] integration tests pe fluxurile cheie
 
 ## Epic 2 - Libraria de Reguli + Legal Mapping
 

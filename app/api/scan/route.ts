@@ -6,18 +6,21 @@ import {
   analyzeExtractedScan,
   createExtractedScan,
   type ExtractionResult,
-  type ScanInputPayload,
+  validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as ScanInputPayload
+    const body = validateScanInputPayload(await request.json())
+    const actor = await resolveOptionalEventActor(request)
     let extractionResult: ExtractionResult | undefined
 
     const nextState = await mutateState(async (current) => {
-      const extracted = await createExtractedScan(current, body)
+      const extracted = await createExtractedScan(current, body, actor)
       extractionResult = extracted.result
-      return analyzeExtractedScan(extracted.nextState, extracted.result.scan.id, body.content)
+      return analyzeExtractedScan(extracted.nextState, extracted.result.scan.id, body.content, actor)
     })
 
     if (!extractionResult) {
@@ -34,7 +37,18 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "Eroare la scanare."
-    const status = message.includes("Nu am extras") ? 422 : 400
-    return NextResponse.json({ error: message }, { status })
+    const status =
+      error instanceof RequestValidationError
+        ? error.status
+        : message.includes("Nu am extras")
+          ? 422
+          : 400
+    return NextResponse.json(
+      {
+        error: message,
+        code: error instanceof RequestValidationError ? error.code : "SCAN_FAILED",
+      },
+      { status }
+    )
   }
 }

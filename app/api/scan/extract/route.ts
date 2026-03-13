@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server"
 
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 import {
   createExtractedScan,
   type ExtractionResult,
-  type ScanInputPayload,
+  validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
+import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as ScanInputPayload
+    const body = validateScanInputPayload(await request.json())
+    const actor = await resolveOptionalEventActor(request)
     let extractionResult: ExtractionResult | undefined
 
     const nextState = await mutateState(async (current) => {
-      const extracted = await createExtractedScan(current, body)
+      const extracted = await createExtractedScan(current, body, actor)
       extractionResult = extracted.result
       return extracted.nextState
     })
@@ -34,9 +37,19 @@ export async function POST(request: Request) {
   } catch (error) {
     const err = error as Error & { ocrWarning?: string | null }
     const message = err instanceof Error ? err.message : "Eroare la extragere."
-    const status = message.includes("Nu am extras") ? 422 : 400
+    const status =
+      error instanceof RequestValidationError
+        ? error.status
+        : message.includes("Nu am extras")
+          ? 422
+          : 400
     return NextResponse.json(
-      { error: message, ocrWarning: err.ocrWarning ?? null, extractionStatus: "needs_review" },
+      {
+        error: message,
+        code: error instanceof RequestValidationError ? error.code : "SCAN_EXTRACT_FAILED",
+        ocrWarning: err.ocrWarning ?? null,
+        extractionStatus: "needs_review",
+      },
       { status }
     )
   }

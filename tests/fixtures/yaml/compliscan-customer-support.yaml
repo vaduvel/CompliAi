@@ -1,0 +1,26 @@
+version: "1.0"
+system_id: "customer-support-ai"
+name: "Customer Support Assistant"
+
+specs:
+  provider: "openai"
+  model: "gpt-4o"
+  capability: ["text-generation", "classification"]
+  temperature_limit: 0.3
+  filters_enabled: true
+
+governance:
+  risk_class: "limited"
+  data_residency: "eu-central-1"
+  personal_data_processed: true
+  retention_days: 30
+
+human_oversight:
+  required: true
+  review_method: "sampling-audit"
+  reviewer_role: "support-lead"
+  alert_on_failure: true
+
+mapping:
+  regulations: ["GDPR", "EU-AI-ACT"]
+  articles: ["Art. 13", "Art. 52"]

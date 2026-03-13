@@ -11,11 +11,19 @@ import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import type { ChatMessage, ComplianceState } from "@/lib/compliance/types"
 import { buildComplianceDriftRecords, mergeDriftRecords } from "@/lib/server/compliance-drift"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
+import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallback-policy"
 import {
   hasSupabaseConfig,
   supabaseSelect,
   supabaseUpsert,
 } from "@/lib/server/supabase-rest"
+import {
+  loadOrgStateFromSupabase,
+  persistOrgStateToSupabase,
+  shouldUseSupabaseOrgStateAsPrimary,
+} from "@/lib/server/supabase-org-state"
+import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
+import { systemEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
 
 const DATA_DIR = path.join(process.cwd(), ".data")
@@ -107,6 +115,27 @@ function uid(prefix: string) {
 }
 
 async function loadState(orgId: string): Promise<ComplianceState> {
+  const dataBackend = getConfiguredDataBackend()
+
+  if (shouldUseSupabaseOrgStateAsPrimary()) {
+    try {
+      const mirroredState = await loadOrgStateFromSupabase(orgId)
+      if (mirroredState) return normalizeComplianceState(mirroredState)
+
+      const initialCloudState = normalizeComplianceState(initialComplianceState)
+      await persistOrgStateToSupabase(orgId, initialCloudState)
+      return structuredClone(initialCloudState)
+    } catch (error) {
+      if (!isLocalFallbackAllowedForCloudPrimary()) {
+        throw new Error(
+          error instanceof Error
+            ? `SUPABASE_ORG_STATE_REQUIRED: ${error.message}`
+            : "SUPABASE_ORG_STATE_REQUIRED"
+        )
+      }
+    }
+  }
+
   if (hasSupabaseConfig()) {
     try {
       type AppStateRow = { org_id: string; state: ComplianceState }
@@ -114,7 +143,17 @@ async function loadState(orgId: string): Promise<ComplianceState> {
         "app_state",
         `select=org_id,state&org_id=eq.${orgId}&limit=1`
       )
-      if (rows.length > 0) return rows[0].state
+      if (rows.length > 0) {
+        const normalized = normalizeComplianceState(rows[0].state)
+        if (dataBackend === "supabase") {
+          try {
+            await persistOrgStateToSupabase(orgId, normalized)
+          } catch {
+            // Ignore org_state mirror failures while legacy state remains readable.
+          }
+        }
+        return normalized
+      }
 
       const inserted = await supabaseUpsert<
         { org_id: string; state: ComplianceState },
@@ -123,23 +162,79 @@ async function loadState(orgId: string): Promise<ComplianceState> {
         org_id: orgId,
         state: normalizeComplianceState(initialComplianceState),
       })
-      if (inserted[0]) return normalizeComplianceState(inserted[0].state)
+      if (inserted[0]) {
+        const normalized = normalizeComplianceState(inserted[0].state)
+        if (dataBackend === "supabase") {
+          try {
+            await persistOrgStateToSupabase(orgId, normalized)
+          } catch {
+            // Ignore org_state mirror failures while legacy state remains readable.
+          }
+        }
+        return normalized
+      }
     } catch {
       // Falls back to local store if schema is not initialized yet.
     }
   }
-  return loadFromDisk(orgId)
+
+  const diskState = await loadFromDisk(orgId)
+  if (dataBackend === "supabase") {
+    try {
+      await persistOrgStateToSupabase(orgId, diskState)
+    } catch (error) {
+      if (!isLocalFallbackAllowedForCloudPrimary()) {
+        throw new Error(
+          error instanceof Error
+            ? `SUPABASE_ORG_STATE_REQUIRED: ${error.message}`
+            : "SUPABASE_ORG_STATE_REQUIRED"
+        )
+      }
+    }
+  }
+  return diskState
 }
 
 async function persistState(orgId: string, state: ComplianceState): Promise<void> {
+  const dataBackend = getConfiguredDataBackend()
+  const keepLocalCopy = dataBackend !== "supabase"
+  let cloudPersisted = false
+
+  if (shouldUseSupabaseOrgStateAsPrimary()) {
+    try {
+      const mirrored = await persistOrgStateToSupabase(orgId, state)
+      if (mirrored.synced) return
+    } catch (error) {
+      if (!isLocalFallbackAllowedForCloudPrimary()) {
+        throw new Error(
+          error instanceof Error
+            ? `SUPABASE_ORG_STATE_REQUIRED: ${error.message}`
+            : "SUPABASE_ORG_STATE_REQUIRED"
+        )
+      }
+    }
+
+    await persistToDisk(orgId, state)
+    return
+  }
+
+  try {
+    const mirrored = await persistOrgStateToSupabase(orgId, state)
+    cloudPersisted = mirrored.synced
+  } catch {
+    // Falls back to legacy and/or local store if public org_state is not available.
+  }
+
   if (hasSupabaseConfig()) {
     try {
       await supabaseUpsert("app_state", { org_id: orgId, state })
-      return
+      cloudPersisted = true
     } catch {
       // Falls back to local store if schema is not initialized yet.
     }
   }
+
+  if (cloudPersisted && !keepLocalCopy) return
   await persistToDisk(orgId, state)
 }
 
@@ -217,7 +312,7 @@ async function enrichStateWithSnapshots(nextState: ComplianceState): Promise<Com
           entityId: event.driftId,
           message: event.message,
           createdAtISO: currentSnapshot.generatedAt,
-        })
+        }, systemEventActor())
       )
     ),
   }

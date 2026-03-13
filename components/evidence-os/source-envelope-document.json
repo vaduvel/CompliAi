@@ -1,0 +1,9 @@
+{
+  "sourceId": "doc-fixture-001",
+  "orgId": "org-fixture-demo",
+  "sourceName": "Politica_Recrutare_AI.pdf",
+  "sourceType": "document",
+  "rawText": "Sistemul folosește algoritmi de machine learning pentru a analiza CV-urile candidaților și a acorda un scor de relevanță automat. Nu există intervenție umană în faza de filtrare inițială.",
+  "sourceSignals": ["screening cv", "decizie automată", "fără intervenție umană"],
+  "extractedAtISO": "2026-03-13T10:00:00.000Z"
+}

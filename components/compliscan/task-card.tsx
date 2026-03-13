@@ -17,8 +17,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import type { CockpitTask } from "@/components/compliscan/types"
-import type { TaskEvidenceKind } from "@/lib/compliance/types"
+import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
+import type { EvidenceQualityAssessment, TaskEvidenceKind } from "@/lib/compliance/types"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
+import {
+  formatEvidenceQualityStatus,
+  getEvidenceQualitySummary,
+} from "@/lib/compliance/evidence-quality"
 
 type TaskCardProps = {
   task: CockpitTask
@@ -74,6 +79,20 @@ function validationLabel(status: CockpitTask["validationStatus"]) {
   return "idle"
 }
 
+function validationConfidenceLabel(confidence?: CockpitTask["validationConfidence"]) {
+  if (confidence === "high") return "încredere mare"
+  if (confidence === "medium") return "încredere medie"
+  if (confidence === "low") return "încredere redusă"
+  return "încredere n/a"
+}
+
+function validationBasisLabel(basis?: CockpitTask["validationBasis"]) {
+  if (basis === "direct_signal") return "semnal direct"
+  if (basis === "inferred_signal") return "semnal inferat"
+  if (basis === "operational_state") return "stare operațională"
+  return "bază n/a"
+}
+
 function severityTone(severity: CockpitTask["severity"]) {
   if (severity === "critical" || severity === "high") {
     return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
@@ -96,6 +115,16 @@ function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
   return mode === "rapid" ? "remediere rapida" : "remediere structurala"
 }
 
+function evidenceQualityTone(status?: EvidenceQualityAssessment["status"]) {
+  if (status === "sufficient") {
+    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+  }
+  if (status === "weak") {
+    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+  }
+  return "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+}
+
 export function TaskCard({
   task,
   highlighted,
@@ -108,6 +137,7 @@ export function TaskCard({
   const [selectedEvidenceKind, setSelectedEvidenceKind] = useState<TaskEvidenceKind>(
     task.evidenceKinds[0] ?? "other"
   )
+  const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
 
   async function handleCopyReadyText() {
     try {
@@ -289,6 +319,20 @@ export function TaskCard({
                     <p className="text-sm text-[var(--color-on-surface)]">
                       {task.validationMessage || "Task-ul nu a fost validat încă."}
                     </p>
+                    {(task.validationBasis || task.validationConfidence) && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {task.validationBasis && (
+                          <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                            bază: {validationBasisLabel(task.validationBasis)}
+                          </Badge>
+                        )}
+                        {task.validationConfidence && (
+                          <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                            {validationConfidenceLabel(task.validationConfidence)}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                     {task.validatedAtLabel && (
                       <p className="text-xs text-[var(--color-muted)]">
                         Ultima verificare: {task.validatedAtLabel}
@@ -316,9 +360,9 @@ export function TaskCard({
               {task.attachedEvidence ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <span>Dovada atasata:</span>
-                  {task.attachedEvidence.publicPath ? (
+                  {evidenceHref ? (
                     <a
-                      href={task.attachedEvidence.publicPath}
+                      href={evidenceHref}
                       target="_blank"
                       rel="noreferrer"
                       className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
@@ -332,6 +376,19 @@ export function TaskCard({
                   )}
                   <span>·</span>
                   <span>{formatEvidenceKind(task.attachedEvidence.kind)}</span>
+                  {task.attachedEvidence.quality && (
+                    <>
+                      <span>·</span>
+                      <Badge className={evidenceQualityTone(task.attachedEvidence.quality.status)}>
+                        dovadă {formatEvidenceQualityStatus(task.attachedEvidence.quality.status)}
+                      </Badge>
+                    </>
+                  )}
+                  {getEvidenceQualitySummary(task.attachedEvidence) && (
+                    <span className="basis-full text-[var(--color-on-surface-muted)]">
+                      {getEvidenceQualitySummary(task.attachedEvidence)}
+                    </span>
+                  )}
                 </div>
               ) : (
                 "Nu exista dovada atasata inca."

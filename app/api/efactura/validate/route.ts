@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { validateEFacturaXml } from "@/lib/compliance/efactura-validator"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 
 type ValidationPayload = {
@@ -12,6 +13,7 @@ type ValidationPayload = {
 
 export async function POST(request: Request) {
   const body = (await request.json()) as ValidationPayload
+  const actor = await resolveOptionalEventActor(request)
   const xml = body.xml?.trim() || ""
 
   if (!xml) {
@@ -42,7 +44,7 @@ export async function POST(request: Request) {
           errors: result.errors.length,
           warnings: result.warnings.length,
         },
-      }),
+      }, actor),
     ]),
   }))
 

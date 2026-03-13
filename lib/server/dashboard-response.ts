@@ -7,6 +7,7 @@ import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildAICompliancePack } from "@/lib/server/ai-compliance-pack"
 import { buildComplianceTraceRecords } from "@/lib/server/compliance-trace"
 import { getOrgContext } from "@/lib/server/org-context"
+import { hydrateEvidenceAttachmentsFromSupabase } from "@/lib/server/supabase-evidence-read"
 
 export type DashboardPayload = {
   state: ComplianceState
@@ -18,10 +19,11 @@ export type DashboardPayload = {
 }
 
 export async function buildDashboardPayload(state: ComplianceState) {
-  const normalizedState = normalizeComplianceState(state)
+  const workspace = await getOrgContext()
+  const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
+  const normalizedState = normalizeComplianceState(hydratedState)
   const summary = computeDashboardSummary(normalizedState)
   const remediationPlan = buildRemediationPlan(normalizedState)
-  const workspace = await getOrgContext()
   const snapshot =
     normalizedState.snapshotHistory[0] ??
     buildCompliScanSnapshot({

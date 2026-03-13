@@ -1,4 +1,5 @@
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
+import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
 import type { ComplianceAlert, ComplianceState } from "@/lib/compliance/types"
 
 type TaskResolutionTargets = {
@@ -39,7 +40,8 @@ export function getTaskResolutionTargets(
   taskId: string
 ): TaskResolutionTargets {
   if (taskId.startsWith("finding-")) {
-    const findingId = taskId.replace("finding-", "")
+    const findingId = resolveFindingIdFromTaskId(taskId)
+    if (!findingId) return { alertIds: [], findingIds: [], driftIds: [] }
     return {
       findingIds: [findingId],
       alertIds: unique(findRelatedAlertIdsForFinding(state.alerts, state, findingId)),

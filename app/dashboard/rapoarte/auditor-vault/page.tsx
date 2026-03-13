@@ -22,6 +22,8 @@ import {
 } from "@/components/compliscan/ai-compliance-pack-card"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
+import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -412,18 +414,23 @@ function EvidenceLedgerCard({
                   </Badge>
                 </div>
                 <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
-                  {task.attachedEvidence?.publicPath ? (
-                    <a
-                      href={task.attachedEvidence.publicPath}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
-                    >
-                      {task.attachedEvidence.fileName}
-                    </a>
-                  ) : (
-                    task.attachedEvidence?.fileName
-                  )}
+                  {(() => {
+                    const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
+                    if (evidenceHref && task.attachedEvidence) {
+                      return (
+                        <a
+                          href={evidenceHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                        >
+                          {task.attachedEvidence.fileName}
+                        </a>
+                      )
+                    }
+
+                    return task.attachedEvidence?.fileName ?? null
+                  })()}
                 </p>
                 {task.attachedEvidence && (
                   <p className="mt-2 text-xs text-[var(--color-muted)]">
@@ -941,10 +948,20 @@ function TraceabilityMatrixCard({
                 value={record.evidence.fileName ?? "neatașată"}
                 hint={
                   record.evidence.attached
-                    ? `status ${record.evidence.validationStatus}`
+                    ? [
+                        `status ${record.evidence.validationStatus}`,
+                        record.evidence.validationBasis
+                          ? `bază ${formatValidationBasis(record.evidence.validationBasis)}`
+                          : null,
+                        record.evidence.validationConfidence
+                          ? formatValidationConfidence(record.evidence.validationConfidence)
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")
                     : "cere dovadă pentru audit"
                 }
-                  />
+              />
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
@@ -959,6 +976,12 @@ function TraceabilityMatrixCard({
                 <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
                   {record.evidenceRequired || "Nu există încă o cerință explicită de dovadă pentru acest control."}
                 </p>
+                {record.evidence.quality && (
+                  <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">
+                    Calitate dovadă: {formatEvidenceQualityStatus(record.evidence.quality.status)} ·{" "}
+                    {record.evidence.quality.summary}
+                  </p>
+                )}
                 {record.bundleFiles.length > 0 && (
                   <p className="mt-2 text-xs text-[var(--color-muted)]">
                     Fișiere legate: {record.bundleFiles.join(" · ")}
@@ -1364,6 +1387,8 @@ type ValidationEntry = {
   taskId: string
   taskTitle: string
   status: CockpitTask["validationStatus"]
+  confidence?: CockpitTask["validationConfidence"]
+  basis?: CockpitTask["validationBasis"]
   validatedAtISO?: string
   evidence?: string
   message?: string
@@ -1407,9 +1432,23 @@ function ValidationLedgerCard({
                   ? "validated"
                   : entry.status === "failed"
                     ? "failed"
-                    : "needs review"}
+                  : "needs review"}
               </Badge>
             </div>
+            {(entry.basis || entry.confidence) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {entry.basis && (
+                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                    bază: {formatValidationBasis(entry.basis)}
+                  </Badge>
+                )}
+                {entry.confidence && (
+                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                    {formatValidationConfidence(entry.confidence)}
+                  </Badge>
+                )}
+              </div>
+            )}
             {entry.message && (
               <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">{entry.message}</p>
             )}
@@ -1474,6 +1513,11 @@ function AuditTimelineCard({
                       : ""}
                   </p>
                 )}
+                {event.actorLabel && (
+                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                    Actor: {formatEventActor(event)}
+                  </p>
+                )}
                 <p className="mt-2 text-xs text-[var(--color-muted)]">
                   {event.entityType} · {formatRelativeRomanian(event.createdAtISO)}
                 </p>
@@ -1484,6 +1528,10 @@ function AuditTimelineCard({
       </CardContent>
     </Card>
   )
+}
+
+function formatEventActor(event: ComplianceEvent) {
+  return event.actorRole ? `${event.actorLabel} (${event.actorRole})` : event.actorLabel
 }
 
 function MiniMeta({ label, value }: { label: string; value: number }) {
@@ -1502,11 +1550,11 @@ function buildValidationEntries(
 ): ValidationEntry[] {
   return tasks
     .filter((task) => {
-      const persisted = taskState[task.id]
+      const persisted = getTaskStateByTaskId(taskState, task.id)
       return Boolean(task.attachedEvidence || persisted?.validatedAtISO)
     })
     .map((task) => {
-      const persisted = taskState[task.id]
+      const persisted = getTaskStateByTaskId(taskState, task.id)
       const latestValidationEvent = events.find(
         (event) => event.entityType === "task" && event.entityId === task.id && event.type === "task.validated"
       )
@@ -1523,6 +1571,8 @@ function buildValidationEntries(
         ) as ValidationEntry["status"],
         validatedAtISO: persisted?.validatedAtISO,
         evidence: task.attachedEvidence?.fileName,
+        confidence: task.validationConfidence,
+        basis: task.validationBasis,
         message:
           task.validationMessage ||
           (latestValidationEvent?.metadata?.validationMessage
@@ -1550,6 +1600,23 @@ function validationBadgeClass(status: ValidationEntry["status"]) {
     return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
   }
   return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+}
+
+function formatValidationBasis(value: NonNullable<ValidationEntry["basis"]>) {
+  if (value === "direct_signal") return "semnal direct"
+  if (value === "inferred_signal") return "semnal inferat"
+  return "stare operațională"
+}
+
+function formatValidationConfidence(value: NonNullable<ValidationEntry["confidence"]>) {
+  if (value === "high") return "încredere mare"
+  if (value === "medium") return "încredere medie"
+  return "încredere redusă"
+}
+
+function formatEvidenceQualityStatus(value: NonNullable<ComplianceTraceRecord["evidence"]["quality"]>["status"]) {
+  if (value === "sufficient") return "suficientă"
+  return "slabă"
 }
 
 function traceStatusBadgeClass(status: ComplianceTraceRecord["traceStatus"]) {

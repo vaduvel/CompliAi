@@ -2,6 +2,13 @@
 
 Acest roadmap defineste cum ducem CompliScan in fata competitiei fara sa-l transformam intr-o platforma greoaie.
 
+Nota:
+
+- roadmap-ul de produs ramane valabil
+- sprinturile de maturizare tehnica si operationala sunt urmarite separat in `public/sprinturi-maturizare-compliscan.md`
+- evaluarea riguroasa a stadiului actual este in `public/raport-maturitate-compliscan.md`
+- ideile parcate sau filtrate din `feedback.md` sunt tinute separat in `public/backlog-din-feedback.md`
+
 ## North Star
 
 CompliScan trebuie sa fie:
@@ -117,6 +124,21 @@ Drift-ul trebuie sa fie:
 - framework legal academic
 - integrari cu tot internetul
 - proces complet de CE / notified body / bureaucracy suite
+
+## Filtru strategic din feedback
+
+Din ultima runda de analiza a `feedback.md`, pastram clar doar aceste directii:
+
+- `continuous governance` ca north star
+- `compliscan.yaml + repo sync + drift + evidence + audit` ca diferentiere reala
+- `e-Factura` ca wedge local ulterior, nu ca pivot imediat
+
+Nu mutam in roadmap-ul activ, pana dupa sprinturile de maturizare:
+
+- Policy Engine separat
+- Event-driven core / realtime bus
+- agentic loop light
+- mapping multi-reg extins
 
 ## Roadmap pe sprinturi
 

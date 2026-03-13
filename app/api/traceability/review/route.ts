@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { mutateState, readState } from "@/lib/server/mvp-store"
 
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
   const action = body.action ?? "confirm"
   const note = typeof body.note === "string" ? body.note.trim() || null : null
   const nowISO = new Date().toISOString()
+  const actor = await resolveOptionalEventActor(request)
   const traceIds =
     scope === "record"
       ? [body.traceId!.trim()]
@@ -101,7 +103,7 @@ export async function POST(request: Request) {
             affectedControls: traceIds.length,
             hasNote: Boolean(note),
           },
-        }),
+        }, actor),
       ]),
     }
   })

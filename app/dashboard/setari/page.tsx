@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { FileCode2, KeyRound, ShieldCheck, Trash2 } from "lucide-react"
+import { Cloud, Database, FileCode2, KeyRound, ShieldCheck, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
@@ -21,6 +22,54 @@ type RepoSyncStatus = {
   curlExample: string
 } | null
 
+type CurrentUser = {
+  email: string
+  orgId: string
+  orgName: string
+  role: "owner" | "compliance" | "reviewer" | "viewer"
+  membershipId: string | null
+} | null
+
+type OrganizationMember = {
+  membershipId: string
+  userId: string
+  email: string
+  role: "owner" | "compliance" | "reviewer" | "viewer"
+  createdAtISO: string
+  orgId: string
+  orgName: string
+}
+
+type MembersResponse = {
+  members: OrganizationMember[]
+  actorRole: NonNullable<CurrentUser>["role"]
+  orgId: string
+  orgName: string
+} | null
+
+type SupabaseOperationalStatus = {
+  authBackend: "local" | "supabase" | "hybrid"
+  dataBackend: "local" | "supabase" | "hybrid"
+  restConfigured: boolean
+  storageConfigured: boolean
+  localFallbackAllowed: boolean
+  bucket: {
+    ok: boolean
+    name: string
+    state?: "present" | "missing_bucket" | "error"
+    error?: string
+  } | null
+  tables: Record<string, { ok: boolean; state?: "healthy" | "missing_schema" | "error"; error?: string }>
+  summary: {
+    healthyTables: number
+    totalTables: number
+    schemaReady: boolean
+    bucketReady: boolean
+    blockers: string[]
+    ready: boolean
+  }
+} | null
+
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Default policy" },
   { value: "low", label: "Low" },
@@ -37,16 +86,94 @@ const DRIFT_OVERRIDE_FIELDS = [
   { change: "data_residency_changed", label: "Data residency changed" },
 ] as const
 
+const MEMBER_ROLE_OPTIONS = [
+  { value: "owner", label: "Owner" },
+  { value: "compliance", label: "Compliance" },
+  { value: "reviewer", label: "Reviewer" },
+  { value: "viewer", label: "Viewer" },
+] as const
+
 export default function SetariPage() {
   const cockpit = useCockpit()
   const [repoSyncStatus, setRepoSyncStatus] = useState<RepoSyncStatus>(null)
   const [driftOverrides, setDriftOverrides] = useState<Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>>({})
+  const [currentUser, setCurrentUser] = useState<CurrentUser>(null)
+  const [membersData, setMembersData] = useState<MembersResponse>(null)
+  const [membersLoading, setMembersLoading] = useState(true)
+  const [membersError, setMembersError] = useState<string | null>(null)
+  const [updatingMembershipId, setUpdatingMembershipId] = useState<string | null>(null)
+  const [supabaseStatus, setSupabaseStatus] = useState<SupabaseOperationalStatus>(null)
+  const [supabaseStatusLoading, setSupabaseStatusLoading] = useState(true)
+  const [supabaseStatusError, setSupabaseStatusError] = useState<string | null>(null)
 
   useEffect(() => {
     void fetch("/api/integrations/repo-sync/status")
       .then((response) => response.json())
       .then((payload: RepoSyncStatus) => setRepoSyncStatus(payload))
       .catch(() => null)
+  }, [])
+
+  useEffect(() => {
+    void fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { user: CurrentUser }) => setCurrentUser(payload.user ?? null))
+      .catch(() => setCurrentUser(null))
+  }, [])
+
+  useEffect(() => {
+    setSupabaseStatusLoading(true)
+    setSupabaseStatusError(null)
+
+    void fetch("/api/integrations/supabase/status", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = (await response.json()) as
+          | ({ ok?: boolean; error?: string } & NonNullable<SupabaseOperationalStatus>)
+          | { error?: string; code?: string }
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload && payload.error
+              ? payload.error
+              : "Nu am putut verifica statusul operational Supabase."
+          )
+        }
+
+        setSupabaseStatus(payload as NonNullable<SupabaseOperationalStatus>)
+      })
+      .catch((error) => {
+        setSupabaseStatus(null)
+        setSupabaseStatusError(
+          error instanceof Error ? error.message : "Nu am putut verifica statusul Supabase."
+        )
+      })
+      .finally(() => setSupabaseStatusLoading(false))
+  }, [])
+
+  useEffect(() => {
+    setMembersLoading(true)
+    setMembersError(null)
+
+    void fetch("/api/auth/members", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = (await response.json()) as
+          | (NonNullable<MembersResponse> & { error?: string })
+          | { error?: string; code?: string }
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload && payload.error
+              ? payload.error
+              : "Nu am putut incarca membrii organizatiei."
+          )
+        }
+
+        setMembersData(payload as NonNullable<MembersResponse>)
+      })
+      .catch((error) => {
+        setMembersData(null)
+        setMembersError(error instanceof Error ? error.message : "Nu am putut incarca membrii.")
+      })
+      .finally(() => setMembersLoading(false))
   }, [])
 
   useEffect(() => {
@@ -139,6 +266,298 @@ export default function SetariPage() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Status operational Supabase</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Verificare rapida pentru backend-ul de identitate, date si storage. Ne ajuta sa vedem daca Sprint 5 este cu adevarat pregatit operational, nu doar configurat.
+              </p>
+            </div>
+            <Badge
+              className={
+                supabaseStatus?.summary.ready
+                  ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+                  : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+              }
+            >
+              {supabaseStatusLoading
+                ? "Se verifica"
+                : supabaseStatus?.summary.ready
+                  ? "Operational ready"
+                  : "Needs review"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {supabaseStatusLoading ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Verificam traseul Supabase pentru auth, data si storage...
+            </div>
+          ) : supabaseStatusError ? (
+            <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
+              {supabaseStatusError}
+            </div>
+          ) : supabaseStatus ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+                <SettingsTile
+                  icon={ShieldCheck}
+                  label="Auth backend"
+                  value={formatBackendLabel(supabaseStatus.authBackend)}
+                />
+                <SettingsTile
+                  icon={Database}
+                  label="Data backend"
+                  value={formatBackendLabel(supabaseStatus.dataBackend)}
+                />
+                <SettingsTile
+                  icon={Cloud}
+                  label="Supabase REST"
+                  value={supabaseStatus.restConfigured ? "Configurat" : "Lipseste"}
+                />
+                <SettingsTile
+                  icon={Cloud}
+                  label="Storage privat"
+                  value={supabaseStatus.storageConfigured ? "Configurat" : "Lipseste"}
+                />
+                <SettingsTile
+                  icon={FileCode2}
+                  label="Bucket evidence"
+                  value={supabaseStatus.bucket?.ok ? "Prezent" : "Lipseste"}
+                />
+                <SettingsTile
+                  icon={ShieldCheck}
+                  label="Fallback local"
+                  value={supabaseStatus.localFallbackAllowed ? "Permis" : "Blocat"}
+                />
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    Stare tabele critice
+                  </p>
+                  <div className="mt-4 space-y-3">
+                    {Object.entries(supabaseStatus.tables).map(([table, status]) => (
+                      <div
+                        key={table}
+                        className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                            {table}
+                          </span>
+                          <Badge
+                            className={
+                              status.ok
+                                ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+                                : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+                            }
+                          >
+                            {status.ok
+                              ? "ok"
+                              : status.state === "missing_schema"
+                                ? "schema lipsa"
+                                : "degradat"}
+                          </Badge>
+                        </div>
+                        {status.error ? (
+                          <p className="mt-2 text-xs text-[var(--color-warning)]">{status.error}</p>
+                        ) : (
+                          <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
+                            Tabelul raspunde la verificarea operationala.
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                    {supabaseStatus.bucket ? (
+                      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                            bucket:{supabaseStatus.bucket.name}
+                          </span>
+                          <Badge
+                            className={
+                              supabaseStatus.bucket.ok
+                                ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+                                : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+                            }
+                          >
+                            {supabaseStatus.bucket.ok ? "ok" : "lipsa / invalid"}
+                          </Badge>
+                        </div>
+                        <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
+                          {supabaseStatus.bucket.ok
+                            ? "Bucket-ul privat pentru evidence este disponibil."
+                            : supabaseStatus.bucket.error || "Bucket-ul nu este pregatit."}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    Rezumat readiness
+                  </p>
+                  <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                    <p>
+                      Tabele sanatoase:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {supabaseStatus.summary.healthyTables}/{supabaseStatus.summary.totalTables}
+                      </span>
+                    </p>
+                    <p>
+                      Schema Sprint 5:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {supabaseStatus.summary.schemaReady ? "aplicata" : "incompleta"}
+                      </span>
+                    </p>
+                    <p>
+                      Bucket evidence:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {supabaseStatus.summary.bucketReady ? "pregatit" : "lipseste / invalid"}
+                      </span>
+                    </p>
+                    <p>
+                      Auth ruleaza pe{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {formatBackendLabel(supabaseStatus.authBackend)}
+                      </span>
+                      , iar state-ul de date foloseste{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {formatBackendLabel(supabaseStatus.dataBackend)}
+                      </span>
+                      .
+                    </p>
+                    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-xs">
+                      {supabaseStatus.summary.ready
+                        ? "Traseul Supabase este pregatit operational pentru auth, metadata si storage controlat."
+                        : "Mai exista piese de configurat sau verificat in Supabase inainte sa tratam traseul cloud ca fundatie finala."}
+                    </div>
+                    {supabaseStatus.summary.blockers.length > 0 ? (
+                      <div className="rounded-xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-3 text-xs text-[var(--color-warning)]">
+                        <p className="font-semibold text-[var(--color-on-surface)]">
+                          Blocaje Sprint 5
+                        </p>
+                        <ul className="mt-2 space-y-1">
+                          {supabaseStatus.summary.blockers.map((blocker) => (
+                            <li key={blocker}>• {blocker}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Endpoint intern: <code>/api/integrations/supabase/status</code>
+                    </p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      SQL Editor: <code>supabase/apply-sprint5-complete.sql</code>
+                    </p>
+                    <Button asChild variant="outline" className="h-10 rounded-xl px-4">
+                      <Link href="/supabase-rls-verification-runbook.md" target="_blank">
+                        Deschide runbook RLS
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Membri si roluri</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Owner-ul poate ajusta rolurile. Compliance vede lista pentru audit si separarea responsabilitatilor.
+              </p>
+            </div>
+            {currentUser?.role && (
+              <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                Rolul tau: {formatMemberRole(currentUser.role)}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {membersLoading ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Incarcam membrii organizatiei...
+            </div>
+          ) : membersError ? (
+            <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+              {membersError}
+            </div>
+          ) : membersData?.members.length ? (
+            <div className="space-y-3">
+              {membersData.members.map((member) => {
+                const isSelf = member.membershipId === currentUser?.membershipId
+                const canManageRoles = currentUser?.role === "owner"
+
+                return (
+                  <div
+                    key={member.membershipId}
+                    className="grid gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                        {member.email}
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--color-muted)]">
+                        Adaugat pe {new Date(member.createdAtISO).toLocaleString("ro-RO")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        {formatMemberRole(member.role)}
+                      </Badge>
+                      {isSelf && (
+                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+                          Tu
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-start lg:justify-end">
+                      {canManageRoles ? (
+                        <select
+                          className="h-11 min-w-[180px] rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                          value={member.role}
+                          disabled={isSelf || updatingMembershipId === member.membershipId}
+                          onChange={(event) =>
+                            void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
+                          }
+                        >
+                          {MEMBER_ROLE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-xs text-[var(--color-muted)]">
+                          Doar owner-ul poate schimba rolurile.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Inca nu exista membri suplimentari in organizatia curenta.
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -288,7 +707,7 @@ export default function SetariPage() {
 
       <Card className="border-[var(--color-error)] bg-[var(--color-surface)]">
         <CardHeader>
-          <CardTitle className="text-xl text-[var(--color-error)]">Reset demo workspace</CardTitle>
+          <CardTitle className="text-xl text-[var(--color-error)]">Reset workspace local</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-on-surface-muted)]">
@@ -330,6 +749,52 @@ export default function SetariPage() {
       </Card>
     </div>
   )
+
+  async function handleRoleChange(
+    membershipId: string,
+    role: OrganizationMember["role"]
+  ) {
+    setUpdatingMembershipId(membershipId)
+    setMembersError(null)
+
+    try {
+      const response = await fetch(`/api/auth/members/${membershipId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      })
+
+      const payload = (await response.json()) as {
+        ok?: boolean
+        error?: string
+        member?: OrganizationMember
+      }
+
+      if (!response.ok || !payload.member) {
+        throw new Error(payload.error || "Rolul nu a putut fi actualizat.")
+      }
+
+      setMembersData((current) => {
+        if (!current) return current
+        return {
+          ...current,
+          members: current.members.map((member) =>
+            member.membershipId === membershipId ? payload.member! : member
+          ),
+        }
+      })
+
+      toast.success("Rol actualizat", {
+        description: `${payload.member.email} este acum ${formatMemberRole(payload.member.role)}.`,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Rolul nu a putut fi actualizat."
+      setMembersError(message)
+      toast.error("Actualizarea a esuat", { description: message })
+    } finally {
+      setUpdatingMembershipId(null)
+    }
+  }
 }
 
 function SettingsTile({
@@ -372,4 +837,32 @@ function EndpointRow({
       <p className="mt-2 break-all text-xs text-[var(--color-on-surface-muted)]">{value}</p>
     </div>
   )
+}
+
+function formatMemberRole(role: OrganizationMember["role"]) {
+  switch (role) {
+    case "owner":
+      return "Owner"
+    case "compliance":
+      return "Compliance"
+    case "reviewer":
+      return "Reviewer"
+    case "viewer":
+      return "Viewer"
+    default:
+      return role
+  }
+}
+
+function formatBackendLabel(backend: "local" | "supabase" | "hybrid") {
+  switch (backend) {
+    case "local":
+      return "Local"
+    case "supabase":
+      return "Supabase"
+    case "hybrid":
+      return "Hybrid"
+    default:
+      return backend
+  }
 }

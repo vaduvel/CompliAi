@@ -1,17 +1,23 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { eventActorFromSession } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 
 type BaselineAction = "set" | "clear"
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as { action?: BaselineAction }
-  const action = body.action === "clear" ? "clear" : "set"
-  const nowISO = new Date().toISOString()
-
   try {
+    const session = requireRole(request, ["owner", "compliance"], "administrarea baseline-ului")
+    const actor = eventActorFromSession(session)
+
+    const body = (await request.json().catch(() => ({}))) as { action?: BaselineAction }
+    const action = body.action === "clear" ? "clear" : "set"
+    const nowISO = new Date().toISOString()
+
     const nextState = await mutateState((current) => {
       if (action === "clear") {
         return {
@@ -24,7 +30,7 @@ export async function POST(request: Request) {
               entityId: "baseline",
               message: "Baseline-ul validat a fost eliminat.",
               createdAtISO: nowISO,
-            }),
+            }, actor),
           ]),
         }
       }
@@ -44,7 +50,7 @@ export async function POST(request: Request) {
             entityId: currentSnapshot.snapshotId,
             message: "Snapshot-ul curent a fost validat ca baseline.",
             createdAtISO: nowISO,
-          }),
+          }, actor),
         ]),
       }
     })
@@ -57,16 +63,18 @@ export async function POST(request: Request) {
           : "Snapshot-ul curent a fost salvat ca baseline validat pentru drift.",
     })
   } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error && error.message === "BASELINE_REQUIRES_SNAPSHOT"
-            ? "Ai nevoie de cel putin un snapshot real inainte sa setezi baseline-ul."
-            : error instanceof Error
-              ? error.message
-              : "Nu am putut actualiza baseline-ul.",
-      },
-      { status: 400 }
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+
+    return jsonError(
+      error instanceof Error && error.message === "BASELINE_REQUIRES_SNAPSHOT"
+        ? "Ai nevoie de cel putin un snapshot real inainte sa setezi baseline-ul."
+        : error instanceof Error
+          ? error.message
+          : "Nu am putut actualiza baseline-ul.",
+      400,
+      "BASELINE_UPDATE_FAILED"
     )
   }
 }

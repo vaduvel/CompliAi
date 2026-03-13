@@ -1,0 +1,10 @@
+{
+  "documentName": "recruitment-high-risk-bundle.txt",
+  "requiredRuleIds": [
+    "EUAI-001",
+    "EUAI-HO-001",
+    "GDPR-PD-001",
+    "GDPR-RET-001",
+    "GDPR-INT-001"
+  ]
+}

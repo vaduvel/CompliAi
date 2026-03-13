@@ -22,6 +22,11 @@ import {
   severityToLegacyRisk,
 } from "@/lib/compliance/constitution"
 import {
+  buildFindingConfidenceReason,
+  inferFindingConfidence,
+} from "@/lib/compliance/finding-confidence"
+import { detectComplianceSignals } from "@/lib/compliance/signal-detection"
+import {
   isDriftLifecycleOpen,
   normalizeDriftLifecycleStatus,
 } from "@/lib/compliance/drift-lifecycle"
@@ -279,20 +284,20 @@ export function simulateFindings(
   highRiskDelta: number
   lowRiskDelta: number
 } {
-  const sourceText = `${documentName} ${content}`
-  const text = sourceText.toLowerCase()
-  const manifestSignals = new Set(
-    (options?.manifestSignals ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean)
-  )
+  const signals = detectComplianceSignals({
+    documentName,
+    content,
+    manifestSignals: options?.manifestSignals,
+  })
   const findings: ScanFinding[] = []
   const alerts: ComplianceAlert[] = []
 
   let highRiskDelta = 0
   let lowRiskDelta = 0
 
-  for (const rule of COMPLIANCE_RULE_LIBRARY) {
-    const match = findFirstRuleMatch(text, sourceText, rule.keywords, rule.manifestKeys, manifestSignals)
-    if (!match) continue
+  for (const signal of signals) {
+    const rule = COMPLIANCE_RULE_LIBRARY.find((item) => item.ruleId === signal.ruleId)
+    if (!rule) continue
 
     if (rule.category === "EU_AI_ACT") {
       highRiskDelta += 1
@@ -300,12 +305,28 @@ export function simulateFindings(
     }
 
     const findingId = uid("finding")
+    const provenance = {
+      ruleId: signal.ruleId,
+      matchedKeyword: signal.keyword,
+      excerpt: signal.excerpt,
+      startChar: signal.startChar,
+      endChar: signal.endChar,
+      signalSource: signal.signalSource,
+      verdictBasis: signal.verdictBasis,
+      signalConfidence: signal.signalConfidence,
+    } satisfies ScanFinding["provenance"]
     findings.push({
       id: findingId,
       title: rule.title,
       detail: rule.detail,
       category: rule.category,
       severity: rule.severity,
+      verdictConfidence: inferFindingConfidence(provenance),
+      verdictConfidenceReason: buildFindingConfidenceReason({
+        title: rule.title,
+        sourceDocument: documentName,
+        provenance,
+      }),
       risk: severityToLegacyRisk(rule.severity),
       principles: rule.principles,
       createdAtISO: nowISO,
@@ -321,13 +342,7 @@ export function simulateFindings(
       rescanHint: rule.rescanHint,
       readyTextLabel: rule.readyTextLabel,
       readyText: rule.readyText,
-      provenance: {
-        ruleId: rule.ruleId,
-        matchedKeyword: match.keyword,
-        excerpt: match.excerpt,
-        startChar: match.startChar,
-        endChar: match.endChar,
-      },
+      provenance,
     })
 
     if (rule.alertMessage && rule.alertSeverity) {
@@ -345,57 +360,6 @@ export function simulateFindings(
   }
 
   return { findings, alerts, highRiskDelta, lowRiskDelta }
-}
-
-function findFirstRuleMatch(
-  text: string,
-  sourceText: string,
-  keywords: string[],
-  manifestKeys: string[] | undefined,
-  manifestSignals: Set<string>
-) {
-  for (const keyword of keywords) {
-    const startChar = text.indexOf(keyword)
-    if (startChar === -1) continue
-
-    return {
-      keyword,
-      startChar,
-      endChar: startChar + keyword.length,
-      excerpt: buildExcerpt(sourceText, startChar, startChar + keyword.length),
-    }
-  }
-
-  for (const manifestKey of manifestKeys ?? []) {
-    const normalized = manifestKey.toLowerCase()
-    if (!manifestSignals.has(normalized)) continue
-
-    const startChar = text.indexOf(normalized)
-    if (startChar !== -1) {
-      return {
-        keyword: manifestKey,
-        startChar,
-        endChar: startChar + normalized.length,
-        excerpt: buildExcerpt(sourceText, startChar, startChar + normalized.length),
-      }
-    }
-
-    return {
-      keyword: manifestKey,
-      startChar: undefined,
-      endChar: undefined,
-      excerpt: `Semnal tehnic detectat in manifest/config: ${manifestKey}`,
-    }
-  }
-
-  return null
-}
-
-function buildExcerpt(text: string, startChar: number, endChar: number) {
-  const padding = 64
-  const start = Math.max(0, startChar - padding)
-  const end = Math.min(text.length, endChar + padding)
-  return text.slice(start, end).replace(/\s+/g, " ").trim()
 }
 
 function normalizeAlert(alert: ComplianceAlert): ComplianceAlert {
@@ -423,6 +387,9 @@ function normalizeFinding(finding: ScanFinding): ScanFinding {
   return {
     ...finding,
     severity,
+    verdictConfidence: finding.verdictConfidence || inferFindingConfidence(finding.provenance),
+    verdictConfidenceReason:
+      finding.verdictConfidenceReason || buildFindingConfidenceReason(finding),
     risk: severityToLegacyRisk(severity),
     principles,
   }
@@ -495,6 +462,22 @@ function normalizeTaskState(
               kind: isTaskEvidenceKind(entry.attachedEvidenceMeta.kind)
                 ? entry.attachedEvidenceMeta.kind
                 : "other",
+              storageProvider:
+                entry.attachedEvidenceMeta.storageProvider === "public_local" ||
+                entry.attachedEvidenceMeta.storageProvider === "local_private" ||
+                entry.attachedEvidenceMeta.storageProvider === "supabase_private"
+                  ? entry.attachedEvidenceMeta.storageProvider
+                  : undefined,
+              storageKey:
+                typeof entry.attachedEvidenceMeta.storageKey === "string" &&
+                entry.attachedEvidenceMeta.storageKey.trim()
+                  ? entry.attachedEvidenceMeta.storageKey
+                  : undefined,
+              accessPath:
+                typeof entry.attachedEvidenceMeta.accessPath === "string" &&
+                entry.attachedEvidenceMeta.accessPath.trim()
+                  ? entry.attachedEvidenceMeta.accessPath
+                  : undefined,
               publicPath:
                 typeof entry.attachedEvidenceMeta.publicPath === "string" &&
                 entry.attachedEvidenceMeta.publicPath.trim()
@@ -512,6 +495,18 @@ function normalizeTaskState(
         typeof entry.validationMessage === "string" && entry.validationMessage.trim()
           ? entry.validationMessage.trim()
           : undefined
+      const validationConfidence =
+        entry.validationConfidence === "high" ||
+        entry.validationConfidence === "medium" ||
+        entry.validationConfidence === "low"
+          ? entry.validationConfidence
+          : undefined
+      const validationBasis =
+        entry.validationBasis === "direct_signal" ||
+        entry.validationBasis === "inferred_signal" ||
+        entry.validationBasis === "operational_state"
+          ? entry.validationBasis
+          : undefined
       const validatedAtISO = isValidIso(entry.validatedAtISO) ? entry.validatedAtISO : undefined
       const lastRescanAtISO = isValidIso(entry.lastRescanAtISO) ? entry.lastRescanAtISO : undefined
 
@@ -524,6 +519,8 @@ function normalizeTaskState(
           updatedAtISO,
           validationStatus,
           validationMessage,
+          validationConfidence,
+          validationBasis,
           validatedAtISO,
           lastRescanAtISO,
         } satisfies PersistedTaskState,

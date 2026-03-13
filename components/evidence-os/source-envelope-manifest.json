@@ -1,0 +1,14 @@
+{
+  "sourceId": "manifest-fixture-001",
+  "orgId": "org-fixture-demo",
+  "sourceName": "package.json",
+  "sourceType": "manifest",
+  "parsedManifest": {
+    "dependencies": {
+      "openai": "^4.0.0",
+      "langchain": "^0.1.0"
+    }
+  },
+  "sourceSignals": ["dependency:openai", "dependency:langchain"],
+  "extractedAtISO": "2026-03-13T10:00:00.000Z"
+}

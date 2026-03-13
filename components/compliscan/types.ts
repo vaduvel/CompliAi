@@ -47,6 +47,8 @@ export type CockpitTask = {
   evidenceKinds: TaskEvidenceKind[]
   validationStatus: TaskValidationStatus
   validationMessage?: string
+  validationConfidence?: "high" | "medium" | "low"
+  validationBasis?: "direct_signal" | "inferred_signal" | "operational_state"
   validatedAtLabel?: string
 }
 

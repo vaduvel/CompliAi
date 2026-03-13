@@ -6,6 +6,7 @@ import {
 } from "@/lib/compliance/control-families"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState, readState } from "@/lib/server/mvp-store"
 
 type FamilyEvidencePayload = {
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
 
   const current = await readState()
   const payload = await buildDashboardPayload(current)
+  const hydratedState = payload.state
+  const actor = await resolveOptionalEventActor(request)
   const remediationByTaskId = new Map<string, (typeof payload.remediationPlan)[number]>(
     payload.remediationPlan.map((task) => [`rem-${task.id}`, task] as const)
   )
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
   const sourceTaskId = familyRecords
     .map((record) => record.entryId)
     .find((taskId) => {
-      const taskState = current.taskState[taskId]
+      const taskState = hydratedState.taskState[taskId]
       return Boolean(taskState?.attachedEvidenceMeta && taskState.validationStatus === "passed")
     })
 
@@ -50,9 +53,28 @@ export async function POST(request: Request) {
     )
   }
 
-  const sourceEvidence = current.taskState[sourceTaskId]?.attachedEvidenceMeta
+  const sourceEvidence = hydratedState.taskState[sourceTaskId]?.attachedEvidenceMeta
+  const sourceTaskState = hydratedState.taskState[sourceTaskId]
   if (!sourceEvidence) {
     return NextResponse.json({ error: "Dovada sursă nu mai este disponibilă." }, { status: 400 })
+  }
+  if (sourceEvidence.quality?.status === "weak") {
+    return NextResponse.json(
+      {
+        error:
+          "Dovada sursă este marcată ca slabă. Înlocuiește dovada sau validează una mai puternică înainte de reuse.",
+      },
+      { status: 400 }
+    )
+  }
+  if (sourceTaskState?.validationBasis === "inferred_signal") {
+    return NextResponse.json(
+      {
+        error:
+          "Controlul sursă este validat doar pe semnal inferat. Refolosirea cere mai întâi dovadă directă sau confirmare umană mai puternică.",
+      },
+      { status: 400 }
+    )
   }
 
   const sourceTask = remediationByTaskId.get(sourceTaskId)
@@ -63,10 +85,22 @@ export async function POST(request: Request) {
     const taskId = record.entryId
     if (taskId === sourceTaskId) continue
 
-    const taskState = current.taskState[taskId]
+    const taskState = hydratedState.taskState[taskId]
     if (taskState?.attachedEvidenceMeta && taskState.validationStatus === "passed") continue
 
     const remediation = remediationByTaskId.get(taskId)
+    const openRelatedDrifts = (hydratedState.driftRecords ?? []).filter(
+      (drift) => drift.open && (remediation?.relatedDriftIds ?? []).includes(drift.id)
+    )
+    if (openRelatedDrifts.length > 0) {
+      blockedTargets.push({
+        taskId,
+        reason:
+          "Controlul țintă are drift-uri deschise. Închide mai întâi schimbările active înainte de reuse.",
+      })
+      continue
+    }
+
     const decision = canReuseEvidenceWithinFamily({
       familyKey,
       sourceEvidenceKind: sourceEvidence.kind,
@@ -134,7 +168,7 @@ export async function POST(request: Request) {
             blockedControls: blockedTargets.length,
             fileName: sourceEvidence.fileName,
           },
-        }),
+        }, actor),
       ]),
     }
   })

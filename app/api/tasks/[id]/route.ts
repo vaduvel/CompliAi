@@ -5,7 +5,10 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import type { PersistedTaskStatus } from "@/lib/compliance/types"
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import { getTaskResolutionTargets } from "@/lib/compliance/task-resolution"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { eventActorFromSession } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 import { validateTaskAgainstState } from "@/lib/compliance/task-validation"
 
@@ -26,6 +29,8 @@ type TaskUpdateFeedback = {
   scoreDelta: number
   validationStatus?: "idle" | "passed" | "failed" | "needs_review"
   validationMessage?: string
+  validationConfidence?: "high" | "medium" | "low"
+  validationBasis?: "direct_signal" | "inferred_signal" | "operational_state"
 }
 
 function isPersistedTaskStatus(value: unknown): value is PersistedTaskStatus {
@@ -44,19 +49,23 @@ export async function PATCH(
     const hasAction = typeof body.action !== "undefined"
     let feedback: TaskUpdateFeedback | undefined
 
+    const session = requireRole(
+      request,
+      ["owner", "compliance", "reviewer"],
+      "actualizarea task-urilor de remediere"
+    )
+    const actor = eventActorFromSession(session)
+
     if (!hasStatus && !hasEvidence && !hasAction) {
-      return NextResponse.json(
-        { error: "Trimite status, attachedEvidence si/sau action." },
-        { status: 400 }
-      )
+      return jsonError("Trimite status, attachedEvidence si/sau action.", 400, "TASK_PATCH_EMPTY")
     }
 
     if (hasStatus && !isPersistedTaskStatus(body.status)) {
-      return NextResponse.json({ error: "Status invalid." }, { status: 400 })
+      return jsonError("Status invalid.", 400, "TASK_STATUS_INVALID")
     }
 
     if (hasAction && body.action !== "validate" && body.action !== "mark_done_and_validate") {
-      return NextResponse.json({ error: "Actiune invalida." }, { status: 400 })
+      return jsonError("Actiune invalida.", 400, "TASK_ACTION_INVALID")
     }
 
     const nextState = await mutateState((current) => {
@@ -84,6 +93,8 @@ export async function PATCH(
       const resolutionTargets = getTaskResolutionTargets(current, id)
       let validationStatus = previous.validationStatus ?? "idle"
       let validationMessage = previous.validationMessage
+      let validationConfidence = previous.validationConfidence
+      let validationBasis = previous.validationBasis
       let validatedAtISO = previous.validatedAtISO
       let lastRescanAtISO = previous.lastRescanAtISO
       let checkedSource = ""
@@ -94,6 +105,8 @@ export async function PATCH(
         const validation = validateTaskAgainstState(current, id, attachedEvidence)
         validationStatus = validation.status
         validationMessage = validation.message
+        validationConfidence = validation.confidence
+        validationBasis = validation.basis
         validatedAtISO = nowISO
         lastRescanAtISO = nowISO
         checkedSource = validation.checkedSource || ""
@@ -102,6 +115,8 @@ export async function PATCH(
       } else if (hasStatus && nextStatus === "todo") {
         validationStatus = "idle"
         validationMessage = undefined
+        validationConfidence = undefined
+        validationBasis = undefined
         validatedAtISO = undefined
       }
 
@@ -163,7 +178,7 @@ export async function PATCH(
             entityId: alertId,
             message: `Alerta a fost închisă automat după finalizarea task-ului ${id}.`,
             createdAtISO: nowISO,
-          })
+          }, actor)
         ),
         ...Array.from(reopenedAlertIds).map((alertId) =>
           createComplianceEvent({
@@ -172,7 +187,7 @@ export async function PATCH(
             entityId: alertId,
             message: `Alerta a fost redeschisă după revenirea task-ului ${id} la todo.`,
             createdAtISO: nowISO,
-          })
+          }, actor)
         ),
       ]
       const driftEvents = [
@@ -183,7 +198,7 @@ export async function PATCH(
             entityId: driftId,
             message: `Drift-ul a fost închis automat după finalizarea task-ului ${id}.`,
             createdAtISO: nowISO,
-          })
+          }, actor)
         ),
         ...Array.from(reopenedDriftIds).map((driftId) =>
           createComplianceEvent({
@@ -192,7 +207,7 @@ export async function PATCH(
             entityId: driftId,
             message: `Drift-ul a fost redeschis după revenirea task-ului ${id} la todo.`,
             createdAtISO: nowISO,
-          })
+          }, actor)
         ),
       ]
 
@@ -209,6 +224,8 @@ export async function PATCH(
             updatedAtISO: nowISO,
             validationStatus,
             validationMessage,
+            validationConfidence,
+            validationBasis,
             validatedAtISO,
             lastRescanAtISO,
           },
@@ -226,7 +243,7 @@ export async function PATCH(
                     status: nextStatus,
                     fileName: attachedEvidence || "unknown",
                   },
-                }),
+                }, actor),
               ]
             : []),
           createComplianceEvent({
@@ -244,9 +261,11 @@ export async function PATCH(
               autoResolvedDrifts: autoResolvedDriftIds.size,
               validationStatus,
               validationMessage: validationMessage || "",
+              validationConfidence: validationConfidence || "",
+              validationBasis: validationBasis || "",
               checkedSource,
             },
-          }),
+          }, actor),
           ...alertEvents,
           ...driftEvents,
         ]),
@@ -265,6 +284,8 @@ export async function PATCH(
           scoreDelta: nextSummary.score - previousSummary.score,
           validationStatus,
           validationMessage,
+          validationConfidence,
+          validationBasis,
         }
       }
 
@@ -277,13 +298,18 @@ export async function PATCH(
       feedback,
     })
   } catch (error) {
-    if (error instanceof Error && error.message === "TASK_NOT_FOUND") {
-      return NextResponse.json(
-        { error: "Task-ul nu mai exista in starea curenta." },
-        { status: 404 }
-      )
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
     }
 
-    throw error
+    if (error instanceof Error && error.message === "TASK_NOT_FOUND") {
+      return jsonError("Task-ul nu mai exista in starea curenta.", 404, "TASK_NOT_FOUND")
+    }
+
+    return jsonError(
+      error instanceof Error ? error.message : "Task-ul nu a putut fi actualizat.",
+      500,
+      "TASK_PATCH_FAILED"
+    )
   }
 }

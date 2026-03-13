@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 
 import type { ComplianceDriftChange, ComplianceDriftSeverity } from "@/lib/compliance/types"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { mutateState } from "@/lib/server/mvp-store"
 
@@ -9,20 +11,33 @@ type DriftSettingsPayload = {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as DriftSettingsPayload
-  const severityOverrides = sanitizeOverrides(body.severityOverrides)
+  try {
+    requireRole(request, ["owner", "compliance"], "actualizarea setarilor de drift")
 
-  const nextState = await mutateState((current) => ({
-    ...current,
-    driftSettings: {
-      severityOverrides,
-    },
-  }))
+    const body = (await request.json().catch(() => ({}))) as DriftSettingsPayload
+    const severityOverrides = sanitizeOverrides(body.severityOverrides)
 
-  return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
-    message: "Setarile de severitate pentru drift au fost actualizate.",
-  })
+    const nextState = await mutateState((current) => ({
+      ...current,
+      driftSettings: {
+        severityOverrides,
+      },
+    }))
+
+    return NextResponse.json({
+      ...(await buildDashboardPayload(nextState)),
+      message: "Setarile de severitate pentru drift au fost actualizate.",
+    })
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+    return jsonError(
+      error instanceof Error ? error.message : "Setarile de drift nu au putut fi actualizate.",
+      500,
+      "DRIFT_SETTINGS_UPDATE_FAILED"
+    )
+  }
 }
 
 function sanitizeOverrides(

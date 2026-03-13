@@ -7,6 +7,7 @@ import { promisify } from "node:util"
 import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
+import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
 
 const execFileAsync = promisify(execFile)
 
@@ -115,19 +116,17 @@ async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {
 
   for (const entry of auditPack.evidenceLedger) {
     const evidence = entry.evidence
-    if (!evidence?.publicPath) continue
-
-    const sourceFile = path.join(process.cwd(), "public", evidence.publicPath.replace(/^\//, ""))
-    const exists = await fs
-      .stat(sourceFile)
-      .then(() => true)
-      .catch(() => false)
-
-    if (!exists) continue
+    if (!evidence) continue
 
     const safeName = `${sanitizeSegment(entry.taskId)}-${sanitizeSegment(evidence.fileName)}`
     const destination = path.join(evidenceDir, safeName)
-    await fs.copyFile(sourceFile, destination)
+    try {
+      await copyStoredEvidenceFile(evidence, destination, {
+        orgId: auditPack.workspace.id,
+      })
+    } catch {
+      continue
+    }
 
     includedEvidence.push({
       taskId: entry.taskId,

@@ -19,13 +19,26 @@ type CurrentUser = {
   email: string
   orgName: string
   orgId: string
+  role: "owner" | "compliance" | "reviewer" | "viewer"
+  membershipId: string | null
 } | null
+
+type UserMembership = {
+  membershipId: string
+  orgId: string
+  orgName: string
+  role: "owner" | "compliance" | "reviewer" | "viewer"
+  createdAtISO: string
+  status: "active" | "inactive"
+}
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<CurrentUser>(null)
+  const [memberships, setMemberships] = useState<UserMembership[]>([])
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [switchingMembershipId, setSwitchingMembershipId] = useState<string | null>(null)
 
   useEffect(() => {
     void fetch("/api/auth/me")
@@ -34,12 +47,46 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         if (data.user) setCurrentUser(data.user)
       })
       .catch(() => null)
+
+    void fetch("/api/auth/memberships")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { memberships?: UserMembership[] } | null) => {
+        setMemberships(data?.memberships ?? [])
+      })
+      .catch(() => setMemberships([]))
   }, [])
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" })
     toast.success("Deconectat")
     router.push("/login")
+  }
+
+  async function handleSwitchOrganization(membershipId: string) {
+    setSwitchingMembershipId(membershipId)
+    try {
+      const response = await fetch("/api/auth/switch-org", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ membershipId }),
+      })
+      const payload = (await response.json()) as { message?: string; error?: string }
+      if (!response.ok) {
+        throw new Error(payload.error || "Nu am putut schimba organizatia activa.")
+      }
+
+      toast.success("Organizatie schimbata", {
+        description: payload.message || "Sesiunea a fost mutata pe organizatia selectata.",
+      })
+      setUserMenuOpen(false)
+      router.refresh()
+    } catch (error) {
+      toast.error("Schimbarea organizatiei a esuat", {
+        description: error instanceof Error ? error.message : "Incearca din nou.",
+      })
+    } finally {
+      setSwitchingMembershipId(null)
+    }
   }
 
   const initials = currentUser?.orgName
@@ -138,6 +185,40 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
                 {userMenuOpen && (
                   <div className="absolute bottom-full left-0 mb-2 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg">
+                    {memberships.filter((membership) => membership.status === "active").length > 1 && (
+                      <div className="mb-2 border-b border-[var(--color-border)] pb-2">
+                        <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                          Organizatie activa
+                        </p>
+                        <div className="space-y-1">
+                          {memberships
+                            .filter((membership) => membership.status === "active")
+                            .map((membership) => {
+                              const active = membership.membershipId === currentUser?.membershipId
+                              return (
+                                <button
+                                  key={membership.membershipId}
+                                  onClick={() => void handleSwitchOrganization(membership.membershipId)}
+                                  disabled={active || switchingMembershipId === membership.membershipId}
+                                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate font-medium">{membership.orgName}</p>
+                                    <p className="truncate text-xs text-[var(--color-muted)]">
+                                      Rol: {membership.role}
+                                    </p>
+                                  </div>
+                                  {active ? (
+                                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-primary)]">
+                                      Activ
+                                    </span>
+                                  ) : null}
+                                </button>
+                              )
+                            })}
+                        </div>
+                      </div>
+                    )}
                     <button
                       onClick={() => void handleLogout()}
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--color-error)] hover:bg-[var(--color-error-muted)]"

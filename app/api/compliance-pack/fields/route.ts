@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { AICompliancePackFieldKey } from "@/lib/compliance/ai-compliance-pack"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 
 type FieldUpdateAction = "save" | "confirm" | "clear"
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
+  const actor = await resolveOptionalEventActor(request)
   const nextState = await mutateState((current) => {
     const currentSystem = current.aiSystems.find((item) => item.id === body.systemId)
     const detectedSystem = current.detectedAISystems.find((item) => item.id === body.systemId)
@@ -104,7 +106,7 @@ export async function POST(request: Request) {
             field: body.field!,
             action,
           },
-        }),
+        }, actor),
       ]),
     }
   })

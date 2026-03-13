@@ -1,4 +1,5 @@
 import type {
+  EvidenceQualityAssessment,
   RemediationMode,
   ScanSourceKind,
   TaskEvidenceKind,
@@ -44,8 +45,11 @@ export type ComplianceTraceRecord = {
   evidence: {
     attached: boolean
     validationStatus: TaskValidationStatus
+    validationBasis: "direct_signal" | "inferred_signal" | "operational_state" | null
+    validationConfidence: "high" | "medium" | "low" | null
     fileName: string | null
     kind: TaskEvidenceKind | null
+    quality: EvidenceQualityAssessment | null
     updatedAtISO: string | null
   }
   evidenceRequired: string | null

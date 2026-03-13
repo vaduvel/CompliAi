@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { ExportCenter } from "@/components/compliscan/export-center"
+import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { RiskHeader } from "@/components/compliscan/risk-header"
 import { TextExtractDrawer } from "@/components/compliscan/text-extract-drawer"
@@ -876,7 +877,7 @@ export function ModulesGrid({
               </p>
             ) : (
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Integrarea nu este conectata inca. Poti porni un sync demo cand esti pregatit.
+                Integrarea nu este conectata inca. Poti porni un sync local cand esti pregatit.
               </p>
             )}
             <p className="mt-2 text-sm text-[var(--color-muted)]">
@@ -892,7 +893,7 @@ export function ModulesGrid({
             disabled={busy}
             className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
           >
-            {state.efacturaConnected ? "Trimite la ANAF" : "Activeaza sync demo"}
+            {state.efacturaConnected ? "Trimite la ANAF" : "Activeaza sync local"}
           </Button>
         </CardContent>
       </Card>
@@ -1271,6 +1272,7 @@ export function LatestDocumentSection({
                         <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
                           {finding.provenance?.excerpt || finding.detail}
                         </p>
+                        <FindingVerdictMeta finding={finding} className="mt-3" />
                       </div>
                     ))}
                   </div>
@@ -1454,6 +1456,11 @@ export function RecentActivityCard({ events }: { events: ComplianceEvent[] }) {
             className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
           >
             <p className="text-sm font-medium text-[var(--color-on-surface)]">{eventItem.message}</p>
+            {eventItem.actorLabel && (
+              <p className="mt-2 text-xs text-[var(--color-muted)]">
+                Actor: {eventItem.actorRole ? `${eventItem.actorLabel} (${eventItem.actorRole})` : eventItem.actorLabel}
+              </p>
+            )}
             <p className="mt-2 text-xs text-[var(--color-muted)]">
               {eventItem.type} · {formatRelativeRomanian(eventItem.createdAtISO)}
             </p>

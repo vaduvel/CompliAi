@@ -40,6 +40,9 @@ export type FindingProvenance = {
   excerpt?: string
   startChar?: number
   endChar?: number
+  signalSource?: "keyword" | "manifest"
+  verdictBasis?: "direct_signal" | "inferred_signal"
+  signalConfidence?: "high" | "medium"
 }
 
 export type LegalMapping = {
@@ -55,6 +58,8 @@ export type ScanFinding = {
   detail: string
   category: FindingCategory
   severity: ComplianceSeverity
+  verdictConfidence?: "high" | "medium" | "low"
+  verdictConfidenceReason?: string
   risk: "high" | "low"
   principles: CompliancePrinciple[]
   createdAtISO: string
@@ -117,6 +122,14 @@ export type TaskEvidenceKind =
   | "yaml_evidence"
   | "document_bundle"
   | "other"
+export type EvidenceQualityStatus = "sufficient" | "weak"
+export type EvidenceQualityReasonCode =
+  | "generic_kind"
+  | "generic_filename"
+  | "unknown_mime"
+  | "very_small_file"
+  | "tiny_text_payload"
+  | "tiny_bundle"
 export type TaskValidationKind =
   | "human-oversight"
   | "tracking-consent"
@@ -126,6 +139,13 @@ export type TaskValidationKind =
   | "data-residency"
   | "evidence-only"
 
+export type EvidenceQualityAssessment = {
+  status: EvidenceQualityStatus
+  summary: string
+  reasonCodes: EvidenceQualityReasonCode[]
+  checkedAtISO: string
+}
+
 export type TaskEvidenceAttachment = {
   id: string
   fileName: string
@@ -133,7 +153,11 @@ export type TaskEvidenceAttachment = {
   sizeBytes: number
   uploadedAtISO: string
   kind: TaskEvidenceKind
+  storageProvider?: "public_local" | "local_private" | "supabase_private"
+  storageKey?: string
+  accessPath?: string
   publicPath?: string
+  quality?: EvidenceQualityAssessment
 }
 
 export type AIComplianceFieldOverride = {
@@ -198,6 +222,8 @@ export type PersistedTaskState = {
   updatedAtISO: string
   validationStatus?: TaskValidationStatus
   validationMessage?: string
+  validationConfidence?: "high" | "medium" | "low"
+  validationBasis?: "direct_signal" | "inferred_signal" | "operational_state"
   validatedAtISO?: string
   lastRescanAtISO?: string
 }
@@ -216,6 +242,10 @@ export type ComplianceEvent = {
   entityId: string
   message: string
   createdAtISO: string
+  actorId?: string
+  actorLabel?: string
+  actorRole?: "owner" | "compliance" | "reviewer" | "viewer"
+  actorSource?: "session" | "workspace" | "system"
   metadata?: Record<string, string | number | boolean>
 }
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import {
   ArrowRight,
   CheckCircle2,
+  Bot,
   Clock3,
   FileCode2,
   FileText,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react"
 
 import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
+import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import {
   LatestDocumentSection,
@@ -27,6 +29,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
+import { AgentWorkspace } from "@/components/compliscan/agent-workspace"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { ComplianceSeverity } from "@/lib/compliance/constitution"
 import { formatDriftTypeLabel, getDriftPolicyFromRecord } from "@/lib/compliance/drift-policy"
@@ -37,10 +41,12 @@ import type {
   ScanFinding,
   ScanRecord,
 } from "@/lib/compliance/types"
+import type { SourceEnvelope } from "@/lib/compliance/agent-os"
 
 export default function ScanariPage() {
   const router = useRouter()
   const cockpit = useCockpit()
+  const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<"document" | "text" | "manifest" | "yaml">(
     "document"
   )
@@ -124,17 +130,56 @@ export default function ScanariPage() {
       (drift.systemLabel ? yamlPanelSystemNames.has(drift.systemLabel) : false)
   )
 
+  // Construim plicul pentru agenti pe baza starii curente din UI
+  const currentEnvelope: SourceEnvelope = {
+    sourceId: `temp-${Date.now()}`,
+    sourceType: sourceType === "yaml" ? "yaml" : sourceType === "manifest" ? "manifest" : sourceType === "text" ? "text" : "document",
+    sourceName: cockpit.documentName || (sourceType === "yaml" ? "compliscan.yaml" : "New Source"),
+    orgId: cockpit.data.workspace.orgId,
+    rawText: cockpit.documentContent || undefined,
+    sourceSignals: [], // Vor fi populate de backend la extractie
+    extractedAtISO: new Date().toISOString()
+  }
+
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Scanari"
-        description="Alege sursa potrivita: document, text manual, manifest de cod sau compliscan.yaml"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
-      />
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <PageHeader
+          title="Scanari"
+          description="Alege sursa potrivita: document, text manual, manifest de cod sau compliscan.yaml"
+          score={cockpit.data.summary.score}
+          riskLabel={cockpit.data.summary.riskLabel}
+        />
+        <Button 
+          variant={agentFlow.agentModeActive ? "default" : "outline"}
+          className="shrink-0 gap-2"
+          onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
+        >
+          <Bot className="size-4" />
+          {agentFlow.agentModeActive ? "Ieși din Mod Agent" : "Agent Assist"}
+        </Button>
+      </div>
 
       <PillarTabs sectionId="scanare" />
 
+      {agentFlow.agentModeActive ? (
+        <AgentWorkspace
+          sourceEnvelope={currentEnvelope}
+          bundle={agentFlow.bundle}
+          loading={agentFlow.loading}
+          onRunAgents={() => agentFlow.runAgents(currentEnvelope)}
+          onCommit={async (finalBundle) => {
+            if (!finalBundle) return
+            const success = await agentFlow.commitBundle(finalBundle)
+            if (success) {
+              agentFlow.setAgentModeActive(false)
+              router.refresh()
+            }
+          }}
+          onCancel={() => agentFlow.setAgentModeActive(false)}
+        />
+      ) : (
+        <>
       <SourceModeGuide sourceType={sourceType} />
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -290,6 +335,8 @@ export default function ScanariPage() {
           latestScanInsights={latestDocumentInsights}
           latestScanTasks={latestDocumentTasks}
         />
+      )}
+        </>
       )}
     </div>
   )
@@ -699,6 +746,7 @@ function LatestYamlSection({
                           <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
                             {finding.detail}
                           </p>
+                          <FindingVerdictMeta finding={finding} className="mt-3" />
                         </div>
                         <Badge
                           className={findingSeverityClasses(finding.severity)}

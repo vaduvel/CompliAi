@@ -1,0 +1,4 @@
+{
+  "documentName": "compliscan.yaml",
+  "requiredRuleIds": ["EUAI-TR-001", "GDPR-PD-001"]
+}

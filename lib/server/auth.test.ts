@@ -1,0 +1,479 @@
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import crypto from "node:crypto"
+import os from "node:os"
+import path from "node:path"
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import {
+  createSessionToken,
+  findUserByEmail,
+  findUserById,
+  getConfiguredAuthBackend,
+  linkUserToExternalIdentity,
+  loadMemberships,
+  loadOrganizations,
+  listUserMemberships,
+  readSessionFromRequest,
+  registerUser,
+  resolveUserForMembership,
+  requireRole,
+  updateOrganizationMemberRole,
+  verifySessionToken,
+  type PersistedUserRecord,
+} from "@/lib/server/auth"
+const ORIGINAL_ENV = {
+  usersFile: process.env.COMPLISCAN_USERS_FILE,
+  orgsFile: process.env.COMPLISCAN_ORGS_FILE,
+  membershipsFile: process.env.COMPLISCAN_MEMBERSHIPS_FILE,
+  sessionSecret: process.env.COMPLISCAN_SESSION_SECRET,
+}
+
+describe("lib/server/auth", () => {
+  let tempDir = ""
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(path.join(os.tmpdir(), "compliscan-auth-"))
+    process.env.COMPLISCAN_USERS_FILE = path.join(tempDir, "users.json")
+    process.env.COMPLISCAN_ORGS_FILE = path.join(tempDir, "orgs.json")
+    process.env.COMPLISCAN_MEMBERSHIPS_FILE = path.join(tempDir, "memberships.json")
+    process.env.COMPLISCAN_SESSION_SECRET = "test-secret"
+    process.env.COMPLISCAN_DATA_BACKEND = "local"
+  })
+
+  afterEach(async () => {
+    vi.restoreAllMocks()
+
+    if (ORIGINAL_ENV.usersFile === undefined) delete process.env.COMPLISCAN_USERS_FILE
+    else process.env.COMPLISCAN_USERS_FILE = ORIGINAL_ENV.usersFile
+
+    if (ORIGINAL_ENV.orgsFile === undefined) delete process.env.COMPLISCAN_ORGS_FILE
+    else process.env.COMPLISCAN_ORGS_FILE = ORIGINAL_ENV.orgsFile
+
+    if (ORIGINAL_ENV.membershipsFile === undefined) delete process.env.COMPLISCAN_MEMBERSHIPS_FILE
+    else process.env.COMPLISCAN_MEMBERSHIPS_FILE = ORIGINAL_ENV.membershipsFile
+
+    if (ORIGINAL_ENV.sessionSecret === undefined) delete process.env.COMPLISCAN_SESSION_SECRET
+    else process.env.COMPLISCAN_SESSION_SECRET = ORIGINAL_ENV.sessionSecret
+
+    delete process.env.COMPLISCAN_DATA_BACKEND
+
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it("ramane local-first cand backend-ul cloud nu este configurat complet", async () => {
+    process.env.COMPLISCAN_DATA_BACKEND = "supabase"
+
+    const user = await registerUser("cloud@site.ro", "secret123", "Org Cloud")
+
+    expect(user.email).toBe("cloud@site.ro")
+    expect(user.authProvider).toBe("local")
+  })
+
+  it("creeaza user, organizatie si membership separat la inregistrare", async () => {
+    const user = await registerUser("Nou@Site.RO", "secret123", "Org Nou")
+
+    expect(user.email).toBe("nou@site.ro")
+    expect(user.orgName).toBe("Org Nou")
+    expect(user.role).toBe("owner")
+    expect(user.membershipId).toMatch(/^membership-/)
+
+    const usersRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_USERS_FILE as string, "utf8")
+    ) as PersistedUserRecord[]
+    const orgsRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_ORGS_FILE as string, "utf8")
+    ) as Array<{ id: string; name: string }>
+    const membershipsRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_MEMBERSHIPS_FILE as string, "utf8")
+    ) as Array<{ userId: string; orgId: string; role: string }>
+
+    expect(usersRaw).toHaveLength(1)
+    expect(usersRaw[0]?.orgId).toBeUndefined()
+    expect(orgsRaw).toEqual([
+      expect.objectContaining({
+        id: user.orgId,
+        name: "Org Nou",
+      }),
+    ])
+    expect(membershipsRaw).toEqual([
+      expect.objectContaining({
+        userId: user.id,
+        orgId: user.orgId,
+        role: "owner",
+      }),
+    ])
+  })
+
+  it("permite inregistrarea cu identitate externa Supabase", async () => {
+    const user = await registerUser("sync@site.ro", "secret123", "Org Sync", {
+      externalUserId: "00000000-0000-0000-0000-000000000123",
+      authProvider: "supabase",
+    })
+
+    expect(user.id).toBe("00000000-0000-0000-0000-000000000123")
+    expect(user.authProvider).toBe("supabase")
+
+    const usersRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_USERS_FILE as string, "utf8")
+    ) as PersistedUserRecord[]
+    expect(usersRaw[0]).toEqual(
+      expect.objectContaining({
+        id: "00000000-0000-0000-0000-000000000123",
+        authProvider: "supabase",
+        passwordHash: "",
+        salt: "",
+      })
+    )
+  })
+
+  it("migreaza compatibil din users legacy catre orgs si memberships", async () => {
+    const legacyUsers: PersistedUserRecord[] = [
+      {
+        id: "user-legacy",
+        email: "legacy@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        orgId: "org-legacy",
+        orgName: "Legacy Org",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+
+    await writeFile(
+      process.env.COMPLISCAN_USERS_FILE as string,
+      JSON.stringify(legacyUsers, null, 2),
+      "utf8"
+    )
+
+    const organizations = await loadOrganizations()
+    const memberships = await loadMemberships()
+    const user = await findUserByEmail("legacy@example.com")
+
+    expect(organizations).toEqual([
+      expect.objectContaining({
+        id: "org-legacy",
+        name: "Legacy Org",
+      }),
+    ])
+    expect(memberships).toEqual([
+      expect.objectContaining({
+        userId: "user-legacy",
+        orgId: "org-legacy",
+        role: "owner",
+      }),
+    ])
+    expect(user).toEqual(
+      expect.objectContaining({
+        email: "legacy@example.com",
+        orgId: "org-legacy",
+        orgName: "Legacy Org",
+        role: "owner",
+      })
+    )
+  })
+
+  it("returneaza rolul si membership-ul din structura noua", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "reviewer@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Control Org", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "reviewer",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const user = await findUserByEmail("reviewer@example.com")
+
+    expect(user).toEqual(
+      expect.objectContaining({
+        email: "reviewer@example.com",
+        orgId: "org-1",
+        orgName: "Control Org",
+        role: "reviewer",
+        membershipId: "membership-1",
+      })
+    )
+  })
+
+  it("accepta token legacy fara rol si il normalizeaza pe owner", () => {
+    const legacyToken = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "demo@site.ro",
+      orgName: "Org Demo",
+      role: "owner",
+    })
+
+    const dotIndex = legacyToken.lastIndexOf(".")
+    const encoded = legacyToken.slice(0, dotIndex)
+    const signature = legacyToken.slice(dotIndex + 1)
+    const decoded = JSON.parse(Buffer.from(encoded, "base64url").toString()) as Record<string, unknown>
+    delete decoded.role
+
+    const legacyPayload = Buffer.from(JSON.stringify(decoded)).toString("base64url")
+    const migratedSignature = crypto
+      .createHmac("sha256", process.env.COMPLISCAN_SESSION_SECRET as string)
+      .update(legacyPayload)
+      .digest("base64url")
+    expect(signature).not.toBe(migratedSignature)
+    const migratedToken = `${legacyPayload}.${migratedSignature}`
+    const payload = verifySessionToken(migratedToken)
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        userId: "user-1",
+        role: "owner",
+      })
+    )
+  })
+
+  it("blocheaza un rol insuficient la requireRole", () => {
+    const token = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "viewer@example.com",
+      orgName: "Viewer Org",
+      role: "viewer",
+    })
+
+    const request = new Request("http://localhost/api/private", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    expect(() => requireRole(request, ["owner"], "resetarea workspace-ului")).toThrowError(
+      /viewer/
+    )
+    expect(readSessionFromRequest(request)).toEqual(
+      expect.objectContaining({
+        email: "viewer@example.com",
+        role: "viewer",
+      })
+    )
+  })
+
+  it("nu permite eliminarea ultimului owner activ din organizatie", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Owner Org", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    await expect(
+      updateOrganizationMemberRole("org-1", "membership-1", "viewer")
+    ).rejects.toThrow("LAST_OWNER_REQUIRED")
+  })
+
+  it("listeaza toate membership-urile utilizatorului", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [
+      { id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" },
+      { id: "org-2", name: "Org Beta", createdAtISO: "2026-03-13T10:05:00.000Z" },
+    ]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+      {
+        id: "membership-2",
+        userId: "user-1",
+        orgId: "org-2",
+        role: "reviewer",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const result = await listUserMemberships("user-1")
+
+    expect(result).toHaveLength(2)
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        membershipId: "membership-1",
+        orgId: "org-1",
+        orgName: "Org Alpha",
+        role: "owner",
+      })
+    )
+    expect(result[1]).toEqual(
+      expect.objectContaining({
+        membershipId: "membership-2",
+        orgId: "org-2",
+        orgName: "Org Beta",
+        role: "reviewer",
+      })
+    )
+  })
+
+  it("rezolva utilizatorul pe membership selectat pentru switch de organizatie", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [
+      { id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" },
+      { id: "org-2", name: "Org Beta", createdAtISO: "2026-03-13T10:05:00.000Z" },
+    ]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+      {
+        id: "membership-2",
+        userId: "user-1",
+        orgId: "org-2",
+        role: "reviewer",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const resolved = await resolveUserForMembership("user-1", "membership-2")
+
+    expect(resolved).toEqual(
+      expect.objectContaining({
+        membershipId: "membership-2",
+        orgId: "org-2",
+        orgName: "Org Beta",
+        role: "reviewer",
+      })
+    )
+  })
+
+  it("leaga un user local existent la identitatea externa si muta membership-urile", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "legacy-user",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "legacy-user",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const linked = await linkUserToExternalIdentity(
+      "owner@example.com",
+      "00000000-0000-0000-0000-000000000999",
+      "supabase"
+    )
+
+    expect(linked).toEqual(
+      expect.objectContaining({
+        id: "00000000-0000-0000-0000-000000000999",
+        authProvider: "supabase",
+        membershipId: "membership-1",
+      })
+    )
+
+    const resolved = await findUserById("00000000-0000-0000-0000-000000000999")
+    expect(resolved?.authProvider).toBe("supabase")
+
+    const membershipsRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_MEMBERSHIPS_FILE as string, "utf8")
+    ) as Array<{ userId: string }>
+    expect(membershipsRaw[0]?.userId).toBe("00000000-0000-0000-0000-000000000999")
+  })
+
+  it("ramane pe backend local in lipsa configurarii explicite", () => {
+    delete process.env.COMPLISCAN_AUTH_BACKEND
+    expect(getConfiguredAuthBackend()).toBe("local")
+  })
+})

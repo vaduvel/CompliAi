@@ -1,9 +1,14 @@
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import type { AICompliancePack, AICompliancePackEntry } from "@/lib/compliance/ai-compliance-pack"
+import type {
+  AuditQualityGateDecision,
+  AuditQualityGateSummary,
+} from "@/lib/compliance/audit-quality-gates"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
 import type { ControlFamilyRef } from "@/lib/compliance/control-families"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import type {
+  EvidenceQualityAssessment,
   RemediationMode,
   ComplianceDriftLifecycleStatus,
   ComplianceDriftRecord,
@@ -38,6 +43,9 @@ export type AuditPackV2 = {
     remediationOpen: number
     validatedEvidenceItems: number
     missingEvidenceItems: number
+    auditQualityDecision: AuditQualityGateDecision
+    blockedQualityGates: number
+    reviewQualityGates: number
     topBlockers: string[]
     nextActions: string[]
   }
@@ -157,9 +165,10 @@ export type AuditPackV2 = {
     }
     relatedFindingIds: string[]
     relatedDriftIds: string[]
-    attachedEvidence: TaskEvidenceAttachment | null
-    lastRescanAtISO: string | null
-    validatedAtISO: string | null
+      attachedEvidence: TaskEvidenceAttachment | null
+      evidenceQuality: EvidenceQualityAssessment | null
+      lastRescanAtISO: string | null
+      validatedAtISO: string | null
   }>
   evidenceLedger: Array<{
     taskId: string
@@ -170,8 +179,10 @@ export type AuditPackV2 = {
     validationMessage: string | null
     updatedAtISO: string
     evidence: TaskEvidenceAttachment | null
+    evidenceQuality: EvidenceQualityAssessment | null
     sourceDocument: string | null
   }>
+  auditQualityGates: AuditQualityGateSummary
   driftRegister: Array<{
     id: string
     type: ComplianceDriftRecord["type"]
@@ -226,6 +237,10 @@ export type AuditPackV2 = {
     entityId: string
     type: string
     message: string
+    actorId?: string
+    actorLabel?: string
+    actorRole?: ComplianceEvent["actorRole"]
+    actorSource?: ComplianceEvent["actorSource"]
     metadata: Record<string, string | number | boolean> | null
   }>
   traceabilityMatrix: ComplianceTraceRecord[]

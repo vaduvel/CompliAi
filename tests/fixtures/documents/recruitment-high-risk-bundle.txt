@@ -1,0 +1,10 @@
+Politica interna pentru AI de recrutare si evaluare candidati
+
+Fluxul de CV screening foloseste scoring si ranking pentru a prioriza candidatii.
+Pentru anumite roluri, shortlist-ul este fully automated si fara review uman inainte de trimiterea catre recruiter.
+
+Sistemul prelucreaza date personale, profil utilizator, istoric client si documente incarcate de candidat.
+Retentia datelor este retention 365 zile pentru audit si analiza ulterioara.
+
+Datele sunt procesate in us-east-1 si exista furnizori outside the EU pentru unele etape de inferenta.
+Orice exceptie trebuie documentata separat in registrul de transfer international.

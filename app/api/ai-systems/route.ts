@@ -4,6 +4,7 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import type { AISystemPurpose } from "@/lib/compliance/types"
 import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 
 type AISystemPayload = {
@@ -32,6 +33,7 @@ function isPurpose(value: unknown): value is AISystemPurpose {
 
 export async function POST(request: Request) {
   const body = (await request.json()) as AISystemPayload
+  const actor = await resolveOptionalEventActor(request)
 
   if (!body.name?.trim()) {
     return NextResponse.json({ error: "Numele sistemului este obligatoriu." }, { status: 400 })
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
           riskLevel: record.riskLevel,
           purpose: record.purpose,
         },
-      }),
+      }, actor),
     ]),
   }))
 
@@ -84,6 +86,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get("id")
+  const actor = await resolveOptionalEventActor(request)
 
   if (!id) {
     return NextResponse.json({ error: "ID-ul sistemului este obligatoriu." }, { status: 400 })
@@ -104,7 +107,7 @@ export async function DELETE(request: Request) {
           entityId: id,
           message: `Sistem AI eliminat din inventar.`,
           createdAtISO: nowISO,
-        }),
+        }, actor),
       ]),
     }
   })

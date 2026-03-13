@@ -15,6 +15,8 @@ export type TaskValidationResult = {
   status: TaskValidationStatus
   nextStatus: PersistedTaskStatus
   message: string
+  confidence: "high" | "medium" | "low"
+  basis: "direct_signal" | "inferred_signal" | "operational_state"
   checkedSource?: string
 }
 
@@ -38,6 +40,7 @@ export function validateTaskAgainstState(
   const primaryRule = primaryFinding?.provenance?.ruleId
     ? COMPLIANCE_RULE_LIBRARY.find((rule) => rule.ruleId === primaryFinding.provenance?.ruleId)
     : undefined
+  const validationMeta = deriveValidationMeta(primaryFinding, validationKind)
 
   if (!hasEvidence && validationKind !== "efactura-sync") {
     return {
@@ -46,6 +49,8 @@ export function validateTaskAgainstState(
       message: primaryRule
         ? `Atașează dovada cerută pentru ${primaryRule.legalReference} înainte de Mark as fixed & rescan.`
         : "Atașează dovada cerută înainte de Mark as fixed & rescan.",
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
       checkedSource: latestSource?.documentName,
     }
   }
@@ -56,6 +61,8 @@ export function validateTaskAgainstState(
       nextStatus: "todo",
       message:
         "Nu există încă o sursă rescannată pentru acest task. Reîncarcă documentul, manifestul sau compliscan.yaml și rulează din nou analiza.",
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
     }
   }
 
@@ -72,7 +79,13 @@ export function validateTaskAgainstState(
     return {
       status: "needs_review",
       nextStatus: "todo",
-      message: signalCheck.message,
+      message: buildValidationMessage({
+        message: signalCheck.message,
+        status: "needs_review",
+        basis: validationMeta.basis,
+      }),
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
       checkedSource: latestSource?.documentName,
     }
   }
@@ -81,9 +94,15 @@ export function validateTaskAgainstState(
     return {
       status: "passed",
       nextStatus: "done",
-      message:
-        signalCheck.message ||
-        "Semnalul de risc nu mai apare în sursa curentă sau există indicatori suficienți de remediere și dovada a fost atașată.",
+      message: buildValidationMessage({
+        message:
+          signalCheck.message ||
+          "Semnalul de risc nu mai apare în sursa curentă sau există indicatori suficienți de remediere și dovada a fost atașată.",
+        status: "passed",
+        basis: validationMeta.basis,
+      }),
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
       checkedSource: latestSource?.documentName,
     }
   }
@@ -92,7 +111,13 @@ export function validateTaskAgainstState(
     return {
       status: "failed",
       nextStatus: "todo",
-      message: signalCheck.message,
+      message: buildValidationMessage({
+        message: signalCheck.message,
+        status: "failed",
+        basis: validationMeta.basis,
+      }),
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
       checkedSource: latestSource?.documentName,
     }
   }
@@ -100,11 +125,98 @@ export function validateTaskAgainstState(
   return {
     status: hasEvidence ? "passed" : "needs_review",
     nextStatus: hasEvidence ? "done" : "todo",
-    message: hasEvidence
-      ? "Task-ul are dovadă și nu mai există semnale deschise pe sursa curentă."
-      : "Task-ul pare remediat, dar încă lipsește dovada pentru audit.",
+    message: buildValidationMessage({
+      message: hasEvidence
+        ? "Task-ul are dovadă și nu mai există semnale deschise pe sursa curentă."
+        : "Task-ul pare remediat, dar încă lipsește dovada pentru audit.",
+      status: hasEvidence ? "passed" : "needs_review",
+      basis: validationMeta.basis,
+    }),
+    confidence: validationMeta.confidence,
+    basis: validationMeta.basis,
     checkedSource: latestSource?.documentName,
   }
+}
+
+function deriveValidationMeta(
+  finding: ScanFinding | undefined,
+  validationKind: TaskValidationKind
+): {
+  confidence: "high" | "medium" | "low"
+  basis: "direct_signal" | "inferred_signal" | "operational_state"
+} {
+  if (validationKind === "efactura-sync") {
+    return {
+      confidence: "medium",
+      basis: "operational_state",
+    }
+  }
+
+  if (finding?.provenance?.verdictBasis === "direct_signal") {
+    return {
+      confidence: finding.verdictConfidence || "high",
+      basis: "direct_signal",
+    }
+  }
+
+  if (finding?.provenance?.verdictBasis === "inferred_signal") {
+    return {
+      confidence: finding.verdictConfidence || "medium",
+      basis: "inferred_signal",
+    }
+  }
+
+  return {
+    confidence: finding?.verdictConfidence || "low",
+    basis: "operational_state",
+  }
+}
+
+function buildValidationContextSuffix(
+  basis: "direct_signal" | "inferred_signal" | "operational_state"
+) {
+  if (basis === "direct_signal") {
+    return "Verificarea curentă se bazează pe un semnal direct din sursa rescannată."
+  }
+  if (basis === "inferred_signal") {
+    return "Verificarea curentă se bazează pe un semnal inferat din manifest sau configurare și poate cere confirmare umană suplimentară."
+  }
+  return "Verificarea curentă se bazează pe starea operațională disponibilă."
+}
+
+function buildValidationMessage({
+  message,
+  status,
+  basis,
+}: {
+  message: string
+  status: TaskValidationStatus
+  basis: "direct_signal" | "inferred_signal" | "operational_state"
+}) {
+  const prefix = buildValidationMessagePrefix(status, basis)
+  const suffix = buildValidationContextSuffix(basis)
+  return `${prefix} ${message} ${suffix}`.trim()
+}
+
+function buildValidationMessagePrefix(
+  status: TaskValidationStatus,
+  basis: "direct_signal" | "inferred_signal" | "operational_state"
+) {
+  if (status === "passed") {
+    if (basis === "direct_signal") return "Confirmare puternică:"
+    if (basis === "inferred_signal") return "Confirmare parțială:"
+    return "Confirmare operațională:"
+  }
+
+  if (status === "failed") {
+    if (basis === "direct_signal") return "Semnal direct încă prezent:"
+    if (basis === "inferred_signal") return "Semnal inferat încă neclar:"
+    return "Control operațional insuficient:"
+  }
+
+  if (basis === "direct_signal") return "Necesită verificare suplimentară:"
+  if (basis === "inferred_signal") return "Necesită confirmare umană:"
+  return "Necesită review operațional:"
 }
 
 function runSignalValidation({

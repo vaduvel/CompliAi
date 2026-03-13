@@ -1,0 +1,48 @@
+{
+  "sourceId": "doc-fixture-001",
+  "intake": {
+    "proposedSystems": [
+      {
+        "tempId": "sys-temp-001",
+        "systemName": "HR CV Screening System",
+        "purpose": "hr-screening",
+        "riskClassSuggested": "high",
+        "dataUsed": ["cv-data", "personal-data"],
+        "humanOversight": "missing",
+        "fieldStatus": {
+          "provider": "missing",
+          "model": "inferred",
+          "purpose": "detected",
+          "risk_class": "inferred"
+        },
+        "sourceSignals": ["screening cv"],
+        "confidence": "high"
+      }
+    ],
+    "sourceSummary": "Documentul descrie un sistem de recrutare automatizat."
+  },
+  "findings": [
+    {
+      "findingId": "find-temp-001",
+      "issue": "Lipsă Human Oversight în sistem High-Risk",
+      "severity": "critical",
+      "principle": "oversight",
+      "evidence": ["Nu există intervenție umană în faza de filtrare"],
+      "recommendedFix": "Implementează un pas de revizuire umană (Human-in-the-loop) pentru deciziile de respingere.",
+      "lawReference": "AI Act Art. 14",
+      "rationale": "Sistemele de recrutare sunt High-Risk (Annex III) și necesită supraveghere umană obligatorie.",
+      "confidence": "high",
+      "sourceSignals": ["fără intervenție umană"]
+    }
+  ],
+  "drifts": [],
+  "evidence": {
+    "auditReadiness": "blocked",
+    "missingEvidence": ["Procedura Human Oversight", "DPIA"],
+    "reusableEvidenceIds": [],
+    "controlCoverage": [],
+    "executiveSummaryDraft": "Sistemul nu este gata de audit. Lipsesc controale critice de supraveghere.",
+    "stakeholderChecklist": ["Desemnează un reviewer uman", "Completează DPIA"]
+  },
+  "reviewState": "needs_review"
+}

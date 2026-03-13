@@ -1,0 +1,11 @@
+{
+  "id": "run-intake-001",
+  "sourceId": "manifest-fixture-001",
+  "orgId": "org-fixture-demo",
+  "kind": "intake",
+  "status": "completed",
+  "startedAtISO": "2026-03-13T10:00:01.000Z",
+  "completedAtISO": "2026-03-13T10:00:03.000Z",
+  "reviewState": "needs_review",
+  "confidence": "high"
+}
