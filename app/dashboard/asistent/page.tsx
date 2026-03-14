@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Loader2, Send, Sparkles } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
@@ -27,6 +27,9 @@ export default function AsistentPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const composerNoteId = useId()
+  const suggestionsId = useId()
   const hasMessages = messages.length > 0
 
   useEffect(() => {
@@ -40,6 +43,11 @@ export default function AsistentPage() {
   }, [messages, sending])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+
+  function handleSuggestionSelect(suggestion: string) {
+    setInput(suggestion)
+    window.requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
   async function handleSend() {
     const text = input.trim()
@@ -99,18 +107,19 @@ export default function AsistentPage() {
       <section className="flex min-h-[32rem] min-w-0 flex-1 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm">
         <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-5 py-4">
           <div className="mx-auto flex w-full max-w-4xl flex-wrap items-start justify-between gap-3">
-            <div>
-              <Badge variant="outline" className="mb-2">
-                Asistent Evidence OS
-              </Badge>
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <Badge variant="outline">Asistent Evidence OS</Badge>
+                <Badge variant="warning">Validare umana</Badge>
+              </div>
               <h2 className="text-lg font-semibold text-eos-text">Asistent de conformitate</h2>
-              <p className="mt-1 text-sm text-eos-text-muted">
+              <p className="mt-1 max-w-2xl text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                 Intreaba despre GDPR, EU AI Act si e-Factura, apoi valideaza uman concluziile oficiale.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Gemini</Badge>
-              <Badge variant="warning">Validare umană obligatorie</Badge>
+              <Badge variant="outline">Context de lucru</Badge>
             </div>
           </div>
         </div>
@@ -125,17 +134,19 @@ export default function AsistentPage() {
                   label="Incepe cu o intrebare despre starea actuala, riscurile curente sau pasii urmatori de conformitate."
                   className="border-eos-border-subtle bg-eos-bg-panel"
                 />
-                <div className="space-y-3" aria-label="Sugestii de intrebari">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-medium text-eos-text">Intrebari rapide</h3>
-                <p className="text-xs text-eos-text-muted">Alege una sau scrie direct.</p>
-              </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                <div className="space-y-3" aria-labelledby={suggestionsId}>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 id={suggestionsId} className="text-sm font-medium text-eos-text">
+                      Intrebari rapide
+                    </h3>
+                    <p className="text-xs text-eos-text-muted">Alege una sau scrie direct.</p>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-2">
                     {assistantSuggestions.map((suggestion) => (
                       <AssistantSuggestionChip
                         key={suggestion}
                         suggestion={suggestion}
-                        onSelect={setInput}
+                        onSelect={handleSuggestionSelect}
                         disabled={sending}
                       />
                     ))}
@@ -187,6 +198,7 @@ export default function AsistentPage() {
               }}
             >
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -194,7 +206,7 @@ export default function AsistentPage() {
                 className="min-w-0 flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text outline-none transition-[border-color,box-shadow] placeholder:text-eos-text-muted focus:border-eos-primary focus:ring-2 focus:ring-eos-primary-focus"
                 disabled={sending}
                 aria-label="Mesaj pentru asistentul de conformitate"
-                aria-describedby="assistant-composer-note"
+                aria-describedby={composerNoteId}
                 autoComplete="off"
                 enterKeyHint="send"
               />
@@ -208,7 +220,7 @@ export default function AsistentPage() {
                 <span className="sm:hidden">Trimite</span>
               </Button>
             </form>
-            <p id="assistant-composer-note" className="mt-2 text-[11px] text-eos-text-muted">
+            <p id={composerNoteId} className="mt-2 text-[11px] text-eos-text-muted">
               Raspuns orientativ; validarea umana ramane obligatorie.
             </p>
           </div>

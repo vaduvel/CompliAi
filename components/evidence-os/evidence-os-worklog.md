@@ -1017,6 +1017,96 @@ Validare:
 
 - `npm run lint`
 
+### 2026-03-14 39
+
+Am executat lotul `task-codex-2-paralel-safe-2026-03-14` strict pe suprafața permisă, fără atingere de runtime, API sau navigație.
+
+Suprafețe actualizate:
+
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/export-center.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/evidence-os/EmptyState.tsx`
+- `components/evidence-os/ProposalBundlePanel.tsx`
+- `components/evidence-os/SourceContextPanel.tsx`
+- `components/evidence-os/SourceEnvelopeCard.tsx`
+- `components/evidence-os/ui-audit-backlog.md`
+
+Ce s-a schimbat:
+
+- `TaskCard` a fost compactat:
+  - `summary` rămâne mesajul principal
+  - `fixPreview` apare doar când aduce semnal nou
+  - CTA-ul primar este separat de acțiunile de dovadă și export
+  - badge-urile vizibile simultan au fost reduse
+- `RemediationBoard` și `NextBestAction` au fost aliniate la aceeași ierarhie:
+  - descrieri mai scurte
+  - densitate mai bună
+  - `Pas recomandat` separat de sumar când există
+- `ExportCenter` separă acum clar:
+  - exportul principal
+  - exporturile de audit / review
+  - artefactele tehnice
+- `FloatingAssistant` are acum:
+  - focus ring explicit
+  - `aria-expanded` / `aria-controls`
+  - lățime și grid mai sigure pe viewport mic
+- componentele canonice `Evidence OS` de tip `empty state`, `tabs` și `source context` tratează mai bine:
+  - nume lungi
+  - wrapping
+  - preview text
+
+Ce a rămas intenționat în afara lotului meu:
+
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/logo.tsx`
+- orice pagină mare din:
+  - `app/dashboard/alerte/*`
+  - `app/dashboard/rapoarte/*`
+  - `app/dashboard/setari/*`
+
+Validare:
+
+- `npm run lint`
+
+Rezultat:
+
+- lotul este predabil
+- schimbările rămân component-level și sigure pentru paralelism
+- backlogul local indică explicit ce am închis și ce rămâne la Codex principal
+
+### 2026-03-14 40
+
+Am continuat cu singurul pas suplimentar sănătos rămas în lot: consistență locală pentru `Asistent`, fără schimbare de flow.
+
+Suprafață actualizată:
+
+- `app/dashboard/asistent/page.tsx`
+
+Ce s-a schimbat:
+
+- headerul folosește acum aceeași ierarhie scurtă ca panoul flotant:
+  - badge de produs
+  - badge de validare umană
+  - badge contextual separat
+- sugestiile rapide:
+  - au structură mai curată
+  - folosesc grid mai sigur pe viewport mic
+  - mută focusul în composer când sunt selectate
+- composerul folosește acum `useId()` pentru legătura `aria-describedby`
+- wrapping-ul în header este mai sigur pentru copy real
+
+De ce:
+
+- păstrăm consistența între asistentul flotant și pagina dedicată
+- închidem un mic rest de recipe local fără să intrăm peste cockpitul mare
+
+Validare:
+
+- `npm run lint`
+
 ## Regula de update
 
 Pentru fiecare batch nou pe `Evidence OS`, acest fișier trebuie actualizat cu:

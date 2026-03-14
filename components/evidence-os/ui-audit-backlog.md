@@ -16,6 +16,66 @@ Principiu:
 - compactăm doar unde claritatea și viteza de operare cresc
 - păstrăm explicația acolo unde utilizatorul ia o decizie reală
 
+## Actualizare 2026-03-14 - lot safe polish
+
+Închis în acest lot, pe suprafața permisă:
+
+- `3. Compactare TaskCard`
+  - închis prin:
+    - `components/compliscan/task-card.tsx`
+    - `components/compliscan/remediation-board.tsx`
+    - `components/compliscan/next-best-action.tsx`
+  - rezultat:
+    - rezumat principal mai clar
+    - `fixPreview` afișat doar când aduce semnal nou
+    - CTA principal separat de dovadă și export
+    - badge noise redus
+- `6. Ierarhie clară pentru exporturi`
+  - închis în:
+    - `components/compliscan/export-center.tsx`
+  - rezultat:
+    - raportul principal este izolat vizual
+    - exporturile de audit și cele tehnice sunt separate
+    - label-urile sunt mai scurte
+- `7. Overflow și wrapping`
+  - închis pe suprafața permisă în:
+    - `components/compliscan/floating-assistant.tsx`
+    - `app/dashboard/asistent/page.tsx`
+    - `components/evidence-os/EmptyState.tsx`
+    - `components/evidence-os/ProposalBundlePanel.tsx`
+    - `components/evidence-os/SourceContextPanel.tsx`
+    - `components/evidence-os/SourceEnvelopeCard.tsx`
+  - rezultat:
+    - numele lungi și textele reale împing mai greu layout-ul
+    - panoul flotant are limite mai sigure pe viewport-uri mici
+    - focus ring-ul minim este explicit pe butonul flotant
+- `8. Curățare CTA labels`
+  - închis pe suprafața permisă în:
+    - `components/compliscan/task-card.tsx`
+    - `components/compliscan/next-best-action.tsx`
+    - `components/compliscan/export-center.tsx`
+    - `app/dashboard/asistent/page.tsx`
+
+Parțial închis:
+
+- `9. Canonizare de page recipes`
+  - închis local pentru:
+    - `dense operational list`
+    - `summary + actions`
+    - `empty state`
+  - rămas deschis pentru `route-sections.tsx`, fiind în afara lotului curent permis
+
+Rămas intenționat neatins pentru Codex principal:
+
+- `1. Compactare Overview`
+- `2. Compactare Drift în Overview și Alerte`
+- orice punct care cere atingerea:
+  - `app/dashboard/alerte/page.tsx`
+  - `app/dashboard/rapoarte/*`
+  - `app/dashboard/setari/*`
+  - `components/compliscan/route-sections.tsx`
+  - `components/compliscan/logo.tsx`
+
 ## Val 1 - Ierarhie și compactare
 
 ### 1. Compactare `Overview`

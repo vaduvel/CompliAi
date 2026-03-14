@@ -110,14 +110,6 @@ function severityTone(severity: CockpitTask["severity"]) {
   return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
 }
 
-function remediationModeTone(mode: CockpitTask["remediationMode"]) {
-  if (mode === "rapid") {
-    return "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
-  }
-
-  return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-}
-
 function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
   return mode === "rapid" ? "remediere rapida" : "remediere structurala"
 }
@@ -130,6 +122,23 @@ function evidenceQualityTone(status?: EvidenceQualityAssessment["status"]) {
     return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
   }
   return "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+}
+
+function normalizeTaskCopy(value: string) {
+  return value.replace(/\s+/g, " ").trim().toLowerCase()
+}
+
+function hasDistinctTaskCopy(primary: string, secondary: string) {
+  const normalizedPrimary = normalizeTaskCopy(primary)
+  const normalizedSecondary = normalizeTaskCopy(secondary)
+
+  if (!normalizedSecondary) return false
+
+  return (
+    normalizedPrimary !== normalizedSecondary &&
+    !normalizedPrimary.includes(normalizedSecondary) &&
+    !normalizedSecondary.includes(normalizedPrimary)
+  )
 }
 
 export function TaskCard({
@@ -145,6 +154,13 @@ export function TaskCard({
     task.evidenceKinds[0] ?? "other"
   )
   const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
+  const evidenceQualitySummary = task.attachedEvidence
+    ? getEvidenceQualitySummary(task.attachedEvidence)
+    : null
+  const hasDistinctFixPreview = hasDistinctTaskCopy(task.summary, task.fixPreview)
+  const visiblePrinciples = task.principles.slice(0, 2)
+  const hiddenPrinciples = task.principles.slice(visiblePrinciples.length)
+  const hiddenPrinciplesLabel = hiddenPrinciples.map((principle) => formatPrincipleLabel(principle)).join(", ")
 
   async function handleCopyReadyText() {
     try {
@@ -172,19 +188,18 @@ export function TaskCard({
       <CardContent className={`border-l-4 px-5 py-5 ${tone.accent}`}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="space-y-2">
+            <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className={tone.badge}>{task.priority}</Badge>
                 <Badge className={severityTone(task.severity)}>{severityLabel(task.severity)}</Badge>
-                <Badge className={remediationModeTone(task.remediationMode)}>
-                  {remediationModeLabel(task.remediationMode)}
-                </Badge>
-                <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] uppercase tracking-[0.24em] text-[11px] text-[var(--color-muted)]">
-                  {task.status === "done" ? "inchis" : "deschis"}
-                </Badge>
                 <Badge className={validationTone(task.validationStatus)}>
                   {validationLabel(task.validationStatus)}
                 </Badge>
+                {task.status === "done" ? (
+                  <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] uppercase tracking-[0.24em] text-[11px] text-[var(--color-muted)]">
+                    inchis
+                  </Badge>
+                ) : null}
               </div>
               <h3 className="break-words text-lg font-semibold text-[var(--color-on-surface)]">
                 {task.title}
@@ -192,13 +207,20 @@ export function TaskCard({
               <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
                 {task.summary}
               </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+                <span>Tip: {remediationModeLabel(task.remediationMode)}</span>
+                <span>Sursa: {task.source}</span>
+                <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
+              </div>
             </div>
 
-            <div className="grid gap-1 text-sm text-[var(--color-muted)] sm:grid-cols-2 sm:gap-x-4 md:grid-cols-1 md:text-right">
-              <span>Responsabil: {task.owner}</span>
-              <span>Termen: {task.dueDate}</span>
-              <span>{task.effortLabel}</span>
-              <span>Incredere: {confidenceLabel(task.confidence)}</span>
+            <div className="min-w-0 md:w-[18rem]">
+              <div className="grid gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-muted)]">
+                <span>Responsabil: {task.owner}</span>
+                <span>Termen: {task.dueDate}</span>
+                <span>{task.effortLabel}</span>
+                <span>Incredere: {confidenceLabel(task.confidence)}</span>
+              </div>
             </div>
           </div>
 
@@ -215,9 +237,6 @@ export function TaskCard({
                 <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface-muted)]">
                   {task.triggerSnippet ?? "Nu exista excerpt salvat pentru acest task."}
                 </p>
-                <p className="mt-3 text-xs text-[var(--color-muted)]">
-                  {task.source} · {task.lawReference}
-                </p>
                 {task.legalSummary && (
                   <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
                     {task.legalSummary}
@@ -225,7 +244,7 @@ export function TaskCard({
                 )}
                 {task.principles.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {task.principles.map((principle) => (
+                    {visiblePrinciples.map((principle) => (
                       <Badge
                         key={`${task.id}-${principle}`}
                         className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
@@ -233,6 +252,14 @@ export function TaskCard({
                         {formatPrincipleLabel(principle)}
                       </Badge>
                     ))}
+                    {hiddenPrinciples.length > 0 ? (
+                      <Badge
+                        title={hiddenPrinciplesLabel}
+                        className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+                      >
+                        +{hiddenPrinciples.length}
+                      </Badge>
+                    ) : null}
                   </div>
                 )}
               </section>
@@ -260,19 +287,21 @@ export function TaskCard({
             <div className="space-y-4">
               <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Fix recomandat
+                  Plan de remediere
                 </p>
                 <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
                   {task.remediationMode === "rapid"
                     ? "Schimbare mica de text, setare sau dovada care poate fi validata imediat."
                     : "Actualizare de procedura sau configurare persistenta, cu efect stabil in control."}
                 </p>
-                <p className="mt-2 break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
-                  {task.fixPreview}
-                </p>
+                {hasDistinctFixPreview ? (
+                  <p className="mt-3 break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                    {task.fixPreview}
+                  </p>
+                ) : null}
                 <div className="mt-3">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    Ce faci acum
+                    {hasDistinctFixPreview ? "Pasii imediati" : "Ce faci acum"}
                   </p>
                   <ul className="mt-2 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
                     {task.steps.slice(0, 3).map((step, index) => (
@@ -369,9 +398,9 @@ export function TaskCard({
                       </Badge>
                     </>
                   )}
-                  {getEvidenceQualitySummary(task.attachedEvidence) && (
+                  {evidenceQualitySummary && (
                     <span className="basis-full text-[var(--color-on-surface-muted)]">
-                      {getEvidenceQualitySummary(task.attachedEvidence)}
+                      {evidenceQualitySummary}
                     </span>
                   )}
                 </div>
@@ -380,47 +409,50 @@ export function TaskCard({
               )}
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-              <select
-                value={selectedEvidenceKind}
-                onChange={(event) =>
-                  setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
-                }
-                className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 text-sm text-[var(--color-on-surface)] outline-none sm:w-auto sm:min-w-40"
-              >
-                {task.evidenceKinds.map((kind) => (
-                  <option key={`${task.id}-${kind}`} value={kind}>
-                    {formatEvidenceKind(kind)}
-                  </option>
-                ))}
-              </select>
+            <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[22rem]">
               <Button
                 onClick={() => onMarkDone(task.id)}
-                className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] sm:w-auto"
+                className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
               >
                 {task.status === "done" ? (
                   <CheckCircle2 className="size-4" strokeWidth={2.25} />
                 ) : (
                   <RefreshCcw className="size-4" strokeWidth={2.25} />
                 )}
-                {task.status === "done" ? "Redeschide" : "Valideaza si rescaneaza"}
+                {task.status === "done" ? "Redeschide taskul" : "Valideaza si rescaneaza"}
               </Button>
-              <Button
-                onClick={() => evidenceInputRef.current?.click()}
-                variant="outline"
-                className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
-              >
-                <Paperclip className="size-4" strokeWidth={2.25} />
-                {task.attachedEvidence ? "Schimba dovada" : "Ataseaza dovada"}
-              </Button>
-              <Button
-                onClick={() => onExport(task.id)}
-                variant="outline"
-                className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
-              >
-                <FileDown className="size-4" strokeWidth={2.25} />
-                Export PDF
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                <select
+                  value={selectedEvidenceKind}
+                  onChange={(event) =>
+                    setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
+                  }
+                  aria-label="Tipul de dovada"
+                  className="h-10 w-full min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 text-sm text-[var(--color-on-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-40"
+                >
+                  {task.evidenceKinds.map((kind) => (
+                    <option key={`${task.id}-${kind}`} value={kind}>
+                      {formatEvidenceKind(kind)}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  onClick={() => evidenceInputRef.current?.click()}
+                  variant="outline"
+                  className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
+                >
+                  <Paperclip className="size-4" strokeWidth={2.25} />
+                  {task.attachedEvidence ? "Actualizeaza dovada" : "Adauga dovada"}
+                </Button>
+                <Button
+                  onClick={() => onExport(task.id)}
+                  variant="outline"
+                  className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
+                >
+                  <FileDown className="size-4" strokeWidth={2.25} />
+                  Export task
+                </Button>
+              </div>
             </div>
           </div>
           <input

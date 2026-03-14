@@ -38,6 +38,27 @@ function severityLabel(severity: CockpitTask["severity"]) {
   return "scazut"
 }
 
+function normalizeNextStepCopy(value: string) {
+  return value.replace(/\s+/g, " ").trim().toLowerCase()
+}
+
+function hasDistinctNextStepCopy(primary: string, secondary: string) {
+  const normalizedPrimary = normalizeNextStepCopy(primary)
+  const normalizedSecondary = normalizeNextStepCopy(secondary)
+
+  if (!normalizedSecondary) return false
+
+  return (
+    normalizedPrimary !== normalizedSecondary &&
+    !normalizedPrimary.includes(normalizedSecondary) &&
+    !normalizedSecondary.includes(normalizedPrimary)
+  )
+}
+
+function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
+  return mode === "rapid" ? "remediere rapida" : "remediere structurala"
+}
+
 export function NextBestAction({
   task,
   onResolve,
@@ -90,6 +111,16 @@ export function NextBestAction({
       </CardHeader>
 
       <CardContent className="pt-5">
+        {hasDistinctNextStepCopy(task.summary, task.fixPreview) ? (
+          <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              Pas recomandat
+            </p>
+            <p className="mt-2 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+              {task.fixPreview}
+            </p>
+          </div>
+        ) : null}
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)_auto] lg:items-center">
           <div>
             <p className="break-words text-xl font-semibold text-[var(--color-on-surface)]">{task.title}</p>
@@ -111,13 +142,17 @@ export function NextBestAction({
               <ShieldAlert className="size-4 text-[var(--icon-secondary)]" strokeWidth={2.25} />
               <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <ArrowRight className="size-4 text-[var(--icon-secondary)]" strokeWidth={2.25} />
+              <span>{remediationModeLabel(task.remediationMode)}</span>
+            </div>
           </div>
 
           <Button
             onClick={onResolve}
             className="h-11 w-full rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] lg:w-auto"
           >
-            Deschide remedierea
+            Deschide taskul
             <ArrowRight className="size-4" strokeWidth={2.25} />
           </Button>
         </div>
