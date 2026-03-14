@@ -80,7 +80,7 @@ type TaskEvidenceUploadResponse = DashboardPayload & {
   evidence?: TaskEvidenceAttachment
 }
 
-function useCockpitStore() {
+function useCockpitStore(initialData?: DashboardPayload | null) {
   const DASHBOARD_CORE_ENDPOINT = "/api/dashboard/core"
   const DASHBOARD_FULL_ENDPOINT = "/api/dashboard"
   const [documentName, setDocumentName] = useState("")
@@ -90,17 +90,27 @@ function useCockpitStore() {
   const [lastExtractedPreview, setLastExtractedPreview] = useState("")
   const [pendingScanId, setPendingScanId] = useState<string | null>(null)
   const [pendingExtractedText, setPendingExtractedText] = useState("")
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialData)
   const [scanning, setScanning] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<DashboardPayload | null>(null)
+  const [data, setData] = useState<DashboardPayload | null>(initialData ?? null)
   const tasks = useMemo(() => (data ? buildCockpitTasks(data) : []), [data])
-  const hasLoadedOnce = useRef(false)
+  const hasLoadedOnce = useRef(Boolean(initialData))
 
   useEffect(() => {
-    void reloadDashboard()
-  }, [])
+    if (initialData) {
+      setData(initialData)
+      setLoading(false)
+      setError(null)
+      hasLoadedOnce.current = true
+      return
+    }
+
+    if (!hasLoadedOnce.current) {
+      void reloadDashboard()
+    }
+  }, [initialData])
 
   const latestScan = data?.state.scans[0] ?? null
   const latestScanText =
@@ -1105,8 +1115,14 @@ type CockpitStore = ReturnType<typeof useCockpitStore>
 
 const CockpitContext = createContext<CockpitStore | null>(null)
 
-export function CockpitProvider({ children }: { children: React.ReactNode }) {
-  const store = useCockpitStore()
+export function CockpitProvider({
+  children,
+  initialData,
+}: {
+  children: React.ReactNode
+  initialData?: DashboardPayload | null
+}) {
+  const store = useCockpitStore(initialData)
   return <CockpitContext.Provider value={store}>{children}</CockpitContext.Provider>
 }
 

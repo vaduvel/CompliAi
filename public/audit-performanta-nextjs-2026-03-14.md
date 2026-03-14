@@ -382,6 +382,12 @@ Ce facem:
   - optimistic UI
   - refresh local
 
+Stare curenta:
+
+- `app/dashboard/layout.tsx` hidrateaza server-side `core payload` pentru `CockpitProvider`
+- `DashboardShell` primeste server-side user + memberships, fara fetch initial la mount
+- `useCockpit()` porneste acum cu date initiale injectate si nu mai cere `/api/dashboard/core` la primul mount daca bootstrap-ul exista
+
 Acesta este pasul cel mai valoros pe termen mediu.
 
 ### C2. Folosim segmente si `loading.tsx` unde chiar ajuta

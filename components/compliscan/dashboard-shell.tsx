@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { LogOut, ChevronDown } from "lucide-react"
@@ -32,26 +32,21 @@ type UserMembership = {
   status: "active" | "inactive"
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  initialUser,
+  initialMemberships,
+}: {
+  children: React.ReactNode
+  initialUser: CurrentUser
+  initialMemberships: UserMembership[]
+}) {
   const pathname = usePathname()
   const router = useRouter()
-  const [currentUser, setCurrentUser] = useState<CurrentUser>(null)
-  const [memberships, setMemberships] = useState<UserMembership[]>([])
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [switchingMembershipId, setSwitchingMembershipId] = useState<string | null>(null)
-
-  useEffect(() => {
-    void fetch("/api/auth/summary")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { user?: CurrentUser; memberships?: UserMembership[] } | null) => {
-        setCurrentUser(data?.user ?? null)
-        setMemberships(data?.memberships ?? [])
-      })
-      .catch(() => {
-        setCurrentUser(null)
-        setMemberships([])
-      })
-  }, [])
+  const currentUser = initialUser
+  const memberships = initialMemberships
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" })

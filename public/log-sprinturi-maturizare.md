@@ -139,6 +139,10 @@ Suita curenta:
   - `Audit si export` incarca dinamic `RemediationBoard` si `ExportCenter` cu placeholder local
   - `Scanari` incarca dinamic `AgentWorkspace` si `AIDiscoveryPanel` cu placeholder local
   - `Auditor Vault` incarca dinamic `TraceabilityMatrixCard` dupa extragerea zonei de traceability intr-un component separat
+- Val C1 (server-first bootstrap):
+  - `app/dashboard/layout.tsx` hidrateaza server-side `core payload` pentru `CockpitProvider`
+  - `DashboardShell` primeste server-side user + memberships, fara fetch initial la mount
+  - `useCockpit()` porneste direct din datele injectate si sare peste primul fetch client daca bootstrap-ul exista
 
 ### Sprint 6 - Audit defensibility
 
