@@ -445,3 +445,23 @@ Aceasta directie pastreaza:
 - flow-urile validate deja
 
 si reduce greutatea fara rescriere periculoasa.
+
+## Implementare initiala (Val A0)
+
+Am aplicat un prim pas sigur, fara schimbare de logica:
+
+- am introdus un `CockpitProvider` care tine starea `useCockpit` la nivel de `app/dashboard/layout.tsx`
+- paginile din dashboard consuma acum aceeasi instanta de store, fara a reinitializa pe fiecare navigare
+- `use-cockpit` a fost trecut in `components/compliscan/use-cockpit.tsx` pentru a permite provider-ul React
+
+Efect imediat:
+
+- shell-ul ramane stabil intre pagini
+- scade frecventa ecranelor full-page de incarcare
+- nu se modifica flow-ul de scanare / remediere / audit
+
+Validare:
+
+- `npm run lint`
+- `npm test`
+- `npm run build`

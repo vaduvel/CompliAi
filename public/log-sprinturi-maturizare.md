@@ -1479,3 +1479,17 @@ Validare dupa inchiderea `Val 3`:
 - `npm run lint` -> verde
 - `npm test` -> verde
 - `npm run build` -> verde
+
+Val de performanta - pas initial:
+
+- am introdus `CockpitProvider` la nivel de `app/dashboard/layout.tsx`
+- `useCockpit` este acum consumat din context, nu recreat per pagina
+- fisierul a fost trecut la:
+  - `components/compliscan/use-cockpit.tsx`
+- efect: shell stabil intre navigari si mai putine ecrane full-page de incarcare
+
+Validare dupa pasul de performanta:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde

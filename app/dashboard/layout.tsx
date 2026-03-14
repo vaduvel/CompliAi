@@ -1,3 +1,4 @@
+import { CockpitProvider } from "@/components/compliscan/use-cockpit"
 import { DashboardShell } from "@/components/compliscan/dashboard-shell"
 
 export default function DashboardLayout({
@@ -5,5 +6,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <DashboardShell>{children}</DashboardShell>
+  return (
+    <CockpitProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </CockpitProvider>
+  )
 }
