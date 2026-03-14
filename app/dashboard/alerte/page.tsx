@@ -10,7 +10,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { AlertsList, LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import {
   formatDriftEscalationDeadline,
   formatDriftEscalationTier,
@@ -22,7 +22,8 @@ import {
 } from "@/lib/compliance/drift-lifecycle"
 
 export default function AlertePage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
@@ -44,7 +45,7 @@ export default function AlertePage() {
 
     setActingDriftId(driftId)
     try {
-      await cockpit.updateDriftLifecycle({
+      await cockpitActions.updateDriftLifecycle({
         driftId,
         action,
         note,

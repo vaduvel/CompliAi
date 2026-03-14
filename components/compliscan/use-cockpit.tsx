@@ -1102,6 +1102,209 @@ export function useCockpit() {
   return store
 }
 
+export type CockpitDataSlice = Pick<
+  CockpitStore,
+  | "loading"
+  | "scanning"
+  | "busy"
+  | "error"
+  | "data"
+  | "tasks"
+  | "latestScan"
+  | "latestScanText"
+  | "latestScanFindings"
+  | "recentEvents"
+  | "latestScanInsights"
+  | "nextBestAction"
+  | "lastScanLabel"
+  | "pendingScanId"
+  | "pendingExtractedText"
+  | "documentName"
+  | "documentContent"
+  | "documentFile"
+  | "scanInfo"
+  | "openAlerts"
+  | "activeDrifts"
+  | "validatedInvoicesToday"
+  | "efacturaErrorsToday"
+  | "gdprQuickFixes"
+>
+
+export type CockpitActionSlice = Pick<
+  CockpitStore,
+  | "setDocumentName"
+  | "setDocumentContent"
+  | "setDocumentFile"
+  | "setPendingExtractedText"
+  | "reloadDashboard"
+  | "handleExtractScan"
+  | "handleAnalyzePendingScan"
+  | "handleScan"
+  | "handleGenerateReport"
+  | "handleGenerateAuditPack"
+  | "handleGenerateAuditBundle"
+  | "handleGenerateAnnexLite"
+  | "handleChecklistExport"
+  | "handleExportCompliScanJson"
+  | "handleExportCompliScanYaml"
+  | "handleShareWithAccountant"
+  | "handleSyncNow"
+  | "handleMarkDone"
+  | "attachEvidence"
+  | "handleTaskExport"
+  | "handleSandbox"
+  | "addAISystem"
+  | "discoverAISystemsFromManifest"
+  | "removeAISystem"
+  | "updateDetectedAISystem"
+  | "editDetectedAISystem"
+  | "validateEFacturaXml"
+  | "resetWorkspaceState"
+  | "setValidatedBaseline"
+  | "clearValidatedBaseline"
+  | "updateDriftSeverityOverrides"
+  | "updateCompliancePackField"
+  | "updateTraceabilityReview"
+  | "reuseFamilyEvidence"
+  | "updateDriftLifecycle"
+>
+
+export function useCockpitData(): CockpitDataSlice {
+  const store = useCockpit()
+  const {
+    loading,
+    scanning,
+    busy,
+    error,
+    data,
+    tasks,
+    latestScan,
+    latestScanText,
+    latestScanFindings,
+    recentEvents,
+    latestScanInsights,
+    nextBestAction,
+    lastScanLabel,
+    pendingScanId,
+    pendingExtractedText,
+    documentName,
+    documentContent,
+    documentFile,
+    scanInfo,
+    openAlerts,
+    activeDrifts,
+    validatedInvoicesToday,
+    efacturaErrorsToday,
+    gdprQuickFixes,
+  } = store
+
+  return {
+    loading,
+    scanning,
+    busy,
+    error,
+    data,
+    tasks,
+    latestScan,
+    latestScanText,
+    latestScanFindings,
+    recentEvents,
+    latestScanInsights,
+    nextBestAction,
+    lastScanLabel,
+    pendingScanId,
+    pendingExtractedText,
+    documentName,
+    documentContent,
+    documentFile,
+    scanInfo,
+    openAlerts,
+    activeDrifts,
+    validatedInvoicesToday,
+    efacturaErrorsToday,
+    gdprQuickFixes,
+  }
+}
+
+export function useCockpitMutations(): CockpitActionSlice {
+  const store = useCockpit()
+  const {
+    setDocumentName,
+    setDocumentContent,
+    setDocumentFile,
+    setPendingExtractedText,
+    reloadDashboard,
+    handleExtractScan,
+    handleAnalyzePendingScan,
+    handleScan,
+    handleGenerateReport,
+    handleGenerateAuditPack,
+    handleGenerateAuditBundle,
+    handleGenerateAnnexLite,
+    handleChecklistExport,
+    handleExportCompliScanJson,
+    handleExportCompliScanYaml,
+    handleShareWithAccountant,
+    handleSyncNow,
+    handleMarkDone,
+    attachEvidence,
+    handleTaskExport,
+    handleSandbox,
+    addAISystem,
+    discoverAISystemsFromManifest,
+    removeAISystem,
+    updateDetectedAISystem,
+    editDetectedAISystem,
+    validateEFacturaXml,
+    resetWorkspaceState,
+    setValidatedBaseline,
+    clearValidatedBaseline,
+    updateDriftSeverityOverrides,
+    updateCompliancePackField,
+    updateTraceabilityReview,
+    reuseFamilyEvidence,
+    updateDriftLifecycle,
+  } = store
+
+  return {
+    setDocumentName,
+    setDocumentContent,
+    setDocumentFile,
+    setPendingExtractedText,
+    reloadDashboard,
+    handleExtractScan,
+    handleAnalyzePendingScan,
+    handleScan,
+    handleGenerateReport,
+    handleGenerateAuditPack,
+    handleGenerateAuditBundle,
+    handleGenerateAnnexLite,
+    handleChecklistExport,
+    handleExportCompliScanJson,
+    handleExportCompliScanYaml,
+    handleShareWithAccountant,
+    handleSyncNow,
+    handleMarkDone,
+    attachEvidence,
+    handleTaskExport,
+    handleSandbox,
+    addAISystem,
+    discoverAISystemsFromManifest,
+    removeAISystem,
+    updateDetectedAISystem,
+    editDetectedAISystem,
+    validateEFacturaXml,
+    resetWorkspaceState,
+    setValidatedBaseline,
+    clearValidatedBaseline,
+    updateDriftSeverityOverrides,
+    updateCompliancePackField,
+    updateTraceabilityReview,
+    reuseFamilyEvidence,
+    updateDriftLifecycle,
+  }
+}
+
 function formatDriftActionTitle(
   action: "acknowledge" | "start" | "resolve" | "waive" | "reopen"
 ) {

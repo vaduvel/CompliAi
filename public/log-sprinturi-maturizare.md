@@ -129,6 +129,9 @@ Suita curenta:
 - Val A3 (shell bootstrap):
   - endpoint agregat nou: `GET /api/auth/summary`
   - `DashboardShell` incarca user + memberships intr-un singur fetch
+- Val B1 (scaffold):
+  - `useCockpitData()` + `useCockpitMutations()`
+  - prima pagina migrata: `Alerte`
 
 ### Sprint 6 - Audit defensibility
 

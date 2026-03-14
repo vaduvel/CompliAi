@@ -510,3 +510,14 @@ Impact:
 
 - mai putine request-uri la fiecare intrare in dashboard
 - acelasi comportament de autentificare si schimbare org
+
+## Implementare Val B1 (scaffold)
+
+Am introdus separarea `data` vs `mutations` in `use-cockpit`:
+
+- noi hook-uri: `useCockpitData()` si `useCockpitMutations()`
+- prima pagina migrata: `Alerte`
+
+Impact:
+
+- pregateste split-ul intern fara a schimba contractul existent
