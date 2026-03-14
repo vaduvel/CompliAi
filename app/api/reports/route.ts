@@ -75,7 +75,7 @@ function buildReportHtml(report: {
       <p class="muted">Generat la ${report.generatedAtLabel}</p>
       <section class="grid">
         <article class="card"><strong>Scor de risc:</strong> ${report.score}% (${report.riskLabel})</article>
-        <article class="card"><strong>Alerte active:</strong> ${report.openAlerts}</article>
+        <article class="card"><strong>Drift activ:</strong> ${report.openAlerts}</article>
         <article class="card"><strong>EU AI Act:</strong> High-risk ${report.euAiAct.highRisk}, Low-risk ${report.euAiAct.lowRisk}</article>
         <article class="card"><strong>GDPR Checklist:</strong> ${report.gdprProgress}%</article>
       </section>

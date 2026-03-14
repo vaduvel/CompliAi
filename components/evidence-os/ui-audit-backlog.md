@@ -76,6 +76,61 @@ Rămas intenționat neatins pentru Codex principal:
   - `components/compliscan/route-sections.tsx`
   - `components/compliscan/logo.tsx`
 
+## Actualizare 2026-03-14 - lot Agent Workspace convergence
+
+Închis în acest lot, pe suprafața permisă:
+
+- convergență layout pentru `Agent Workspace`
+  - închis în:
+    - `lib/compliance/agent-workspace.tsx`
+    - `components/evidence-os/AgentReviewLayout.tsx`
+    - `components/evidence-os/ProposalColumnShell.tsx`
+    - `components/evidence-os/AgentStartStateCard.tsx`
+  - rezultat:
+    - coloanele au raport mai stabil pe desktop
+    - shell-urile au min-height și overflow safety mai bune
+    - start state-ul comunică mai clar sursa și ieșirea așteptată
+- tabs și review decision
+  - închis în:
+    - `components/evidence-os/AgentProposalTabs.tsx`
+    - `components/evidence-os/ReviewDecisionPanel.tsx`
+  - rezultat:
+    - review-ul vede mai clar ce rămâne după respingeri
+    - secțiunile au label-uri și count-uri mai executabile
+    - CTA-ul principal rămâne confirmarea, iar contextul pentru acțiune este mai clar
+- convergență pe cardurile canonice
+  - închis în:
+    - `components/evidence-os/IntakeSystemCard.tsx`
+    - `components/evidence-os/FindingProposalCard.tsx`
+    - `components/evidence-os/DriftProposalCard.tsx`
+  - rezultat:
+    - ierarhie mai apropiată între titlu, metadata, rationale și remediere
+    - overflow safety mai bun pe nume, referințe și diff-uri JSON
+    - mai puține pattern-uri locale divergente
+
+Verificat și lăsat intenționat neschimbat:
+
+- `components/compliscan/agent-workspace.tsx`
+  - rămâne re-export subțire și nu cere lot nou de UI
+
+Rămas deschis intenționat:
+
+- micro-polish în:
+  - `components/evidence-os/ProposalBundlePanel.tsx`
+  - `components/evidence-os/CommitSummaryCard.tsx`
+  - `components/evidence-os/HumanReviewPanel.tsx`
+  deoarece sunt în afara listei permise pentru acest lot
+- orice extindere în:
+  - `app/dashboard/*`
+  - `components/compliscan/navigation.ts`
+  - `components/compliscan/route-sections.tsx`
+  - `components/compliscan/use-cockpit.tsx`
+  - `app/api/*`
+  - `lib/server/*`
+- warning-ul de build pe `/dashboard/rapoarte` legat de `SUPABASE_ORG_STATE_REQUIRED`
+  - observat la `npm run build`
+  - în afara lotului curent permis
+
 ## Val 1 - Ierarhie și compactare
 
 ### 1. Compactare `Overview`

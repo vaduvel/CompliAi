@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -336,28 +336,60 @@ export function OverviewPageSections({
             <CardHeader className="pb-2">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <CardTitle className="text-lg">Alerte active</CardTitle>
+                  <CardTitle className="text-lg">Drift activ</CardTitle>
                   <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
                     Pastrezi vizibile doar semnalele care cer atentie rapida.
                   </p>
                 </div>
                 <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-                  {openAlerts.length > 0 ? `${openAlerts.length} deschise` : "fara alerte"}
+                  {activeDrifts.length > 0 ? `${activeDrifts.length} deschise` : "fara drift"}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-2.5 pt-2">
-              {openAlerts.slice(0, 4).map((alert, index) => (
-                <div
-                  key={`${alert.message}-${index}`}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3 text-sm leading-6 text-[var(--color-on-surface-muted)]"
-                >
-                  {alert.message}
-                </div>
-              ))}
-              {openAlerts.length === 0 && (
+              {activeDrifts.slice(0, 3).map((drift) => {
+                const guidance = getDriftPolicyFromRecord(drift)
+                const breached = isDriftSlaBreached(drift)
+
+                return (
+                  <Link
+                    key={drift.id}
+                    href="/dashboard/alerte"
+                    className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3 transition hover:bg-[var(--color-surface-hover)]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                          {drift.summary}
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          {[
+                            formatDriftTypeLabel(drift.type),
+                            drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
+                            formatRelativeRomanian(drift.detectedAtISO),
+                          ].join(" · ")}
+                        </p>
+                        <p className="mt-2 text-xs leading-5 text-[var(--color-on-surface-muted)] line-clamp-2">
+                          {guidance.nextAction}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={driftSeverityClasses(drift.severity)}>
+                          {driftSeverityLabel(drift.severity)}
+                        </Badge>
+                        {breached ? (
+                          <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                            SLA depășit
+                          </Badge>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+              {activeDrifts.length === 0 && (
                 <EmptyState
-                  title="Nu exista alerte deschise"
+                  title="Nu exista drift deschis"
                   label="Cand apare un drift, o problema de conformitate sau o abatere de proces, o vezi aici."
                   className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
                 />
@@ -366,7 +398,7 @@ export function OverviewPageSections({
                 href="/dashboard/alerte"
                 className="inline-flex items-center gap-2 pt-1 text-sm font-medium text-[var(--color-on-surface)] transition hover:text-[var(--color-primary)]"
               >
-                Vezi toate alertele
+                Vezi tot drift-ul
                 <ArrowRight className="size-4" strokeWidth={2.25} />
               </Link>
             </CardContent>
@@ -409,11 +441,25 @@ export function DriftCommandCenter({
   latestDocumentScan: ScanRecord | null
   latestManifestScan: ScanRecord | null
 }) {
+  const [selectedDriftId, setSelectedDriftId] = useState<string | null>(activeDrifts[0]?.id ?? null)
   const primaryDrift = activeDrifts[0] ?? null
   const breachedCount = activeDrifts.filter((drift) => isDriftSlaBreached(drift)).length
   const latestSource = latestManifestScan ?? latestDocumentScan
-  const primaryGuidance = primaryDrift ? getDriftPolicyFromRecord(primaryDrift) : null
-  const primaryBreached = primaryDrift ? isDriftSlaBreached(primaryDrift) : false
+  const selectedDrift =
+    activeDrifts.find((drift) => drift.id === selectedDriftId) ?? primaryDrift
+  const selectedGuidance = selectedDrift ? getDriftPolicyFromRecord(selectedDrift) : null
+  const selectedBreached = selectedDrift ? isDriftSlaBreached(selectedDrift) : false
+
+  useEffect(() => {
+    if (activeDrifts.length === 0) {
+      setSelectedDriftId(null)
+      return
+    }
+
+    setSelectedDriftId((current) =>
+      current && activeDrifts.some((drift) => drift.id === current) ? current : activeDrifts[0].id
+    )
+  }, [activeDrifts])
 
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -432,64 +478,85 @@ export function DriftCommandCenter({
       </CardHeader>
 
       <CardContent className="space-y-4 pt-5">
-        {primaryDrift ? (
+        {selectedDrift ? (
           <>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="max-w-2xl">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                    {formatDriftTypeLabel(primaryDrift.type)}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-[var(--color-on-surface)]">
-                    {primaryDrift.summary}
-                  </p>
-                  <p className="mt-2 break-words text-sm text-[var(--color-on-surface-muted)]">
-                    {[primaryDrift.systemLabel, primaryDrift.sourceDocument].filter(Boolean).join(" · ") || "Sursa tehnica fara eticheta"} ·{" "}
-                    {formatRelativeRomanian(primaryDrift.detectedAtISO)}
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                    {primaryGuidance?.impactSummary}
-                  </p>
-                </div>
-                <Badge className={driftSeverityClasses(primaryDrift.severity)}>
-                  {driftSeverityLabel(primaryDrift.severity)}
-                </Badge>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                  {formatDriftLifecycleStatus(primaryDrift.lifecycleStatus ?? "open")}
-                </Badge>
-                {primaryBreached && (
-                  <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
-                    SLA depășit
-                  </Badge>
-                )}
-                {breachedCount > 1 && (
-                  <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
-                    {breachedCount} drift-uri depășesc SLA-ul
-                  </Badge>
-                )}
-              </div>
+            <div className="space-y-3">
+              {activeDrifts.map((drift) => {
+                const guidance = getDriftPolicyFromRecord(drift)
+                const breached = isDriftSlaBreached(drift)
+                const isSelected = drift.id === selectedDrift.id
+
+                return (
+                  <button
+                    key={drift.id}
+                    type="button"
+                    onClick={() => setSelectedDriftId(drift.id)}
+                    className={`w-full rounded-2xl border p-4 text-left transition ${
+                      isSelected
+                        ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
+                        : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:bg-[var(--color-surface-hover)]"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                            {drift.summary}
+                          </p>
+                          {isSelected ? (
+                            <Badge className="border-[var(--border-subtle)] bg-[var(--bg-inset)] text-[var(--text-primary)]">
+                              selectat
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          {[
+                            formatDriftTypeLabel(drift.type),
+                            drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
+                            formatRelativeRomanian(drift.detectedAtISO),
+                          ].join(" · ")}
+                        </p>
+                        <p className="mt-2 text-sm text-[var(--color-on-surface-muted)] line-clamp-2">
+                          {guidance.nextAction}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Badge className={driftSeverityClasses(drift.severity)}>
+                          {driftSeverityLabel(drift.severity)}
+                        </Badge>
+                        <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                          {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
+                        </Badge>
+                        {breached ? (
+                          <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                            SLA depășit
+                          </Badge>
+                        ) : null}
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
 
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Impact principal</p>
                 <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {primaryGuidance?.lawReference || "revizie legala / operationala"}
+                  {selectedGuidance?.lawReference || "revizie legala / operationala"}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
-                  {primaryDrift.severityReason}
+                  {selectedDrift.severityReason}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Pasul urmator</p>
                 <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {primaryGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
+                  {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
-                  {primaryGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
+                  {selectedGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
                 </p>
               </div>
 
@@ -500,24 +567,24 @@ export function DriftCommandCenter({
                 </p>
                 <p className="mt-2 text-xs text-[var(--color-muted)]">
                   <span className="font-medium text-[var(--color-on-surface)]">Owner:</span>{" "}
-                  {primaryDrift.escalationOwner || primaryGuidance?.ownerSuggestion || "in curs de confirmare"}
+                  {selectedDrift.escalationOwner || selectedGuidance?.ownerSuggestion || "in curs de confirmare"}
                 </p>
                 <p className="mt-2 text-xs text-[var(--color-muted)]">
                   <span className="font-medium text-[var(--color-on-surface)]">Escalare:</span>{" "}
                   {formatDriftEscalationTier(
-                    primaryDrift.escalationTier || primaryGuidance?.escalationTier || "watch"
+                    selectedDrift.escalationTier || selectedGuidance?.escalationTier || "watch"
                   )}{" "}
                   ·{" "}
                   {formatDriftEscalationDeadline(
-                    primaryDrift.escalationDueAtISO || primaryGuidance?.escalationDueAtISO
+                    selectedDrift.escalationDueAtISO || selectedGuidance?.escalationDueAtISO
                   )}
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
                   <span className="font-medium text-[var(--color-on-surface)]">Impact operational:</span>{" "}
                   {[
-                    primaryDrift.blocksAudit ? "blocheaza auditul" : null,
-                    primaryDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
-                    primaryDrift.requiresHumanApproval ? "cere aprobare umana" : null,
+                    selectedDrift.blocksAudit ? "blocheaza auditul" : null,
+                    selectedDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
+                    selectedDrift.requiresHumanApproval ? "cere aprobare umana" : null,
                   ]
                     .filter(Boolean)
                     .join(" · ") || "nu blocheaza auditul daca review-ul este documentat"}
@@ -548,6 +615,16 @@ export function DriftCommandCenter({
               >
                 Vezi controlul
               </Link>
+              {selectedBreached ? (
+                <Badge className="h-10 rounded-xl border-[var(--color-error)] bg-[var(--color-error-muted)] px-4 text-[var(--color-error)]">
+                  Driftul selectat a depasit SLA-ul
+                </Badge>
+              ) : null}
+              {breachedCount > 1 ? (
+                <Badge className="h-10 rounded-xl border-[var(--color-warning)] bg-[var(--color-warning-muted)] px-4 text-[var(--color-warning)]">
+                  {breachedCount} drift-uri depasesc SLA-ul
+                </Badge>
+              ) : null}
             </div>
           </>
         ) : (
@@ -647,15 +724,15 @@ export function DashboardGuideCard({
     },
     {
       id: "step-close",
-      title: "3. Inchizi si exporti",
+      title: "3. Executi in Dovada",
       description:
-        "Remedierea si exporturile finale raman in paginile dedicate.",
-      href: "/dashboard/rapoarte",
+        "Inchizi task-urile in Remediere, verifici dovezile in Vault si livrezi separat din Audit si export.",
+      href: "/dashboard/checklists",
       icon: ListChecks,
       meta:
         activeRiskCount > 0
-          ? `${activeRiskCount} riscuri active de inchis`
-          : "Niciun risc activ in acest moment",
+          ? `${activeRiskCount} riscuri active cer remediere`
+          : "Poti verifica dovada si pregati livrabilul",
     },
   ]
 
@@ -674,7 +751,7 @@ export function DashboardGuideCard({
               {hasEvidence ? "workspace activ" : "pornire initiala"}
             </Badge>
             <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-              {openAlertsCount} alerte deschise
+              {openAlertsCount} drifturi deschise
             </Badge>
             {latestManifestScan && (
               <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
@@ -1526,7 +1603,7 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--color-on-surface-muted)]">
-          {tasks.length} alerte active care necesita atentie
+          {tasks.length} actiuni deschise generate din drift
         </p>
         <Link
           href="/dashboard/rapoarte"

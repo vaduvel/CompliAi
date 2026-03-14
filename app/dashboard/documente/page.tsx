@@ -29,7 +29,7 @@ export default function DocumentePage() {
     <div className="space-y-8">
       <PageHeader
         title="Documente"
-        description="Analize si rezultate pentru documentele scanate"
+        description="Istoric si rezultate pentru documentele scanate, separat de fluxul activ"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />

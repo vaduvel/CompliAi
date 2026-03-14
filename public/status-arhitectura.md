@@ -1,6 +1,6 @@
 # CompliScan - Status Arhitectura
 
-Data actualizarii: 2026-03-13
+Data actualizarii: 2026-03-14
 
 ## Verdict scurt
 
@@ -339,8 +339,16 @@ Ultimul punct inchis in implementare:
 - severitate unica in findings / alerts / drift / task-uri
 - taxonomie unica de principii in model si UI
 - drift-ul genereaza acum task-uri de remediere dedicate
-- navigatie primara grupata pe `Scanare / Control / Dovada`
-- sub-sectiunile sunt acum tabs per pilon, nu produse separate in sidebar
+- IA oficiala aprobata este acum:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Dovada`
+  - `Setari`
+- `Scanare / Control / Dovada` raman pilonii de executie
+- `Dashboard` este home/orchestrator, nu dublura de `Control`
+- `Setari` este suprafata top-level de operare, nu pilon de executie
+- sub-sectiunile raman tabs per zona, nu produse separate in sidebar
 - drift-ul este urcat in dashboard ca semnal operational principal
 - `AI Compliance Pack` comun peste documente, manifests si `compliscan.yaml`
 - registru operational de evidence in DB, nu doar sync de metadata
@@ -389,7 +397,7 @@ Ultimul punct inchis in implementare:
   - referința de control / lege
 - drift UX armonizat în:
   - Dashboard
-  - Alerte
+  - Drift
   - Scanări
   - Audit si export
   - Auditor Vault
@@ -588,26 +596,50 @@ Exista deja:
 
 ### 1. Modelul de produs in UI
 
-In cod, produsul tinde catre 3 piloni:
+In cod, produsul a convergent initial catre 3 piloni de executie:
 
 - Scanare
 - Control
 - Dovada
 
-Navigatia principala a fost deja grupata sub cei 3 piloni, dar inca exista shortcut-uri si pagini secundare care expun conceptele vechi:
+Decizia oficiala de IA este acum un shell top-level cu:
+
+- Dashboard
+- Scanare
+- Control
+- Dovada
+- Setari
+
+Asta nu introduce concepte noi de produs.
+
+Face explicita diferenta dintre:
+
+- orientare (`Dashboard`)
+- executie (`Scanare / Control / Dovada`)
+- operare (`Setari`)
+
+In implementarea curenta, inca exista pagini si etichete mostenite care expun conceptele vechi:
 
 - Documente
 - Sisteme AI
 - Remediere
-- Alerte
+- Drift (ruta curenta `/dashboard/alerte`)
 - Audit si export
-- Setari
+- Asistent
 
 Asta este mult mai bine pentru user, dar mai trebuie armonizate:
 
 - titlurile unor pagini
-- copy-ul dintre piloni si shortcut-uri
-- relatia dintre `Remediere`, `Audit si export` si `Audit si dovezi`
+- copy-ul dintre zonele top-level si sub-sectiunile lor
+- relatia dintre `Dashboard` si `Control`
+- relatia dintre `Remediere`, `Audit si export` si `Auditor Vault`
+
+Progres recent pe punctul acesta:
+
+- `DashboardShell` descrie acum top-level-urile in vocabularul oficial al produsului, nu prin shortcut-uri vechi
+- pagina `/dashboard/sisteme` se prezinta acum ca workspace de `Control`
+- pasul 3 din `Dashboard` trimite spre `Dovada` ca loc de executie, nu direct spre export
+- `Documente` se prezinta explicit ca istoric separat de fluxul activ de scanare
 
 ### 2. Severitate si principii
 
@@ -637,7 +669,11 @@ Punctul acesta este acum avansat, dar nu complet inchis:
 - task-urile de drift au owner, dovada ceruta, text gata de copiat si pas clar de remediere
 - inchiderea/redeschiderea task-ului poate inchide/redeschide si drift-ul asociat
 - drift-ul are acum politică unificată pentru impact și acțiune
-- aceeasi poveste de drift apare si in Dashboard, si in Alerte, si in Audit
+- aceeasi poveste de drift apare si in Dashboard, si in Drift, si in Audit
+- densitatea operationala a fost totusi redusa:
+  - `Dashboard` arata feed compact de drift, nu toate detaliile de executie
+  - workspace-ul `Drift` foloseste progressive disclosure, cu detalii si actiuni doar pe elementul expandat
+  - `DriftCommandCenter` selecteaza explicit drift-ul activ, in loc sa repete pachetul complet pentru toate semnalele
 
 Ce mai ramane:
 

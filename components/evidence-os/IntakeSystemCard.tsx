@@ -28,55 +28,55 @@ export function IntakeSystemCard({
         isRejected ? "border-l-eos-border opacity-60" : "border-l-eos-info"
       )}
       title={
-        <span className="flex items-center gap-2">
+        <span className="flex min-w-0 items-center gap-2">
           {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
-          <span className={cn(isRejected && "line-through text-eos-text-tertiary")}>
+          <span className={cn("break-words [overflow-wrap:anywhere]", isRejected && "line-through text-eos-text-tertiary")}>
             {system.systemName || "Sistem nedetectat"}
           </span>
         </span>
       }
       titleClassName="text-base"
+      titleMeta={
+        system.provider || system.model ? (
+          <p className="text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+            {[system.provider, system.model].filter(Boolean).join(" · ")}
+          </p>
+        ) : undefined
+      }
       badges={<ProposalConfidenceBadge confidence={system.confidence} />}
       actions={<ProposalRejectButton onClick={() => onToggleRejection(system.tempId)} />}
-      contentClassName="space-y-3 px-4 py-3 text-sm"
+      contentClassName="space-y-4 px-4 py-4 text-sm"
     >
       {!isRejected && (
         <>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <span className="text-xs text-eos-text-muted">Provider:</span>
-              <p>{system.provider || "-"}</p>
-            </div>
-            <div>
-              <span className="text-xs text-eos-text-muted">Model:</span>
-              <p>{system.model || "-"}</p>
-            </div>
-            <div>
-              <span className="text-xs text-eos-text-muted">Scop:</span>
-              <p>{system.purpose || "-"}</p>
-            </div>
-            <div>
-              <span className="text-xs text-eos-text-muted">Risc sugerat:</span>
-              <RiskClassBadge riskClass={system.riskClassSuggested} />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <MetadataBlock label="Provider" value={system.provider || "Nespecificat"} />
+            <MetadataBlock label="Model" value={system.model || "Nespecificat"} />
+            <MetadataBlock label="Scop" value={system.purpose || "Nespecificat"} />
+            <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset p-3">
+              <p className="text-xs text-eos-text-muted">Risc sugerat</p>
+              <div className="mt-2">
+                <RiskClassBadge riskClass={system.riskClassSuggested} />
+              </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs text-eos-text-muted">Transparenta campuri</p>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center justify-between rounded-eos-sm bg-eos-bg-inset px-2 py-2">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Transparenta campuri</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
                 <span className="text-xs text-eos-text-muted">Provider</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.provider} />
               </div>
-              <div className="flex items-center justify-between rounded-eos-sm bg-eos-bg-inset px-2 py-2">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
                 <span className="text-xs text-eos-text-muted">Model</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.model} />
               </div>
-              <div className="flex items-center justify-between rounded-eos-sm bg-eos-bg-inset px-2 py-2">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
                 <span className="text-xs text-eos-text-muted">Scop</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.purpose} />
               </div>
-              <div className="flex items-center justify-between rounded-eos-sm bg-eos-bg-inset px-2 py-2">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
                 <span className="text-xs text-eos-text-muted">Risc</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.risk_class} />
               </div>
@@ -84,7 +84,7 @@ export function IntakeSystemCard({
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs text-eos-text-muted">Control uman</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Control uman</p>
             <HumanOversightBadge status={system.humanOversight} />
           </div>
 
@@ -92,5 +92,14 @@ export function IntakeSystemCard({
         </>
       )}
     </ProposalCard>
+  )
+}
+
+function MetadataBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset p-3">
+      <p className="text-xs text-eos-text-muted">{label}</p>
+      <p className="mt-1 break-words text-sm text-eos-text [overflow-wrap:anywhere]">{value}</p>
+    </div>
   )
 }

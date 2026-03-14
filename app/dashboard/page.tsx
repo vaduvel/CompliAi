@@ -6,7 +6,6 @@ import {
   LoadingScreen,
   OverviewPageSections,
 } from "@/components/compliscan/route-sections"
-import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
 export default function DashboardPage() {
@@ -18,7 +17,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <PillarTabs sectionId="control" />
       <OverviewPageSections
         summary={cockpit.data.summary}
         lastScanLabel={cockpit.lastScanLabel}

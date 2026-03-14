@@ -3,113 +3,157 @@
 Date: 2026-03-14
 
 ## Purpose
-This brief describes the current user flow, navigation, and UI hierarchy in CompliScan so GPT can propose UX improvements. Focus on reducing confusion and clarifying the flow without rewriting the product or changing the domain model.
+This brief describes the approved information architecture and target user flow in CompliScan so GPT can propose UX improvements without re-opening settled product decisions.
 
 ## Non-negotiables
-- Product framing stays: Scanare -> Control -> Dovada, Remediere, Audit si export.
-- Human validation remains mandatory (no "automatic compliance" claims).
-- Evidence OS stays the design language (no new UI system).
-- Avoid new top-level product concepts.
+- Golden path stays: source -> verdict -> remediation -> evidence -> audit/export.
+- Human validation remains mandatory.
+- Evidence OS stays the design language.
+- Do not introduce new top-level product concepts.
+- Dashboard is orientation, not an execution workspace.
 
 ## Entry & auth flow
-- Entry page: `/login` (single page, toggles Login/Register).
+- Entry page: `/login`.
 - After successful login/register: redirect to `/dashboard`.
 - Auth endpoints: `/api/auth/login`, `/api/auth/register`, `/api/auth/logout`.
 
 ## Global layout (Dashboard Shell)
 - Layout wrapper: `app/dashboard/layout.tsx` -> `DashboardShell` + `CockpitProvider`.
-- Left sidebar (desktop): logo + primary nav (Scanare, Control, Dovada).
-- Sidebar note: sub-sections appear as tabs per page.
-- Top-level user/org switcher in sidebar footer.
-- Mobile: bottom nav + floating assistant.
+- Left sidebar (desktop): logo + primary nav.
+- Primary nav is approved as:
+  - Dashboard
+  - Scanare
+  - Control
+  - Dovada
+  - Setari
+- Sub-sections stay inside page tabs, not as competing pseudo-products in the sidebar.
+- Top-level user/org switcher stays in sidebar footer.
+- Asistent is a global utility. It may have a dedicated page for longer history, but it does not sit under Dovada.
 
-## Primary navigation (sidebar)
+## Approved primary navigation (sidebar)
+- Dashboard -> `/dashboard`
 - Scanare -> `/dashboard/scanari`
-- Control -> `/dashboard`
-- Dovada -> `/dashboard/checklists`
+- Control -> routed today through `/dashboard/sisteme` and `/dashboard/alerte`
+- Dovada -> routed today through `/dashboard/checklists`, `/dashboard/rapoarte`, `/dashboard/rapoarte/auditor-vault`
+- Setari -> `/dashboard/setari`
 
-## Secondary navigation (tabs per pillar)
-- Scanare: Flux scanare (`/dashboard/scanari`), Documente (`/dashboard/documente`)
-- Control: Dashboard (`/dashboard`), Sisteme AI (`/dashboard/sisteme`), Alerte (`/dashboard/alerte`), Setari (`/dashboard/setari`)
-- Dovada: Remediere (`/dashboard/checklists`), Audit si export (`/dashboard/rapoarte`), Asistent (`/dashboard/asistent`)
+## Approved secondary navigation (tabs per area)
+- Dashboard:
+  - Readiness
+  - Drift feed
+  - Next best action
+  - Evidence quality summary
+  - Audit readiness snapshot
+- Scanare:
+  - Adauga sursa
+  - Rezultat curent
+  - Istoric
+- Control:
+  - Overview
+  - Sisteme
+  - Drift
+  - Review
+- Sisteme sub-tabs:
+  - Inventar
+  - Discovery
+  - Compliance Pack
+  - Baseline
+- Dovada:
+  - Remediere
+  - Dovezi
+  - Audit Pack
+  - Vault
+- Setari:
+  - Workspace
+  - Integrari
+  - Acces
+  - Operational
+  - Avansat
 
 ## Page-by-page flow summary
 
-### 1) Overview (Control)
-- Route: `/dashboard`
-- Role: high-level summary + next best action + risk overview.
-
-### 2) Scanare (Flow)
-- Route: `/dashboard/scanari`
-- Flow modes inside same page: document / text / manifest / yaml.
-- Sections include: active flow, latest result, AIDiscoveryPanel for manifest/yaml.
-- Agent mode toggle exists on this page.
-
-### 3) Documente (History)
-- Route: `/dashboard/documente`
-- Latest document summary + recent scans list.
-
-### 4) Sisteme AI (Control)
-- Route: `/dashboard/sisteme`
-- Mixed content on one page:
-  - Discovery (AIDiscoveryPanel)
-  - Inventory (AIInventoryPanel)
-  - Compliance Pack review
-  - Baseline + drift preview
-  - e-Factura validator
-
-### 5) Alerte (Drift)
-- Route: `/dashboard/alerte`
-- Drift lifecycle actions + tasks linked to drift.
-
-### 6) Remediere (Tasks)
-- Route: `/dashboard/checklists`
-- Remediation board with task filters + evidence attachment.
-
-### 7) Audit si export
-- Route: `/dashboard/rapoarte`
-- Mixed content:
-  - RemediationBoard (tasks)
-  - snapshot/baseline status
+### 1) Dashboard
+- Route today: `/dashboard`
+- Role: orientation home, not execution.
+- Should show:
+  - readiness
+  - drift feed
+  - next best action
+  - evidence quality summary
+  - audit readiness snapshot
+- Should not host:
+  - discovery
+  - remediation board
   - export center
-  - recent drift summary
 
-### 8) Auditor Vault
-- Route: `/dashboard/rapoarte/auditor-vault`
-- Audit-ready view: evidence ledger, traceability matrix, audit pack, timeline.
+### 2) Scanare
+- Route today: `/dashboard/scanari`
+- Target structure:
+  - Adauga sursa
+  - Rezultat curent
+  - Istoric
+- Agent mode remains on this page.
 
-### 9) Setari
-- Route: `/dashboard/setari`
-- Dense operational page:
-  - Members & roles
-  - Repo sync
-  - Supabase status
-  - App health
-  - Release readiness
-  - Drift overrides
-  - Reset/state actions
+### 3) Istoric documente
+- Route today: `/dashboard/documente`
+- Serves the history function for Scanare.
 
-### 10) Asistent AI
-- Route: `/dashboard/asistent`
-- Chat assistant, suggestions, messages.
+### 4) Control
+- Main execution surfaces today:
+  - `/dashboard/sisteme`
+  - `/dashboard/alerte`
+- Target structure:
+  - Overview
+  - Sisteme
+  - Drift
+  - Review
 
-## UI hierarchy (typical page)
-1. PageHeader (title, description, risk score)
-2. Pillar tabs (secondary nav)
-3. Content sections (cards/boards)
+### 5) Sisteme
+- Route today: `/dashboard/sisteme`
+- Must converge toward:
+  - Inventar
+  - Discovery
+  - Compliance Pack
+  - Baseline
 
-## Current UX pain points (observed)
-- Scanare mixes 4 modes in one workspace; active flow and results are not clearly separated.
-- Sisteme AI mixes discovery, inventory, baseline, drift, compliance pack, and e-Factura on one page.
-- Audit si export mixes remediation tasks with export (two different intents).
-- Setari is too dense, multiple operational areas in one page.
-- Asistent sits under Dovada tab; may be confusing as a utility tool.
+### 6) Drift
+- Route today: `/dashboard/alerte`
+- This surface is conceptually Drift, not generic alerts.
+- Keeps drift lifecycle actions and links to remediation.
+
+### 7) Dovada
+- Main execution surfaces today:
+  - `/dashboard/checklists`
+  - `/dashboard/rapoarte`
+  - `/dashboard/rapoarte/auditor-vault`
+- Separation must stay:
+  - Remediere = execution
+  - Dovezi/Vault = ledger, traceability, timeline
+  - Audit Pack = final export/delivery
+
+### 8) Setari
+- Route today: `/dashboard/setari`
+- Must converge toward:
+  - Workspace
+  - Integrari
+  - Acces
+  - Operational
+  - Avansat
+
+### 9) Asistent AI
+- Route today: `/dashboard/asistent`
+- Utility surface, not part of Dovada.
+
+## Current UX pain points that still matter
+- Scanare still carries the heaviest mixed flow.
+- Control still spans multiple routes and legacy labels.
+- Setari is still too dense.
+- Some documents and diagrams still describe sidebar shortcuts as if they were products.
 
 ## Desired improvements from GPT
 Please propose:
-- A clearer flow with fewer mixed intents per page.
-- A re-mapping of sections into tabs or sub-sections to reduce confusion.
-- Minimal routing changes (prefer reorganizing content in-place or via tabs).
-- A short sequence of priority changes (first 2-3 wins).
-- Keep Evidence OS and product framing intact.
-
+- clearer decomposition inside these approved top-level areas
+- tab/sub-tab structures that reduce mixed intent
+- minimal routing changes where possible
+- short priority sequence for implementation
+- no contradiction with the approved IA above

@@ -1107,6 +1107,75 @@ Validare:
 
 - `npm run lint`
 
+### 2026-03-14 41
+
+Am deschis un lot nou, separat de `safe polish`, pentru convergența locală a `Agent Workspace`, după commit separat al batch-ului anterior.
+
+Suprafețe actualizate:
+
+- `lib/compliance/agent-workspace.tsx`
+- `components/evidence-os/AgentReviewLayout.tsx`
+- `components/evidence-os/ProposalColumnShell.tsx`
+- `components/evidence-os/AgentStartStateCard.tsx`
+- `components/evidence-os/AgentProposalTabs.tsx`
+- `components/evidence-os/ReviewDecisionPanel.tsx`
+- `components/evidence-os/IntakeSystemCard.tsx`
+- `components/evidence-os/FindingProposalCard.tsx`
+- `components/evidence-os/DriftProposalCard.tsx`
+- `components/evidence-os/ui-audit-backlog.md`
+
+Verificat și lăsat neschimbat intenționat:
+
+- `components/compliscan/agent-workspace.tsx`
+  - adaptorul este deja re-export subțire și nu avea nevoie de markup nou
+
+Ce s-a schimbat:
+
+- `agent-workspace` calculează acum o singură dată propunerile rămase și numărul de itemi respinși, doar pentru sumarul UI
+- `AgentReviewLayout` și `ProposalColumnShell` sunt mai robuste pe desktop și pe viewport-uri înguste:
+  - coloane mai echilibrate
+  - `min-width` și `min-height` mai sigure
+  - scroll intern mai predictibil
+- `AgentStartStateCard` explică mai clar:
+  - ce suprafață se deschide
+  - ce sursă este analizată
+  - ce tip de rezultate vor apărea
+- `AgentProposalTabs` arată acum mai bine review-ul real:
+  - titluri mai scurte
+  - count total
+  - count rămas pentru commit
+  - count respins, unde există
+- `ReviewDecisionPanel` explică explicit:
+  - ce mai intră în commit
+  - ce a fost exclus
+  - de ce CTA-ul principal rămâne confirmarea
+- `IntakeSystemCard`, `FindingProposalCard` și `DriftProposalCard` converg mai bine pe aceeași ierarhie:
+  - metadata la început
+  - rationale / impact în bloc separat
+  - remediere / acțiune propusă clar delimitată
+  - overflow safety pe valori lungi și JSON diff
+
+Ce a rămas deschis:
+
+- `ProposalBundlePanel`, `CommitSummaryCard` și `HumanReviewPanel`
+  - ar mai suporta un polish mic de densitate
+  - nu au intrat în acest lot pentru că nu erau în lista permisă
+- warning-ul de build pe `/dashboard/rapoarte`
+  - `SUPABASE_ORG_STATE_REQUIRED`
+  - vine dintr-un fetch `no-store` pe o suprafață interzisă pentru acest lot
+  - build-ul a trecut, dar warning-ul rămâne de preluat de Codex principal
+
+Validare:
+
+- `npm run lint`
+- `npm run build`
+
+Rezultat:
+
+- `Agent Workspace` este mai coerent vizual și operațional fără schimbare de flow
+- adaptoarele runtime permise rămân subțiri
+- lotul este pregătit pentru audit și integrare separată
+
 ## Regula de update
 
 Pentru fiecare batch nou pe `Evidence OS`, acest fișier trebuie actualizat cu:

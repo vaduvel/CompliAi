@@ -402,7 +402,7 @@ function ExportArtifactsCard() {
       icon: FileSearch,
       title: "Raport PDF",
       detail:
-        "Rezumat pentru stakeholderi: scor, alerte, progres și remediere într-un format ușor de distribuit.",
+        "Rezumat pentru stakeholderi: scor, drift, progres și remediere într-un format ușor de distribuit.",
     },
     {
       icon: FileCode2,

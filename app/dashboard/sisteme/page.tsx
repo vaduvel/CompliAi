@@ -67,8 +67,8 @@ export default function SistemePage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Control sisteme AI"
-        description="Detectie automata, confirmare umana, inventar AI si drift fata de baseline"
+        title="Control"
+        description="Discovery, inventar, baseline si drift pentru sistemele AI asumate operational"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
@@ -406,7 +406,7 @@ function ControlViewTabs({
         className="h-9 rounded-xl"
         onClick={() => onChange("inventory")}
       >
-        Sisteme AI
+        Sisteme
       </Button>
       <Button
         variant={active === "baseline" ? "default" : "outline"}
@@ -467,10 +467,10 @@ function SystemsGuideCard() {
             Flux recomandat
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
-            Detectie automata, confirmare umana, inventar stabil
+            Discovery, confirmare umana, inventar stabil
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            Pagina asta nu mai e doar o lista de carduri. E locul in care trecem de la manifestul sursa la un inventar AI credibil, cu baseline si drift usor de urmarit.
+            Pagina asta este workspace-ul de Control: trecem de la manifestul sursa la un inventar AI credibil, cu baseline si drift usor de urmarit.
           </p>
         </div>
         <div className="grid gap-3">

@@ -27,10 +27,19 @@ export function FindingProposalCard({
         isRejected ? "border-l-eos-border opacity-60" : "border-l-eos-warning"
       )}
       title={
-        <span className="flex items-center gap-2">
+        <span className="flex min-w-0 items-center gap-2">
           {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
-          <span className={cn(isRejected && "line-through text-eos-text-tertiary")}>{finding.issue}</span>
+          <span className={cn("break-words [overflow-wrap:anywhere]", isRejected && "line-through text-eos-text-tertiary")}>
+            {finding.issue}
+          </span>
         </span>
+      }
+      titleMeta={
+        finding.ownerSuggestion ? (
+          <p className="text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+            Responsabil sugerat: {finding.ownerSuggestion}
+          </p>
+        ) : undefined
       }
       badges={
         <>
@@ -39,31 +48,40 @@ export function FindingProposalCard({
         </>
       }
       actions={<ProposalRejectButton onClick={() => onToggleRejection(finding.findingId)} />}
-      contentClassName="space-y-3 px-4 py-3 text-sm"
+      contentClassName="space-y-4 px-4 py-4 text-sm"
     >
       {!isRejected && (
         <>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="normal-case tracking-normal">
-              Principiu: {finding.principle}
-            </Badge>
-            {finding.lawReference && (
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Referinta: {finding.lawReference}
-              </Badge>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <MetadataBadge label="Principiu" value={finding.principle} />
+            {finding.lawReference ? (
+              <MetadataBadge label="Referinta" value={finding.lawReference} />
+            ) : (
+              <MetadataBadge label="Referinta" value="Nespecificata" />
             )}
           </div>
 
-          <p className="text-eos-text-muted">{finding.rationale}</p>
+          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset p-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">De ce conteaza</p>
+            <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">{finding.rationale}</p>
+          </div>
 
-          <div className="rounded bg-eos-bg-inset p-2 text-xs">
-            <span className="font-semibold">Remediere propusa: </span>
-            {finding.recommendedFix}
+          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset p-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Remediere propusa</p>
+            <p className="mt-1 text-sm text-eos-text [overflow-wrap:anywhere]">{finding.recommendedFix}</p>
           </div>
 
           <SignalBadgeList signals={finding.sourceSignals} title="Semnale sursa" />
         </>
       )}
     </ProposalCard>
+  )
+}
+
+function MetadataBadge({ label, value }: { label: string; value: string }) {
+  return (
+    <Badge variant="outline" className="justify-start normal-case tracking-normal [overflow-wrap:anywhere]">
+      {label}: {value}
+    </Badge>
   )
 }

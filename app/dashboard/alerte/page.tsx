@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
@@ -18,18 +18,32 @@ import {
   getDriftPolicyFromRecord,
 } from "@/lib/compliance/drift-policy"
 import {
+  formatDriftLifecycleStatus,
   isDriftSlaBreached,
 } from "@/lib/compliance/drift-lifecycle"
+import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
-export default function AlertePage() {
+export default function DriftPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
+  const [expandedDriftId, setExpandedDriftId] = useState<string | null>(null)
+  const openDrifts = cockpit.activeDrifts
+
+  useEffect(() => {
+    if (openDrifts.length === 0) {
+      setExpandedDriftId(null)
+      return
+    }
+
+    setExpandedDriftId((current) =>
+      current && openDrifts.some((drift) => drift.id === current) ? current : openDrifts[0].id
+    )
+  }, [openDrifts])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
-  const openDrifts = cockpit.activeDrifts
   const breachedDrifts = openDrifts.filter((drift) => isDriftSlaBreached(drift)).length
 
   async function handleDriftAction(
@@ -58,8 +72,8 @@ export default function AlertePage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Alerte"
-        description="Task-uri deschise care necesita atentie"
+        title="Drift"
+        description="Semnale de drift si actiuni deschise care cer decizie umana"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
@@ -102,143 +116,189 @@ export default function AlertePage() {
               const guidance = getDriftPolicyFromRecord(drift)
               const breached = isDriftSlaBreached(drift)
               const isActing = actingDriftId === drift.id
+              const isExpanded = expandedDriftId === drift.id
 
               return (
                 <div
                   key={drift.id}
                   className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-base font-semibold text-[var(--color-on-surface)]">
-                        {drift.summary}
-                      </p>
-                      <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                        {formatDriftTypeLabel(drift.type)} · {drift.change}
-                      </p>
-                      <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                        {guidance.impactSummary}
-                      </p>
-                    </div>
-                    <SeverityBadge severity={drift.severity} />
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
+                      }
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-base font-semibold text-[var(--color-on-surface)]">
+                              {drift.summary}
+                            </p>
+                            {isExpanded ? (
+                              <Badge variant="secondary">
+                                detalii deschise
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                            {formatDriftTypeLabel(drift.type)} · {drift.change}
+                          </p>
+                          <p className="mt-2 text-xs text-[var(--color-muted)]">
+                            {[
+                              drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
+                              formatRelativeRomanian(drift.detectedAtISO),
+                            ].join(" · ")}
+                          </p>
+                          <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)] line-clamp-2">
+                            {guidance.impactSummary}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <SeverityBadge severity={drift.severity} />
+                          <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
+                          {breached && (
+                            <Badge variant="destructive">
+                              SLA depășit
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
+                      }
+                      variant="outline"
+                      className="h-10 rounded-xl"
+                    >
+                      {isExpanded ? "Restrange" : "Detalii"}
+                    </Button>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
-                    {breached && (
-                      <Badge variant="destructive">
-                        SLA depășit
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                        De ce conteaza
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
-                        {guidance.lawReference}
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--color-muted)]">
-                        {guidance.severityReason}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                        Ce faci acum
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
-                        {guidance.nextAction}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                        Dovada
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
-                        {guidance.evidenceRequired}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                        Escalare
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
-                        {drift.escalationOwner || guidance.ownerSuggestion}
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--color-muted)]">
-                        {formatDriftEscalationTier(drift.escalationTier || guidance.escalationTier)} · până la{" "}
-                        {formatDriftEscalationDeadline(
-                          drift.escalationDueAtISO || guidance.escalationDueAtISO
+                  {isExpanded ? (
+                    <>
+                      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                            De ce conteaza
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                            {guidance.lawReference}
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--color-muted)]">
+                            {guidance.severityReason}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                            Ce faci acum
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                            {guidance.nextAction}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                            Dovada
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                            {guidance.evidenceRequired}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                            Escalare
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                            {drift.escalationOwner || guidance.ownerSuggestion}
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--color-muted)]">
+                            {formatDriftEscalationTier(drift.escalationTier || guidance.escalationTier)} · până la{" "}
+                            {formatDriftEscalationDeadline(
+                              drift.escalationDueAtISO || guidance.escalationDueAtISO
+                            )}
+                          </p>
+                          <p className="mt-2 text-xs text-[var(--color-muted)]">
+                            {[
+                              drift.blocksAudit ? "blochează auditul" : null,
+                              drift.blocksBaseline ? "blochează baseline-ul" : null,
+                              drift.requiresHumanApproval ? "cere aprobare umană" : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ") || "review operațional recomandat"}
+                          </p>
+                        </div>
+                      </div>
+                      {(drift.systemLabel || drift.sourceDocument) && (
+                        <p className="mt-3 text-xs text-[var(--color-muted)]">
+                          {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {(drift.lifecycleStatus === "open" || !drift.lifecycleStatus) && (
+                          <Button
+                            onClick={() => void handleDriftAction(drift.id, "acknowledge")}
+                            disabled={cockpit.busy || isActing}
+                            variant="outline"
+                            className="h-10 rounded-xl"
+                          >
+                            Preia drift-ul
+                          </Button>
                         )}
-                      </p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
-                        {[
-                          drift.blocksAudit ? "blochează auditul" : null,
-                          drift.blocksBaseline ? "blochează baseline-ul" : null,
-                          drift.requiresHumanApproval ? "cere aprobare umană" : null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ") || "review operațional recomandat"}
-                      </p>
-                    </div>
-                  </div>
-                  {(drift.systemLabel || drift.sourceDocument) && (
+                        {(drift.lifecycleStatus === "open" ||
+                          drift.lifecycleStatus === "acknowledged") && (
+                          <Button
+                            onClick={() => void handleDriftAction(drift.id, "start")}
+                            disabled={cockpit.busy || isActing}
+                            variant="outline"
+                            className="h-10 rounded-xl"
+                          >
+                            Marchează în lucru
+                          </Button>
+                        )}
+                        {drift.open && (
+                          <>
+                            <Button
+                              onClick={() => void handleDriftAction(drift.id, "resolve")}
+                              disabled={cockpit.busy || isActing}
+                              className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                            >
+                              Marchează rezolvat
+                            </Button>
+                            <Button
+                              onClick={() => void handleDriftAction(drift.id, "waive")}
+                              disabled={cockpit.busy || isActing}
+                              variant="outline"
+                              className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-warning)] hover:bg-[var(--color-warning-muted)]"
+                            >
+                              Waive cu justificare
+                            </Button>
+                          </>
+                        )}
+                        {!drift.open && (
+                          <Button
+                            onClick={() => void handleDriftAction(drift.id, "reopen")}
+                            disabled={cockpit.busy || isActing}
+                            variant="outline"
+                            className="h-10 rounded-xl"
+                          >
+                            Redeschide
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
                     <p className="mt-3 text-xs text-[var(--color-muted)]">
-                      {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
+                      {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")} · owner:{" "}
+                      {drift.escalationOwner || guidance.ownerSuggestion} ·{" "}
+                      {formatDriftEscalationDeadline(
+                        drift.escalationDueAtISO || guidance.escalationDueAtISO
+                      )}
                     </p>
                   )}
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(drift.lifecycleStatus === "open" || !drift.lifecycleStatus) && (
-                      <Button
-                        onClick={() => void handleDriftAction(drift.id, "acknowledge")}
-                        disabled={cockpit.busy || isActing}
-                        variant="outline"
-                        className="h-10 rounded-xl"
-                      >
-                        Preia drift-ul
-                      </Button>
-                    )}
-                    {(drift.lifecycleStatus === "open" ||
-                      drift.lifecycleStatus === "acknowledged") && (
-                      <Button
-                        onClick={() => void handleDriftAction(drift.id, "start")}
-                        disabled={cockpit.busy || isActing}
-                        variant="outline"
-                        className="h-10 rounded-xl"
-                      >
-                        Marchează în lucru
-                      </Button>
-                    )}
-                    {drift.open && (
-                      <>
-                        <Button
-                          onClick={() => void handleDriftAction(drift.id, "resolve")}
-                          disabled={cockpit.busy || isActing}
-                          className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                        >
-                          Marchează rezolvat
-                        </Button>
-                        <Button
-                          onClick={() => void handleDriftAction(drift.id, "waive")}
-                          disabled={cockpit.busy || isActing}
-                          variant="outline"
-                          className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-warning)] hover:bg-[var(--color-warning-muted)]"
-                        >
-                          Waive cu justificare
-                        </Button>
-                      </>
-                    )}
-                    {!drift.open && (
-                      <Button
-                        onClick={() => void handleDriftAction(drift.id, "reopen")}
-                        disabled={cockpit.busy || isActing}
-                        variant="outline"
-                        className="h-10 rounded-xl"
-                      >
-                        Redeschide
-                      </Button>
-                    )}
-                  </div>
                 </div>
               )
             })}
@@ -248,8 +308,8 @@ export default function AlertePage() {
 
       {openTasks.length === 0 && openDrifts.length === 0 ? (
         <EmptyState
-          title="Fara alerte deschise"
-          label="Momentan nu exista alerte care sa ceara actiune imediata."
+          title="Fara drift deschis"
+          label="Momentan nu exista semnale de drift sau actiuni care sa ceara atentie imediata."
         />
       ) : openTasks.length > 0 ? (
         <AlertsList tasks={openTasks} />

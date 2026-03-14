@@ -168,6 +168,101 @@ Suita curenta:
   - pagina de rapoarte ramane focusata pe snapshot, readiness si artefacte de livrare
   - `Remediere` explica clar ca acolo se executa task-urile si se ataseaza dovada
   - `Auditor Vault` este expus direct in navigatie si isi asuma explicit rolul de vedere audit-ready
+- audit `.md` pentru backlog si sprint-ready:
+  - backlog-ul real ramas a fost filtrat in:
+    - `public/audit-md-backlog-sprint-ready-2026-03-14.md`
+  - a fost confirmat ca fronturile principale raman:
+    - `Drift`
+    - `Setari`
+    - cleanup de performanta
+    - member admin
+    - parser XML robust `e-Factura`
+  - a fost creat task-ul paralel sigur pentru Codex 2:
+    - `public/task-codex-2-paralel-safe-2026-03-14.md`
+  - delegarea veche `Evidence OS UI` a fost marcata explicit ca `deprecated`
+- IA oficiala documentata pentru shell-ul dashboard:
+  - `Dashboard / Scanare / Control / Dovada / Setari`
+  - `Dashboard` este home/orchestrator, nu dublura de `Control`
+  - `Scanare / Control / Dovada` raman pilonii de executie
+  - `Asistent` este utilitar global, nu sectiune din `Dovada`
+  - documentele aliniate:
+    - `public/gpt-ux-flow-brief.md`
+    - `public/ux-ui-flow-arhitectura.md`
+    - `public/status-arhitectura.md`
+    - `public/evidence-os-design-system-v1.md`
+- naming pass operational pentru `Alerte` -> `Drift` pe traseele principale:
+  - navigatia secundara din `Control` afiseaza acum `Drift`
+  - pagina `/dashboard/alerte` foloseste acum limbaj de `Drift`, fara sa schimbe ruta
+  - `Dashboard`, `Sisteme AI`, `AIDiscoveryPanel` si exportul HTML sumar folosesc aceeasi eticheta de `Drift`
+  - au ramas intentional neatinse suprafetele deja murdare de alt agent sau zonele legacy necanonice, pentru a evita conflicte de integrare
+- audit final pe batch-ul `codex/evidence-os-safe-polish`:
+  - lotul component-level al Codex 2 a fost verificat pe diff si marcat `predabil`
+  - validare completa pe snapshot-ul curent:
+    - `npm run lint`
+    - `npm run build`
+    - `npm test`
+  - rezultate:
+    - `npm run lint` trece
+    - `npm run build` trece
+    - `npm test` trece (`66` fisiere, `231` teste)
+  - batch-ul lui trebuie comis separat de lotul principal `Drift + documentatie`, pentru a pastra integrarea curata
+- `Setari` a fost spart pe taburile oficiale de produs:
+  - `Workspace`
+  - `Integrari`
+  - `Acces`
+  - `Operational`
+  - `Avansat`
+  - scopul a fost separarea intentiilor, nu schimbarea logicii sau a wiring-ului existent
+  - mapping-ul actual:
+    - `Workspace`: org, baseline, rezumat local
+    - `Integrari`: Supabase + repo sync
+    - `Acces`: membri si roluri
+    - `Operational`: health check + release readiness
+    - `Avansat`: drift severity policy + reset workspace
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece
+- navigatia principala a fost aliniata cu IA oficiala:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Dovada`
+  - `Setari`
+  - `Dashboard` nu mai sta in tabs de `Control`
+  - `Setari` nu mai sta in tabs de `Control`
+  - `Asistent` nu mai este expus ca sub-sectiune de `Dovada`
+  - paginile `Dashboard`, `Setari` si `Asistent` nu mai afiseaza `PillarTabs` mostenite din pilonii vechi
+  - tabs-urile secundare raman acum doar pe zonele de executie reale:
+    - `Scanare`
+    - `Control`
+    - `Dovada`
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece dupa rebuild curat (`rm -rf .next`)
+- compactare UX pentru `Drift`, fara schimbare de business logic:
+  - cardul de `Drift` din `Dashboard` arata acum doar feed scurt, orientat pe semnal si urmatorul pas
+  - `DriftCommandCenter` din overview foloseste selectie explicita pe drift, nu mai expune toate detaliile simultan
+  - pagina `/dashboard/alerte` foloseste progressive disclosure:
+    - rand compact pentru fiecare drift
+    - detalii, impact, dovada si actiuni doar pe elementul expandat
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+  - observatie:
+    - `next build` raporteaza in continuare warning-ul existent de `dynamic server usage` pentru `/dashboard/alerte` din cauza fetch-ului `no-store` pe `org_state`, dar build-ul se inchide cu succes
+- cleanup suplimentar pentru `mixed intent` in shell si overview:
+  - `DashboardShell` foloseste acum descrieri top-level aliniate la IA oficiala:
+    - `Scanare` = surse, verdict curent si istoric
+    - `Control` = discovery, sisteme, baseline si drift
+    - `Dovada` = remediere, dovezi si livrabil
+  - pagina `/dashboard/sisteme` se prezinta acum explicit ca workspace de `Control`, nu ca pseudo-produs separat
+  - sub-sectiunea secundara din `Control` foloseste eticheta `Sisteme`, nu `Sisteme AI`, pentru a reduce competitia cu pilonul top-level
+  - `DashboardGuideCard` trimite acum pasul 3 spre `Dovada` (`/dashboard/checklists`), nu direct spre `Audit si export`, pentru a separa mai clar executia de livrabil
+  - pagina `/dashboard/documente` explica mai clar ca este istoric separat de fluxul activ de scanare
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
 
 ### Sprint 6 - Audit defensibility
 

@@ -195,6 +195,89 @@ Nu poate intra încă în:
 - runtime critic de audit
 - itemii din backlog-ul local care cer atingerea cockpit-ului mare în afara suprafeței aprobate
 
+## Actualizare dupa auditul `.md` din 2026-03-14
+
+Auditul documentatiei a confirmat ca backlog-ul real ramas este:
+
+- cockpit cleanup pe:
+  - `Drift`
+  - `Setari`
+- cleanup de performanta incremental
+- member admin / invitatii
+- parser XML robust pentru `e-Factura`
+- polish component-level sigur pe suprafata `Evidence OS`
+
+Consecinta:
+
+- Codex principal tine cockpitul mare si performanta
+- Codex secundar nu mai primeste extindere pe pagini mari
+- taskul curent pentru Codex secundar este mutat in:
+  - `public/task-codex-2-paralel-safe-2026-03-14.md`
+
+Regula activa de acum:
+
+- folosim documentul nou pentru delegarea curenta
+- `public/task-codex-evidence-os-ui.md` ramane referinta istorica, nu instructiunea activa
+
+## Audit final batch `safe polish` - 2026-03-14
+
+Batch-ul curent al lui Codex secundar a fost auditat pe diff si validat separat.
+
+Verdict:
+
+- batch-ul este `predabil`
+- nu au fost gasite blocaje functionale sau conflicte de arhitectura
+- lotul trebuie comis separat de lotul principal de `Drift` + documentatie
+
+Validare rulata de Codex principal:
+
+- `npm run lint`
+- `npm run build`
+- `npm test`
+
+Rezultat validare:
+
+- `npm run lint` trece
+- `npm run build` trece
+- `npm test` trece:
+  - `66` fisiere
+  - `231` teste verzi
+
+Lista exacta pentru commitul Codex secundar:
+
+- `app/dashboard/asistent/page.tsx`
+- `components/compliscan/export-center.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/task-card.tsx`
+- `components/evidence-os/EmptyState.tsx`
+- `components/evidence-os/ProposalBundlePanel.tsx`
+- `components/evidence-os/SourceContextPanel.tsx`
+- `components/evidence-os/SourceEnvelopeCard.tsx`
+- `components/evidence-os/evidence-os-worklog.md`
+- `components/evidence-os/ui-audit-backlog.md`
+
+Ramas explicit in lotul Codex principal:
+
+- `app/dashboard/alerte/page.tsx`
+- `app/dashboard/rapoarte/page.tsx`
+- `app/dashboard/setari/page.tsx`
+- `app/api/chat/route.ts`
+- `app/api/reports/route.ts`
+- `components/compliscan/ai-discovery-panel.tsx`
+- `components/compliscan/navigation.ts`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/use-cockpit.tsx`
+- `components/dashboard/DashboardCards.tsx`
+- `public/log-sprinturi-maturizare.md`
+- `public/gpt-ux-flow-brief.md`
+- `public/status-arhitectura.md`
+- `public/ux-ui-flow-arhitectura.md`
+- `public/evidence-os-design-system-v1.md`
+- `public/audit-md-backlog-sprint-ready-2026-03-14.md`
+- `public/task-codex-2-paralel-safe-2026-03-14.md`
+
 ## Criteriul de predare pentru Codex secundar
 
 Codex secundar predă lotul când poate spune clar:

@@ -3,7 +3,6 @@
 import { useEffect, useId, useRef, useState } from "react"
 import { Loader2, Send, Sparkles } from "lucide-react"
 
-import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import { AssistantMessageBubble } from "@/components/evidence-os/AssistantMessageBubble"
 import { AssistantSuggestionChip } from "@/components/evidence-os/AssistantSuggestionChip"
@@ -101,8 +100,6 @@ export default function AsistentPage() {
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
-
-      <PillarTabs sectionId="dovada" />
 
       <section className="flex min-h-[32rem] min-w-0 flex-1 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm">
         <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-5 py-4">

@@ -192,7 +192,7 @@ export function DashboardCards() {
             <div>
               <CardTitle className="flex items-center gap-2 text-zinc-50">
                 <TriangleAlertIcon className="size-4 text-amber-300" />
-                Alerte active
+                Drift activ
               </CardTitle>
               <CardDescription className="mt-1">
                 Prioritizează înainte de raport oficial.
@@ -225,12 +225,12 @@ export function DashboardCards() {
             className="w-full"
             variant="secondary"
             onClick={() =>
-              toast.message("Alerte", {
-                description: "Alertele sunt sugestii. Verifică uman înainte de raport.",
+              toast.message("Drift", {
+                description: "Semnalele sunt sugestii. Verifică uman înainte de raport.",
               })
             }
           >
-            Gestionează alertele
+            Gestionează driftul
             <ArrowRightIcon className="ml-2 size-4" />
           </Button>
         </CardFooter>
@@ -238,4 +238,3 @@ export function DashboardCards() {
     </div>
   )
 }
-

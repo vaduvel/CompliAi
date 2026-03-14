@@ -281,7 +281,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       resetPendingScanReview()
       setScanInfo("Analiza finalizata pe textul revizuit.")
       toast.success("Analiza finalizata", {
-        description: "Findings, alerte si task-uri au fost regenerate pentru documentul curent.",
+        description: "Findings, drift si task-uri au fost regenerate pentru documentul curent.",
       })
       return true
     } catch (err) {
@@ -681,7 +681,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       toast.success("Workspace resetat", {
         description:
           payload.message ||
-          "Toate scanarile, alertele si task-urile au fost sterse din workspace-ul curent.",
+          "Toate scanarile, drift-ul si task-urile au fost sterse din workspace-ul curent.",
       })
       return payload
     } catch (err) {
@@ -1368,11 +1368,11 @@ function formatTaskStatusFeedback(feedback?: TaskUpdateFeedback) {
     impactLabels.push(
       alertCount === 1
         ? feedback.status === "done"
-          ? "1 alerta inchisa automat"
-          : "1 alerta redeschisa"
+          ? "1 semnal inchis automat"
+          : "1 semnal redeschis"
         : feedback.status === "done"
-          ? `${alertCount} alerte inchise automat`
-          : `${alertCount} alerte redeschise`
+          ? `${alertCount} semnale inchise automat`
+          : `${alertCount} semnale redeschise`
     )
   }
 

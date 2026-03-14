@@ -100,7 +100,7 @@ export function DashboardShell({
             <CompliScanLogoLockup
               variant="flat"
               size="md"
-              subtitle="control operational pentru documente si sisteme AI"
+              subtitle="scanare, control si dovada cu validare umana"
               titleClassName="text-[var(--color-on-surface)]"
               subtitleClassName="text-[var(--color-muted)]"
             />
@@ -135,11 +135,15 @@ export function DashboardShell({
                       <div className="min-w-0 flex-1">
                         <span className="block font-medium">{item.label}</span>
                         <span className="block truncate text-[11px] text-[var(--color-muted)]">
-                          {item.id === "scanare"
-                            ? "Adaugi surse si rulezi analiza"
+                          {item.id === "dashboard"
+                            ? "Readiness, drift si urmatorul pas"
+                            : item.id === "scanare"
+                            ? "Surse, verdict curent si istoric"
                             : item.id === "control"
-                              ? "Vezi risc, baseline si drift"
-                              : "Inchizi task-uri si exporti audit"}
+                              ? "Discovery, sisteme, baseline si drift"
+                              : item.id === "dovada"
+                                ? "Remediere, dovezi si livrabil"
+                                : "Workspace, integrari, acces si operational"}
                         </span>
                       </div>
                     </Link>
