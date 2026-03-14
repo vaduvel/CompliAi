@@ -65,7 +65,9 @@ export default function AuditorVaultPage() {
   }, [needsHeavyPayload, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
-  if (needsHeavyPayload) return <LoadingScreen variant="section" />
+  if (needsHeavyPayload || !cockpit.data.compliancePack || !cockpit.data.traceabilityMatrix) {
+    return <LoadingScreen variant="section" />
+  }
 
   const latestSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(

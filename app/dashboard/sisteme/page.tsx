@@ -41,7 +41,9 @@ export default function SistemePage() {
   }, [needsCompliancePack, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
-  if (needsCompliancePack) return <LoadingScreen variant="section" />
+  if (needsCompliancePack || !cockpit.data.compliancePack) {
+    return <LoadingScreen variant="section" />
+  }
 
   const aiHighRisk = cockpit.data.state.aiSystems.filter((s) => s.riskLevel === "high").length
   const aiLowRisk = cockpit.data.state.aiSystems.filter(
