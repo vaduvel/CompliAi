@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import type {
@@ -93,17 +93,12 @@ function useCockpitStore() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<DashboardPayload | null>(null)
-  const [tasks, setTasks] = useState<CockpitTask[]>([])
+  const tasks = useMemo(() => (data ? buildCockpitTasks(data) : []), [data])
   const hasLoadedOnce = useRef(false)
 
   useEffect(() => {
     void reloadDashboard()
   }, [])
-
-  useEffect(() => {
-    if (!data) return
-    setTasks(buildCockpitTasks(data))
-  }, [data])
 
   const latestScan = data?.state.scans[0] ?? null
   const latestScanText =
