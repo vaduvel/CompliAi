@@ -1,6 +1,6 @@
 # CompliScan - Release Readiness Checklist
 
-Data actualizarii: 2026-03-13
+Data actualizarii: 2026-03-14
 
 ## Scop
 
@@ -54,3 +54,28 @@ Checklist-ul de mai jos decide daca putem spune onest ca un build este gata de r
 ## Verdict
 
 Release-ul este "gata controlat" doar daca toate blocajele de mai sus sunt inchise sau marcate explicit ca exceptii acceptate.
+
+## Verificare curenta - 2026-03-14
+
+Verificari trecute in sesiunea curenta:
+
+- `npm run lint`
+- `npm test`
+- `npm run build`
+- `npm run preflight:release`
+- `npm run verify:supabase:sprint5`
+- `npm run verify:supabase:strict`
+- `npm run verify:supabase:rls`
+
+Observatii:
+
+- `preflight:release` trece si dupa valurile `C1/C2/C3`
+- serverul local porneste cu `npm start`
+- `/api/health` si `/api/release-readiness` raspund, dar fara sesiune valida intorc `Unauthorized`
+- asta inseamna ca runtime-ul si guard-urile sunt active, dar verificarea operationala finala trebuie facuta in context autentificat
+
+Verdict de azi:
+
+- gate-ul tehnic minim este verde
+- gate-ul Supabase / RLS este verde
+- gate-ul operational este verde partial, cu observatia de mai sus pentru verificarea autentificata a endpoint-urilor
