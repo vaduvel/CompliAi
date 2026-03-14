@@ -260,7 +260,7 @@ export default function SetariPage() {
     setDriftOverrides(nextOverrides)
   }, [cockpit.data])
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const activeSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(

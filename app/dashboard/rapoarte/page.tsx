@@ -38,7 +38,7 @@ export default function AuditExportPage() {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null)
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const latestSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(

@@ -466,6 +466,19 @@ Validare:
 - `npm test`
 - `npm run build`
 
+## Implementare Val A1 (loading local)
+
+Am redus impactul de "full-screen loading" pe paginile mari:
+
+- `LoadingScreen` are acum variantă `section`
+- paginile din dashboard folosesc `LoadingScreen variant="section"`
+- loader-ul rămâne local, nu mai acoperă tot viewport-ul
+
+Impact:
+
+- percepție mai bună la navigare
+- fără schimbare de logică sau date
+
 ## Implementare Val A2 (Setari)
 
 Am redus numarul de request-uri la mount in `Setari`:

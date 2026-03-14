@@ -28,7 +28,7 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 export default function SistemePage() {
   const cockpit = useCockpit()
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const aiHighRisk = cockpit.data.state.aiSystems.filter((s) => s.riskLevel === "high").length
   const aiLowRisk = cockpit.data.state.aiSystems.filter(

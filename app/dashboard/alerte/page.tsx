@@ -25,7 +25,7 @@ export default function AlertePage() {
   const cockpit = useCockpit()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const openDrifts = cockpit.activeDrifts

@@ -39,7 +39,7 @@ export default function AsistentPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, sending])
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   async function handleSend() {
     const text = input.trim()

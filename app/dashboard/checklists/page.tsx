@@ -14,7 +14,7 @@ export default function RemediationPage() {
   const cockpit = useCockpit()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   return (
     <div className="space-y-8">

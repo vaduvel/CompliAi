@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const cockpit = useCockpit()
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   return (
     <div className="space-y-8">

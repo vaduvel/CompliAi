@@ -50,7 +50,7 @@ export default function ScanariPage() {
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const yamlFilePattern = /compliscan\.(yaml|yml)$/i
   const manifestPanelSystems = cockpit.data.state.detectedAISystems.filter(

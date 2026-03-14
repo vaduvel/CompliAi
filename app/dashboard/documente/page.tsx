@@ -7,7 +7,7 @@ import { buildScanInsights, useCockpit } from "@/components/compliscan/use-cockp
 export default function DocumentePage() {
   const cockpit = useCockpit()
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const latestDocumentScan =
     cockpit.data.state.scans.find((scan) => scan.sourceKind === "document") ?? null

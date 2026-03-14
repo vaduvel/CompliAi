@@ -48,9 +48,14 @@ import type {
 } from "@/lib/compliance/types"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
-export function LoadingScreen() {
+export function LoadingScreen({ variant = "page" }: { variant?: "page" | "section" }) {
+  const containerClass =
+    variant === "page"
+      ? "grid min-h-screen place-items-center bg-[var(--color-bg)] text-[var(--color-on-surface)]"
+      : "grid min-h-[40vh] place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)]"
+
   return (
-    <div className="grid min-h-screen place-items-center bg-[var(--color-bg)] text-[var(--color-on-surface)]">
+    <div className={containerClass}>
       <Loader2 className="size-6 animate-spin" />
     </div>
   )

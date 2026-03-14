@@ -122,6 +122,9 @@ Suita curenta:
 - optimizare defensiva de performanta in `Setari`:
   - endpoint agregat nou: `GET /api/settings/summary`
   - un singur fetch pentru status repo sync, sesiune, membri, Supabase, health check si release readiness
+- Val A1 (loading local, nu full-screen):
+  - `LoadingScreen` accepta acum varianta `section`
+  - paginile din dashboard folosesc `LoadingScreen variant="section"`
 
 ### Sprint 6 - Audit defensibility
 

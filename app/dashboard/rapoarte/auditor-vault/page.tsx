@@ -51,7 +51,7 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 export default function AuditorVaultPage() {
   const cockpit = useCockpit()
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const latestSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
