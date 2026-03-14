@@ -28,8 +28,7 @@ import {
   PageHeader,
   ScanWorkspace,
 } from "@/components/compliscan/route-sections"
-import { buildScanInsights } from "@/components/compliscan/use-cockpit"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
 import { AgentWorkspace } from "@/components/compliscan/agent-workspace"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
@@ -46,7 +45,8 @@ import type { SourceEnvelope } from "@/lib/compliance/agent-os"
 
 export default function ScanariPage() {
   const router = useRouter()
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
 
@@ -181,11 +181,11 @@ export default function ScanariPage() {
         <>
       <SourceModeGuideCard sourceType={sourceType} />
 
-      <ScanSourceTypeSelector
+          <ScanSourceTypeSelector
         value={sourceType}
         onValueChange={(nextSourceType) => {
           if (nextSourceType === "text") {
-            cockpit.setDocumentFile(null)
+            cockpitActions.setDocumentFile(null)
           }
           setSourceType(nextSourceType)
         }}
@@ -219,9 +219,9 @@ export default function ScanariPage() {
             systems={sourceType === "yaml" ? yamlPanelSystems : manifestPanelSystems}
             drifts={sourceType === "yaml" ? yamlPanelDrifts : manifestPanelDrifts}
             busy={cockpit.busy}
-            onDiscover={cockpit.discoverAISystemsFromManifest}
-            onUpdateStatus={cockpit.updateDetectedAISystem}
-            onEdit={cockpit.editDetectedAISystem}
+            onDiscover={cockpitActions.discoverAISystemsFromManifest}
+            onUpdateStatus={cockpitActions.updateDetectedAISystem}
+            onEdit={cockpitActions.editDetectedAISystem}
           />
           <SectionDividerCard
             eyebrow="Ultimul rezultat"
@@ -276,15 +276,15 @@ export default function ScanariPage() {
             scanInfo={cockpit.scanInfo}
             scanning={cockpit.scanning}
             scannedDocuments={cockpit.data.state.scannedDocuments}
-            setDocumentName={cockpit.setDocumentName}
-            setDocumentContent={cockpit.setDocumentContent}
-            setDocumentFile={cockpit.setDocumentFile}
-            setPendingExtractedText={cockpit.setPendingExtractedText}
+            setDocumentName={cockpitActions.setDocumentName}
+            setDocumentContent={cockpitActions.setDocumentContent}
+            setDocumentFile={cockpitActions.setDocumentFile}
+            setPendingExtractedText={cockpitActions.setPendingExtractedText}
             onExtract={() => {
-              void cockpit.handleExtractScan()
+              void cockpitActions.handleExtractScan()
             }}
             onAnalyze={async () => {
-              const success = await cockpit.handleAnalyzePendingScan()
+              const success = await cockpitActions.handleAnalyzePendingScan()
               if (success) router.push("/dashboard/documente")
             }}
           />
