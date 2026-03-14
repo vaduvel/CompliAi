@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
   CheckCircle2,
@@ -51,8 +51,21 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 export default function AuditorVaultPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
+  const heavyPayloadRequested = useRef(false)
+
+  const needsCompliancePack = Boolean(cockpit.data && !cockpit.data.compliancePack)
+  const needsTraceability = Boolean(cockpit.data && !cockpit.data.traceabilityMatrix)
+  const needsHeavyPayload = needsCompliancePack || needsTraceability
+
+  useEffect(() => {
+    if (needsHeavyPayload && !heavyPayloadRequested.current) {
+      heavyPayloadRequested.current = true
+      void cockpitActions.ensureHeavyPayload()
+    }
+  }, [needsHeavyPayload, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+  if (needsHeavyPayload) return <LoadingScreen variant="section" />
 
   const latestSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(

@@ -134,6 +134,7 @@ Suita curenta:
   - pagini migrate: `Alerte`, `Audit si export`, `Audit si dovezi`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`, `Asistent`, `Dashboard`, `Setari`
 - Val B2 (scaffold):
   - endpoint nou: `GET /api/dashboard/core`
+  - cockpit foloseste implicit payload-ul `core`, iar paginile `Control sisteme AI` si `Audit si dovezi` cer lazy load pentru `compliancePack` + `traceabilityMatrix`
 
 ### Sprint 6 - Audit defensibility
 

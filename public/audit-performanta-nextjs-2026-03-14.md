@@ -341,6 +341,7 @@ Abordare sigura:
 Stare curenta:
 
 - endpoint nou `GET /api/dashboard/core` pentru payload minimal (state, summary, remediationPlan, workspace)
+- cockpit foloseste acum payload-ul `core` by default, iar paginile care cer `compliancePack`/`traceabilityMatrix` fac lazy load la payload-ul complet
 
 Castig:
 

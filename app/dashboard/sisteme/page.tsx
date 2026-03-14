@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useRef } from "react"
 import {
   ArrowRight,
   CheckCircle2,
@@ -28,8 +29,19 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 export default function SistemePage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
+  const heavyPayloadRequested = useRef(false)
+
+  const needsCompliancePack = Boolean(cockpit.data && !cockpit.data.compliancePack)
+
+  useEffect(() => {
+    if (needsCompliancePack && !heavyPayloadRequested.current) {
+      heavyPayloadRequested.current = true
+      void cockpitActions.ensureHeavyPayload()
+    }
+  }, [needsCompliancePack, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+  if (needsCompliancePack) return <LoadingScreen variant="section" />
 
   const aiHighRisk = cockpit.data.state.aiSystems.filter((s) => s.riskLevel === "high").length
   const aiLowRisk = cockpit.data.state.aiSystems.filter(

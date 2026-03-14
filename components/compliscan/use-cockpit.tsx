@@ -49,8 +49,8 @@ export type DashboardPayload = {
   summary: DashboardSummary
   remediationPlan: RemediationAction[]
   workspace: WorkspaceContext
-  compliancePack: AICompliancePack
-  traceabilityMatrix: ComplianceTraceRecord[]
+  compliancePack?: AICompliancePack
+  traceabilityMatrix?: ComplianceTraceRecord[]
 }
 
 type TaskUpdateFeedback = {
@@ -81,6 +81,8 @@ type TaskEvidenceUploadResponse = DashboardPayload & {
 }
 
 function useCockpitStore() {
+  const DASHBOARD_CORE_ENDPOINT = "/api/dashboard/core"
+  const DASHBOARD_FULL_ENDPOINT = "/api/dashboard"
   const [documentName, setDocumentName] = useState("")
   const [documentContent, setDocumentContent] = useState("")
   const [documentFile, setDocumentFile] = useState<File | null>(null)
@@ -122,7 +124,7 @@ function useCockpitStore() {
     if (shouldShowLoading) setLoading(true)
     setError(null)
     try {
-      const response = await fetch("/api/dashboard", { cache: "no-store" })
+      const response = await fetch(DASHBOARD_CORE_ENDPOINT, { cache: "no-store" })
       if (!response.ok) throw new Error("Nu am putut incarca dashboard-ul.")
       const payload = (await response.json()) as DashboardPayload
       setData(payload)
@@ -131,6 +133,24 @@ function useCockpitStore() {
       setError(err instanceof Error ? err.message : "Eroare necunoscuta.")
     } finally {
       if (shouldShowLoading) setLoading(false)
+    }
+  }
+
+  async function ensureHeavyPayload() {
+    if (!data) return
+    if (data.compliancePack && data.traceabilityMatrix) return
+
+    setBusy(true)
+    try {
+      const response = await fetch(DASHBOARD_FULL_ENDPOINT, { cache: "no-store" })
+      if (!response.ok) throw new Error("Nu am putut incarca payload-ul complet.")
+      const payload = (await response.json()) as DashboardPayload
+      setData(payload)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Eroare la incarcarea payload-ului."
+      toast.error("Incarcare esuata", { description: message })
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -1047,6 +1067,7 @@ function useCockpitStore() {
     setDocumentFile: updateDocumentFile,
     setPendingExtractedText,
     reloadDashboard,
+    ensureHeavyPayload,
     handleExtractScan,
     handleAnalyzePendingScan,
     handleScan,
@@ -1132,6 +1153,7 @@ export type CockpitActionSlice = Pick<
   | "setDocumentFile"
   | "setPendingExtractedText"
   | "reloadDashboard"
+  | "ensureHeavyPayload"
   | "handleExtractScan"
   | "handleAnalyzePendingScan"
   | "handleScan"
@@ -1229,6 +1251,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     setDocumentFile,
     setPendingExtractedText,
     reloadDashboard,
+    ensureHeavyPayload,
     handleExtractScan,
     handleAnalyzePendingScan,
     handleScan,
@@ -1267,6 +1290,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     setDocumentFile,
     setPendingExtractedText,
     reloadDashboard,
+    ensureHeavyPayload,
     handleExtractScan,
     handleAnalyzePendingScan,
     handleScan,
