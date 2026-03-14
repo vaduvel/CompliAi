@@ -401,6 +401,15 @@ Putem introduce:
 - loading segmentat
 - fara sa depindem de `LoadingScreen` full-page peste tot
 
+Stare curenta:
+
+- exista acum `loading.tsx` pe `app/dashboard`
+- exista loading segmentat si pe `app/dashboard/scanari`
+- exista loading segmentat si pe `app/dashboard/sisteme`
+- exista loading segmentat si pe `app/dashboard/rapoarte`
+- exista loading segmentat si pe `app/dashboard/rapoarte/auditor-vault`
+- toate folosesc un skeleton coerent de dashboard in loc de spinner generic
+
 ### C3. `router.refresh()` doar unde e necesar
 
 Exista deja locuri unde refresh-ul poate re-simti greu pentru utilizator.

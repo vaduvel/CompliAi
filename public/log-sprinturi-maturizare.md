@@ -143,6 +143,13 @@ Suita curenta:
   - `app/dashboard/layout.tsx` hidrateaza server-side `core payload` pentru `CockpitProvider`
   - `DashboardShell` primeste server-side user + memberships, fara fetch initial la mount
   - `useCockpit()` porneste direct din datele injectate si sare peste primul fetch client daca bootstrap-ul exista
+- Val C2 (segment loading):
+  - `loading.tsx` adaugat pe `app/dashboard`
+  - `loading.tsx` adaugat pe `app/dashboard/scanari`
+  - `loading.tsx` adaugat pe `app/dashboard/sisteme`
+  - `loading.tsx` adaugat pe `app/dashboard/rapoarte`
+  - `loading.tsx` adaugat pe `app/dashboard/rapoarte/auditor-vault`
+  - segmentele folosesc acum un skeleton coerent de dashboard, nu doar spinner local
 
 ### Sprint 6 - Audit defensibility
 
