@@ -154,6 +154,10 @@ Suita curenta:
   - `Scanari` foloseste `reloadDashboard()` local dupa commit din Agent Workspace, nu `router.refresh()`
   - refresh global a ramas doar la schimbarea de organizatie din shell
   - schimbarea de organizatie ruleaza acum in `startTransition(...)`
+- UX clarificare Scanari (tabs):
+  - `Flux scanare` izolat pentru lucru activ
+  - `Verdicts` mutat separat pentru ultimul rezultat confirmat
+  - `Istoric documente` agregat cu scanari recente + link spre `Documente`
 
 ### Sprint 6 - Audit defensibility
 

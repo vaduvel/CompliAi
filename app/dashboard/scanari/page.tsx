@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
@@ -26,6 +26,7 @@ import {
   LatestDocumentSection,
   LoadingScreen,
   PageHeader,
+  RecentScansCard,
   ScanWorkspace,
 } from "@/components/compliscan/route-sections"
 import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -68,12 +69,21 @@ const AIDiscoveryPanel = dynamic(
   }
 )
 
+type ScanViewMode = "flow" | "verdicts" | "history"
+
 export default function ScanariPage() {
   const router = useRouter()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
+  const [viewMode, setViewMode] = useState<ScanViewMode>("flow")
+
+  useEffect(() => {
+    if (agentFlow.agentModeActive) {
+      setViewMode("flow")
+    }
+  }, [agentFlow.agentModeActive])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -186,6 +196,12 @@ export default function ScanariPage() {
 
       <PillarTabs sectionId="scanare" />
 
+      <ScanViewTabs
+        active={viewMode}
+        onChange={setViewMode}
+        locked={agentFlow.agentModeActive}
+      />
+
       {agentFlow.agentModeActive ? (
         <AgentWorkspace
           sourceEnvelope={currentEnvelope}
@@ -204,132 +220,159 @@ export default function ScanariPage() {
         />
       ) : (
         <>
-      <SourceModeGuideCard sourceType={sourceType} />
+          {viewMode !== "history" && (
+            <>
+              <SourceModeGuideCard sourceType={sourceType} />
 
-          <ScanSourceTypeSelector
-        value={sourceType}
-        onValueChange={(nextSourceType) => {
-          if (nextSourceType === "text") {
-            cockpitActions.setDocumentFile(null)
-          }
-          setSourceType(nextSourceType)
-        }}
-      />
-
-      <ScanFlowOverviewCard
-        sourceType={sourceType}
-        latestDocumentScan={latestDocumentScan}
-        latestManifestScan={latestManifestScan}
-        latestYamlScan={latestYamlScan}
-      />
-
-      {sourceType === "manifest" || sourceType === "yaml" ? (
-        <div className="space-y-6">
-          <SectionDividerCard
-            eyebrow="Flux activ"
-            title={
-              sourceType === "yaml"
-                ? "Validezi configuratia declarata"
-                : "Lucrezi pe candidate detectate automat"
-            }
-            description={
-              sourceType === "yaml"
-                ? "Aici verifici compliscan.yaml, corectezi detectia si decizi ce intra in inventarul oficial."
-                : "Aici transformi manifestele de cod in candidate curate, apoi confirmi doar sistemele bune in inventar."
-            }
-          />
-          <AIDiscoveryPanel
-            key={sourceType}
-            mode={sourceType === "yaml" ? "yaml" : "manifest"}
-            systems={sourceType === "yaml" ? yamlPanelSystems : manifestPanelSystems}
-            drifts={sourceType === "yaml" ? yamlPanelDrifts : manifestPanelDrifts}
-            busy={cockpit.busy}
-            onDiscover={cockpitActions.discoverAISystemsFromManifest}
-            onUpdateStatus={cockpitActions.updateDetectedAISystem}
-            onEdit={cockpitActions.editDetectedAISystem}
-          />
-          <SectionDividerCard
-            eyebrow="Ultimul rezultat"
-            title={
-              sourceType === "yaml"
-                ? "Vezi ultimul config validat si drift-ul lui"
-                : "Vezi ultimul manifest procesat si ce a iesit din el"
-            }
-            description={
-              sourceType === "yaml"
-                ? "Zona de mai jos este read-only: te ajuta sa verifici ultimul rezultat, nu sa lucrezi pe candidate."
-                : "Zona de mai jos este sumarul ultimului scan de repo. Nu dubleaza work queue-ul, doar iti arata rezultatul ramas in urma."
-            }
-          />
-          {sourceType === "manifest" ? (
-            <LatestManifestSection
-              latestManifestScan={latestManifestScan}
-              systems={latestManifestSystems}
-              drifts={latestManifestDrifts}
-            />
-          ) : (
-            <LatestYamlSection
-              latestYamlScan={latestYamlScan}
-              systems={latestYamlSystems}
-              findings={latestYamlFindings}
-              drifts={latestYamlDrifts}
-            />
+              <ScanSourceTypeSelector
+                value={sourceType}
+                onValueChange={(nextSourceType) => {
+                  if (nextSourceType === "text") {
+                    cockpitActions.setDocumentFile(null)
+                  }
+                  setSourceType(nextSourceType)
+                }}
+              />
+            </>
           )}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <SectionDividerCard
-            eyebrow="Flux activ"
-            title={
-              sourceType === "text"
-                ? "Pregătești analiza din text manual"
-                : "Încarci documentul și revizuiești OCR-ul"
-            }
-            description={
-              sourceType === "text"
-                ? "Aici lipești textul, îi dai un nume clar și trimiți analiza direct în verdict și task-uri."
-                : "Aici încarci fișierul, extragi textul și faci review înainte să generezi verdictul final."
-            }
-          />
-          <ScanWorkspace
-            sourceMode={sourceType === "text" ? "text" : "document"}
-            documentName={cockpit.documentName}
-            documentContent={cockpit.documentContent}
-            documentFile={cockpit.documentFile}
-            pendingScanId={cockpit.pendingScanId}
-            pendingExtractedText={cockpit.pendingExtractedText}
-            scanInfo={cockpit.scanInfo}
-            scanning={cockpit.scanning}
-            scannedDocuments={cockpit.data.state.scannedDocuments}
-            setDocumentName={cockpitActions.setDocumentName}
-            setDocumentContent={cockpitActions.setDocumentContent}
-            setDocumentFile={cockpitActions.setDocumentFile}
-            setPendingExtractedText={cockpitActions.setPendingExtractedText}
-            onExtract={() => {
-              void cockpitActions.handleExtractScan()
-            }}
-            onAnalyze={async () => {
-              const success = await cockpitActions.handleAnalyzePendingScan()
-              if (success) router.push("/dashboard/documente")
-            }}
-          />
-          <SectionDividerCard
-            eyebrow="Ultimul rezultat"
-            title="Vezi clar ultimul document analizat"
-            description="Zona de mai jos este rezultatul scanului precedent: de ce a ieșit verdictul și ce task-uri a deschis. Nu este formularul de lucru curent."
-          />
-        </div>
-      )}
 
-      {(sourceType === "document" || sourceType === "text") && (
-        <LatestDocumentSection
-          latestScan={latestDocumentScan}
-          latestScanText={latestDocumentText}
-          latestScanFindings={latestDocumentFindings}
-          latestScanInsights={latestDocumentInsights}
-          latestScanTasks={latestDocumentTasks}
-        />
-      )}
+          {viewMode === "flow" && (
+            <>
+              <ScanFlowOverviewCard
+                sourceType={sourceType}
+                latestDocumentScan={latestDocumentScan}
+                latestManifestScan={latestManifestScan}
+                latestYamlScan={latestYamlScan}
+              />
+
+              {sourceType === "manifest" || sourceType === "yaml" ? (
+                <div className="space-y-6">
+                  <SectionDividerCard
+                    eyebrow="Flux activ"
+                    title={
+                      sourceType === "yaml"
+                        ? "Validezi configuratia declarata"
+                        : "Lucrezi pe candidate detectate automat"
+                    }
+                    description={
+                      sourceType === "yaml"
+                        ? "Aici verifici compliscan.yaml, corectezi detectia si decizi ce intra in inventarul oficial."
+                        : "Aici transformi manifestele de cod in candidate curate, apoi confirmi doar sistemele bune in inventar."
+                    }
+                  />
+                  <AIDiscoveryPanel
+                    key={sourceType}
+                    mode={sourceType === "yaml" ? "yaml" : "manifest"}
+                    systems={sourceType === "yaml" ? yamlPanelSystems : manifestPanelSystems}
+                    drifts={sourceType === "yaml" ? yamlPanelDrifts : manifestPanelDrifts}
+                    busy={cockpit.busy}
+                    onDiscover={cockpitActions.discoverAISystemsFromManifest}
+                    onUpdateStatus={cockpitActions.updateDetectedAISystem}
+                    onEdit={cockpitActions.editDetectedAISystem}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <SectionDividerCard
+                    eyebrow="Flux activ"
+                    title={
+                      sourceType === "text"
+                        ? "Pregatesti analiza din text manual"
+                        : "Incarci documentul si revizuiesti OCR-ul"
+                    }
+                    description={
+                      sourceType === "text"
+                        ? "Aici lipesti textul, ii dai un nume clar si trimiti analiza direct in verdict si task-uri."
+                        : "Aici incarci fisierul, extragi textul si faci review inainte sa generezi verdictul final."
+                    }
+                  />
+                  <ScanWorkspace
+                    sourceMode={sourceType === "text" ? "text" : "document"}
+                    documentName={cockpit.documentName}
+                    documentContent={cockpit.documentContent}
+                    documentFile={cockpit.documentFile}
+                    pendingScanId={cockpit.pendingScanId}
+                    pendingExtractedText={cockpit.pendingExtractedText}
+                    scanInfo={cockpit.scanInfo}
+                    scanning={cockpit.scanning}
+                    scannedDocuments={cockpit.data.state.scannedDocuments}
+                    setDocumentName={cockpitActions.setDocumentName}
+                    setDocumentContent={cockpitActions.setDocumentContent}
+                    setDocumentFile={cockpitActions.setDocumentFile}
+                    setPendingExtractedText={cockpitActions.setPendingExtractedText}
+                    onExtract={() => {
+                      void cockpitActions.handleExtractScan()
+                    }}
+                    onAnalyze={async () => {
+                      const success = await cockpitActions.handleAnalyzePendingScan()
+                      if (success) router.push("/dashboard/documente")
+                    }}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {viewMode === "verdicts" && (
+            <div className="space-y-6">
+              <SectionDividerCard
+                eyebrow="Verdicts"
+                title="Ultimul rezultat confirmat"
+                description="Zona aceasta este read-only: te ajuta sa explici verdictul, finding-urile si drift-ul fara sa amesteci fluxul activ."
+              />
+              {sourceType === "manifest" ? (
+                <LatestManifestSection
+                  latestManifestScan={latestManifestScan}
+                  systems={latestManifestSystems}
+                  drifts={latestManifestDrifts}
+                />
+              ) : sourceType === "yaml" ? (
+                <LatestYamlSection
+                  latestYamlScan={latestYamlScan}
+                  systems={latestYamlSystems}
+                  findings={latestYamlFindings}
+                  drifts={latestYamlDrifts}
+                />
+              ) : (
+                <LatestDocumentSection
+                  latestScan={latestDocumentScan}
+                  latestScanText={latestDocumentText}
+                  latestScanFindings={latestDocumentFindings}
+                  latestScanInsights={latestDocumentInsights}
+                  latestScanTasks={latestDocumentTasks}
+                />
+              )}
+            </div>
+          )}
+
+          {viewMode === "history" && (
+            <div className="space-y-6">
+              <SectionDividerCard
+                eyebrow="Istoric"
+                title="Istoric documente"
+                description="Vezi toate scanarile recente intr-o singura lista si sari direct la rezultatul relevant."
+              />
+              <RecentScansCard scans={cockpit.data.state.scans} tasks={cockpit.tasks} />
+              <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+                <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+                  <div>
+                    <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                      Istoricul complet ramane in Documente
+                    </p>
+                    <p className="text-xs text-[var(--color-on-surface-muted)]">
+                      Acolo gasesti toate scanarile, nu doar cele recente.
+                    </p>
+                  </div>
+                  <Button asChild variant="outline" className="h-9 rounded-xl">
+                    <Link href="/dashboard/documente">
+                      Mergi la Documente
+                      <ArrowRight className="size-4" strokeWidth={2.25} />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -812,6 +855,49 @@ function ScanDriftCard({
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function ScanViewTabs({
+  active,
+  onChange,
+  locked,
+}: {
+  active: ScanViewMode
+  onChange: (next: ScanViewMode) => void
+  locked: boolean
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        variant={active === "flow" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("flow")}
+      >
+        Flux scanare
+      </Button>
+      <Button
+        variant={active === "verdicts" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("verdicts")}
+        disabled={locked}
+      >
+        Verdicts
+      </Button>
+      <Button
+        variant={active === "history" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("history")}
+        disabled={locked}
+      >
+        Istoric documente
+      </Button>
+      {locked && (
+        <Badge variant="outline" className="h-9 rounded-xl px-3 text-xs">
+          Mod Agent activ
+        </Badge>
+      )}
     </div>
   )
 }
