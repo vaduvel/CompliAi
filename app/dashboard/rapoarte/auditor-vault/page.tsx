@@ -115,8 +115,8 @@ export default function AuditorVaultPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Audit si dovezi"
-        description="Dovezi, mapare legala, snapshot, pack de sisteme si drift intr-o singura vedere audit-ready"
+        title="Auditor Vault"
+        description="Vedere audit-ready pentru dovezi, trasabilitate, snapshot, baseline si drift"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
@@ -263,7 +263,7 @@ function VaultGuideCard() {
             Podul dintre tehnic, remediation si audit
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            Auditor Vault nu este un nou flux separat. Este vederea in care toate sursele, articolele, dovezile si schimbarile recente se leaga intr-un loc usor de explicat intern sau extern.
+            Auditor Vault nu este board de executie si nici pagina de export. Este vederea in care toate sursele, articolele, dovezile si schimbarile recente se leaga intr-un loc usor de sustinut intern sau extern.
           </p>
         </div>
         <div className="grid gap-3">
@@ -305,7 +305,8 @@ function VaultQuickActionsCard() {
 
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardContent className="grid gap-4 p-5 lg:grid-cols-3">
+      <CardContent className="space-y-4 p-5">
+        <div className="grid gap-4 lg:grid-cols-3">
         {items.map((item) => (
           <div
             key={item.title}
@@ -317,6 +318,21 @@ function VaultQuickActionsCard() {
             </p>
           </div>
         ))}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild variant="outline" className="h-10 rounded-xl">
+            <Link href="/dashboard/checklists">
+              Remediere
+              <ArrowRight className="size-4" strokeWidth={2.25} />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-10 rounded-xl">
+            <Link href="/dashboard/rapoarte">
+              Audit si export
+              <ArrowRight className="size-4" strokeWidth={2.25} />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )

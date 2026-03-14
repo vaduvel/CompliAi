@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import dynamic from "next/dynamic"
-import { useState } from "react"
 import {
   ArrowRight,
   ClipboardList,
@@ -18,7 +17,6 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
-import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import type { ComplianceDriftRecord } from "@/lib/compliance/types"
 import {
@@ -29,21 +27,6 @@ import {
 } from "@/lib/compliance/drift-policy"
 import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
-
-type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
-
-const RemediationBoard = dynamic(
-  () => import("@/components/compliscan/remediation-board").then((mod) => mod.RemediationBoard),
-  {
-    ssr: false,
-    loading: () => (
-      <SectionLoadingCard
-        title="Remediere in incarcare"
-        detail="Board-ul de remediere se incarca in fundal."
-      />
-    ),
-  }
-)
 
 const ExportCenter = dynamic(
   () => import("@/components/compliscan/export-center").then((mod) => mod.ExportCenter),
@@ -61,8 +44,6 @@ const ExportCenter = dynamic(
 export default function AuditExportPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
-  const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
-  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null)
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -78,7 +59,7 @@ export default function AuditExportPage() {
     <div className="space-y-8">
       <PageHeader
         title="Audit si export"
-        description="Snapshot exportabil, baseline pentru drift si remediere gata de livrat"
+        description="Snapshot exportabil, readiness de audit si artefacte curate de livrare"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
@@ -87,7 +68,7 @@ export default function AuditExportPage() {
 
       <ReportsGuideCard />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.8fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <div className="space-y-6">
           <ReportsStatusGrid
             openTasks={openTasks.length}
@@ -95,19 +76,12 @@ export default function AuditExportPage() {
             activeDrifts={activeDrifts.length}
             hasBaseline={Boolean(validatedBaseline)}
           />
-
-          <RemediationBoard
-            tasks={cockpit.tasks}
-            activeFilter={taskFilter}
-            highlightedTaskId={highlightedTaskId}
-            onFilterChange={setTaskFilter}
-            onMarkDone={(taskId) => {
-              setHighlightedTaskId(taskId)
-              cockpitActions.handleMarkDone(taskId)
-            }}
-            onAttachEvidence={cockpitActions.attachEvidence}
-            onExport={cockpitActions.handleTaskExport}
+          <RemediationHandoffCard
+            openTasks={openTasks.length}
+            doneTasks={doneTasks.length}
+            driftCount={activeDrifts.length}
           />
+          <ExportArtifactsCard />
         </div>
 
         <div className="space-y-6">
@@ -127,13 +101,9 @@ export default function AuditExportPage() {
             onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
             onShare={() => void cockpitActions.handleShareWithAccountant()}
           />
-
-          <ExportArtifactsCard />
-
           <RecentDriftCard drifts={activeDrifts} />
         </div>
       </div>
-
     </div>
   )
 }
@@ -141,19 +111,19 @@ export default function AuditExportPage() {
 function ReportsGuideCard() {
   const steps = [
     {
-      title: "1. Validezi task-urile critice",
+      title: "1. Verifici readiness-ul livrabilului",
       detail:
-        "Remedierea rămâne sursa de lucru. Atașezi dovada direct din card și folosești Mark as fixed & rescan ca să închizi task-ul pe bune.",
+        "Vezi rapid câte task-uri, drift-uri și blocaje mai intră în snapshot înainte să generezi un artefact extern.",
     },
     {
-      title: "2. Verifici snapshot-ul și baseline-ul",
+      title: "2. Confirmi snapshot-ul și baseline-ul",
       detail:
         "Înainte de export, te uiți dacă snapshot-ul curent este valid și dacă drift-ul e comparat cu baseline-ul potrivit.",
     },
     {
       title: "3. Exporți artefactul potrivit",
       detail:
-        "PDF pentru stakeholderi, checklist pentru execuție, iar compliscan.json/yaml pentru sursa de adevăr și workflow-uri viitoare.",
+        "PDF pentru stakeholderi, ZIP pentru pachet complet, iar compliscan.json/yaml pentru sursa tehnică de adevăr și workflow-uri viitoare.",
     },
   ]
 
@@ -165,10 +135,10 @@ function ReportsGuideCard() {
             Flux de export
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
-            Audit si export, snapshot si dovada intr-un singur loc
+            Snapshot, readiness si export fara amestec cu executia
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            Pagina asta leagă remedierea de export. Nu doar generezi un fișier, ci verifici ce intră în snapshot, față de ce baseline compari și ce drift este inclus în livrabil.
+            Pagina asta nu mai este board de lucru. Aici verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat. Remedierea ramane in pagina ei, iar dovezile detaliate stau in Auditor Vault.
           </p>
         </div>
         <div className="grid gap-3">
@@ -183,6 +153,60 @@ function ReportsGuideCard() {
               </p>
             </div>
           ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function RemediationHandoffCard({
+  openTasks,
+  doneTasks,
+  driftCount,
+}: {
+  openTasks: number
+  doneTasks: number
+  driftCount: number
+}) {
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <CardTitle className="text-xl">Unde continui munca reala</CardTitle>
+            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+              `Audit si export` ramane read-only pentru livrabil. Daca mai ai task-uri deschise sau gap-uri de dovada, revii in paginile de executie.
+            </p>
+          </div>
+          <Badge variant="outline">
+            {openTasks} deschise · {doneTasks} inchise · {driftCount} drift
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-4 pt-6 md:grid-cols-2">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+          <p className="text-sm font-medium text-[var(--color-on-surface)]">Remediere</p>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+            Acolo inchizi task-uri, atasezi dovezi si rulezi `Mark as fixed & rescan`.
+          </p>
+          <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
+            <Link href="/dashboard/checklists">
+              Deschide Remediere
+              <ArrowRight className="size-4" strokeWidth={2.25} />
+            </Link>
+          </Button>
+        </div>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+          <p className="text-sm font-medium text-[var(--color-on-surface)]">Auditor Vault</p>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+            Acolo verifici trasabilitatea, calitatea dovezii si povestea completa care sustine auditul.
+          </p>
+          <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
+            <Link href="/dashboard/rapoarte/auditor-vault">
+              Deschide Auditor Vault
+              <ArrowRight className="size-4" strokeWidth={2.25} />
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

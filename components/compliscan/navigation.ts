@@ -4,6 +4,7 @@ import {
   BarChart3,
   CheckCircle2,
   FileSearch,
+  FolderKanban,
   FolderOpen,
   MessageSquareMore,
   Scan,
@@ -22,6 +23,7 @@ export type DashboardNavId =
   | "sisteme"
   | "checklists"
   | "alerte"
+  | "auditorVault"
   | "rapoarte"
   | "setari"
   | "asistent"
@@ -88,6 +90,12 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     label: "Dovada",
     items: [
       { id: "checklists", label: "Remediere", href: "/dashboard/checklists", icon: CheckCircle2 },
+      {
+        id: "auditorVault",
+        label: "Auditor Vault",
+        href: "/dashboard/rapoarte/auditor-vault",
+        icon: FolderKanban,
+      },
       { id: "rapoarte", label: "Audit si export", href: "/dashboard/rapoarte", icon: FileSearch },
       { id: "asistent", label: "Asistent", href: "/dashboard/asistent", icon: MessageSquareMore },
     ],

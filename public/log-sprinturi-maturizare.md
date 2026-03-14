@@ -163,6 +163,11 @@ Suita curenta:
   - autodiscovery separat de inventarul oficial
   - baseline si drift sunt expuse ca sectiuni distincte
   - e-Factura mutat in tab de integrari, nu in fluxul principal de control
+- UX clarificare Dovada:
+  - `Audit si export` nu mai contine board-ul de remediere
+  - pagina de rapoarte ramane focusata pe snapshot, readiness si artefacte de livrare
+  - `Remediere` explica clar ca acolo se executa task-urile si se ataseaza dovada
+  - `Auditor Vault` este expus direct in navigatie si isi asuma explicit rolul de vedere audit-ready
 
 ### Sprint 6 - Audit defensibility
 

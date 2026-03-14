@@ -67,6 +67,7 @@ Checkpoint-ul curent din implementare:
   - `Scanari`: separare clara intre `flux activ` si `ultimul rezultat`
   - `AIDiscoveryPanel`: drift comprimat, fara repetitie grea pe fiecare card
   - `Auditor Vault`: quick-start clar si limitare initiala a traseelor individuale
+  - `Dovada`: separare clara intre `Remediere`, `Auditor Vault` si `Audit si export`
 - [x] micro-copy si empty states cleanup pe paginile cheie:
   - `Scanari`
   - `Sisteme`
