@@ -80,7 +80,7 @@ Dupa autentificare, userul intra in shell-ul de dashboard.
 
 #### Control
 
-- `Sisteme AI` -> `/dashboard/sisteme`
+- `Sisteme` -> `/dashboard/sisteme`
 - `Drift` -> `/dashboard/alerte`
 
 #### Dovada
@@ -176,7 +176,7 @@ Impact UX:
 6. Muta sistemele curate in `Control`
 7. Intra in `/dashboard/sisteme`
 8. Lucreaza in `Discovery`
-9. Confirma sistemele in `Sisteme AI`
+9. Confirma sistemele in `Sisteme`
 10. Seteaza / valideaza `Baseline`
 11. Urmareste `Drift`
 12. Daca apar probleme, merge in `Remediere`
@@ -187,7 +187,7 @@ Impact UX:
 - userul incepe in `Scanare`, dar "adevaratul control" se muta apoi in `Sisteme`
 - pagina `Sisteme` are 6 moduri interne:
   - `Discovery`
-  - `Sisteme AI`
+  - `Sisteme`
   - `Baseline`
   - `Drift`
   - `Compliance Pack`
