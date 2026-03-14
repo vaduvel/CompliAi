@@ -135,6 +135,8 @@ Suita curenta:
 - Val B2 (scaffold):
   - endpoint nou: `GET /api/dashboard/core`
   - cockpit foloseste implicit payload-ul `core`, iar paginile `Control sisteme AI` si `Audit si dovezi` cer lazy load pentru `compliancePack` + `traceabilityMatrix`
+- Val B3 (lazy load):
+  - `Audit si export` incarca dinamic `RemediationBoard` si `ExportCenter` cu placeholder local
 
 ### Sprint 6 - Audit defensibility
 

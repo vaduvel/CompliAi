@@ -357,6 +357,10 @@ Candidate bune:
 - panouri mari din `Scanari`
 - `Assistant` unde se poate
 
+Stare curenta:
+
+- `Audit si export` face lazy load pentru `RemediationBoard` si `ExportCenter` (dynamic import cu placeholder local)
+
 Castig:
 
 - pagina initiala porneste mai repede

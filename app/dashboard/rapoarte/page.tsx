@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useState } from "react"
 import {
   ArrowRight,
@@ -15,9 +16,7 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { ExportCenter } from "@/components/compliscan/export-center"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -32,6 +31,32 @@ import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
+
+const RemediationBoard = dynamic(
+  () => import("@/components/compliscan/remediation-board").then((mod) => mod.RemediationBoard),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Remediere in incarcare"
+        detail="Board-ul de remediere se incarca in fundal."
+      />
+    ),
+  }
+)
+
+const ExportCenter = dynamic(
+  () => import("@/components/compliscan/export-center").then((mod) => mod.ExportCenter),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Export in incarcare"
+        detail="Centrul de export se incarca in fundal."
+      />
+    ),
+  }
+)
 
 export default function AuditExportPage() {
   const cockpit = useCockpitData()
@@ -159,6 +184,19 @@ function ReportsGuideCard() {
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
+      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+        {detail}
       </CardContent>
     </Card>
   )
