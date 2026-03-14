@@ -6,12 +6,13 @@ import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
 
 export default function RemediationPage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
@@ -31,9 +32,9 @@ export default function RemediationPage() {
         tasks={cockpit.tasks}
         activeFilter={taskFilter}
         onFilterChange={setTaskFilter}
-        onMarkDone={cockpit.handleMarkDone}
-        onAttachEvidence={cockpit.attachEvidence}
-        onExport={cockpit.handleTaskExport}
+        onMarkDone={cockpitActions.handleMarkDone}
+        onAttachEvidence={cockpitActions.attachEvidence}
+        onExport={cockpitActions.handleTaskExport}
       />
     </div>
   )

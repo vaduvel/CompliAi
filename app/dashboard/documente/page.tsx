@@ -2,10 +2,10 @@
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LatestDocumentSection, LoadingScreen, PageHeader, RecentScansCard } from "@/components/compliscan/route-sections"
-import { buildScanInsights, useCockpit } from "@/components/compliscan/use-cockpit"
+import { buildScanInsights, useCockpitData } from "@/components/compliscan/use-cockpit"
 
 export default function DocumentePage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
