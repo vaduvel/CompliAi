@@ -41,19 +41,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [switchingMembershipId, setSwitchingMembershipId] = useState<string | null>(null)
 
   useEffect(() => {
-    void fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data: { user: CurrentUser }) => {
-        if (data.user) setCurrentUser(data.user)
-      })
-      .catch(() => null)
-
-    void fetch("/api/auth/memberships")
+    void fetch("/api/auth/summary")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { memberships?: UserMembership[] } | null) => {
+      .then((data: { user?: CurrentUser; memberships?: UserMembership[] } | null) => {
+        setCurrentUser(data?.user ?? null)
         setMemberships(data?.memberships ?? [])
       })
-      .catch(() => setMemberships([]))
+      .catch(() => {
+        setCurrentUser(null)
+        setMemberships([])
+      })
   }, [])
 
   async function handleLogout() {

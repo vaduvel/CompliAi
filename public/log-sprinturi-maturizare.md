@@ -125,6 +125,9 @@ Suita curenta:
 - Val A1 (loading local, nu full-screen):
   - `LoadingScreen` accepta acum varianta `section`
   - paginile din dashboard folosesc `LoadingScreen variant="section"`
+- Val A3 (shell bootstrap):
+  - endpoint agregat nou: `GET /api/auth/summary`
+  - `DashboardShell` incarca user + memberships intr-un singur fetch
 
 ### Sprint 6 - Audit defensibility
 

@@ -497,3 +497,15 @@ Impact:
 - mai putine request-uri paralele la mount
 - acelasi comportament de acces si aceleasi mesaje
 - fara schimbari de logica sau arhitectura
+
+## Implementare Val A3 (Shell bootstrap)
+
+Am redus request-urile din `DashboardShell`:
+
+- endpoint agregat nou: `GET /api/auth/summary`
+- `DashboardShell` incarca acum user + memberships intr-un singur fetch
+
+Impact:
+
+- mai putine request-uri la fiecare intrare in dashboard
+- acelasi comportament de autentificare si schimbare org
