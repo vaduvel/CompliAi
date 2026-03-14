@@ -11,7 +11,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
 type RepoSyncStatus = {
   headerName: string
@@ -142,7 +142,8 @@ const MEMBER_ROLE_OPTIONS = [
 const SETTINGS_SUMMARY_ENDPOINT = "/api/settings/summary"
 
 export default function SetariPage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
   const [repoSyncStatus, setRepoSyncStatus] = useState<RepoSyncStatus>(null)
   const [driftOverrides, setDriftOverrides] = useState<Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>>({})
   const [currentUser, setCurrentUser] = useState<CurrentUser>(null)
@@ -328,7 +329,7 @@ export default function SetariPage() {
                   variant="secondary"
                   disabled={cockpit.busy || !activeSnapshot}
                   className="h-11 rounded-xl px-5"
-                  onClick={() => void cockpit.setValidatedBaseline()}
+                  onClick={() => void cockpitActions.setValidatedBaseline()}
                 >
                   Valideaza snapshot-ul curent
                 </Button>
@@ -336,7 +337,7 @@ export default function SetariPage() {
                   variant="outline"
                   disabled={cockpit.busy || !validatedBaseline}
                   className="h-11 rounded-xl px-5"
-                  onClick={() => void cockpit.clearValidatedBaseline()}
+                  onClick={() => void cockpitActions.clearValidatedBaseline()}
                 >
                   Elimina baseline-ul
                 </Button>
@@ -957,7 +958,7 @@ export default function SetariPage() {
               variant="secondary"
               disabled={cockpit.busy}
               className="h-11 rounded-xl px-5"
-              onClick={() => void cockpit.updateDriftSeverityOverrides(driftOverrides)}
+              onClick={() => void cockpitActions.updateDriftSeverityOverrides(driftOverrides)}
             >
               Salvează severitatea drift
             </Button>
@@ -1030,7 +1031,7 @@ export default function SetariPage() {
                   return
                 }
 
-                void cockpit.resetWorkspaceState()
+                void cockpitActions.resetWorkspaceState()
               }}
             >
               <Trash2 className="size-4" strokeWidth={2.25} />

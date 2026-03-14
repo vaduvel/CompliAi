@@ -7,11 +7,12 @@ import {
   OverviewPageSections,
 } from "@/components/compliscan/route-sections"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -25,11 +26,11 @@ export default function DashboardPage() {
         nextBestAction={cockpit.nextBestAction}
         onResolveNow={() => router.push("/dashboard/checklists")}
         onScan={() => router.push("/dashboard/scanari")}
-        onSandbox={cockpit.handleSandbox}
-        onGeneratePdf={() => void cockpit.handleGenerateReport()}
-        onExportChecklist={() => void cockpit.handleChecklistExport()}
-        onShare={() => void cockpit.handleShareWithAccountant()}
-        onSyncNow={() => void cockpit.handleSyncNow()}
+        onSandbox={cockpitActions.handleSandbox}
+        onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
+        onExportChecklist={() => void cockpitActions.handleChecklistExport()}
+        onShare={() => void cockpitActions.handleShareWithAccountant()}
+        onSyncNow={() => void cockpitActions.handleSyncNow()}
         busy={cockpit.busy}
         state={cockpit.data.state}
         activeDrifts={cockpit.activeDrifts}

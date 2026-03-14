@@ -131,7 +131,7 @@ Suita curenta:
   - `DashboardShell` incarca user + memberships intr-un singur fetch
 - Val B1 (scaffold):
   - `useCockpitData()` + `useCockpitMutations()`
-  - pagini migrate: `Alerte`, `Audit si export`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`
+  - pagini migrate: `Alerte`, `Audit si export`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`, `Asistent`, `Dashboard`, `Setari`
 
 ### Sprint 6 - Audit defensibility
 

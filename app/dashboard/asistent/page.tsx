@@ -10,7 +10,7 @@ import { AssistantSuggestionChip } from "@/components/evidence-os/AssistantSugge
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { ChatMessage } from "@/lib/compliance/types"
 
@@ -22,7 +22,7 @@ const assistantSuggestions = [
 ]
 
 export default function AsistentPage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
