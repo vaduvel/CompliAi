@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
   CheckCircle2,
@@ -26,12 +26,16 @@ import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
+type ControlViewMode = "discovery" | "inventory" | "baseline" | "drift" | "pack" | "integrari"
+
 export default function SistemePage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const heavyPayloadRequested = useRef(false)
+  const [viewMode, setViewMode] = useState<ControlViewMode>("discovery")
 
-  const needsCompliancePack = Boolean(cockpit.data && !cockpit.data.compliancePack)
+  const needsCompliancePack =
+    viewMode === "pack" && Boolean(cockpit.data && !cockpit.data.compliancePack)
 
   useEffect(() => {
     if (needsCompliancePack && !heavyPayloadRequested.current) {
@@ -41,9 +45,7 @@ export default function SistemePage() {
   }, [needsCompliancePack, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
-  if (needsCompliancePack || !cockpit.data.compliancePack) {
-    return <LoadingScreen variant="section" />
-  }
+  if (needsCompliancePack) return <LoadingScreen variant="section" />
 
   const aiHighRisk = cockpit.data.state.aiSystems.filter((s) => s.riskLevel === "high").length
   const aiLowRisk = cockpit.data.state.aiSystems.filter(
@@ -61,7 +63,6 @@ export default function SistemePage() {
   )
   const recentInventory = cockpit.data.state.aiSystems.slice(0, 4)
   const recentDrifts = cockpit.activeDrifts.slice(0, 4)
-  const controlPackageHighlights = buildControlPackageHighlights(cockpit.data.compliancePack.entries)
 
   return (
     <div className="space-y-8">
@@ -74,257 +75,367 @@ export default function SistemePage() {
 
       <PillarTabs sectionId="control" />
 
-      <SystemsGuideCard />
+      <ControlViewTabs active={viewMode} onChange={setViewMode} />
 
-      <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} compact />
+      {viewMode === "discovery" && (
+        <>
+          <SystemsGuideCard />
 
-      <ControlPackageHighlightsCard highlights={controlPackageHighlights} />
+          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+              <CardTitle className="text-xl">Ce faci acum</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <ActionRow
+                icon={Sparkles}
+                title="Rulezi autodiscovery pe manifestele sursă"
+                detail="Foloseste package.json, requirements.txt sau pyproject.toml ca sa propui sisteme AI reale, nu inventar scris manual dupa memorie."
+              />
+              <ActionRow
+                icon={CheckCircle2}
+                title="Corectezi detectiile inainte de confirmare"
+                detail="Scopul, modelul si nivelul de incredere trebuie sa fie validate uman inainte sa intre in inventarul oficial."
+              />
+              <ActionRow
+                icon={Radar}
+                title="Fixezi un baseline validat"
+                detail="Cand snapshot-ul este bun, il salvezi ca baseline si drift-ul va compara viitoarele schimbari fata de acel punct."
+              />
+            </CardContent>
+          </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">Stare inventar AI</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
-          <MetricTile
-            label="High-risk confirmate"
-            value={aiHighRisk}
-            tone="text-[var(--color-error)]"
-            hint="Necesita control si scopul sau impactul intra in zona high-risk."
+          <SectionDivider
+            eyebrow="Flux activ"
+            title="Detectii in lucru si prefill pentru validare"
+            description="Aici lucram pe ce a detectat sistemul automat. Corectam candidatii, confirmam campurile importante si mutam doar sistemele curate in inventarul oficial."
+            stats={[
+              { label: "Detectii active", value: detectedActiveCount },
+              { label: "Revizuite", value: reviewedCount },
+              { label: "Drift activ", value: recentDrifts.length },
+            ]}
           />
-          <MetricTile
-            label="Minimal / limited confirmate"
-            value={aiLowRisk}
-            tone="text-[var(--status-success-text)]"
-            hint="Sisteme deja intrate in inventarul oficial."
-          />
-          <MetricTile
-            label="Detectii ce cer review"
-            value={detectedActiveCount}
-            tone="text-[var(--color-warning)]"
-            hint="Autodiscovery a gasit candidate care trebuie validate uman."
-          />
-          <MetricTile
-            label="Revizuite, neconfirmate"
-            value={reviewedCount}
-            tone="text-[var(--color-info)]"
-            hint="Candidate deja ajustate, dar inca neintroduse in inventar."
-          />
-        </CardContent>
-      </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardHeader className="border-b border-[var(--color-border)] pb-5">
-            <CardTitle className="text-xl">Ce faci acum</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <ActionRow
-              icon={Sparkles}
-              title="Rulezi autodiscovery pe manifestele sursă"
-              detail="Foloseste package.json, requirements.txt sau pyproject.toml ca sa propui sisteme AI reale, nu inventar scris manual dupa memorie."
-            />
-            <ActionRow
-              icon={CheckCircle2}
-              title="Corectezi detectiile inainte de confirmare"
-              detail="Scopul, modelul si nivelul de incredere trebuie sa fie validate uman inainte sa intre in inventarul oficial."
-            />
-            <ActionRow
-              icon={Radar}
-              title="Fixezi un baseline validat"
-              detail="Cand snapshot-ul este bun, il salvezi ca baseline si drift-ul va compara viitoarele schimbari fata de acel punct."
-            />
-          </CardContent>
-        </Card>
+          <AIDiscoveryPanel
+            systems={cockpit.data.state.detectedAISystems}
+            drifts={cockpit.activeDrifts}
+            busy={cockpit.busy}
+            onDiscover={cockpitActions.discoverAISystemsFromManifest}
+            onUpdateStatus={cockpitActions.updateDetectedAISystem}
+            onEdit={cockpitActions.editDetectedAISystem}
+          />
+        </>
+      )}
 
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardHeader className="border-b border-[var(--color-border)] pb-5">
-            <CardTitle className="text-xl">Baseline si drift</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                Baseline activ
-              </p>
-              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                {validatedBaseline
-                  ? `Validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
-                  : "Nu exista baseline validat"}
-              </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                {validatedBaseline
-                  ? "Drift-ul activ este comparat cu snapshot-ul validat uman."
-                  : "Momentan drift-ul compara cu ultimul snapshot disponibil. Pentru comparatii curate, valideaza un baseline din Setari."}
-              </p>
-            </div>
+      {viewMode === "inventory" && (
+        <>
+          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+              <CardTitle className="text-xl">Stare inventar AI</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-4">
+              <MetricTile
+                label="High-risk confirmate"
+                value={aiHighRisk}
+                tone="text-[var(--color-error)]"
+                hint="Necesita control si scopul sau impactul intra in zona high-risk."
+              />
+              <MetricTile
+                label="Minimal / limited confirmate"
+                value={aiLowRisk}
+                tone="text-[var(--status-success-text)]"
+                hint="Sisteme deja intrate in inventarul oficial."
+              />
+              <MetricTile
+                label="Detectii ce cer review"
+                value={detectedActiveCount}
+                tone="text-[var(--color-warning)]"
+                hint="Autodiscovery a gasit candidate care trebuie validate uman."
+              />
+              <MetricTile
+                label="Revizuite, neconfirmate"
+                value={reviewedCount}
+                tone="text-[var(--color-info)]"
+                hint="Candidate deja ajustate, dar inca neintroduse in inventar."
+              />
+            </CardContent>
+          </Card>
 
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <div className="flex items-center justify-between gap-3">
+          <SectionDivider
+            eyebrow="Inventar oficial"
+            title="Sisteme confirmate, administrare si monitorizare"
+            description="De aici incolo lucram doar cu inventarul oficial. Detectiile confirmate nu mai sunt candidate, ci sisteme asumate operational si urmarite fata de baseline."
+            stats={[
+              { label: "Confirmate", value: confirmedCount },
+              { label: "High-risk", value: aiHighRisk },
+              { label: "Limited / minimal", value: aiLowRisk },
+            ]}
+          />
+
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
+            <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+              <CardHeader className="border-b border-[var(--color-border)] pb-5">
+                <CardTitle className="text-xl">Inventar confirmat recent</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-6">
+                {recentInventory.length === 0 && (
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
+                    Încă nu există sisteme confirmate în inventar. Confirmă mai întâi o detectie din fluxul activ sau adaugă manual un sistem nou dacă nu ai încă manifestul sursă.
+                  </div>
+                )}
+                {recentInventory.map((system) => (
+                  <div
+                    key={system.id}
+                    className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                          {system.name}
+                        </p>
+                        <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                          {system.vendor} · {formatPurposeLabel(system.purpose)}
+                        </p>
+                      </div>
+                      <Badge
+                        className={
+                          system.riskLevel === "high"
+                            ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+                            : system.riskLevel === "limited"
+                              ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+                              : "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+                        }
+                      >
+                        {system.riskLevel}
+                      </Badge>
+                    </div>
+                    <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          <AIInventoryPanel
+            systems={cockpit.data.state.aiSystems}
+            busy={cockpit.busy}
+            onSubmit={cockpitActions.addAISystem}
+            onRemove={cockpitActions.removeAISystem}
+          />
+        </>
+      )}
+
+      {viewMode === "baseline" && (
+        <>
+          <SectionDivider
+            eyebrow="Baseline"
+            title="Snapshot validat pentru comparatii curate"
+            description="Stabilesti punctul de referinta pentru drift si inventar. Baseline-ul validat separa schimbarea reala de zgomotul operational."
+            stats={[
+              { label: "Baseline activ", value: validatedBaseline ? 1 : 0 },
+              { label: "Sisteme confirmate", value: confirmedCount },
+              { label: "Drift activ", value: recentDrifts.length },
+            ]}
+          />
+
+          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+              <CardTitle className="text-xl">Baseline activ</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Status
+                </p>
+                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+                  {validatedBaseline
+                    ? `Validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
+                    : "Nu exista baseline validat"}
+                </p>
+                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                  {validatedBaseline
+                    ? "Drift-ul activ este comparat cu snapshot-ul validat uman."
+                    : "Momentan drift-ul compara cu ultimul snapshot disponibil. Pentru comparatii curate, valideaza un baseline in Setari."}
+                </p>
+              </div>
+              <Button asChild variant="outline" className="h-10 rounded-xl">
+                <Link href="/dashboard/setari">
+                  Gestioneaza baseline
+                  <ArrowRight className="size-4" strokeWidth={2.25} />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {viewMode === "drift" && (
+        <>
+          <SectionDivider
+            eyebrow="Drift"
+            title="Schimbari fata de baseline"
+            description="Drift-ul arata diferentele fata de snapshot-ul validat si prioritizeaza ce trebuie investigat imediat."
+            stats={[
+              { label: "Drift activ", value: recentDrifts.length },
+              { label: "High-risk", value: aiHighRisk },
+              { label: "Sisteme confirmate", value: confirmedCount },
+            ]}
+          />
+
+          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+              <CardTitle className="text-xl">Drift activ</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    Drift activ
+                    Semnale deschise
                   </p>
                   <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
                     {recentDrifts.length} semnale deschise
                   </p>
                 </div>
                 <Button asChild variant="outline" className="h-10 rounded-xl">
-                  <Link href="/dashboard/setari">
-                    Gestioneaza baseline
+                  <Link href="/dashboard/alerte">
+                    Vezi drift-ul complet
                     <ArrowRight className="size-4" strokeWidth={2.25} />
                   </Link>
                 </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
 
-      <SectionDivider
-        eyebrow="Flux activ"
-        title="Detectii in lucru si prefill pentru validare"
-        description="Aici lucram pe ce a detectat sistemul automat. Corectam candidatii, confirmam campurile importante si mutam doar sistemele curate in inventarul oficial."
-        stats={[
-          { label: "Detectii active", value: detectedActiveCount },
-          { label: "Revizuite", value: reviewedCount },
-          { label: "Drift activ", value: recentDrifts.length },
-        ]}
-      />
-
-      <AIDiscoveryPanel
-        systems={cockpit.data.state.detectedAISystems}
-        drifts={cockpit.activeDrifts}
-        busy={cockpit.busy}
-        onDiscover={cockpitActions.discoverAISystemsFromManifest}
-        onUpdateStatus={cockpitActions.updateDetectedAISystem}
-        onEdit={cockpitActions.editDetectedAISystem}
-      />
-
-      <AICompliancePackEntriesCard
-        pack={cockpit.data.compliancePack}
-        title="Pack pre-completat pentru review"
-        editable
-        busy={cockpit.busy}
-        onUpdateField={cockpitActions.updateCompliancePackField}
-      />
-
-      <SectionDivider
-        eyebrow="Inventar oficial"
-        title="Sisteme confirmate, administrare si monitorizare"
-        description="De aici incolo lucram doar cu inventarul oficial. Detectiile confirmate nu mai sunt candidate, ci sisteme asumate operational si urmarite fata de baseline."
-        stats={[
-          { label: "Confirmate", value: confirmedCount },
-          { label: "High-risk", value: aiHighRisk },
-          { label: "Limited / minimal", value: aiLowRisk },
-        ]}
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)]">
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardHeader className="border-b border-[var(--color-border)] pb-5">
-            <CardTitle className="text-xl">Inventar confirmat recent</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            {recentInventory.length === 0 && (
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-                Încă nu există sisteme confirmate în inventar. Confirmă mai întâi o detectie din fluxul activ sau adaugă manual un sistem nou dacă nu ai încă manifestul sursă.
-              </div>
-            )}
-            {recentInventory.map((system) => (
-              <div
-                key={system.id}
-                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--color-on-surface)]">
-                      {system.name}
-                    </p>
-                    <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
-                      {system.vendor} · {formatPurposeLabel(system.purpose)}
-                    </p>
-                  </div>
-                  <Badge
-                    className={
-                      system.riskLevel === "high"
-                        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                        : system.riskLevel === "limited"
-                          ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                          : "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-                    }
-                  >
-                    {system.riskLevel}
-                  </Badge>
+          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+              <CardTitle className="text-xl">Drift recent pe inventar</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              {recentDrifts.length === 0 && (
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--status-success-text)]">
+                  Nu exista drift deschis pe inventarul AI in acest moment. Inventarul confirmat este stabil fata de baseline-ul curent.
                 </div>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
-                </p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardHeader className="border-b border-[var(--color-border)] pb-5">
-            <CardTitle className="text-xl">Drift recent pe inventar</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            {recentDrifts.length === 0 && (
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--status-success-text)]">
-                Nu exista drift deschis pe inventarul AI in acest moment. Inventarul confirmat este stabil fata de baseline-ul curent.
-              </div>
-            )}
-            {recentDrifts.map((drift) => (
-              <div
-                key={drift.id}
-                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-[var(--color-on-surface)]">
-                      {drift.summary}
-                    </p>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">
-                      {drift.systemLabel || drift.sourceDocument || "Inventar AI"} ·{" "}
-                      {formatRelativeRomanian(drift.detectedAtISO)}
-                    </p>
+              )}
+              {recentDrifts.map((drift) => (
+                <div
+                  key={drift.id}
+                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                        {drift.summary}
+                      </p>
+                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                        {drift.systemLabel || drift.sourceDocument || "Inventar AI"} ·{" "}
+                        {formatRelativeRomanian(drift.detectedAtISO)}
+                      </p>
+                    </div>
+                    <Badge
+                      className={
+                        drift.severity === "critical" || drift.severity === "high"
+                          ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+                          : drift.severity === "medium"
+                            ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+                            : "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
+                      }
+                    >
+                      {drift.severity}
+                    </Badge>
                   </div>
-                  <Badge
-                    className={
-                      drift.severity === "critical" || drift.severity === "high"
-                        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                        : drift.severity === "medium"
-                          ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                          : "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
-                    }
-                  >
-                    {drift.severity}
-                  </Badge>
                 </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+              ))}
+            </CardContent>
+          </Card>
+        </>
+      )}
 
-      <AIInventoryPanel
-        systems={cockpit.data.state.aiSystems}
-        busy={cockpit.busy}
-        onSubmit={cockpitActions.addAISystem}
-        onRemove={cockpitActions.removeAISystem}
-      />
-
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">Utilitare operatiuni</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <EFacturaValidatorCard
-            validations={cockpit.data.state.efacturaValidations}
-            busy={cockpit.busy}
-            onValidate={cockpitActions.validateEFacturaXml}
+      {viewMode === "pack" && cockpit.data.compliancePack && (
+        <>
+          <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} compact />
+          <ControlPackageHighlightsCard
+            highlights={buildControlPackageHighlights(cockpit.data.compliancePack.entries)}
           />
-        </CardContent>
-      </Card>
+          <AICompliancePackEntriesCard
+            pack={cockpit.data.compliancePack}
+            title="Pack pre-completat pentru review"
+            editable
+            busy={cockpit.busy}
+            onUpdateField={cockpitActions.updateCompliancePackField}
+          />
+        </>
+      )}
+
+      {viewMode === "integrari" && (
+        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <CardHeader className="border-b border-[var(--color-border)] pb-5">
+            <CardTitle className="text-xl">Integrari operationale</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <EFacturaValidatorCard
+              validations={cockpit.data.state.efacturaValidations}
+              busy={cockpit.busy}
+              onValidate={cockpitActions.validateEFacturaXml}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function ControlViewTabs({
+  active,
+  onChange,
+}: {
+  active: ControlViewMode
+  onChange: (next: ControlViewMode) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        variant={active === "discovery" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("discovery")}
+      >
+        Discovery
+      </Button>
+      <Button
+        variant={active === "inventory" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("inventory")}
+      >
+        Sisteme AI
+      </Button>
+      <Button
+        variant={active === "baseline" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("baseline")}
+      >
+        Baseline
+      </Button>
+      <Button
+        variant={active === "drift" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("drift")}
+      >
+        Drift
+      </Button>
+      <Button
+        variant={active === "pack" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("pack")}
+      >
+        Compliance Pack
+      </Button>
+      <Button
+        variant={active === "integrari" ? "default" : "outline"}
+        className="h-9 rounded-xl"
+        onClick={() => onChange("integrari")}
+      >
+        Integrari
+      </Button>
     </div>
   )
 }

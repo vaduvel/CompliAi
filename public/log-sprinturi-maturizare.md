@@ -158,6 +158,11 @@ Suita curenta:
   - `Flux scanare` izolat pentru lucru activ
   - `Verdicts` mutat separat pentru ultimul rezultat confirmat
   - `Istoric documente` agregat cu scanari recente + link spre `Documente`
+- UX clarificare Control (tabs in Sisteme AI):
+  - `Discovery`, `Sisteme AI`, `Baseline`, `Drift`, `Compliance Pack`, `Integrari`
+  - autodiscovery separat de inventarul oficial
+  - baseline si drift sunt expuse ca sectiuni distincte
+  - e-Factura mutat in tab de integrari, nu in fluxul principal de control
 
 ### Sprint 6 - Audit defensibility
 
