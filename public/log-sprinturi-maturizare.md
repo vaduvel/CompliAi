@@ -132,6 +132,8 @@ Suita curenta:
 - Val B1 (scaffold):
   - `useCockpitData()` + `useCockpitMutations()`
   - pagini migrate: `Alerte`, `Audit si export`, `Audit si dovezi`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`, `Asistent`, `Dashboard`, `Setari`
+- Val B2 (scaffold):
+  - endpoint nou: `GET /api/dashboard/core`
 
 ### Sprint 6 - Audit defensibility
 

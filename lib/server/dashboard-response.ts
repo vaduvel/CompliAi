@@ -18,7 +18,7 @@ export type DashboardPayload = {
   traceabilityMatrix: ComplianceTraceRecord[]
 }
 
-type DashboardCorePayload = {
+export type DashboardCorePayload = {
   state: ComplianceState
   summary: ReturnType<typeof computeDashboardSummary>
   remediationPlan: ReturnType<typeof buildRemediationPlan>
@@ -26,7 +26,7 @@ type DashboardCorePayload = {
   snapshot: ReturnType<typeof buildCompliScanSnapshot>
 }
 
-async function buildDashboardCorePayload(state: ComplianceState): Promise<DashboardCorePayload> {
+export async function buildDashboardCorePayload(state: ComplianceState): Promise<DashboardCorePayload> {
   const workspace = await getOrgContext()
   const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
   const normalizedState = normalizeComplianceState(hydratedState)

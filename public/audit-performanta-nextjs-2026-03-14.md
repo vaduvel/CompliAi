@@ -338,6 +338,10 @@ Abordare sigura:
 - introducem endpoint-uri specializate in paralel
 - migram treptat paginile
 
+Stare curenta:
+
+- endpoint nou `GET /api/dashboard/core` pentru payload minimal (state, summary, remediationPlan, workspace)
+
 Castig:
 
 - mai putin transport inutil
