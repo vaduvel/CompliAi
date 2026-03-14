@@ -1,11 +1,11 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import {
   ArrowRight,
   CheckCircle2,
-  ClipboardList,
   Download,
   FolderKanban,
   Paperclip,
@@ -32,7 +32,6 @@ import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
 import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
-import { getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import {
   formatDriftEscalationDeadline,
   formatDriftEscalationTier,
@@ -40,13 +39,28 @@ import {
   getDriftPolicyFromRecord,
 } from "@/lib/compliance/drift-policy"
 import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
-import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import type {
   ComplianceDriftRecord,
   ComplianceEvent,
   PersistedTaskState,
 } from "@/lib/compliance/types"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
+
+const TraceabilityMatrixCard = dynamic(
+  () =>
+    import("@/components/compliscan/traceability-matrix-card").then(
+      (mod) => mod.TraceabilityMatrixCard
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Traceability in incarcare"
+        detail="Matricea de trasabilitate se incarca in fundal."
+      />
+    ),
+  }
+)
 
 export default function AuditorVaultPage() {
   const cockpit = useCockpitData()
@@ -640,668 +654,6 @@ function SnapshotAuditCard({
   )
 }
 
-function TraceabilityMatrixCard({
-  records,
-  busy,
-  onReview,
-  onReuseFamilyEvidence,
-}: {
-  records: ComplianceTraceRecord[]
-  busy: boolean
-  onReview: (input: {
-    scope?: "record" | "law_reference" | "family"
-    familyKey?: string
-    traceId?: string
-    lawReference?: string
-    action: "confirm" | "clear"
-    note?: string | null
-  }) => Promise<unknown>
-  onReuseFamilyEvidence: (familyKey: string) => Promise<unknown>
-}) {
-  const [draftNotes, setDraftNotes] = useState<Record<string, string>>({})
-  const familyGroups = buildTraceabilityFamilyGroups(records)
-  const reviewGroups = buildTraceabilityReviewGroups(records)
-
-  return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-primary)]">
-            <ClipboardList className="size-4" strokeWidth={2.25} />
-          </div>
-          <div>
-            <CardTitle className="text-xl">Matrice de trasabilitate</CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
-              Traseul dintre sursă, finding, task, drift și snapshot pentru fiecare control urmărit la audit.
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-6">
-        {records.length === 0 && (
-          <VaultEmptyState
-            title="Nu exista inca trasee complete de control"
-            description="Dupa ce ai task-uri, dovada si cel putin un snapshot, matricea de trasabilitate se completeaza singura."
-          />
-        )}
-        {familyGroups.length > 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Familie de controale
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                  Aici refolosim dovada validată și confirmăm împreună controale care au aceeași natură operațională. Scădem munca repetitivă, dar păstrăm trasabilitatea pe fiecare control.
-                </p>
-              </div>
-              <Badge variant="outline">
-                {familyGroups.length} familii
-              </Badge>
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {familyGroups.map((group) => (
-                <div
-                  key={group.familyKey}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">
-                        {group.familyLabel}
-                      </p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
-                        {group.recordsCount} controale · {group.confirmedCount} confirmate · {group.reusableEvidenceCount} dovezi reutilizabile
-                      </p>
-                    </div>
-                    <Badge variant={group.pendingEvidenceCount === 0 ? "success" : "warning"}>
-                      {group.pendingEvidenceCount === 0 ? "familie acoperita" : "reuse disponibil"}
-                    </Badge>
-                  </div>
-                      <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                        {group.description}
-                      </p>
-                      <div className="mt-3 grid gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-xs text-[var(--color-muted)]">
-                        <p>
-                          <span className="font-medium text-[var(--color-on-surface)]">De ce contează:</span>{" "}
-                          {group.familyImpact}
-                        </p>
-                        <p>
-                          <span className="font-medium text-[var(--color-on-surface)]">Ce dovedește:</span>{" "}
-                          {group.proofSummary}
-                        </p>
-                        <p>
-                          <span className="font-medium text-[var(--color-on-surface)]">Surse în scope:</span>{" "}
-                          {group.sourceDocuments.length > 0 ? group.sourceDocuments.join(" · ") : "fără surse legate încă"}
-                        </p>
-                        <p>
-                          <span className="font-medium text-[var(--color-on-surface)]">Presiune curentă:</span>{" "}
-                          {group.findingsCount} findings · {group.driftsCount} drift
-                        </p>
-                      </div>
-                      <p className="mt-3 text-xs leading-6 text-[var(--color-muted)]">
-                        {group.reusePolicy}
-                      </p>
-                      <p className="mt-3 text-xs text-[var(--color-muted)]">
-                        Articole: {group.lawReferences.join(" · ") || "fără articol explicit"}
-                      </p>
-                      {group.reusableFiles.length > 0 && (
-                        <p className="mt-2 text-xs text-[var(--color-muted)]">
-                          Bundle curent: {group.reusableFiles.join(" · ")}
-                        </p>
-                      )}
-                  <textarea
-                    value={draftNotes[group.familyKey] ?? group.defaultNote}
-                    onChange={(event) =>
-                      setDraftNotes((current) => ({
-                        ...current,
-                        [group.familyKey]: event.target.value,
-                      }))
-                    }
-                    rows={3}
-                    className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 py-3 text-sm text-[var(--color-on-surface)] outline-none ring-0"
-                    placeholder="Notă comună pentru această familie de controale."
-                  />
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                      disabled={busy || group.validatedCount !== group.recordsCount}
-                      onClick={() =>
-                        void onReview({
-                          scope: "family",
-                          familyKey: group.familyKey,
-                          action: "confirm",
-                          note: (draftNotes[group.familyKey] ?? group.defaultNote).trim() || null,
-                        })
-                      }
-                    >
-                      Confirmă familia
-                    </Button>
-                    {group.reusableEvidenceCount > 0 && group.pendingEvidenceCount > 0 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 rounded-lg"
-                        disabled={busy}
-                        onClick={() => void onReuseFamilyEvidence(group.familyKey)}
-                      >
-                        Reutilizează ultima dovadă
-                      </Button>
-                    )}
-                    {group.confirmedCount > 0 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 rounded-lg"
-                        disabled={busy}
-                        onClick={() =>
-                          void onReview({
-                            scope: "family",
-                            familyKey: group.familyKey,
-                            action: "clear",
-                          })
-                        }
-                      >
-                        Elimină confirmarea
-                      </Button>
-                    )}
-                  </div>
-                  {group.validatedCount !== group.recordsCount && (
-                    <p className="mt-3 text-xs text-[var(--color-warning)]">
-                      Finalizează dovada și rescan-ul pentru toate controalele din familie înainte de confirmare.
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {reviewGroups.length > 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Confirmare pe articol / control
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                  Poți confirma toate controalele legate de același articol legal dintr-o singură acțiune. Asta păstrează auditul coerent când mai multe task-uri susțin aceeași obligație.
-                </p>
-              </div>
-              <Badge variant="outline">
-                {reviewGroups.length} grupuri
-              </Badge>
-            </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
-              {reviewGroups.map((group) => (
-                <div
-                  key={group.lawReference}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">
-                        {group.lawReference}
-                      </p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
-                        {group.recordsCount} controale · {group.confirmedCount} confirmate · {group.sourceCount} surse
-                      </p>
-                    </div>
-                    <Badge variant={group.confirmedCount === group.recordsCount ? "success" : "warning"}>
-                      {group.confirmedCount === group.recordsCount ? "grup confirmat" : "revizuire deschisa"}
-                    </Badge>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                    {group.sampleNextStep}
-                  </p>
-                  <textarea
-                    value={draftNotes[group.lawReference] ?? group.defaultNote}
-                    onChange={(event) =>
-                      setDraftNotes((current) => ({
-                        ...current,
-                        [group.lawReference]: event.target.value,
-                      }))
-                    }
-                    rows={3}
-                    className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 py-3 text-sm text-[var(--color-on-surface)] outline-none ring-0"
-                    placeholder="Notă comună pentru toate controalele din acest articol."
-                  />
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                      disabled={busy || group.validatedCount !== group.recordsCount}
-                      onClick={() =>
-                        void onReview({
-                          scope: "law_reference",
-                          lawReference: group.lawReference,
-                          action: "confirm",
-                          note: (draftNotes[group.lawReference] ?? group.defaultNote).trim() || null,
-                        })
-                      }
-                    >
-                      Confirmă grupul
-                    </Button>
-                    {group.confirmedCount > 0 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 rounded-lg"
-                        disabled={busy}
-                        onClick={() =>
-                          void onReview({
-                            scope: "law_reference",
-                            lawReference: group.lawReference,
-                            action: "clear",
-                          })
-                        }
-                      >
-                        Elimină confirmarea
-                      </Button>
-                    )}
-                  </div>
-                  {group.validatedCount !== group.recordsCount && (
-                    <p className="mt-3 text-xs text-[var(--color-warning)]">
-                      Grupul mai conține controale cu dovadă slabă sau validare nefinalizată.
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {records.length > 3 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-sm text-[var(--color-on-surface-muted)]">
-            Afisam primele 3 trasee de control ca sa ramana pagina usor de citit. Pentru restul, confirma mai intai pe familie sau pe articol si apoi revino pe controalele individuale.
-          </div>
-        )}
-        {records.slice(0, 3).map((record) => (
-          <div
-            key={record.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">
-                    {record.entryKind === "control_task" ? "control" : "finding"}
-                  </Badge>
-                  {record.remediationMode && (
-                    <Badge variant="outline">
-                      {record.remediationMode === "rapid" ? "rapid" : "structural"}
-                    </Badge>
-                  )}
-                </div>
-                <p className="mt-3 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {record.title}
-                </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  {record.sourceDocuments.length > 0
-                    ? record.sourceDocuments.join(" · ")
-                    : "fără sursă explicită"}
-                </p>
-                {record.review.confirmedByUser && (
-                  <p className="mt-2 text-xs text-[var(--status-success-text)]">
-                    Confirmat pentru audit
-                    {record.review.updatedAtISO
-                      ? ` · ${new Date(record.review.updatedAtISO).toLocaleString("ro-RO")}`
-                      : ""}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={traceStatusBadgeVariant(record.traceStatus)}>
-                  {record.traceStatus === "validated"
-                    ? "validat"
-                    : record.traceStatus === "evidence_required"
-                      ? "cere dovada"
-                      : "actiune necesara"}
-                </Badge>
-                <Badge variant={auditDecisionBadgeVariant(record.auditDecision)}>
-                  {formatAuditDecision(record.auditDecision)}
-                </Badge>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              <TraceMiniCard
-                label="Finding / drift"
-                value={`${record.findingRefs.length} findings · ${record.driftRefs.length} drift`}
-                hint={
-                  record.lawReferences.length > 0
-                    ? record.lawReferences.join(" · ")
-                    : "fără referință explicită"
-                }
-              />
-              <TraceMiniCard
-                label="Snapshot"
-                value={record.snapshotContext.currentSnapshotId ?? "n/a"}
-                hint={
-                  record.snapshotContext.validatedBaselineSnapshotId
-                    ? `baseline ${record.snapshotContext.validatedBaselineSnapshotId}`
-                    : "baseline lipsă"
-                }
-              />
-              <TraceMiniCard
-                label="Dovadă"
-                value={record.evidence.fileName ?? "neatașată"}
-                hint={
-                  record.evidence.attached
-                    ? [
-                        `status ${record.evidence.validationStatus}`,
-                        record.evidence.validationBasis
-                          ? `bază ${formatValidationBasis(record.evidence.validationBasis)}`
-                          : null,
-                        record.evidence.validationConfidence
-                          ? formatValidationConfidence(record.evidence.validationConfidence)
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")
-                    : "cere dovadă pentru audit"
-                }
-              />
-            </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    Coverage pe control
-                  </p>
-                  <Badge variant={controlCoverageBadgeVariant(record.bundleCoverageStatus)}>
-                    {record.bundleCoverageStatus}
-                  </Badge>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                  {record.evidenceRequired || "Nu există încă o cerință explicită de dovadă pentru acest control."}
-                </p>
-                {record.evidence.quality && (
-                  <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">
-                    Calitate dovadă: {formatEvidenceQualityStatus(record.evidence.quality.status)} ·{" "}
-                    {record.evidence.quality.summary}
-                  </p>
-                )}
-                {record.auditGateCodes.length > 0 && (
-                  <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">
-                    Gates active: {record.auditGateCodes.map(formatAuditGateCode).join(" · ")}
-                  </p>
-                )}
-                {record.bundleFiles.length > 0 && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
-                    Fișiere legate: {record.bundleFiles.join(" · ")}
-                  </p>
-                )}
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Referințe și surse
-                </p>
-                <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                  {record.lawReferences.length > 0
-                    ? record.lawReferences.join(" · ")
-                    : "Fără referință legală explicită"}
-                </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  {record.sourceKinds.join(" · ") || "tip sursă neconfirmat"}
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                Ce urmează
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                {record.nextStep}
-              </p>
-              <div className="mt-4 space-y-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Confirmare control / articol
-                </p>
-                <textarea
-                  value={draftNotes[record.id] ?? record.review.note ?? ""}
-                  onChange={(event) =>
-                    setDraftNotes((current) => ({
-                      ...current,
-                      [record.id]: event.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3 text-sm text-[var(--color-on-surface)] outline-none ring-0"
-                  placeholder="Notează de ce acest control este acceptat sau ce a fost validat manual."
-                />
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                    disabled={busy || record.auditDecision !== "pass"}
-                    onClick={() =>
-                      void onReview({
-                        scope: "record",
-                        traceId: record.id,
-                        action: "confirm",
-                        note: (draftNotes[record.id] ?? record.review.note ?? "").trim() || null,
-                      })
-                    }
-                  >
-                    Confirmă pentru audit
-                  </Button>
-                  {record.review.confirmedByUser && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 rounded-lg"
-                      disabled={busy}
-                      onClick={() =>
-                        void onReview({ scope: "record", traceId: record.id, action: "clear" })
-                      }
-                    >
-                      Elimină confirmarea
-                    </Button>
-                  )}
-                </div>
-                {record.auditDecision !== "pass" && (
-                  <p className="text-xs text-[var(--color-warning)]">
-                    Finalizează dovada, gates-urile și rescan-ul înainte de confirmarea pentru audit.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
-
-function buildTraceabilityFamilyGroups(records: ComplianceTraceRecord[]) {
-  const grouped = new Map<
-    string,
-    {
-      familyKey: string
-      familyLabel: string
-      description: string
-      recordsCount: number
-      validatedCount: number
-      confirmedCount: number
-      pendingEvidenceCount: number
-      reusableEvidenceFiles: Set<string>
-      reusePolicy: string
-      lawReferences: Set<string>
-      sourceDocuments: Set<string>
-      findingsCount: number
-      driftsCount: number
-      familyImpact: string
-      proofSummary: string
-      defaultNote: string
-    }
-  >()
-
-  for (const record of records) {
-    const current = grouped.get(record.controlFamily.key) ?? {
-      familyKey: record.controlFamily.key,
-      familyLabel: record.controlFamily.label,
-      description: record.controlFamily.description,
-      recordsCount: 0,
-      validatedCount: 0,
-      confirmedCount: 0,
-      pendingEvidenceCount: 0,
-      reusableEvidenceFiles: new Set<string>(),
-      reusePolicy: getControlFamilyReusePolicySummary(record.controlFamily.key),
-      lawReferences: new Set<string>(),
-      sourceDocuments: new Set<string>(),
-      findingsCount: 0,
-      driftsCount: 0,
-      familyImpact: buildFamilyImpact(record.controlFamily.key),
-      proofSummary: buildFamilyProofSummary(record.controlFamily.key),
-      defaultNote: `Familia ${record.controlFamily.label} a fost revizuită pe baza dovezii comune și a snapshot-ului curent.`,
-    }
-
-    current.recordsCount += 1
-    current.validatedCount += record.auditDecision === "pass" ? 1 : 0
-    current.confirmedCount += record.review.confirmedByUser ? 1 : 0
-    current.findingsCount += record.linkedFindingIds.length
-    current.driftsCount += record.linkedDriftIds.length
-    current.pendingEvidenceCount += record.auditDecision === "pass" ? 0 : 1
-    if (record.auditDecision === "pass" && record.evidence.fileName) {
-      current.reusableEvidenceFiles.add(record.evidence.fileName)
-    }
-    for (const lawReference of record.lawReferences) current.lawReferences.add(lawReference)
-    for (const sourceDocument of record.sourceDocuments) current.sourceDocuments.add(sourceDocument)
-    if (record.review.note) current.defaultNote = record.review.note
-    grouped.set(record.controlFamily.key, current)
-  }
-
-  return [...grouped.values()]
-    .map((group) => ({
-      ...group,
-      reusableEvidenceCount: group.reusableEvidenceFiles.size,
-      reusableFiles: [...group.reusableEvidenceFiles],
-      lawReferences: [...group.lawReferences],
-      sourceDocuments: [...group.sourceDocuments],
-    }))
-    .sort((left, right) => left.familyLabel.localeCompare(right.familyLabel))
-}
-
-function buildFamilyImpact(familyKey: string) {
-  if (familyKey === "human-oversight") {
-    return "Arată dacă sistemul poate fi oprit, revizuit sau escaladat înainte să producă efecte operaționale."
-  }
-  if (familyKey === "privacy-tracking") {
-    return "Arată dacă profilarea, tracking-ul și suprafețele publice pot fi apărate legal și operațional."
-  }
-  if (familyKey === "data-residency") {
-    return "Arată dacă rezidența datelor și transferurile sunt explicate clar înainte de audit."
-  }
-  if (familyKey === "retention-and-deletion") {
-    return "Arată dacă datele personale sunt păstrate doar cât trebuie și dacă există ieșire controlată din flux."
-  }
-  if (familyKey === "governance-baseline") {
-    return "Leagă scopul declarat, baseline-ul și asumarea operațională într-un punct defensibil."
-  }
-  if (familyKey === "efactura-operations") {
-    return "Arată că fluxurile cu impact financiar au owner, reconciliere și dovadă operațională."
-  }
-
-  return "Această familie ține împreună controale care trebuie explicate ca un pachet, nu ca task-uri izolate."
-}
-
-function buildFamilyProofSummary(familyKey: string) {
-  if (familyKey === "human-oversight") {
-    return "Workflow de review, log de override și notă clară de escaladare."
-  }
-  if (familyKey === "privacy-tracking") {
-    return "CMP activ, consent log și textul legal folosit în suprafața relevantă."
-  }
-  if (familyKey === "data-residency") {
-    return "Regiune declarată, traseu de transfer și document tehnic de susținere."
-  }
-  if (familyKey === "retention-and-deletion") {
-    return "Politică de retenție și dovadă de ștergere sau anonimizare."
-  }
-  if (familyKey === "governance-baseline") {
-    return "Baseline validat, owner confirmat și decizie de review legată de snapshot."
-  }
-  if (familyKey === "efactura-operations") {
-    return "Runbook operațional, owner financiar și exemplu de reconciliere."
-  }
-
-  return "O combinație de dovadă operațională, referință legală și confirmare de audit."
-}
-
-function buildTraceabilityReviewGroups(records: ComplianceTraceRecord[]) {
-  const grouped = new Map<
-    string,
-    {
-      lawReference: string
-      recordsCount: number
-      validatedCount: number
-      confirmedCount: number
-      sourceDocuments: Set<string>
-      sampleNextStep: string
-      defaultNote: string
-    }
-  >()
-
-  for (const record of records) {
-    for (const lawReference of record.lawReferences) {
-      const current = grouped.get(lawReference)
-      const defaultNote = record.review.confirmedByUser
-        ? record.review.note ?? ""
-        : `Control validat în contextul ${lawReference} pe baza dovezilor și a snapshot-ului curent.`
-
-      if (!current) {
-        grouped.set(lawReference, {
-          lawReference,
-          recordsCount: 1,
-          validatedCount: record.auditDecision === "pass" ? 1 : 0,
-          confirmedCount: record.review.confirmedByUser ? 1 : 0,
-          sourceDocuments: new Set(record.sourceDocuments),
-          sampleNextStep: record.nextStep,
-          defaultNote,
-        })
-        continue
-      }
-
-      current.recordsCount += 1
-      current.validatedCount += record.auditDecision === "pass" ? 1 : 0
-      current.confirmedCount += record.review.confirmedByUser ? 1 : 0
-      for (const sourceDocument of record.sourceDocuments) {
-        current.sourceDocuments.add(sourceDocument)
-      }
-      if (current.sampleNextStep.length < record.nextStep.length) {
-        current.sampleNextStep = record.nextStep
-      }
-      if (!current.defaultNote && defaultNote) {
-        current.defaultNote = defaultNote
-      }
-    }
-  }
-
-  return [...grouped.values()]
-    .map((group) => ({
-      ...group,
-      sourceCount: group.sourceDocuments.size,
-    }))
-    .sort((left, right) => left.lawReference.localeCompare(right.lawReference))
-}
-
-function TraceMiniCard({
-  label,
-  value,
-  hint,
-}: {
-  label: string
-  value: string
-  hint: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
-      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">{value}</p>
-      <p className="mt-2 text-xs text-[var(--color-muted)]">{hint}</p>
-    </div>
-  )
-}
-
 function DriftWatchCard({
   drifts,
 }: {
@@ -1584,6 +936,19 @@ function VaultEmptyState({
   return <EmptyState title={title} label={description} className="rounded-2xl" />
 }
 
+function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
+      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+        {detail}
+      </CardContent>
+    </Card>
+  )
+}
+
 function formatEventActor(event: ComplianceEvent) {
   return event.actorRole ? `${event.actorLabel} (${event.actorRole})` : event.actorLabel
 }
@@ -1666,56 +1031,6 @@ function formatValidationConfidence(value: NonNullable<ValidationEntry["confiden
   if (value === "high") return "încredere mare"
   if (value === "medium") return "încredere medie"
   return "încredere redusă"
-}
-
-function formatEvidenceQualityStatus(value: NonNullable<ComplianceTraceRecord["evidence"]["quality"]>["status"]) {
-  if (value === "sufficient") return "suficientă"
-  return "slabă"
-}
-
-function formatAuditDecision(value: ComplianceTraceRecord["auditDecision"]) {
-  if (value === "pass") return "gata pentru audit"
-  if (value === "review") return "review necesar"
-  return "blocat"
-}
-
-function formatAuditGateCode(value: ComplianceTraceRecord["auditGateCodes"][number]) {
-  if (value === "missing_evidence") return "dovadă lipsă"
-  if (value === "pending_validation") return "validare în așteptare"
-  if (value === "weak_evidence") return "dovadă slabă"
-  if (value === "stale_evidence") return "dovadă veche / afectată de drift"
-  if (value === "unresolved_drift") return "drift nerezolvat"
-  return "finding doar inferat"
-}
-
-function traceStatusBadgeVariant(status: ComplianceTraceRecord["traceStatus"]) {
-  if (status === "validated") {
-    return "success" as const
-  }
-  if (status === "evidence_required") {
-    return "warning" as const
-  }
-  return "destructive" as const
-}
-
-function auditDecisionBadgeVariant(status: ComplianceTraceRecord["auditDecision"]) {
-  if (status === "pass") {
-    return "success" as const
-  }
-  if (status === "review") {
-    return "warning" as const
-  }
-  return "destructive" as const
-}
-
-function controlCoverageBadgeVariant(status: ComplianceTraceRecord["bundleCoverageStatus"]) {
-  if (status === "covered") {
-    return "success" as const
-  }
-  if (status === "partial") {
-    return "warning" as const
-  }
-  return "secondary" as const
 }
 
 function formatEventLabel(type: string) {

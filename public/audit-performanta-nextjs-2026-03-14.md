@@ -361,6 +361,7 @@ Stare curenta:
 
 - `Audit si export` face lazy load pentru `RemediationBoard` si `ExportCenter` (dynamic import cu placeholder local)
 - `Scanari` face lazy load pentru `AgentWorkspace` si `AIDiscoveryPanel` (dynamic import cu placeholder local)
+- `Auditor Vault` face lazy load pentru `TraceabilityMatrixCard` dupa extragerea lui intr-un component separat
 
 Castig:
 

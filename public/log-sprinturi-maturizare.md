@@ -138,6 +138,7 @@ Suita curenta:
 - Val B3 (lazy load):
   - `Audit si export` incarca dinamic `RemediationBoard` si `ExportCenter` cu placeholder local
   - `Scanari` incarca dinamic `AgentWorkspace` si `AIDiscoveryPanel` cu placeholder local
+  - `Auditor Vault` incarca dinamic `TraceabilityMatrixCard` dupa extragerea zonei de traceability intr-un component separat
 
 ### Sprint 6 - Audit defensibility
 
