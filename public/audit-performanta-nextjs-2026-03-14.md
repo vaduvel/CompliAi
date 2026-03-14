@@ -465,3 +465,22 @@ Validare:
 - `npm run lint`
 - `npm test`
 - `npm run build`
+
+## Implementare Val A2 (Setari)
+
+Am redus numarul de request-uri la mount in `Setari`:
+
+- endpoint agregat nou: `GET /api/settings/summary`
+- pagina `Setari` foloseste acum un singur fetch pentru:
+  - repo sync status
+  - sesiune curenta (`auth/me`)
+  - membri organizatie
+  - status Supabase
+  - health check aplicatie
+  - release readiness (doar pentru roluri permise)
+
+Impact:
+
+- mai putine request-uri paralele la mount
+- acelasi comportament de acces si aceleasi mesaje
+- fara schimbari de logica sau arhitectura

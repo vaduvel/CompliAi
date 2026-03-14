@@ -119,6 +119,9 @@ Suita curenta:
     - `Sisteme`
     - `Finding-uri`
     - `comparat cu`
+- optimizare defensiva de performanta in `Setari`:
+  - endpoint agregat nou: `GET /api/settings/summary`
+  - un singur fetch pentru status repo sync, sesiune, membri, Supabase, health check si release readiness
 
 ### Sprint 6 - Audit defensibility
 

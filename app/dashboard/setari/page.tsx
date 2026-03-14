@@ -103,6 +103,19 @@ type ReleaseReadinessStatus = {
   }>
 } | null
 
+type SettingsSummaryResponse = {
+  repoSyncStatus: RepoSyncStatus
+  currentUser: CurrentUser
+  members: MembersResponse
+  membersError?: string | null
+  supabaseStatus: SupabaseOperationalStatus
+  supabaseStatusError?: string | null
+  appHealth: ApplicationHealthStatus
+  appHealthError?: string | null
+  releaseReadiness: ReleaseReadinessStatus
+  releaseReadinessError?: string | null
+}
+
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Default policy" },
   { value: "low", label: "Low" },
@@ -125,6 +138,8 @@ const MEMBER_ROLE_OPTIONS = [
   { value: "reviewer", label: "Revizor" },
   { value: "viewer", label: "Vizualizator" },
 ] as const
+
+const SETTINGS_SUMMARY_ENDPOINT = "/api/settings/summary"
 
 export default function SetariPage() {
   const cockpit = useCockpit()
@@ -149,146 +164,88 @@ export default function SetariPage() {
     currentUser?.role === "owner" || currentUser?.role === "compliance"
 
   useEffect(() => {
-    void fetch("/api/integrations/repo-sync/status")
-      .then((response) => response.json())
-      .then((payload: RepoSyncStatus) => setRepoSyncStatus(payload))
-      .catch(() => null)
-  }, [])
+    let active = true
 
-  useEffect(() => {
-    setCurrentUserResolved(false)
+    const loadSummary = async () => {
+      setRepoSyncStatus(null)
+      setCurrentUser(null)
+      setCurrentUserResolved(false)
+      setMembersData(null)
+      setMembersError(null)
+      setMembersLoading(true)
+      setSupabaseStatus(null)
+      setSupabaseStatusError(null)
+      setSupabaseStatusLoading(true)
+      setAppHealth(null)
+      setAppHealthError(null)
+      setAppHealthLoading(true)
+      setReleaseReadiness(null)
+      setReleaseReadinessError(null)
+      setReleaseReadinessLoading(true)
 
-    void fetch("/api/auth/me", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload: { user: CurrentUser }) => setCurrentUser(payload.user ?? null))
-      .catch(() => setCurrentUser(null))
-      .finally(() => setCurrentUserResolved(true))
-  }, [])
-
-  useEffect(() => {
-    setSupabaseStatusLoading(true)
-    setSupabaseStatusError(null)
-
-    void fetch("/api/integrations/supabase/status", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = (await response.json()) as
-          | ({ ok?: boolean; error?: string } & NonNullable<SupabaseOperationalStatus>)
-          | { error?: string; code?: string }
+      try {
+        const response = await fetch(SETTINGS_SUMMARY_ENDPOINT, { cache: "no-store" })
+        const payload = (await response.json()) as SettingsSummaryResponse | { error?: string }
 
         if (!response.ok) {
           throw new Error(
             "error" in payload && payload.error
               ? payload.error
-              : "Nu am putut verifica statusul operational Supabase."
+              : "Nu am putut incarca sumarul de setari."
           )
         }
 
-        setSupabaseStatus(payload as NonNullable<SupabaseOperationalStatus>)
-      })
-      .catch((error) => {
+        if (!active) return
+
+        const summary = payload as SettingsSummaryResponse
+
+        setRepoSyncStatus(summary.repoSyncStatus ?? null)
+        setCurrentUser(summary.currentUser ?? null)
+        setMembersData(summary.members ?? null)
+        setMembersError(summary.membersError ?? null)
+        setSupabaseStatus(summary.supabaseStatus ?? null)
+        setSupabaseStatusError(summary.supabaseStatusError ?? null)
+        setAppHealth(summary.appHealth ?? null)
+        setAppHealthError(summary.appHealthError ?? null)
+        setReleaseReadiness(summary.releaseReadiness ?? null)
+        setReleaseReadinessError(summary.releaseReadinessError ?? null)
+      } catch (error) {
+        if (!active) return
+
+        setRepoSyncStatus(null)
+        setCurrentUser(null)
+        setMembersData(null)
         setSupabaseStatus(null)
+        setAppHealth(null)
+        setReleaseReadiness(null)
+
+        setMembersError(
+          error instanceof Error ? error.message : "Nu am putut incarca membrii."
+        )
         setSupabaseStatusError(
           error instanceof Error ? error.message : "Nu am putut verifica statusul Supabase."
         )
-      })
-      .finally(() => setSupabaseStatusLoading(false))
-  }, [])
-
-  useEffect(() => {
-    setAppHealthLoading(true)
-    setAppHealthError(null)
-
-    void fetch("/api/health", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = (await response.json()) as
-          | ({ ok?: boolean; error?: string } & NonNullable<ApplicationHealthStatus>)
-          | { error?: string; code?: string }
-
-        if (!response.ok) {
-          throw new Error(
-            "error" in payload && payload.error
-              ? payload.error
-              : "Nu am putut verifica health check-ul aplicației."
-          )
-        }
-
-        setAppHealth(payload as NonNullable<ApplicationHealthStatus>)
-      })
-      .catch((error) => {
-        setAppHealth(null)
         setAppHealthError(
           error instanceof Error ? error.message : "Nu am putut verifica health check-ul aplicației."
         )
-      })
-      .finally(() => setAppHealthLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (!currentUserResolved) return
-
-    const canViewReleaseReadiness =
-      currentUser?.role === "owner" || currentUser?.role === "compliance"
-
-    if (!canViewReleaseReadiness) {
-      setReleaseReadiness(null)
-      setReleaseReadinessError(null)
-      setReleaseReadinessLoading(false)
-      return
-    }
-
-    setReleaseReadinessLoading(true)
-    setReleaseReadinessError(null)
-
-    void fetch("/api/release-readiness", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = (await response.json()) as
-          | ({ ok?: boolean; error?: string } & NonNullable<ReleaseReadinessStatus>)
-          | { error?: string; code?: string }
-
-        if (!response.ok) {
-          throw new Error(
-            "error" in payload && payload.error
-              ? payload.error
-              : "Nu am putut verifica release readiness."
-          )
-        }
-
-        setReleaseReadiness(payload as NonNullable<ReleaseReadinessStatus>)
-      })
-      .catch((error) => {
-        setReleaseReadiness(null)
         setReleaseReadinessError(
           error instanceof Error ? error.message : "Nu am putut verifica release readiness."
         )
-      })
-      .finally(() => setReleaseReadinessLoading(false))
-  }, [currentUserResolved, currentUser?.role])
+      } finally {
+        if (!active) return
+        setCurrentUserResolved(true)
+        setMembersLoading(false)
+        setSupabaseStatusLoading(false)
+        setAppHealthLoading(false)
+        setReleaseReadinessLoading(false)
+      }
+    }
 
-  useEffect(() => {
-    setMembersLoading(true)
-    setMembersError(null)
+    void loadSummary()
 
-    void fetch("/api/auth/members", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = (await response.json()) as
-          | (NonNullable<MembersResponse> & { error?: string })
-          | { error?: string; code?: string }
-
-        if (!response.ok) {
-          throw new Error(
-            "error" in payload && payload.error
-              ? payload.error
-              : "Nu am putut incarca membrii organizatiei."
-          )
-        }
-
-        setMembersData(payload as NonNullable<MembersResponse>)
-      })
-      .catch((error) => {
-        setMembersData(null)
-        setMembersError(error instanceof Error ? error.message : "Nu am putut incarca membrii.")
-      })
-      .finally(() => setMembersLoading(false))
+    return () => {
+      active = false
+    }
   }, [])
 
   useEffect(() => {
