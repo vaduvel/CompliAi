@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { startTransition, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { LogOut, ChevronDown } from "lucide-react"
@@ -71,7 +71,9 @@ export function DashboardShell({
         description: payload.message || "Sesiunea a fost mutata pe organizatia selectata.",
       })
       setUserMenuOpen(false)
-      router.refresh()
+      startTransition(() => {
+        router.refresh()
+      })
     } catch (error) {
       toast.error("Schimbarea organizatiei a esuat", {
         description: error instanceof Error ? error.message : "Incearca din nou.",

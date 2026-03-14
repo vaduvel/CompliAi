@@ -419,6 +419,12 @@ Scop:
 - refresh mai putin global
 - mutatii locale mai precise
 
+Stare curenta:
+
+- `Scanari` nu mai foloseste `router.refresh()` dupa commit din Agent Workspace; face `reloadDashboard()` local
+- refresh global a ramas doar la schimbarea de organizatie din shell, unde este necesar pentru rehidratarea contextului server-side
+- schimbarea de organizatie ruleaza acum in `startTransition(...)` pentru a pastra UI-ul mai fluid
+
 ## Ordinea recomandata
 
 Ca sa nu stricam ce merge:

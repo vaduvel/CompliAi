@@ -197,7 +197,7 @@ export default function ScanariPage() {
             const success = await agentFlow.commitBundle(finalBundle)
             if (success) {
               agentFlow.setAgentModeActive(false)
-              router.refresh()
+              await cockpitActions.reloadDashboard()
             }
           }}
           onCancel={() => agentFlow.setAgentModeActive(false)}

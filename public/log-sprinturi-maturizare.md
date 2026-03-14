@@ -150,6 +150,10 @@ Suita curenta:
   - `loading.tsx` adaugat pe `app/dashboard/rapoarte`
   - `loading.tsx` adaugat pe `app/dashboard/rapoarte/auditor-vault`
   - segmentele folosesc acum un skeleton coerent de dashboard, nu doar spinner local
+- Val C3 (refresh mai precis):
+  - `Scanari` foloseste `reloadDashboard()` local dupa commit din Agent Workspace, nu `router.refresh()`
+  - refresh global a ramas doar la schimbarea de organizatie din shell
+  - schimbarea de organizatie ruleaza acum in `startTransition(...)`
 
 ### Sprint 6 - Audit defensibility
 
