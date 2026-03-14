@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import type {
@@ -94,6 +94,7 @@ function useCockpitStore() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<DashboardPayload | null>(null)
   const [tasks, setTasks] = useState<CockpitTask[]>([])
+  const hasLoadedOnce = useRef(false)
 
   useEffect(() => {
     void reloadDashboard()
@@ -122,17 +123,19 @@ function useCockpitStore() {
     : "inca fara scan"
 
   async function reloadDashboard() {
-    setLoading(true)
+    const shouldShowLoading = !hasLoadedOnce.current
+    if (shouldShowLoading) setLoading(true)
     setError(null)
     try {
       const response = await fetch("/api/dashboard", { cache: "no-store" })
       if (!response.ok) throw new Error("Nu am putut incarca dashboard-ul.")
       const payload = (await response.json()) as DashboardPayload
       setData(payload)
+      hasLoadedOnce.current = true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Eroare necunoscuta.")
     } finally {
-      setLoading(false)
+      if (shouldShowLoading) setLoading(false)
     }
   }
 

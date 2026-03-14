@@ -125,6 +125,7 @@ Suita curenta:
 - Val A1 (loading local, nu full-screen):
   - `LoadingScreen` accepta acum varianta `section`
   - paginile din dashboard folosesc `LoadingScreen variant="section"`
+  - `reloadDashboard()` nu mai ridica `loading=true` daca exista deja date
 - Val A3 (shell bootstrap):
   - endpoint agregat nou: `GET /api/auth/summary`
   - `DashboardShell` incarca user + memberships intr-un singur fetch

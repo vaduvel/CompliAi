@@ -473,6 +473,7 @@ Am redus impactul de "full-screen loading" pe paginile mari:
 - `LoadingScreen` are acum variantă `section`
 - paginile din dashboard folosesc `LoadingScreen variant="section"`
 - loader-ul rămâne local, nu mai acoperă tot viewport-ul
+- `reloadDashboard()` nu mai seteaza `loading=true` daca exista deja date
 
 Impact:
 
