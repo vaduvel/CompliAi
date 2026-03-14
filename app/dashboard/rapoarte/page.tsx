@@ -20,7 +20,7 @@ import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import type { ComplianceDriftRecord } from "@/lib/compliance/types"
 import {
   formatDriftEscalationDeadline,
@@ -34,7 +34,8 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
 
 export default function AuditExportPage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null)
 
@@ -77,10 +78,10 @@ export default function AuditExportPage() {
             onFilterChange={setTaskFilter}
             onMarkDone={(taskId) => {
               setHighlightedTaskId(taskId)
-              cockpit.handleMarkDone(taskId)
+              cockpitActions.handleMarkDone(taskId)
             }}
-            onAttachEvidence={cockpit.attachEvidence}
-            onExport={cockpit.handleTaskExport}
+            onAttachEvidence={cockpitActions.attachEvidence}
+            onExport={cockpitActions.handleTaskExport}
           />
         </div>
 
@@ -92,14 +93,14 @@ export default function AuditExportPage() {
           />
 
           <ExportCenter
-            onGeneratePdf={() => void cockpit.handleGenerateReport()}
-            onGenerateAuditPack={() => void cockpit.handleGenerateAuditPack()}
-            onGenerateAuditBundle={() => void cockpit.handleGenerateAuditBundle()}
-            onGenerateAnnexLite={() => void cockpit.handleGenerateAnnexLite()}
-            onExportChecklist={() => void cockpit.handleChecklistExport()}
-            onExportCompliScanJson={() => void cockpit.handleExportCompliScanJson()}
-            onExportCompliScanYaml={() => void cockpit.handleExportCompliScanYaml()}
-            onShare={() => void cockpit.handleShareWithAccountant()}
+            onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
+            onGenerateAuditPack={() => void cockpitActions.handleGenerateAuditPack()}
+            onGenerateAuditBundle={() => void cockpitActions.handleGenerateAuditBundle()}
+            onGenerateAnnexLite={() => void cockpitActions.handleGenerateAnnexLite()}
+            onExportChecklist={() => void cockpitActions.handleChecklistExport()}
+            onExportCompliScanJson={() => void cockpitActions.handleExportCompliScanJson()}
+            onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
+            onShare={() => void cockpitActions.handleShareWithAccountant()}
           />
 
           <ExportArtifactsCard />

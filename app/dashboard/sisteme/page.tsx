@@ -21,12 +21,13 @@ import { LoadingScreen, PageHeader } from "@/components/compliscan/route-section
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 export default function SistemePage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -179,9 +180,9 @@ export default function SistemePage() {
         systems={cockpit.data.state.detectedAISystems}
         drifts={cockpit.activeDrifts}
         busy={cockpit.busy}
-        onDiscover={cockpit.discoverAISystemsFromManifest}
-        onUpdateStatus={cockpit.updateDetectedAISystem}
-        onEdit={cockpit.editDetectedAISystem}
+        onDiscover={cockpitActions.discoverAISystemsFromManifest}
+        onUpdateStatus={cockpitActions.updateDetectedAISystem}
+        onEdit={cockpitActions.editDetectedAISystem}
       />
 
       <AICompliancePackEntriesCard
@@ -189,7 +190,7 @@ export default function SistemePage() {
         title="Pack pre-completat pentru review"
         editable
         busy={cockpit.busy}
-        onUpdateField={cockpit.updateCompliancePackField}
+        onUpdateField={cockpitActions.updateCompliancePackField}
       />
 
       <SectionDivider
@@ -294,8 +295,8 @@ export default function SistemePage() {
       <AIInventoryPanel
         systems={cockpit.data.state.aiSystems}
         busy={cockpit.busy}
-        onSubmit={cockpit.addAISystem}
-        onRemove={cockpit.removeAISystem}
+        onSubmit={cockpitActions.addAISystem}
+        onRemove={cockpitActions.removeAISystem}
       />
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -306,7 +307,7 @@ export default function SistemePage() {
           <EFacturaValidatorCard
             validations={cockpit.data.state.efacturaValidations}
             busy={cockpit.busy}
-            onValidate={cockpit.validateEFacturaXml}
+            onValidate={cockpitActions.validateEFacturaXml}
           />
         </CardContent>
       </Card>
