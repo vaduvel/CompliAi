@@ -28,7 +28,7 @@ import {
   AICompliancePackSummaryCard,
 } from "@/components/compliscan/ai-compliance-pack-card"
 import type { CockpitTask } from "@/components/compliscan/types"
-import { useCockpit } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
 import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
@@ -49,7 +49,8 @@ import type {
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 export default function AuditorVaultPage() {
-  const cockpit = useCockpit()
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -187,8 +188,8 @@ export default function AuditorVaultPage() {
           <TraceabilityMatrixCard
             records={cockpit.data.traceabilityMatrix}
             busy={cockpit.busy}
-            onReview={cockpit.updateTraceabilityReview}
-            onReuseFamilyEvidence={cockpit.reuseFamilyEvidence}
+            onReview={cockpitActions.updateTraceabilityReview}
+            onReuseFamilyEvidence={cockpitActions.reuseFamilyEvidence}
           />
         </div>
 

@@ -516,7 +516,7 @@ Impact:
 Am introdus separarea `data` vs `mutations` in `use-cockpit`:
 
 - noi hook-uri: `useCockpitData()` si `useCockpitMutations()`
-- pagini migrate: `Alerte`, `Audit si export`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`, `Asistent`, `Dashboard`, `Setari`
+- pagini migrate: `Alerte`, `Audit si export`, `Audit si dovezi`, `Control sisteme AI`, `Documente`, `Remediere`, `Scanari`, `Asistent`, `Dashboard`, `Setari`
 
 Impact:
 
