@@ -27,6 +27,7 @@ export default function AsistentPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
+  const hasMessages = messages.length > 0
 
   useEffect(() => {
     if (cockpit.data?.state.chat) {
@@ -85,56 +86,63 @@ export default function AsistentPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] flex-col gap-6">
+    <div className="flex min-h-[calc(100vh-120px)] flex-col gap-6 lg:h-[calc(100vh-120px)]">
       <PageHeader
         title="Asistent AI"
-        description="Intrebari despre conformitate GDPR, EU AI Act, e-Factura"
+        description="Intrebari despre obligatii, riscuri si pasul urmator"
         score={cockpit.data.summary.score}
         riskLabel={cockpit.data.summary.riskLabel}
       />
 
       <PillarTabs sectionId="dovada" />
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm">
+      <section className="flex min-h-[32rem] min-w-0 flex-1 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm">
         <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-5 py-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="mx-auto flex w-full max-w-4xl flex-wrap items-start justify-between gap-3">
             <div>
               <Badge variant="outline" className="mb-2">
                 Asistent Evidence OS
               </Badge>
-              <h2 className="text-lg font-semibold text-eos-text">Conversație ghidată pentru conformitate</h2>
+              <h2 className="text-lg font-semibold text-eos-text">Asistent de conformitate</h2>
               <p className="mt-1 text-sm text-eos-text-muted">
-                Pune întrebări despre GDPR, EU AI Act și e-Factura. Verificarea umană rămâne obligatorie pentru deciziile oficiale.
+                Intreaba despre GDPR, EU AI Act si e-Factura, apoi valideaza uman concluziile oficiale.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Motor conversațional: Gemini</Badge>
-              <Badge variant="warning">Validare umană recomandată</Badge>
+              <Badge variant="secondary">Gemini</Badge>
+              <Badge variant="warning">Validare umană obligatorie</Badge>
             </div>
           </div>
         </div>
 
         <ScrollArea className="flex-1 p-5" aria-label="Conversatie cu asistentul de conformitate">
-          <div className="space-y-4">
-          {messages.length === 0 && (
-            <div className="space-y-6 py-12">
-              <EmptyState
-                icon={Sparkles}
-                label="Asistentul este pregătit. Începe cu o întrebare despre starea actuală, riscuri sau pașii următori de conformitate."
-                className="border-eos-border-subtle bg-eos-bg-panel"
-              />
-              <div className="grid gap-2 sm:grid-cols-2">
-                {assistantSuggestions.map((suggestion) => (
-                  <AssistantSuggestionChip
-                    key={suggestion}
-                    suggestion={suggestion}
-                    onSelect={setInput}
-                    disabled={sending}
-                  />
-                ))}
+          <div className="mx-auto w-full max-w-4xl space-y-4" role="log" aria-live="polite" aria-relevant="additions text">
+            {!hasMessages && (
+              <div className="space-y-6 py-12">
+                <EmptyState
+                  icon={Sparkles}
+                  title="Asistentul este pregatit"
+                  label="Incepe cu o intrebare despre starea actuala, riscurile curente sau pasii urmatori de conformitate."
+                  className="border-eos-border-subtle bg-eos-bg-panel"
+                />
+                <div className="space-y-3" aria-label="Sugestii de intrebari">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-medium text-eos-text">Intrebari rapide</h3>
+                <p className="text-xs text-eos-text-muted">Alege una sau scrie direct.</p>
               </div>
-            </div>
-          )}
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {assistantSuggestions.map((suggestion) => (
+                      <AssistantSuggestionChip
+                        key={suggestion}
+                        suggestion={suggestion}
+                        onSelect={setInput}
+                        disabled={sending}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {messages.map((msg) => (
               <AssistantMessageBubble key={msg.id} message={msg} />
@@ -147,7 +155,7 @@ export default function AsistentPage() {
                 </div>
                 <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-3">
                   <Loader2 className="size-4 animate-spin text-eos-text-muted" aria-hidden="true" />
-                  <span className="text-sm text-eos-text-muted">Gemini genereaza raspuns...</span>
+                  <span className="text-sm text-eos-text-muted">Se genereaza raspuns...</span>
                 </div>
               </div>
             )}
@@ -157,33 +165,53 @@ export default function AsistentPage() {
         </ScrollArea>
 
         <div className="border-t border-eos-border-subtle bg-eos-bg-panel p-4">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  void handleSend()
-                }
+          <div className="mx-auto w-full max-w-4xl">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-medium text-eos-text">Mesaj nou</h3>
+                <p className="text-xs text-eos-text-muted">
+                  Foloseste intrebari scurte si context clar.
+                </p>
+              </div>
+              {hasMessages ? (
+                <Badge variant="outline" className="shrink-0">
+                  Conversatie activa
+                </Badge>
+              ) : null}
+            </div>
+            <form
+              className="flex flex-col gap-3 sm:flex-row"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void handleSend()
               }}
-              placeholder="Pune o intrebare despre conformitate..."
-              className="flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text outline-none transition-[border-color,box-shadow] placeholder:text-eos-text-muted focus:border-eos-primary focus:ring-2 focus:ring-eos-primary-focus"
-              disabled={sending}
-              aria-label="Mesaj pentru asistentul de conformitate"
-            />
-            <Button
-              onClick={() => void handleSend()}
-              disabled={!input.trim() || sending}
-              className="h-10 rounded-eos-md px-4"
             >
-              <Send className="size-4" strokeWidth={2.25} />
-            </Button>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Intreaba despre risc, GDPR sau e-Factura"
+                className="min-w-0 flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text outline-none transition-[border-color,box-shadow] placeholder:text-eos-text-muted focus:border-eos-primary focus:ring-2 focus:ring-eos-primary-focus"
+                disabled={sending}
+                aria-label="Mesaj pentru asistentul de conformitate"
+                aria-describedby="assistant-composer-note"
+                autoComplete="off"
+                enterKeyHint="send"
+              />
+              <Button
+                type="submit"
+                disabled={!input.trim() || sending}
+                className="h-10 gap-2 rounded-eos-md px-4 sm:self-auto"
+                aria-label="Trimite mesajul"
+              >
+                <Send className="size-4 shrink-0" strokeWidth={2.25} />
+                <span className="sm:hidden">Trimite</span>
+              </Button>
+            </form>
+            <p id="assistant-composer-note" className="mt-2 text-[11px] text-eos-text-muted">
+              Raspuns orientativ; validarea umana ramane obligatorie.
+            </p>
           </div>
-          <p className="mt-2 text-center text-[11px] text-eos-text-muted">
-            Recomandarile sunt AI — verifica uman inainte de decizii oficiale.
-          </p>
         </div>
       </section>
     </div>

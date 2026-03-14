@@ -53,7 +53,7 @@ export function ReviewDecisionPanel({
           Decizie finala
         </h3>
         <p id={descriptionId} className="mt-1 text-xs text-eos-text-muted">
-          Confirmi propunerile agentilor? Acestea vor intra in starea oficiala a sistemului.
+          Confirmi propunerile agentilor? Acestea intra in starea oficiala a sistemului.
         </p>
       </div>
 

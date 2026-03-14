@@ -36,7 +36,7 @@ export function SourceContextPanel({ envelope, className }: SourceContextPanelPr
           {envelope.sourceName}
         </h3>
         <p className="mt-1 text-xs uppercase tracking-[0.01em] text-eos-text-muted">
-          Context extras pentru decizia de audit
+          Context pentru decizia de audit
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export function SourceContextPanel({ envelope, className }: SourceContextPanelPr
               signals={envelope.sourceSignals}
               title="Semnale detectate"
               showEmpty
-              emptyLabel="Niciun semnal brut"
+              emptyLabel="Fara semnale brute"
             />
           </section>
 

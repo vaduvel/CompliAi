@@ -32,15 +32,15 @@ export function ProposalBundlePanel({ bundle, children, value, onValueChange }: 
         <p id={labelId} className="sr-only">
           Navigatie pentru propunerile generate de Agent Evidence OS
         </p>
-        <TabsList className="grid w-full grid-cols-4" aria-labelledby={labelId}>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4" aria-labelledby={labelId}>
           {items.map((item) => (
             <TabsTrigger
               key={item.value}
               value={item.value}
-              className="gap-2"
+              className="min-w-0 gap-1.5 px-2 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
               aria-label={`${item.label}: ${item.count} ${item.count === 1 ? "propunere" : "propuneri"}`}
             >
-              <span>{item.label}</span>
+              <span className="truncate">{item.label}</span>
               <span
                 className="rounded-eos-sm bg-eos-surface-variant px-1.5 py-0.5 text-[11px] font-semibold text-eos-text-muted"
                 aria-hidden="true"

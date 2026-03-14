@@ -3,12 +3,14 @@ import { FileText, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface EmptyStateProps {
+  title?: string
   label: string
   icon?: LucideIcon
+  actions?: React.ReactNode
   className?: string
 }
 
-export function EmptyState({ label, icon: Icon = FileText, className }: EmptyStateProps) {
+export function EmptyState({ title, label, icon: Icon = FileText, actions, className }: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -21,7 +23,9 @@ export function EmptyState({ label, icon: Icon = FileText, className }: EmptySta
       <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-eos-bg-panel">
         <Icon className="size-5 text-eos-text-tertiary" aria-hidden="true" />
       </div>
-      <p className="max-w-sm text-sm text-eos-text-muted">{label}</p>
+      {title ? <p className="text-sm font-medium text-eos-text">{title}</p> : null}
+      <p className={cn("text-sm leading-6 text-eos-text-muted", title ? "mt-1 max-w-md" : "max-w-sm")}>{label}</p>
+      {actions ? <div className="mt-4 flex flex-wrap justify-center gap-2">{actions}</div> : null}
     </div>
   )
 }

@@ -23,7 +23,7 @@ export function AssistantSuggestionChip({
       onClick={() => onSelect(suggestion)}
       disabled={disabled}
       className={cn(
-        "h-auto min-h-11 justify-start whitespace-normal rounded-eos-md px-4 py-3 text-left text-sm leading-5",
+        "h-auto min-h-11 min-w-0 items-start justify-start whitespace-normal rounded-eos-md px-4 py-3 text-left text-sm leading-5 [overflow-wrap:anywhere]",
         className
       )}
     >

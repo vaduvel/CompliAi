@@ -1,7 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { TaskCard } from "@/components/compliscan/task-card"
 import type { CockpitTask, TaskPriority } from "@/components/compliscan/types"
 import type { TaskEvidenceKind } from "@/lib/compliance/types"
@@ -18,7 +19,15 @@ type RemediationBoardProps = {
   onExport: (id: string) => void
 }
 
-const filters: FilterValue[] = ["ALL", "RAPID", "STRUCTURAL", "P1", "P2", "P3", "DONE"]
+const filters: Array<{ value: FilterValue; label: string }> = [
+  { value: "ALL", label: "Deschise" },
+  { value: "RAPID", label: "Rapide" },
+  { value: "STRUCTURAL", label: "Structurale" },
+  { value: "P1", label: "P1" },
+  { value: "P2", label: "P2" },
+  { value: "P3", label: "P3" },
+  { value: "DONE", label: "Inchise" },
+]
 
 export function RemediationBoard({
   tasks,
@@ -53,14 +62,14 @@ export function RemediationBoard({
         <div>
           <CardTitle className="text-lg text-[var(--color-on-surface)]">Remediere</CardTitle>
           <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-            Task-uri actionabile separate intre inchideri rapide si schimbari structurale. Acesta este workflow-ul principal.
+            Task-uri actionabile, separate intre inchideri rapide si schimbari structurale.
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <span className="rounded-full border border-[var(--color-info)] bg-[var(--color-info-muted)] px-3 py-1 text-[var(--color-info)]">
-              {openRapidCount} remedieri rapide deschise
+              {openRapidCount} rapide deschise
             </span>
             <span className="rounded-full border border-[var(--color-warning)] bg-[var(--color-warning-muted)] px-3 py-1 text-[var(--color-warning)]">
-              {openStructuralCount} remedieri structurale deschise
+              {openStructuralCount} structurale deschise
             </span>
           </div>
         </div>
@@ -68,16 +77,16 @@ export function RemediationBoard({
         <div className="flex flex-wrap gap-2">
           {filters.map((filter) => (
             <Button
-              key={filter}
-              onClick={() => onFilterChange(filter)}
+              key={filter.value}
+              onClick={() => onFilterChange(filter.value)}
               variant="outline"
-              className={`h-9 rounded-xl border-[var(--color-border)] px-4 ${
-                activeFilter === filter
+              className={`h-9 rounded-xl border-[var(--color-border)] px-3.5 text-xs sm:px-4 sm:text-sm ${
+                activeFilter === filter.value
                   ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
                   : "bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
               }`}
             >
-              {filter}
+              {filter.label}
             </Button>
           ))}
         </div>
@@ -85,9 +94,11 @@ export function RemediationBoard({
 
       <CardContent className="space-y-4 pt-6">
         {visibleTasks.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-            Nu exista task-uri pentru filtrul curent.
-          </div>
+          <EmptyState
+            title="Nu exista task-uri pentru filtrul curent"
+            label="Schimba filtrul sau ruleaza un nou scan pentru a genera remedieri relevante."
+            className="border-[var(--color-border)] bg-[var(--color-surface-variant)]"
+          />
         )}
 
         {activeFilter === "ALL" && rapidTasks.length > 0 && (
@@ -159,11 +170,11 @@ function TaskGroup({
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <span className={`rounded-full border px-3 py-1 text-xs font-medium ${toneClass}`}>
             {title}
           </span>
-          <p className="text-sm text-[var(--color-on-surface-muted)]">{description}</p>
+          <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">{description}</p>
         </div>
       </div>
 

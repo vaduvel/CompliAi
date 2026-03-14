@@ -1,6 +1,6 @@
 import { Ban } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { ProposalCard } from "@/components/evidence-os/ProposalCard"
 import { ProposalRejectButton } from "@/components/evidence-os/ProposalRejectButton"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { cn } from "@/lib/utils"
@@ -18,28 +18,23 @@ export function DriftProposalCard({
   onToggleRejection,
 }: DriftProposalCardProps) {
   return (
-    <Card
+    <ProposalCard
       className={cn(
         "border-l-4 transition-opacity",
         isRejected ? "border-l-eos-border opacity-60" : "border-l-eos-error"
       )}
+      title={
+        <span className="flex items-center gap-2">
+          {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
+          <span className={cn(isRejected && "line-through text-eos-text-tertiary")}>{drift.driftType}</span>
+        </span>
+      }
+      badges={<SeverityBadge severity={drift.severity} />}
+      actions={<ProposalRejectButton onClick={() => onToggleRejection(drift.driftId)} />}
+      contentClassName="space-y-3 px-4 py-3 text-sm"
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
-            <CardTitle className={cn("text-sm font-medium", isRejected && "line-through text-eos-text-tertiary")}>
-              {drift.driftType}
-            </CardTitle>
-          </div>
-          <div className="flex gap-2">
-            <SeverityBadge severity={drift.severity} />
-            <ProposalRejectButton onClick={() => onToggleRejection(drift.driftId)} />
-          </div>
-        </div>
-      </CardHeader>
       {!isRejected && (
-        <CardContent className="space-y-3 px-4 py-3 text-sm">
+        <>
           <p>{drift.impactSummary}</p>
 
           {drift.rationale && (
@@ -76,8 +71,8 @@ export function DriftProposalCard({
               </div>
             )}
           </div>
-        </CardContent>
+        </>
       )}
-    </Card>
+    </ProposalCard>
   )
 }

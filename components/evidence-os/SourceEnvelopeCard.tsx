@@ -31,7 +31,9 @@ export function SourceEnvelopeCard({ envelope }: SourceEnvelopeCardProps) {
           <Icon className="size-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-sm font-medium leading-none text-eos-text">{envelope.sourceName}</p>
+          <p className="truncate text-sm font-medium leading-none text-eos-text" title={envelope.sourceName}>
+            {envelope.sourceName}
+          </p>
           <p className="text-xs uppercase tracking-[0.01em] text-eos-text-muted">{sourceTypeLabel}</p>
         </div>
         <Badge variant="outline" aria-label={`${envelope.sourceSignals.length} semnale detectate`}>

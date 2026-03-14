@@ -9,15 +9,18 @@ import {
   FileSearch,
 } from "lucide-react"
 
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
+import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { ExportCenter } from "@/components/compliscan/export-center"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ComplianceDriftRecord } from "@/lib/compliance/types"
 import {
   formatDriftEscalationDeadline,
@@ -25,7 +28,7 @@ import {
   formatDriftTypeLabel,
   getDriftPolicyFromRecord,
 } from "@/lib/compliance/drift-policy"
-import { formatDriftLifecycleStatus, isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
+import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
@@ -133,7 +136,7 @@ function ReportsGuideCard() {
       <CardContent className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)]">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-            Export workflow
+            Flux de export
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
             Audit si export, snapshot si dovada intr-un singur loc
@@ -259,9 +262,10 @@ function SnapshotStatusCard({
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {!latestSnapshot && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Nu există încă snapshot. Rulează mai întâi un scan real sau autodiscovery din manifest.
-          </div>
+          <ReportsEmptyState
+            title="Nu exista inca snapshot"
+            description="Ruleaza mai intai un scan real sau autodiscovery din manifest, apoi revino aici pentru export si baseline."
+          />
         )}
 
         {latestSnapshot && (
@@ -279,16 +283,16 @@ function SnapshotStatusCard({
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <SnapshotMeta label="Sources" value={latestSnapshot.sources.length} />
-              <SnapshotMeta label="Systems" value={latestSnapshot.systems.length} />
-              <SnapshotMeta label="Findings" value={latestSnapshot.findings.length} />
+              <SnapshotMeta label="Surse" value={latestSnapshot.sources.length} />
+              <SnapshotMeta label="Sisteme" value={latestSnapshot.systems.length} />
+              <SnapshotMeta label="Finding-uri" value={latestSnapshot.findings.length} />
               <SnapshotMeta label="Drift inclus" value={driftCount} />
             </div>
 
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
-                  comparedTo
+                <Badge variant="outline">
+                  comparat cu
                 </Badge>
                 <span className="text-sm text-[var(--color-on-surface)]">
                   {latestSnapshot.comparedToSnapshotId || "fără comparație"}
@@ -307,19 +311,29 @@ function SnapshotStatusCard({
   )
 }
 
+function ReportsEmptyState({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return <EmptyState title={title} label={description} className="rounded-2xl" />
+}
+
 function ExportArtifactsCard() {
   const artifacts = [
     {
       icon: FileSearch,
       title: "Audit Pack PDF",
       detail:
-        "Dosar executiv client-facing: readiness, blocaje, owner action register, systems, controls, evidence, drift si validation log într-un format printabil.",
+        "Dosar executiv pentru client: sumar, blocaje, sisteme, controale, dovezi, drift si jurnal de validare intr-un format printabil.",
     },
     {
       icon: FileSearch,
       title: "Audit Pack ZIP",
       detail:
-        "Dossier bundle cu varianta client-facing, JSON-urile structurale, traceability matrix si dovezile agregate disponibile din workspace.",
+        "Pachet complet cu varianta pentru client, JSON-urile structurale, traceability matrix si dovezile agregate disponibile din workspace.",
     },
     {
       icon: FileSearch,
@@ -331,7 +345,7 @@ function ExportArtifactsCard() {
       icon: FileCode2,
       title: "compliscan.json / yaml",
       detail:
-        "Snapshot structurat cu sources, systems, findings, drift și summary. Devine source of truth pentru comparații viitoare.",
+        "Snapshot structurat cu surse, sisteme, findings, drift si sumar. Devine sursa tehnica de adevar pentru comparatii viitoare.",
     },
     {
       icon: ClipboardList,
@@ -384,9 +398,10 @@ function RecentDriftCard({
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--status-success-text)]">
-            Nu există drift activ în acest moment. Snapshot-ul va ieși curat din acest punct de vedere.
-          </div>
+          <ReportsEmptyState
+            title="Nu exista drift activ"
+            description="Snapshot-ul va iesi curat din acest punct de vedere."
+          />
         )}
         {drifts.map((drift) => (
           (() => {
@@ -410,24 +425,12 @@ function RecentDriftCard({
                       {guidance.impactSummary}
                     </p>
                   </div>
-                  <Badge
-                    className={
-                      drift.severity === "critical" || drift.severity === "high"
-                        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                        : drift.severity === "medium"
-                          ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                          : "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
-                    }
-                  >
-                    {drift.severity}
-                  </Badge>
+                  <SeverityBadge severity={drift.severity} />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
-                  </Badge>
+                  <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
                   {breached && (
-                    <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                    <Badge variant="destructive">
                       SLA depășit
                     </Badge>
                   )}

@@ -27,6 +27,13 @@ Poți modifica doar:
 - `app/evidence-os.css`
 - `components/evidence-os/*`
 - `app/dashboard/asistent/page.tsx`
+- `components/compliscan/risk-header.tsx`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/export-center.tsx`
 
 Și acum, în plus, poți modifica și adaptorii de runtime pentru `Agent Evidence OS`:
 
@@ -59,6 +66,65 @@ Nu ai voie să modifici:
 - `public/sprinturi-maturizare-compliscan.md`
 
 ## Ce trebuie să livrezi
+
+### Ținta curentă: `Val 2` la 100% pe suprafața aprobată
+
+Lucrezi după planul oficial din:
+
+- `public/evidence-os-oficializare-si-adoptie.md`
+
+`Val 1` este tratat ca închis și stabil. În faza curentă nu împingem `Evidence OS` peste tot în produs.
+
+Ținta ta este:
+
+- să păstrezi `Val 1` stabil, fără regresii
+- să aduci suprafața deja aprobată din `Val 2` la nivel de canonizare completă
+- să reduci cât se poate de mult folosirea directă a `components/ui/*` pe suprafața aprobată, atunci când există primitive canonice `Evidence OS`
+- să lași motive explicite doar pentru ce trebuie să rămână încă legacy
+- să aduci componentele canonice și adaptorii runtime la o stare coerentă, fără dublă mentenanță inutilă
+
+Suprafața aprobată în batch-ul curent înseamnă:
+
+- `components/evidence-os/*`
+- `app/dashboard/asistent/page.tsx`
+- `components/compliscan/risk-header.tsx`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/export-center.tsx`
+- adaptorii runtime enumerați mai jos
+
+Nu înseamnă încă:
+
+- `Alerte`
+- `app/dashboard/scanari/*`
+- `app/dashboard/rapoarte/*`
+- `app/dashboard/setari/*`
+
+### Definiția de "gata" pentru lotul tău
+
+Lotul tău este gata când:
+
+1. `Val 1` rămâne închis vizual și structural:
+   - `components/evidence-os/*` este biblioteca canonică stabilă
+   - `app/dashboard/asistent/page.tsx` folosește coerent `Evidence OS`
+   - adaptorii runtime nu mai au styling propriu și nu dublează UI
+2. suprafața aprobată din `Val 2` nu mai este doar aliniată vizual, ci folosește pe cât posibil stratul canonic `Evidence OS`:
+   - badge semantics
+   - spacing
+   - CTA hierarchy
+   - Romanian-first
+   - empty/loading states curate
+   - primitive canonice acolo unde există alternativă clară
+   - fără pierdere de semnal operațional critic în compactare
+3. nu introduci componente concurente noi în afara bibliotecii canonice
+4. nu extinzi `Evidence OS` în `Val 3`
+5. lași listă scurtă cu:
+   - ce ai închis
+   - ce a rămas legacy în suprafața permisă și de ce
+   - ce ai amânat intenționat pentru Codex principal
 
 ### Batch 0
 
@@ -147,6 +213,46 @@ Nu ai voie să modifici:
 3. rezolvă doar probleme de UI/component safety
 4. nu adăuga business logic
 
+### Batch 8
+
+1. folosește `components/evidence-os/ui-audit-backlog.md` doar ca listă de lucru pentru suprafața aprobată
+2. poți implementa din acel backlog doar itemii care ating:
+   - `app/dashboard/asistent/page.tsx`
+   - `components/evidence-os/*`
+   - `components/compliscan/risk-header.tsx`
+   - `components/compliscan/route-sections.tsx`
+   - `components/compliscan/task-card.tsx`
+   - `components/compliscan/next-best-action.tsx`
+   - `components/compliscan/floating-assistant.tsx`
+   - `components/compliscan/remediation-board.tsx`
+   - `components/compliscan/export-center.tsx`
+3. nu implementa încă itemii care cer lucru în:
+   - `app/dashboard/alerte/page.tsx`
+   - `components/compliscan/logo.tsx`
+   - `app/dashboard/rapoarte/*`
+   - `app/dashboard/setari/*`
+   - `app/dashboard/scanari/*`
+
+### Batch 9
+
+1. închide convergența UI pe `Asistent` și pe cardurile canonice
+2. urmărește explicit:
+   - responsive layout
+   - wrapping / overflow safety
+   - empty states curate
+   - ierarhie vizuală clară
+   - labels română-first
+3. dacă pentru un pas simți că trebuie să intri în cockpit-ul mare, te oprești și îl lași pentru Codex principal
+
+### Batch 10
+
+1. tratează `public/evidence-os-oficializare-si-adoptie.md` ca regulă de livrare, nu doar context
+2. închide explicit:
+   - `Val 1`
+   - suprafața aprobată din `Val 2`
+3. nu începe `Val 3`
+4. nu extinde `Evidence OS` în paginile mari din dashboard
+
 ## Cum să lucrezi
 
 1. Lucrează în batch-uri mici.
@@ -157,6 +263,7 @@ Nu ai voie să modifici:
 6. Nu modifica:
    - `app/dashboard/scanari/page.tsx`
    - niciun endpoint din `app/api/*`
+7. `components/evidence-os/ui-audit-backlog.md` este backlog local, nu autorizație să extinzi zona permisă
 7. Dacă simți nevoia să atingi backend sau route handlers, te oprești și lași pasul pentru Codex principal.
 
 ## Cum livrezi
@@ -176,6 +283,11 @@ Codex principal va face:
 - `lint`
 - `build`
 - update în documentele de control
+- închiderea `Val 2` pe restul suprafețelor sensibile
+- `Val 3`
+- polish final Sprint 1-7
+- backlog recheck
+- architecture + implementation review
 
 ## Prompt scurt
 

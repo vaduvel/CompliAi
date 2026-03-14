@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import { Loader2, MessageSquare, Send, Sparkles, X } from "lucide-react"
 
-type Message = {
-  id: string
-  role: "user" | "assistant"
-  content: string
-}
+import { AssistantMessageBubble } from "@/components/evidence-os/AssistantMessageBubble"
+import { AssistantSuggestionChip } from "@/components/evidence-os/AssistantSuggestionChip"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import type { ChatMessage } from "@/lib/compliance/types"
 
 const SUGGESTIONS: Record<string, string[]> = {
   "/dashboard": ["Care e prioritatea acum?", "Explica-mi scorul de risc"],
@@ -30,7 +31,7 @@ const DEFAULT_SUGGESTIONS = [
 export function FloatingAssistant({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -43,7 +44,8 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100)
+      const timer = window.setTimeout(() => inputRef.current?.focus(), 100)
+      return () => window.clearTimeout(timer)
     }
   }, [open])
 
@@ -55,7 +57,12 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
 
     setMessages((prev) => [
       ...prev,
-      { id: `u-${Date.now()}`, role: "user", content: msg },
+      {
+        id: `u-${Date.now()}`,
+        role: "user",
+        content: msg,
+        createdAtISO: new Date().toISOString(),
+      },
     ])
 
     try {
@@ -65,16 +72,27 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
         body: JSON.stringify({ message: msg }),
       })
       const data = (await res.json()) as { answer?: string }
-      if (data.answer) {
+      const answer = data.answer?.trim()
+      if (answer) {
         setMessages((prev) => [
           ...prev,
-          { id: `a-${Date.now()}`, role: "assistant", content: data.answer! },
+          {
+            id: `a-${Date.now()}`,
+            role: "assistant",
+            content: answer,
+            createdAtISO: new Date().toISOString(),
+          },
         ])
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        { id: `e-${Date.now()}`, role: "assistant", content: "Eroare de conexiune. Incearca din nou." },
+        {
+          id: `e-${Date.now()}`,
+          role: "assistant",
+          content: "Eroare de conexiune. Incearca din nou.",
+          createdAtISO: new Date().toISOString(),
+        },
       ])
     } finally {
       setSending(false)
@@ -87,10 +105,10 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Asistent AI"
-        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl [box-shadow:var(--shadow-lg)] transition-all md:bottom-6 md:right-6 ${
+        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl transition-all [box-shadow:var(--shadow-lg)] md:bottom-6 md:right-6 ${
           open
-            ? "bg-[var(--color-surface-variant)] text-[var(--color-muted)]"
-            : "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+            ? "border border-eos-border bg-eos-surface text-eos-text-muted"
+            : "border border-transparent bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
         }`}
       >
         {open ? (
@@ -102,95 +120,109 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-36 right-5 z-[79] flex w-[340px] flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] [box-shadow:var(--shadow-xl)] md:bottom-20 md:right-6 md:w-[380px]" style={{ maxHeight: "480px" }}>
-          {/* Header */}
-          <div className="flex items-center gap-3 border-b border-[var(--color-border)] px-4 py-3">
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--bg-active)]">
-              <Sparkles className="size-4 text-[var(--icon-secondary)]" strokeWidth={2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[var(--color-on-surface)]">Asistent CompliScan</p>
-              <p className="text-[11px] text-[var(--color-muted)]">Gemini · cunoaste contextul tau</p>
+        <div className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--shadow-xl)] sm:left-auto sm:w-[min(23rem,calc(100vw-2rem))] md:bottom-20 md:right-6 lg:w-[24rem]">
+          <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-eos-md border border-eos-border-subtle bg-eos-bg-panel text-eos-primary">
+                <Sparkles className="size-4" strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">Asistent Evidence OS</Badge>
+                  <Badge variant="warning">Validare umana</Badge>
+                </div>
+                <p className="mt-2 text-sm font-medium text-eos-text">Asistent de context</p>
+                <p className="text-[11px] text-eos-text-muted">
+                  Contextul paginii te ajuta cu orientare rapida, nu cu verdict final.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: 0 }}>
-            {messages.length === 0 && (
-              <div className="space-y-3">
-                <p className="text-xs text-[var(--color-muted)]">Intrebari frecvente pe aceasta pagina:</p>
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => void handleSend(s)}
-                    className="block w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-2 text-left text-sm text-[var(--color-on-surface-muted)] transition hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-on-surface)]"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                {msg.role === "assistant" && (
-                  <div className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[var(--bg-active)]">
-                    <Sparkles className="size-3 text-[var(--icon-secondary)]" strokeWidth={2} />
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="space-y-3" role="log" aria-live="polite" aria-relevant="additions text">
+              {messages.length === 0 && (
+                <div className="space-y-4">
+                  <EmptyState
+                    icon={Sparkles}
+                    title="Intreaba direct din pagina"
+                    label="Porneste cu o intrebare scurta despre risc, pasul urmator sau sensul unui status."
+                    className="border-eos-border-subtle bg-eos-bg-panel px-4 py-8"
+                  />
+                  <div className="space-y-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-eos-text-muted">
+                      Intrebari rapide
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {suggestions.map((suggestion) => (
+                        <AssistantSuggestionChip
+                          key={suggestion}
+                          suggestion={suggestion}
+                          onSelect={(value) => {
+                            void handleSend(value)
+                          }}
+                          disabled={sending}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-5 ${
-                    msg.role === "user"
-                      ? "bg-[var(--color-primary)] text-[var(--color-on-primary)]"
-                      : "border border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)]"
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
-              </div>
-            ))}
+              )}
 
-            {sending && (
-              <div className="flex gap-2 justify-start">
-                <div className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[var(--bg-active)]">
-                  <Sparkles className="size-3 text-[var(--icon-secondary)]" strokeWidth={2} />
-                </div>
-                <div className="flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-2">
-                  <Loader2 className="size-3 animate-spin text-[var(--color-muted)]" />
-                  <span className="text-xs text-[var(--color-muted)]">Genereaza raspuns...</span>
-                </div>
-              </div>
-            )}
+              {messages.map((msg) => (
+                <AssistantMessageBubble key={msg.id} message={msg} />
+              ))}
 
-            <div ref={bottomRef} />
+              {sending && (
+                <div className="flex justify-start gap-3" role="status" aria-live="polite">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset text-eos-primary">
+                    <Sparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+                  </div>
+                  <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-3">
+                    <Loader2 className="size-4 animate-spin text-eos-text-muted" aria-hidden="true" />
+                    <span className="text-sm text-eos-text-muted">Genereaza raspuns...</span>
+                  </div>
+                </div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
           </div>
 
-          {/* Input */}
-          <div className="border-t border-[var(--color-border)] p-3">
-            <div className="flex gap-2">
+          <div className="border-t border-eos-border-subtle bg-eos-bg-panel p-3">
+            <form
+              className="flex flex-col gap-2 sm:flex-row"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void handleSend()
+              }}
+            >
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    void handleSend()
-                  }
-                }}
-                placeholder="Intreaba ceva..."
+                placeholder="Intreaba ceva despre pagina curenta"
                 disabled={sending}
-                className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-2 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)]"
+                className="min-w-0 flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text outline-none transition-[border-color,box-shadow] placeholder:text-eos-text-muted focus:border-eos-primary focus:ring-2 focus:ring-eos-primary-focus"
+                autoComplete="off"
+                enterKeyHint="send"
+                aria-label="Mesaj pentru asistentul contextual"
               />
-              <button
-                onClick={() => void handleSend()}
+              <Button
+                type="submit"
+                size="icon"
                 disabled={!input.trim() || sending}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
+                className="h-10 w-full shrink-0 rounded-eos-md sm:w-10"
+                aria-label="Trimite mesajul"
+                title="Trimite mesajul"
               >
                 <Send className="size-4" strokeWidth={2.25} />
-              </button>
-            </div>
+              </Button>
+            </form>
+            <p className="mt-2 text-[11px] text-eos-text-muted">
+              Raspuns orientativ. Verifica uman inainte de orice decizie oficiala.
+            </p>
           </div>
         </div>
       )}

@@ -14,6 +14,13 @@ import {
   ShieldCheck,
 } from "lucide-react"
 
+import { EvidenceReadinessBadge } from "@/components/evidence-os/EvidenceReadinessBadge"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
+import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import {
@@ -24,9 +31,6 @@ import type { CockpitTask } from "@/components/compliscan/types"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
 import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import { getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import {
@@ -35,7 +39,7 @@ import {
   formatDriftTypeLabel,
   getDriftPolicyFromRecord,
 } from "@/lib/compliance/drift-policy"
-import { formatDriftLifecycleStatus, isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
+import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import type {
   ComplianceDriftRecord,
@@ -99,10 +103,10 @@ export default function AuditorVaultPage() {
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-[var(--color-on-surface)]">
-            Audit Pack v2 include acum executive summary, system register, controls matrix, evidence ledger, drift register si validation log.
+            Audit Pack v2 aduna intr-un singur loc sumarul executiv, sistemele, controalele, dovezile si drift-ul.
           </p>
           <p className="text-sm text-[var(--color-on-surface-muted)]">
-            Acum exista si o varianta client-facing, printabila, pentru stakeholderi non-tehnici. Exportul JSON ramane sursa structurata de adevar pentru schimburi tehnice.
+            Foloseste varianta pentru client cand vrei un livrabil clar, iar JSON-ul cand ai nevoie de schimb tehnic.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -111,25 +115,25 @@ export default function AuditorVaultPage() {
             className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
           >
             <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
-              Deschide Audit Pack client-facing
+              Audit Pack client
               <Download className="size-4" strokeWidth={2.25} />
             </a>
           </Button>
           <Button asChild variant="outline" className="h-10 rounded-xl">
             <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
-              Deschide Annex IV lite
+              Annex IV lite
               <Download className="size-4" strokeWidth={2.25} />
             </a>
           </Button>
           <Button asChild variant="outline" className="h-10 rounded-xl">
             <a href="/api/exports/audit-pack">
-              Export Audit Pack JSON
+              JSON Audit Pack
               <Download className="size-4" strokeWidth={2.25} />
             </a>
           </Button>
           <Button asChild variant="outline" className="h-10 rounded-xl">
             <a href="/api/exports/audit-pack/bundle">
-              Export Audit Pack ZIP
+              Pachet ZIP
               <Download className="size-4" strokeWidth={2.25} />
             </a>
           </Button>
@@ -304,7 +308,11 @@ function VaultRapidSummaryCard({
       <CardContent className="grid gap-3 p-5 md:grid-cols-4">
         <RapidSummaryItem
           label="Audit readiness"
-          value={auditReadiness === "audit_ready" ? "audit ready" : "review required"}
+          value={
+            <EvidenceReadinessBadge
+              readiness={auditReadiness === "audit_ready" ? "ready" : "partial"}
+            />
+          }
           tone={auditReadiness === "audit_ready" ? "text-[var(--status-success-text)]" : "text-[var(--color-warning)]"}
           hint={auditReadiness === "audit_ready" ? "Poți pregăti distribuirea externă." : "Mai sunt pași de validare înainte de audit."}
         />
@@ -338,14 +346,14 @@ function RapidSummaryItem({
   tone,
 }: {
   label: string
-  value: string
+  value: React.ReactNode
   hint: string
   tone: string
 }) {
   return (
     <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
       <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
-      <p className={`mt-2 text-sm font-semibold ${tone}`}>{value}</p>
+      <div className={`mt-2 text-sm font-semibold ${tone}`}>{value}</div>
       <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">{hint}</p>
     </div>
   )
@@ -383,7 +391,7 @@ function EvidenceLedgerCard({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-xl">Evidence ledger</CardTitle>
+        <CardTitle className="text-xl">Registru dovezi</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
@@ -393,9 +401,11 @@ function EvidenceLedgerCard({
           </div>
           <div className="mt-4 space-y-3">
             {evidenceReadyTasks.length === 0 && (
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Încă nu există task-uri cu dovadă validată. Începe din Remediere, atașează o dovadă și rulează `Mark as fixed & rescan`, apoi revino aici.
-              </p>
+              <EmptyState
+                title="Nu exista inca dovezi validate"
+                label="Incepe din Remediere, ataseaza o dovada si ruleaza `Mark as fixed & rescan`, apoi revino aici."
+                className="rounded-2xl py-8"
+              />
             )}
             {evidenceReadyTasks.slice(0, 6).map((task) => (
               <div
@@ -409,8 +419,8 @@ function EvidenceLedgerCard({
                       {task.source} · {task.lawReference}
                     </p>
                   </div>
-                  <Badge className="border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]">
-                    ready
+                  <Badge variant="success">
+                    pregatit
                   </Badge>
                 </div>
                 <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
@@ -452,9 +462,11 @@ function EvidenceLedgerCard({
           </div>
           <div className="mt-4 space-y-3">
             {evidenceMissingTasks.length === 0 && (
-              <p className="text-sm text-[var(--status-success-text)]">
-                Toate task-urile deschise au deja dovada atasata.
-              </p>
+              <EmptyState
+                title="Nu exista gap-uri de dovada"
+                label="Toate task-urile deschise au deja dovada atasata sau validata in ultimul ciclu."
+                className="rounded-2xl py-8"
+              />
             )}
             {evidenceMissingTasks.slice(0, 6).map((task) => (
               <div
@@ -468,8 +480,8 @@ function EvidenceLedgerCard({
                       {task.source} · {task.lawReference}
                     </p>
                   </div>
-                  <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
-                    {task.attachedEvidence ? "validation pending" : "proof needed"}
+                  <Badge variant="warning">
+                    {task.attachedEvidence ? "validare in asteptare" : "dovada necesara"}
                   </Badge>
                 </div>
                 <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
@@ -494,7 +506,7 @@ function LegalMatrixCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xl">Legal mapping matrix</CardTitle>
+            <CardTitle className="text-xl">Matrice de mapare legala</CardTitle>
             <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
               Pentru fiecare task vezi articolul, de ce conteaza si ce dovada trebuie tinuta.
             </p>
@@ -509,9 +521,10 @@ function LegalMatrixCard({
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {tasks.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Încă nu există task-uri cu mapare legală. Asta apare după ce ai findings și remedieri suficient de clare ca să fie apărate la audit.
-          </div>
+          <VaultEmptyState
+            title="Nu exista inca mapare legala"
+            description="Zona asta apare dupa ce findings-urile si remedierea au suficient context ca sa fie aparate in audit."
+          />
         )}
         {tasks.slice(0, 10).map((task) => (
           <div
@@ -519,7 +532,7 @@ function LegalMatrixCard({
             className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+              <Badge variant="secondary">
                 {task.priority}
               </Badge>
               <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
@@ -570,9 +583,10 @@ function SnapshotAuditCard({
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {!latestSnapshot && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Încă nu există snapshot disponibil pentru audit. Rulează o scanare sau confirmă un sistem, iar primul snapshot va apărea automat aici.
-          </div>
+          <VaultEmptyState
+            title="Nu exista inca snapshot pentru audit"
+            description="Ruleaza o scanare sau confirma un sistem, iar primul snapshot va aparea automat aici."
+          />
         )}
         {latestSnapshot && (
           <>
@@ -640,7 +654,7 @@ function TraceabilityMatrixCard({
             <ClipboardList className="size-4" strokeWidth={2.25} />
           </div>
           <div>
-            <CardTitle className="text-xl">Traceability matrix</CardTitle>
+            <CardTitle className="text-xl">Matrice de trasabilitate</CardTitle>
             <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
               Traseul dintre sursă, finding, task, drift și snapshot pentru fiecare control urmărit la audit.
             </p>
@@ -649,9 +663,10 @@ function TraceabilityMatrixCard({
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {records.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Încă nu există trasee complete de control pentru audit. După ce ai task-uri, dovadă și cel puțin un snapshot, matricea de trasabilitate se completează singură.
-          </div>
+          <VaultEmptyState
+            title="Nu exista inca trasee complete de control"
+            description="Dupa ce ai task-uri, dovada si cel putin un snapshot, matricea de trasabilitate se completeaza singura."
+          />
         )}
         {familyGroups.length > 0 && (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
@@ -664,7 +679,7 @@ function TraceabilityMatrixCard({
                   Aici refolosim dovada validată și confirmăm împreună controale care au aceeași natură operațională. Scădem munca repetitivă, dar păstrăm trasabilitatea pe fiecare control.
                 </p>
               </div>
-              <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+              <Badge variant="outline">
                 {familyGroups.length} familii
               </Badge>
             </div>
@@ -683,14 +698,8 @@ function TraceabilityMatrixCard({
                         {group.recordsCount} controale · {group.confirmedCount} confirmate · {group.reusableEvidenceCount} dovezi reutilizabile
                       </p>
                     </div>
-                    <Badge
-                      className={
-                        group.pendingEvidenceCount === 0
-                          ? "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-                          : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                      }
-                    >
-                      {group.pendingEvidenceCount === 0 ? "family covered" : "reuse available"}
+                    <Badge variant={group.pendingEvidenceCount === 0 ? "success" : "warning"}>
+                      {group.pendingEvidenceCount === 0 ? "familie acoperita" : "reuse disponibil"}
                     </Badge>
                   </div>
                       <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
@@ -803,7 +812,7 @@ function TraceabilityMatrixCard({
                   Poți confirma toate controalele legate de același articol legal dintr-o singură acțiune. Asta păstrează auditul coerent când mai multe task-uri susțin aceeași obligație.
                 </p>
               </div>
-              <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+              <Badge variant="outline">
                 {reviewGroups.length} grupuri
               </Badge>
             </div>
@@ -822,10 +831,8 @@ function TraceabilityMatrixCard({
                         {group.recordsCount} controale · {group.confirmedCount} confirmate · {group.sourceCount} surse
                       </p>
                     </div>
-                    <Badge className={group.confirmedCount === group.recordsCount
-                      ? "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-                      : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"}>
-                      {group.confirmedCount === group.recordsCount ? "group confirmed" : "review pending"}
+                    <Badge variant={group.confirmedCount === group.recordsCount ? "success" : "warning"}>
+                      {group.confirmedCount === group.recordsCount ? "grup confirmat" : "revizuire deschisa"}
                     </Badge>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
@@ -900,11 +907,11 @@ function TraceabilityMatrixCard({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    {record.entryKind === "control_task" ? "control task" : "finding task"}
+                  <Badge variant="secondary">
+                    {record.entryKind === "control_task" ? "control" : "finding"}
                   </Badge>
                   {record.remediationMode && (
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+                    <Badge variant="outline">
                       {record.remediationMode === "rapid" ? "rapid" : "structural"}
                     </Badge>
                   )}
@@ -927,14 +934,14 @@ function TraceabilityMatrixCard({
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Badge className={traceStatusBadgeClass(record.traceStatus)}>
+                <Badge variant={traceStatusBadgeVariant(record.traceStatus)}>
                   {record.traceStatus === "validated"
-                    ? "validated"
+                    ? "validat"
                     : record.traceStatus === "evidence_required"
-                      ? "evidence required"
-                      : "action required"}
+                      ? "cere dovada"
+                      : "actiune necesara"}
                 </Badge>
-                <Badge className={auditDecisionBadgeClass(record.auditDecision)}>
+                <Badge variant={auditDecisionBadgeVariant(record.auditDecision)}>
                   {formatAuditDecision(record.auditDecision)}
                 </Badge>
               </div>
@@ -984,7 +991,7 @@ function TraceabilityMatrixCard({
                   <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
                     Coverage pe control
                   </p>
-                  <Badge className={controlCoverageBadgeClass(record.bundleCoverageStatus)}>
+                  <Badge variant={controlCoverageBadgeVariant(record.bundleCoverageStatus)}>
                     {record.bundleCoverageStatus}
                   </Badge>
                 </div>
@@ -1287,13 +1294,14 @@ function DriftWatchCard({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-xl">Drift watch</CardTitle>
+        <CardTitle className="text-xl">Monitor drift</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--status-success-text)]">
-            Nu exista drift activ fata de baseline sau snapshot-ul comparat. Dacă vrei un control mai curat pe viitor, validează baseline-ul după următorul review stabil.
-          </div>
+          <VaultEmptyState
+            title="Nu exista drift activ"
+            description="Nu exista drift activ fata de baseline sau snapshot-ul comparat. Dupa urmatorul review stabil poti valida baseline-ul nou."
+          />
         )}
         {drifts.slice(0, 6).map((drift) => (
           (() => {
@@ -1317,29 +1325,17 @@ function DriftWatchCard({
                       {guidance.impactSummary}
                     </p>
                   </div>
-                  <Badge
-                    className={
-                      drift.severity === "critical" || drift.severity === "high"
-                        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                        : drift.severity === "medium"
-                          ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                          : "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
-                    }
-                  >
-                    {drift.severity}
-                  </Badge>
+                  <SeverityBadge severity={drift.severity} />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
-                  </Badge>
+                  <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
                   {breached && (
-                    <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                    <Badge variant="destructive">
                       SLA depășit
                     </Badge>
                   )}
                   {drift.requiresHumanApproval && (
-                    <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+                    <Badge variant="warning">
                       cere aprobare umană
                     </Badge>
                   )}
@@ -1434,13 +1430,14 @@ function ValidationLedgerCard({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-xl">Validation ledger</CardTitle>
+        <CardTitle className="text-xl">Registru validari</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {entries.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Încă nu există dovadă plus verificare salvate pentru task-uri. Zona asta începe să se populeze după primul ciclu complet: atașezi dovada, rulezi rescan și apoi primești validarea.
-          </div>
+          <VaultEmptyState
+            title="Nu exista inca validari salvate"
+            description="Zona asta incepe sa se populeze dupa primul ciclu complet: atasezi dovada, rulezi rescan si apoi primesti validarea."
+          />
         )}
         {entries.slice(0, 8).map((entry) => (
           <div
@@ -1457,23 +1454,23 @@ function ValidationLedgerCard({
                   {entry.checkedSource ? ` · sursă verificată: ${entry.checkedSource}` : ""}
                 </p>
               </div>
-              <Badge className={validationBadgeClass(entry.status)}>
+              <Badge variant={validationBadgeVariant(entry.status)}>
                 {entry.status === "passed"
-                  ? "validated"
+                  ? "validat"
                   : entry.status === "failed"
-                    ? "failed"
-                  : "needs review"}
+                    ? "esuat"
+                  : "cere review"}
               </Badge>
             </div>
             {(entry.basis || entry.confidence) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {entry.basis && (
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                  <Badge variant="secondary">
                     bază: {formatValidationBasis(entry.basis)}
                   </Badge>
                 )}
                 {entry.confidence && (
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                  <Badge variant="secondary">
                     {formatValidationConfidence(entry.confidence)}
                   </Badge>
                 )}
@@ -1503,13 +1500,14 @@ function AuditTimelineCard({
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
-        <CardTitle className="text-xl">Audit timeline</CardTitle>
+        <CardTitle className="text-xl">Cronologie audit</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {events.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Nu exista evenimente de audit inca. Primul review, primul rescan sau prima confirmare va deschide automat jurnalul de audit.
-          </div>
+          <VaultEmptyState
+            title="Nu exista inca evenimente de audit"
+            description="Primul review, primul rescan sau prima confirmare va deschide automat jurnalul de audit."
+          />
         )}
         {events.map((event) => (
           <div
@@ -1525,7 +1523,7 @@ function AuditTimelineCard({
                   <p className="text-sm font-medium text-[var(--color-on-surface)]">
                     {event.message}
                   </p>
-                  <Badge className={eventBadgeClass(event.type)}>
+                  <Badge variant={eventBadgeVariant(event.type)}>
                     {formatEventLabel(event.type)}
                   </Badge>
                 </div>
@@ -1558,6 +1556,16 @@ function AuditTimelineCard({
       </CardContent>
     </Card>
   )
+}
+
+function VaultEmptyState({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return <EmptyState title={title} label={description} className="rounded-2xl" />
 }
 
 function formatEventActor(event: ComplianceEvent) {
@@ -1622,14 +1630,14 @@ function buildValidationEntries(
     })
 }
 
-function validationBadgeClass(status: ValidationEntry["status"]) {
+function validationBadgeVariant(status: ValidationEntry["status"]) {
   if (status === "passed") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "success" as const
   }
   if (status === "failed") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    return "destructive" as const
   }
-  return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+  return "warning" as const
 }
 
 function formatValidationBasis(value: NonNullable<ValidationEntry["basis"]>) {
@@ -1664,58 +1672,58 @@ function formatAuditGateCode(value: ComplianceTraceRecord["auditGateCodes"][numb
   return "finding doar inferat"
 }
 
-function traceStatusBadgeClass(status: ComplianceTraceRecord["traceStatus"]) {
+function traceStatusBadgeVariant(status: ComplianceTraceRecord["traceStatus"]) {
   if (status === "validated") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "success" as const
   }
   if (status === "evidence_required") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "warning" as const
   }
-  return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+  return "destructive" as const
 }
 
-function auditDecisionBadgeClass(status: ComplianceTraceRecord["auditDecision"]) {
+function auditDecisionBadgeVariant(status: ComplianceTraceRecord["auditDecision"]) {
   if (status === "pass") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "success" as const
   }
   if (status === "review") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "warning" as const
   }
-  return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+  return "destructive" as const
 }
 
-function controlCoverageBadgeClass(status: ComplianceTraceRecord["bundleCoverageStatus"]) {
+function controlCoverageBadgeVariant(status: ComplianceTraceRecord["bundleCoverageStatus"]) {
   if (status === "covered") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "success" as const
   }
   if (status === "partial") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "warning" as const
   }
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "secondary" as const
 }
 
 function formatEventLabel(type: string) {
-  if (type === "task.validated") return "validation"
-  if (type === "task.evidence-attached") return "evidence"
-  if (type === "alert.auto-resolved") return "auto-resolved"
-  if (type === "alert.reopened") return "reopened"
+  if (type === "task.validated") return "validare"
+  if (type === "task.evidence-attached") return "dovada"
+  if (type === "alert.auto-resolved") return "auto-rezolvat"
+  if (type === "alert.reopened") return "redeschis"
   return type.replaceAll(".", " ")
 }
 
-function eventBadgeClass(type: string) {
+function eventBadgeVariant(type: string) {
   if (type === "task.validated") {
-    return "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
+    return "default" as const
   }
   if (type === "task.evidence-attached") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "warning" as const
   }
   if (type === "alert.auto-resolved") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "success" as const
   }
   if (type === "alert.reopened") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    return "destructive" as const
   }
-  return "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+  return "secondary" as const
 }
 
 function EventIcon({ type }: { type: string }) {
@@ -1735,7 +1743,7 @@ function formatEvidenceKind(kind: string) {
   if (kind === "screenshot") return "Screenshot"
   if (kind === "policy_text") return "Policy text"
   if (kind === "log_export") return "Log export"
-  if (kind === "yaml_evidence") return "YAML evidence"
+  if (kind === "yaml_evidence") return "dovada YAML"
   if (kind === "document_bundle") return "Document bundle"
   return "Other"
 }

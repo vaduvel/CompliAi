@@ -18,7 +18,7 @@ export function AgentReviewLayout({
   return (
     <div
       className={cn(
-        "grid h-[calc(100vh-140px)] grid-cols-[300px_1fr_300px] gap-6 overflow-hidden",
+        "grid min-h-[calc(100vh-140px)] gap-6 xl:h-[calc(100vh-140px)] xl:grid-cols-[280px_minmax(0,1fr)_320px] xl:overflow-hidden",
         className
       )}
     >

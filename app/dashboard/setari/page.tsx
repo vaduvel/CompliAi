@@ -7,9 +7,10 @@ import { toast } from "sonner"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 
 type RepoSyncStatus = {
@@ -111,18 +112,18 @@ const DRIFT_OVERRIDE_OPTIONS = [
 ] as const
 
 const DRIFT_OVERRIDE_FIELDS = [
-  { change: "model_changed", label: "Model changed" },
-  { change: "provider_changed", label: "Provider changed" },
-  { change: "human_review_removed", label: "Human review removed" },
-  { change: "personal_data_detected", label: "Personal data detected" },
-  { change: "data_residency_changed", label: "Data residency changed" },
+  { change: "model_changed", label: "Model schimbat" },
+  { change: "provider_changed", label: "Provider schimbat" },
+  { change: "human_review_removed", label: "Review uman eliminat" },
+  { change: "personal_data_detected", label: "Date personale detectate" },
+  { change: "data_residency_changed", label: "Rezidenta datelor schimbata" },
 ] as const
 
 const MEMBER_ROLE_OPTIONS = [
-  { value: "owner", label: "Owner" },
-  { value: "compliance", label: "Compliance" },
-  { value: "reviewer", label: "Reviewer" },
-  { value: "viewer", label: "Viewer" },
+  { value: "owner", label: "Administrator" },
+  { value: "compliance", label: "Responsabil conformitate" },
+  { value: "reviewer", label: "Revizor" },
+  { value: "viewer", label: "Vizualizator" },
 ] as const
 
 export default function SetariPage() {
@@ -352,6 +353,11 @@ export default function SetariPage() {
                     ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
                     : "Inca nu exista baseline validat"}
                 </p>
+                <div className="mt-3">
+                  <Badge variant={validatedBaseline ? "success" : "warning"}>
+                    {validatedBaseline ? "Baseline activ" : "Cere baseline"}
+                  </Badge>
+                </div>
                 <p className="mt-1 text-sm text-[var(--color-muted)]">
                   {validatedBaseline
                     ? "Drift-ul compara starea curenta cu acest snapshot pana il schimbi sau il elimini."
@@ -393,25 +399,24 @@ export default function SetariPage() {
               </p>
             </div>
             <Badge
-              className={
-                supabaseStatus?.summary.ready
-                  ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
-                  : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+              variant={
+                supabaseStatusLoading ? "outline" : supabaseStatus?.summary.ready ? "success" : "warning"
               }
+              className="gap-1.5"
             >
               {supabaseStatusLoading
                 ? "Se verifica"
                 : supabaseStatus?.summary.ready
-                  ? "Operational ready"
-                  : "Needs review"}
+                  ? "Pregatit operational"
+                  : "Cere revizuire"}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {supabaseStatusLoading ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+            <OperationalLoadingCard>
               Verificam traseul Supabase pentru auth, data si storage...
-            </div>
+            </OperationalLoadingCard>
           ) : supabaseStatusError ? (
             <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
               {supabaseStatusError}
@@ -421,12 +426,12 @@ export default function SetariPage() {
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
                 <SettingsTile
                   icon={ShieldCheck}
-                  label="Auth backend"
+                  label="Backend auth"
                   value={formatBackendLabel(supabaseStatus.authBackend)}
                 />
                 <SettingsTile
                   icon={Database}
-                  label="Data backend"
+                  label="Backend date"
                   value={formatBackendLabel(supabaseStatus.dataBackend)}
                 />
                 <SettingsTile
@@ -441,7 +446,7 @@ export default function SetariPage() {
                 />
                 <SettingsTile
                   icon={FileCode2}
-                  label="Bucket evidence"
+                  label="Bucket dovezi"
                   value={supabaseStatus.bucket?.ok ? "Prezent" : "Lipseste"}
                 />
                 <SettingsTile
@@ -466,13 +471,7 @@ export default function SetariPage() {
                           <span className="text-sm font-medium text-[var(--color-on-surface)]">
                             {table}
                           </span>
-                          <Badge
-                            className={
-                              status.ok
-                                ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
-                                : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                            }
-                          >
+                          <Badge variant={status.ok ? "success" : "warning"}>
                             {status.ok
                               ? "ok"
                               : status.state === "missing_schema"
@@ -495,13 +494,7 @@ export default function SetariPage() {
                           <span className="text-sm font-medium text-[var(--color-on-surface)]">
                             bucket:{supabaseStatus.bucket.name}
                           </span>
-                          <Badge
-                            className={
-                              supabaseStatus.bucket.ok
-                                ? "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
-                                : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                            }
-                          >
+                          <Badge variant={supabaseStatus.bucket.ok ? "success" : "warning"}>
                             {supabaseStatus.bucket.ok ? "ok" : "lipsa / invalid"}
                           </Badge>
                         </div>
@@ -533,7 +526,7 @@ export default function SetariPage() {
                       </span>
                     </p>
                     <p>
-                      Bucket evidence:{" "}
+                      Bucket dovezi:{" "}
                       <span className="font-semibold text-[var(--color-on-surface)]">
                         {supabaseStatus.summary.bucketReady ? "pregatit" : "lipseste / invalid"}
                       </span>
@@ -594,7 +587,7 @@ export default function SetariPage() {
                 Rezumat rapid pentru starea de operare: sesiune, backend-uri, fallback și traseul cloud principal.
               </p>
             </div>
-            <Badge className={healthBadgeClass(appHealth?.state, appHealthLoading)}>
+            <Badge variant={healthBadgeVariant(appHealth?.state, appHealthLoading)}>
               {appHealthLoading
                 ? "Se verifica"
                 : appHealth?.state === "healthy"
@@ -607,9 +600,9 @@ export default function SetariPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {appHealthLoading ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+            <OperationalLoadingCard>
               Verificam starea aplicatiei si preflight-ul operational...
-            </div>
+            </OperationalLoadingCard>
           ) : appHealthError ? (
             <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
               {appHealthError}
@@ -694,16 +687,16 @@ export default function SetariPage() {
         <CardHeader>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <CardTitle className="text-xl">Release readiness</CardTitle>
+              <CardTitle className="text-xl">Pregatire release</CardTitle>
               <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
                 Rezumat clar pentru a decide daca build-ul poate fi promovat ca release controlat.
               </p>
             </div>
             <Badge
-              className={
+              variant={
                 currentUserResolved && !canViewReleaseReadiness
-                  ? "border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]"
-                  : releaseBadgeClass(releaseReadiness?.state, releaseReadinessLoading)
+                  ? "outline"
+                  : releaseBadgeVariant(releaseReadiness?.state, releaseReadinessLoading)
               }
             >
               {currentUserResolved && !canViewReleaseReadiness
@@ -711,7 +704,7 @@ export default function SetariPage() {
                 : releaseReadinessLoading
                   ? "Se verifica"
                   : releaseReadiness?.state === "ready"
-                    ? "Ready"
+                    ? "Pregatit"
                     : releaseReadiness?.state === "blocked"
                       ? "Blocat"
                       : "Revizuire"}
@@ -720,17 +713,17 @@ export default function SetariPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {!currentUserResolved ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+            <OperationalLoadingCard>
               Verificam sesiunea curenta pentru a decide ce diagnostice operationale poti vedea...
-            </div>
+            </OperationalLoadingCard>
           ) : !canViewReleaseReadiness ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              Verdictul complet de release readiness este vizibil doar pentru rolurile <strong>Owner</strong> si <strong>Compliance</strong>.
-            </div>
+            <EmptyState
+              title="Acces restrictionat"
+              label="Verdictul complet de release readiness este vizibil doar pentru rolurile Owner si Responsabil conformitate."
+              className="rounded-2xl"
+            />
           ) : releaseReadinessLoading ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
-              Verificam release readiness...
-            </div>
+            <OperationalLoadingCard>Verificam release readiness...</OperationalLoadingCard>
           ) : releaseReadinessError ? (
             <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
               {releaseReadinessError}
@@ -815,7 +808,7 @@ export default function SetariPage() {
               </p>
             </div>
             {currentUser?.role && (
-              <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+              <Badge variant="outline">
                 Rolul tau: {formatMemberRole(currentUser.role)}
               </Badge>
             )}
@@ -823,9 +816,7 @@ export default function SetariPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {membersLoading ? (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
-              Incarcam membrii organizatiei...
-            </div>
+            <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
           ) : membersError ? (
             <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
               {membersError}
@@ -851,11 +842,11 @@ export default function SetariPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                      <Badge variant="outline">
                         {formatMemberRole(member.role)}
                       </Badge>
                       {isSelf && (
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+                        <Badge variant="secondary">
                           Tu
                         </Badge>
                       )}
@@ -888,9 +879,11 @@ export default function SetariPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
-              Inca nu exista membri suplimentari in organizatia curenta.
-            </div>
+            <EmptyState
+              title="Nu exista membri suplimentari"
+              label="Organizatia curenta are doar utilizatorii deja inregistrati in workspace."
+              className="rounded-2xl"
+            />
           )}
         </CardContent>
       </Card>
@@ -904,6 +897,11 @@ export default function SetariPage() {
                 Endpoint-uri dedicate pentru `compliscan.yaml` si manifests relevante. Folosesti CI sync, nu scan complet de repository.
               </p>
             </div>
+            <Badge variant={repoSyncBadgeVariant(repoSyncStatus)}>
+              {repoSyncBadgeLabel(repoSyncStatus)}
+            </Badge>
+          </div>
+          <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline" className="h-11 rounded-xl px-5">
               <Link href="/ghid-engineering-compliscan.md" target="_blank">
                 Deschide ghidul de engineering
@@ -1041,7 +1039,10 @@ export default function SetariPage() {
 
       <Card className="border-[var(--color-error)] bg-[var(--color-surface)]">
         <CardHeader>
-          <CardTitle className="text-xl text-[var(--color-error)]">Reset workspace local</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-xl text-[var(--color-error)]">Reset workspace local</CardTitle>
+            <Badge variant="destructive">Actiune destructiva</Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-on-surface-muted)]">
@@ -1164,7 +1165,7 @@ function EndpointRow({
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-[var(--color-on-surface)]">{label}</span>
-        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+        <Badge variant="outline">
           {badge}
         </Badge>
       </div>
@@ -1173,16 +1174,28 @@ function EndpointRow({
   )
 }
 
+function OperationalLoadingCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]"
+    >
+      {children}
+    </div>
+  )
+}
+
 function formatMemberRole(role: OrganizationMember["role"]) {
   switch (role) {
     case "owner":
-      return "Owner"
+      return "Administrator"
     case "compliance":
-      return "Compliance"
+      return "Responsabil conformitate"
     case "reviewer":
-      return "Reviewer"
+      return "Revizor"
     case "viewer":
-      return "Viewer"
+      return "Vizualizator"
     default:
       return role
   }
@@ -1195,47 +1208,61 @@ function formatBackendLabel(backend: "local" | "supabase" | "hybrid") {
     case "supabase":
       return "Supabase"
     case "hybrid":
-      return "Hybrid"
+      return "Hibrid"
     default:
       return backend
   }
 }
 
-function healthBadgeClass(
+function repoSyncBadgeVariant(status: RepoSyncStatus) {
+  if (!status) return "outline" as const
+  if (status.requiresKey) return "success" as const
+  if (status.localAllowedWithoutKey) return "warning" as const
+  return "secondary" as const
+}
+
+function repoSyncBadgeLabel(status: RepoSyncStatus) {
+  if (!status) return "Se incarca"
+  if (status.requiresKey) return "Protejat cu cheie"
+  if (status.localAllowedWithoutKey) return "Local fara cheie"
+  return "Disponibil"
+}
+
+function healthBadgeVariant(
   state?: "healthy" | "degraded" | "blocked",
   loading?: boolean
 ) {
   if (loading) {
-    return "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
+    return "outline" as const
   }
 
   switch (state) {
     case "healthy":
-      return "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+      return "success" as const
     case "blocked":
-      return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+      return "destructive" as const
     case "degraded":
     default:
-      return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+      return "warning" as const
   }
 }
 
-function releaseBadgeClass(
+function releaseBadgeVariant(
   state?: "ready" | "review" | "blocked",
   loading?: boolean
 ) {
   if (loading) {
-    return "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
+    return "outline" as const
   }
 
   switch (state) {
     case "ready":
-      return "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+      return "success" as const
     case "blocked":
-      return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+      return "destructive" as const
     case "review":
     default:
-      return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+      return "warning" as const
   }
 }
 

@@ -10,10 +10,10 @@ import {
 } from "lucide-react"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent } from "@/components/evidence-os/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 
 type RiskHeaderProps = {
@@ -47,12 +47,12 @@ function headerState(
       statusLabel: "Fara baseline",
       scoreLabel: "scor de control curent",
       primaryMessage:
-        "Nu ai suficiente dovezi pentru un verdict util. Scaneaza primul document si construieste mai intai baza reala de lucru.",
+        "Nu ai suficiente dovezi pentru un verdict util. Scaneaza primul document si construieste baza reala de lucru.",
       actionTitle: "Scaneaza primul document",
       actionDescription:
-        "Incarca un PDF, o imagine sau text manual. Dupa primul scan poti vedea riscurile reale, task-urile si dovada exportabila.",
+        "Incarca un PDF, o imagine sau text manual. Dupa primul scan vezi riscurile reale, task-urile si dovada exportabila.",
       actionHint:
-        "Flux simplu: colectezi dovezi, primesti recomandare AI, apoi validezi uman.",
+        "Flux: colectezi dovezi, primesti recomandare AI, apoi validezi uman.",
       ctaLabel: "Scaneaza primul document",
       ringLabel: "Pregatire",
     }
@@ -69,12 +69,12 @@ function headerState(
       statusLabel: "0 riscuri active",
       scoreLabel: "scor curent de risc activ",
       primaryMessage:
-        "Nu exista probleme active in acest moment. Scanarile anterioare raman salvate ca istoric de control si dovada, nu ca risc deschis.",
+        "Nu exista probleme active. Scanarile anterioare raman salvate ca istoric de control si dovada.",
       actionTitle: "Monitorizezi doar schimbarile reale",
       actionDescription:
-        "Nu ai de inchis nimic acum. Rulezi un scan nou doar cand apar schimbari in documente, politici sau fluxuri operationale.",
+        "Nu ai de inchis nimic acum. Rulezi un scan nou doar cand apar schimbari reale in documente, politici sau fluxuri.",
       actionHint:
-        "Istoricul ramane salvat. Rescanezi doar cand apare o versiune noua sau o schimbare reala.",
+        "Istoricul ramane salvat. Rescanezi doar la o versiune noua sau la o schimbare reala.",
       ctaLabel: "Mergi la Scanari",
       ringLabel: "Nicio problema activa",
     }
@@ -91,7 +91,7 @@ function headerState(
       statusLabel: riskLabel,
       scoreLabel: "scor curent de risc",
       primaryMessage:
-        "Semnalele colectate indica un risc ridicat. Clarifica documentul critic, rezolva cauza principala si ruleaza din nou scanarea.",
+        "Semnalele colectate indica risc ridicat. Clarifica documentul critic, rezolva cauza principala si ruleaza din nou scanarea.",
       actionTitle: "Rezolva documentul critic si rescaneaza",
       actionDescription:
         "Nu deschide mai multe fronturi. Inchide mai intai cauza care blocheaza scorul, apoi reconfirma starea cu un nou scan.",
@@ -112,7 +112,7 @@ function headerState(
       statusLabel: riskLabel,
       scoreLabel: "scor curent de risc",
       primaryMessage:
-        "Ai deja semnale utile in sistem. Urmatorul castig vine din clarificarea documentelor ambigue, nu din scanari aruncate in volum.",
+        "Ai deja semnale utile. Urmatorul castig vine din clarificarea documentelor ambigue, nu din volum de scanari.",
       actionTitle: "Clarifica punctul ambiguu urmator",
       actionDescription:
         "Concentreaza-te pe documentul cel mai recent sau pe alerta deschisa cu impact real. Inchide un risc complet, apoi treci la urmatorul.",
@@ -131,8 +131,8 @@ function headerState(
     eyebrow: "Control bun",
     statusLabel: riskLabel,
     scoreLabel: "scor curent de risc",
-    primaryMessage:
-      "Ai deja control bun asupra situatiei. Continua doar cand apare o schimbare reala in documente, politici sau fluxuri.",
+      primaryMessage:
+      "Ai deja control bun asupra situatiei. Continui doar cand apare o schimbare reala in documente, politici sau fluxuri.",
     actionTitle: "Pastreaza ritmul si valideaza dovada",
     actionDescription:
       "Foloseste scanari noi doar pentru schimbari reale, apoi valideaza uman rezultatul si exporta dovada necesara.",
@@ -174,6 +174,39 @@ export function RiskHeader({
     workspaceInitials: "IP",
   }
   const state = headerState(score, riskLabel, lastScanLabel, activeRiskCount, hasEvidence)
+  const headerHighlights = [
+    {
+      id: "last-scan",
+      label: "Ultimul scan",
+      icon: Clock3,
+      value: lastScanMeta(lastScanLabel),
+      meta: hasEvidence ? "ultimul reper operational salvat" : "porneste primul scan",
+      valueClassName: "text-[var(--color-on-surface)]",
+    },
+    {
+      id: "open-risks",
+      label: hasEvidence ? "Riscuri deschise" : "Stare curenta",
+      icon: ShieldAlert,
+      value: hasEvidence ? `${activeRiskCount}` : "Fara baseline",
+      meta: hasEvidence
+        ? activeRiskCount === 1
+          ? "un risc cere inchidere"
+          : `${state.statusLabel.toLowerCase()}`
+        : "asteapta primul document analizat",
+      valueClassName: hasEvidence && activeRiskCount > 0 ? state.emphasis : "text-[var(--color-on-surface)]",
+    },
+    {
+      id: "operating-principle",
+      label: activeRiskCount === 0 ? "Istoric" : "Principiu",
+      icon: ShieldCheck,
+      value: activeRiskCount === 0 ? "Dovada ramane salvata" : "AI propune, omul valideaza",
+      meta:
+        activeRiskCount === 0
+          ? "rescanezi doar la schimbari reale"
+          : "validarea umana inchide decizia oficiala",
+      valueClassName: "text-[var(--color-on-surface)]",
+    },
+  ] as const
 
   return (
     <Card className="overflow-hidden border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--card-bg))] shadow-[var(--shadow-xl)]">
@@ -182,7 +215,7 @@ export function RiskHeader({
           <CompliScanLogoLockup
             variant="flat"
             size="lg"
-            subtitle="scor, prioritizare AI si verificare umana"
+            subtitle="prioritizare AI cu validare umana"
             titleClassName="text-[var(--color-on-surface)]"
             subtitleClassName="text-[var(--color-muted)]"
           />
@@ -200,8 +233,8 @@ export function RiskHeader({
 
             <Button
               variant="outline"
-              size="icon-sm"
-              className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)]"
+              size="icon"
+              className="h-8 w-8 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)]"
               aria-label="Notificari"
             >
               <Bell className="size-4" strokeWidth={2.25} />
@@ -217,9 +250,9 @@ export function RiskHeader({
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,420px)]">
-          <div className="space-y-6">
-            <div className="space-y-4">
+        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,380px)]">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
                   {state.eyebrow}
@@ -227,84 +260,74 @@ export function RiskHeader({
                 <Badge className={state.badge}>{state.statusLabel}</Badge>
                 {!state.isOnboarding && (
                   <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
-                    verificare umana obligatorie
+                    validare umana
                   </Badge>
                 )}
               </div>
 
-              <div className="max-w-4xl space-y-4">
+              <div className="max-w-4xl space-y-2.5">
                 <div className="flex flex-wrap items-end gap-3 md:gap-5">
-                  <h1 className="text-[52px] font-semibold leading-none tracking-tight text-[var(--color-on-surface)] md:text-[76px]">
+                  <h1 className="text-[38px] font-semibold leading-none tracking-tight text-[var(--color-on-surface)] md:text-[54px]">
                     {score}
                     <span className="ml-1 text-[0.42em] text-[var(--color-muted)]">/100</span>
                   </h1>
                   <div className="space-y-1 pb-2">
-                    <p className="text-lg text-[var(--color-muted)] md:text-2xl">
+                    <p className="text-sm text-[var(--color-muted)] md:text-lg">
                       {state.scoreLabel}
                     </p>
                     <p className={`text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
                   </div>
                 </div>
 
-                <p className="max-w-3xl text-lg leading-8 text-[var(--color-on-surface-muted)] md:text-[22px] md:leading-9">
+                <p className="max-w-3xl text-sm leading-6 text-[var(--color-on-surface-muted)] md:text-lg md:leading-7">
                   {state.primaryMessage}
                 </p>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    <Clock3 className="size-4" strokeWidth={2.25} />
-                    Ultimul scan
-                  </div>
-                  <p className="mt-3 text-base font-medium text-[var(--color-on-surface)]">
-                    {lastScanMeta(lastScanLabel)}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    <ShieldAlert className="size-4" strokeWidth={2.25} />
-                    Risc activ
-                  </div>
-                  <p className={`mt-3 text-base font-medium ${state.emphasis}`}>{state.statusLabel}</p>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    <ShieldCheck className="size-4" strokeWidth={2.25} />
-                    {activeRiskCount === 0 ? "Istoric pastrat" : "Principiu de lucru"}
-                  </div>
-                  <p className="mt-3 text-base font-medium text-[var(--color-on-surface)]">
-                    {activeRiskCount === 0
-                      ? "Dovada ramane salvata"
-                      : "AI propune, omul valideaza"}
-                  </p>
-                </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {headerHighlights.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4"
+                    >
+                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                        <Icon className="size-4" strokeWidth={2.25} />
+                        {item.label}
+                      </div>
+                      <p className={`mt-2.5 text-base font-medium ${item.valueClassName}`}>{item.value}</p>
+                      <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{item.meta}</p>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-5 shadow-[inset_0_1px_0_0_var(--border-subtle)]">
-            <div className="flex h-full flex-col justify-between gap-5">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 shadow-[inset_0_1px_0_0_var(--border-subtle)]">
+            <div className="flex h-full flex-col justify-between gap-4">
               <div className="space-y-2">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Actiune recomandata
+                  Pasul urmator
                 </p>
-                <h2 className="text-[22px] font-semibold leading-snug text-[var(--color-on-surface)]">
+                <h2 className="text-lg font-semibold leading-snug text-[var(--color-on-surface)] md:text-xl">
                   {state.actionTitle}
                 </h2>
-                <p className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                  {state.actionDescription}
+                </p>
+                <p className="text-xs leading-5 text-[var(--color-muted)]">
                   {state.actionHint}
                 </p>
               </div>
 
               <Button
                 onClick={onScan}
-                className="h-11 rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                className="h-11 w-full rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] sm:w-auto"
               >
                 <Scan className="size-4" strokeWidth={2.25} />
-                Mergi la Scanari
+                {state.ctaLabel}
                 <ArrowRight className="size-4" strokeWidth={2.25} />
               </Button>
             </div>

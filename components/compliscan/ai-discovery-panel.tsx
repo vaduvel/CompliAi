@@ -21,9 +21,10 @@ import type {
   DetectedAISystemRecord,
 } from "@/lib/compliance/types"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
 
 const PURPOSE_OPTIONS: { value: AISystemPurpose; label: string }[] = [
   { value: "support-chatbot", label: "Chatbot / suport" },
@@ -67,41 +68,41 @@ type EditableDetectedSystemUpdates = Partial<
   >
 >
 
-function riskTone(level: DetectedAISystemRecord["riskLevel"]) {
+function riskTone(
+  level: DetectedAISystemRecord["riskLevel"]
+): {
+  badge: "destructive" | "warning" | "success"
+  icon: typeof ShieldAlert | typeof ShieldMinus | typeof ShieldCheck
+  label: string
+} {
   if (level === "high") {
     return {
-      badge: "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]",
+      badge: "destructive",
       icon: ShieldAlert,
       label: "High-risk",
     }
   }
   if (level === "limited") {
     return {
-      badge:
-        "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]",
+      badge: "warning",
       icon: ShieldMinus,
       label: "Limited-risk",
     }
   }
   return {
-    badge:
-      "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]",
+    badge: "success",
     icon: ShieldCheck,
     label: "Minimal-risk",
   }
 }
 
-function statusTone(status: DetectedAISystemRecord["detectionStatus"]) {
-  if (status === "confirmed") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-  }
-  if (status === "reviewed") {
-    return "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
-  }
-  if (status === "rejected") {
-    return "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-muted)]"
-  }
-  return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+function statusTone(
+  status: DetectedAISystemRecord["detectionStatus"]
+): "success" | "secondary" | "outline" | "warning" {
+  if (status === "confirmed") return "success"
+  if (status === "reviewed") return "secondary"
+  if (status === "rejected") return "outline"
+  return "warning"
 }
 
 function formatDetectionStatus(status: DetectedAISystemRecord["detectionStatus"]) {
@@ -346,11 +347,15 @@ export function AIDiscoveryPanel({
             Ce este deja confirmat traieste separat in inventarul oficial, iar drift-ul ramane centralizat in panoul dedicat.
           </div>
           {systems.length === 0 && (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-              {mode === "yaml"
-                ? "Încă nu avem rezultate din compliscan.yaml. Încarcă fișierul, validează-l și apoi revino aici pentru review și confirmare."
-                : "Încă nu avem detectii automate. Ruleaza autodiscovery pe un manifest si apoi confirma doar sistemele utile in inventar."}
-            </div>
+            <EmptyState
+              title={mode === "yaml" ? "Fara rezultate din YAML" : "Fara detectii automate"}
+              label={
+                mode === "yaml"
+                  ? "Inca nu avem rezultate din compliscan.yaml. Incarca fisierul, valideaza-l si apoi revino aici pentru review si confirmare."
+                  : "Inca nu avem detectii automate. Ruleaza autodiscovery pe un manifest si apoi confirma doar sistemele utile in inventar."
+              }
+              className="rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-6"
+            />
           )}
 
           {activeSystems.map((system) => {
@@ -367,17 +372,17 @@ export function AIDiscoveryPanel({
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge className={tone.badge}>
+                      <Badge variant={tone.badge}>
                         <Icon className="size-3.5" strokeWidth={2.25} />
                         {tone.label}
                       </Badge>
-                      <Badge className={statusTone(system.detectionStatus)}>
+                      <Badge variant={statusTone(system.detectionStatus)}>
                         {formatDetectionStatus(system.detectionStatus)}
                       </Badge>
-                      <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                      <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                         confidence: {system.confidence}
                       </Badge>
-                      <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                      <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                         {formatPurposeLabel(system.purpose)}
                       </Badge>
                     </div>
@@ -397,7 +402,8 @@ export function AIDiscoveryPanel({
                       {system.frameworks.map((framework) => (
                         <Badge
                           key={`${system.id}-${framework}`}
-                          className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+                          variant="secondary"
+                          className="normal-case tracking-normal text-eos-text-muted"
                         >
                           {framework}
                         </Badge>
@@ -406,7 +412,7 @@ export function AIDiscoveryPanel({
                     {relatedDrifts.length > 0 && (
                       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
                         <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
-                          <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+                          <Badge variant="warning">
                             {relatedDrifts.length} drift activ
                           </Badge>
                           <span>Detalii in Control / Drift.</span>
@@ -654,9 +660,11 @@ export function AIDiscoveryPanel({
           })}
 
           {systems.length > 0 && activeSystems.length === 0 && (
-            <div className="rounded-2xl border border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] p-4 text-sm text-[var(--status-success-text)]">
-              Nu mai exista detectii active. Ce a fost confirmat este deja in inventarul oficial, iar ce a fost respins a ramas doar in istoric. Daca vrei un nou ciclu de review, ruleaza o scanare noua pentru sursa curenta.
-            </div>
+            <EmptyState
+              title="Nicio detectie activa"
+              label="Ce a fost confirmat este deja in inventarul oficial, iar ce a fost respins a ramas doar in istoric. Daca vrei un nou ciclu de review, ruleaza o scanare noua pentru sursa curenta."
+              className="rounded-2xl border-eos-border-subtle bg-eos-success-soft px-4 py-6"
+            />
           )}
         </CardContent>
       </Card>

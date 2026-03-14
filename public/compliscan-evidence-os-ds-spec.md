@@ -1,6 +1,18 @@
 # CompliScan Evidence OS Design System v2.0
 
-Acest document este facut pentru Codex ca source of truth pentru implementarea Design System-ului CompliScan.
+> Status: `deprecated`
+>
+> Acest document nu mai este sursa canonica de design pentru `Evidence OS`.
+> Se pastreaza doar ca referinta istorica / exploratorie.
+>
+> Sursa oficiala curenta este:
+> - `public/evidence-os-design-system-v1.md`
+>
+> Regulile oficiale de adoptie sunt in:
+> - `public/evidence-os-oficializare-si-adoptie.md`
+
+Acest document ramane in repo doar pentru istoric si comparatie de directie.
+Nu trebuie folosit ca `source of truth` pentru implementari noi.
 Directia NU este CLI-first si NU copiaza Compli-AI 1:1.
 Directia este: evidence operating system, human-review-first, warm graphite surfaces, semantic status, progressive disclosure pentru drift si diff.
 

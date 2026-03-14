@@ -52,7 +52,7 @@ export function AgentProposalTabs({
           <TabsContent value="findings" className="m-0 space-y-4">
             <ProposalSectionHeader
               title="Agent de constatari"
-              description="Probleme de conformitate detectate si reguli incalcate."
+              description="Probleme detectate si reguli incalcate."
               icon={AlertTriangle}
             />
             {bundle.findings?.map((finding) => (
@@ -86,7 +86,7 @@ export function AgentProposalTabs({
           <TabsContent value="evidence" className="m-0 space-y-4">
             <ProposalSectionHeader
               title="Agent de dovezi"
-              description="Starea documentara si pregatirea pentru audit."
+              description="Starea documentara pentru review si audit."
               icon={ShieldAlert}
             />
             {bundle.evidence ? (

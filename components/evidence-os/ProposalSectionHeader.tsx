@@ -22,9 +22,9 @@ export function ProposalSectionHeader({
       <div className="flex size-8 items-center justify-center rounded-eos-lg bg-eos-bg-inset">
         <Icon className="size-4 text-eos-primary" />
       </div>
-      <div>
+      <div className="min-w-0">
         <h4 className="text-sm font-semibold text-eos-text">{title}</h4>
-        <p className="mt-1 text-xs text-eos-text-muted">{description}</p>
+        <p className="mt-1 text-xs leading-5 text-eos-text-muted">{description}</p>
       </div>
     </div>
   )

@@ -21,13 +21,14 @@ import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { RiskHeader } from "@/components/compliscan/risk-header"
 import { TextExtractDrawer } from "@/components/compliscan/text-extract-drawer"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { Separator } from "@/components/evidence-os/Separator"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
 import {
   formatDriftEscalationDeadline,
   formatDriftEscalationTier,
@@ -79,7 +80,7 @@ export function DashboardTop({
   void _onSandbox
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-4">
       <RiskHeader
         score={score}
         riskLabel={riskLabel}
@@ -90,13 +91,11 @@ export function DashboardTop({
         workspace={workspace}
       />
 
-      <Alert className="border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)]">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-xs text-[var(--color-on-surface-muted)]">
         <Bell className="size-4 text-[var(--color-warning)]" />
-        <AlertTitle>Disclaimer legal</AlertTitle>
-        <AlertDescription className="text-[var(--color-on-surface-muted)]">
-          Acesta este un asistent AI. Scorurile si recomandarile sunt sugestii. Nu inlocuieste sfatul unui avocat sau contabil. Verifica uman inainte de orice raport oficial.
-        </AlertDescription>
-      </Alert>
+        <span className="font-medium text-[var(--color-on-surface)]">Asistent AI, nu verdict final.</span>
+        <span>Verifica uman inainte de orice raport sau decizie oficiala.</span>
+      </div>
 
       {error && (
         <Alert className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
@@ -257,39 +256,51 @@ export function OverviewPageSections({
           <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Rezumat operare</CardTitle>
+              <p className="text-sm text-[var(--color-on-surface-muted)]">
+                Vezi rapid presiunea curenta pe fiecare verticala.
+              </p>
             </CardHeader>
-            <CardContent className="grid gap-4 text-sm text-[var(--color-on-surface-muted)]">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <span>Probleme active</span>
-                  <span>{activeRiskCount}</span>
+            <CardContent className="grid gap-3 pt-2 text-sm text-[var(--color-on-surface-muted)] sm:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4 sm:col-span-2">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <span className="font-medium text-[var(--color-on-surface)]">Probleme active</span>
+                  <span className="text-base font-semibold text-[var(--color-on-surface)]">{activeRiskCount}</span>
                 </div>
-                <p className="text-xs text-[var(--color-muted)]">
+                <p className="text-xs leading-5 text-[var(--color-muted)]">
                   {activeRiskCount === 0
                     ? "Istoricul ramane salvat, dar nu exista risc deschis."
-                    : "Numarul de semnale active ramase dupa task-urile inchise."}
+                    : "Semnalele ramase dupa task-urile inchise si validarile deja facute."}
                 </p>
               </div>
-              <div>
-                <div className="mb-2 flex items-center justify-between">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <span>GDPR</span>
                   <span>{state.gdprProgress}%</span>
                 </div>
-                <Progress value={state.gdprProgress} className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]" />
+                <Progress
+                  value={state.gdprProgress}
+                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]"
+                />
               </div>
-              <div>
-                <div className="mb-2 flex items-center justify-between">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <span>EU AI Act</span>
                   <span>{Math.min(100, state.highRisk * 18 + state.lowRisk * 8)}%</span>
                 </div>
-                <Progress value={Math.min(100, state.highRisk * 18 + state.lowRisk * 8)} className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-warning)]" />
+                <Progress
+                  value={Math.min(100, state.highRisk * 18 + state.lowRisk * 8)}
+                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-warning)]"
+                />
               </div>
-              <div>
-                <div className="mb-2 flex items-center justify-between">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4 sm:col-span-2">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <span>e-Factura</span>
                   <span>{efacturaOverviewProgress}%</span>
                 </div>
-                <Progress value={efacturaOverviewProgress} className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-info)]" />
+                <Progress
+                  value={efacturaOverviewProgress}
+                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-info)]"
+                />
               </div>
             </CardContent>
           </Card>
@@ -318,25 +329,37 @@ export function OverviewPageSections({
 
           <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
             <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Alerte active</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <CardTitle className="text-lg">Alerte active</CardTitle>
+                  <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                    Pastrezi vizibile doar semnalele care cer atentie rapida.
+                  </p>
+                </div>
+                <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+                  {openAlerts.length > 0 ? `${openAlerts.length} deschise` : "fara alerte"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2.5 pt-2">
               {openAlerts.slice(0, 4).map((alert, index) => (
                 <div
                   key={`${alert.message}-${index}`}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]"
+                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3 text-sm leading-6 text-[var(--color-on-surface-muted)]"
                 >
                   {alert.message}
                 </div>
               ))}
               {openAlerts.length === 0 && (
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                  Nu exista alerte deschise.
-                </div>
+                <EmptyState
+                  title="Nu exista alerte deschise"
+                  label="Cand apare un drift, o problema de conformitate sau o abatere de proces, o vezi aici."
+                  className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+                />
               )}
               <Link
                 href="/dashboard/alerte"
-                className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-on-surface)] transition hover:text-[var(--color-primary)]"
+                className="inline-flex items-center gap-2 pt-1 text-sm font-medium text-[var(--color-on-surface)] transition hover:text-[var(--color-primary)]"
               >
                 Vezi toate alertele
                 <ArrowRight className="size-4" strokeWidth={2.25} />
@@ -363,6 +386,13 @@ function driftSeverityClasses(severity: ComplianceDriftRecord["severity"]) {
   return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
 }
 
+function driftSeverityLabel(severity: ComplianceDriftRecord["severity"]) {
+  if (severity === "critical") return "critic"
+  if (severity === "high") return "ridicat"
+  if (severity === "medium") return "mediu"
+  return "scazut"
+}
+
 export function DriftCommandCenter({
   activeDrifts,
   hasValidatedBaseline,
@@ -387,7 +417,7 @@ export function DriftCommandCenter({
           <div>
             <CardTitle className="text-xl">Control drift</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
-              Aici vezi imediat ce s-a schimbat fata de baseline si daca exista deja un task de remediere care cere atentie azi.
+              Vezi rapid schimbarea principala, impactul ei si urmatorul pas clar.
             </p>
           </div>
           <Badge className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"}>
@@ -396,10 +426,10 @@ export function DriftCommandCenter({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-5 pt-6">
+      <CardContent className="space-y-4 pt-5">
         {primaryDrift ? (
           <>
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="max-w-2xl">
                   <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
@@ -408,7 +438,7 @@ export function DriftCommandCenter({
                   <p className="mt-2 text-lg font-semibold text-[var(--color-on-surface)]">
                     {primaryDrift.summary}
                   </p>
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <p className="mt-2 break-words text-sm text-[var(--color-on-surface-muted)]">
                     {[primaryDrift.systemLabel, primaryDrift.sourceDocument].filter(Boolean).join(" · ") || "Sursa tehnica fara eticheta"} ·{" "}
                     {formatRelativeRomanian(primaryDrift.detectedAtISO)}
                   </p>
@@ -417,7 +447,7 @@ export function DriftCommandCenter({
                   </p>
                 </div>
                 <Badge className={driftSeverityClasses(primaryDrift.severity)}>
-                  {primaryDrift.severity}
+                  {driftSeverityLabel(primaryDrift.severity)}
                 </Badge>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -437,79 +467,60 @@ export function DriftCommandCenter({
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Baseline</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {hasValidatedBaseline ? "validat" : "inca nevalidat"}
-                </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
-                  {hasValidatedBaseline
-                    ? "Drift-ul este comparat cu snapshot-ul aprobat."
-                    : "Valideaza un baseline ca sa compari schimbarile cu un punct curat."}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">De ce conteaza</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Impact principal</p>
                 <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
                   {primaryGuidance?.lawReference || "revizie legala / operationala"}
                 </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
                   {primaryDrift.severityReason}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ce faci acum</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Pasul urmator</p>
                 <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {primaryGuidance?.nextAction || "Revizuiești drift-ul și închizi task-ul derivat"}
+                  {primaryGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                 </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
-                  CompliScan a transformat schimbarea într-un task operațional, nu într-un semnal vag.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Dovada de pastrat</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {primaryGuidance?.evidenceRequired || "Atașezi dovada și rulezi rescan"}
-                </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
-                  {latestSource ? sourceLabel(latestSource) : "Porneste un scan nou din Scanare."}
+                <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+                  {primaryGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Escalare</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Escalare si baseline</p>
                 <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-                  {primaryDrift.escalationOwner || primaryGuidance?.ownerSuggestion || "owner in curs de confirmare"}
+                  {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
                 </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <span className="font-medium text-[var(--color-on-surface)]">Owner:</span>{" "}
+                  {primaryDrift.escalationOwner || primaryGuidance?.ownerSuggestion || "in curs de confirmare"}
+                </p>
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <span className="font-medium text-[var(--color-on-surface)]">Escalare:</span>{" "}
                   {formatDriftEscalationTier(
                     primaryDrift.escalationTier || primaryGuidance?.escalationTier || "watch"
-                  )} · pana la{" "}
+                  )}{" "}
+                  ·{" "}
                   {formatDriftEscalationDeadline(
                     primaryDrift.escalationDueAtISO || primaryGuidance?.escalationDueAtISO
                   )}
                 </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
+                  <span className="font-medium text-[var(--color-on-surface)]">Impact operational:</span>{" "}
                   {[
                     primaryDrift.blocksAudit ? "blocheaza auditul" : null,
                     primaryDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
                     primaryDrift.requiresHumanApproval ? "cere aprobare umana" : null,
                   ]
                     .filter(Boolean)
-                    .join(" · ") || "nu blocheaza auditul daca review-ul e documentat"}
+                    .join(" · ") || "nu blocheaza auditul daca review-ul este documentat"}
                 </p>
-                {primaryDrift.acknowledgedBy && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
-                    Preluat de {primaryDrift.acknowledgedBy} ·{" "}
-                    {formatRelativeRomanian(
-                      primaryDrift.lastStatusUpdatedAtISO || primaryDrift.acknowledgedAtISO || primaryDrift.detectedAtISO
-                    )}
-                  </p>
-                )}
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <span className="font-medium text-[var(--color-on-surface)]">Sursa reper:</span>{" "}
+                  {latestSource ? sourceLabel(latestSource) : "Porneste un scan nou din Scanare."}
+                </p>
               </div>
             </div>
 
@@ -518,7 +529,7 @@ export function DriftCommandCenter({
                 href="/dashboard/alerte"
                 className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
               >
-                Vezi drift-ul
+                Vezi drifturile
               </Link>
               <Link
                 href="/dashboard/checklists"
@@ -530,7 +541,7 @@ export function DriftCommandCenter({
                 href="/dashboard/sisteme"
                 className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
               >
-                Revizuiește controlul
+                Vezi controlul
               </Link>
             </div>
           </>
@@ -542,8 +553,8 @@ export function DriftCommandCenter({
               </p>
               <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
                 {hasValidatedBaseline
-                  ? "Baseline-ul validat ține controlul stabil. Rulezi un scan nou când se schimbă documentele, providerul, modelul sau compliscan.yaml."
-                  : "Încă nu ai un baseline validat. Următorul pas bun este să confirmi starea curentă din Control ca să poți detecta drift curat."}
+                  ? "Controlul este stabil. Rescanezi doar cand apare o schimbare reala."
+                  : "Confirma mai intai baseline-ul, apoi urmareste drift-ul pe schimbari reale."}
               </p>
             </div>
 
@@ -609,9 +620,9 @@ export function DashboardGuideCard({
   const guideSteps = [
     {
       id: "step-scan",
-      title: "1. Colectezi sursa corecta",
+      title: "1. Scanezi sursa",
       description:
-        "Scanezi documente, text manual sau manifest de cod. Dashboard-ul doar iti spune unde esti, nu inlocuieste fluxul de analiza.",
+        "Pornesti din Scanari si alegi sursa pentru analiza.",
       href: "/dashboard/scanari",
       icon: FileText,
       meta: latestDocumentScan
@@ -620,9 +631,9 @@ export function DashboardGuideCard({
     },
     {
       id: "step-confirm",
-      title: "2. Confirmi inventarul si baseline-ul",
+      title: "2. Confirmi controlul",
       description:
-        "Sistemele AI detectate automat trec prin review uman. Dupa confirmare setezi baseline-ul folosit pentru drift.",
+        "Revizuiesti inventarul AI si fixezi baseline-ul pentru drift.",
       href: "/dashboard/sisteme",
       icon: GitBranch,
       meta: hasValidatedBaseline
@@ -631,9 +642,9 @@ export function DashboardGuideCard({
     },
     {
       id: "step-close",
-      title: "3. Inchizi task-uri si exporti dovada",
+      title: "3. Inchizi si exporti",
       description:
-        "Planul de remediere si exporturile finale stau in paginile dedicate, nu aici in overview.",
+        "Remedierea si exporturile finale raman in paginile dedicate.",
       href: "/dashboard/rapoarte",
       icon: ListChecks,
       meta:
@@ -648,14 +659,14 @@ export function DashboardGuideCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Cum folosesti dashboard-ul</CardTitle>
+            <CardTitle className="text-xl">Flux principal</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
-              Pagina asta iti arata rapid starea workspace-ului, ce faci acum si unde continui. Analiza efectiva se ruleaza in paginile dedicate.
+              Overview-ul te trimite direct spre pagina unde continui lucrul real.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-              {hasEvidence ? "workspace activ" : "onboarding"}
+              {hasEvidence ? "workspace activ" : "pornire initiala"}
             </Badge>
             <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
               {openAlertsCount} alerte deschise
@@ -668,24 +679,24 @@ export function DashboardGuideCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
+      <CardContent className="grid gap-3 pt-5 md:grid-cols-3">
         {guideSteps.map((step) => {
           const Icon = step.icon
           return (
             <Link
               key={step.id}
               href={step.href}
-              className="group rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]"
+              className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="grid size-11 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
-                  <Icon className="size-5" strokeWidth={2.25} />
+                <div className="grid size-10 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
+                  <Icon className="size-4" strokeWidth={2.25} />
                 </div>
                 <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
               </div>
-              <p className="mt-4 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{step.description}</p>
-              <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
+              <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--color-on-surface-muted)]">{step.description}</p>
+              <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
             </Link>
           )
         })}
@@ -712,13 +723,13 @@ export function SnapshotStatusCard({
   const statusItems = [
     {
       id: "status-document",
-      label: "Ultima sursa document",
+      label: "Ultimul document",
       value: latestDocumentScan ? latestDocumentScan.documentName : "inca lipseste",
       meta: latestDocumentScan ? formatScanMoment(latestDocumentScan) : "mergi la Scanari",
     },
     {
       id: "status-manifest",
-      label: "Ultima sursa repo",
+      label: "Ultimul repo",
       value: latestManifestScan ? latestManifestScan.documentName : "inca lipseste",
       meta: latestManifestScan ? formatScanMoment(latestManifestScan) : "detecteaza un manifest",
     },
@@ -737,7 +748,7 @@ export function SnapshotStatusCard({
           <div>
             <CardTitle className="text-xl">Snapshot si schimbari recente</CardTitle>
             <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-              Vezi rapid daca ai suficienta dovada, daca baseline-ul este validat si daca exista drift care cere atentie.
+              Vezi rapid sursele recente, baseline-ul si ultimul semnal important.
             </p>
           </div>
           <Badge
@@ -751,42 +762,50 @@ export function SnapshotStatusCard({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-6">
-        {statusItems.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
-          >
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">{item.label}</p>
-            <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{item.value}</p>
-            <p className="mt-1 text-xs text-[var(--color-muted)]">{item.meta}</p>
-          </div>
-        ))}
-
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ultimul eveniment</p>
-          <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
-            {latestEvent?.message || "Nu exista evenimente in jurnal"}
-          </p>
-          <p className="mt-1 text-xs text-[var(--color-muted)]">
-            {latestEvent
-              ? `${latestEvent.entityType} · ${formatRelativeRomanian(latestEvent.createdAtISO)}`
-              : "Activitatea va aparea aici dupa primul scan"}
-          </p>
+      <CardContent className="space-y-4 pt-5">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {statusItems.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            >
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">{item.label}</p>
+              <p className="mt-2 break-words text-sm font-semibold text-[var(--color-on-surface)]">{item.value}</p>
+              <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{item.meta}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        {latestEvent ? (
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ultimul eveniment</p>
+            <p className="mt-2 break-words text-sm font-semibold text-[var(--color-on-surface)]">
+              {latestEvent.message}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+              {latestEvent.entityType} · {formatRelativeRomanian(latestEvent.createdAtISO)}
+            </p>
+          </div>
+        ) : (
+          <EmptyState
+            title="Nu exista evenimente in jurnal"
+            label="Activitatea va aparea aici dupa primul scan sau dupa prima schimbare confirmata."
+            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+          />
+        )}
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/dashboard/scanari"
-            className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
           >
             Continua in Scanari
           </Link>
           <Link
             href="/dashboard/rapoarte"
-            className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
           >
-            Vezi snapshot-ul complet
+            Vezi snapshot complet
           </Link>
         </div>
       </CardContent>
@@ -838,7 +857,9 @@ export function ModulesGrid({
         <CardContent className="space-y-4 pt-2">
           <div className="space-y-2 text-sm">
             <p className="text-[var(--color-on-surface-muted)]">
-              {aiHighRisk > 0 ? `${aiHighRisk} sisteme high-risk in inventar` : "Niciun sistem high-risk inventariat"}
+              {aiHighRisk > 0
+                ? `${aiHighRisk} sisteme high-risk cer review prioritar.`
+                : "Inventarul nu are sisteme high-risk deschise."}
             </p>
             <div className="flex items-center justify-between text-[var(--color-muted)]">
               <span>High-risk (inventar)</span>
@@ -853,7 +874,7 @@ export function ModulesGrid({
             href="/dashboard/sisteme"
             className="flex h-10 w-full items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] text-sm text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
           >
-            Inventar AI
+            Vezi inventarul
           </Link>
         </CardContent>
       </Card>
@@ -869,15 +890,15 @@ export function ModulesGrid({
           <div>
             {state.efacturaConnected ? (
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Flux zilnic: {validatedInvoicesToday} facturi validate azi | {efacturaErrorsToday} erori
+                Azi: {validatedInvoicesToday} facturi validate si {efacturaErrorsToday} erori.
               </p>
             ) : state.efacturaSignalsCount > 0 ? (
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Flux e-Factura detectat in {state.efacturaSignalsCount} documente, dar integrarea nu este conectata.
+                Semnale detectate in {state.efacturaSignalsCount} documente, dar integrarea nu este conectata.
               </p>
             ) : (
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Integrarea nu este conectata inca. Poti porni un sync local cand esti pregatit.
+                Integrarea nu este conectata. Poti porni un sync local cand esti pregatit.
               </p>
             )}
             <p className="mt-2 text-sm text-[var(--color-muted)]">
@@ -893,7 +914,7 @@ export function ModulesGrid({
             disabled={busy}
             className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
           >
-            {state.efacturaConnected ? "Trimite la ANAF" : "Activeaza sync local"}
+            {state.efacturaConnected ? "Trimite la ANAF" : "Porneste sync local"}
           </Button>
         </CardContent>
       </Card>
@@ -910,21 +931,21 @@ export function ModulesGrid({
             <span className="text-4xl font-semibold">{state.gdprProgress}%</span>
             <span className="pb-1 text-sm text-[var(--color-success)]">conform</span>
           </div>
-          <Progress value={state.gdprProgress} className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]" />
-          <div className="flex flex-wrap gap-2">
-            {gdprQuickFixes.slice(0, 2).map((alert) => (
-              <Badge
-                key={alert.id}
-                className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-              >
-                Rezolvabil in 5 min
-              </Badge>
-            ))}
-            {gdprQuickFixes.length === 0 && (
-              <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-                Fara blocaje rapide
-              </Badge>
-            )}
+          <Progress
+            value={state.gdprProgress}
+            className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]"
+          />
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3">
+            <p className="text-sm font-medium text-[var(--color-on-surface)]">
+              {gdprQuickFixes.length > 0
+                ? `${gdprQuickFixes.length} quick fix${gdprQuickFixes.length !== 1 ? "-uri" : ""} deschise`
+                : "Fara quick fix-uri deschise"}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+              {gdprQuickFixes.length > 0
+                ? "Inchizi rapid remedierea scurta, fara sa pierzi contextul de control."
+                : "Nu exista blocaje rapide care sa ceara interventie imediata."}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -938,14 +959,14 @@ export function ModulesGrid({
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
           <p className="text-sm text-[var(--color-on-surface-muted)]">
-            Testeaza o modificare de politica, banner sau flux AI inainte de implementare.
+            Testeaza o schimbare de politica, banner sau flux AI inainte de rollout.
           </p>
           <Button
             onClick={onSandbox}
             variant="outline"
             className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
           >
-            Porneste simulare
+            Deschide Sandbox
           </Button>
         </CardContent>
       </Card>
@@ -1089,9 +1110,9 @@ export function ScanWorkspace({
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Scope implicit</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">GDPR</Badge>
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">EU AI Act</Badge>
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">e-Factura</Badge>
+                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">GDPR</Badge>
+                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">EU AI Act</Badge>
+                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">e-Factura</Badge>
                   </div>
                 </div>
                 {pendingScanId && (
@@ -1209,9 +1230,11 @@ export function LatestDocumentSection({
 
         <CardContent className="space-y-6 pt-6">
           {!latestScan && (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-              Inca nu exista documente scanate.
-            </div>
+            <EmptyState
+              title="Niciun document scanat"
+              label="Porneste un flux nou din Scanari si aici vei vedea ultimul document analizat."
+              className="items-start rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+            />
           )}
 
           {latestScan && (
@@ -1219,10 +1242,10 @@ export function LatestDocumentSection({
               <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                 <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
                   <div className="flex flex-wrap items-center gap-3">
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                       {latestScan.documentName}
                     </Badge>
-                    <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                       Scanat la {new Date(latestScan.createdAtISO).toLocaleString("ro-RO")}
                     </Badge>
                   </div>
@@ -1247,9 +1270,11 @@ export function LatestDocumentSection({
                   </p>
                   <div className="mt-4 space-y-3">
                     {latestScanFindings.length === 0 && (
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                        Pentru acest document nu exista inca provenance disponibila.
-                      </div>
+                      <EmptyState
+                        title="Fara provenance disponibila"
+                        label="Pentru acest document nu exista inca provenance disponibila."
+                        className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                      />
                     )}
                     {latestScanFindings.slice(0, 3).map((finding) => (
                       <div
@@ -1257,11 +1282,11 @@ export function LatestDocumentSection({
                         className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4"
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                          <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                             {finding.provenance?.ruleId || "fara regula"}
                           </Badge>
                           {finding.provenance?.matchedKeyword && (
-                            <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                            <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                               keyword: {finding.provenance.matchedKeyword}
                             </Badge>
                           )}
@@ -1285,9 +1310,11 @@ export function LatestDocumentSection({
                 </p>
                 <div className="mt-4 space-y-3">
                   {latestScanTasks.length === 0 && (
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                      Nu exista task-uri derivate direct din acest document.
-                    </div>
+                    <EmptyState
+                      title="Fara task-uri derivate"
+                      label="Nu exista task-uri derivate direct din acest document."
+                      className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                    />
                   )}
                   {latestScanTasks.slice(0, 3).map((task) => (
                       <div
@@ -1340,7 +1367,7 @@ export function RecentScansCard({
           <div>
             <CardTitle className="text-xl">Surse recente analizate</CardTitle>
             <p className="text-sm text-[var(--color-on-surface-muted)]">
-              Documentele si manifestele raman separate ca sa vezi imediat ce ai scanat si unde mergi pentru detalii.
+              Documentele si manifestele raman separate ca sa vezi rapid ce ai scanat si unde continui.
             </p>
           </div>
           <Link
@@ -1353,13 +1380,19 @@ export function RecentScansCard({
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {scans.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-            Nu exista documente scanate inca. Mergi la{" "}
-            <Link href="/dashboard/scanari" className="text-[var(--color-primary)] hover:underline">
-              Scanari
-            </Link>{" "}
-            pentru a adauga primul document.
-          </div>
+          <EmptyState
+            title="Nu exista surse scanate inca"
+            label="Mergi la Scanari pentru a adauga primul document sau primul manifest."
+            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+            actions={
+              <Link
+                href="/dashboard/scanari"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
+              >
+                Deschide Scanari
+              </Link>
+            }
+          />
         )}
         {scans.map((scan) => {
           const scanTasks = tasks.filter((task) => task.sourceDocument === scan.documentName)
@@ -1375,14 +1408,14 @@ export function RecentScansCard({
             <Link
               key={scan.id}
               href={targetHref}
-              className="group flex items-center justify-between gap-4 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 transition hover:border-[var(--border-strong)] hover:bg-[var(--color-surface-hover)]"
+              className="group flex flex-col gap-4 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 transition hover:border-[var(--border-strong)] hover:bg-[var(--color-surface-hover)] md:flex-row md:items-center md:justify-between"
             >
               <div className="flex min-w-0 items-center gap-4">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
                   <FileText className="size-5" strokeWidth={2.25} />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-base font-semibold text-[var(--color-on-surface)]">
+                  <p className="break-words text-base font-semibold text-[var(--color-on-surface)] md:truncate">
                     {scan.documentName}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -1396,7 +1429,7 @@ export function RecentScansCard({
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-3">
+              <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:shrink-0 md:justify-end">
                 <Badge
                   className={
                     needsReview
@@ -1425,7 +1458,7 @@ export function RecentScansCard({
                     {p1Count} P1
                   </Badge>
                 )}
-                <span className="hidden text-sm text-[var(--color-muted)] md:inline">
+                <span className="text-sm text-[var(--color-muted)]">
                   {sourceActionLabel(scan)}
                 </span>
                 <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
@@ -1442,26 +1475,38 @@ export function RecentActivityCard({ events }: { events: ComplianceEvent[] }) {
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Activitate recenta</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-2">
-        {events.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Inca nu exista evenimente in jurnal.
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">Activitate recenta</CardTitle>
+            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+              Ultimele actiuni confirmate, fara zgomotul din istoricul complet.
+            </p>
           </div>
+          <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+            {events.length > 0 ? `${Math.min(events.length, 5)} recente` : "fara activitate"}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-2">
+        {events.length === 0 && (
+          <EmptyState
+            title="Inca nu exista activitate"
+            label="Primele schimbari confirmate si actiuni de operator vor aparea aici."
+            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+          />
         )}
         {events.slice(0, 5).map((eventItem) => (
           <div
             key={eventItem.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3"
           >
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">{eventItem.message}</p>
+            <p className="break-words text-sm font-medium text-[var(--color-on-surface)]">{eventItem.message}</p>
             {eventItem.actorLabel && (
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
+              <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
                 Actor: {eventItem.actorRole ? `${eventItem.actorLabel} (${eventItem.actorRole})` : eventItem.actorLabel}
               </p>
             )}
-            <p className="mt-2 text-xs text-[var(--color-muted)]">
+            <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
               {eventItem.type} · {formatRelativeRomanian(eventItem.createdAtISO)}
             </p>
           </div>

@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const evidenceBadgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-eos-sm border px-2 py-1 text-[12px] font-medium uppercase tracking-[0.01em] whitespace-nowrap transition-[color,background,border-color,box-shadow]",
+  "inline-flex max-w-full items-center justify-center gap-1 rounded-eos-sm border px-2 py-1 text-center text-[12px] font-medium uppercase leading-4 tracking-[0.01em] [overflow-wrap:anywhere] transition-[color,background,border-color,box-shadow]",
   {
     variants: {
       variant: {

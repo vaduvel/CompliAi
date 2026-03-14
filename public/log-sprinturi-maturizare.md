@@ -93,6 +93,33 @@ Suita curenta:
   - `Evidence OS` continua separat prin Codex secundar pe branch dedicat:
     - `codex/evidence-os-ds-finish`
 
+## 2026-03-14
+
+### Polish post Sprint 7
+
+- lucrul de polish continua pe branch separat:
+  - `codex/polish-post-sprint7`
+- `Auditor Vault` a primit polish de microcopy si empty states:
+  - empty states mai clare pentru:
+    - snapshot
+    - traceability matrix
+    - validation ledger
+    - audit timeline
+  - badge-urile si textele ramase in engleza au fost uniformizate in romana pe traseele vizibile
+- verificare curenta pe branchul de polish:
+  - `npm test` trece
+  - `npm run lint` trece
+  - `npm run build` trece
+- `Setari` si `Audit / export` au primit si ele un pass scurt de microcopy:
+  - `release readiness` foloseste acum eticheta `Pregatit`
+  - rolurile user-facing sunt mai clare pentru `Responsabil conformitate` si `Vizualizare`
+  - in `Audit / export` au fost uniformizate etichetele ramase in engleza:
+    - `Flux de export`
+    - `Surse`
+    - `Sisteme`
+    - `Finding-uri`
+    - `comparat cu`
+
 ### Sprint 6 - Audit defensibility
 
 Progres pornit:
@@ -1076,3 +1103,379 @@ Coordonare extinsa pentru Codex secundar pe `Evidence OS`:
 - documentele de coordonare au fost actualizate:
   - `public/coordonare-paralel-codex.md`
   - `public/task-codex-evidence-os-ui.md`
+
+Polish post Sprint 7:
+
+- `Setari` foloseste acum loading cards cu `role="status"` si `aria-live="polite"` pentru statusurile operationale si de release
+- `Audit / export` are empty state mai clar pentru snapshot lipsa
+- `Export center` si `Remediation board` au microcopy mai explicit pentru checklist, trimiterea catre contabil si filtre fara rezultate
+- batch-ul `Evidence OS UI` al Codex-ului secundar a fost auditat pe zona permisa si nu are blocaje de integrare; snapshot-ul comun trece `npm test`, `npm run lint`, `npm run build`
+- observatia operationala ramasa: branch-urile separate nu ajuta suficient daca lucram in acelasi worktree, deci pentru loturile urmatoare worktree separat ramane recomandarea sanatoasa
+- delegarea pentru Codex secundar a fost restransa explicit la integrarea completa `Evidence OS` pe `Inelul 1`:
+  - `components/evidence-os/*`
+  - `app/dashboard/asistent/page.tsx`
+  - adaptorii runtime ai `Agent Workspace`
+- backlog-ul local `components/evidence-os/ui-audit-backlog.md` poate fi implementat doar pe itemii care raman in aceasta zona, fara extindere in cockpit-ul mare
+- dupa realiniere, am decis sa injectam controlat `Evidence OS` si peste suprafata aprobata din cockpit:
+  - `risk-header`
+  - `route-sections`
+  - `task-card`
+  - `next-best-action`
+  - `floating-assistant`
+  - `remediation-board`
+  - `export-center`
+- in acelasi batch am reparat doua colturi reale:
+  - `floating-assistant` are acum eticheta accesibila pe butonul icon-only de trimitere
+  - `DriftCommandCenter` pastreaza din nou semnalul operational despre tier-ul de escalare si blocajele de audit / baseline
+
+Oficializare `Evidence OS`:
+
+- am fixat planul oficial de adoptie in:
+  - `public/evidence-os-oficializare-si-adoptie.md`
+- documentul stabileste:
+  - sursa canonica de design
+  - sursa canonica de implementare
+  - ownership-ul intre Codex principal si Codex secundar
+  - valurile de adoptie
+  - ce devine legacy / deprecated
+  - checklist-ul prin care putem spune onest ca `Evidence OS` este design system oficial
+- de aici inainte, `Evidence OS` nu mai este tratat doar ca lot de UI, ci ca program de adoptie controlata peste produs
+
+Delegare actualizata dupa planul oficial:
+
+- Codex secundar primeste:
+  - inchiderea `Val 1`
+  - inchiderea suprafetei aprobate din `Val 2`
+  - convergenta finala pe:
+    - `components/evidence-os/*`
+    - `app/dashboard/asistent/page.tsx`
+    - adaptorii runtime subtiri
+    - suprafata cockpit deja aprobata:
+      - `risk-header`
+      - `route-sections`
+      - `task-card`
+      - `next-best-action`
+      - `floating-assistant`
+      - `remediation-board`
+      - `export-center`
+- Codex principal preia explicit restul:
+  - restul `Val 2`
+  - `Val 3`
+  - polish final Sprint 1-7
+  - verificarea backlog-ului parcat intentionat
+  - verificarea de arhitectura si implementare
+  - declararea oficiala finala a adoptiei `Evidence OS`
+
+Clarificare sursa DS `Evidence OS`:
+
+- `public/compliscan-evidence-os-ds-spec.md` a fost marcat explicit `deprecated`
+- nu il mai luam in calcul ca sursa canonica pentru design sau implementare
+- `public/evidence-os-design-system-v1.md` ramane singura referinta oficiala
+- maturizarea `Evidence OS` continua incremental peste `v1`, prin adoptie controlata si audit
+
+Audit de performanta `Next.js` / dashboard:
+
+- am documentat auditul in:
+  - `public/audit-performanta-nextjs-2026-03-14.md`
+- concluzia centrala:
+  - aplicatia a devenit grea real
+  - `Next.js` ramane alegerea buna
+  - problema principala este modelul actual:
+    - hook client monolitic
+    - payload mare universal
+    - loading full-screen repetat
+    - prea putin server-first pe paginile mari
+- directia recomandata ramane:
+  - optimizare fara rescriere de framework
+  - bootstrap mai bun pe server
+  - split controlat pentru `useCockpit`
+  - payload-uri mai mici
+  - loading local, nu blocaj full-page
+
+Pornire `Val 3` dupa separarea lotului Codex 2:
+
+- am confirmat ca multe suprafete care inca nu folosesc `Evidence OS` tin de `Val 3`, nu de lotul activ al Codex-ului secundar
+- Codex secundar ramane pe:
+  - inchiderea `Val 1`
+  - inchiderea suprafetei aprobate din `Val 2`
+- Codex principal a deschis `Val 3` pe paginile mari printr-un prim pass sigur:
+  - convergenta pe empty states canonice in:
+    - `app/dashboard/alerte/page.tsx`
+    - `app/dashboard/rapoarte/page.tsx`
+    - `app/dashboard/rapoarte/auditor-vault/page.tsx`
+- in acelasi pass a fost reparata si o eroare reala de tipare in:
+  - `components/compliscan/floating-assistant.tsx`
+  - raspunsul din `/api/chat` nu mai permite `content` undefined in mesajele assistant
+
+Validare:
+
+- `npm run lint` -> verde
+- `npm run build` -> verde
+- `npm test` -> verde
+- stare suita:
+  - `66` fisiere de test
+  - `231` teste verzi
+
+Observatie operationala:
+
+- `npm run build` poate pica fals daca ruleaza simultan un `next-server` pe acelasi workspace si aceeasi `.next`
+- build-ul a trecut curat dupa:
+  - oprirea serverului local care ocupa portul `3001`
+  - curatarea `.next`
+
+Pass 2 `Val 3` - convergenta pe badge semantics:
+
+- am introdus badge-urile semantice `Evidence OS` in suprafetele mari unde mapping-ul este clar si sigur:
+  - `app/dashboard/alerte/page.tsx`
+    - drift severity -> `SeverityBadge`
+    - drift lifecycle -> `LifecycleBadge`
+  - `app/dashboard/rapoarte/page.tsx`
+    - drift severity -> `SeverityBadge`
+    - drift lifecycle -> `LifecycleBadge`
+  - `app/dashboard/rapoarte/auditor-vault/page.tsx`
+    - audit readiness sumar -> `EvidenceReadinessBadge`
+    - drift severity -> `SeverityBadge`
+    - drift lifecycle -> `LifecycleBadge`
+- scopul acestui pass:
+  - semantica `Evidence OS` mai vizibila in `Val 3`
+  - fara schimbare de logica
+  - fara schimbare de payload sau flow
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+- `npm run build` -> verde
+- `npm test` -> verde
+
+Realiniere adoptie `Evidence OS`:
+
+- `Val 2` este tratat acum ca:
+  - gata de inchis operational
+  - dar nu inca 100% canonizat
+- prin urmare, Codex secundar primeste explicit misiunea de a duce la 100% suprafata aprobata din `Val 2`:
+  - `risk-header`
+  - `route-sections`
+  - `task-card`
+  - `next-best-action`
+  - `floating-assistant`
+  - `remediation-board`
+  - `export-center`
+- Codex principal continua `Val 3`
+
+Pass 3 `Val 3` - convergenta `Setari` spre `Evidence OS`:
+
+- `app/dashboard/setari/page.tsx`
+  - foloseste acum `Badge` canonic `Evidence OS`
+  - foloseste `EmptyState` canonic pentru:
+    - release readiness restrictionat
+    - lipsa membrilor suplimentari
+  - verdictul de status pentru:
+    - health
+    - release
+    - Supabase operational
+    urmeaza acum semanticile `Evidence OS` prin variante canonice de badge
+- scopul acestui pass:
+  - sa apropiem `Setari` de limbajul `Evidence OS` fara sa atingem logica sau endpoint-urile
+
+Pass 4 `Val 3` - badge primitive canonice in `Alerte`, `Rapoarte`, `Auditor Vault`:
+
+- `app/dashboard/alerte/page.tsx`
+  - foloseste acum `Badge` canonic `Evidence OS`
+  - `SLA depasit` urmeaza acum varianta semantica `destructive`
+- `app/dashboard/rapoarte/page.tsx`
+  - foloseste acum `Badge` canonic `Evidence OS`
+  - `comparat cu` urmeaza acum varianta `outline`
+  - `SLA depasit` urmeaza acum varianta semantica `destructive`
+- `app/dashboard/rapoarte/auditor-vault/page.tsx`
+  - foloseste acum `Badge` canonic `Evidence OS`
+  - maparile de status pentru:
+    - validation ledger
+    - traceability
+    - audit decision
+    - control coverage
+    - timeline events
+    urmeaza acum variante canonice `success / warning / destructive / secondary / outline`
+  - empty state-ul din `Legal matrix` a fost convergit pe `VaultEmptyState`
+  - copy-ul ramas in engleza a fost redus in zona auditului:
+    - `validation pending`
+    - `proof needed`
+    - `Legal mapping matrix`
+    - etichete din timeline
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+- `npm run build` -> verde
+- `npm test` ramane validat pe snapshotul anterior al aceluiasi lot; acest pass a fost doar UI/copy/primitive mapping
+
+Pass 5 `Val 3` - copy si empty states in `Auditor Vault`:
+
+- `app/dashboard/rapoarte/auditor-vault/page.tsx`
+  - titlurile de sectiuni urmeaza acum romana-first:
+    - `Evidence ledger` -> `Registru dovezi`
+    - `Traceability matrix` -> `Matrice de trasabilitate`
+    - `Drift watch` -> `Monitor drift`
+    - `Validation ledger` -> `Registru validari`
+    - `Audit timeline` -> `Cronologie audit`
+  - empty states locale sunt mai coerente:
+    - lipsa dovezilor validate
+    - lipsa gap-urilor de dovada
+    - lipsa drift-ului activ
+- scopul acestui pass:
+  - sa aducem `Auditor Vault` mai aproape de limbajul canonic `Evidence OS`
+  - fara schimbare de logica, audit flow sau date
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde
+
+Pass 6 `Val 3` - CTA hierarchy si status guidance in `Setari`:
+
+- `app/dashboard/setari/page.tsx`
+  - cardul de baseline expune acum verdict rapid:
+    - `Baseline activ`
+    - `Cere baseline`
+  - `Repo sync pentru engineering` are acum badge de stare canonic:
+    - `Protejat cu cheie`
+    - `Local fara cheie`
+    - `Disponibil`
+    - `Se incarca`
+  - zona de reset local marcheaza clar actiunea cu badge `Actiune destructiva`
+- scopul acestui pass:
+  - sa crestem orientarea rapida in `Setari`
+  - sa facem mai clar ce este sanatos, ce cere actiune si ce este riscant
+  - fara sa schimbam logica, fetch-urile sau permisiunile
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde
+
+Val de inchidere post-Sprint 7:
+
+- a fost facut `backlog recheck` in:
+  - `public/backlog-recheck-post-sprint7-2026-03-14.md`
+- a fost facut `architecture + implementation review` in:
+  - `public/review-arhitectura-implementare-2026-03-14.md`
+- a fost facut auditul final `Evidence OS` in:
+  - `public/audit-final-evidence-os-2026-03-14.md`
+- planul oficial `Evidence OS` a fost actualizat la starea reala:
+  - `Val 1` -> inchis
+  - `Val 2` -> inchis operational
+  - `Val 3` -> in progres real
+
+Concluzie de etapa:
+
+- `Evidence OS` poate fi tratat acum ca DS oficial pentru:
+  - suprafata agentica
+  - `Val 2`
+- nu poate fi declarat inca "gata peste tot"
+- blocajul principal ramas pentru inchiderea completa este:
+  - `Val 3`, in special `Scanari`
+
+Actualizare `Val 3` - `Scanari`:
+
+- `app/dashboard/scanari/page.tsx` foloseste acum primitive canonice `Evidence OS` pentru:
+  - `Badge`
+  - `Button`
+  - `Card`
+  - `EmptyState`
+- ultimele rezultate pentru:
+  - `compliscan.yaml`
+  - `manifest`
+  au fost trecute pe:
+  - badge semantics canonice
+  - empty states canonice
+  - mapari coerente pentru severitate, risc si drift
+- logica de scanare, fluxul agentic si payload-urile nu au fost atinse
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde
+- server local repornit la:
+  - `http://localhost:3001`
+
+Verdict de etapa pentru `Scanari`:
+
+- pagina este mai aproape de inchiderea `Val 3`
+- zona `ultimul rezultat` pentru YAML si manifest nu mai este punctul principal de hibridizare
+- `Scanari` nu este inca 100% inchis, deoarece mai exista suprafete importante mostenite din:
+  - `components/compliscan/route-sections.tsx`
+  - `components/compliscan/ai-discovery-panel.tsx`
+
+Actualizare suplimentara `Scanari`:
+
+- `components/compliscan/ai-discovery-panel.tsx` foloseste acum primitive `Evidence OS` pentru:
+  - `Badge`
+  - `Button`
+  - `Card`
+  - `EmptyState`
+- maparile de:
+  - risc detectat
+  - status detectie
+  - drift activ
+  au fost trecute pe variante canonice de badge
+- `components/compliscan/route-sections.tsx` a fost curatat doar pe suprafata folosita direct de `Scanari`:
+  - `ScanWorkspace`
+  - `LatestDocumentSection`
+- acolo au fost convergente:
+  - badge-urile pentru scope implicit si provenance
+  - empty states pentru document, provenance si task-uri derivate
+
+Validare dupa acest pass:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde
+
+Concluzie actualizata pentru `Val 3`:
+
+- `Scanari` nu mai este blocata de primitive concurente in zonele ei proprii
+- gap-ul ramas este mai degraba de reteta de pagina si convergenta completa pe suprafetele mari, nu de componenta canonica lipsa
+
+Inchidere operationala `Val 3`:
+
+- paginile mari:
+  - `Alerte`
+  - `Rapoarte`
+  - `Auditor Vault`
+  - `Setari`
+  - `Scanari`
+  folosesc acum primitive `Evidence OS` pe suprafetele lor proprii
+- `AIDiscoveryPanel` foloseste acum:
+  - `Badge`
+  - `Button`
+  - `Card`
+  - `EmptyState`
+- `ScanWorkspace` si `LatestDocumentSection` au convergenta canonica pentru:
+  - badge-uri
+  - empty states
+  - CTA-uri locale
+
+Legacy ramas, dar justificat:
+
+- `components/ui/avatar` in `risk-header`
+- `components/ui/alert` in `route-sections`
+- `components/ui/progress` in `route-sections`
+- `components/ui/scroll-area` in:
+  - `app/dashboard/asistent/page.tsx`
+  - `components/evidence-os/AgentProposalTabs.tsx`
+  - `components/evidence-os/SourceContextPanel.tsx`
+
+Verdict actualizat:
+
+- `Val 1` -> inchis
+- `Val 2` -> inchis
+- `Val 3` -> inchis operational
+- `Evidence OS` -> DS oficial dominant in produs
+
+Validare dupa inchiderea `Val 3`:
+
+- `npm run lint` -> verde
+- `npm test` -> verde
+- `npm run build` -> verde

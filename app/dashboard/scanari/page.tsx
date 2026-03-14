@@ -14,6 +14,10 @@ import {
 import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
 import { ScanSourceTypeSelector, type ScanSourceType } from "@/components/evidence-os/ScanSourceTypeSelector"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
@@ -25,9 +29,6 @@ import {
   ScanWorkspace,
 } from "@/components/compliscan/route-sections"
 import { buildScanInsights } from "@/components/compliscan/use-cockpit"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
 import { AgentWorkspace } from "@/components/compliscan/agent-workspace"
@@ -310,18 +311,29 @@ export default function ScanariPage() {
   )
 }
 
-function findingSeverityClasses(severity: ComplianceSeverity) {
-  if (severity === "critical" || severity === "high") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-  }
-
-  if (severity === "medium") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-  }
-
-  return "border-[var(--color-success)] bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)] text-[var(--color-success)]"
+function findingSeverityClasses(
+  severity: ComplianceSeverity
+): "destructive" | "warning" | "success" {
+  if (severity === "critical" || severity === "high") return "destructive"
+  if (severity === "medium") return "warning"
+  return "success"
 }
 
+function driftSeverityVariant(
+  severity: ComplianceDriftRecord["severity"]
+): "destructive" | "warning" | "outline" {
+  if (severity === "critical" || severity === "high") return "destructive"
+  if (severity === "medium") return "warning"
+  return "outline"
+}
+
+function systemRiskVariant(
+  riskLevel: DetectedAISystemRecord["riskLevel"]
+): "destructive" | "warning" | "success" {
+  if (riskLevel === "high") return "destructive"
+  if (riskLevel === "limited") return "warning"
+  return "success"
+}
 
 function LatestYamlSection({
   latestYamlScan,
@@ -362,9 +374,11 @@ function LatestYamlSection({
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
         {!latestYamlScan && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-            Inca nu ai procesat niciun `compliscan.yaml`. Alege modul dedicat, valideaza configul si aici vei vedea ce a intrat in controlul operational.
-          </div>
+          <EmptyState
+            title="Niciun compliscan.yaml validat"
+            label="Alege modul dedicat, valideaza configul si aici vei vedea ce a intrat in controlul operational."
+            className="items-start rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+          />
         )}
 
         {latestYamlScan && (
@@ -372,10 +386,10 @@ function LatestYamlSection({
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestYamlScan.documentName}
                   </Badge>
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {formatRelativeRomanian(latestYamlScan.createdAtISO)}
                   </Badge>
                 </div>
@@ -416,10 +430,7 @@ function LatestYamlSection({
                     <div className="mt-3 flex flex-wrap gap-2">
                       {legalArticles.length > 0 ? (
                         legalArticles.map((item) => (
-                          <Badge
-                            key={item}
-                            className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]"
-                          >
+                          <Badge key={item} variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                             {item}
                           </Badge>
                         ))
@@ -458,9 +469,11 @@ function LatestYamlSection({
                 <p className="text-sm font-medium text-[var(--color-on-surface)]">Findings generate din YAML</p>
                 <div className="mt-4 space-y-3">
                   {findings.length === 0 && (
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--status-success-text)]">
-                      Configul nu a generat findings suplimentare.
-                    </div>
+                    <EmptyState
+                      title="Fara findings suplimentare"
+                      label="Configul validat nu a generat findings noi in aceasta rulare."
+                      className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                    />
                   )}
                   {findings.map((finding) => (
                     <div
@@ -477,9 +490,7 @@ function LatestYamlSection({
                           </p>
                           <FindingVerdictMeta finding={finding} className="mt-3" />
                         </div>
-                        <Badge
-                          className={findingSeverityClasses(finding.severity)}
-                        >
+                        <Badge variant={findingSeverityClasses(finding.severity)}>
                           {finding.severity}
                         </Badge>
                       </div>
@@ -492,9 +503,11 @@ function LatestYamlSection({
                 <p className="text-sm font-medium text-[var(--color-on-surface)]">Drift pentru config</p>
                 <div className="mt-4 space-y-3">
                   {drifts.length === 0 && (
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--status-success-text)]">
-                      Nu exista drift activ fata de baseline pentru acest YAML.
-                    </div>
+                    <EmptyState
+                      title="Fara drift activ"
+                      label="Nu exista drift activ fata de baseline pentru acest YAML."
+                      className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                    />
                   )}
                   {drifts.map((drift) => (
                     <ScanDriftCard key={drift.id} drift={drift} compact />
@@ -541,9 +554,11 @@ function LatestManifestSection({
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
         {!latestManifestScan && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-            Inca nu ai procesat niciun manifest. Alege `Repo / manifest`, ruleaza autodiscovery si aici vei vedea exact ce a iesit pentru sursa respectiva.
-          </div>
+          <EmptyState
+            title="Niciun manifest procesat"
+            label="Alege `Repo / manifest`, ruleaza autodiscovery si aici vei vedea exact ce a iesit pentru sursa respectiva."
+            className="items-start rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+          />
         )}
 
         {latestManifestScan && (
@@ -551,10 +566,10 @@ function LatestManifestSection({
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestManifestScan.documentName}
                   </Badge>
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {formatRelativeRomanian(latestManifestScan.createdAtISO)}
                   </Badge>
                 </div>
@@ -601,10 +616,7 @@ function LatestManifestSection({
                     <div className="mt-3 flex flex-wrap gap-2">
                       {frameworks.length > 0 ? (
                         frameworks.map((framework) => (
-                          <Badge
-                            key={framework}
-                            className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]"
-                          >
+                          <Badge key={framework} variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                             {framework}
                           </Badge>
                         ))
@@ -644,9 +656,11 @@ function LatestManifestSection({
               </p>
               <div className="mt-4 space-y-3">
                 {systems.length === 0 && (
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                    Nu avem încă sisteme propuse pentru manifestul curent.
-                  </div>
+                  <EmptyState
+                    title="Fara sisteme propuse"
+                    label="Nu avem inca sisteme propuse pentru manifestul curent."
+                    className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                  />
                 )}
                 {systems.map((system) => (
                   <div
@@ -663,21 +677,13 @@ function LatestManifestSection({
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                           {system.confidence}
                         </Badge>
-                        <Badge
-                          className={
-                            system.riskLevel === "high"
-                              ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                              : system.riskLevel === "limited"
-                                ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                                : "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-                          }
-                        >
+                        <Badge variant={systemRiskVariant(system.riskLevel)}>
                           {system.riskLevel}
                         </Badge>
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+                        <Badge variant="secondary" className="normal-case tracking-normal">
                           {system.detectionStatus}
                         </Badge>
                       </div>
@@ -693,9 +699,11 @@ function LatestManifestSection({
               </p>
               <div className="mt-4 space-y-3">
                 {drifts.length === 0 && (
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--status-success-text)]">
-                    Nu există drift activ pentru această sursă.
-                  </div>
+                  <EmptyState
+                    title="Fara drift activ"
+                    label="Nu exista drift activ pentru aceasta sursa."
+                    className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                  />
                 )}
                 {drifts.map((drift) => (
                   <ScanDriftCard key={drift.id} drift={drift} />
@@ -748,7 +756,7 @@ function ScanDriftCard({
             {guidance.impactSummary}
           </p>
         </div>
-        <Badge className={driftSeverityBadgeClass(drift.severity)}>{drift.severity}</Badge>
+        <Badge variant={driftSeverityVariant(drift.severity)}>{drift.severity}</Badge>
       </div>
       <div className={`mt-4 grid gap-3 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
@@ -781,14 +789,4 @@ function ScanDriftCard({
       </div>
     </div>
   )
-}
-
-function driftSeverityBadgeClass(severity: ComplianceDriftRecord["severity"]) {
-  if (severity === "critical" || severity === "high") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-  }
-  if (severity === "medium") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-  }
-  return "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
 }

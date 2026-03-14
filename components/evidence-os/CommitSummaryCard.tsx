@@ -18,21 +18,21 @@ export function CommitSummaryCard({ systemsCount, findingsCount, driftsCount, cl
         </CardTitle>
       </CardHeader>
       <Separator />
-      <CardContent className="py-3 px-4 grid grid-cols-3 gap-4">
+      <CardContent className="grid grid-cols-3 gap-3 px-4 py-3">
         <div className="flex flex-col">
-          <span className="text-2xl font-semibold text-eos-text">
+          <span className="text-xl font-semibold text-eos-text sm:text-2xl">
             {systemsCount}
           </span>
           <span className="text-xs text-eos-text-muted">Sisteme AI</span>
         </div>
         <div className="flex flex-col">
-          <span className="text-2xl font-semibold text-eos-warning">
+          <span className="text-xl font-semibold text-eos-warning sm:text-2xl">
             {findingsCount}
           </span>
           <span className="text-xs text-eos-text-muted">Constatari</span>
         </div>
         <div className="flex flex-col">
-          <span className="text-2xl font-semibold text-eos-error">
+          <span className="text-xl font-semibold text-eos-error sm:text-2xl">
             {driftsCount}
           </span>
           <span className="text-xs text-eos-text-muted">Drifturi</span>

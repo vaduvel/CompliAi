@@ -2,9 +2,10 @@
 
 import { ArrowRight, Clock3, ShieldAlert, UserRound } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { EmptyState } from "@/components/evidence-os/EmptyState"
 import type { CockpitTask } from "@/components/compliscan/types"
 
 type NextBestActionProps = {
@@ -30,6 +31,13 @@ function severityClasses(severity: CockpitTask["severity"]) {
   return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
 }
 
+function severityLabel(severity: CockpitTask["severity"]) {
+  if (severity === "critical") return "critic"
+  if (severity === "high") return "ridicat"
+  if (severity === "medium") return "mediu"
+  return "scazut"
+}
+
 export function NextBestAction({
   task,
   onResolve,
@@ -37,19 +45,28 @@ export function NextBestAction({
   activeRiskCount,
 }: NextBestActionProps) {
   if (!task) {
+    const emptyLabel = !hasEvidence
+      ? "Scaneaza primul document ca sa construim evaluarea initiala si sa putem recomanda urmatorul pas."
+      : activeRiskCount === 0
+        ? "Nu exista probleme active. Rulezi un scan nou doar cand se schimba documentele, politicile sau fluxurile."
+        : "Mai exista semnale active. Revizuieste alertele si inchide urmatorul risc cu impact real."
+
     return (
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="pb-0">
-          <CardTitle className="text-lg text-[var(--color-on-surface)]">Ce faci acum</CardTitle>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <CardTitle className="text-lg text-[var(--color-on-surface)]">Ce faci acum</CardTitle>
+            <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+              {!hasEvidence ? "fara baseline" : activeRiskCount === 0 ? "fara risc activ" : "in asteptare"}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="pt-4">
-          <p className="text-sm text-[var(--color-on-surface-muted)]">
-            {!hasEvidence
-              ? "Nu exista inca un baseline. Scaneaza primul document ca sa construim o evaluare reala."
-              : activeRiskCount === 0
-                ? "Nu exista probleme active. Scanarile anterioare raman salvate ca istoric si dovada. Rulezi un scan nou doar cand se schimba documentele, politicile sau fluxurile."
-                : "Mai exista semnale active in istoric. Revizuieste documentele scanate si alertele deschise."}
-          </p>
+          <EmptyState
+            title={!hasEvidence ? "Incepi din Scanari" : activeRiskCount === 0 ? "Nu exista lucru urgent" : "Nu exista pas recomandat unic"}
+            label={emptyLabel}
+            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+          />
         </CardContent>
       </Card>
     )
@@ -62,29 +79,26 @@ export function NextBestAction({
           <div>
             <CardTitle className="text-lg text-[var(--color-on-surface)]">Ce faci acum</CardTitle>
             <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-              Urmatoarea actiune recomandata de AI pentru ziua de azi.
+              Urmatorul pas recomandat pentru progresul cu impact real.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge className={priorityClasses(task.priority)}>{task.priority}</Badge>
-            <Badge className={severityClasses(task.severity)}>{task.severity}</Badge>
+            <Badge className={severityClasses(task.severity)}>{severityLabel(task.severity)}</Badge>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="pt-5">
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr_auto] lg:items-center">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)_auto] lg:items-center">
           <div>
-            <p className="text-xl font-semibold text-[var(--color-on-surface)]">{task.title}</p>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+            <p className="break-words text-xl font-semibold text-[var(--color-on-surface)]">{task.title}</p>
+            <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
               {task.summary}
-            </p>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--color-muted)]">
-              {task.fixPreview}
             </p>
           </div>
 
-          <div className="grid gap-2 text-sm text-[var(--color-muted)]">
+          <div className="grid gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)] lg:justify-items-start">
             <div className="flex items-center gap-2">
               <Clock3 className="size-4 text-[var(--icon-secondary)]" strokeWidth={2.25} />
               <span>{task.effortLabel}</span>
@@ -95,15 +109,15 @@ export function NextBestAction({
             </div>
             <div className="flex items-center gap-2">
               <ShieldAlert className="size-4 text-[var(--icon-secondary)]" strokeWidth={2.25} />
-              <span>{task.lawReference}</span>
+              <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
             </div>
           </div>
 
           <Button
             onClick={onResolve}
-            className="h-11 rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+            className="h-11 w-full rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] lg:w-auto"
           >
-            Rezolva acum
+            Deschide remedierea
             <ArrowRight className="size-4" strokeWidth={2.25} />
           </Button>
         </div>

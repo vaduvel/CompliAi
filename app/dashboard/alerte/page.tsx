@@ -2,11 +2,14 @@
 
 import { useState } from "react"
 
+import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
+import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { AlertsList, EmptyStateCard, LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertsList, LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
 import { useCockpit } from "@/components/compliscan/use-cockpit"
 import {
   formatDriftEscalationDeadline,
@@ -15,7 +18,6 @@ import {
   getDriftPolicyFromRecord,
 } from "@/lib/compliance/drift-policy"
 import {
-  formatDriftLifecycleStatus,
   isDriftSlaBreached,
 } from "@/lib/compliance/drift-lifecycle"
 
@@ -117,24 +119,12 @@ export default function AlertePage() {
                         {guidance.impactSummary}
                       </p>
                     </div>
-                    <Badge
-                      className={
-                        drift.severity === "critical" || drift.severity === "high"
-                          ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                          : drift.severity === "medium"
-                            ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                            : "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-muted)]"
-                      }
-                    >
-                      {drift.severity}
-                    </Badge>
+                    <SeverityBadge severity={drift.severity} />
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                      {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
-                    </Badge>
+                    <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
                     {breached && (
-                      <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                      <Badge variant="destructive">
                         SLA depășit
                       </Badge>
                     )}
@@ -256,9 +246,9 @@ export default function AlertePage() {
       )}
 
       {openTasks.length === 0 && openDrifts.length === 0 ? (
-        <EmptyStateCard
+        <EmptyState
           title="Fara alerte deschise"
-          description="Momentan nu exista alerte care sa ceara actiune imediata."
+          label="Momentan nu exista alerte care sa ceara actiune imediata."
         />
       ) : openTasks.length > 0 ? (
         <AlertsList tasks={openTasks} />

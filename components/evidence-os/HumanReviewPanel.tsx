@@ -24,12 +24,12 @@ export function HumanReviewPanel({ onConfirm, onReject, onEdit, disabled }: Huma
       <CardContent className="space-y-3 pt-4">
         <Button className="w-full justify-start" variant="default" onClick={onConfirm} disabled={disabled}>
           <Check className="mr-2 size-4" />
-          Confirma si comite
+          Confirma propunerile
         </Button>
 
         <Button className="w-full justify-start" variant="outline" onClick={onReject} disabled={disabled}>
           <X className="mr-2 size-4" />
-          Respinge propunerea
+          Respinge lotul
         </Button>
 
         {onEdit && (
@@ -39,7 +39,7 @@ export function HumanReviewPanel({ onConfirm, onReject, onEdit, disabled }: Huma
           </Button>
         )}
 
-        <p className="mt-2 text-[10px] text-eos-text-muted">
+        <p className="mt-2 text-[10px] leading-4 text-eos-text-muted">
           Confirmarea aplica propunerile in starea oficiala si lasa o urma clara pentru audit.
         </p>
       </CardContent>

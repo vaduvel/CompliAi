@@ -1,8 +1,8 @@
 import { Ban } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { ProposalConfidenceBadge } from "@/components/evidence-os/ProposalConfidenceBadge"
+import { ProposalCard } from "@/components/evidence-os/ProposalCard"
 import { ProposalRejectButton } from "@/components/evidence-os/ProposalRejectButton"
 import { SignalBadgeList } from "@/components/evidence-os/SignalBadgeList"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
@@ -21,29 +21,28 @@ export function FindingProposalCard({
   onToggleRejection,
 }: FindingProposalCardProps) {
   return (
-    <Card
+    <ProposalCard
       className={cn(
         "border-l-4 transition-opacity",
         isRejected ? "border-l-eos-border opacity-60" : "border-l-eos-warning"
       )}
+      title={
+        <span className="flex items-center gap-2">
+          {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
+          <span className={cn(isRejected && "line-through text-eos-text-tertiary")}>{finding.issue}</span>
+        </span>
+      }
+      badges={
+        <>
+          <ProposalConfidenceBadge confidence={finding.confidence} />
+          <SeverityBadge severity={finding.severity} />
+        </>
+      }
+      actions={<ProposalRejectButton onClick={() => onToggleRejection(finding.findingId)} />}
+      contentClassName="space-y-3 px-4 py-3 text-sm"
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            {isRejected && <Ban className="size-4 text-eos-text-tertiary" />}
-            <CardTitle className={cn("text-sm font-medium", isRejected && "line-through text-eos-text-tertiary")}>
-              {finding.issue}
-            </CardTitle>
-          </div>
-          <div className="flex gap-2">
-            <ProposalConfidenceBadge confidence={finding.confidence} />
-            <SeverityBadge severity={finding.severity} />
-            <ProposalRejectButton onClick={() => onToggleRejection(finding.findingId)} />
-          </div>
-        </div>
-      </CardHeader>
       {!isRejected && (
-        <CardContent className="space-y-3 px-4 py-3 text-sm">
+        <>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="normal-case tracking-normal">
               Principiu: {finding.principle}
@@ -63,8 +62,8 @@ export function FindingProposalCard({
           </div>
 
           <SignalBadgeList signals={finding.sourceSignals} title="Semnale sursa" />
-        </CardContent>
+        </>
       )}
-    </Card>
+    </ProposalCard>
   )
 }

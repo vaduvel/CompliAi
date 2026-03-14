@@ -16,6 +16,7 @@ export function ProposalRejectButton({
 }: ProposalRejectButtonProps) {
   return (
     <Button
+      type="button"
       variant="ghost"
       size="sm"
       className={cn("h-6 w-6 p-0 hover:bg-eos-error-soft hover:text-eos-error", className)}
