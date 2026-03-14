@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import {
   ArrowRight,
   CheckCircle2,
@@ -11,7 +12,6 @@ import {
   ShieldAlert,
 } from "lucide-react"
 
-import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -30,7 +30,6 @@ import {
 } from "@/components/compliscan/route-sections"
 import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
-import { AgentWorkspace } from "@/components/compliscan/agent-workspace"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { ComplianceSeverity } from "@/lib/compliance/constitution"
 import { formatDriftTypeLabel, getDriftPolicyFromRecord } from "@/lib/compliance/drift-policy"
@@ -42,6 +41,32 @@ import type {
   ScanRecord,
 } from "@/lib/compliance/types"
 import type { SourceEnvelope } from "@/lib/compliance/agent-os"
+
+const AgentWorkspace = dynamic(
+  () => import("@/components/compliscan/agent-workspace").then((mod) => mod.AgentWorkspace),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Agent workspace in incarcare"
+        detail="Panoul agentilor se incarca in fundal."
+      />
+    ),
+  }
+)
+
+const AIDiscoveryPanel = dynamic(
+  () => import("@/components/compliscan/ai-discovery-panel").then((mod) => mod.AIDiscoveryPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Autodiscovery in incarcare"
+        detail="Panoul de detectie automata se incarca in fundal."
+      />
+    ),
+  }
+)
 
 export default function ScanariPage() {
   const router = useRouter()
@@ -788,5 +813,18 @@ function ScanDriftCard({
         )}
       </div>
     </div>
+  )
+}
+
+function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
+      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+        {detail}
+      </CardContent>
+    </Card>
   )
 }

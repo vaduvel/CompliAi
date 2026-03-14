@@ -137,6 +137,7 @@ Suita curenta:
   - cockpit foloseste implicit payload-ul `core`, iar paginile `Control sisteme AI` si `Audit si dovezi` cer lazy load pentru `compliancePack` + `traceabilityMatrix`
 - Val B3 (lazy load):
   - `Audit si export` incarca dinamic `RemediationBoard` si `ExportCenter` cu placeholder local
+  - `Scanari` incarca dinamic `AgentWorkspace` si `AIDiscoveryPanel` cu placeholder local
 
 ### Sprint 6 - Audit defensibility
 

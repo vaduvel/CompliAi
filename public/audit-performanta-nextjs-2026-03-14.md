@@ -360,6 +360,7 @@ Candidate bune:
 Stare curenta:
 
 - `Audit si export` face lazy load pentru `RemediationBoard` si `ExportCenter` (dynamic import cu placeholder local)
+- `Scanari` face lazy load pentru `AgentWorkspace` si `AIDiscoveryPanel` (dynamic import cu placeholder local)
 
 Castig:
 
