@@ -1,8 +1,12 @@
+import { promises as fs } from "node:fs"
 import path from "node:path"
 
 import { loadEnvFile } from "./lib/supabase-live-check.mjs"
 
 const ENV_PATH = path.join(process.cwd(), ".env.local")
+const MARKER_PATH =
+  process.env.COMPLISCAN_RLS_VERIFICATION_FILE?.trim() ||
+  path.join(process.cwd(), ".data", "ops", "last-rls-verification.json")
 
 async function main() {
   const env = await loadEnvFile(ENV_PATH)
@@ -119,10 +123,12 @@ async function main() {
     }
 
     result.ready = result.blockers.length === 0
+    await writeMarker(result)
     console.log(JSON.stringify(result, null, 2))
     process.exitCode = result.ready ? 0 : 1
   } catch (error) {
     result.blockers.push(error instanceof Error ? error.message : String(error))
+    await writeMarker(result)
     console.log(JSON.stringify(result, null, 2))
     process.exitCode = 1
   } finally {
@@ -397,6 +403,19 @@ async function deleteAuthUser(config, userId) {
       Authorization: `Bearer ${config.serviceRoleKey}`,
     },
   })
+}
+
+async function writeMarker(result) {
+  const payload = {
+    checkedAtISO: new Date().toISOString(),
+    ready: Boolean(result.ready),
+    runId: result.runId,
+    blockers: Array.isArray(result.blockers) ? result.blockers : [],
+    checks: Array.isArray(result.checks) ? result.checks : [],
+  }
+
+  await fs.mkdir(path.dirname(MARKER_PATH), { recursive: true })
+  await fs.writeFile(MARKER_PATH, JSON.stringify(payload, null, 2), "utf8")
 }
 
 main().catch((error) => {

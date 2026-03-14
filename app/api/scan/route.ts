@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server"
-
 import { mutateState } from "@/lib/server/mvp-store"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import {
   analyzeExtractedScan,
@@ -9,9 +8,13 @@ import {
   validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/scan")
+
   try {
     const body = validateScanInputPayload(await request.json())
     const actor = await resolveOptionalEventActor(request)
@@ -27,14 +30,17 @@ export async function POST(request: Request) {
       throw new Error("Extragerea s-a terminat fara rezultat utilizabil.")
     }
 
-    return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
-      ocrUsed: extractionResult.ocrUsed,
-      ocrWarning: extractionResult.ocrWarning,
-      extractedTextPreview: extractionResult.extractedTextPreview,
-      message:
-        "Scanare finalizată. Acesta este un scor de risc și o recomandare AI. Verifică uman înainte de raport oficial.",
-    })
+    return jsonWithRequestContext(
+      {
+        ...(await buildDashboardPayload(nextState)),
+        ocrUsed: extractionResult.ocrUsed,
+        ocrWarning: extractionResult.ocrWarning,
+        extractedTextPreview: extractionResult.extractedTextPreview,
+        message:
+          "Scanare finalizată. Acesta este un scor de risc și o recomandare AI. Verifică uman înainte de raport oficial.",
+      },
+      context
+    )
   } catch (error) {
     const message = error instanceof Error ? error.message : "Eroare la scanare."
     const status =
@@ -43,12 +49,14 @@ export async function POST(request: Request) {
         : message.includes("Nu am extras")
           ? 422
           : 400
-    return NextResponse.json(
-      {
-        error: message,
-        code: error instanceof RequestValidationError ? error.code : "SCAN_FAILED",
-      },
-      { status }
-    )
+    const code = error instanceof RequestValidationError ? error.code : "SCAN_FAILED"
+
+    logRouteError(context, error, {
+      code,
+      durationMs: getRequestDurationMs(context),
+      status,
+    })
+
+    return jsonError(message, status, code, undefined, context)
   }
 }

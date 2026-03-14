@@ -194,6 +194,61 @@ curl -X POST http://localhost:3000/api/integrations/supabase/keepalive \
 - runbook manual:
   - `public/supabase-rls-verification-runbook.md`
 
+## Application health
+
+- Endpoint intern: `GET /api/health`
+- UI:
+  - pagina `Setari` afiseaza acum health check-ul aplicatiei separat de statusul Supabase
+- scop:
+  - sumar rapid pentru sesiune, backend-uri, fallback local si traseul cloud principal
+
+## Release readiness
+
+- Endpoint intern: `GET /api/release-readiness`
+- scop:
+  - verdict agregat pentru blocajele operationale
+  - combina:
+    - `app health`
+    - `strict supabase preflight`
+    - configuratia backend-urilor
+    - politica de fallback local
+
+## Release preflight (local)
+
+- Comanda locala pentru preflight complet:
+  - `npm run preflight:release`
+- preflight-ul ruleaza acum:
+  - `lint`
+  - `test`
+  - `build`
+  - `verify:supabase:strict`
+  - `verify:supabase:rls`
+- `release readiness` foloseste si marker-ul ultimei verificari RLS locale:
+  - `.data/ops/last-rls-verification.json`
+  - este regenerat de `npm run verify:supabase:rls`
+
+## Timeouts si retry operational
+
+- helper comun:
+  - `lib/server/http-client.ts`
+- aplicat pe:
+  - Google Vision
+  - Supabase REST
+  - Supabase Storage
+  - Supabase Auth
+- scop:
+  - evitam request-uri agatate
+  - avem comportament mai uniform pe integrările externe critice
+
+## Request tracing minimal
+
+- rutele critice expun acum header-ul `x-request-id`
+- raspunsurile JSON de eroare includ si `requestId` in payload
+- scop:
+  - debugging mai rapid
+  - corelare intre eroarea vazuta de user si logurile server-side
+  - baza minima pentru operational logging in Sprint 7
+
 ## Chat AI (Gemini Free Tier)
 
 - Endpoint: `POST /api/chat`

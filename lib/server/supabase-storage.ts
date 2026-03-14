@@ -1,3 +1,5 @@
+import { fetchWithOperationalGuard } from "@/lib/server/http-client"
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -202,16 +204,22 @@ async function storageRequest(
     throw new Error("Supabase env vars lipsa pentru storage.")
   }
 
-  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/storage/v1${endpoint}`, {
-    method: options.method,
-    headers: {
-      apikey: SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
-      ...(options.headers ?? {}),
-    },
-    body: options.body as BodyInit | undefined,
-    cache: "no-store",
-  })
+  const response = await fetchWithOperationalGuard(
+    `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1${endpoint}`,
+    {
+      method: options.method,
+      headers: {
+        apikey: SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+        ...(options.headers ?? {}),
+      },
+      body: options.body as BodyInit | undefined,
+      cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: `supabase-storage:${endpoint}`,
+    }
+  )
 
   return response
 }

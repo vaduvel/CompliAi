@@ -1,3 +1,5 @@
+import { fetchWithOperationalGuard } from "@/lib/server/http-client"
+
 type HttpMethod = "GET" | "POST" | "PATCH"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -85,11 +87,14 @@ async function request<T>(
   }
   if (options.prefer) headers.Prefer = options.prefer
 
-  const res = await fetch(url, {
+  const res = await fetchWithOperationalGuard(url, {
     method,
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
     cache: "no-store",
+    timeoutMs: 8_000,
+    retries: 1,
+    label: `supabase-rest:${table}`,
   })
 
   if (!res.ok) {

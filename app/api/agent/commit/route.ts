@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 import { buildDetectedAISystemRecord } from "@/lib/compliance/ai-inventory"
@@ -17,8 +16,11 @@ import type {
   FindingCategory,
   ScanFinding,
 } from "@/lib/compliance/types"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { requireAuthenticatedSession } from "@/lib/server/auth"
 import { mutateState } from "@/lib/server/mvp-store"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
 const AI_SYSTEM_PURPOSES: AISystemPurpose[] = [
   "hr-screening",
@@ -45,11 +47,17 @@ function inferCategory(bundle: AgentProposalBundle, lawReference?: string): Find
 }
 
 export async function POST(request: NextRequest) {
+  const context = createRequestContext(request, "/api/agent/commit")
   try {
     requireAuthenticatedSession(request, "salvarea propunerilor Agent OS")
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unauthorized"
-    return NextResponse.json({ error: message }, { status: 401 })
+    logRouteError(context, error, {
+      code: "AUTH_UNAUTHORIZED",
+      durationMs: getRequestDurationMs(context),
+      status: 401,
+    })
+    return jsonError(message, 401, "AUTH_UNAUTHORIZED", undefined, context)
   }
 
   try {
@@ -177,17 +185,27 @@ export async function POST(request: NextRequest) {
       return state
     })
 
-    return NextResponse.json({
-      success: true,
-      systemsCount: bundle.intake?.proposedSystems.length || 0,
-      findingsCount: bundle.findings?.length || 0,
-      driftsCount: bundle.drifts?.length || 0,
-    })
+    return jsonWithRequestContext(
+      {
+        success: true,
+        systemsCount: bundle.intake?.proposedSystems.length || 0,
+        findingsCount: bundle.findings?.length || 0,
+        driftsCount: bundle.drifts?.length || 0,
+      },
+      context
+    )
   } catch (error) {
-    console.error("Agent commit failed:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error", details: String(error) },
-      { status: 500 }
+    logRouteError(context, error, {
+      code: "AGENT_COMMIT_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+    return jsonError(
+      "Internal Server Error",
+      500,
+      "AGENT_COMMIT_FAILED",
+      { details: String(error) },
+      context
     )
   }
 }

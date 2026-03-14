@@ -11,22 +11,22 @@ interface AgentRunBadgeProps {
 export function AgentRunBadge({ status }: AgentRunBadgeProps) {
   if (status === "running") {
     return (
-      <Badge variant="outline" className="gap-1">
+      <Badge variant="warning" className="gap-1">
         <Loader2 className="size-3 animate-spin" />
-        Running
+        In rulare
       </Badge>
     )
   }
 
   const config = {
-    queued: { icon: Clock, variant: "secondary" as const, label: "Queued" },
-    completed: { icon: CheckCircle2, variant: "success" as const, label: "Done" },
-    failed: { icon: XCircle, variant: "destructive" as const, label: "Failed" },
-    cancelled: { icon: XCircle, variant: "secondary" as const, label: "Cancelled" },
+    queued: { icon: Clock, variant: "outline" as const, label: "In coada" },
+    completed: { icon: CheckCircle2, variant: "success" as const, label: "Finalizat" },
+    failed: { icon: XCircle, variant: "destructive" as const, label: "Esuat" },
+    cancelled: { icon: XCircle, variant: "secondary" as const, label: "Anulat" },
   }[status] || { icon: Clock, variant: "secondary" as const, label: status }
 
   const Icon = config.icon
-  
+
   return (
     <Badge variant={config.variant} className="gap-1">
       <Icon className="size-3" />

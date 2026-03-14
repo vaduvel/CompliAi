@@ -35,6 +35,7 @@ describe("POST /api/scan", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(400)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("INVALID_REQUEST")
   })
 
@@ -54,6 +55,7 @@ describe("POST /api/scan", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(422)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("SCAN_FAILED")
   })
 
@@ -76,6 +78,7 @@ describe("POST /api/scan", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.message).toContain("Scanare finalizată")
   })
 })

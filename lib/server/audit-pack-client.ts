@@ -176,7 +176,21 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
         )}</span></td>
         <td>${escapeHtml(formatRemediationMode(task.remediationMode))}</td>
         <td>${escapeHtml(task.owner)}</td>
-        <td>${escapeHtml(formatTaskStatus(task.status, task.validationStatus))}</td>
+        <td>
+          <span class="chip ${auditDecisionClass(task.auditDecision)}">${escapeHtml(
+            formatAuditDecision(task.auditDecision)
+          )}</span>
+          <div class="muted small" style="margin-top:6px;">status task: ${escapeHtml(
+            formatTaskStatus(task.status, task.validationStatus)
+          )}</div>
+          ${
+            task.auditGateCodes.length > 0
+              ? `<div class="muted small" style="margin-top:6px;">blocaje/gates: ${escapeHtml(
+                  task.auditGateCodes.map(formatAuditGateCode).join(" · ")
+                )}</div>`
+              : ""
+          }
+        </td>
         <td>${escapeHtml(task.evidenceRequired)}</td>
         <td>${escapeHtml(task.lawReference ?? "revizie juridica")}${
           annexRefs.length > 0
@@ -324,7 +338,18 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
               <td>${entry.linkedFindingIds.length} findings / ${entry.linkedDriftIds.length} drift</td>
               <td><span class="chip ${validationClass(entry.evidence.validationStatus)}">${escapeHtml(
                 entry.traceStatus
-              )}</span>${
+              )}</span>
+              <div class="muted small" style="margin-top:6px;">
+                <span class="chip ${auditDecisionClass(entry.auditDecision)}">${escapeHtml(
+                  formatAuditDecision(entry.auditDecision)
+                )}</span>
+              </div>${
+                entry.auditGateCodes.length > 0
+                  ? `<div class="muted small" style="margin-top:6px;">gates active: ${escapeHtml(
+                      entry.auditGateCodes.map(formatAuditGateCode).join(" · ")
+                    )}</div>`
+                  : ""
+              }${
                 entry.evidence.quality
                   ? `<div class="muted small" style="margin-top:6px;">calitate dovadă: ${escapeHtml(
                       entry.evidence.quality.status
@@ -862,6 +887,28 @@ function formatTaskStatus(
   if (validationStatus === "needs_review") return "necesita revizie"
   if (validationStatus === "failed") return "rescan esuat"
   return "inchis"
+}
+
+function formatAuditDecision(value: AuditPackV2["controlsMatrix"][number]["auditDecision"]) {
+  if (value === "pass") return "gata pentru audit"
+  if (value === "review") return "review necesar"
+  return "blocat"
+}
+
+function auditDecisionClass(value: AuditPackV2["controlsMatrix"][number]["auditDecision"]) {
+  if (value === "pass") return "success"
+  if (value === "review") return "warning"
+  return "danger"
+}
+
+function formatAuditGateCode(value: AuditPackV2["controlsMatrix"][number]["auditGateCodes"][number]) {
+  if (value === "missing_evidence") return "dovadă lipsă"
+  if (value === "pending_validation") return "validare în așteptare"
+  if (value === "weak_evidence") return "dovadă slabă"
+  if (value === "stale_evidence") return "dovadă veche / afectată de drift"
+  if (value === "unresolved_drift") return "drift nerezolvat"
+  if (value === "inferred_only_finding") return "finding doar inferat"
+  return value
 }
 
 function formatValidationStatus(value: AuditPackV2["validationLog"][number]["validationStatus"]) {

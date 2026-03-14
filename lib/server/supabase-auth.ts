@@ -1,4 +1,5 @@
 import { getConfiguredAuthBackend } from "@/lib/server/auth"
+import { fetchWithOperationalGuard } from "@/lib/server/http-client"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
@@ -29,7 +30,7 @@ export async function signInSupabaseIdentity(
     throw new Error("SUPABASE_AUTH_NOT_CONFIGURED")
   }
 
-  const response = await fetch(
+  const response = await fetchWithOperationalGuard(
     `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/token?grant_type=password`,
     {
       method: "POST",
@@ -40,6 +41,9 @@ export async function signInSupabaseIdentity(
       },
       body: JSON.stringify({ email, password }),
       cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: "supabase-auth-login",
     }
   )
 
@@ -72,20 +76,26 @@ export async function registerSupabaseIdentity(
     throw new Error("SUPABASE_AUTH_NOT_CONFIGURED")
   }
 
-  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/users`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-      password,
-      email_confirm: true,
-    }),
-    cache: "no-store",
-  })
+  const response = await fetchWithOperationalGuard(
+    `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/users`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        email_confirm: true,
+      }),
+      cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: "supabase-auth-register",
+    }
+  )
 
   if (!response.ok) {
     const text = await response.text()

@@ -104,6 +104,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(400)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("EVIDENCE_FILE_REQUIRED")
   })
 
@@ -123,6 +124,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(400)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("EVIDENCE_FILE_INVALID")
     expect(payload.error).toContain("nu este permis")
     expect(mocks.storePrivateEvidenceFileMock).not.toHaveBeenCalled()
@@ -152,6 +154,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(404)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("TASK_NOT_FOUND")
   })
 
@@ -178,6 +181,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.message).toBe("Dovada a fost încărcată.")
     expect(payload.evidence.fileName).toBe("proof final.PNG")
     expect(payload.evidence.kind).toBe("screenshot")
@@ -212,6 +216,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(403)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("AUTH_ROLE_FORBIDDEN")
     expect(mocks.storePrivateEvidenceFileMock).not.toHaveBeenCalled()
   })
@@ -236,6 +241,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
 
     const payload = await response.json()
     expect(response.status).toBe(500)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("EVIDENCE_UPLOAD_FAILED")
     expect(payload.error).toContain("Supabase evidence sync failed")
   })

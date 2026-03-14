@@ -8,16 +8,16 @@ import {
   CheckCircle2,
   Bot,
   Clock3,
-  FileCode2,
-  FileText,
-  type LucideIcon,
-  ScanText,
   ShieldAlert,
 } from "lucide-react"
 
 import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
+import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
+import { ScanSourceTypeSelector, type ScanSourceType } from "@/components/evidence-os/ScanSourceTypeSelector"
+import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
+import { SourceModeGuideCard } from "@/components/evidence-os/SourceModeGuideCard"
 import {
   LatestDocumentSection,
   LoadingScreen,
@@ -47,9 +47,7 @@ export default function ScanariPage() {
   const router = useRouter()
   const cockpit = useCockpit()
   const agentFlow = useAgentFlow()
-  const [sourceType, setSourceType] = useState<"document" | "text" | "manifest" | "yaml">(
-    "document"
-  )
+  const [sourceType, setSourceType] = useState<ScanSourceType>("document")
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen />
 
@@ -156,7 +154,7 @@ export default function ScanariPage() {
           onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
         >
           <Bot className="size-4" />
-          {agentFlow.agentModeActive ? "Ieși din Mod Agent" : "Agent Assist"}
+          {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
         </Button>
       </div>
 
@@ -180,49 +178,19 @@ export default function ScanariPage() {
         />
       ) : (
         <>
-      <SourceModeGuide sourceType={sourceType} />
+      <SourceModeGuideCard sourceType={sourceType} />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardContent className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-4">
-          <SourceTypeButton
-            active={sourceType === "document"}
-            icon={FileText}
-            title="Document"
-            description="PDF, imagine sau document scanat cu OCR si review."
-            badge="GDPR / AI Act / e-Factura"
-            onClick={() => setSourceType("document")}
-          />
-          <SourceTypeButton
-            active={sourceType === "text"}
-            icon={ScanText}
-            title="Text manual"
-            description="Cand ai deja continutul copiat si vrei analiza directa."
-            badge="Rapid review"
-            onClick={() => {
-              cockpit.setDocumentFile(null)
-              setSourceType("text")
-            }}
-          />
-          <SourceTypeButton
-            active={sourceType === "manifest"}
-            icon={FileCode2}
-            title="Repo / manifest"
-            description="package.json, requirements.txt, pyproject.toml si lockfiles."
-            badge="Auto-discovery"
-            onClick={() => setSourceType("manifest")}
-          />
-          <SourceTypeButton
-            active={sourceType === "yaml"}
-            icon={ShieldAlert}
-            title="compliscan.yaml"
-            description="Sursa de adevar declarata pentru provider, model, rezidenta si human oversight."
-            badge="Compliance as code"
-            onClick={() => setSourceType("yaml")}
-          />
-        </CardContent>
-      </Card>
+      <ScanSourceTypeSelector
+        value={sourceType}
+        onValueChange={(nextSourceType) => {
+          if (nextSourceType === "text") {
+            cockpit.setDocumentFile(null)
+          }
+          setSourceType(nextSourceType)
+        }}
+      />
 
-      <ScanFlowStatusCard
+      <ScanFlowOverviewCard
         sourceType={sourceType}
         latestDocumentScan={latestDocumentScan}
         latestManifestScan={latestManifestScan}
@@ -231,7 +199,7 @@ export default function ScanariPage() {
 
       {sourceType === "manifest" || sourceType === "yaml" ? (
         <div className="space-y-6">
-          <ScanStageDivider
+          <SectionDividerCard
             eyebrow="Flux activ"
             title={
               sourceType === "yaml"
@@ -254,7 +222,7 @@ export default function ScanariPage() {
             onUpdateStatus={cockpit.updateDetectedAISystem}
             onEdit={cockpit.editDetectedAISystem}
           />
-          <ScanStageDivider
+          <SectionDividerCard
             eyebrow="Ultimul rezultat"
             title={
               sourceType === "yaml"
@@ -284,7 +252,7 @@ export default function ScanariPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <ScanStageDivider
+          <SectionDividerCard
             eyebrow="Flux activ"
             title={
               sourceType === "text"
@@ -319,7 +287,7 @@ export default function ScanariPage() {
               if (success) router.push("/dashboard/documente")
             }}
           />
-          <ScanStageDivider
+          <SectionDividerCard
             eyebrow="Ultimul rezultat"
             title="Vezi clar ultimul document analizat"
             description="Zona de mai jos este rezultatul scanului precedent: de ce a ieșit verdictul și ce task-uri a deschis. Nu este formularul de lucru curent."
@@ -342,166 +310,6 @@ export default function ScanariPage() {
   )
 }
 
-function ScanFlowStatusCard({
-  sourceType,
-  latestDocumentScan,
-  latestManifestScan,
-  latestYamlScan,
-}: {
-  sourceType: "document" | "text" | "manifest" | "yaml"
-  latestDocumentScan: ScanRecord | null
-  latestManifestScan: ScanRecord | null
-  latestYamlScan: ScanRecord | null
-}) {
-  const currentSourceLabel =
-    sourceType === "document"
-      ? "Document cu OCR și review"
-      : sourceType === "text"
-        ? "Text manual pentru analiză rapidă"
-        : sourceType === "manifest"
-          ? "Manifest / lockfile pentru autodiscovery"
-          : "compliscan.yaml pentru control declarat"
-
-  const latestResult =
-    sourceType === "manifest"
-      ? latestManifestScan
-      : sourceType === "yaml"
-        ? latestYamlScan
-        : latestDocumentScan
-
-  const resultLabel =
-    sourceType === "manifest"
-      ? "Ultimul rezultat de repo"
-      : sourceType === "yaml"
-        ? "Ultimul rezultat YAML"
-        : "Ultimul rezultat document"
-
-  return (
-    <Card className="border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--color-surface))]">
-      <CardContent className="grid gap-4 p-5 lg:grid-cols-3">
-        <FlowStatusItem
-          label="Lucrezi acum în"
-          value={currentSourceLabel}
-          hint="Zona de sus este singurul loc unde pornești scanarea sau validarea."
-        />
-        <FlowStatusItem
-          label={resultLabel}
-          value={latestResult?.documentName ?? "încă lipsește"}
-          hint={
-            latestResult
-              ? `Procesat ${formatRelativeRomanian(latestResult.createdAtISO)}`
-              : "Rezultatul apare după primul scan pentru acest tip de sursă."
-          }
-        />
-        <FlowStatusItem
-          label="Cum citești pagina"
-          value="sus lucrezi · jos verifici"
-          hint="Păstrăm separat work queue-ul de sumarul ultimului rezultat ca să nu pară două scanări diferite."
-        />
-      </CardContent>
-    </Card>
-  )
-}
-
-function FlowStatusItem({
-  label,
-  value,
-  hint,
-}: {
-  label: string
-  value: string
-  hint: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">{label}</p>
-      <p className="mt-3 text-sm font-semibold text-[var(--color-on-surface)]">{value}</p>
-      <p className="mt-2 text-xs leading-6 text-[var(--color-muted)]">{hint}</p>
-    </div>
-  )
-}
-
-function ScanStageDivider({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string
-  title: string
-  description: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-5 py-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{eyebrow}</p>
-      <div className="mt-2 flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-lg font-semibold text-[var(--color-on-surface)]">{title}</p>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--color-on-surface-muted)]">
-            {description}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SourceTypeButton({
-  active,
-  icon: Icon,
-  title,
-  description,
-  badge,
-  onClick,
-}: {
-  active: boolean
-  icon: LucideIcon
-  title: string
-  description: string
-  badge: string
-  onClick: () => void
-}) {
-  return (
-    <Button
-      type="button"
-      variant={active ? "secondary" : "ghost"}
-      onClick={onClick}
-      className={`h-auto items-start justify-start rounded-3xl border px-5 py-4 text-left ${
-        active
-          ? "border-[var(--color-border-strong)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--color-surface-variant))] text-[var(--color-on-surface)]"
-          : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
-      }`}
-    >
-      <div className="flex w-full items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`grid size-8 place-items-center rounded-2xl border ${
-                active
-                  ? "border-[var(--color-border-strong)] bg-[var(--bg-inset)] text-[var(--color-on-surface)]"
-                  : "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
-              }`}
-            >
-              <Icon className="size-4" strokeWidth={2.25} />
-            </span>
-            <span className="text-base font-semibold">{title}</span>
-          </div>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-            {description}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
-            {badge}
-          </Badge>
-          {active && (
-            <span className="text-xs font-medium text-[var(--color-primary)]">Selectat</span>
-          )}
-        </div>
-      </div>
-    </Button>
-  )
-}
-
 function findingSeverityClasses(severity: ComplianceSeverity) {
   if (severity === "critical" || severity === "high") {
     return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
@@ -514,85 +322,6 @@ function findingSeverityClasses(severity: ComplianceSeverity) {
   return "border-[var(--color-success)] bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)] text-[var(--color-success)]"
 }
 
-function SourceModeGuide({
-  sourceType,
-}: {
-  sourceType: "document" | "text" | "manifest" | "yaml"
-}) {
-  const content = {
-    document: {
-      title: "Flux pentru documente scanate",
-      description:
-        "Incarci PDF sau imagine, extragem textul, il revizuiesti si apoi rulezi analiza finala pe continutul curatat.",
-      steps: [
-        "Alegi fisierul si ii confirmi numele.",
-        "Verifici textul extras daca OCR-ul a corectat ceva prost.",
-        "Pornesti analiza si mergi direct la rezultatul documentului.",
-      ],
-    },
-    text: {
-      title: "Flux pentru text manual",
-      description:
-        "Cand ai deja politica, contractul sau ToS-ul copiat, sari peste OCR si pregatesti analiza direct pe textul introdus.",
-      steps: [
-        "Dai un nume clar analizei.",
-        "Lipesti continutul relevant in zona de text.",
-        "Pregatesti analiza si confirmi rezultatul ca pe un document normal.",
-      ],
-    },
-    manifest: {
-      title: "Flux pentru autodiscovery din cod",
-      description:
-        "Incarci manifestul, detectam provideri si framework-uri AI, apoi confirmi uman ce sisteme intra in inventarul oficial.",
-      steps: [
-        "Alegi `package.json`, `requirements.txt` sau lockfile-ul relevant.",
-        "Rulezi autodiscovery si revizuiesti sistemele propuse.",
-        "Editezi, confirmi si folosesti drift-ul fata de baseline-ul validat.",
-      ],
-    },
-    yaml: {
-      title: "Flux pentru compliscan.yaml",
-      description:
-        "Incarci configuratia declarata a sistemului AI, verificam providerul, modelul, datele, human oversight si drift-ul fata de baseline.",
-      steps: [
-        "Adaugi fisierul `compliscan.yaml` sau lipesti continutul direct.",
-        "Validam configuratia si generam findings cu mapare legala si dovezi necesare.",
-        "Folosesti rezultatul ca sursa de adevar pentru control, audit si drift detection.",
-      ],
-    },
-  }[sourceType]
-
-  return (
-    <Card className="border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--color-surface))]">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-            Mod activ
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
-            {content.title}
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            {content.description}
-          </p>
-        </div>
-        <div className="grid gap-3">
-          {content.steps.map((step, index) => (
-            <div
-              key={`${sourceType}-${index}`}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
-            >
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                Pas {index + 1}
-              </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface)]">{step}</p>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function LatestYamlSection({
   latestYamlScan,

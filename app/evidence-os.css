@@ -1,0 +1,153 @@
+/* Evidence OS v1 design tokens, derived from public/evidence-os-design-system-v1.md */
+
+@theme inline {
+  --color-eos-bg: var(--eos-surface-base);
+  --color-eos-bg-panel: var(--eos-surface-primary);
+  --color-eos-bg-inset: var(--eos-surface-secondary);
+  --color-eos-surface: var(--eos-surface-primary);
+  --color-eos-surface-variant: var(--eos-surface-secondary);
+  --color-eos-surface-active: var(--eos-surface-tertiary);
+  --color-eos-surface-elevated: var(--eos-surface-elevated);
+
+  --color-eos-border: var(--eos-border-default);
+  --color-eos-border-subtle: var(--eos-border-subtle);
+  --color-eos-border-strong: var(--eos-border-strong);
+
+  --color-eos-text: var(--eos-text-primary);
+  --color-eos-text-muted: var(--eos-text-secondary);
+  --color-eos-text-tertiary: var(--eos-text-tertiary);
+  --color-eos-text-link: var(--eos-accent-secondary);
+
+  --color-eos-primary: var(--eos-accent-primary);
+  --color-eos-primary-hover: var(--eos-accent-primary-hover);
+  --color-eos-primary-focus: var(--eos-accent-primary);
+  --color-eos-primary-text: var(--eos-text-inverse);
+  --color-eos-primary-soft: var(--eos-accent-primary-subtle);
+
+  --color-eos-secondary: var(--eos-surface-secondary);
+  --color-eos-secondary-hover: var(--eos-surface-tertiary);
+  --color-eos-secondary-text: var(--eos-text-primary);
+
+  --color-eos-success: var(--eos-status-success);
+  --color-eos-success-text: var(--eos-status-success);
+  --color-eos-success-soft: var(--eos-status-success-soft);
+  --color-eos-warning: var(--eos-status-warning);
+  --color-eos-warning-text: var(--eos-status-warning);
+  --color-eos-warning-soft: var(--eos-status-warning-soft);
+  --color-eos-warning-border: var(--eos-status-warning-border);
+  --color-eos-error: var(--eos-status-danger);
+  --color-eos-error-text: var(--eos-status-danger);
+  --color-eos-error-soft: var(--eos-status-danger-soft);
+  --color-eos-error-border: var(--eos-status-danger-border);
+  --color-eos-info: var(--eos-severity-low);
+
+  --radius-eos-sm: var(--eos-radius-sm);
+  --radius-eos-md: var(--eos-radius-md);
+  --radius-eos-lg: var(--eos-radius-lg);
+  --radius-eos-xl: var(--eos-radius-xl);
+}
+
+:root {
+  --eos-surface-base: hsl(220 14% 4%);
+  --eos-surface-primary: hsl(220 14% 8%);
+  --eos-surface-secondary: hsl(220 14% 12%);
+  --eos-surface-tertiary: hsl(220 14% 16%);
+  --eos-surface-elevated: hsl(220 14% 18%);
+
+  --eos-border-subtle: hsl(220 14% 16%);
+  --eos-border-default: hsl(220 14% 22%);
+  --eos-border-strong: hsl(220 14% 30%);
+
+  --eos-text-primary: hsl(220 14% 93%);
+  --eos-text-secondary: hsl(220 14% 63%);
+  --eos-text-tertiary: hsl(220 14% 40%);
+  --eos-text-inverse: hsl(220 14% 10%);
+
+  --eos-accent-primary: hsl(230 80% 62%);
+  --eos-accent-primary-hover: hsl(230 80% 55%);
+  --eos-accent-primary-subtle: hsl(230 80% 62% / 0.12);
+  --eos-accent-secondary: hsl(230 60% 72%);
+
+  --eos-severity-critical: hsl(0 72% 62%);
+  --eos-severity-high: hsl(25 90% 58%);
+  --eos-severity-medium: hsl(45 90% 55%);
+  --eos-severity-low: hsl(210 70% 62%);
+
+  --eos-status-success: hsl(145 60% 48%);
+  --eos-status-success-soft: hsl(145 60% 48% / 0.12);
+  --eos-status-warning: hsl(45 90% 55%);
+  --eos-status-warning-soft: hsl(45 90% 55% / 0.12);
+  --eos-status-warning-border: hsl(45 90% 55% / 0.2);
+  --eos-status-danger: hsl(0 72% 62%);
+  --eos-status-danger-soft: hsl(0 72% 62% / 0.12);
+  --eos-status-danger-border: hsl(0 72% 62% / 0.2);
+  --eos-status-neutral: hsl(220 14% 63%);
+  --eos-status-muted: hsl(220 14% 40%);
+
+  --eos-space-0: 0px;
+  --eos-space-1: 4px;
+  --eos-space-2: 8px;
+  --eos-space-3: 12px;
+  --eos-space-4: 16px;
+  --eos-space-5: 20px;
+  --eos-space-6: 24px;
+  --eos-space-7: 32px;
+  --eos-space-8: 40px;
+  --eos-space-9: 48px;
+  --eos-space-10: 64px;
+
+  --eos-radius-sm: 4px;
+  --eos-radius-md: 8px;
+  --eos-radius-lg: 12px;
+  --eos-radius-xl: 16px;
+  --eos-radius-full: 9999px;
+
+  --eos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --eos-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --eos-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --eos-shadow-focus: 0 0 0 2px hsl(230 80% 62% / 0.4);
+
+  --eos-motion-instant: 100ms;
+  --eos-motion-fast: 150ms;
+  --eos-motion-default: 200ms;
+  --eos-motion-slow: 300ms;
+  --eos-motion-deliberate: 500ms;
+}
+
+[data-theme="light"] {
+  --eos-surface-base: hsl(0 0% 100%);
+  --eos-surface-primary: hsl(220 14% 98%);
+  --eos-surface-secondary: hsl(220 14% 95%);
+  --eos-surface-tertiary: hsl(220 14% 91%);
+  --eos-surface-elevated: hsl(0 0% 100%);
+
+  --eos-border-subtle: hsl(220 14% 90%);
+  --eos-border-default: hsl(220 14% 82%);
+  --eos-border-strong: hsl(220 14% 70%);
+
+  --eos-text-primary: hsl(220 14% 10%);
+  --eos-text-secondary: hsl(220 14% 45%);
+  --eos-text-tertiary: hsl(220 14% 60%);
+  --eos-text-inverse: hsl(220 14% 93%);
+
+  --eos-accent-primary: hsl(230 80% 50%);
+  --eos-accent-primary-hover: hsl(230 80% 45%);
+  --eos-accent-primary-subtle: hsl(230 80% 50% / 0.12);
+  --eos-accent-secondary: hsl(230 60% 58%);
+
+  --eos-severity-critical: hsl(0 72% 50%);
+  --eos-severity-high: hsl(25 90% 48%);
+  --eos-severity-medium: hsl(45 90% 45%);
+  --eos-severity-low: hsl(210 70% 50%);
+
+  --eos-status-success: hsl(145 60% 38%);
+  --eos-status-success-soft: hsl(145 60% 38% / 0.12);
+  --eos-status-warning: hsl(45 90% 45%);
+  --eos-status-warning-soft: hsl(45 90% 45% / 0.12);
+  --eos-status-warning-border: hsl(45 90% 45% / 0.2);
+  --eos-status-danger: hsl(0 72% 50%);
+  --eos-status-danger-soft: hsl(0 72% 50% / 0.12);
+  --eos-status-danger-border: hsl(0 72% 50% / 0.2);
+  --eos-status-neutral: hsl(220 14% 45%);
+  --eos-status-muted: hsl(220 14% 60%);
+}

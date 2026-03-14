@@ -741,7 +741,7 @@ function TraceabilityMatrixCard({
                     <Button
                       size="sm"
                       className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                      disabled={busy}
+                      disabled={busy || group.validatedCount !== group.recordsCount}
                       onClick={() =>
                         void onReview({
                           scope: "family",
@@ -782,6 +782,11 @@ function TraceabilityMatrixCard({
                       </Button>
                     )}
                   </div>
+                  {group.validatedCount !== group.recordsCount && (
+                    <p className="mt-3 text-xs text-[var(--color-warning)]">
+                      Finalizează dovada și rescan-ul pentru toate controalele din familie înainte de confirmare.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -842,7 +847,7 @@ function TraceabilityMatrixCard({
                     <Button
                       size="sm"
                       className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                      disabled={busy}
+                      disabled={busy || group.validatedCount !== group.recordsCount}
                       onClick={() =>
                         void onReview({
                           scope: "law_reference",
@@ -872,6 +877,11 @@ function TraceabilityMatrixCard({
                       </Button>
                     )}
                   </div>
+                  {group.validatedCount !== group.recordsCount && (
+                    <p className="mt-3 text-xs text-[var(--color-warning)]">
+                      Grupul mai conține controale cu dovadă slabă sau validare nefinalizată.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -916,13 +926,18 @@ function TraceabilityMatrixCard({
                   </p>
                 )}
               </div>
-              <Badge className={traceStatusBadgeClass(record.traceStatus)}>
-                {record.traceStatus === "validated"
-                  ? "validated"
-                  : record.traceStatus === "evidence_required"
-                    ? "evidence required"
-                    : "action required"}
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge className={traceStatusBadgeClass(record.traceStatus)}>
+                  {record.traceStatus === "validated"
+                    ? "validated"
+                    : record.traceStatus === "evidence_required"
+                      ? "evidence required"
+                      : "action required"}
+                </Badge>
+                <Badge className={auditDecisionBadgeClass(record.auditDecision)}>
+                  {formatAuditDecision(record.auditDecision)}
+                </Badge>
+              </div>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <TraceMiniCard
@@ -982,6 +997,11 @@ function TraceabilityMatrixCard({
                     {record.evidence.quality.summary}
                   </p>
                 )}
+                {record.auditGateCodes.length > 0 && (
+                  <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">
+                    Gates active: {record.auditGateCodes.map(formatAuditGateCode).join(" · ")}
+                  </p>
+                )}
                 {record.bundleFiles.length > 0 && (
                   <p className="mt-2 text-xs text-[var(--color-muted)]">
                     Fișiere legate: {record.bundleFiles.join(" · ")}
@@ -1029,7 +1049,7 @@ function TraceabilityMatrixCard({
                   <Button
                     size="sm"
                     className="h-8 rounded-lg bg-[var(--color-primary)] px-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                    disabled={busy}
+                    disabled={busy || record.auditDecision !== "pass"}
                     onClick={() =>
                       void onReview({
                         scope: "record",
@@ -1055,6 +1075,11 @@ function TraceabilityMatrixCard({
                     </Button>
                   )}
                 </div>
+                {record.auditDecision !== "pass" && (
+                  <p className="text-xs text-[var(--color-warning)]">
+                    Finalizează dovada, gates-urile și rescan-ul înainte de confirmarea pentru audit.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1072,6 +1097,7 @@ function buildTraceabilityFamilyGroups(records: ComplianceTraceRecord[]) {
       familyLabel: string
       description: string
       recordsCount: number
+      validatedCount: number
       confirmedCount: number
       pendingEvidenceCount: number
       reusableEvidenceFiles: Set<string>
@@ -1092,6 +1118,7 @@ function buildTraceabilityFamilyGroups(records: ComplianceTraceRecord[]) {
       familyLabel: record.controlFamily.label,
       description: record.controlFamily.description,
       recordsCount: 0,
+      validatedCount: 0,
       confirmedCount: 0,
       pendingEvidenceCount: 0,
       reusableEvidenceFiles: new Set<string>(),
@@ -1106,12 +1133,12 @@ function buildTraceabilityFamilyGroups(records: ComplianceTraceRecord[]) {
     }
 
     current.recordsCount += 1
+    current.validatedCount += record.auditDecision === "pass" ? 1 : 0
     current.confirmedCount += record.review.confirmedByUser ? 1 : 0
     current.findingsCount += record.linkedFindingIds.length
     current.driftsCount += record.linkedDriftIds.length
-    current.pendingEvidenceCount +=
-      record.evidence.attached && record.evidence.validationStatus === "passed" ? 0 : 1
-    if (record.evidence.attached && record.evidence.validationStatus === "passed" && record.evidence.fileName) {
+    current.pendingEvidenceCount += record.auditDecision === "pass" ? 0 : 1
+    if (record.auditDecision === "pass" && record.evidence.fileName) {
       current.reusableEvidenceFiles.add(record.evidence.fileName)
     }
     for (const lawReference of record.lawReferences) current.lawReferences.add(lawReference)
@@ -1183,6 +1210,7 @@ function buildTraceabilityReviewGroups(records: ComplianceTraceRecord[]) {
     {
       lawReference: string
       recordsCount: number
+      validatedCount: number
       confirmedCount: number
       sourceDocuments: Set<string>
       sampleNextStep: string
@@ -1201,6 +1229,7 @@ function buildTraceabilityReviewGroups(records: ComplianceTraceRecord[]) {
         grouped.set(lawReference, {
           lawReference,
           recordsCount: 1,
+          validatedCount: record.auditDecision === "pass" ? 1 : 0,
           confirmedCount: record.review.confirmedByUser ? 1 : 0,
           sourceDocuments: new Set(record.sourceDocuments),
           sampleNextStep: record.nextStep,
@@ -1210,6 +1239,7 @@ function buildTraceabilityReviewGroups(records: ComplianceTraceRecord[]) {
       }
 
       current.recordsCount += 1
+      current.validatedCount += record.auditDecision === "pass" ? 1 : 0
       current.confirmedCount += record.review.confirmedByUser ? 1 : 0
       for (const sourceDocument of record.sourceDocuments) {
         current.sourceDocuments.add(sourceDocument)
@@ -1619,11 +1649,36 @@ function formatEvidenceQualityStatus(value: NonNullable<ComplianceTraceRecord["e
   return "slabă"
 }
 
+function formatAuditDecision(value: ComplianceTraceRecord["auditDecision"]) {
+  if (value === "pass") return "gata pentru audit"
+  if (value === "review") return "review necesar"
+  return "blocat"
+}
+
+function formatAuditGateCode(value: ComplianceTraceRecord["auditGateCodes"][number]) {
+  if (value === "missing_evidence") return "dovadă lipsă"
+  if (value === "pending_validation") return "validare în așteptare"
+  if (value === "weak_evidence") return "dovadă slabă"
+  if (value === "stale_evidence") return "dovadă veche / afectată de drift"
+  if (value === "unresolved_drift") return "drift nerezolvat"
+  return "finding doar inferat"
+}
+
 function traceStatusBadgeClass(status: ComplianceTraceRecord["traceStatus"]) {
   if (status === "validated") {
     return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
   }
   if (status === "evidence_required") {
+    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+  }
+  return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+}
+
+function auditDecisionBadgeClass(status: ComplianceTraceRecord["auditDecision"]) {
+  if (status === "pass") {
+    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+  }
+  if (status === "review") {
     return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
   }
   return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"

@@ -240,6 +240,11 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.auditQualityGates.items.map((item) => item.code)).toEqual(
       expect.arrayContaining(["weak_evidence", "inferred_only_finding"])
     )
+    expect(auditPack.controlsMatrix[0].auditDecision).toBe("review")
+    expect(auditPack.controlsMatrix[0].auditGateCodes).toEqual(
+      expect.arrayContaining(["weak_evidence", "inferred_only_finding"])
+    )
+    expect(auditPack.bundleEvidenceSummary.familyCoverage[0]?.reuseAvailable).toBe(false)
   })
 
   it("iese audit_ready cand exista baseline validat, dovada suficienta si nu exista drift sau review gates", () => {
@@ -290,6 +295,7 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.executiveSummary.auditReadiness).toBe("audit_ready")
     expect(auditPack.executiveSummary.auditQualityDecision).toBe("pass")
     expect(auditPack.auditQualityGates.items).toHaveLength(0)
+    expect(auditPack.controlsMatrix[0].auditDecision).toBe("pass")
   })
 
   it("forteaza blocked cand exista drift deschis care blocheaza auditul chiar daca dovada exista", () => {
@@ -326,6 +332,9 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.executiveSummary.auditReadiness).toBe("review_required")
     expect(auditPack.executiveSummary.auditQualityDecision).toBe("blocked")
     expect(auditPack.auditQualityGates.items.map((item) => item.code)).toContain("unresolved_drift")
+    expect(auditPack.controlsMatrix[0].auditDecision).toBe("blocked")
+    expect(auditPack.controlsMatrix[0].auditGateCodes).toContain("unresolved_drift")
+    expect(auditPack.bundleEvidenceSummary.familyCoverage[0]?.reuseAvailable).toBe(false)
   })
 
   it("ramane blocked pe un pachet high-risk de recrutare fara dovezi atasate", () => {
@@ -407,5 +416,7 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.executiveSummary.auditReadiness).toBe("review_required")
     expect(auditPack.executiveSummary.auditQualityDecision).toBe("review")
     expect(auditPack.auditQualityGates.items.map((item) => item.code)).toContain("pending_validation")
+    expect(auditPack.controlsMatrix[0].auditDecision).toBe("review")
+    expect(auditPack.controlsMatrix[0].auditGateCodes).toContain("pending_validation")
   })
 })

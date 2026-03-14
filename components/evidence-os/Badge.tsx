@@ -5,21 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const evidenceBadgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] whitespace-nowrap rounded-full transition-[color,background,border-color,box-shadow]",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-eos-sm border px-2 py-1 text-[12px] font-medium uppercase tracking-[0.01em] whitespace-nowrap transition-[color,background,border-color,box-shadow]",
   {
     variants: {
       variant: {
-        default:
-          "bg-eos-primary text-eos-primary-text border-transparent shadow-sm",
-        secondary:
-          "bg-eos-secondary text-eos-secondary-text border-transparent",
-        destructive:
-          "bg-eos-error text-eos-error-text border-transparent",
-        outline: "text-eos-text border-eos-border",
-        success:
-          "bg-eos-success text-eos-success-text border-transparent",
-        warning:
-          "bg-eos-warning text-eos-warning-text border-transparent",
+        default: "border-transparent bg-eos-primary-soft text-eos-primary shadow-sm",
+        secondary: "border-eos-border-subtle bg-eos-surface-variant text-eos-text-muted",
+        destructive: "border-transparent bg-eos-error-soft text-eos-error shadow-sm",
+        outline: "border-eos-border bg-eos-surface text-eos-text",
+        success: "border-transparent bg-eos-success-soft text-eos-success shadow-sm",
+        warning: "border-transparent bg-eos-warning-soft text-eos-warning shadow-sm",
       },
     },
     defaultVariants: {

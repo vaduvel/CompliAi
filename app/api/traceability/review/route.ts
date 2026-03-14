@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { mutateState, readState } from "@/lib/server/mvp-store"
+import { mutateState } from "@/lib/server/mvp-store"
 
 type TraceabilityReviewPayload = {
   scope?: "record" | "law_reference" | "family"
@@ -12,6 +13,15 @@ type TraceabilityReviewPayload = {
   familyKey?: string
   action?: "confirm" | "clear"
   note?: string | null
+}
+
+class TraceabilityReviewError extends Error {
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
 }
 
 export async function POST(request: Request) {
@@ -35,110 +45,147 @@ export async function POST(request: Request) {
   const note = typeof body.note === "string" ? body.note.trim() || null : null
   const nowISO = new Date().toISOString()
   const actor = await resolveOptionalEventActor(request)
-  const traceIds =
-    scope === "record"
-      ? [body.traceId!.trim()]
-      : scope === "law_reference"
-        ? await resolveTraceIdsForLawReference(body.lawReference!.trim())
-        : await resolveTraceIdsForFamily(body.familyKey!.trim())
+  let affectedControls = 0
+  let nextState
 
-  if (traceIds.length === 0) {
-    return NextResponse.json(
-      { error: "Nu am găsit controale legate de această referință legală." },
-      { status: 404 }
-    )
-  }
+  try {
+    nextState = await mutateState(async (current) => {
+      const payload = await buildDashboardPayload(current)
+      const traceIds = resolveTraceIds(payload.traceabilityMatrix, scope, body)
 
-  const nextState = await mutateState((current) => {
-    const traceabilityReviews = {
-      ...(current.traceabilityReviews ?? {}),
-    }
+      if (traceIds.length === 0) {
+        throw new TraceabilityReviewError(
+          404,
+          scope === "family"
+            ? "Nu am găsit controale legate de această familie."
+            : scope === "law_reference"
+              ? "Nu am găsit controale legate de această referință legală."
+              : "Nu am găsit controlul cerut în traceability matrix."
+        )
+      }
 
-    if (action === "clear") {
-      for (const traceId of traceIds) delete traceabilityReviews[traceId]
-    } else {
-      for (const traceId of traceIds) {
-        traceabilityReviews[traceId] = {
-          confirmedByUser: true,
-          note,
-          updatedAtISO: nowISO,
+      if (action === "confirm") {
+        const selectedRecords = payload.traceabilityMatrix.filter((record) => traceIds.includes(record.id))
+        const blockedRecords = selectedRecords.filter((record) => !isRecordAuditConfirmable(record))
+        if (blockedRecords.length > 0) {
+          const sampleTitles = blockedRecords
+            .slice(0, 2)
+            .map((record) => record.title)
+            .join(" · ")
+          const suffix =
+            blockedRecords.length > 2
+              ? ` și încă ${blockedRecords.length - 2} controale`
+              : ""
+          throw new TraceabilityReviewError(
+            409,
+            `Nu poți confirma pentru audit controale care încă au dovadă slabă sau validare nefinalizată. Verifică întâi: ${sampleTitles}${suffix}.`
+          )
         }
       }
-    }
 
-    const entityId =
-      scope === "law_reference"
-        ? body.lawReference!.trim()
-        : scope === "family"
-          ? body.familyKey!.trim()
-          : body.traceId!.trim()
-    const message =
-      scope === "law_reference"
-        ? action === "clear"
-          ? `Confirmarea pentru grupul ${body.lawReference} a fost eliminată pentru ${traceIds.length} controale.`
-          : `Grupul ${body.lawReference} a fost confirmat pentru audit (${traceIds.length} controale).`
-        : scope === "family"
+      affectedControls = traceIds.length
+      const traceabilityReviews = {
+        ...(current.traceabilityReviews ?? {}),
+      }
+
+      if (action === "clear") {
+        for (const traceId of traceIds) delete traceabilityReviews[traceId]
+      } else {
+        for (const traceId of traceIds) {
+          traceabilityReviews[traceId] = {
+            confirmedByUser: true,
+            note,
+            updatedAtISO: nowISO,
+          }
+        }
+      }
+
+      const entityId =
+        scope === "law_reference"
+          ? body.lawReference!.trim()
+          : scope === "family"
+            ? body.familyKey!.trim()
+            : body.traceId!.trim()
+      const message =
+        scope === "law_reference"
           ? action === "clear"
-            ? `Confirmarea pentru familia ${body.familyKey} a fost eliminată pentru ${traceIds.length} controale.`
-            : `Familia ${body.familyKey} a fost confirmată pentru audit (${traceIds.length} controale).`
-        : action === "clear"
-          ? `Confirmarea pentru controlul ${body.traceId} a fost eliminată.`
-          : `Controlul ${body.traceId} a fost confirmat pentru audit.`
+            ? `Confirmarea pentru grupul ${body.lawReference} a fost eliminată pentru ${traceIds.length} controale.`
+            : `Grupul ${body.lawReference} a fost confirmat pentru audit (${traceIds.length} controale).`
+          : scope === "family"
+            ? action === "clear"
+              ? `Confirmarea pentru familia ${body.familyKey} a fost eliminată pentru ${traceIds.length} controale.`
+              : `Familia ${body.familyKey} a fost confirmată pentru audit (${traceIds.length} controale).`
+          : action === "clear"
+            ? `Confirmarea pentru controlul ${body.traceId} a fost eliminată.`
+            : `Controlul ${body.traceId} a fost confirmat pentru audit.`
 
-    return {
-      ...current,
-      traceabilityReviews,
-      events: appendComplianceEvents(current, [
-        createComplianceEvent({
-          type: action === "clear" ? "trace.review-cleared" : "trace.review-confirmed",
-          entityType: "system",
-          entityId,
-          message,
-          createdAtISO: nowISO,
-          metadata: {
-            scope,
-            traceId: body.traceId?.trim() ?? "",
-            lawReference: body.lawReference?.trim() ?? "",
-            familyKey: body.familyKey?.trim() ?? "",
-            affectedControls: traceIds.length,
-            hasNote: Boolean(note),
-          },
-        }, actor),
-      ]),
+      return {
+        ...current,
+        traceabilityReviews,
+        events: appendComplianceEvents(current, [
+          createComplianceEvent(
+            {
+              type: action === "clear" ? "trace.review-cleared" : "trace.review-confirmed",
+              entityType: "system",
+              entityId,
+              message,
+              createdAtISO: nowISO,
+              metadata: {
+                scope,
+                traceId: body.traceId?.trim() ?? "",
+                lawReference: body.lawReference?.trim() ?? "",
+                familyKey: body.familyKey?.trim() ?? "",
+                affectedControls: traceIds.length,
+                hasNote: Boolean(note),
+              },
+            },
+            actor
+          ),
+        ]),
+      }
+    })
+  } catch (error) {
+    if (error instanceof TraceabilityReviewError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
     }
-  })
+    throw error
+  }
 
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),
     message:
       scope === "law_reference"
         ? action === "clear"
-          ? `Confirmarea a fost eliminată pentru ${traceIds.length} controale din grupul ${body.lawReference}.`
-          : `Au fost confirmate ${traceIds.length} controale pentru articolul ${body.lawReference}.`
+          ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din grupul ${body.lawReference}.`
+          : `Au fost confirmate ${affectedControls} controale pentru articolul ${body.lawReference}.`
         : scope === "family"
           ? action === "clear"
-            ? `Confirmarea a fost eliminată pentru ${traceIds.length} controale din familia ${body.familyKey}.`
-            : `Au fost confirmate ${traceIds.length} controale pentru familia ${body.familyKey}.`
+            ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din familia ${body.familyKey}.`
+            : `Au fost confirmate ${affectedControls} controale pentru familia ${body.familyKey}.`
         : action === "clear"
           ? "Confirmarea controlului a fost eliminată."
           : "Controlul a fost confirmat pentru audit.",
   })
 }
 
-async function resolveTraceIdsForLawReference(lawReference: string) {
-  const current = await readState()
-  const payload = await buildDashboardPayload(current)
-
-  return payload.traceabilityMatrix
-    .filter((record) => record.lawReferences.includes(lawReference))
-    .map((record) => record.id)
+function isRecordAuditConfirmable(record: ComplianceTraceRecord) {
+  return record.auditDecision ? record.auditDecision === "pass" : record.traceStatus === "validated"
 }
 
-async function resolveTraceIdsForFamily(familyKey: string) {
-  const current = await readState()
-  const payload = await buildDashboardPayload(current)
+function resolveTraceIds(
+  traceabilityMatrix: ComplianceTraceRecord[],
+  scope: "record" | "law_reference" | "family",
+  body: TraceabilityReviewPayload
+) {
+  if (scope === "record") return [body.traceId!.trim()]
 
-  return payload.traceabilityMatrix
-    .filter((record) => record.controlFamily.key === familyKey)
+  if (scope === "law_reference") {
+    return traceabilityMatrix
+      .filter((record) => record.lawReferences.includes(body.lawReference!.trim()))
+      .map((record) => record.id)
+  }
+
+  return traceabilityMatrix
+    .filter((record) => record.controlFamily.key === body.familyKey!.trim())
     .map((record) => record.id)
 }

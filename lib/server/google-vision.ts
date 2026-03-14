@@ -1,3 +1,5 @@
+import { fetchWithOperationalGuard } from "@/lib/server/http-client"
+
 const GOOGLE_CLOUD_VISION_API_KEY = process.env.GOOGLE_CLOUD_VISION_API_KEY
 const GOOGLE_CLOUD_VISION_LOCATION =
   process.env.GOOGLE_CLOUD_VISION_LOCATION ?? "eu"
@@ -19,7 +21,7 @@ export async function extractTextWithVision(imageBase64: string) {
 
   const visionHost = getVisionHost()
 
-  const response = await fetch(
+  const response = await fetchWithOperationalGuard(
     `https://${visionHost}/v1/images:annotate?key=${GOOGLE_CLOUD_VISION_API_KEY}`,
     {
       method: "POST",
@@ -41,6 +43,9 @@ export async function extractTextWithVision(imageBase64: string) {
         ],
       }),
       cache: "no-store",
+      timeoutMs: 15_000,
+      retries: 1,
+      label: "google-vision-image",
     }
   )
 
@@ -76,7 +81,7 @@ export async function extractTextFromPdfWithVision(pdfBase64: string) {
   }
 
   const visionHost = getVisionHost()
-  const response = await fetch(
+  const response = await fetchWithOperationalGuard(
     `https://${visionHost}/v1/files:annotate?key=${GOOGLE_CLOUD_VISION_API_KEY}`,
     {
       method: "POST",
@@ -94,6 +99,9 @@ export async function extractTextFromPdfWithVision(pdfBase64: string) {
         ],
       }),
       cache: "no-store",
+      timeoutMs: 20_000,
+      retries: 1,
+      label: "google-vision-pdf",
     }
   )
 

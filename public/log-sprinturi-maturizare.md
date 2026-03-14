@@ -2,6 +2,97 @@
 
 ## 2026-03-13
 
+### Sprint 7 - Operational readiness
+
+Progres pornit:
+
+- a fost adaugat un health check unificat pentru aplicatie:
+  - `lib/server/app-health.ts`
+  - `GET /api/health`
+- `Setari` afiseaza acum si:
+  - `Health check aplicatie`
+  - sumar operational pentru sesiune, backend-uri, fallback si traseul cloud principal
+- au fost adaugate documentele de operare minima:
+  - `public/release-readiness-checklist.md`
+  - `public/pilot-onboarding-checklist.md`
+  - `public/incident-runbook-minim.md`
+- a fost adaugat helper comun pentru fetch operational:
+  - `lib/server/http-client.ts`
+- integrările critice folosesc acum timeout + retry minim controlat:
+  - Google Vision
+  - Supabase REST
+  - Supabase Storage
+  - Supabase Auth
+- a fost adaugat si verdict agregat de release readiness:
+  - `lib/server/release-readiness.ts`
+  - `GET /api/release-readiness`
+  - compune `app health` + strict supabase preflight intr-un singur diagnostic de operare
+- a fost adaugat un preflight local complet pentru release:
+  - `scripts/preflight-release.mjs`
+  - `npm run preflight:release`
+- `Setari` afiseaza acum un card separat de `Release readiness`, cu:
+  - summary operational
+  - checks agregate
+  - blocaje si avertismente
+- exista acum si un gate vizual de blocare cand `release readiness = blocked`
+- auditul Sprint 7 a dus la intariri suplimentare:
+  - `GET /api/health` nu mai este public; cere sesiune activa
+  - `GET /api/release-readiness` nu mai raporteaza `ok=true` pentru starea `review`
+  - `release readiness` include acum si verdictul ultimei verificari RLS locale
+  - `scripts/preflight-release.mjs` ruleaza acum si `npm run verify:supabase:rls`
+  - `scripts/verify-supabase-rls.mjs` scrie marker local in:
+    - `.data/ops/last-rls-verification.json`
+  - `Setari` nu mai cere `release readiness` pentru roluri fara acces
+  - `GET /api/integrations/supabase/status` este aliniat acum la modelul cu `requestId` si logging operational
+- polish microcopy:
+  - butonul de `Mod Agent` este acum consistent in `Scanari`
+  - statusul `Review` a fost uniformizat ca `Revizuire` in `Setari`
+
+Verdict:
+
+- Sprint 7 este inchis operational.
+- a fost creat backlog-ul de polish post Sprint 7:
+  - `public/polish-backlog-post-sprint7.md`
+- a fost adaugat si logging operational minim:
+  - `lib/server/request-context.ts`
+  - `lib/server/operational-logger.ts`
+  - rutele critice expun acum `x-request-id`
+  - erorile JSON expun acum si `requestId`
+  - logging structurat este legat pe:
+    - `GET /api/health`
+    - `GET /api/release-readiness`
+    - `POST /api/scan`
+    - `POST /api/tasks/[id]/evidence`
+    - `GET /api/exports/audit-pack/client`
+    - `POST /api/agent/run`
+    - `POST /api/agent/commit`
+  - `lib/server/http-client.ts` logheaza acum warning-uri pentru retry-urile operationale
+- checkpoint explicit:
+  - dupa ce Codex 2 termina batch-ul `Evidence OS UI`, facem audit dedicat pe acel diff inainte de integrarea finala
+- auditul pe batch-ul `Evidence OS UI` a fost incheiat:
+  - verificare manuala pe `components/evidence-os/*`
+  - integrare in `lib/compliance/agent-workspace.tsx` pastrata curata
+  - fix minim de siguranta pe `AgentProposalTabs` si `ProposalBundlePanel` pentru cazurile cu `proposedSystems` lipsa
+  - `npm test`, `npm run lint`, `npm run build` trec
+
+Verificare curenta:
+
+- `npm test` trece
+- `npm run preflight:release` trece live:
+  - `verify:supabase:strict` ✅
+  - `verify:supabase:rls` ✅
+- `npm run lint` trece
+- `npm run build` trece
+
+Suita curenta:
+
+- `66` fisiere de test
+- `231` teste verzi
+- checkpoint pregatit de push:
+  - snapshot-ul curent este validat local si live
+  - `Evidence OS` continua separat prin Codex secundar pe branch dedicat:
+    - `codex/evidence-os-ds-finish`
+
 ### Sprint 6 - Audit defensibility
 
 Progres pornit:
@@ -28,6 +119,35 @@ Progres pornit:
 - a fost adaugat test dedicat pentru `compliance-trace`:
   - dovada slaba + `passed` => `action_required`
   - dovada suficienta + `passed` => `validated`
+- `traceability review` blocheaza acum explicit confirmarea pentru audit cand:
+  - controlul nu este `validated`
+  - dovada este slaba
+  - validarea este inca nefinalizata
+- `Auditor Vault` dezactiveaza acum butoanele de confirmare pentru:
+  - control individual
+  - familie
+  - articol legal
+  daca grupul contine controale nevalidate
+- sumarul pe familie trateaza acum drept reutilizabila doar dovada venita din controale deja `validated`
+- `traceability` foloseste acum si verdict de audit explicit pe fiecare control:
+  - `auditDecision = pass / review / blocked`
+  - `auditGateCodes` pentru motivele active de blocaj sau review
+- confirmarea din `traceability review` urmareste acum `auditDecision`, nu doar `traceStatus`
+- `Auditor Vault` afiseaza acum si:
+  - badge pentru `gata pentru audit / review necesar / blocat`
+  - lista de `gates active` pe fiecare control
+- `traceability` poate bloca acum auditul chiar daca dovada a trecut rescan-ul, de exemplu:
+  - drift deschis
+  - finding ramas doar pe semnal inferat
+- `Audit Pack` client-facing afiseaza acum acelasi verdict si pentru `traceability matrix`, nu doar pentru `controls matrix`:
+  - `gata pentru audit / review necesar / blocat`
+  - `gates active`
+- au fost adaugate teste noi pentru:
+  - `POST /api/traceability/review`
+  - blocaj pe `weak evidence`
+  - blocaj pe `needs_review`
+  - blocaj pe familie cu controale nevalidate
+  - confirmare permisa doar pentru controale validate
 
 - a inceput efectiv `Sprint 6`
 - a fost introdusa evaluarea minima de calitate pentru dovezi:
@@ -86,8 +206,8 @@ Verificare:
 
 Suita curenta:
 
-- `58` fisiere de test
-- `206` teste verzi
+- `60` fisiere de test
+- `213` teste verzi
 
 ### Sprint 5 - Persistence si storage maturity
 
@@ -895,3 +1015,64 @@ Audit pre-push - curatare integrari Gemini si blocaje reale:
   - `npm test` trece
   - `npm run lint` trece
   - `npm run build` trece
+- 2026-03-13: am separat oficial lucrul paralel intre `Sprint 6` si `Evidence OS UI` prin doua documente:
+  - `public/coordonare-paralel-codex.md`
+  - `public/task-codex-evidence-os-ui.md`
+  Scopul este sa evitam coliziuni intre runtime-ul critic si integrarea de design system facuta de alt Codex.
+- 2026-03-13: am dus `Sprint 6` si in varianta client-facing a dosarului:
+  - `Audit Pack` client-facing afiseaza acum decizia de audit per control:
+    - `gata pentru audit`
+    - `review necesar`
+    - `blocat`
+  - controalele in review sau blocate afiseaza acum si motivele sintetizate din `auditGateCodes`
+  - am adaugat test direct pe HTML-ul generat pentru:
+    - caz `blocked` cu `unresolved_drift`
+    - caz `pass` fara gates active
+  - validare:
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
+  - suita curenta urca la:
+    - `60` fisiere de test
+    - `212` teste verzi
+
+Reevaluare sobra post-Sprint 6:
+
+- raportul de maturitate a fost recalibrat in:
+  - `public/raport-maturitate-compliscan.md`
+- verdictul actual este:
+  - `~79%` maturitate de produs pilot-ready cu ghidaj uman
+  - `~64%` maturitate de platforma software serioasa
+  - `~61%` maturitate de motor de compliance / audit defensibil
+- motivele principale pentru crestere:
+  - `Sprint 4` inchis operational pe auth / roluri / membership / actor trail
+  - `Sprint 5` inchis operational pe cloud-first tenancy, evidence privat si `RLS` verificat live
+  - `Sprint 6` a ridicat defensibilitatea auditului prin:
+    - evidence quality
+    - audit quality gates
+    - `auditDecision`
+    - `auditGateCodes`
+- motivele pentru care verdictul ramane sub nivel “produs matur complet”:
+  - motorul de analiza ramane inca prea dependent de euristici
+  - nu exista browser e2e si observabilitate de productie suficient de adanca
+  - lipseste inca pachetul comercial / juridic minim serios pentru rulare mai independenta
+
+Coordonare extinsa pentru Codex secundar pe `Evidence OS`:
+
+- dupa auditul worklog-ului si al hartii de integrare din `components/evidence-os/*`, zona permisa pentru Codex secundar a fost extinsa controlat
+- poate intra acum si in adaptorii runtime ai `Agent Workspace`:
+  - `lib/compliance/agent-workspace.tsx`
+  - `lib/compliance/IntakeSystemCard.tsx`
+  - `lib/compliance/FindingProposalCard.tsx`
+  - `lib/compliance/DriftProposalCard.tsx`
+  - `components/compliscan/agent-workspace.tsx`
+- nu poate intra in:
+  - `app/api/*`
+  - `lib/server/*`
+  - `traceability`
+  - `Audit Pack`
+  - `app/dashboard/scanari/*`
+  - `app/dashboard/asistent/*`
+- documentele de coordonare au fost actualizate:
+  - `public/coordonare-paralel-codex.md`
+  - `public/task-codex-evidence-os-ui.md`

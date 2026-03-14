@@ -15,9 +15,15 @@ Pentru evaluarea stricta de maturitate, fara optimism, vezi:
 
 Nivel estimat de maturitate arhitecturala, privit strict ca implementare curenta:
 
-- fundatie de produs: `~75%`
-- arhitectura unificata: `~72-75%`
-- MVP serios: `~65%`
+- fundatie de produs: `~80%`
+- arhitectura unificata: `~77-79%`
+- produs pilot-ready cu ghidaj uman: `~79%`
+
+Verdictul strict recalibrat post-`Sprint 6` este:
+
+- `~79%` maturitate de produs pilot-ready cu ghidaj uman
+- `~64%` maturitate de platforma software serioasa
+- `~61%` maturitate de motor de compliance / audit defensibil
 
 Problema actuala nu este lipsa de features. Problema actuala este riscul de fragmentare:
 
@@ -42,11 +48,30 @@ Ci prin:
 
 Sprintul de maturizare activ este:
 
-- `Sprint 6 - Audit defensibility`
+- `Sprint 7 - Operational readiness` (inchis operational)
   - trierea rapoartelor Gemini este separata acum in `public/triere-rapoarte-gemini.md`, cu distinctie explicita intre:
     - ce mai este valid
     - ce este depasit dupa Sprint 4-6
     - ce merge in backlog
+  - firul paralel `Evidence OS UI` a fost auditat dupa batch-ul curent al lui Codex 2
+  - integrările critice au acum timeout + retry minim unificat prin `lib/server/http-client.ts`
+  - exista si verdict agregat de `release readiness`, nu doar checklist in documente:
+    - `lib/server/release-readiness.ts`
+    - `GET /api/release-readiness`
+  - exista preflight local complet pentru release:
+    - `scripts/preflight-release.mjs`
+    - `npm run preflight:release`
+    - include acum si `npm run verify:supabase:rls`
+  - `Setari` afiseaza acum si cardul de `Release readiness`
+  - gate vizual activ cand `release readiness = blocked`
+  - `GET /api/health` cere acum sesiune activa, nu mai expune public diagnosticul complet
+  - `release readiness` foloseste si marker-ul ultimei verificari RLS locale
+  - `Setari` nu mai face fetch de `release readiness` pentru roluri fara acces
+  - rutele critice au acum trasabilitate operationala minima:
+    - `requestId`
+    - header `x-request-id`
+    - logging structurat pentru erori de route
+    - warning-uri pentru retry-urile operationale
 
 Progres deja pornit:
 
@@ -258,10 +283,24 @@ Progres deja pornit:
   - `evidence.quality`
   - `evidence.validationBasis`
   - `evidence.validationConfidence`
+- `ComplianceTraceRecord` retine acum si verdictul de audit:
+  - `auditDecision`
+  - `auditGateCodes`
 - un control cu dovada `weak` nu mai apare ca `validated`, chiar daca a ramas `passed`
+- `traceability review` blocheaza acum confirmarea pentru audit a controalelor care nu au `auditDecision=pass`
+- `Auditor Vault` dezactiveaza confirmarile pe control / familie / articol cand grupul contine dovezi slabe sau validare nefinalizata
+- `Auditor Vault` afiseaza acum si `gates active` pe control, plus badge de audit:
+  - `gata pentru audit`
+  - `review necesar`
+  - `blocat`
+- sumarul pe familie considera reutilizabila doar dovada venita din controale deja `validated`
 - `Auditor Vault` si exportul client-facing afiseaza acum calitatea dovezii direct in traceability
   - `controlsMatrix` si `evidenceLedger` includ acum `evidenceQuality`
   - `auditReadiness` nu mai poate iesi `audit_ready` daca quality gates raman pe `review` sau `blocked`
+  - `Audit Pack` client-facing afiseaza acum si:
+    - decizia de audit per control (`pass / review / blocked`)
+    - motivele sintetizate din `auditGateCodes`
+    - aceeasi logica este afisata acum si in `traceability matrix`, nu doar in `controls matrix`
   - `family reuse` este acum mai defensiv:
     - sursa cu dovada `weak` nu mai poate fi refolosita
     - sursa validata doar pe `inferred_signal` nu mai poate fi refolosita automat
@@ -275,13 +314,17 @@ Progres deja pornit:
     - `evidence-quality`
     - `audit-quality-gates`
     - propagarea calitatii dovezii prin upload si registrul cloud
+    - `compliance-trace` pentru:
+      - `weak evidence -> auditDecision=review`
+      - `passed + drift deschis -> auditDecision=blocked`
+    - `POST /api/traceability/review` pentru blocaj pe `weak evidence`, `needs_review` si familie nevalidata
   - validarea completa este verde:
     - `npm test`
     - `npm run lint`
     - `npm run build`
-  - suita curenta este acum la:
-    - `57` fisiere de test
-    - `206` teste verzi
+  - suita curenta are:
+    - `60` fisiere de test
+    - `213` teste verzi
 - progresul executiei este jurnalizat in `public/log-sprinturi-maturizare.md`
 
 ## Checkpoint curent de implementare

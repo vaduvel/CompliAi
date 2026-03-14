@@ -7,6 +7,10 @@ import type {
 } from "@/lib/compliance/types"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
 import type { ControlFamilyRef } from "@/lib/compliance/control-families"
+import type {
+  AuditQualityGateCode,
+  AuditQualityGateDecision,
+} from "@/lib/compliance/audit-quality-gates"
 
 export type ComplianceTraceStatus = "validated" | "evidence_required" | "action_required"
 
@@ -66,5 +70,7 @@ export type ComplianceTraceRecord = {
     updatedAtISO: string | null
   }
   traceStatus: ComplianceTraceStatus
+  auditDecision: AuditQualityGateDecision
+  auditGateCodes: AuditQualityGateCode[]
   nextStep: string
 }

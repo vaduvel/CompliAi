@@ -11,10 +11,10 @@ interface CommitSummaryCardProps {
 
 export function CommitSummaryCard({ systemsCount, findingsCount, driftsCount, className }: CommitSummaryCardProps) {
   return (
-    <Card className={cn("bg-eos-bg shadow-none", className)}>
+    <Card className={cn("border-eos-border-subtle bg-eos-bg-panel shadow-none", className)} aria-label="Sumar impact propus">
       <CardHeader className="py-3 px-4">
         <CardTitle className="text-sm font-medium text-eos-text-muted uppercase tracking-wider">
-          Sumar Impact
+          Impact propus
         </CardTitle>
       </CardHeader>
       <Separator />
@@ -23,19 +23,19 @@ export function CommitSummaryCard({ systemsCount, findingsCount, driftsCount, cl
           <span className="text-2xl font-semibold text-eos-text">
             {systemsCount}
           </span>
-          <span className="text-xs text-eos-text-muted">Sisteme</span>
+          <span className="text-xs text-eos-text-muted">Sisteme AI</span>
         </div>
         <div className="flex flex-col">
           <span className="text-2xl font-semibold text-eos-warning">
             {findingsCount}
           </span>
-          <span className="text-xs text-eos-text-muted">Findings</span>
+          <span className="text-xs text-eos-text-muted">Constatari</span>
         </div>
         <div className="flex flex-col">
           <span className="text-2xl font-semibold text-eos-error">
             {driftsCount}
           </span>
-          <span className="text-xs text-eos-text-muted">Drifts</span>
+          <span className="text-xs text-eos-text-muted">Drifturi</span>
         </div>
       </CardContent>
     </Card>

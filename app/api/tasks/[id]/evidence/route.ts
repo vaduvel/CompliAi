@@ -1,19 +1,19 @@
 import { randomUUID } from "node:crypto"
 import path from "node:path"
 
-import { NextResponse } from "next/server"
-
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { assessEvidenceQuality } from "@/lib/compliance/evidence-quality"
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import type { TaskEvidenceAttachment, TaskEvidenceKind } from "@/lib/compliance/types"
-import { jsonError } from "@/lib/server/api-response"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
 import { storePrivateEvidenceFile } from "@/lib/server/evidence-storage"
+import { logRouteError } from "@/lib/server/operational-logger"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateState } from "@/lib/server/mvp-store"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import {
   shouldUseSupabaseEvidenceAsRequired,
   syncEvidenceObjectToSupabase,
@@ -116,6 +116,8 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const requestContext = createRequestContext(request, "/api/tasks/[id]/evidence")
+
   try {
     const { id } = await context.params
     const session = requireRole(
@@ -129,17 +131,29 @@ export async function POST(
     const rawKind = formData.get("kind")
 
     if (!(uploaded instanceof File) || uploaded.size === 0) {
-      return jsonError("Încarcă un fișier înainte să trimiți dovada.", 400, "EVIDENCE_FILE_REQUIRED")
+      return jsonError(
+        "Încarcă un fișier înainte să trimiți dovada.",
+        400,
+        "EVIDENCE_FILE_REQUIRED",
+        undefined,
+        requestContext
+      )
     }
 
     if (uploaded.size > MAX_EVIDENCE_BYTES) {
-      return jsonError("Fișierul este prea mare. Limita curentă este 10 MB.", 400, "EVIDENCE_FILE_TOO_LARGE")
+      return jsonError(
+        "Fișierul este prea mare. Limita curentă este 10 MB.",
+        400,
+        "EVIDENCE_FILE_TOO_LARGE",
+        undefined,
+        requestContext
+      )
     }
 
     const kind = isTaskEvidenceKind(rawKind) ? rawKind : "other"
     const validationError = validateEvidenceFile(uploaded, kind)
     if (validationError) {
-      return jsonError(validationError, 400, "EVIDENCE_FILE_INVALID")
+      return jsonError(validationError, 400, "EVIDENCE_FILE_INVALID", undefined, requestContext)
     }
 
     const nowISO = new Date().toISOString()
@@ -223,24 +237,46 @@ export async function POST(
       }
     })
 
-    return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
-      message: "Dovada a fost încărcată.",
-      evidence,
-    })
+    return jsonWithRequestContext(
+      {
+        ...(await buildDashboardPayload(nextState)),
+        message: "Dovada a fost încărcată.",
+        evidence,
+      },
+      requestContext
+    )
   } catch (error) {
     if (error instanceof AuthzError) {
-      return jsonError(error.message, error.status, error.code)
+      logRouteError(requestContext, error, {
+        code: error.code,
+        durationMs: getRequestDurationMs(requestContext),
+        status: error.status,
+      })
+      return jsonError(error.message, error.status, error.code, undefined, requestContext)
     }
 
     if (error instanceof Error && error.message === "TASK_NOT_FOUND") {
-      return jsonError("Task-ul nu mai există în starea curentă.", 404, "TASK_NOT_FOUND")
+      return jsonError(
+        "Task-ul nu mai există în starea curentă.",
+        404,
+        "TASK_NOT_FOUND",
+        undefined,
+        requestContext
+      )
     }
+
+    logRouteError(requestContext, error, {
+      code: "EVIDENCE_UPLOAD_FAILED",
+      durationMs: getRequestDurationMs(requestContext),
+      status: 500,
+    })
 
     return jsonError(
       error instanceof Error ? error.message : "Dovada nu a putut fi incarcata.",
       500,
-      "EVIDENCE_UPLOAD_FAILED"
+      "EVIDENCE_UPLOAD_FAILED",
+      undefined,
+      requestContext
     )
   }
 }

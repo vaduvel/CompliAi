@@ -165,10 +165,12 @@ export type AuditPackV2 = {
     }
     relatedFindingIds: string[]
     relatedDriftIds: string[]
-      attachedEvidence: TaskEvidenceAttachment | null
-      evidenceQuality: EvidenceQualityAssessment | null
-      lastRescanAtISO: string | null
-      validatedAtISO: string | null
+    attachedEvidence: TaskEvidenceAttachment | null
+    evidenceQuality: EvidenceQualityAssessment | null
+    auditDecision: AuditQualityGateDecision
+    auditGateCodes: string[]
+    lastRescanAtISO: string | null
+    validatedAtISO: string | null
   }>
   evidenceLedger: Array<{
     taskId: string

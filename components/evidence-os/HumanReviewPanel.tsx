@@ -14,38 +14,33 @@ interface HumanReviewPanelProps {
 
 export function HumanReviewPanel({ onConfirm, onReject, onEdit, disabled }: HumanReviewPanelProps) {
   return (
-    <Card className="bg-eos-bg-panel border-eos-border">
+    <Card className="border-eos-border-subtle bg-eos-bg-panel" aria-label="Actiuni review uman">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium uppercase tracking-wider text-eos-text-muted">
-          Human Review Gate
+          Review uman obligatoriu
         </CardTitle>
       </CardHeader>
       <Separator />
       <CardContent className="space-y-3 pt-4">
-        <Button 
-          className="w-full justify-start" 
-          variant="default" 
-          onClick={onConfirm} 
-          disabled={disabled}
-        >
+        <Button className="w-full justify-start" variant="default" onClick={onConfirm} disabled={disabled}>
           <Check className="mr-2 size-4" />
-          Confirm & Commit
+          Confirma si comite
         </Button>
-        
+
         <Button className="w-full justify-start" variant="outline" onClick={onReject} disabled={disabled}>
           <X className="mr-2 size-4" />
-          Reject Proposal
+          Respinge propunerea
         </Button>
 
         {onEdit && (
           <Button className="w-full justify-start" variant="ghost" onClick={onEdit} disabled={disabled}>
             <Edit2 className="mr-2 size-4" />
-            Edit Manually
+            Editeaza manual
           </Button>
         )}
-        
-        <p className="text-[10px] text-eos-text-muted mt-2">
-          Confimarea aplică datele în inventarul permanent și generează task-uri de remediere.
+
+        <p className="mt-2 text-[10px] text-eos-text-muted">
+          Confirmarea aplica propunerile in starea oficiala si lasa o urma clara pentru audit.
         </p>
       </CardContent>
     </Card>

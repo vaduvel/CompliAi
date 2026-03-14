@@ -651,10 +651,33 @@ Ridicam pachetul de audit din "bun pentru demo si review" in "bun pentru pilot s
   - un control cu `validationStatus=passed`, dar dovada `weak`, nu mai apare ca `validated`
   - `bundleCoverageStatus` cade la `partial` cand dovada exista, dar calitatea ei ramane slaba
   - `nextStep` prefera sumarul de calitate al dovezii cand acesta blocheaza controlul
+- `traceability review` blocheaza acum explicit confirmarea pentru audit daca:
+  - controlul nu este `validated`
+  - dovada este slaba
+  - validarea este inca nefinalizata
+- `traceability` retine acum si verdict de audit explicit la nivel de control:
+  - `auditDecision`
+  - `auditGateCodes`
+- confirmarea din `Auditor Vault` urmareste acum `auditDecision = pass`, nu doar `traceStatus = validated`
+- `Auditor Vault` dezactiveaza acum butoanele de confirmare pentru:
+  - control individual
+  - familie
+  - articol legal
+  cand grupul contine controale nevalidate
+- `Auditor Vault` afiseaza acum si:
+  - status de audit per control (`gata pentru audit` / `review necesar` / `blocat`)
+  - `gates active` pe control, pentru motivele concrete de review / blocare
+- sumarul pe familie trateaza drept reutilizabila doar dovada provenita din controale deja `validated`
 - `Auditor Vault` si exportul client-facing afiseaza acum si:
   - calitatea dovezii
   - baza validarii
   - increderea validarii, unde exista
+- `Audit Pack` client-facing afiseaza acum explicit pe fiecare control:
+  - decizia de audit (`gata pentru audit` / `review necesar` / `blocat`)
+  - motivele sintetizate din `auditGateCodes`
+- `Audit Pack` client-facing afiseaza acum aceeasi logica si in `traceability matrix`:
+  - verdictul de audit
+  - `gates active`
 - exista teste noi pentru:
   - heuristica de `evidence quality`
   - `audit quality gates`
@@ -662,6 +685,12 @@ Ridicam pachetul de audit din "bun pentru demo si review" in "bun pentru pilot s
   - `compliance trace` pentru cazurile:
     - dovada slaba + passed => `action_required`
     - dovada suficienta + passed => `validated`
+    - passed + drift deschis => `auditDecision=blocked`
+  - `POST /api/traceability/review` pentru:
+    - blocaj pe `weak evidence`
+    - blocaj pe `needs_review`
+    - blocaj pe familie cu controale nevalidate
+    - confirmare permisa doar pentru controale validate
 - a fost adaugata si trierea rapoartelor Gemini:
   - `public/triere-rapoarte-gemini.md`
 - validarea completa este din nou verde:
@@ -669,12 +698,18 @@ Ridicam pachetul de audit din "bun pentru demo si review" in "bun pentru pilot s
   - `npm run lint`
   - `npm run build`
 - suita curenta are:
-  - `58` fisiere de test
-  - `206` teste verzi
+  - `60` fisiere de test
+  - `213` teste verzi
+- reevaluarea stricta post-`Sprint 6` este acum actualizata in:
+  - `public/raport-maturitate-compliscan.md`
+  Verdictul curent este:
+  - `~79%` maturitate de produs pilot-ready cu ghidaj uman
+  - `~64%` maturitate de platforma software serioasa
+  - `~61%` maturitate de motor de compliance / audit defensibil
 
 ## Sprint 7 - Operational readiness
 
-Status: `planned`
+Status: `done`
 
 ### Obiectiv
 
@@ -683,7 +718,7 @@ Punem produsul pe picioare ca sistem software responsabil.
 ### Task-uri
 
 - health checks si observabilitate minima
-- logging operational mai bun
+- logging operational minim cu `requestId`
 - timeouts si retry discipline pentru integrari
 - document de release readiness
 - checklist de pilot onboarding
@@ -692,6 +727,46 @@ Punem produsul pe picioare ca sistem software responsabil.
 
 - produsul poate fi operat mai linistit
 - riscurile tehnice curente sunt mai bine vazute si gestionate
+
+### Progres curent
+
+- exista acum helper de health unificat:
+  - `lib/server/app-health.ts`
+- exista endpoint operational:
+  - `GET /api/health`
+  - cere sesiune activa, nu mai expune public diagnosticul complet
+- `Setari` afiseaza acum:
+  - `Status operational Supabase`
+  - `Health check aplicatie`
+  - lista de membri si roluri
+- `Setari` afiseaza acum si:
+  - card dedicat de `Release readiness`
+  - gate vizual cand starea este `blocked`
+  - verdict de release readiness este vizibil si actionabil
+- exista documentele de readiness:
+  - `public/release-readiness-checklist.md`
+  - `public/pilot-onboarding-checklist.md`
+  - `public/incident-runbook-minim.md`
+- exista helper comun pentru fetch operational:
+  - `lib/server/http-client.ts`
+- Vision, Supabase REST, Supabase Storage si Supabase Auth folosesc acum timeout + retry minim controlat
+- exista verdict agregat de release readiness:
+  - `lib/server/release-readiness.ts`
+  - `GET /api/release-readiness`
+  - include si marker-ul ultimei verificari RLS locale
+- exista preflight local complet pentru release:
+  - `scripts/preflight-release.mjs`
+  - `npm run preflight:release`
+  - ruleaza acum si `npm run verify:supabase:rls`
+- exista acum si logging operational minim:
+  - `lib/server/request-context.ts`
+  - `lib/server/operational-logger.ts`
+  - `x-request-id` pe rutele critice
+  - `requestId` in payload-urile JSON de eroare
+  - warning-uri operationale pentru retry-urile din `lib/server/http-client.ts`
+- checkpoint separat:
+  - auditul dedicat pe firul `Evidence OS UI` este facut
+  - `Setari` nu mai cere `release readiness` pentru roluri fara acces
 
 ## Ordinea corecta
 
@@ -726,10 +801,10 @@ Vom spune ca produsul a intrat intr-o zona serioasa cand sunt adevarate simultan
 
 Lucram in:
 
-### Sprint 4 - Auth, roles, org model
+### Sprint 7 - Operational readiness
 
 Acesta este sprintul corect acum, pentru ca:
 
-- Sprint 1, 2 si mare parte din Sprint 3 sunt deja suficient de solide
-- urmatorul risc real nu mai este doar analiza, ci controlul pe actiuni sensibile
-- produsul incepe sa semene cu o platforma folosibila de mai multi actori, nu doar cu un workspace local unic
+- Sprint 4, 5 si 6 au ridicat deja fundatia de auth, cloud si defensibilitate de audit
+- urmatorul risc real nu mai este doar "daca merge", ci "cat de linistit se poate opera"
+- avem nevoie de health, readiness, onboarding si incident discipline inainte de un polish mare

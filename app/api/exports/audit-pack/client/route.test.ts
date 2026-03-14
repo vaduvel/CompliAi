@@ -105,6 +105,7 @@ describe("GET /api/exports/audit-pack/client", () => {
     const body = await response.text()
 
     expect(response.status).toBe(200)
+    expect(response.headers.get("x-request-id")).toBeTruthy()
     expect(response.headers.get("content-type")).toContain("text/html")
     expect(response.headers.get("content-disposition")).toContain(
       'inline; filename="audit-pack-client-magazin-online-s-r-l-2026-03-13.html"'
@@ -135,6 +136,7 @@ describe("GET /api/exports/audit-pack/client", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(403)
+    expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.code).toBe("AUTH_ROLE_FORBIDDEN")
   })
 })

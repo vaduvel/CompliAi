@@ -94,7 +94,7 @@ Observatie:
 
 Sprint activ:
 
-- `Sprint 6 - Audit defensibility`
+- `Sprint 7 - Operational readiness` (inchis operational)
 
 Fronturile active acum:
 
@@ -158,11 +158,70 @@ Fronturile active acum:
   - fallback-ul local este acum controlat explicit prin:
     - `COMPLISCAN_ALLOW_LOCAL_FALLBACK`
   - in productie, traseul cloud poate fi fortat fara degradare tacuta
+- [x] health check unificat pentru aplicatie
+  - helper dedicat:
+    - `lib/server/app-health.ts`
+  - endpoint dedicat:
+    - `GET /api/health`
+  - UI vizibil in `Setari`
+- [x] status operational Supabase vizibil in `Setari`
+- [x] checklist-uri operationale minime:
+  - `public/release-readiness-checklist.md`
+  - `public/pilot-onboarding-checklist.md`
+  - `public/incident-runbook-minim.md`
+- [x] timeout si retry discipline minima pentru integrari critice:
+  - `lib/server/http-client.ts`
+  - aplicat pe:
+    - Google Vision
+    - Supabase REST
+    - Supabase Storage
+    - Supabase Auth
+- [x] verdict agregat de release readiness:
+  - `lib/server/release-readiness.ts`
+  - `GET /api/release-readiness`
+  - compune:
+    - `app health`
+    - strict supabase preflight
+    - blocker-ele operationale active
+- [x] preflight local complet pentru release:
+  - `scripts/preflight-release.mjs`
+  - `npm run preflight:release`
+  - include si `npm run verify:supabase:rls`
+- [x] card dedicat pentru `Release readiness` in `Setari`
+- [x] gate vizual de blocare cand `release readiness = blocked`
+- [x] `GET /api/health` cere sesiune activa
+- [x] `release readiness` ia in calcul si ultima verificare RLS locala
+- [x] `Setari` nu mai cere `release readiness` pentru roluri fara acces
+- [x] logging operational minim:
+  - `lib/server/request-context.ts`
+  - `lib/server/operational-logger.ts`
+  - `x-request-id` pe rutele critice
+  - `requestId` in payload-urile JSON de eroare
+  - logare structurata minima pe:
+    - `health`
+    - `release-readiness`
+    - `scan`
+    - `evidence upload`
+    - `audit-pack client`
+    - `agent run`
+    - `agent commit`
+- [x] audit de integrare pentru firul paralel `Evidence OS UI`
+  - batch-ul lui Codex 2 a fost verificat
+  - nu au fost gasite blocaje, doar fix minim de siguranta
+  - auditul final se face dupa ce inchide batch-ul curent
 
 Verdict Sprint 4:
 
 - [x] Sprint 4 poate fi considerat inchis operational
 - [ ] invitare / administrare membri ramane backlog secundar, nu blocaj pentru Sprint 5
+
+Verdict Sprint 7:
+
+- [x] health / readiness / onboarding au fundatie operationala minima coerenta
+- [~] timeout / retry discipline minima este pusa pe traseele externe critice
+- [x] logging operational minim pe rutele critice
+- [x] timeouts si retry discipline pentru integrari externe critice
+- [x] audit final pe batch-ul `Evidence OS UI`
 
 Sprint 2 inchis operational:
 
@@ -443,15 +502,32 @@ Sprint 6 trebuie sa atace direct riscurile:
     - `evidence.quality`
     - `evidence.validationBasis`
     - `evidence.validationConfidence`
+    - `auditDecision`
+    - `auditGateCodes`
   - un control cu `validationStatus=passed`, dar dovada `weak`, nu mai apare `validated`
   - `bundleCoverageStatus` cade la `partial` daca dovada este slaba
   - `nextStep` foloseste sumarul de calitate al dovezii cand acesta este motivul real de blocaj
+- [x] blocaj explicit pe confirmarea de audit cand controlul nu are `auditDecision=pass`
+  - `POST /api/traceability/review` respinge acum:
+    - `weak evidence`
+    - `needs_review`
+    - familii cu controale nevalidate
+    - controale cu drift deschis chiar daca rescan-ul a iesit `passed`
 - [x] vizibilitate mai buna in UI / export pentru traceability
   - `Auditor Vault` afiseaza:
     - calitatea dovezii
     - baza validarii
     - increderea validarii
+    - statusul de audit per control
+    - `gates active`
   - `Audit Pack` client-facing afiseaza acum si sumarul de calitate al dovezii in traceability matrix
+  - `Audit Pack` client-facing afiseaza acum si:
+    - decizia de audit per control
+    - motivele sintetizate din `auditGateCodes`
+  - `traceability matrix` din varianta client-facing foloseste acum aceeasi logica de audit:
+    - verdict per control
+    - `gates active`
+  - butoanele de confirmare sunt dezactivate pe control / familie / articol cand grupul nu este complet validat
 - [x] documentatie Sprint 6:
   - `public/evidence-quality-spec.md`
   - `public/sprint-6-audit-quality-gates.md`
@@ -462,8 +538,8 @@ Sprint 6 trebuie sa atace direct riscurile:
   - `tests/fixtures/expected-findings/recruitment-high-risk-bundle.json`
   - `tests/fixtures/expected-findings/compliscan-recruitment-high-risk.json`
 - [x] suita curenta dupa pornirea Sprint 6:
-  - `58` fisiere de test
-  - `206` teste verzi
+  - `60` fisiere de test
+  - `213` teste verzi
 - [~] UI de administrare roluri / membri
 
 ## Epic 1 - Claritate produs si navigatie

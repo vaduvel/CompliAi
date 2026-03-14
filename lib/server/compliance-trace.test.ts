@@ -87,10 +87,12 @@ describe("lib/server/compliance-trace", () => {
     })
 
     expect(record.traceStatus).toBe("action_required")
+    expect(record.auditDecision).toBe("review")
+    expect(record.auditGateCodes).toContain("weak_evidence")
     expect(record.bundleCoverageStatus).toBe("partial")
     expect(record.evidence.quality?.status).toBe("weak")
     expect(record.evidence.validationBasis).toBe("direct_signal")
-    expect(record.nextStep).toContain("Dovada cere review")
+    expect(record.nextStep).toContain("Dovada este marcată ca slabă")
   })
 
   it("marcheaza controlul ca validat doar cand dovada este suficienta si validarea a trecut", () => {
@@ -124,8 +126,61 @@ describe("lib/server/compliance-trace", () => {
     })
 
     expect(record.traceStatus).toBe("validated")
+    expect(record.auditDecision).toBe("pass")
+    expect(record.auditGateCodes).toEqual([])
     expect(record.bundleCoverageStatus).toBe("covered")
     expect(record.evidence.quality?.status).toBe("sufficient")
     expect(record.evidence.validationConfidence).toBe("high")
+  })
+
+  it("poate bloca auditul pe control validat dacă există drift deschis", () => {
+    const state = createState()
+    state.taskState["rem-task-1"] = {
+      status: "todo",
+      updatedAtISO: "2026-03-13T12:00:00.000Z",
+      validationStatus: "passed",
+      validationBasis: "direct_signal",
+      validationConfidence: "high",
+      attachedEvidenceMeta: {
+        id: "evidence-1",
+        fileName: "consent-banner-proof.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 48_000,
+        uploadedAtISO: "2026-03-13T10:00:00.000Z",
+        kind: "document_bundle",
+        quality: {
+          status: "sufficient",
+          summary: "Dovada pare suficientă pentru tipul selectat și poate intra în pachetul de audit.",
+          reasonCodes: [],
+          checkedAtISO: "2026-03-13T10:00:00.000Z",
+        },
+      },
+    }
+    state.driftRecords = [
+      {
+        id: "drift-1",
+        type: "compliance_drift",
+        change: "tracking_detected",
+        severity: "high",
+        summary: "Tracking nou detectat",
+        lawReference: "GDPR Art. 7",
+        detectedAtISO: "2026-03-13T13:00:00.000Z",
+        sourceDocument: "policy.pdf",
+        sourceKind: "document",
+        open: true,
+        lifecycleStatus: "open",
+      },
+    ]
+
+    const [record] = buildComplianceTraceRecords({
+      state,
+      remediationPlan: [{ ...createTask(), relatedDriftIds: ["drift-1"] }],
+      snapshot: null,
+    })
+
+    expect(record.traceStatus).toBe("validated")
+    expect(record.auditDecision).toBe("blocked")
+    expect(record.auditGateCodes).toContain("unresolved_drift")
+    expect(record.nextStep).toContain("drift")
   })
 })

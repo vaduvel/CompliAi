@@ -15,19 +15,29 @@ export function SourceEnvelopeCard({ envelope }: SourceEnvelopeCardProps) {
     manifest: FileCode2,
     text: ScanText,
     yaml: ShieldAlert,
-    repo: FileCode2
   }[envelope.sourceType] || FileText
 
+  const sourceTypeLabel = {
+    document: "Document",
+    manifest: "Manifest",
+    text: "Text extras",
+    yaml: "Fisier YAML",
+  }[envelope.sourceType]
+
   return (
-    <Card className="flex items-center gap-4 p-4">
-      <div className="flex size-10 items-center justify-center rounded-eos-md bg-eos-bg-inset text-eos-primary">
-        <Icon className="size-5" />
+    <Card className="border-eos-border-subtle bg-eos-bg-panel p-4">
+      <div className="flex items-center gap-4">
+        <div className="flex size-10 items-center justify-center rounded-eos-md bg-eos-bg-inset text-eos-primary">
+          <Icon className="size-5" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="text-sm font-medium leading-none text-eos-text">{envelope.sourceName}</p>
+          <p className="text-xs uppercase tracking-[0.01em] text-eos-text-muted">{sourceTypeLabel}</p>
+        </div>
+        <Badge variant="outline" aria-label={`${envelope.sourceSignals.length} semnale detectate`}>
+          {envelope.sourceSignals.length} semnale
+        </Badge>
       </div>
-      <div className="flex-1 space-y-1">
-        <p className="text-sm font-medium leading-none text-eos-text">{envelope.sourceName}</p>
-        <p className="text-xs text-eos-text-muted capitalize">{envelope.sourceType}</p>
-      </div>
-      <Badge variant="outline">{envelope.sourceSignals.length} signals</Badge>
     </Card>
   )
 }

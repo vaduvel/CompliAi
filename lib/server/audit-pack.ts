@@ -32,9 +32,9 @@ export function buildAuditPack({
   const validatedBaseline =
     state.snapshotHistory.find((item) => item.snapshotId === state.validatedBaselineSnapshotId) ?? null
   const activeDrifts = state.driftRecords.filter((item) => item.open)
-  const controlsMatrix = buildControlsMatrix(state, remediationPlan)
-  const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
   const auditQualityGates = buildAuditQualityGates({ state, remediationPlan, nowISO: generatedAt })
+  const controlsMatrix = buildControlsMatrix(state, remediationPlan, auditQualityGates)
+  const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
   const validationLog = buildValidationLog(controlsMatrix)
   const traceabilityMatrix = buildComplianceTraceRecords({
     state,
@@ -42,12 +42,8 @@ export function buildAuditPack({
     snapshot,
   })
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
-  const validatedEvidenceItems = controlsMatrix.filter(
-    (item) => item.attachedEvidence && item.validationStatus === "passed"
-  ).length
-  const missingEvidenceItems = controlsMatrix.filter(
-    (item) => !item.attachedEvidence || item.validationStatus !== "passed"
-  ).length
+  const validatedEvidenceItems = controlsMatrix.filter((item) => item.auditDecision === "pass").length
+  const missingEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
 
   return {
     version: "2.1",
@@ -241,6 +237,7 @@ function buildBundleEvidenceSummary(
       validatedControls: number
       pendingControls: number
       includedFiles: Set<string>
+      reusableFiles: Set<string>
       reusePolicy: string
     }
   >()
@@ -274,13 +271,15 @@ function buildBundleEvidenceSummary(
       validatedControls: 0,
       pendingControls: 0,
       includedFiles: new Set<string>(),
+      reusableFiles: new Set<string>(),
       reusePolicy: getControlFamilyReusePolicySummary(control.controlFamily.key),
     }
     current.totalControls += 1
     if (control.attachedEvidence?.fileName) current.includedFiles.add(control.attachedEvidence.fileName)
     if (control.attachedEvidence) current.attachedControls += 1
-    if (control.attachedEvidence && control.validationStatus === "passed") {
+    if (control.auditDecision === "pass") {
       current.validatedControls += 1
+      if (control.attachedEvidence?.fileName) current.reusableFiles.add(control.attachedEvidence.fileName)
     } else {
       current.pendingControls += 1
     }
@@ -332,8 +331,8 @@ function buildBundleEvidenceSummary(
       attachedControls: coverage.attachedControls,
       validatedControls: coverage.validatedControls,
       pendingControls: coverage.pendingControls,
-      reusableEvidenceFiles: coverage.includedFiles.size,
-      reuseAvailable: coverage.includedFiles.size > 0 && coverage.pendingControls > 0,
+      reusableEvidenceFiles: coverage.reusableFiles.size,
+      reuseAvailable: coverage.reusableFiles.size > 0 && coverage.pendingControls > 0,
       reusePolicy: coverage.reusePolicy,
       includedFiles: [...coverage.includedFiles],
     })),
@@ -341,12 +340,31 @@ function buildBundleEvidenceSummary(
   }
 }
 
-function buildControlsMatrix(state: ComplianceState, remediationPlan: RemediationAction[]) {
+function buildControlsMatrix(
+  state: ComplianceState,
+  remediationPlan: RemediationAction[],
+  auditQualityGates: AuditPackV2["auditQualityGates"]
+): AuditPackV2["controlsMatrix"] {
+  const gatesByTaskId = new Map<string, AuditPackV2["auditQualityGates"]["items"]>()
+  for (const item of auditQualityGates.items) {
+    const current = gatesByTaskId.get(item.taskId) ?? []
+    current.push(item)
+    gatesByTaskId.set(item.taskId, current)
+  }
+
   return remediationPlan.map((task) => {
-    const taskState = state.taskState[`rem-${task.id}`]
+    const taskId = `rem-${task.id}`
+    const taskState = state.taskState[taskId]
+    const taskQualityGates = gatesByTaskId.get(taskId) ?? []
+    const auditDecision: AuditPackV2["controlsMatrix"][number]["auditDecision"] =
+      taskQualityGates.some((item) => item.decision === "blocked")
+        ? "blocked"
+        : taskQualityGates.some((item) => item.decision === "review")
+          ? "review"
+          : "pass"
 
     return {
-      taskId: `rem-${task.id}`,
+      taskId,
       title: task.title,
       priority: task.priority,
       severity: task.severity,
@@ -375,6 +393,8 @@ function buildControlsMatrix(state: ComplianceState, remediationPlan: Remediatio
       relatedDriftIds: task.relatedDriftIds ?? [],
       attachedEvidence: taskState?.attachedEvidenceMeta ?? null,
       evidenceQuality: taskState?.attachedEvidenceMeta?.quality ?? null,
+      auditDecision,
+      auditGateCodes: taskQualityGates.map((item) => item.code),
       lastRescanAtISO: taskState?.lastRescanAtISO ?? null,
       validatedAtISO: taskState?.validatedAtISO ?? null,
     }

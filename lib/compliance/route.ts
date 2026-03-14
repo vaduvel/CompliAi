@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 import {
@@ -9,29 +8,41 @@ import {
   validateAgentOutput,
 } from "@/lib/compliance/agent-runner"
 import type { AgentProposalBundle, SourceEnvelope } from "@/lib/compliance/agent-os"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { requireAuthenticatedSession } from "@/lib/server/auth"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
 export async function POST(request: NextRequest) {
+  const context = createRequestContext(request, "/api/agent/run")
   let orgId: string
   try {
     orgId = requireAuthenticatedSession(request, "rularea Agent OS").orgId
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unauthorized"
-    return NextResponse.json({ error: message }, { status: 401 })
+    logRouteError(context, error, {
+      code: "AUTH_UNAUTHORIZED",
+      durationMs: getRequestDurationMs(context),
+      status: 401,
+    })
+    return jsonError(message, 401, "AUTH_UNAUTHORIZED", undefined, context)
   }
 
   const sourceEnvelope = (await request.json()) as SourceEnvelope
 
   // Validare de bază
   if (!sourceEnvelope || !sourceEnvelope.sourceId) {
-    return NextResponse.json({ error: "Invalid SourceEnvelope provided." }, { status: 400 })
+    return jsonError("Invalid SourceEnvelope provided.", 400, "INVALID_SOURCE_ENVELOPE", undefined, context)
   }
 
   // Asigură-te că plicul aparține organizației autentificate
   if (sourceEnvelope.orgId !== orgId) {
-    return NextResponse.json(
-      { error: "Forbidden: SourceEnvelope does not belong to your organization." },
-      { status: 403 }
+    return jsonError(
+      "Forbidden: SourceEnvelope does not belong to your organization.",
+      403,
+      "AUTH_ORG_MISMATCH",
+      undefined,
+      context
     )
   }
 
@@ -62,21 +73,25 @@ export async function POST(request: NextRequest) {
 
     const validationErrors = validations.flatMap((entry) => entry.errors)
     if (validationErrors.length > 0) {
-      return NextResponse.json(
-        {
-          error: "Agent output invalid",
-          details: validationErrors,
-        },
-        { status: 422 }
+      return jsonError(
+        "Agent output invalid",
+        422,
+        "AGENT_OUTPUT_INVALID",
+        { details: validationErrors },
+        context
       )
     }
 
     // În mod normal, acest pachet ar fi salvat în baza de date pentru review uman.
     // Acum, îl returnăm direct.
-    return NextResponse.json(proposalBundle)
+    return jsonWithRequestContext(proposalBundle, context)
   } catch (error) {
-    console.error("Agent run failed:", error)
+    logRouteError(context, error, {
+      code: "AGENT_RUN_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
-    return NextResponse.json({ error: "Agent run failed", details: errorMessage }, { status: 500 })
+    return jsonError("Agent run failed", 500, "AGENT_RUN_FAILED", { details: errorMessage }, context)
   }
 }

@@ -70,6 +70,38 @@ type SupabaseOperationalStatus = {
   }
 } | null
 
+type ApplicationHealthStatus = {
+  state: "healthy" | "degraded" | "blocked"
+  summary: string
+  blockers: string[]
+  warnings: string[]
+  checks: Array<{
+    key: string
+    label: string
+    state: "healthy" | "degraded" | "blocked"
+    summary: string
+  }>
+  config: {
+    authBackend: "local" | "supabase" | "hybrid"
+    dataBackend: "local" | "supabase" | "hybrid"
+    localFallbackAllowed: boolean
+    production: boolean
+  }
+} | null
+
+type ReleaseReadinessStatus = {
+  state: "ready" | "review" | "blocked"
+  summary: string
+  blockers: string[]
+  warnings: string[]
+  checks: Array<{
+    key: string
+    label: string
+    state: "healthy" | "degraded" | "blocked"
+    summary: string
+  }>
+} | null
+
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Default policy" },
   { value: "low", label: "Low" },
@@ -98,6 +130,7 @@ export default function SetariPage() {
   const [repoSyncStatus, setRepoSyncStatus] = useState<RepoSyncStatus>(null)
   const [driftOverrides, setDriftOverrides] = useState<Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>>({})
   const [currentUser, setCurrentUser] = useState<CurrentUser>(null)
+  const [currentUserResolved, setCurrentUserResolved] = useState(false)
   const [membersData, setMembersData] = useState<MembersResponse>(null)
   const [membersLoading, setMembersLoading] = useState(true)
   const [membersError, setMembersError] = useState<string | null>(null)
@@ -105,6 +138,14 @@ export default function SetariPage() {
   const [supabaseStatus, setSupabaseStatus] = useState<SupabaseOperationalStatus>(null)
   const [supabaseStatusLoading, setSupabaseStatusLoading] = useState(true)
   const [supabaseStatusError, setSupabaseStatusError] = useState<string | null>(null)
+  const [appHealth, setAppHealth] = useState<ApplicationHealthStatus>(null)
+  const [appHealthLoading, setAppHealthLoading] = useState(true)
+  const [appHealthError, setAppHealthError] = useState<string | null>(null)
+  const [releaseReadiness, setReleaseReadiness] = useState<ReleaseReadinessStatus>(null)
+  const [releaseReadinessLoading, setReleaseReadinessLoading] = useState(true)
+  const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
+  const canViewReleaseReadiness =
+    currentUser?.role === "owner" || currentUser?.role === "compliance"
 
   useEffect(() => {
     void fetch("/api/integrations/repo-sync/status")
@@ -114,10 +155,13 @@ export default function SetariPage() {
   }, [])
 
   useEffect(() => {
+    setCurrentUserResolved(false)
+
     void fetch("/api/auth/me", { cache: "no-store" })
       .then((response) => response.json())
       .then((payload: { user: CurrentUser }) => setCurrentUser(payload.user ?? null))
       .catch(() => setCurrentUser(null))
+      .finally(() => setCurrentUserResolved(true))
   }, [])
 
   useEffect(() => {
@@ -148,6 +192,76 @@ export default function SetariPage() {
       })
       .finally(() => setSupabaseStatusLoading(false))
   }, [])
+
+  useEffect(() => {
+    setAppHealthLoading(true)
+    setAppHealthError(null)
+
+    void fetch("/api/health", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = (await response.json()) as
+          | ({ ok?: boolean; error?: string } & NonNullable<ApplicationHealthStatus>)
+          | { error?: string; code?: string }
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload && payload.error
+              ? payload.error
+              : "Nu am putut verifica health check-ul aplicației."
+          )
+        }
+
+        setAppHealth(payload as NonNullable<ApplicationHealthStatus>)
+      })
+      .catch((error) => {
+        setAppHealth(null)
+        setAppHealthError(
+          error instanceof Error ? error.message : "Nu am putut verifica health check-ul aplicației."
+        )
+      })
+      .finally(() => setAppHealthLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!currentUserResolved) return
+
+    const canViewReleaseReadiness =
+      currentUser?.role === "owner" || currentUser?.role === "compliance"
+
+    if (!canViewReleaseReadiness) {
+      setReleaseReadiness(null)
+      setReleaseReadinessError(null)
+      setReleaseReadinessLoading(false)
+      return
+    }
+
+    setReleaseReadinessLoading(true)
+    setReleaseReadinessError(null)
+
+    void fetch("/api/release-readiness", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = (await response.json()) as
+          | ({ ok?: boolean; error?: string } & NonNullable<ReleaseReadinessStatus>)
+          | { error?: string; code?: string }
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload && payload.error
+              ? payload.error
+              : "Nu am putut verifica release readiness."
+          )
+        }
+
+        setReleaseReadiness(payload as NonNullable<ReleaseReadinessStatus>)
+      })
+      .catch((error) => {
+        setReleaseReadiness(null)
+        setReleaseReadinessError(
+          error instanceof Error ? error.message : "Nu am putut verifica release readiness."
+        )
+      })
+      .finally(() => setReleaseReadinessLoading(false))
+  }, [currentUserResolved, currentUser?.role])
 
   useEffect(() => {
     setMembersLoading(true)
@@ -464,6 +578,226 @@ export default function SetariPage() {
                       </Link>
                     </Button>
                   </div>
+                </div>
+              </div>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Health check aplicatie</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Rezumat rapid pentru starea de operare: sesiune, backend-uri, fallback și traseul cloud principal.
+              </p>
+            </div>
+            <Badge className={healthBadgeClass(appHealth?.state, appHealthLoading)}>
+              {appHealthLoading
+                ? "Se verifica"
+                : appHealth?.state === "healthy"
+                  ? "Sanatos"
+                  : appHealth?.state === "blocked"
+                    ? "Blocat"
+                    : "Degradat"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {appHealthLoading ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Verificam starea aplicatiei si preflight-ul operational...
+            </div>
+          ) : appHealthError ? (
+            <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+              {appHealthError}
+            </div>
+          ) : appHealth ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                {appHealth.checks.map((check) => (
+                  <SettingsTile
+                    key={check.key}
+                    icon={check.key === "session_secret" ? KeyRound : check.key === "supabase_operational" ? Cloud : ShieldCheck}
+                    label={check.label}
+                    value={formatHealthCheckSummary(check.state, check.summary)}
+                  />
+                ))}
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    Rezumat operational
+                  </p>
+                  <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                    <p>{appHealth.summary}</p>
+                    <p>
+                      Auth:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {formatBackendLabel(appHealth.config.authBackend)}
+                      </span>
+                    </p>
+                    <p>
+                      Date:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {formatBackendLabel(appHealth.config.dataBackend)}
+                      </span>
+                    </p>
+                    <p>
+                      Fallback local:{" "}
+                      <span className="font-semibold text-[var(--color-on-surface)]">
+                        {appHealth.config.localFallbackAllowed ? "Permis" : "Blocat"}
+                      </span>
+                    </p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Endpoint intern: <code>/api/health</code>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {appHealth.blockers.length > 0 ? (
+                    <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+                      <p className="font-semibold text-[var(--color-on-surface)]">Blocaje active</p>
+                      <ul className="mt-2 space-y-1">
+                        {appHealth.blockers.map((blocker) => (
+                          <li key={blocker}>• {blocker}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {appHealth.warnings.length > 0 ? (
+                    <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
+                      <p className="font-semibold text-[var(--color-on-surface)]">Avertismente</p>
+                      <ul className="mt-2 space-y-1">
+                        {appHealth.warnings.map((warning) => (
+                          <li key={warning}>• {warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-[var(--color-success)] bg-[var(--color-primary-muted)] p-4 text-sm text-[var(--color-success)]">
+                      Aplicatia trece health check-ul curent fara blocaje sau avertismente operationale majore.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Release readiness</CardTitle>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Rezumat clar pentru a decide daca build-ul poate fi promovat ca release controlat.
+              </p>
+            </div>
+            <Badge
+              className={
+                currentUserResolved && !canViewReleaseReadiness
+                  ? "border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]"
+                  : releaseBadgeClass(releaseReadiness?.state, releaseReadinessLoading)
+              }
+            >
+              {currentUserResolved && !canViewReleaseReadiness
+                ? "Restrictionat"
+                : releaseReadinessLoading
+                  ? "Se verifica"
+                  : releaseReadiness?.state === "ready"
+                    ? "Ready"
+                    : releaseReadiness?.state === "blocked"
+                      ? "Blocat"
+                      : "Revizuire"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!currentUserResolved ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Verificam sesiunea curenta pentru a decide ce diagnostice operationale poti vedea...
+            </div>
+          ) : !canViewReleaseReadiness ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+              Verdictul complet de release readiness este vizibil doar pentru rolurile <strong>Owner</strong> si <strong>Compliance</strong>.
+            </div>
+          ) : releaseReadinessLoading ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+              Verificam release readiness...
+            </div>
+          ) : releaseReadinessError ? (
+            <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+              {releaseReadinessError}
+            </div>
+          ) : releaseReadiness ? (
+            <>
+              {releaseReadiness.state === "blocked" ? (
+                <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+                  <p className="font-semibold text-[var(--color-on-surface)]">Release blocat</p>
+                  <p className="mt-2 text-[var(--color-error)]">
+                    Build-ul nu trebuie promovat pana cand blocajele operationale sunt inchise.
+                  </p>
+                  <p className="mt-3 text-xs text-[var(--color-on-surface-muted)]">
+                    Ruleaza <code>npm run preflight:release</code> si verifica <code>/api/release-readiness</code> dupa fixuri.
+                  </p>
+                </div>
+              ) : null}
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {releaseReadiness.checks.map((check) => (
+                  <SettingsTile
+                    key={check.key}
+                    icon={check.key.includes("supabase") ? Cloud : check.key === "session_secret" ? KeyRound : ShieldCheck}
+                    label={check.label}
+                    value={formatHealthCheckSummary(check.state, check.summary)}
+                  />
+                ))}
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">Rezumat</p>
+                  <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                    <p>{releaseReadiness.summary}</p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Endpoint intern: <code>/api/release-readiness</code>
+                    </p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Preflight local: <code>npm run preflight:release</code>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {releaseReadiness.blockers.length > 0 ? (
+                    <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+                      <p className="font-semibold text-[var(--color-on-surface)]">Blocaje active</p>
+                      <ul className="mt-2 space-y-1">
+                        {releaseReadiness.blockers.map((blocker) => (
+                          <li key={blocker}>• {blocker}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {releaseReadiness.warnings.length > 0 ? (
+                    <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
+                      <p className="font-semibold text-[var(--color-on-surface)]">Avertismente</p>
+                      <ul className="mt-2 space-y-1">
+                        {releaseReadiness.warnings.map((warning) => (
+                          <li key={warning}>• {warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-[var(--color-success)] bg-[var(--color-primary-muted)] p-4 text-sm text-[var(--color-success)]">
+                      Release readiness nu raporteaza avertismente majore.
+                    </div>
+                  )}
                 </div>
               </div>
             </>
@@ -864,5 +1198,58 @@ function formatBackendLabel(backend: "local" | "supabase" | "hybrid") {
       return "Hybrid"
     default:
       return backend
+  }
+}
+
+function healthBadgeClass(
+  state?: "healthy" | "degraded" | "blocked",
+  loading?: boolean
+) {
+  if (loading) {
+    return "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
+  }
+
+  switch (state) {
+    case "healthy":
+      return "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+    case "blocked":
+      return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    case "degraded":
+    default:
+      return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+  }
+}
+
+function releaseBadgeClass(
+  state?: "ready" | "review" | "blocked",
+  loading?: boolean
+) {
+  if (loading) {
+    return "border-[var(--color-border)] bg-transparent text-[var(--color-muted)]"
+  }
+
+  switch (state) {
+    case "ready":
+      return "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+    case "blocked":
+      return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    case "review":
+    default:
+      return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+  }
+}
+
+function formatHealthCheckSummary(
+  state: "healthy" | "degraded" | "blocked",
+  summary: string
+) {
+  switch (state) {
+    case "healthy":
+      return `OK · ${summary}`
+    case "blocked":
+      return `Blocat · ${summary}`
+    case "degraded":
+    default:
+      return `Revizuire · ${summary}`
   }
 }
