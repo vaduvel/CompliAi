@@ -2152,6 +2152,25 @@ Pornire executie - `Checklists wave 1` page shell:
   - `npm test` -> verde
   - `npm run lint` -> verde
 
+Inchidere executie - `Checklists wave 1` component density pass:
+
+- `components/compliscan/remediation-board.tsx`
+  - filtrele sunt acum separate mai clar pe `Status`, `Tip remediere` si `Prioritate`
+  - intrarea in board este mai scanabila, fara sa schimbe logica de filtrare
+- `components/compliscan/task-card.tsx`
+  - metadata duplicata a fost scoasa din coloana de actiune
+  - CTA-ul primar `Valideaza si rescaneaza` ramane dominant
+  - dovada curenta si `Export task` coboara sub disclosure local
+- efect:
+  - `Checklists` se simte mai clar ca pagina de executie
+  - utilitarele nu mai concureaza cu actiunea principala
+  - buildul ramane stabil:
+    - `/dashboard/checklists` in zona `7.17 kB / 179 kB first load`
+- validare:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 Pornire executie - `Dashboard` executive declutter:
 
 - `components/compliscan/route-sections.tsx` a fost compactat pentru homepage-ul operational

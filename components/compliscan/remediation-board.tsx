@@ -92,41 +92,15 @@ export function RemediationBoard({
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3 xl:min-w-[42rem]">
+          <div className="space-y-3 xl:min-w-[42rem]">
             {filterGroups.map((group) => (
-              <div
+              <FilterCluster
                 key={group.label}
-                className={`rounded-2xl border p-3 ${
-                  group.values.includes(activeFilter)
-                    ? "border-[var(--border-subtle)] bg-[var(--bg-inset)]"
-                    : "border-[var(--color-border)] bg-[var(--color-surface-variant)]"
-                }`}
-              >
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                  {group.label}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {group.values.map((value) => {
-                    const filter = filters.find((item) => item.value === value)
-                    if (!filter) return null
-
-                    return (
-                      <Button
-                        key={filter.value}
-                        onClick={() => onFilterChange(filter.value)}
-                        variant="outline"
-                        className={`h-8 rounded-xl px-3 text-xs ${
-                          activeFilter === filter.value
-                            ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
-                            : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
-                        }`}
-                      >
-                        {filter.label}
-                      </Button>
-                    )
-                  })}
-                </div>
-              </div>
+                label={group.label}
+                activeFilter={activeFilter}
+                values={group.values}
+                onFilterChange={onFilterChange}
+              />
             ))}
           </div>
         </div>
@@ -144,7 +118,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && rapidTasks.length > 0 && (
           <TaskGroup
             title="Remedieri rapide"
-            description="Schimbari mici pe care le poti inchide si valida rapid."
+            description="Task-uri pe care le poti inchide rapid daca dovada e pregatita."
             tone="info"
             tasks={rapidTasks}
             highlightedTaskId={highlightedTaskId}
@@ -157,7 +131,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && structuralTasks.length > 0 && (
           <TaskGroup
             title="Remedieri structurale"
-            description="Schimbari persistente care cer coordonare si dovada mai riguroasa."
+            description="Task-uri care cer coordonare, schimbare persistenta sau dovada mai riguroasa."
             tone="warning"
             tasks={structuralTasks}
             highlightedTaskId={highlightedTaskId}
@@ -180,6 +154,45 @@ export function RemediationBoard({
           ))}
       </CardContent>
     </Card>
+  )
+}
+
+function FilterCluster({
+  label,
+  values,
+  activeFilter,
+  onFilterChange,
+}: {
+  label: string
+  values: FilterValue[]
+  activeFilter: FilterValue
+  onFilterChange: (value: FilterValue) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {values.map((value) => {
+          const filter = filters.find((item) => item.value === value)
+          if (!filter) return null
+
+          return (
+            <Button
+              key={filter.value}
+              onClick={() => onFilterChange(filter.value)}
+              variant="outline"
+              className={`h-8 rounded-xl px-3 text-xs ${
+                activeFilter === filter.value
+                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
+                  : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
+              }`}
+            >
+              {filter.label}
+            </Button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

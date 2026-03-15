@@ -942,6 +942,18 @@ Actualizare suplimentara 2026-03-15:
 
 Actualizare suplimentara 2026-03-15:
 
+- `Checklists wave 1` este inchis si la nivel component-level
+- asta inseamna:
+  - filtre mai clare in board
+  - CTA primar mai dominant in `TaskCard`
+  - dovada si exportul nu mai concureaza cu executia
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba shell-ul paginii
+  - intareste rolul de `Remediere = executie`
+
+Actualizare suplimentara 2026-03-15:
+
 - `Auditor Vault` a primit si lotul component-level pentru `wave 1`
 - asta inseamna:
   - verdictul ramane sus in carduri

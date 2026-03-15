@@ -221,6 +221,7 @@ export function TaskCard({
                 <span>Responsabil: {task.owner}</span>
                 <span>Termen: {task.dueDate}</span>
                 <span>Tip: {remediationModeLabel(task.remediationMode)}</span>
+                <span>{task.effortLabel}</span>
               </div>
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
@@ -234,12 +235,6 @@ export function TaskCard({
             </div>
 
             <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-              <div className="grid gap-2 text-sm text-[var(--color-muted)]">
-                <span>Responsabil: {task.owner}</span>
-                <span>Termen: {task.dueDate}</span>
-                <span>{task.effortLabel}</span>
-              </div>
-
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge
                   className={
@@ -294,64 +289,81 @@ export function TaskCard({
                 </div>
               </div>
 
-              <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-on-surface-muted)]">
-                {task.attachedEvidence ? (
-                  <div className="space-y-2">
-                    <p className="font-medium text-[var(--color-on-surface)]">Dovada curenta</p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {evidenceHref ? (
-                        <a
-                          href={evidenceHref}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="max-w-full break-all text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
-                        >
-                          {task.attachedEvidence.fileName}
-                        </a>
-                      ) : (
-                        <span className="break-all text-[var(--color-on-surface)]">
-                          {task.attachedEvidence.fileName}
-                        </span>
-                      )}
-                      <span>·</span>
-                      <span>{formatEvidenceKind(task.attachedEvidence.kind)}</span>
-                      {task.attachedEvidence.quality ? (
-                        <>
-                          <span>·</span>
-                          <Badge className={evidenceQualityTone(task.attachedEvidence.quality.status)}>
-                            dovada {formatEvidenceQualityStatus(task.attachedEvidence.quality.status)}
-                          </Badge>
-                        </>
-                      ) : null}
+              <details className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-on-surface-muted)]">
+                <summary className="cursor-pointer list-none">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        Dovada si utilitare
+                      </p>
+                      <p className="text-xs text-[var(--color-on-surface-muted)]">
+                        {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
+                      </p>
                     </div>
-                    {evidenceQualitySummary ? <p>{evidenceQualitySummary}</p> : null}
+                    <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
                   </div>
-                ) : (
-                  <div className="space-y-1">
-                    <p className="font-medium text-[var(--color-on-surface)]">Dovada lipseste</p>
-                    <p>Ataseaza fisierul sau extrasul relevant inainte sa inchizi task-ul.</p>
+                </summary>
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                    {task.attachedEvidence ? (
+                      <div className="space-y-2">
+                        <p className="font-medium text-[var(--color-on-surface)]">Dovada curenta</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {evidenceHref ? (
+                            <a
+                              href={evidenceHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="max-w-full break-all text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                            >
+                              {task.attachedEvidence.fileName}
+                            </a>
+                          ) : (
+                            <span className="break-all text-[var(--color-on-surface)]">
+                              {task.attachedEvidence.fileName}
+                            </span>
+                          )}
+                          <span>·</span>
+                          <span>{formatEvidenceKind(task.attachedEvidence.kind)}</span>
+                          {task.attachedEvidence.quality ? (
+                            <>
+                              <span>·</span>
+                              <Badge className={evidenceQualityTone(task.attachedEvidence.quality.status)}>
+                                dovada {formatEvidenceQualityStatus(task.attachedEvidence.quality.status)}
+                              </Badge>
+                            </>
+                          ) : null}
+                        </div>
+                        {evidenceQualitySummary ? <p>{evidenceQualitySummary}</p> : null}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="font-medium text-[var(--color-on-surface)]">Dovada lipseste</p>
+                        <p>Ataseaza fisierul sau extrasul relevant inainte sa inchizi task-ul.</p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
-                <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                    Utilitar
-                  </p>
-                  <p className="text-xs text-[var(--color-on-surface-muted)]">
-                    Export separat pentru acest task.
-                  </p>
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--bg-inset)] px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        Utilitar
+                      </p>
+                      <p className="text-xs text-[var(--color-on-surface-muted)]">
+                        Export separat pentru acest task.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => onExport(task.id)}
+                      variant="outline"
+                      className="h-9 shrink-0 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                    >
+                      <FileDown className="size-4" strokeWidth={2.25} />
+                      Export task
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  onClick={() => onExport(task.id)}
-                  variant="outline"
-                  className="h-9 shrink-0 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-xs text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
-                >
-                  <FileDown className="size-4" strokeWidth={2.25} />
-                  Export task
-                </Button>
-              </div>
+              </details>
             </section>
           </div>
 

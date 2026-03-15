@@ -1044,7 +1044,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Dovada / Audit si export`
   - `Dovada / Auditor Vault`
   - `Setari`
-- [ ] `Checklists wave 1`
+- [x] `Checklists wave 1`
   - compactare a zonei de deasupra board-ului
   - ierarhie mai clara pentru filtre
   - `TaskCard` mai usor de scanat
@@ -1067,7 +1067,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - Codex 2 = densitate si ierarhie in componentele operationale din `Checklists`
 - [x] lotul serios permis pentru Codex 2 este documentat in:
   - `public/task-codex-2-checklists-wave-1-components-2026-03-15.md`
-- [ ] executie efectiva dupa merge:
+- [x] executie efectiva dupa merge:
   - `Checklists wave 1`
   - `Dashboard` executive declutter
 
@@ -1078,9 +1078,21 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] `SummaryStrip` nu mai concureaza cu board-ul prin ton doctrinar
 - [x] blocul mare de `Flux canonic` a fost scos din zona de deasupra board-ului
 - [x] handoff-ul spre `Auditor Vault` si `Audit si export` a fost coborat dupa zona de lucru
-- [ ] component-level density pass ramas pentru:
+- [x] component-level density pass inchis pentru:
   - `components/compliscan/remediation-board.tsx`
+    - filtre mai clare pe:
+      - `Status`
+      - `Tip remediere`
+      - `Prioritate`
   - `components/compliscan/task-card.tsx`
+    - metadata duplicata scoasa din coloana de actiune
+    - dovada curenta si `Export task` mutate sub disclosure
+- [x] efect confirmat in build:
+  - `/dashboard/checklists` ramane in zona `7.17 kB / 179 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
 
 ### Actualizare 2026-03-15 - `Dashboard` executive declutter pornit
 

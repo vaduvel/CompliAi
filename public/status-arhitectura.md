@@ -1130,7 +1130,24 @@ Asta este sanatos arhitectural pentru ca:
   - `Remediere`
   - `Audit si export`
   - `Auditor Vault`
-- lasa component-level density pass-ul pentru lotul separat, fara sa amestece shell-ul cu cardurile
+- lotul component-level a fost inchis separat, fara sa amestece shell-ul cu cardurile
+
+## Actualizare 2026-03-15 - `Checklists wave 1` component density pass
+
+- `RemediationBoard` foloseste acum o ierarhie mai clara pentru filtre:
+  - `Status`
+  - `Tip remediere`
+  - `Prioritate`
+- `TaskCard` nu mai dubleaza metadata operationala in coloana de actiune
+- CTA-ul primar ramane dominant:
+  - `Valideaza si rescaneaza`
+- dovada curenta si utilitarul de export stau acum sub disclosure local
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Checklists` ramane pagina de executie
+- actiunea bate contextul si utilitarul tertiar
+- pasul nu schimba business logic, doar ierarhia de runtime
 
 ## Actualizare 2026-03-15 - `Dashboard` este mai aproape de orientare pura
 
