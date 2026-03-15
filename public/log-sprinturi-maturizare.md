@@ -1911,3 +1911,27 @@ Validare dupa code-splitting:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Pas de performanta - `Auditor Vault`:
+
+- `app/dashboard/rapoarte/auditor-vault/page.tsx` nu mai blocheaza toata pagina pana vine `heavy payload`
+- pagina randaza acum shell-ul si ledger-ul de baza imediat ce exista `core payload`
+- sectiunile grele se incarca local, separat:
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+  - `TraceabilityMatrixCard`
+- efect:
+  - `Compliance Pack` si `traceability` nu mai opresc randarea registrului de dovezi, snapshot-ului si timeline-ului
+  - loading-ul a trecut de la full-page blocking la `section-level loading`, ceea ce este mai sanatos pentru `Vault`
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte/auditor-vault`
+  - inainte: `17.3 kB / 189 kB first load`
+  - dupa: `9.69 kB / 181 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde

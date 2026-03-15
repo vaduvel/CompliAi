@@ -978,3 +978,24 @@ Efect masurabil in build:
 - `/dashboard/sisteme`
   - inainte: `17.3 kB` / `195 kB first load`
   - dupa: `9.31 kB` / `181 kB first load`
+
+## Actualizare 2026-03-15 - `Auditor Vault` section-level loading
+
+- `Auditor Vault` nu mai conditioneaza randarea intregii pagini de sosirea `compliancePack` si `traceabilityMatrix`
+- shell-ul paginii si ledger-ul de baza pornesc acum din `core payload`
+- sectiunile grele se hidrateaza separat, cu loading local:
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+  - `TraceabilityMatrixCard`
+
+Asta respecta mai bine si doctrina canonica:
+
+- `Vault` ramane ledger si vedere audit-ready
+- summary-ul si handoff-urile nu mai sunt blocate de detaliul greu
+- progressive disclosure functioneaza si la nivel de incarcare, nu doar de layout
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte/auditor-vault`
+  - inainte: `17.3 kB` / `189 kB first load`
+  - dupa: `9.69 kB` / `181 kB first load`

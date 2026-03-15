@@ -27,10 +27,6 @@ import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
-import {
-  AICompliancePackEntriesCard,
-  AICompliancePackSummaryCard,
-} from "@/components/compliscan/ai-compliance-pack-card"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
@@ -66,6 +62,36 @@ const TraceabilityMatrixCard = dynamic(
   }
 )
 
+const AICompliancePackSummaryCard = dynamic(
+  () =>
+    import("@/components/compliscan/ai-compliance-pack-card").then(
+      (mod) => mod.AICompliancePackSummaryCard
+    ),
+  {
+    loading: () => (
+      <SectionLoadingCard
+        title="Compliance Pack in incarcare"
+        detail="Sumarul pack-ului se incarca in fundal."
+      />
+    ),
+  }
+)
+
+const AICompliancePackEntriesCard = dynamic(
+  () =>
+    import("@/components/compliscan/ai-compliance-pack-card").then(
+      (mod) => mod.AICompliancePackEntriesCard
+    ),
+  {
+    loading: () => (
+      <SectionLoadingCard
+        title="Intrari pack in incarcare"
+        detail="Intrarile detaliate pentru audit se incarca in fundal."
+      />
+    ),
+  }
+)
+
 export default function AuditorVaultPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
@@ -83,9 +109,6 @@ export default function AuditorVaultPage() {
   }, [needsHeavyPayload, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
-  if (needsHeavyPayload || !cockpit.data.compliancePack || !cockpit.data.traceabilityMatrix) {
-    return <LoadingScreen variant="section" />
-  }
 
   const latestSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
@@ -279,7 +302,14 @@ export default function AuditorVaultPage() {
         </div>
       </div>
 
-      <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
+      {cockpit.data.compliancePack ? (
+        <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
+      ) : (
+        <SectionLoadingCard
+          title="Compliance Pack in incarcare"
+          detail="Pachetul complet de control este cerut in fundal si va aparea aici imediat ce este disponibil."
+        />
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <VaultMetric
@@ -310,22 +340,36 @@ export default function AuditorVaultPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
         <div className="space-y-6">
-          <AICompliancePackEntriesCard
-            pack={cockpit.data.compliancePack}
-            title="Intrări din pack folosite la audit"
-            limit={6}
-          />
+          {cockpit.data.compliancePack ? (
+            <AICompliancePackEntriesCard
+              pack={cockpit.data.compliancePack}
+              title="Intrări din pack folosite la audit"
+              limit={6}
+            />
+          ) : (
+            <SectionLoadingCard
+              title="Intrari audit in incarcare"
+              detail="Intrarile pack-ului se incarca separat, fara sa blocheze registrul de dovezi si restul ledger-ului."
+            />
+          )}
           <EvidenceLedgerCard
             evidenceReadyTasks={evidenceReadyTasks}
             evidenceMissingTasks={evidenceMissingTasks}
           />
           <LegalMatrixCard tasks={legalMappedTasks} />
-          <TraceabilityMatrixCard
-            records={cockpit.data.traceabilityMatrix}
-            busy={cockpit.busy}
-            onReview={cockpitActions.updateTraceabilityReview}
-            onReuseFamilyEvidence={cockpitActions.reuseFamilyEvidence}
-          />
+          {cockpit.data.traceabilityMatrix ? (
+            <TraceabilityMatrixCard
+              records={cockpit.data.traceabilityMatrix}
+              busy={cockpit.busy}
+              onReview={cockpitActions.updateTraceabilityReview}
+              onReuseFamilyEvidence={cockpitActions.reuseFamilyEvidence}
+            />
+          ) : (
+            <SectionLoadingCard
+              title="Traceability in incarcare"
+              detail="Matricea de trasabilitate se incarca separat, fara sa blocheze vault-ul."
+            />
+          )}
         </div>
 
         <div className="space-y-6">

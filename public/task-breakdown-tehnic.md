@@ -979,3 +979,13 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `AICompliancePackEntriesCard`
 - [x] efect confirmat in build:
   - `/dashboard/sisteme` a coborat la `9.31 kB / 181 kB first load`
+
+- [x] `Auditor Vault` nu mai asteapta full-page `heavy payload`
+  - shell-ul porneste din `core payload`
+  - `Compliance Pack` si `traceability` se incarca separat
+- [x] code-splitting pe `Auditor Vault` pentru:
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+  - `TraceabilityMatrixCard`
+- [x] efect confirmat in build:
+  - `/dashboard/rapoarte/auditor-vault` a coborat la `9.69 kB / 181 kB first load`
