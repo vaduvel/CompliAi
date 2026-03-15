@@ -5,7 +5,7 @@ import {
   addOrganizationMemberByEmail,
   AuthzError,
   listOrganizationMembers,
-  requireRole,
+  requireFreshRole,
   type UserRole,
 } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
@@ -15,7 +15,11 @@ import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/l
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "compliance"], "vizualizarea membrilor organizatiei")
+    const session = await requireFreshRole(
+      request,
+      ["owner", "compliance"],
+      "vizualizarea membrilor organizatiei"
+    )
     const members = await listOrganizationMembers(session.orgId)
 
     return NextResponse.json({
@@ -39,7 +43,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner"], "adaugarea membrilor in organizatie")
+    const session = await requireFreshRole(request, ["owner"], "adaugarea membrilor in organizatie")
     const actor = eventActorFromSession(session)
     const actorLabel = formatEventActorLabel(actor)
     const body = requirePlainObject(await request.json())

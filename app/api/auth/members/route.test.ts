@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   listOrganizationMembersMock: vi.fn(),
   addOrganizationMemberByEmailMock: vi.fn(),
   mutateStateMock: vi.fn(),
@@ -28,7 +28,7 @@ vi.mock("@/lib/compliance/events", () => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
   listOrganizationMembers: mocks.listOrganizationMembersMock,
   addOrganizationMemberByEmail: mocks.addOrganizationMemberByEmailMock,
 }))
@@ -47,7 +47,7 @@ import { GET, POST } from "./route"
 describe("/api/auth/members", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Demo",
@@ -92,9 +92,9 @@ describe("/api/auth/members", () => {
   })
 
   it("respinge rolul nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
-      throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
+    )
 
     const response = await GET(new Request("http://localhost/api/auth/members"))
     const payload = await response.json()

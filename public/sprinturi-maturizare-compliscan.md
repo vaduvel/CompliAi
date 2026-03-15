@@ -546,6 +546,12 @@ Starea si dovezile trebuie sa stea pe o fundatie mai solida.
   - `auth/summary`
   - `app/dashboard/layout.tsx`
   - asta reduce riscul de rol sau org stale dupa schimbari de membership in backend
+- acelasi model fresh a fost extins si pe suprafetele de tenancy/admin:
+  - `auth/memberships`
+  - `auth/switch-org`
+  - `auth/members`
+  - `auth/members/[membershipId]`
+  - `settings/summary`
 - suita curenta dupa verificarea operationala Supabase este acum la:
   - `54` fisiere de test
   - `186` teste verzi

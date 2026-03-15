@@ -249,6 +249,12 @@ Progres deja pornit:
   - shell-ul dashboard si endpoint-urile de sesiune nu mai expun orb rolul sau org-ul din cookie:
     - sesiunea este re-hidratata din membership-ul curent
     - daca membership-ul dispare, sesiunea vizibila cade la `null`
+  - si suprafetele de tenancy/admin folosesc acum sesiunea fresh:
+    - `GET /api/auth/memberships`
+    - `POST /api/auth/switch-org`
+    - `GET|POST /api/auth/members`
+    - `PATCH /api/auth/members/[membershipId]`
+    - `GET /api/settings/summary`
   - exista si target state explicit pentru "100%":
     - `public/target-state-100-compliscan.md`
   - exista si checklist formal de inchidere Sprint 5:

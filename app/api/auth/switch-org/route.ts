@@ -4,7 +4,7 @@ import {
   AuthzError,
   createSessionToken,
   getSessionCookieOptions,
-  requireAuthenticatedSession,
+  requireFreshAuthenticatedSession,
   resolveUserForMembership,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
@@ -13,7 +13,10 @@ import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/l
 
 export async function POST(request: Request) {
   try {
-    const session = requireAuthenticatedSession(request, "schimbarea organizatiei active")
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "schimbarea organizatiei active"
+    )
     const body = requirePlainObject(await request.json())
     const membershipId = asTrimmedString(body.membershipId, 120)
     if (!membershipId) {

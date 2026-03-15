@@ -3,13 +3,16 @@ import { NextResponse } from "next/server"
 import {
   AuthzError,
   listUserMemberships,
-  requireAuthenticatedSession,
+  requireFreshAuthenticatedSession,
 } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 
 export async function GET(request: Request) {
   try {
-    const session = requireAuthenticatedSession(request, "vizualizarea organizatiilor disponibile")
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "vizualizarea organizatiilor disponibile"
+    )
     const memberships = await listUserMemberships(session.userId)
 
     return NextResponse.json({

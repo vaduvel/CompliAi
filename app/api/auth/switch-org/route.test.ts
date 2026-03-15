@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireAuthenticatedSessionMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   resolveUserForMembershipMock: vi.fn(),
   createSessionTokenMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   SESSION_COOKIE: "compliscan_session",
-  requireAuthenticatedSession: mocks.requireAuthenticatedSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
   resolveUserForMembership: mocks.resolveUserForMembershipMock,
   createSessionToken: mocks.createSessionTokenMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
@@ -31,7 +31,7 @@ import { POST } from "./route"
 describe("POST /api/auth/switch-org", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireAuthenticatedSessionMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Alpha",

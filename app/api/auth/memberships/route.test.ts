@@ -11,13 +11,13 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireAuthenticatedSessionMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   listUserMembershipsMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireAuthenticatedSession: mocks.requireAuthenticatedSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
   listUserMemberships: mocks.listUserMembershipsMock,
 }))
 
@@ -26,7 +26,7 @@ import { GET } from "./route"
 describe("GET /api/auth/memberships", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireAuthenticatedSessionMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Alpha",
@@ -66,9 +66,9 @@ describe("GET /api/auth/memberships", () => {
   })
 
   it("respinge fara sesiune valida", async () => {
-    mocks.requireAuthenticatedSessionMock.mockImplementationOnce(() => {
-      throw new mocks.AuthzErrorMock("Ai nevoie de sesiune.", 401, "AUTH_SESSION_REQUIRED")
-    })
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Ai nevoie de sesiune.", 401, "AUTH_SESSION_REQUIRED")
+    )
 
     const response = await GET(new Request("http://localhost/api/auth/memberships"))
     const payload = await response.json()

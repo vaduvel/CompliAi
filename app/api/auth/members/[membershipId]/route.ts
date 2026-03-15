@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import {
   AuthzError,
-  requireRole,
+  requireFreshRole,
   updateOrganizationMemberRole,
   type UserRole,
 } from "@/lib/server/auth"
@@ -17,7 +17,11 @@ export async function PATCH(
   context: { params: Promise<{ membershipId: string }> }
 ) {
   try {
-    const session = requireRole(request, ["owner"], "actualizarea rolurilor membrilor")
+    const session = await requireFreshRole(
+      request,
+      ["owner"],
+      "actualizarea rolurilor membrilor"
+    )
     const actor = eventActorFromSession(session)
     const actorLabel = formatEventActorLabel(actor)
     const { membershipId } = await context.params

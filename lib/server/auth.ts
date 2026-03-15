@@ -1013,12 +1013,47 @@ export function requireAuthenticatedSession(request: Request, action?: string): 
   return session
 }
 
+export async function requireFreshAuthenticatedSession(
+  request: Request,
+  action?: string
+): Promise<SessionPayload> {
+  const session = await readFreshSessionFromRequest(request)
+  if (!session) {
+    throw new AuthzError(
+      action
+        ? `Ai nevoie de sesiune activa pentru ${action}.`
+        : "Ai nevoie de sesiune activa pentru aceasta actiune.",
+      401,
+      "AUTH_SESSION_REQUIRED"
+    )
+  }
+  return session
+}
+
 export function requireRole(
   request: Request,
   allowedRoles: UserRole[],
   action?: string
 ): SessionPayload {
   const session = requireAuthenticatedSession(request, action)
+  if (!allowedRoles.includes(session.role)) {
+    throw new AuthzError(
+      action
+        ? `Rolul ${session.role} nu poate efectua ${action}.`
+        : "Rolul curent nu are acces la aceasta actiune.",
+      403,
+      "AUTH_ROLE_FORBIDDEN"
+    )
+  }
+  return session
+}
+
+export async function requireFreshRole(
+  request: Request,
+  allowedRoles: UserRole[],
+  action?: string
+): Promise<SessionPayload> {
+  const session = await requireFreshAuthenticatedSession(request, action)
   if (!allowedRoles.includes(session.role)) {
     throw new AuthzError(
       action

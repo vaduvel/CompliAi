@@ -3,9 +3,9 @@ import { getApplicationHealthStatus } from "@/lib/server/app-health"
 import {
   AuthzError,
   listOrganizationMembers,
-  requireAuthenticatedSession,
-  requireRole,
-  readSessionFromRequest,
+  requireFreshAuthenticatedSession,
+  requireFreshRole,
+  readFreshSessionFromRequest,
 } from "@/lib/server/auth"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { buildRepoSyncStatus } from "@/lib/server/repo-sync"
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/settings/summary")
 
   try {
-    const session = readSessionFromRequest(request)
+    const session = await readFreshSessionFromRequest(request)
     const currentUser = session
       ? {
           email: session.email,
@@ -73,18 +73,18 @@ export async function GET(request: Request) {
         resolveSection(
           context,
           async () => {
-            const actor = requireRole(
+            const freshActor = await requireFreshRole(
               request,
               ["owner", "compliance"],
               "vizualizarea membrilor organizatiei"
             )
-            const members = await listOrganizationMembers(actor.orgId)
+            const members = await listOrganizationMembers(freshActor.orgId)
 
             return {
               members,
-              orgId: actor.orgId,
-              orgName: actor.orgName,
-              actorRole: actor.role,
+              orgId: freshActor.orgId,
+              orgName: freshActor.orgName,
+              actorRole: freshActor.role,
             }
           },
           {
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
         resolveSection(
           context,
           async () => {
-            requireRole(
+            await requireFreshRole(
               request,
               ["owner", "compliance"],
               "verificarea statusului operational Supabase"
@@ -110,7 +110,7 @@ export async function GET(request: Request) {
         resolveSection(
           context,
           async () => {
-            requireAuthenticatedSession(request, "verificarea health check-ului")
+            await requireFreshAuthenticatedSession(request, "verificarea health check-ului")
             return getApplicationHealthStatus()
           },
           {
@@ -122,7 +122,11 @@ export async function GET(request: Request) {
           ? resolveSection(
               context,
               async () => {
-                requireRole(request, ["owner", "compliance"], "verificarea release readiness")
+                await requireFreshRole(
+                  request,
+                  ["owner", "compliance"],
+                  "verificarea release readiness"
+                )
                 return getReleaseReadinessStatus()
               },
               {

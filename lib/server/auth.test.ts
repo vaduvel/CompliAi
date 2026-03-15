@@ -20,6 +20,8 @@ import {
   refreshSessionPayload,
   registerUser,
   resolveUserForMembership,
+  requireFreshAuthenticatedSession,
+  requireFreshRole,
   requireRole,
   updateOrganizationMemberRole,
   verifySessionToken,
@@ -658,6 +660,67 @@ describe("lib/server/auth", () => {
         membershipId: "membership-1",
       })
     )
+  })
+
+  it("cere sesiune fresh activa pentru actiuni protejate", async () => {
+    const request = new Request("http://localhost/api/auth/memberships")
+
+    await expect(
+      requireFreshAuthenticatedSession(request, "vizualizarea organizatiilor disponibile")
+    ).rejects.toMatchObject({
+      status: 401,
+      code: "AUTH_SESSION_REQUIRED",
+    })
+  })
+
+  it("blocheaza rolul insuficient dupa refresh-ul fresh al sesiunii", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "viewer",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const token = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "owner@example.com",
+      orgName: "Org Alpha",
+      role: "owner",
+      membershipId: "membership-1",
+    })
+
+    const request = new Request("http://localhost/api/auth/members", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    await expect(
+      requireFreshRole(request, ["owner"], "adaugarea membrilor in organizatie")
+    ).rejects.toMatchObject({
+      status: 403,
+      code: "AUTH_ROLE_FORBIDDEN",
+    })
   })
 
   it("leaga un user local existent la identitatea externa si muta membership-urile", async () => {

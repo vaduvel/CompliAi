@@ -190,6 +190,7 @@ Fronturile active acum:
   - fallback-ul local este acum controlat explicit prin:
     - `COMPLISCAN_ALLOW_LOCAL_FALLBACK`
   - shell-ul dashboard si endpoint-urile de sesiune (`auth/me`, `auth/summary`) re-hidrateaza acum rolul si organizatia din membership-ul curent, nu doar din cookie
+  - suprafetele sensibile de tenancy/admin (`auth/memberships`, `auth/switch-org`, `auth/members`, `auth/members/[membershipId]`, `settings/summary`) valideaza acum sesiunea fresh din membership-ul curent, nu doar din cookie
   - in productie, traseul cloud poate fi fortat fara degradare tacuta
 - [x] health check unificat pentru aplicatie
   - helper dedicat:

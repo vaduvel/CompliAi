@@ -1978,6 +1978,27 @@ Validare dupa pas:
 
 - `npm test -- 'lib/server/auth.test.ts' 'app/api/auth/me/route.test.ts' 'app/api/auth/summary/route.test.ts'` -> verde
 - `npm test` -> verde
+
+Pas de hardening - tenancy/admin pe sesiune fresh:
+
+- au fost adaugate in `lib/server/auth.ts`:
+  - `requireFreshAuthenticatedSession(...)`
+  - `requireFreshRole(...)`
+- suprafetele sensibile de tenancy/admin nu mai autorizeaza doar din cookie:
+  - `GET /api/auth/memberships`
+  - `POST /api/auth/switch-org`
+  - `GET|POST /api/auth/members`
+  - `PATCH /api/auth/members/[membershipId]`
+  - `GET /api/settings/summary`
+- efect:
+  - daca rolul sau membership-ul se schimba in backend, actiunile de tenancy/admin folosesc acum starea curenta
+  - `Setari` nu mai compune sumarul operational din sesiune stale
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
