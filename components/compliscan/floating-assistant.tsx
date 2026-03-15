@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Loader2, MessageSquare, Send, Sparkles, X } from "lucide-react"
 
 import { AssistantMessageBubble } from "@/components/evidence-os/AssistantMessageBubble"
@@ -35,6 +35,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const panelId = useId()
 
   const suggestions = SUGGESTIONS[pathname] ?? DEFAULT_SUGGESTIONS
 
@@ -103,9 +104,12 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
     <>
       {/* Floating button */}
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Asistent AI"
-        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl transition-all [box-shadow:var(--shadow-lg)] md:bottom-6 md:right-6 ${
+        aria-expanded={open}
+        aria-controls={panelId}
+        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg [box-shadow:var(--shadow-lg)] md:bottom-6 md:right-6 ${
           open
             ? "border border-eos-border bg-eos-surface text-eos-text-muted"
             : "border border-transparent bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
@@ -120,7 +124,10 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--shadow-xl)] sm:left-auto sm:w-[min(23rem,calc(100vw-2rem))] md:bottom-20 md:right-6 lg:w-[24rem]">
+        <div
+          id={panelId}
+          className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--shadow-xl)] sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-20 md:right-6 xl:w-[26rem]"
+        >
           <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
             <div className="flex items-start gap-3">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-eos-md border border-eos-border-subtle bg-eos-bg-panel text-eos-primary">
@@ -153,7 +160,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
                     <p className="text-xs uppercase tracking-[0.18em] text-eos-text-muted">
                       Intrebari rapide
                     </p>
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid gap-2 md:grid-cols-2">
                       {suggestions.map((suggestion) => (
                         <AssistantSuggestionChip
                           key={suggestion}

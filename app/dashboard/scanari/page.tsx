@@ -18,14 +18,16 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
 import { ScanSourceTypeSelector, type ScanSourceType } from "@/components/evidence-os/ScanSourceTypeSelector"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SourceModeGuideCard } from "@/components/evidence-os/SourceModeGuideCard"
 import {
   LatestDocumentSection,
   LoadingScreen,
-  PageHeader,
   RecentScansCard,
   ScanWorkspace,
 } from "@/components/compliscan/route-sections"
@@ -177,22 +179,55 @@ export default function ScanariPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <PageHeader
-          title="Scanari"
-          description="Alege sursa potrivita: document, text manual, manifest de cod sau compliscan.yaml"
-          score={cockpit.data.summary.score}
-          riskLabel={cockpit.data.summary.riskLabel}
-        />
-        <Button 
-          variant={agentFlow.agentModeActive ? "default" : "outline"}
-          className="shrink-0 gap-2"
-          onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
-        >
-          <Bot className="size-4" />
-          {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
-        </Button>
-      </div>
+      <PageIntro
+        eyebrow="Scanare"
+        title="Pornesti fluxul de analiza din sursa potrivita"
+        description="Aici adaugi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {sourceType === "document"
+                ? "document"
+                : sourceType === "text"
+                  ? "text manual"
+                  : sourceType === "manifest"
+                    ? "manifest / repo"
+                    : "compliscan.yaml"}
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {viewMode === "flow"
+                ? "flux activ"
+                : viewMode === "verdicts"
+                  ? "verdict read-only"
+                  : "istoric recent"}
+            </Badge>
+            {agentFlow.agentModeActive ? (
+              <Badge variant="warning" className="normal-case tracking-normal">
+                mod agent activ
+              </Badge>
+            ) : null}
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot curent
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <Button
+            variant={agentFlow.agentModeActive ? "default" : "outline"}
+            className="gap-2"
+            onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
+          >
+            <Bot className="size-4" />
+            {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
+          </Button>
+        }
+      />
 
       <PillarTabs sectionId="scanare" />
 
@@ -200,6 +235,12 @@ export default function ScanariPage() {
         active={viewMode}
         onChange={setViewMode}
         locked={agentFlow.agentModeActive}
+      />
+
+      <ScanWorkflowGuideCard
+        sourceType={sourceType}
+        viewMode={viewMode}
+        agentModeActive={agentFlow.agentModeActive}
       />
 
       {agentFlow.agentModeActive ? (
@@ -868,34 +909,71 @@ function ScanViewTabs({
   onChange: (next: ScanViewMode) => void
   locked: boolean
 }) {
+  const tabs: Array<{
+    id: ScanViewMode
+    title: string
+    description: string
+    badge?: string
+  }> = [
+    {
+      id: "flow",
+      title: "Flux scanare",
+      description: "Aici adaugi sursa, extragi, revizuiesti si pornesti analiza.",
+      badge: "executie",
+    },
+    {
+      id: "verdicts",
+      title: "Verdicts",
+      description: "Aici citesti ultimul rezultat confirmat, fara sa amesteci fluxul activ.",
+      badge: "read-only",
+    },
+    {
+      id: "history",
+      title: "Istoric documente",
+      description: "Aici vezi sursele recente si sari la rezultatul relevant.",
+      badge: "lookup",
+    },
+  ]
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button
-        variant={active === "flow" ? "default" : "outline"}
-        className="h-9 rounded-xl"
-        onClick={() => onChange("flow")}
-      >
-        Flux scanare
-      </Button>
-      <Button
-        variant={active === "verdicts" ? "default" : "outline"}
-        className="h-9 rounded-xl"
-        onClick={() => onChange("verdicts")}
-        disabled={locked}
-      >
-        Verdicts
-      </Button>
-      <Button
-        variant={active === "history" ? "default" : "outline"}
-        className="h-9 rounded-xl"
-        onClick={() => onChange("history")}
-        disabled={locked}
-      >
-        Istoric documente
-      </Button>
+    <div className="space-y-3">
+      <div className="grid gap-3 lg:grid-cols-3">
+        {tabs.map((tab) => {
+          const isActive = active === tab.id
+          const disabled = locked && tab.id !== "flow"
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onChange(tab.id)}
+              disabled={disabled}
+              className={`rounded-2xl border p-4 text-left transition ${
+                isActive
+                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
+                  : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]"
+              } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-[var(--color-on-surface)]">{tab.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                    {tab.description}
+                  </p>
+                </div>
+                {tab.badge ? (
+                  <Badge variant="outline" className="rounded-full px-2.5 py-1 normal-case tracking-normal">
+                    {tab.badge}
+                  </Badge>
+                ) : null}
+              </div>
+            </button>
+          )
+        })}
+      </div>
       {locked && (
-        <Badge variant="outline" className="h-9 rounded-xl px-3 text-xs">
-          Mod Agent activ
+        <Badge variant="outline" className="rounded-xl px-3 py-2 text-xs">
+          Mod Agent activ: verdicts si istoric raman blocate pana iesi din workspace-ul agentului.
         </Badge>
       )}
     </div>
@@ -912,5 +990,133 @@ function SectionLoadingCard({ title, detail }: { title: string; detail: string }
         {detail}
       </CardContent>
     </Card>
+  )
+}
+
+function ScanWorkflowGuideCard({
+  sourceType,
+  viewMode,
+  agentModeActive,
+}: {
+  sourceType: ScanSourceType
+  viewMode: ScanViewMode
+  agentModeActive: boolean
+}) {
+  const executionLabel =
+    viewMode === "flow"
+      ? sourceType === "manifest"
+        ? "Autodiscovery si curatare de candidate"
+        : sourceType === "yaml"
+          ? "Validare config declarata"
+          : sourceType === "text"
+            ? "Analiza directa din text manual"
+            : "OCR, review si analiza document"
+      : viewMode === "verdicts"
+        ? "Explici ultimul rezultat confirmat"
+        : "Cauti sursa deja analizata"
+
+  const nextStep =
+    viewMode === "history"
+      ? {
+          title: "Continui in Documente",
+          description: "Acolo gasesti istoricul complet, nu doar cele mai recente surse.",
+          href: "/dashboard/documente",
+          cta: "Deschide Documente",
+        }
+      : sourceType === "manifest" || sourceType === "yaml"
+        ? {
+            title: "Dupa scanare continui in Control",
+            description: "Confirmi sistemele, baseline-ul si drift-ul pe ce a iesit din sursa tehnica.",
+            href: "/dashboard/sisteme",
+            cta: "Mergi la Control",
+          }
+        : {
+            title: "Dupa scanare continui in Dovada",
+            description: "Rezultatul documentului se transforma in task-uri, dovezi si livrabil separat.",
+            href: "/dashboard/checklists",
+            cta: "Mergi la Dovada",
+          }
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+      <SectionBoundary
+        eyebrow="Context curent"
+        title={
+          viewMode === "flow"
+            ? "Lucrezi in fluxul activ"
+            : viewMode === "verdicts"
+              ? "Citesti ultimul verdict confirmat"
+              : "Cauti rapid sursa relevanta"
+        }
+        description={executionLabel}
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {agentModeActive ? "validare umana obligatorie" : "flux operator"}
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {sourceType === "manifest" || sourceType === "yaml" ? "handoff spre Control" : "handoff spre Dovada"}
+            </Badge>
+          </>
+        }
+        support={
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Rolul paginii</p>
+              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+                {agentModeActive
+                  ? "Workspace-ul agentului propune, dar omul valideaza."
+                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Regula de citire</p>
+              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+                Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata.
+              </p>
+            </div>
+          </div>
+        }
+      />
+
+      <HandoffCard
+        title={nextStep.title}
+        description={nextStep.description}
+        destinationLabel={
+          viewMode === "history"
+            ? "istoric complet"
+            : sourceType === "manifest" || sourceType === "yaml"
+              ? "control operational"
+              : "executie si dovada"
+        }
+        checklist={
+          viewMode === "history"
+            ? [
+                "verifici sursa recenta potrivita",
+                "sari in Documente pentru lista completa",
+                "revii in flux doar daca ai o sursa noua",
+              ]
+            : sourceType === "manifest" || sourceType === "yaml"
+              ? [
+                  "confirmi ce intra real in inventar",
+                  "verifici baseline-ul si drift-ul",
+                  "nu inchizi auditul direct din Scanare",
+                ]
+              : [
+                  "citesti verdictul pentru sursa curenta",
+                  "deschizi task-urile derivate in Dovada",
+                  "atasezi dovezi si livrezi separat",
+                ]
+        }
+        actions={
+          <Button asChild variant="outline">
+            <Link href={nextStep.href}>
+              {nextStep.cta}
+              <ArrowRight className="size-4" strokeWidth={2.25} />
+            </Link>
+          </Button>
+        }
+      />
+    </div>
   )
 }

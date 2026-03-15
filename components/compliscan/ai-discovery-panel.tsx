@@ -420,7 +420,7 @@ export function AIDiscoveryPanel({
                             className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
                             href="/dashboard/alerte"
                           >
-                            Deschide panoul
+                            Deschide Drift
                           </a>
                         </div>
                       </div>

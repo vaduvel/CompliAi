@@ -1,6 +1,6 @@
 # CompliScan - Status Arhitectura
 
-Data actualizarii: 2026-03-13
+Data actualizarii: 2026-03-14
 
 ## Verdict scurt
 
@@ -339,8 +339,16 @@ Ultimul punct inchis in implementare:
 - severitate unica in findings / alerts / drift / task-uri
 - taxonomie unica de principii in model si UI
 - drift-ul genereaza acum task-uri de remediere dedicate
-- navigatie primara grupata pe `Scanare / Control / Dovada`
-- sub-sectiunile sunt acum tabs per pilon, nu produse separate in sidebar
+- IA oficiala aprobata este acum:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Dovada`
+  - `Setari`
+- `Scanare / Control / Dovada` raman pilonii de executie
+- `Dashboard` este home/orchestrator, nu dublura de `Control`
+- `Setari` este suprafata top-level de operare, nu pilon de executie
+- sub-sectiunile raman tabs per zona, nu produse separate in sidebar
 - drift-ul este urcat in dashboard ca semnal operational principal
 - `AI Compliance Pack` comun peste documente, manifests si `compliscan.yaml`
 - registru operational de evidence in DB, nu doar sync de metadata
@@ -389,7 +397,7 @@ Ultimul punct inchis in implementare:
   - referința de control / lege
 - drift UX armonizat în:
   - Dashboard
-  - Alerte
+  - Drift
   - Scanări
   - Audit si export
   - Auditor Vault
@@ -588,26 +596,87 @@ Exista deja:
 
 ### 1. Modelul de produs in UI
 
-In cod, produsul tinde catre 3 piloni:
+In cod, produsul a convergent initial catre 3 piloni de executie:
 
 - Scanare
 - Control
 - Dovada
 
-Navigatia principala a fost deja grupata sub cei 3 piloni, dar inca exista shortcut-uri si pagini secundare care expun conceptele vechi:
+Decizia oficiala de IA este acum un shell top-level cu:
+
+- Dashboard
+- Scanare
+- Control
+- Dovada
+- Setari
+
+Asta nu introduce concepte noi de produs.
+
+Face explicita diferenta dintre:
+
+- orientare (`Dashboard`)
+- executie (`Scanare / Control / Dovada`)
+- operare (`Setari`)
+
+In implementarea curenta, inca exista pagini si etichete mostenite care expun conceptele vechi:
 
 - Documente
 - Sisteme AI
 - Remediere
-- Alerte
+- Drift (ruta curenta `/dashboard/alerte`)
 - Audit si export
-- Setari
+- Asistent
 
 Asta este mult mai bine pentru user, dar mai trebuie armonizate:
 
 - titlurile unor pagini
-- copy-ul dintre piloni si shortcut-uri
-- relatia dintre `Remediere`, `Audit si export` si `Audit si dovezi`
+- copy-ul dintre zonele top-level si sub-sectiunile lor
+- relatia dintre `Dashboard` si `Control`
+- relatia dintre `Remediere`, `Audit si export` si `Auditor Vault`
+
+Progres recent pe punctul acesta:
+
+- `DashboardShell` descrie acum top-level-urile in vocabularul oficial al produsului, nu prin shortcut-uri vechi
+- pagina `/dashboard/sisteme` se prezinta acum ca workspace de `Control`
+- pasul 3 din `Dashboard` trimite spre `Dovada` ca loc de executie, nu direct spre export
+- `Documente` se prezinta explicit ca istoric separat de fluxul activ de scanare
+- `Dovada` a fost dusa pe page governance explicit:
+  - `Remediere` = executie
+  - `Audit si export` = readiness + livrabil
+  - `Auditor Vault` = ledger + trasabilitate
+  - paginile folosesc acum `PageIntro`, `SummaryStrip`, `SectionBoundary` si `HandoffCard` pentru a separa sumarul de actiune si de livrabil
+- `Setari` a fost adusa pe aceeasi schema:
+  - administrare operationala
+  - tabs locale clare
+  - handoff explicit inapoi in `Dashboard`, `Control` si `Dovada`
+  - pagina foloseste acum `PageIntro`, `SummaryStrip`, `SectionBoundary` si `HandoffCard`, fara sa schimbe wiring-ul functional
+- shell-ul `dashboard` este acum marcat explicit ca zona dinamica autentificata:
+  - `app/dashboard/layout.tsx` foloseste `dynamic = "force-dynamic"`
+  - asta elimina ambiguitatea dintre shell autenticat si incercarile de prerender static
+  - warning-urile de `dynamic server usage` nu mai polueaza build-ul pentru rutele dashboard
+- `Documente` si `Asistent` nu mai stau pe `PageHeader` legacy:
+  - `Documente` isi asuma clar rolul de istoric read-only si handoff spre `Scanare` sau `Dovada`
+  - `Asistent` isi asuma clar rolul de utilitar global si orientare, cu validare umana explicita
+  - ambele folosesc acum primitivele canonice de compozitie din `Evidence OS`
+- `Drift` foloseste acum aceeasi schema canonica de pagina ca restul pilonilor:
+  - `PageIntro`
+  - `SummaryStrip`
+  - `SectionBoundary`
+  - `HandoffCard`
+  - asta lasa board-ul si actiunile de drift mai jos in pagina, sub intentia dominanta, nu amestecate chiar din header
+- `PageHeader` a fost eliminat din `route-sections`:
+  - runtime-ul activ nu mai foloseste doua scheme paralele de compozitie pentru pagini
+- hook-ul central `use-cockpit` a intrat in cleanup structural:
+  - derivarile pure pentru task-uri, insights si formatare au fost extrase in `components/compliscan/cockpit-derivations.ts`
+  - separarea dintre orchestrare client-side si logica pura este acum mai clara
+  - comportamentul public a ramas compatibil pentru paginile existente
+- efectele de browser din `use-cockpit` au fost si ele separate:
+  - `components/compliscan/cockpit-browser.ts`
+  - asta reduce amestecul dintre mutatii de produs si helper-ele de preview/download/share
+- `use-cockpit` foloseste acum si helper-e interne de orchestrare:
+  - operatiile `busy` sunt mai coerente
+  - aplicarea payload-ului de dashboard este mai consistenta
+  - asta reduce boilerplate-ul fara sa schimbe contractul public al cockpit-ului
 
 ### 2. Severitate si principii
 
@@ -637,7 +706,11 @@ Punctul acesta este acum avansat, dar nu complet inchis:
 - task-urile de drift au owner, dovada ceruta, text gata de copiat si pas clar de remediere
 - inchiderea/redeschiderea task-ului poate inchide/redeschide si drift-ul asociat
 - drift-ul are acum politică unificată pentru impact și acțiune
-- aceeasi poveste de drift apare si in Dashboard, si in Alerte, si in Audit
+- aceeasi poveste de drift apare si in Dashboard, si in Drift, si in Audit
+- densitatea operationala a fost totusi redusa:
+  - `Dashboard` arata feed compact de drift, nu toate detaliile de executie
+  - workspace-ul `Drift` foloseste progressive disclosure, cu detalii si actiuni doar pe elementul expandat
+  - `DriftCommandCenter` selecteaza explicit drift-ul activ, in loc sa repete pachetul complet pentru toate semnalele
 
 Ce mai ramane:
 
@@ -863,3 +936,87 @@ Nu inseamna:
 Arhitectura buna pentru CompliScan acum este:
 
 **o singura arhitectura operationala, centrata pe sursa -> verdict -> remediere -> dovada -> audit**
+
+## Actualizare 2026-03-15 - cockpit store cleanup inchis
+
+- `components/compliscan/use-cockpit.tsx` foloseste acum consecvent doua reguli interne pentru mutatii:
+  - `withBusyOperation(...)` pentru orchestrarea starii `busy`
+  - `applyDashboardPayload(...)` pentru aplicarea uniforma a `DashboardPayload`
+- nu mai exista in blocul principal de mutatii pattern-uri paralele de tip:
+  - `setBusy(true) -> try/finally`
+  - `setData(payload)` repetat manual in fiecare operatie
+- efectul nu este doar cosmetic:
+  - reduce divergenta intre mutatiile de scanare, control, dovada si drift
+  - face store-ul central mai auditabil si mai usor de separat in pasi viitori
+  - muta produsul din zona de "hook mare, greu de controlat" spre orchestrare mai explicita
+
+Verdict:
+
+- cleanup-ul structural pentru `use-cockpit` este inchis operational
+- pasii urmatori pot intra deja in polish / split incremental, nu in reparatie de baza
+
+## Actualizare 2026-03-15 - audit final PR si code-splitting pe Control
+
+- auditul final pe branch-ul activ nu a gasit blocaje noi de `mixed intent`
+- principalele reguli canonice sunt respectate in runtime:
+  - `Dashboard` ramane orientare
+  - `Control` ramane confirmare
+  - `Dovada` ramane separata intre executie, ledger si livrabil
+- riscul ramas a coborat din zona de arhitectura in zona de greutate pe suprafete client-heavy
+
+Pas tehnic aplicat:
+
+- `app/dashboard/sisteme/page.tsx` face acum code-splitting pentru:
+  - `AIDiscoveryPanel`
+  - `AIInventoryPanel`
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+- asta inseamna ca `Control > Sisteme` nu mai forteaza incarcarea tuturor workspace-urilor grele la intrarea initiala in pagina
+
+Efect masurabil in build:
+
+- `/dashboard/sisteme`
+  - inainte: `17.3 kB` / `195 kB first load`
+  - dupa: `9.31 kB` / `181 kB first load`
+
+## Actualizare 2026-03-15 - `Auditor Vault` section-level loading
+
+- `Auditor Vault` nu mai conditioneaza randarea intregii pagini de sosirea `compliancePack` si `traceabilityMatrix`
+- shell-ul paginii si ledger-ul de baza pornesc acum din `core payload`
+- sectiunile grele se hidrateaza separat, cu loading local:
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+  - `TraceabilityMatrixCard`
+
+Asta respecta mai bine si doctrina canonica:
+
+- `Vault` ramane ledger si vedere audit-ready
+- summary-ul si handoff-urile nu mai sunt blocate de detaliul greu
+- progressive disclosure functioneaza si la nivel de incarcare, nu doar de layout
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte/auditor-vault`
+  - inainte: `17.3 kB` / `189 kB first load`
+  - dupa: `9.69 kB` / `181 kB first load`
+
+## Actualizare 2026-03-15 - `Setari` code-splitting pentru taburile grele
+
+- `Setari` ramane pilon operational/admin, dar nu mai aduce in bundle-ul initial toate diagnosticele tehnice
+- `Integrari` si `Operational` au fost extrase in componente dedicate si incarcate local prin `dynamic import`
+- tipurile si helper-ele reutilizabile au fost mutate intr-un modul comun:
+  - `components/compliscan/settings/settings-shared.tsx`
+
+Asta este sanatos arhitectural pentru ca:
+
+- pastreaza `Setari` ca shell de orchestrare, nu ca ecran monolitic
+- lasa taburile usoare (`Workspace`, `Acces`, `Avansat`) sa porneasca rapid
+- impinge diagnosticele grele doar in momentul in care utilizatorul intra explicit pe:
+  - `Integrari`
+  - `Operational`
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: aproximativ `11.7 kB` / `185 kB first load`
+  - dupa: `7.73 kB` / `184 kB first load`

@@ -1,15 +1,20 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { Loader2, Send, Sparkles } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useId, useRef, useState } from "react"
+import { ArrowRight, Loader2, Send, Sparkles } from "lucide-react"
 
-import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { AssistantMessageBubble } from "@/components/evidence-os/AssistantMessageBubble"
 import { AssistantSuggestionChip } from "@/components/evidence-os/AssistantSuggestionChip"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { ChatMessage } from "@/lib/compliance/types"
@@ -27,6 +32,9 @@ export default function AsistentPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const composerNoteId = useId()
+  const suggestionsId = useId()
   const hasMessages = messages.length > 0
 
   useEffect(() => {
@@ -40,6 +48,38 @@ export default function AsistentPage() {
   }, [messages, sending])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+
+  const summaryItems: SummaryStripItem[] = [
+    {
+      label: "Mesaje in istoric",
+      value: `${messages.length}`,
+      hint: messages.length > 0 ? "conversatia curenta ramane locala acestui workspace" : "inca nu ai pornit conversatia",
+      tone: messages.length > 0 ? "accent" : "neutral",
+    },
+    {
+      label: "Intrebari rapide",
+      value: `${assistantSuggestions.length}`,
+      hint: "scurtaturi pentru orientare, nu verdict automat",
+      tone: "neutral",
+    },
+    {
+      label: "Context activ",
+      value: cockpit.data.workspace.orgName,
+      hint: "asistentul lucreaza in contextul workspace-ului curent",
+      tone: "success",
+    },
+    {
+      label: "Regula",
+      value: "validare umana",
+      hint: "asistentul sprijina analiza, dar omul valideaza concluzia finala",
+      tone: "warning",
+    },
+  ]
+
+  function handleSuggestionSelect(suggestion: string) {
+    setInput(suggestion)
+    window.requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
   async function handleSend() {
     const text = input.trim()
@@ -87,30 +127,118 @@ export default function AsistentPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-120px)] flex-col gap-6 lg:h-[calc(100vh-120px)]">
-      <PageHeader
-        title="Asistent AI"
-        description="Intrebari despre obligatii, riscuri si pasul urmator"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
+      <PageIntro
+        eyebrow="Utilitar global / Asistent"
+        title="Intrebari rapide despre risc, obligatii si pasul urmator"
+        description="Asistentul ramane utilitar global pentru clarificare si orientare. Nu este sursa de adevar finala si nu inlocuieste validarea umana sau fluxurile reale de lucru."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              utilitar global
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              omul valideaza
+            </Badge>
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot asistent
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">
+                Dashboard
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/checklists">
+                Dovada
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+          </>
+        }
       />
 
-      <PillarTabs sectionId="dovada" />
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardContent className="px-5 py-5">
+          <SummaryStrip
+            eyebrow="Asistent"
+            title="Orientare rapida, nu verdict final"
+            description="Asistentul te ajuta sa formulezi intrebarea buna si sa intelegi contextul, dar decizia finala si validarea raman la om si in workspaces-urile reale."
+            items={summaryItems}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <SectionBoundary
+          eyebrow="Flux canonic"
+          title="Asistentul explica si te redirectioneaza, nu executa in locul produsului"
+          description="Poti clarifica riscul, obligatia sau urmatorul pas, apoi revii in Dashboard, Scanare, Control sau Dovada pentru actiunea reala."
+          support={
+            <div className="grid gap-4 md:grid-cols-3">
+              <AssistantFlowHint
+                title="1. Formulezi intrebarea"
+                detail="Pornesti cu o intrebare scurta despre risc, obligatii sau status."
+              />
+              <AssistantFlowHint
+                title="2. Clarifici contextul"
+                detail="Asistentul te ajuta sa intelegi problema si sa vezi urmatorul pas plauzibil."
+              />
+              <AssistantFlowHint
+                title="3. Revii in produs"
+                detail="Pentru executie, review sau dovada mergi inapoi in paginile principale."
+              />
+            </div>
+          }
+        />
+        <HandoffCard
+          title="Dupa clarificare revii in flow-ul real"
+          description="Asistentul nu inchide task-uri, nu valideaza controlul si nu livreaza audit pack-ul in locul tau. Il folosesti pentru orientare, apoi continui in pagina potrivita."
+          destinationLabel="dashboard / scanare / dovada"
+          checklist={[
+            "nu tratezi raspunsul ca verdict definitiv",
+            "nu sari peste validarea umana",
+            "duci actiunea reala inapoi in produs",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/scanari">Deschide Scanare</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       <section className="flex min-h-[32rem] min-w-0 flex-1 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm">
         <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-5 py-4">
           <div className="mx-auto flex w-full max-w-4xl flex-wrap items-start justify-between gap-3">
-            <div>
-              <Badge variant="outline" className="mb-2">
-                Asistent Evidence OS
-              </Badge>
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <Badge variant="outline">Asistent Evidence OS</Badge>
+                <Badge variant="warning">Validare umana</Badge>
+              </div>
               <h2 className="text-lg font-semibold text-eos-text">Asistent de conformitate</h2>
-              <p className="mt-1 text-sm text-eos-text-muted">
+              <p className="mt-1 max-w-2xl text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                 Intreaba despre GDPR, EU AI Act si e-Factura, apoi valideaza uman concluziile oficiale.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Gemini</Badge>
-              <Badge variant="warning">Validare umană obligatorie</Badge>
+              <Badge variant="outline">Context de lucru</Badge>
             </div>
           </div>
         </div>
@@ -125,17 +253,19 @@ export default function AsistentPage() {
                   label="Incepe cu o intrebare despre starea actuala, riscurile curente sau pasii urmatori de conformitate."
                   className="border-eos-border-subtle bg-eos-bg-panel"
                 />
-                <div className="space-y-3" aria-label="Sugestii de intrebari">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-medium text-eos-text">Intrebari rapide</h3>
-                <p className="text-xs text-eos-text-muted">Alege una sau scrie direct.</p>
-              </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                <div className="space-y-3" aria-labelledby={suggestionsId}>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 id={suggestionsId} className="text-sm font-medium text-eos-text">
+                      Intrebari rapide
+                    </h3>
+                    <p className="text-xs text-eos-text-muted">Alege una sau scrie direct.</p>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-2">
                     {assistantSuggestions.map((suggestion) => (
                       <AssistantSuggestionChip
                         key={suggestion}
                         suggestion={suggestion}
-                        onSelect={setInput}
+                        onSelect={handleSuggestionSelect}
                         disabled={sending}
                       />
                     ))}
@@ -187,6 +317,7 @@ export default function AsistentPage() {
               }}
             >
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -194,7 +325,7 @@ export default function AsistentPage() {
                 className="min-w-0 flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text outline-none transition-[border-color,box-shadow] placeholder:text-eos-text-muted focus:border-eos-primary focus:ring-2 focus:ring-eos-primary-focus"
                 disabled={sending}
                 aria-label="Mesaj pentru asistentul de conformitate"
-                aria-describedby="assistant-composer-note"
+                aria-describedby={composerNoteId}
                 autoComplete="off"
                 enterKeyHint="send"
               />
@@ -208,12 +339,21 @@ export default function AsistentPage() {
                 <span className="sm:hidden">Trimite</span>
               </Button>
             </form>
-            <p id="assistant-composer-note" className="mt-2 text-[11px] text-eos-text-muted">
+            <p id={composerNoteId} className="mt-2 text-[11px] text-eos-text-muted">
               Raspuns orientativ; validarea umana ramane obligatorie.
             </p>
           </div>
         </div>
       </section>
+    </div>
+  )
+}
+
+function AssistantFlowHint({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
     </div>
   )
 }

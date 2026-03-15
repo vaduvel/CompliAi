@@ -29,6 +29,16 @@ export function AgentWorkspace({
 }: AgentWorkspaceProps) {
   const [activeTab, setActiveTab] = React.useState("intake")
   const [rejectedIds, setRejectedIds] = React.useState<Set<string>>(new Set())
+  const activeSystems = bundle?.intake?.proposedSystems.filter((system) => !rejectedIds.has(system.tempId)) ?? []
+  const activeFindings = bundle?.findings?.filter((finding) => !rejectedIds.has(finding.findingId)) ?? []
+  const activeDrifts = bundle?.drifts?.filter((drift) => !rejectedIds.has(drift.driftId)) ?? []
+  const rejectedCount =
+    (bundle?.intake?.proposedSystems.length ?? 0) -
+    activeSystems.length +
+    (bundle?.findings?.length ?? 0) -
+    activeFindings.length +
+    (bundle?.drifts?.length ?? 0) -
+    activeDrifts.length
 
   const toggleRejection = (id: string) => {
     const next = new Set(rejectedIds)
@@ -60,14 +70,20 @@ export function AgentWorkspace({
   }
 
   if (!bundle && !loading) {
-    return <AgentStartStateCard sourceName={sourceEnvelope.sourceName} onRunAgents={onRunAgents} />
+    return (
+      <AgentStartStateCard
+        sourceName={sourceEnvelope.sourceName}
+        onRunAgents={onRunAgents}
+        className="min-h-[26rem]"
+      />
+    )
   }
 
   return (
     <AgentReviewLayout
-      context={<SourceContextPanel envelope={sourceEnvelope} />}
+      context={<SourceContextPanel envelope={sourceEnvelope} className="min-h-[20rem] xl:h-full" />}
       proposals={
-        <ProposalColumnShell loading={loading}>
+        <ProposalColumnShell loading={loading} className="min-h-[32rem] xl:h-full">
           {bundle ? (
             <AgentProposalTabs
               bundle={bundle}
@@ -81,13 +97,15 @@ export function AgentWorkspace({
       }
       review={
         <ReviewDecisionPanel
-          systemsCount={bundle?.intake?.proposedSystems.filter((system) => !rejectedIds.has(system.tempId)).length || 0}
-          findingsCount={bundle?.findings?.filter((finding) => !rejectedIds.has(finding.findingId)).length || 0}
-          driftsCount={bundle?.drifts?.filter((drift) => !rejectedIds.has(drift.driftId)).length || 0}
+          systemsCount={activeSystems.length}
+          findingsCount={activeFindings.length}
+          driftsCount={activeDrifts.length}
+          rejectedCount={rejectedCount}
           reviewState={bundle?.reviewState}
           onConfirm={handleCommit}
           onReject={onCancel}
           disabled={!bundle || loading}
+          className="min-h-[24rem] xl:h-full"
         />
       }
     />

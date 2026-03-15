@@ -1,5 +1,6 @@
 "use client"
 
+import { Badge } from "@/components/evidence-os/Badge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -62,15 +63,15 @@ export function RemediationBoard({
         <div>
           <CardTitle className="text-lg text-[var(--color-on-surface)]">Remediere</CardTitle>
           <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-            Task-uri actionabile, separate intre inchideri rapide si schimbari structurale.
+            Task-uri de executat, grupate intre inchideri rapide si schimbari structurale.
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full border border-[var(--color-info)] bg-[var(--color-info-muted)] px-3 py-1 text-[var(--color-info)]">
+            <Badge className="border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]">
               {openRapidCount} rapide deschise
-            </span>
-            <span className="rounded-full border border-[var(--color-warning)] bg-[var(--color-warning-muted)] px-3 py-1 text-[var(--color-warning)]">
+            </Badge>
+            <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
               {openStructuralCount} structurale deschise
-            </span>
+            </Badge>
           </div>
         </div>
 
@@ -96,7 +97,7 @@ export function RemediationBoard({
         {visibleTasks.length === 0 && (
           <EmptyState
             title="Nu exista task-uri pentru filtrul curent"
-            label="Schimba filtrul sau ruleaza un nou scan pentru a genera remedieri relevante."
+            label="Schimba filtrul sau ruleaza un scan nou pentru remedieri relevante."
             className="border-[var(--color-border)] bg-[var(--color-surface-variant)]"
           />
         )}
@@ -104,7 +105,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && rapidTasks.length > 0 && (
           <TaskGroup
             title="Remedieri rapide"
-            description="Schimbari mici de text, setare sau dovada pe care le poti valida imediat prin rescan."
+            description="Schimbari mici de text, setare sau dovada pe care le poti valida rapid."
             tone="info"
             tasks={rapidTasks}
             highlightedTaskId={highlightedTaskId}
@@ -117,7 +118,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && structuralTasks.length > 0 && (
           <TaskGroup
             title="Remedieri structurale"
-            description="Schimbari de proces, control operational sau configurare persistenta care cer coordonare mai larga."
+            description="Schimbari de proces, control operational sau configurare persistenta care cer coordonare."
             tone="warning"
             tasks={structuralTasks}
             highlightedTaskId={highlightedTaskId}
@@ -170,10 +171,13 @@ function TaskGroup({
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <span className={`rounded-full border px-3 py-1 text-xs font-medium ${toneClass}`}>
-            {title}
-          </span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={toneClass}>{title}</Badge>
+            <Badge className="border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]">
+              {tasks.length} task-uri
+            </Badge>
+          </div>
           <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">{description}</p>
         </div>
       </div>

@@ -18,13 +18,13 @@ export function AgentReviewLayout({
   return (
     <div
       className={cn(
-        "grid min-h-[calc(100vh-140px)] gap-6 xl:h-[calc(100vh-140px)] xl:grid-cols-[280px_minmax(0,1fr)_320px] xl:overflow-hidden",
+        "grid min-h-[32rem] gap-4 xl:h-[calc(100vh-140px)] xl:grid-cols-[minmax(17rem,0.88fr)_minmax(0,1.35fr)_minmax(18rem,0.98fr)] xl:items-start xl:gap-5 xl:overflow-hidden",
         className
       )}
     >
-      {context}
-      {proposals}
-      {review}
+      <div className="min-w-0 xl:h-full">{context}</div>
+      <div className="min-w-0 xl:h-full">{proposals}</div>
+      <div className="min-w-0 xl:h-full">{review}</div>
     </div>
   )
 }

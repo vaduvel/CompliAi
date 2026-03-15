@@ -96,6 +96,12 @@
   --eos-space-9: 48px;
   --eos-space-10: 64px;
 
+  --eos-page-max-width: 1200px;
+  --eos-page-rail-width: 360px;
+  --eos-page-section-gap: 24px;
+  --eos-page-cluster-gap: 16px;
+  --eos-page-summary-item-min: 220px;
+
   --eos-radius-sm: 4px;
   --eos-radius-md: 8px;
   --eos-radius-lg: 12px;
@@ -150,4 +156,27 @@
   --eos-status-danger-border: hsl(0 72% 50% / 0.2);
   --eos-status-neutral: hsl(220 14% 45%);
   --eos-status-muted: hsl(220 14% 60%);
+}
+
+.eos-page-shell {
+  width: 100%;
+  max-width: var(--eos-page-max-width);
+}
+
+.eos-page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eos-page-section-gap);
+}
+
+.eos-page-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eos-page-cluster-gap);
+}
+
+.eos-summary-strip-grid {
+  display: grid;
+  gap: var(--eos-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--eos-page-summary-item-min)), 1fr));
 }

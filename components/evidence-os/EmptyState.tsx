@@ -23,9 +23,16 @@ export function EmptyState({ title, label, icon: Icon = FileText, actions, class
       <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-eos-bg-panel">
         <Icon className="size-5 text-eos-text-tertiary" aria-hidden="true" />
       </div>
-      {title ? <p className="text-sm font-medium text-eos-text">{title}</p> : null}
-      <p className={cn("text-sm leading-6 text-eos-text-muted", title ? "mt-1 max-w-md" : "max-w-sm")}>{label}</p>
-      {actions ? <div className="mt-4 flex flex-wrap justify-center gap-2">{actions}</div> : null}
+      {title ? <p className="break-words text-sm font-medium text-eos-text [overflow-wrap:anywhere]">{title}</p> : null}
+      <p
+        className={cn(
+          "break-words text-sm leading-6 text-eos-text-muted [overflow-wrap:anywhere]",
+          title ? "mt-1 max-w-md" : "max-w-sm"
+        )}
+      >
+        {label}
+      </p>
+      {actions ? <div className="mt-4 flex w-full flex-wrap justify-center gap-2">{actions}</div> : null}
     </div>
   )
 }

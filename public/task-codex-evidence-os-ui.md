@@ -1,5 +1,13 @@
 # Task curent pentru Codex secundar - Evidence OS UI
 
+Status: `deprecated dupa auditul .md din 2026-03-14`
+
+Nu mai folosi acest fisier ca instructiune curenta.
+
+Delegarea activa a fost mutata in:
+
+- `public/task-codex-2-paralel-safe-2026-03-14.md`
+
 Data: 2026-03-14
 
 ## Context

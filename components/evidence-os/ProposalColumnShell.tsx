@@ -16,21 +16,26 @@ export function ProposalColumnShell({
   className,
 }: ProposalColumnShellProps) {
   return (
-    <div
+    <section
       className={cn(
-        "flex flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm",
+        "flex min-h-[26rem] min-w-0 flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-sm",
         className
       )}
       aria-busy={loading}
+      aria-label="Propuneri generate de Agent Evidence OS"
     >
       {loading ? (
-        <div className="flex h-full flex-col items-center justify-center gap-4 px-6 py-10 text-center" role="status" aria-live="polite">
+        <div
+          className="flex h-full min-h-[26rem] flex-1 flex-col items-center justify-center gap-4 px-6 py-10 text-center"
+          role="status"
+          aria-live="polite"
+        >
           <Loader2 className="size-8 animate-spin text-eos-primary" aria-hidden="true" />
           <p className="animate-pulse text-sm text-eos-text-muted">{loadingLabel}</p>
         </div>
       ) : (
-        children
+        <div className="min-h-0 flex-1">{children}</div>
       )}
-    </div>
+    </section>
   )
 }

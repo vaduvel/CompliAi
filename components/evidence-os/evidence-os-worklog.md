@@ -1017,6 +1017,165 @@ Validare:
 
 - `npm run lint`
 
+### 2026-03-14 39
+
+Am executat lotul `task-codex-2-paralel-safe-2026-03-14` strict pe suprafața permisă, fără atingere de runtime, API sau navigație.
+
+Suprafețe actualizate:
+
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/export-center.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/evidence-os/EmptyState.tsx`
+- `components/evidence-os/ProposalBundlePanel.tsx`
+- `components/evidence-os/SourceContextPanel.tsx`
+- `components/evidence-os/SourceEnvelopeCard.tsx`
+- `components/evidence-os/ui-audit-backlog.md`
+
+Ce s-a schimbat:
+
+- `TaskCard` a fost compactat:
+  - `summary` rămâne mesajul principal
+  - `fixPreview` apare doar când aduce semnal nou
+  - CTA-ul primar este separat de acțiunile de dovadă și export
+  - badge-urile vizibile simultan au fost reduse
+- `RemediationBoard` și `NextBestAction` au fost aliniate la aceeași ierarhie:
+  - descrieri mai scurte
+  - densitate mai bună
+  - `Pas recomandat` separat de sumar când există
+- `ExportCenter` separă acum clar:
+  - exportul principal
+  - exporturile de audit / review
+  - artefactele tehnice
+- `FloatingAssistant` are acum:
+  - focus ring explicit
+  - `aria-expanded` / `aria-controls`
+  - lățime și grid mai sigure pe viewport mic
+- componentele canonice `Evidence OS` de tip `empty state`, `tabs` și `source context` tratează mai bine:
+  - nume lungi
+  - wrapping
+  - preview text
+
+Ce a rămas intenționat în afara lotului meu:
+
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/logo.tsx`
+- orice pagină mare din:
+  - `app/dashboard/alerte/*`
+  - `app/dashboard/rapoarte/*`
+  - `app/dashboard/setari/*`
+
+Validare:
+
+- `npm run lint`
+
+Rezultat:
+
+- lotul este predabil
+- schimbările rămân component-level și sigure pentru paralelism
+- backlogul local indică explicit ce am închis și ce rămâne la Codex principal
+
+### 2026-03-14 40
+
+Am continuat cu singurul pas suplimentar sănătos rămas în lot: consistență locală pentru `Asistent`, fără schimbare de flow.
+
+Suprafață actualizată:
+
+- `app/dashboard/asistent/page.tsx`
+
+Ce s-a schimbat:
+
+- headerul folosește acum aceeași ierarhie scurtă ca panoul flotant:
+  - badge de produs
+  - badge de validare umană
+  - badge contextual separat
+- sugestiile rapide:
+  - au structură mai curată
+  - folosesc grid mai sigur pe viewport mic
+  - mută focusul în composer când sunt selectate
+- composerul folosește acum `useId()` pentru legătura `aria-describedby`
+- wrapping-ul în header este mai sigur pentru copy real
+
+De ce:
+
+- păstrăm consistența între asistentul flotant și pagina dedicată
+- închidem un mic rest de recipe local fără să intrăm peste cockpitul mare
+
+Validare:
+
+- `npm run lint`
+
+### 2026-03-14 41
+
+Am deschis un lot nou, separat de `safe polish`, pentru convergența locală a `Agent Workspace`, după commit separat al batch-ului anterior.
+
+Suprafețe actualizate:
+
+- `lib/compliance/agent-workspace.tsx`
+- `components/evidence-os/AgentReviewLayout.tsx`
+- `components/evidence-os/ProposalColumnShell.tsx`
+- `components/evidence-os/AgentStartStateCard.tsx`
+- `components/evidence-os/AgentProposalTabs.tsx`
+- `components/evidence-os/ReviewDecisionPanel.tsx`
+- `components/evidence-os/IntakeSystemCard.tsx`
+- `components/evidence-os/FindingProposalCard.tsx`
+- `components/evidence-os/DriftProposalCard.tsx`
+- `components/evidence-os/ui-audit-backlog.md`
+
+Verificat și lăsat neschimbat intenționat:
+
+- `components/compliscan/agent-workspace.tsx`
+  - adaptorul este deja re-export subțire și nu avea nevoie de markup nou
+
+Ce s-a schimbat:
+
+- `agent-workspace` calculează acum o singură dată propunerile rămase și numărul de itemi respinși, doar pentru sumarul UI
+- `AgentReviewLayout` și `ProposalColumnShell` sunt mai robuste pe desktop și pe viewport-uri înguste:
+  - coloane mai echilibrate
+  - `min-width` și `min-height` mai sigure
+  - scroll intern mai predictibil
+- `AgentStartStateCard` explică mai clar:
+  - ce suprafață se deschide
+  - ce sursă este analizată
+  - ce tip de rezultate vor apărea
+- `AgentProposalTabs` arată acum mai bine review-ul real:
+  - titluri mai scurte
+  - count total
+  - count rămas pentru commit
+  - count respins, unde există
+- `ReviewDecisionPanel` explică explicit:
+  - ce mai intră în commit
+  - ce a fost exclus
+  - de ce CTA-ul principal rămâne confirmarea
+- `IntakeSystemCard`, `FindingProposalCard` și `DriftProposalCard` converg mai bine pe aceeași ierarhie:
+  - metadata la început
+  - rationale / impact în bloc separat
+  - remediere / acțiune propusă clar delimitată
+  - overflow safety pe valori lungi și JSON diff
+
+Ce a rămas deschis:
+
+- `ProposalBundlePanel`, `CommitSummaryCard` și `HumanReviewPanel`
+  - ar mai suporta un polish mic de densitate
+  - nu au intrat în acest lot pentru că nu erau în lista permisă
+- warning-ul de build pe `/dashboard/rapoarte`
+  - `SUPABASE_ORG_STATE_REQUIRED`
+  - vine dintr-un fetch `no-store` pe o suprafață interzisă pentru acest lot
+  - build-ul a trecut, dar warning-ul rămâne de preluat de Codex principal
+
+Validare:
+
+- `npm run lint`
+- `npm run build`
+
+Rezultat:
+
+- `Agent Workspace` este mai coerent vizual și operațional fără schimbare de flow
+- adaptoarele runtime permise rămân subțiri
+- lotul este pregătit pentru audit și integrare separată
+
 ## Regula de update
 
 Pentru fiecare batch nou pe `Evidence OS`, acest fișier trebuie actualizat cu:
@@ -1025,3 +1184,79 @@ Pentru fiecare batch nou pe `Evidence OS`, acest fișier trebuie actualizat cu:
 - în ce fișiere
 - de ce
 - ce validare a fost rulată
+
+### 2026-03-14 42
+
+Am deschis `UX Wave 1` strict in inelul permis pentru `Evidence OS`, cu scopul de a muta sistemul din zona de primitive locale spre un `page system` canonic.
+
+Fișiere atinse:
+
+- `app/evidence-os.css`
+- `components/evidence-os/ActionCluster.tsx`
+- `components/evidence-os/PageIntro.tsx`
+- `components/evidence-os/SummaryStrip.tsx`
+- `components/evidence-os/HandoffCard.tsx`
+- `components/evidence-os/SectionBoundary.tsx`
+- `components/evidence-os/SectionDividerCard.tsx`
+- `components/evidence-os/ScanFlowOverviewCard.tsx`
+- `public/evidence-os-design-system-v1.md`
+- `public/legacy-dashboard-ui-map-2026-03-14.md`
+- `components/evidence-os/ui-audit-backlog.md`
+- `components/evidence-os/evidence-os-worklog.md`
+
+Ce s-a schimbat:
+
+- am introdus recipe-urile canonice lipsa pentru compoziție de pagină:
+  - `PageIntro`
+  - `SummaryStrip`
+  - `ActionCluster`
+  - `HandoffCard`
+  - `SectionBoundary`
+- am adăugat token-uri și utility classes minime pentru page layout în `app/evidence-os.css`:
+  - `--eos-page-max-width`
+  - `--eos-page-rail-width`
+  - `--eos-page-section-gap`
+  - `--eos-page-cluster-gap`
+  - `--eos-page-summary-item-min`
+  - `.eos-page-shell`
+  - `.eos-page-stack`
+  - `.eos-page-cluster`
+  - `.eos-summary-strip-grid`
+- `SectionDividerCard` nu mai este un shell local izolat; devine alias subțire peste `SectionBoundary`
+- `ScanFlowOverviewCard` nu mai compune trei blocuri bespoke; consumă acum `SummaryStrip` ca recipe generic de summary row
+- am actualizat `Evidence OS v1` cu reguli explicite de page composition și cu regula clară că `components/dashboard/*` este legacy/demo, nu sursă canonică pentru lucru nou
+- am creat document public separat care mapează zona legacy `components/dashboard/*` și explică de ce nu trebuie reutilizată
+
+De ce:
+
+- backlog-ul cerea explicit `canonizare de page recipes`, dar până acum DS-ul controla mai ales primitive și shell-uri locale
+- fără aceste rețete, `Evidence OS` risca să rămână un strat de look and feel, nu o disciplină de structură de pagină
+- am vrut să pregătim terenul pentru Codex principal ca paginile mari să poată fi simplificate folosind piese canonice, nu încă un val de markup bespoke
+
+Ce NU am atins:
+
+- `app/dashboard/*`
+- `components/compliscan/navigation.ts`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/use-cockpit.tsx`
+- `app/api/*`
+- `lib/server/*`
+- orice runtime critic sau flow de business
+
+Validare:
+
+- `npm run lint` a trecut
+- `npm run build` a trecut după curățarea `.next`
+
+Rezidual observat la build, în afara lotului curent:
+
+- warning `SUPABASE_ORG_STATE_REQUIRED`
+- raportat pe `/dashboard/documente`
+- cauza este `dynamic server usage` pe fetch `no-store` către Supabase
+- rămâne pentru Codex principal, fiind pe o suprafață interzisă pentru acest lot
+
+Rezultat:
+
+- `Evidence OS` are acum un strat canonic de page recipes reutilizabile
+- DS-ul documentează explicit cum se compun paginile și unde se opresc suprafețele legacy
+- lotul pregătește convergența de structură pentru paginile mari, fără să intre peste ele direct

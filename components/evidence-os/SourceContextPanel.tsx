@@ -32,7 +32,11 @@ export function SourceContextPanel({ envelope, className }: SourceContextPanelPr
         <Badge variant="outline" className="mb-2">
           Context sursa
         </Badge>
-        <h3 id={headingId} className="truncate text-lg font-semibold text-eos-text" title={envelope.sourceName}>
+        <h3
+          id={headingId}
+          className="break-words text-lg font-semibold text-eos-text [overflow-wrap:anywhere]"
+          title={envelope.sourceName}
+        >
           {envelope.sourceName}
         </h3>
         <p className="mt-1 text-xs uppercase tracking-[0.01em] text-eos-text-muted">
@@ -63,7 +67,7 @@ export function SourceContextPanel({ envelope, className }: SourceContextPanelPr
               <p id={previewId} className="text-xs font-medium text-eos-text-muted">
                 Preview continut
               </p>
-              <pre className="line-clamp-[10] overflow-hidden whitespace-pre-wrap rounded-eos-md bg-eos-bg-inset p-3 text-[10px] font-mono text-eos-text-muted">
+              <pre className="line-clamp-[10] overflow-hidden whitespace-pre-wrap rounded-eos-md bg-eos-bg-inset p-3 text-[10px] font-mono text-eos-text-muted [overflow-wrap:anywhere]">
                 {envelope.rawText}
               </pre>
             </section>

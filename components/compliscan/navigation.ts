@@ -6,7 +6,6 @@ import {
   FileSearch,
   FolderKanban,
   FolderOpen,
-  MessageSquareMore,
   Scan,
   Settings,
   ShieldPlus,
@@ -44,6 +43,13 @@ export type DashboardNavSection = {
 
 export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   {
+    id: "dashboard",
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: BarChart3,
+    matchers: ["/dashboard"],
+  },
+  {
     id: "scanare",
     label: "Scanare",
     href: "/dashboard/scanari",
@@ -53,9 +59,9 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   {
     id: "control",
     label: "Control",
-    href: "/dashboard",
+    href: "/dashboard/sisteme",
     icon: ShieldPlus,
-    matchers: ["/dashboard", "/dashboard/sisteme", "/dashboard/alerte", "/dashboard/setari", "/dashboard/asistent"],
+    matchers: ["/dashboard/sisteme", "/dashboard/alerte"],
   },
   {
     id: "dovada",
@@ -63,6 +69,13 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: "/dashboard/checklists",
     icon: FileSearch,
     matchers: ["/dashboard/checklists", "/dashboard/rapoarte"],
+  },
+  {
+    id: "setari",
+    label: "Setari",
+    href: "/dashboard/setari",
+    icon: Settings,
+    matchers: ["/dashboard/setari"],
   },
 ] as const
 
@@ -79,10 +92,8 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "control",
     label: "Control",
     items: [
-      { id: "dashboard", label: "Dashboard", href: "/dashboard", icon: BarChart3 },
-      { id: "sisteme", label: "Sisteme AI", href: "/dashboard/sisteme", icon: ShieldPlus },
-      { id: "alerte", label: "Alerte", href: "/dashboard/alerte", icon: TriangleAlert },
-      { id: "setari", label: "Setari", href: "/dashboard/setari", icon: Settings },
+      { id: "sisteme", label: "Sisteme", href: "/dashboard/sisteme", icon: ShieldPlus },
+      { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
     ],
   },
   {
@@ -97,7 +108,6 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
         icon: FolderKanban,
       },
       { id: "rapoarte", label: "Audit si export", href: "/dashboard/rapoarte", icon: FileSearch },
-      { id: "asistent", label: "Asistent", href: "/dashboard/asistent", icon: MessageSquareMore },
     ],
   },
 ] as const

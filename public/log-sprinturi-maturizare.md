@@ -168,6 +168,320 @@ Suita curenta:
   - pagina de rapoarte ramane focusata pe snapshot, readiness si artefacte de livrare
   - `Remediere` explica clar ca acolo se executa task-urile si se ataseaza dovada
   - `Auditor Vault` este expus direct in navigatie si isi asuma explicit rolul de vedere audit-ready
+- audit `.md` pentru backlog si sprint-ready:
+  - backlog-ul real ramas a fost filtrat in:
+    - `public/audit-md-backlog-sprint-ready-2026-03-14.md`
+  - a fost confirmat ca fronturile principale raman:
+    - `Drift`
+    - `Setari`
+    - cleanup de performanta
+    - member admin
+    - parser XML robust `e-Factura`
+  - a fost creat task-ul paralel sigur pentru Codex 2:
+    - `public/task-codex-2-paralel-safe-2026-03-14.md`
+  - delegarea veche `Evidence OS UI` a fost marcata explicit ca `deprecated`
+- IA oficiala documentata pentru shell-ul dashboard:
+  - `Dashboard / Scanare / Control / Dovada / Setari`
+  - `Dashboard` este home/orchestrator, nu dublura de `Control`
+  - `Scanare / Control / Dovada` raman pilonii de executie
+  - `Asistent` este utilitar global, nu sectiune din `Dovada`
+  - documentele aliniate:
+    - `public/gpt-ux-flow-brief.md`
+    - `public/ux-ui-flow-arhitectura.md`
+    - `public/status-arhitectura.md`
+    - `public/evidence-os-design-system-v1.md`
+- naming pass operational pentru `Alerte` -> `Drift` pe traseele principale:
+  - navigatia secundara din `Control` afiseaza acum `Drift`
+  - pagina `/dashboard/alerte` foloseste acum limbaj de `Drift`, fara sa schimbe ruta
+  - `Dashboard`, `Sisteme AI`, `AIDiscoveryPanel` si exportul HTML sumar folosesc aceeasi eticheta de `Drift`
+  - au ramas intentional neatinse suprafetele deja murdare de alt agent sau zonele legacy necanonice, pentru a evita conflicte de integrare
+- audit final pe batch-ul `codex/evidence-os-safe-polish`:
+  - lotul component-level al Codex 2 a fost verificat pe diff si marcat `predabil`
+  - validare completa pe snapshot-ul curent:
+    - `npm run lint`
+    - `npm run build`
+    - `npm test`
+  - rezultate:
+    - `npm run lint` trece
+    - `npm run build` trece
+    - `npm test` trece (`66` fisiere, `231` teste)
+  - batch-ul lui trebuie comis separat de lotul principal `Drift + documentatie`, pentru a pastra integrarea curata
+- `Setari` a fost spart pe taburile oficiale de produs:
+  - `Workspace`
+  - `Integrari`
+  - `Acces`
+  - `Operational`
+  - `Avansat`
+  - scopul a fost separarea intentiilor, nu schimbarea logicii sau a wiring-ului existent
+  - mapping-ul actual:
+    - `Workspace`: org, baseline, rezumat local
+    - `Integrari`: Supabase + repo sync
+    - `Acces`: membri si roluri
+    - `Operational`: health check + release readiness
+    - `Avansat`: drift severity policy + reset workspace
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+- navigatia principala a fost aliniata cu IA oficiala:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Dovada`
+  - `Setari`
+  - `Dashboard` nu mai sta in tabs de `Control`
+  - `Setari` nu mai sta in tabs de `Control`
+  - `Asistent` nu mai este expus ca sub-sectiune de `Dovada`
+  - paginile `Dashboard`, `Setari` si `Asistent` nu mai afiseaza `PillarTabs` mostenite din pilonii vechi
+  - tabs-urile secundare raman acum doar pe zonele de executie reale:
+    - `Scanare`
+    - `Control`
+    - `Dovada`
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece dupa rebuild curat (`rm -rf .next`)
+- compactare UX pentru `Drift`, fara schimbare de business logic:
+  - cardul de `Drift` din `Dashboard` arata acum doar feed scurt, orientat pe semnal si urmatorul pas
+  - `DriftCommandCenter` din overview foloseste selectie explicita pe drift, nu mai expune toate detaliile simultan
+  - pagina `/dashboard/alerte` foloseste progressive disclosure:
+    - rand compact pentru fiecare drift
+    - detalii, impact, dovada si actiuni doar pe elementul expandat
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+  - observatie:
+    - `next build` raporteaza in continuare warning-ul existent de `dynamic server usage` pentru `/dashboard/alerte` din cauza fetch-ului `no-store` pe `org_state`, dar build-ul se inchide cu succes
+- cleanup suplimentar pentru `mixed intent` in shell si overview:
+  - `DashboardShell` foloseste acum descrieri top-level aliniate la IA oficiala:
+    - `Scanare` = surse, verdict curent si istoric
+    - `Control` = discovery, sisteme, baseline si drift
+    - `Dovada` = remediere, dovezi si livrabil
+  - pagina `/dashboard/sisteme` se prezinta acum explicit ca workspace de `Control`, nu ca pseudo-produs separat
+  - sub-sectiunea secundara din `Control` foloseste eticheta `Sisteme`, nu `Sisteme AI`, pentru a reduce competitia cu pilonul top-level
+  - `DashboardGuideCard` trimite acum pasul 3 spre `Dovada` (`/dashboard/checklists`), nu direct spre `Audit si export`, pentru a separa mai clar executia de livrabil
+  - pagina `/dashboard/documente` explica mai clar ca este istoric separat de fluxul activ de scanare
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+- a fost centralizat corpusul UX intr-un document unic:
+  - `public/ux-corpus-si-plan-recuperare-2026-03-14.md`
+  - verdictul explicit:
+    - `Evidence OS` este oficial si corect
+    - UX-ul produsului mare ramane inca prea greu si prea amestecat
+    - urmatorul val sanatos nu este repaint cosmetic, ci adoptie `Evidence OS` ca page system:
+      - `Dashboard`
+      - `Scanare`
+      - `Control`
+      - `Dovada`
+      - `Setari`
+- a fost delegat explicit lotul paralel `UX Wave 1` pentru Codex secundar:
+  - `public/task-codex-2-ux-wave-1-page-recipes-2026-03-14.md`
+  - regula activa:
+    - Codex secundar pregateste doar fundatia reutilizabila `Evidence OS` pentru page recipes
+    - Codex principal ramane singurul owner pentru integrarea reala in `app/dashboard/*`
+  - documentul de coordonare a fost restrans in aceeasi directie:
+    - `public/coordonare-paralel-codex.md`
+- a fost pornit `UX Wave 1` pe firul principal cu primele doua retete canonice:
+  - `public/page-recipes-dashboard-scanare-2026-03-14.md`
+  - `Dashboard` a fost comprimat spre orientare reala:
+    - summary strip
+    - next best action
+    - flux principal
+    - drift focus
+    - snapshot / activitate
+    - fara export center in overview
+  - `Scanare` a primit clarificare de flow:
+    - tab-uri descriptive
+    - workflow guide
+    - handoff explicit spre `Control`, `Dovada` sau `Documente`, in functie de sursa si context
+- a fost absorbit lotul `Evidence OS page recipes` livrat de Codex secundar in runtime-ul real pentru `UX Wave 1`:
+  - `components/evidence-os/SummaryStrip.tsx` intra acum in `Dashboard`
+  - `components/evidence-os/PageIntro.tsx`, `SectionBoundary.tsx` si `HandoffCard.tsx` intra acum in `Scanare`
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece
+  - observatie:
+    - warning-ul cunoscut de `dynamic server usage` pe fetch-ul `no-store` din Supabase ramane, dar build-ul se inchide cu succes
+- combo-ul de guvernare UX a fost ridicat la sursa de adevar canonica pentru compozitia paginilor mari:
+  - `Progressive Disclosure`
+  - `Trust Through Transparency`
+  - `Role-Aware Surfaces`
+  - `Tab-based sub-navigation`
+  - `Summary / Detail / Action separation`
+  - `One dominant page intent`
+  - fixat explicit in:
+    - `public/ux-ui-flow-arhitectura.md`
+    - `public/gpt-ux-flow-brief.md`
+    - `public/evidence-os-design-system-v1.md`
+- `Control` a fost trecut pe noua doctrina canonica:
+  - `Overview`
+  - `Sisteme`
+  - `Drift`
+  - `Review`
+  - sub-tabs in `Sisteme`:
+    - `Discovery`
+    - `Inventar`
+    - `Baseline`
+    - `Compliance Pack`
+  - `Integrari` nu mai concureaza in structura principala de `Control`
+  - recipe scris in:
+    - `public/page-recipes-control-2026-03-14.md`
+  - implementare in:
+    - `app/dashboard/sisteme/page.tsx`
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece
+- a fost fixat si un snapshot explicit de maturitate operationala in:
+  - `public/maturity-snapshot-2026-03-14.md`
+- `Dovada` a fost trecuta pe noua doctrina canonica de page governance:
+  - `Remediere` isi asuma explicit executia reala:
+    - task-uri
+    - dovada atasata
+    - rescan
+  - `Audit si export` isi asuma explicit:
+    - snapshot
+    - readiness
+    - artefacte de livrare
+  - `Auditor Vault` isi asuma explicit:
+    - ledger complet
+    - trasabilitate
+    - vedere audit-ready
+  - recipe scris in:
+    - `public/page-recipes-dovada-2026-03-14.md`
+  - implementare in:
+    - `app/dashboard/checklists/page.tsx`
+    - `app/dashboard/rapoarte/page.tsx`
+    - `app/dashboard/rapoarte/auditor-vault/page.tsx`
+  - primitive `Evidence OS` folosite in runtime:
+    - `PageIntro`
+    - `SummaryStrip`
+    - `SectionBoundary`
+    - `HandoffCard`
+  - validare:
+    - `npm run lint` trece
+    - `npm run build` trece
+  - observatie:
+    - `next build` raporteaza in continuare warning-ul cunoscut de `dynamic server usage` pentru rute dashboard care citesc `org_state` prin fetch `no-store`, inclusiv `/dashboard/checklists`, dar build-ul se inchide cu succes
+- `Setari` a fost trecuta pe aceeasi doctrina canonica de page governance:
+  - pagina se prezinta explicit ca zona administrativa, nu ca suprafata de executie
+  - recipe scris in:
+    - `public/page-recipes-setari-2026-03-14.md`
+  - implementare in:
+    - `app/dashboard/setari/page.tsx`
+  - primitive `Evidence OS` folosite in runtime:
+    - `PageIntro`
+    - `SummaryStrip`
+    - `SectionBoundary`
+    - `HandoffCard`
+  - taburile oficiale raman:
+    - `Workspace`
+    - `Integrari`
+    - `Acces`
+    - `Operational`
+    - `Avansat`
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+  - observatie:
+    - warning-ul cunoscut de `dynamic server usage` pe rutele dashboard cu fetch `no-store` ramane vizibil si poate aparea pe alte pagini dinamice, cum este `/dashboard/documente`, dar build-ul se inchide cu succes
+- shell-ul `app/dashboard` a fost declarat explicit dinamic:
+  - `app/dashboard/layout.tsx` exporta acum `dynamic = "force-dynamic"`
+  - motiv:
+    - dashboard-ul autenticat citeste sesiune, workspace si `org_state` live
+    - nu este o suprafata care trebuie lasata sa incerce prerender static
+  - efect:
+    - build-ul nu mai produce warning-urile zgomotoase de `dynamic server usage` pentru rutele dashboard
+    - arhitectura devine mai explicita: dashboard-ul este o zona autentificata, server-rendered on demand
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece fara warning-ul anterior de `dynamic server usage`
+- zona `components/dashboard/*` a fost marcata si local ca legacy:
+  - `components/dashboard/README.md`
+  - scopul este sa prevenim reutilizarea accidentala a shell-ului demo in runtime-ul nou
+- ultimele doua suprafete hibride vizibile au fost aliniate la `Evidence OS` page system:
+  - `app/dashboard/documente/page.tsx`
+  - `app/dashboard/asistent/page.tsx`
+  - ambele folosesc acum:
+    - `PageIntro`
+    - `SummaryStrip`
+    - `SectionBoundary`
+    - `HandoffCard`
+  - scop:
+    - `Documente` ramane istoric read-only separat de fluxul activ
+    - `Asistent` ramane utilitar global de orientare, nu sursa finala de verdict
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+- `Drift` a fost trecut si el pe aceeasi compozitie canonica de pagina:
+  - `app/dashboard/alerte/page.tsx`
+  - foloseste acum:
+    - `PageIntro`
+    - `SummaryStrip`
+    - `SectionBoundary`
+    - `HandoffCard`
+  - board-ul de drift si actiunile au ramas neschimbate functional; a fost clarificata doar intentia dominanta a paginii
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+- helper-ul vechi `PageHeader` a fost eliminat din runtime:
+  - `components/compliscan/route-sections.tsx`
+  - motiv:
+    - nu mai avea consumatori
+    - mentinea iluzia unei a doua scheme de compozitie pentru pagini
+  - validare:
+    - `npm run lint` trece
+- `use-cockpit` a primit primul cleanup structural real:
+  - logica pura de derivare a task-urilor si insight-urilor a fost extrasa in:
+    - `components/compliscan/cockpit-derivations.ts`
+  - `components/compliscan/use-cockpit.tsx` ramane acum mai clar separata intre:
+    - state + fetch/mutatii
+    - helper-e pure importate
+  - API-ul public a ramas compatibil:
+    - `buildScanInsights`
+    - `getRiskLastSyncLabel`
+  - scop:
+    - reducerea densitatii din hook-ul central
+    - pregatirea unui cleanup mai sigur pe payload-uri si mutatii
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+- `use-cockpit` a primit si a doua extracție sigură:
+  - helper-ele de browser si export au fost mutate in:
+    - `components/compliscan/cockpit-browser.ts`
+  - mutarea acopera:
+    - preview HTML in fereastra noua
+    - clipboard copy
+    - blob download
+    - filename parsing
+    - file-to-base64
+  - scop:
+    - hook-ul central sa ramana mai mult despre orchestrare si mai putin despre efecte de browser
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
+- `use-cockpit` a primit si primul pass de reducere a boilerplate-ului:
+  - helper intern nou pentru operatii `busy`
+  - helper intern nou pentru aplicarea consistenta a `DashboardPayload`
+  - a fost redus zgomotul repetitiv pe:
+    - `ensureHeavyPayload`
+    - exporturile principale
+    - `e-Factura sync`
+    - adaugare / autodiscovery sisteme AI
+    - upload dovada
+    - update task state
+  - scop:
+    - sa pregatim un split ulterior pe mutatii fara sa rupem contractul public al hook-ului
+  - validare:
+    - `npm test` trece (`66` fisiere, `231` teste)
+    - `npm run lint` trece
+    - `npm run build` trece
 
 ### Sprint 6 - Audit defensibility
 
@@ -1541,4 +1855,108 @@ Validare dupa pasul de performanta:
 
 - `npm run lint` -> verde
 - `npm test` -> verde
+- `npm run build` -> verde
+
+Actualizare 2026-03-15 - cleanup final `use-cockpit`:
+
+- blocul ramas de mutatii din `components/compliscan/use-cockpit.tsx` a fost trecut pe acelasi model deja folosit pentru restul store-ului:
+  - `withBusyOperation(...)`
+  - `applyDashboardPayload(...)`
+- au fost aliniate pe noul model:
+  - `updateDetectedAISystem`
+  - `editDetectedAISystem`
+  - `removeAISystem`
+  - `validateEFacturaXml`
+  - `resetWorkspaceState`
+  - `updateValidatedBaseline`
+  - `updateDriftSeverityOverrides`
+  - `updateCompliancePackField`
+  - `updateTraceabilityReview`
+  - `reuseFamilyEvidence`
+  - `updateDriftLifecycle`
+- comportamentul functional, mesajele si disciplina `omul valideaza` au ramas neschimbate
+- efectul real este reducerea boilerplate-ului si inchiderea cleanup-ului structural pentru store-ul central de cockpit
+
+Validare dupa inchiderea lotului:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Audit final PR - UX clarity / mixed intent:
+
+- auditul final pe branch-ul curent nu a gasit blocaje noi de `mixed intent`
+- doctrinele canonice raman respectate pe runtime:
+  - o pagina = o intentie dominanta
+  - `summary / detail / action` sunt separate
+  - tabs locale tin sub-sectiunile in pilon, nu in sidebar
+- riscul ramas este acum mai degraba de greutate pe suprafete client-heavy, nu de arhitectura de intentie:
+  - `Setari`
+  - `Auditor Vault`
+  - `Control > Sisteme`
+
+Pas de performanta aplicat imediat dupa audit:
+
+- `app/dashboard/sisteme/page.tsx` foloseste acum `dynamic import` pentru panourile grele:
+  - `AIDiscoveryPanel`
+  - `AIInventoryPanel`
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+- efect:
+  - `Control > Sisteme` nu mai aduce aceste panouri in bundle-ul initial daca userul intra doar pe overview sau pe alte sub-vizualizari
+  - dimensiunea rutei a coborat de la `17.3 kB / 195 kB first load` la `9.31 kB / 181 kB first load`
+
+Validare dupa code-splitting:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Pas de performanta - `Auditor Vault`:
+
+- `app/dashboard/rapoarte/auditor-vault/page.tsx` nu mai blocheaza toata pagina pana vine `heavy payload`
+- pagina randaza acum shell-ul si ledger-ul de baza imediat ce exista `core payload`
+- sectiunile grele se incarca local, separat:
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+  - `TraceabilityMatrixCard`
+- efect:
+  - `Compliance Pack` si `traceability` nu mai opresc randarea registrului de dovezi, snapshot-ului si timeline-ului
+  - loading-ul a trecut de la full-page blocking la `section-level loading`, ceea ce este mai sanatos pentru `Vault`
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte/auditor-vault`
+  - inainte: `17.3 kB / 189 kB first load`
+  - dupa: `9.69 kB / 181 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Pas de performanta - `Setari`:
+
+- `app/dashboard/setari/page.tsx` nu mai tine in modulul initial toata logica pentru taburile grele `Integrari` si `Operational`
+- taburile au fost extrase in componente dedicate:
+  - `components/compliscan/settings/settings-integrations-tab.tsx`
+  - `components/compliscan/settings/settings-operational-tab.tsx`
+- tipurile, helper-ele si loading shell-urile comune au fost mutate in:
+  - `components/compliscan/settings/settings-shared.tsx`
+- efect:
+  - shell-ul `Setari` pastreaza orchestration-ul si intentia paginii
+  - diagnosticele de infrastructura si release readiness intra doar cand utilizatorul deschide taburile respective
+  - pagina ramane aliniata cu doctrina `summary / detail / action`, fara sa incarce upfront tot contextul operational
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: aproximativ `11.7 kB / 185 kB first load`
+  - dupa: `7.73 kB / 184 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
 - `npm run build` -> verde

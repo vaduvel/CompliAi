@@ -28,6 +28,39 @@
 | **Motion** | Purposeful, fast (150-250ms) | Bouncy, decorative, slow |
 | **Language** | Romanian-first UI labels | Mixed or inconsistent language |
 
+### 1.3 Page Governance Doctrine
+
+The principles above become operational only when they are applied together as a page-composition doctrine.
+
+This doctrine is not optional. It is the canonical rule for large product surfaces.
+
+Core doctrine:
+
+- **Progressive Disclosure**
+- **Trust Through Transparency**
+- **Role-Aware Surfaces**
+- **Tab-based sub-navigation**
+- **Summary / Detail / Action separation**
+- **One dominant page intent**
+
+What this means in practice:
+
+- one large page has one dominant intent
+- sub-sections stay in local tabs, not as competing sidebar shortcuts
+- summary, execution, and export are not allowed to compete equally on the same surface
+- the user must understand:
+  - why the system shows this
+  - what the current action is
+  - what the next handoff is
+
+Approved dominant intents:
+
+- `Dashboard` = orientation
+- `Scanare` = intake + analysis
+- `Control` = confirmation + baseline + drift
+- `Dovada` = remediation + evidence + delivery
+- `Setari` = operational administration
+
 ---
 
 ## 2. Color System
@@ -225,9 +258,12 @@ Dark mode shadows are subtle — rely more on surface color differentiation than
 
 | Concept | Icon | Context |
 |---------|------|---------|
+| Dashboard | `layout-dashboard` | Top-level nav |
 | Scanare (Scanning) | `scan-line` | Pillar nav |
 | Control | `shield-check` | Pillar nav |
 | Dovada (Evidence) | `file-check-2` | Pillar nav |
+| Setari | `settings-2` | Top-level nav |
+| Asistent | `message-square-more` | Global utility |
 | Drift | `git-compare` | Drift records |
 | Severity: Critical | `alert-octagon` | Badges, alerts |
 | Severity: High | `alert-triangle` | Badges, alerts |
@@ -571,25 +607,38 @@ The primary sub-navigation pattern within each pillar.
 
 ### 7.1 Navigation Architecture
 
+Evidence OS uses a top-level shell with:
+
+- `Dashboard`
+- `Scanare`
+- `Control`
+- `Dovada`
+- `Setari`
+
+Important:
+
+- `Scanare / Control / Dovada` remain the execution pillars
+- `Dashboard` is orientation/home, not a duplicate of `Control`
+- `Setari` is operational/admin surface, not an execution pillar
+- `Asistent` is a global utility and may be opened from a global trigger or separate history page
+- sidebar must not expose old operational shortcuts as if they were parallel products
+- `components/dashboard/*` is a legacy demo layer and must not be used as source of truth for new work
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  SIDEBAR (240px / 64px collapsed)                           │
 │  ┌──────────────────────────┐  ┌──────────────────────────┐│
 │  │  CompliScan Logo         │  │  MAIN CONTENT AREA       ││
 │  │  ───────────────────     │  │                          ││
-│  │  PILLARS                 │  │  ┌─ Tab Bar ──────────┐  ││
-│  │  ○ Scanare               │  │  │ Tab 1 │ Tab 2 │ T3 │  ││
-│  │  ○ Control               │  │  └────────────────────┘  ││
-│  │  ○ Dovada                │  │                          ││
-│  │  ───────────────────     │  │  ┌─ Content ──────────┐  ││
-│  │  SHORTCUTS               │  │  │                    │  ││
-│  │  ○ Documente             │  │  │  (Tab content)     │  ││
-│  │  ○ Sisteme AI            │  │  │                    │  ││
-│  │  ○ Remediere             │  │  │                    │  ││
-│  │  ○ Alerte                │  │  └────────────────────┘  ││
-│  │  ○ Audit si export       │  │                          ││
-│  │  ───────────────────     │  │                          ││
-│  │  ○ Setari                │  │                          ││
+│  │  TOP-LEVEL NAV           │  │  ┌─ Tab Bar ──────────┐  ││
+│  │  ○ Dashboard             │  │  │ Tab 1 │ Tab 2 │ T3 │  ││
+│  │  ○ Scanare               │  │  └────────────────────┘  ││
+│  │  ○ Control               │  │                          ││
+│  │  ○ Dovada                │  │  ┌─ Content ──────────┐  ││
+│  │  ○ Setari                │  │  │  (Tab content)     │  ││
+│  │  ───────────────────     │  │  │                    │  ││
+│  │  GLOBAL UTILITY          │  │  └────────────────────┘  ││
+│  │  ◇ Asistent              │  │                          ││
 │  │  ───────────────────     │  │                          ││
 │  │  [Org Switcher]          │  │                          ││
 │  │  [User Avatar]           │  │                          ││
@@ -730,21 +779,24 @@ The agent review interface uses a **tri-column layout**:
 
 ## 8. Page Templates
 
-### 8.1 Pillar Page Template
+### 8.1 Top-Level Page Templates
 
-All three pillars (Scanare, Control, Dovada) share a common structure:
+`Scanare`, `Control`, `Dovada` share the same execution-page structure.
+
+`Dashboard` and `Setari` are top-level shell surfaces with different intent.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  SIDEBAR │  PAGE HEADER                                      │
 │          │  ┌──────────────────────────────────────────────┐ │
-│  ○ Scan  │  │  Page Title (heading-1)      [Action Bar]   │ │
-│  ● Ctrl  │  │  Description (body, secondary)              │ │
-│  ○ Dov   │  └──────────────────────────────────────────────┘ │
+│  ○ Dash  │  │  Page Title (heading-1)      [Action Bar]   │ │
+│  ○ Scan  │  │  Description (body, secondary)              │ │
+│  ● Ctrl  │  └──────────────────────────────────────────────┘ │
+│  ○ Dov   │  ┌──────────────────────────────────────────────┐ │
+│  ○ Set   │  │  Tab 1  │  Tab 2  │  Tab 3  │  Tab 4       │ │
 │          │  ┌──────────────────────────────────────────────┐ │
-│  ─────   │  │  Tab 1  │  Tab 2  │  Tab 3  │  Tab 4       │ │
-│  Shortcuts│  └──────────────────────────────────────────────┘ │
-│          │  ┌──────────────────────────────────────────────┐ │
+│  Utility │  └──────────────────────────────────────────────┘ │
+│  Assist  │  ┌──────────────────────────────────────────────┐ │
 │          │  │  TOOLBAR                                     │ │
 │          │  │  [Search] [Filters] [Sort]     [View toggle] │ │
 │          │  └──────────────────────────────────────────────┘ │
@@ -757,24 +809,84 @@ All three pillars (Scanare, Control, Dovada) share a common structure:
 └──────────────────────────────────────────────────────────────┘
 ```
 
+#### Canonical Page Recipes
+
+To function as a page system, Evidence OS needs page-level recipes, not only primitive controls.
+
+The canonical recipe layer is:
+
+| Primitive | Purpose | Rules |
+|-----------|---------|-------|
+| `PageIntro` | Single page opening block for title, description, badges and optional actions | Max 1 per page. No metrics grid inside it. No tutorial essay. |
+| `SummaryStrip` | Compact row of 2-4 current-state summaries | Use for state, not onboarding. No primary CTA inside summary items. |
+| `ActionCluster` | Grouping for page-level CTAs | Max 1 primary action and up to 2 secondary actions. |
+| `HandoffCard` | Explicit delegation to the next pillar or route | Use only when a page hands work off elsewhere. |
+| `SectionBoundary` | Boundary between major sections on the same page | One message, one title, one context block. Replaces ad-hoc guide banners. |
+
+Composition rules:
+
+- `Dashboard` and `Setari` may use `PageIntro` + `SummaryStrip` as their top recipe.
+- Execution pages use `PageIntro`, then tabs, then a `SectionBoundary` above the active workspace.
+- `SummaryStrip` and `HandoffCard` must not explain the same concept twice on the same page.
+- A page may have multiple `SectionBoundary` blocks, but only one `PageIntro`.
+- If a page needs more than one intro or more than one guide card before action, the IA is wrong.
+- Guide content should become either `SectionBoundary` or `HandoffCard`, never a bespoke freeform hero.
+
+#### Legacy Dashboard Boundary
+
+`components/dashboard/*` is explicitly **legacy**.
+
+Reasons:
+
+- it was built as a demo shell, not as the current runtime source of truth
+- it uses hard-coded mock data and placeholder toasts
+- it still depends on `components/ui/*` instead of canonical `components/evidence-os/*`
+- it does not follow the approved IA for `Dashboard / Scanare / Control / Dovada / Setari`
+- it competes mentally with the real runtime if reused or referenced as a live pattern
+
+Rules:
+
+- do not build new surfaces from `components/dashboard/*`
+- do not copy layout patterns from it into runtime pages
+- treat it as audit material / migration residue until Codex principal retires or isolates it
+
 ### 8.2 Pillar-Specific Templates
+
+**Dashboard**
+
+| Section | Content |
+|---------|---------|
+| Readiness | Health, release readiness, blockers |
+| Drift feed | Most important drift signals |
+| Next best action | Single clear guidance block |
+| Evidence quality summary | Weak / missing evidence summary |
+| Audit readiness snapshot | High-level audit state |
 
 **Scanare (Scanning)**
 
 | Tab | Content |
 |-----|---------|
-| Flux scanare | Wizard stepper + step content |
-| Verdicts | Table: findings with severity badges, source, confidence |
-| Rezultate | Summary cards + traceability preview |
+| Adauga sursa | Wizard stepper + source preparation |
+| Rezultat curent | Findings, verdict, explanation |
+| Istoric | Recent scans + history entry point |
 
 **Control**
 
 | Tab | Content |
 |-----|---------|
-| Sisteme AI | System cards / table with state badges |
-| Baseline | Baseline timeline + comparison view |
+| Overview | Summary of inventory, baseline, drift, review queues |
+| Sisteme | Container for inventory/discovery/compliance/baseline |
 | Drift | Drift table with lifecycle badges, SLA indicators |
-| Discovery | AIDiscoveryPanel — active detections only |
+| Review | Human review queues and pending confirmations |
+
+**Sisteme (sub-tabs)**
+
+| Sub-tab | Content |
+|---------|---------|
+| Inventar | Confirmed systems table/cards |
+| Discovery | Active detections only |
+| Compliance Pack | Field review and completeness |
+| Baseline | Baseline timeline + comparison view |
 
 **Dovada (Evidence)**
 
@@ -782,8 +894,18 @@ All three pillars (Scanare, Control, Dovada) share a common structure:
 |-----|---------|
 | Remediere | Task cards with evidence quality badges |
 | Dovezi | Evidence ledger table |
-| Auditor Vault | Secure read-only view with control families |
-| Audit si export | Export controls + Audit Pack preview |
+| Audit Pack | Export controls + delivery preview |
+| Vault | Secure read-only view with traceability, timeline, control families |
+
+**Setari**
+
+| Tab | Content |
+|-----|---------|
+| Workspace | Org/workspace context and baseline controls |
+| Integrari | Repo sync, Supabase, external integrations |
+| Acces | Members, roles, permissions |
+| Operational | Health, release readiness, operational diagnostics |
+| Avansat | Reset, destructive actions, advanced config |
 
 ### 8.3 Detail Page Template
 
@@ -1046,7 +1168,12 @@ module.exports = {
   ├── layout/                  # Shell & navigation
   │   ├── AppShell.tsx         # Sidebar + main content
   │   ├── Sidebar.tsx          # Collapsible sidebar
-  │   ├── PageHeader.tsx       # Title + description + actions
+  │   ├── PageIntro.tsx        # Title + description + badges + action cluster
+  │   ├── SummaryStrip.tsx     # Compact page-level summary row
+  │   ├── ActionCluster.tsx    # Canonical CTA grouping
+  │   ├── HandoffCard.tsx      # Explicit route/pillar handoff
+  │   ├── SectionBoundary.tsx  # Section title + context boundary
+  │   ├── PageHeader.tsx       # Legacy alias during migration
   │   ├── Toolbar.tsx          # Search + filters + view toggle
   │   └── Breadcrumb.tsx       # Navigation breadcrumb
   │
