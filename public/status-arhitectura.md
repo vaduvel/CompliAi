@@ -1314,3 +1314,22 @@ Asta este sanatos arhitectural pentru ca:
 - starea si urmatorul pas bat framing-ul si explicatia
 - `summary / detail / action` este aplicat si la nivel de componente
 - pasul nu schimba shell-ul paginii si nu schimba business logic
+
+## Actualizare 2026-03-15 - `Dashboard` cleanup suplimentar
+
+- `Dashboard` foloseste acum mai clar regula `blocaj + urmatorul pas`
+- `SummaryStrip` a pierdut descrierea redundanta si spune direct ce cere actiune
+- `Unde continui` nu mai pune toate traseele la greutate egala:
+  - pasul curent este urcat primul
+  - pasul curent este marcat explicit cu `acum`
+- `Stare curenta` nu mai trimite generic spre `Scanare` / `Control`, ci spre actiunea dominanta din starea reala:
+  - scanare lipsa
+  - baseline nevalidat
+  - drift deschis
+  - control stabil
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Dashboard` ramane orientare pura, nu home explicativ
+- actiunea principala domina fara sa deschidem produs paralel
+- `summary / detail / action` este aplicat si la nivelul home-ului operational

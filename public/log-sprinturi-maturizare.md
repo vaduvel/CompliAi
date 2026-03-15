@@ -2208,6 +2208,33 @@ Pas suplimentar - `Dashboard` orientation hardening:
   - `Scanare`
   - `Control`
 
+Inchidere executie - `Dashboard` cleanup suplimentar:
+
+- `components/compliscan/route-sections.tsx` a primit un al treilea pass scurt, orientat strict pe `blocaj + urmatorul pas`
+- `SummaryStrip` spune acum direct `Ce cere actiune acum`, fara descriere suplimentara
+- `Unde continui` nu mai lasa toate cele trei directii la greutate egala:
+  - pasul curent este urcat primul
+  - pasul curent este marcat explicit cu `acum`
+  - badge-ul de stare spune daca exista blocaj urgent sau nu
+- `Stare curenta` foloseste acum CTA contextual:
+  - `Porneste scanarea`
+  - `Confirma baseline-ul`
+  - `Inchide remedierea`
+  - `Verifica controlul`
+- CTA-ul secundar ramane doar ca suport contextual:
+  - `Vezi drifturile`
+  - `Vezi sistemele`
+  - `Vezi istoricul`
+- efect:
+  - `Dashboard` se citeste mai clar ca orientare si handoff
+  - urmatorul pas bate explicatia si butoanele generice
+  - build-ul ramane stabil:
+    - `/dashboard` in zona `1.62 kB / 170 kB first load`
+- validare:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 Pornire executie - `Control wave 1` page shell:
 
 - `app/dashboard/sisteme/page.tsx` a primit primul pass de austeritate pe shell

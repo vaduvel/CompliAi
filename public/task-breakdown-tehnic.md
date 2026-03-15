@@ -1049,10 +1049,12 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - ierarhie mai clara pentru filtre
   - `TaskCard` mai usor de scanat
   - CTA primar mai dominant
-- [ ] `Dashboard` cleanup suplimentar
+- [x] `Dashboard` cleanup suplimentar
   - orientare pura
   - blocaj + urmatorul pas dominante
   - fara competitie cu proof si panouri suport
+  - `Unde continui` ridica si marcheaza pasul curent
+  - `Stare curenta` trimite spre actiunea dominanta, nu generic spre aceleasi doua zone
 - [ ] orice pas nou pe `Agent Evidence OS` ramane sub regula:
   - layer peste produsul actual
   - fara produs paralel

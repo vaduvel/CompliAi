@@ -973,3 +973,15 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba modelul de produs
   - nu muta home-ul spre executie
   - intareste rolul de orientare pura
+
+Actualizare suplimentara 2026-03-15:
+
+- `Dashboard cleanup suplimentar` este inchis
+- asta inseamna:
+  - `Unde continui` ridica pasul curent si il marcheaza explicit
+  - `Stare curenta` trimite spre actiunea corecta pentru blocajul real
+  - descrierea redundanta din `SummaryStrip` a fost eliminata
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba modelul de produs
+  - intareste rolul de `Dashboard = orientare pura`

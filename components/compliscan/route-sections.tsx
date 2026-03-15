@@ -272,8 +272,7 @@ function OverviewSummaryStrip({
       <CardContent className="px-5 py-5">
         <SummaryStrip
           eyebrow="Stare curenta"
-          title="Ce e blocat si unde mergi"
-          description="Vezi imediat ce cere actiune."
+          title="Ce cere actiune acum"
           items={items}
         />
       </CardContent>
@@ -565,11 +564,19 @@ export function DashboardGuideCard({
   hasValidatedBaseline: boolean
   latestDocumentScan: ScanRecord | null
 }) {
+  const currentStepId = !latestDocumentScan
+    ? "step-scan"
+    : !hasValidatedBaseline
+      ? "step-confirm"
+      : activeRiskCount > 0 || openAlertsCount > 0
+        ? "step-close"
+        : "step-confirm"
+
   const guideSteps = [
     {
       id: "step-scan",
       title: "Scanare",
-      description: "Adaugi sursa noua.",
+      description: "Adaugi sursa.",
       href: "/dashboard/scanari",
       icon: FileText,
       meta: latestDocumentScan
@@ -579,7 +586,7 @@ export function DashboardGuideCard({
     {
       id: "step-confirm",
       title: "Control",
-      description: "Confirmi baseline si drift.",
+      description: "Confirmi baseline.",
       href: "/dashboard/sisteme",
       icon: GitBranch,
       meta: hasValidatedBaseline
@@ -589,7 +596,7 @@ export function DashboardGuideCard({
     {
       id: "step-close",
       title: "Dovada",
-      description: "Inchizi taskul si pregatesti livrabilul.",
+      description: "Inchizi remedierea.",
       href: "/dashboard/checklists",
       icon: ListChecks,
       meta:
@@ -597,34 +604,50 @@ export function DashboardGuideCard({
           ? `${activeRiskCount} riscuri active cer inchidere`
           : "Dovada este gata de verificare",
     },
-  ]
+  ].sort((left, right) => {
+    if (left.id === currentStepId) return -1
+    if (right.id === currentStepId) return 1
+    return 0
+  })
 
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Traseu rapid</CardTitle>
+            <CardTitle className="text-xl">Unde continui</CardTitle>
           </div>
           <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-            {openAlertsCount} drifturi deschise
+            {openAlertsCount > 0 ? `${openAlertsCount} drifturi cer review` : "fara blocaj urgent"}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="grid gap-3 pt-5 md:grid-cols-3">
         {guideSteps.map((step) => {
           const Icon = step.icon
+          const isCurrentStep = step.id === currentStepId
           return (
             <Link
               key={step.id}
               href={step.href}
-              className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]"
+              className={`group rounded-2xl border p-4 transition ${
+                isCurrentStep
+                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
+                  : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]"
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="grid size-10 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
                   <Icon className="size-4" strokeWidth={2.25} />
                 </div>
-                <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
+                <div className="flex items-center gap-2">
+                  {isCurrentStep ? (
+                    <Badge className="border-[var(--border-subtle)] bg-[var(--bg-inset)] text-[var(--text-primary)]">
+                      acum
+                    </Badge>
+                  ) : null}
+                  <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
+                </div>
               </div>
               <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
               <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
@@ -651,23 +674,37 @@ export function SnapshotStatusCard({
   openDriftCount: number
 }) {
   const latestEvent = events[0] ?? null
+  const primaryAction = !latestDocumentScan
+    ? { href: "/dashboard/scanari", label: "Porneste scanarea" }
+    : !hasValidatedBaseline
+      ? { href: "/dashboard/sisteme", label: "Confirma baseline-ul" }
+      : openDriftCount > 0
+        ? { href: "/dashboard/checklists", label: "Inchide remedierea" }
+        : { href: "/dashboard/sisteme", label: "Verifica controlul" }
+  const secondaryAction = openDriftCount > 0
+    ? { href: "/dashboard/alerte", label: "Vezi drifturile" }
+    : latestManifestScan
+      ? { href: "/dashboard/sisteme", label: "Vezi sistemele" }
+      : latestDocumentScan
+        ? { href: "/dashboard/documente", label: "Vezi istoricul" }
+        : null
 
   const statusItems = [
     {
       id: "status-document",
-      label: "Ultimul document",
+      label: "Document",
       value: latestDocumentScan ? latestDocumentScan.documentName : "inca lipseste",
       meta: latestDocumentScan ? formatScanMoment(latestDocumentScan) : "mergi la Scanari",
     },
     {
       id: "status-manifest",
-      label: "Ultimul repo",
+      label: "Repo",
       value: latestManifestScan ? latestManifestScan.documentName : "inca lipseste",
       meta: latestManifestScan ? formatScanMoment(latestManifestScan) : "detecteaza un manifest",
     },
     {
       id: "status-baseline",
-      label: "Baseline pentru drift",
+      label: "Baseline",
       value: hasValidatedBaseline ? "validat" : "nevalidat",
       meta: hasValidatedBaseline ? "comparatiile folosesc snapshot-ul curent" : "valideaza in Sisteme sau Setari",
     },
@@ -707,7 +744,7 @@ export function SnapshotStatusCard({
 
         {latestEvent ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ultimul eveniment</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ultimul semnal</p>
             <p className="mt-2 break-words text-sm font-semibold text-[var(--color-on-surface)]">
               {latestEvent.message}
             </p>
@@ -725,17 +762,19 @@ export function SnapshotStatusCard({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
-            href="/dashboard/scanari"
+            href={primaryAction.href}
             className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
           >
-            Scanare
+            {primaryAction.label}
           </Link>
-          <Link
-            href="/dashboard/sisteme"
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
-          >
-            Control
-          </Link>
+          {secondaryAction ? (
+            <Link
+              href={secondaryAction.href}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+            >
+              {secondaryAction.label}
+            </Link>
+          ) : null}
         </div>
       </CardContent>
     </Card>
