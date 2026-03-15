@@ -1050,3 +1050,12 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu depinde de browser sau sesiuni locale fragile
   - accelereaza auditul repetabil pe flow-ul canonic
+
+Actualizare suplimentara 2026-03-15:
+
+- traseul cloud pentru state este acum clarificat final:
+  - `public.org_state` este singura cale cloud activa
+  - `compliscan.app_state` ramane doar sursa legacy de migrare
+- in backend `supabase`, daca `org_state` lipseste, legacy-ul este migrat in `org_state`
+- runtime-ul curent nu mai scrie in `app_state`
+- asta inchide ambiguitatea ramasa din Sprint 5 fara sa rupa compatibilitatea cu datele vechi

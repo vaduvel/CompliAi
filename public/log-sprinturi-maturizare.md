@@ -1983,6 +1983,27 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 
+Pas de persistence hardening - `org_state` devine singura cale cloud activa pentru state:
+
+- `lib/server/mvp-store.ts` nu mai foloseste `compliscan.app_state` ca traseu operational curent
+- `public.org_state` ramane singura cale cloud activa pentru:
+  - citire
+  - scriere
+  - migrare de stare in backend `supabase`
+- `compliscan.app_state` a ramas doar sursa legacy de migrare:
+  - este citit numai daca `org_state` lipseste
+  - starea legacy este mutata imediat in `org_state`
+- in backend `hybrid`, `org_state` ramane doar mirror, iar local ramane sursa principala
+- au fost adaugate teste noi pentru:
+  - migrarea unei stari legacy din `app_state` in `org_state`
+  - evitarea scrierii in `app_state` in modul `hybrid`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

@@ -69,10 +69,63 @@ describe("lib/server/mvp-store", () => {
       "org-1",
       expect.objectContaining(initialComplianceState)
     )
-    expect(mocks.supabaseSelectMock).not.toHaveBeenCalled()
+    expect(mocks.supabaseSelectMock).toHaveBeenCalledWith(
+      "app_state",
+      "select=org_id,state&org_id=eq.org-1&limit=1"
+    )
+  })
+
+  it("migreaza o stare legacy din app_state in org_state cand snapshotul nou lipseste", async () => {
+    mocks.loadOrgStateFromSupabaseMock.mockResolvedValueOnce(null)
+    mocks.supabaseSelectMock.mockResolvedValueOnce([
+      {
+        org_id: "org-1",
+        state: {
+          ...initialComplianceState,
+          scans: [
+            {
+              id: "scan-legacy",
+              filename: "legacy.txt",
+              uploadedAt: "2026-03-15T10:00:00.000Z",
+              status: "processed",
+              findings: [],
+              summary: "legacy summary",
+            },
+          ],
+        },
+      },
+    ])
+
+    const { readState } = await import("@/lib/server/mvp-store")
+
+    const state = await readState()
+
+    expect(state.scans).toHaveLength(1)
+    expect(state.scans[0]?.id).toBe("scan-legacy")
+    expect(mocks.persistOrgStateToSupabaseMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.objectContaining({
+        scans: [expect.objectContaining({ id: "scan-legacy" })],
+      })
+    )
   })
 
   it("scrie direct in public.org_state cand backend-ul supabase este sursa primara", async () => {
+    const { writeState } = await import("@/lib/server/mvp-store")
+
+    await writeState(initialComplianceState)
+
+    expect(mocks.persistOrgStateToSupabaseMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.objectContaining(initialComplianceState)
+    )
+    expect(mocks.supabaseUpsertMock).not.toHaveBeenCalled()
+  })
+
+  it("oglindeste doar org_state in modul hibrid si nu mai scrie app_state legacy", async () => {
+    mocks.getConfiguredDataBackendMock.mockReturnValue("hybrid")
+    mocks.shouldUseSupabaseOrgStateAsPrimaryMock.mockReturnValue(false)
+
     const { writeState } = await import("@/lib/server/mvp-store")
 
     await writeState(initialComplianceState)

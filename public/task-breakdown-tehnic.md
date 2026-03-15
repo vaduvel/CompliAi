@@ -449,7 +449,7 @@ Sprint 5 trebuie sa atace direct riscurile:
   - exista helper dedicat pentru `public.org_state`
   - in backend `supabase`, `public.org_state` poate fi citit ca sursa primara
   - in backend `hybrid`, `public.org_state` este oglindit la scriere, dar local ramane sursa principala
-- `compliscan.app_state` ramane fallback legacy pana la mutarea finala a source-of-truth-ului
+- `compliscan.app_state` ramane doar sursa legacy de migrare, nu traseu operational curent
 - `Agent Evidence OS` este acum stabilizat minimal:
   - tipuri reale in `lib/compliance/agent-os.ts`
   - endpoint-uri corecte in `/api/agent/run` si `/api/agent/commit`
@@ -465,7 +465,16 @@ Sprint 5 trebuie sa atace direct riscurile:
     - `GET /api/tasks/[id]/evidence/[evidenceId]`
   - `delivery=redirect` emite redirect securizat pentru `supabase_private`
   - `download=1` forteaza descarcare explicita
-- [ ] clarificare finala pentru `app_state` cloud ca source of truth
+- [x] clarificare finala pentru `app_state` cloud ca source of truth
+  - `public.org_state` este acum singura cale cloud activa pentru state
+  - `compliscan.app_state` mai este citit doar pentru migrare legacy in `org_state`
+  - runtime-ul curent nu mai scrie in `app_state`
+  - in `hybrid`, `org_state` ramane doar mirror, iar local ramane sursa primara
+  - in `supabase`, lipsa sau eroarea pe `org_state` ramane blocanta in mod strict
+  - validare dupa pas:
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
 - [x] consum operational mai larg pentru `public.evidence_objects`
   - `DashboardPayload` hidrateaza metadata din registrul cloud
   - `family-evidence` reutilizeaza acum dovada din starea hidratata, nu doar din state local brut

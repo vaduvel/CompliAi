@@ -1419,3 +1419,18 @@ Asta este sanatos arhitectural pentru ca:
   - `Dashboard payload`
   - derivarea de `Remediere`
 - scade dependenta de sesiuni locale fragile si de verificari manuale cap-coada
+
+## Actualizare 2026-03-15 - `org_state` este singura cale cloud activa pentru state
+
+- `lib/server/mvp-store.ts` foloseste acum `public.org_state` ca singura cale cloud activa pentru state
+- `compliscan.app_state` ramane doar sursa legacy de migrare:
+  - este citit doar daca `org_state` lipseste in backend `supabase`
+  - dupa citire, starea este mutata in `org_state`
+- runtime-ul curent nu mai scrie in `app_state`
+- in backend `hybrid`, `org_state` ramane mirror de siguranta, nu sursa primara
+
+Asta este sanatos arhitectural pentru ca:
+
+- elimina ambiguitatea intre doua tabele cloud pentru acelasi state operational
+- pastreaza compatibilitatea cu datele legacy fara sa le lase in traseul curent
+- face mai clara trecerea spre RLS si spre un source of truth unic in cloud

@@ -15,7 +15,6 @@ import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallba
 import {
   hasSupabaseConfig,
   supabaseSelect,
-  supabaseUpsert,
 } from "@/lib/server/supabase-rest"
 import {
   loadOrgStateFromSupabase,
@@ -122,6 +121,12 @@ async function loadState(orgId: string): Promise<ComplianceState> {
       const mirroredState = await loadOrgStateFromSupabase(orgId)
       if (mirroredState) return normalizeComplianceState(mirroredState)
 
+      const legacyCloudState = await loadLegacyCloudAppState(orgId)
+      if (legacyCloudState) {
+        await persistOrgStateToSupabase(orgId, legacyCloudState)
+        return structuredClone(legacyCloudState)
+      }
+
       const initialCloudState = normalizeComplianceState(initialComplianceState)
       await persistOrgStateToSupabase(orgId, initialCloudState)
       return structuredClone(initialCloudState)
@@ -133,48 +138,6 @@ async function loadState(orgId: string): Promise<ComplianceState> {
             : "SUPABASE_ORG_STATE_REQUIRED"
         )
       }
-    }
-  }
-
-  if (hasSupabaseConfig()) {
-    try {
-      type AppStateRow = { org_id: string; state: ComplianceState }
-      const rows = await supabaseSelect<AppStateRow>(
-        "app_state",
-        `select=org_id,state&org_id=eq.${orgId}&limit=1`
-      )
-      if (rows.length > 0) {
-        const normalized = normalizeComplianceState(rows[0].state)
-        if (dataBackend === "supabase") {
-          try {
-            await persistOrgStateToSupabase(orgId, normalized)
-          } catch {
-            // Ignore org_state mirror failures while legacy state remains readable.
-          }
-        }
-        return normalized
-      }
-
-      const inserted = await supabaseUpsert<
-        { org_id: string; state: ComplianceState },
-        AppStateRow
-      >("app_state", {
-        org_id: orgId,
-        state: normalizeComplianceState(initialComplianceState),
-      })
-      if (inserted[0]) {
-        const normalized = normalizeComplianceState(inserted[0].state)
-        if (dataBackend === "supabase") {
-          try {
-            await persistOrgStateToSupabase(orgId, normalized)
-          } catch {
-            // Ignore org_state mirror failures while legacy state remains readable.
-          }
-        }
-        return normalized
-      }
-    } catch {
-      // Falls back to local store if schema is not initialized yet.
     }
   }
 
@@ -198,7 +161,6 @@ async function loadState(orgId: string): Promise<ComplianceState> {
 async function persistState(orgId: string, state: ComplianceState): Promise<void> {
   const dataBackend = getConfiguredDataBackend()
   const keepLocalCopy = dataBackend !== "supabase"
-  let cloudPersisted = false
 
   if (shouldUseSupabaseOrgStateAsPrimary()) {
     try {
@@ -219,23 +181,30 @@ async function persistState(orgId: string, state: ComplianceState): Promise<void
   }
 
   try {
-    const mirrored = await persistOrgStateToSupabase(orgId, state)
-    cloudPersisted = mirrored.synced
+    await persistOrgStateToSupabase(orgId, state)
   } catch {
-    // Falls back to legacy and/or local store if public org_state is not available.
+    // Falls back to local store if public org_state mirror is not available.
   }
 
-  if (hasSupabaseConfig()) {
-    try {
-      await supabaseUpsert("app_state", { org_id: orgId, state })
-      cloudPersisted = true
-    } catch {
-      // Falls back to local store if schema is not initialized yet.
-    }
-  }
-
-  if (cloudPersisted && !keepLocalCopy) return
+  if (!keepLocalCopy) return
   await persistToDisk(orgId, state)
+}
+
+async function loadLegacyCloudAppState(orgId: string): Promise<ComplianceState | null> {
+  if (!hasSupabaseConfig()) return null
+
+  try {
+    type AppStateRow = { org_id: string; state: ComplianceState }
+    const rows = await supabaseSelect<AppStateRow>(
+      "app_state",
+      `select=org_id,state&org_id=eq.${orgId}&limit=1`
+    )
+
+    if (!rows[0]?.state) return null
+    return normalizeComplianceState(rows[0].state)
+  } catch {
+    return null
+  }
 }
 
 async function enrichStateWithSnapshots(nextState: ComplianceState): Promise<ComplianceState> {
