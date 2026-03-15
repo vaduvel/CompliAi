@@ -203,7 +203,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 1 && (
             <div className="space-y-4">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Identifica sistemul pe care vrei sa-l clasifici.
+                Identifica sistemul pe care il confirmi acum in inventar.
               </p>
               <input
                 value={name}
@@ -231,7 +231,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 2 && (
             <div className="space-y-3">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Care este scopul principal al sistemului?
+                Alege scopul dominant ca sa fixam clasa de risc.
               </p>
               <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
                 {PURPOSE_OPTIONS.map((opt) => (
@@ -273,7 +273,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 3 && (
             <div className="space-y-3">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Raspunde la urmatoarele intrebari pentru a rafina clasificarea.
+                Marcheaza doar semnalele care schimba riscul sau obligatiile de control.
               </p>
               {[
                 {
@@ -329,7 +329,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 4 && (
             <div className="space-y-4">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Clasificarea sistemului bazata pe raspunsurile tale.
+                Rezultatul pe care il vei confirma in inventar.
               </p>
               <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -352,10 +352,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                 )}
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+              <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
                   Urmatorii pasi recomandati
-                </p>
+                </summary>
                 <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
                   {previewClassification.recommendedActions.map((action, i) => (
                     <li key={i} className="flex gap-2">
@@ -367,7 +367,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     </li>
                   ))}
                 </ul>
-              </div>
+              </details>
             </div>
           )}
 
@@ -458,18 +458,16 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     </div>
 
                     <div className="flex flex-col items-end gap-3">
-                      <div className="grid gap-1.5 text-right text-sm text-[var(--color-muted)]">
-                        <span>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
                           {system.usesPersonalData ? "Date personale" : "Fara date personale"}
-                        </span>
-                        <span>
-                          {system.makesAutomatedDecisions
-                            ? "Decizie automata"
-                            : "Asistenta, fara decizie automata"}
-                        </span>
-                        <span>
+                        </Badge>
+                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                          {system.makesAutomatedDecisions ? "Decizie automata" : "Asistenta"}
+                        </Badge>
+                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
                           {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
-                        </span>
+                        </Badge>
                       </div>
                       <button
                         onClick={() => void handleRemove(system.id)}
@@ -482,10 +480,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
                       Urmatorii pasi
-                    </p>
+                    </summary>
                     <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
                       {system.recommendedActions.map((item, index) => (
                         <li key={`${system.id}-${index}`} className="flex gap-2">
@@ -497,7 +495,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </details>
                 </div>
               )
             })}

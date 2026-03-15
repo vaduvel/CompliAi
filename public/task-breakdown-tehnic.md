@@ -1156,3 +1156,21 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Control wave 1` component density pass
+  - `AIDiscoveryPanel`
+    - contextul de suport si evidenta detectiei coboara sub disclosure
+    - lista activa ramane mai scanabila
+  - `AIInventoryPanel`
+    - wizard cu copy mai scurt
+    - semnale rapide ca badge-uri
+    - `Urmatorii pasi` sub disclosure
+  - `AICompliancePack`
+    - snapshot si prefill status raman sus
+    - `coverage`, `sources`, `controls + trace`, `Annex IV lite` coboara sub disclosure
+- [x] efect confirmat in build:
+  - `/dashboard/sisteme` ramane la `9.28 kB / 179 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

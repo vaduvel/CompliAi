@@ -1226,3 +1226,31 @@ Asta este sanatos arhitectural pentru ca:
 - starea si traseul bat explicatia lunga
 - integrarile raman in `Setari`, executia ramane in `Dovada`
 - pasul nu schimba business logic si nu intra peste lotul component-level
+
+## Actualizare 2026-03-15 - `Control wave 1` component density pass
+
+- `AIDiscoveryPanel` a coborat sub disclosure:
+  - explicatia de suport
+  - sursa detectiei
+  - evidenta detectiei
+- `AIInventoryPanel` foloseste acum:
+  - copy mai scurt in wizard
+  - badge-uri rapide pentru semnalele de risc
+  - `Urmatorii pasi` sub disclosure
+- `AICompliancePack` pastreaza sus:
+  - snapshot
+  - prefill status
+  - confidence model
+  - suggested next step
+- blocurile grele sunt acum sub disclosure local:
+  - source coverage details
+  - semnale si surse
+  - controale + evidence bundle + trace
+  - Annex IV lite
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Control` ramane suprafata de confirmare si triere, nu document dump
+- starea si urmatorul pas bat framing-ul si explicatia
+- `summary / detail / action` este aplicat si la nivel de componente
+- pasul nu schimba shell-ul paginii si nu schimba business logic
