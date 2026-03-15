@@ -2063,6 +2063,26 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 
+Pas de runtime UX - `Checklists wave 3` authority pass:
+
+- `app/dashboard/checklists/page.tsx` foloseste acum `Blocaj curent` in loc de `score / risk`
+- `components/compliscan/remediation-board.tsx` ordoneaza board-ul `ALL` dupa:
+  - blocaje de audit
+  - urgente P1
+  - remedieri rapide
+  - remedieri structurale
+- `components/compliscan/task-card.tsx` tine mai clar sus:
+  - primul pas
+  - blocajul de audit
+  - actiunea principala
+- detaliile de verificare si utilitarele raman sub disclosure
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

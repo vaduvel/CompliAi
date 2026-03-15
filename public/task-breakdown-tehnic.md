@@ -1119,6 +1119,24 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
     - `deschise`
     - `P1`
     - `fara dovada`
+- [x] `Checklists wave 3` authority pass
+  - `Remediere` porneste acum din blocajul real, nu din `score / risk`
+  - board-ul `ALL` ordoneaza acum:
+    - `Blocaje de audit`
+    - `Urgente P1`
+    - `Remedieri rapide`
+    - `Remedieri structurale`
+  - `TaskCard` tine sus:
+    - primul pas
+    - blocajul de audit
+    - CTA-ul primar
+  - detaliile de verificare si utilitarele raman sub disclosure
+  - efect confirmat in build:
+    - `/dashboard/checklists` ramane in zona `7.52 kB / 179 kB first load`
+  - validare completa dupa pas:
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
 - [x] orice pas nou pe `Agent Evidence OS` ramane sub regula:
   - layer peste produsul actual
   - fara produs paralel

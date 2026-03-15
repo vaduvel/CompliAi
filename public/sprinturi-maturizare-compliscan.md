@@ -1095,3 +1095,12 @@ Actualizare suplimentara 2026-03-15:
   - `Dashboard` tine directia buna
   - `Checklists` ramane cea mai densa pagina vizibila
   - densitatea ramasa nu mai blocheaza firul canonic
+
+Actualizare suplimentara 2026-03-15:
+
+- `Checklists wave 3` a impins pagina spre un cockpit de executie mai dur
+- asta inseamna:
+  - `Blocaje de audit` urca primele in board
+  - `Urgente P1` raman imediat dupa ele
+  - `TaskCard` tine sus primul pas si blocajul curent
+  - utilitarele si rationale-ul raman sub disclosure

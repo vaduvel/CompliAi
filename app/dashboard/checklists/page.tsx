@@ -29,6 +29,12 @@ export default function RemediationPage() {
   const evidenceAttached = cockpit.tasks.filter((task) => Boolean(task.attachedEvidence))
   const openPriorityOneTasks = openTasks.filter((task) => task.priority === "P1")
   const tasksMissingEvidence = openTasks.filter((task) => !task.attachedEvidence)
+  const dominantExecutionSignal =
+    tasksMissingEvidence.length > 0
+      ? `${tasksMissingEvidence.length} task-uri fara dovada`
+      : openPriorityOneTasks.length > 0
+        ? `${openPriorityOneTasks.length} urgente P1`
+        : `${openTasks.length} task-uri active`
   const items: SummaryStripItem[] = [
     {
       label: "Task-uri deschise",
@@ -69,10 +75,16 @@ export default function RemediationPage() {
         aside={
           <div className="space-y-2">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Snapshot dovada
+              Blocaj curent
             </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+            <p className="text-2xl font-semibold text-eos-text">{dominantExecutionSignal}</p>
+            <p className="text-sm text-eos-text-muted">
+              {tasksMissingEvidence.length > 0
+                ? "Atasezi dovada inainte sa inchizi task-ul."
+                : openPriorityOneTasks.length > 0
+                  ? "Intri in urgentele P1 inaintea restului."
+                  : "Poti lucra direct din board fara blocaje majore."}
+            </p>
           </div>
         }
       />

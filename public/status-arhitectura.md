@@ -1488,3 +1488,23 @@ Asta este sanatos arhitectural pentru ca:
 - inchide auditul final intr-o forma repetabila, nu doar vizuala sau contextuala
 - leaga runtime UX de payload si handoff real
 - reduce dependenta de sesiuni locale fragile pentru verificarea fluxului principal
+
+## Actualizare 2026-03-15 - `Checklists` primeste un pass mai dur pe autoritatea de executie
+
+- `app/dashboard/checklists/page.tsx` nu mai foloseste `score / risk` ca signal principal de intrare
+- `components/compliscan/remediation-board.tsx` ordoneaza acum board-ul `ALL` dupa:
+  - blocaje de audit
+  - urgente P1
+  - remedieri rapide
+  - remedieri structurale
+- `components/compliscan/task-card.tsx` tine acum sus:
+  - primul pas
+  - blocajul de audit
+  - CTA-ul primar
+- detaliile de verificare si utilitarele raman sub disclosure
+
+Asta este sanatos arhitectural pentru ca:
+
+- muta `Checklists` mai aproape de un cockpit de executie, nu de o pagina de explicatii
+- face dovada lipsa si urgenta P1 dominante fata de framing
+- pastreaza separarea intre actiune si suport

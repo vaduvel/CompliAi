@@ -54,8 +54,19 @@ export function RemediationBoard({
     if (activeFilter === "DONE") return task.status === "done"
     return task.priority === activeFilter && task.status !== "done"
   })
-  const rapidTasks = visibleTasks.filter((task) => task.remediationMode === "rapid")
-  const structuralTasks = visibleTasks.filter((task) => task.remediationMode === "structural")
+  const evidenceBlockedTasks = visibleTasks.filter(
+    (task) => task.status !== "done" && !task.attachedEvidence
+  )
+  const urgentTasks = visibleTasks.filter(
+    (task) => task.status !== "done" && task.priority === "P1" && task.attachedEvidence
+  )
+  const groupedTaskIds = new Set([...evidenceBlockedTasks, ...urgentTasks].map((task) => task.id))
+  const rapidTasks = visibleTasks.filter(
+    (task) => task.remediationMode === "rapid" && !groupedTaskIds.has(task.id)
+  )
+  const structuralTasks = visibleTasks.filter(
+    (task) => task.remediationMode === "structural" && !groupedTaskIds.has(task.id)
+  )
   const openCount = tasks.filter((task) => task.status !== "done").length
   const openPriorityOneCount = tasks.filter(
     (task) => task.status !== "done" && task.priority === "P1"
@@ -112,6 +123,32 @@ export function RemediationBoard({
             title="Nu exista task-uri pentru filtrul curent"
             label="Schimba filtrul sau ruleaza un scan nou pentru remedieri relevante."
             className="border-[var(--color-border)] bg-[var(--color-surface-variant)]"
+          />
+        )}
+
+        {activeFilter === "ALL" && evidenceBlockedTasks.length > 0 && (
+          <TaskGroup
+            title="Blocaje de audit"
+            description="Task-uri fara dovada atasata. Le rezolvi primele ca sa nu blocheze inchiderea si exportul."
+            tone="danger"
+            tasks={evidenceBlockedTasks}
+            highlightedTaskId={highlightedTaskId}
+            onMarkDone={onMarkDone}
+            onAttachEvidence={onAttachEvidence}
+            onExport={onExport}
+          />
+        )}
+
+        {activeFilter === "ALL" && urgentTasks.length > 0 && (
+          <TaskGroup
+            title="Urgente P1"
+            description="Task-uri cu prioritate maxima care au deja context suficient ca sa fie inchise imediat."
+            tone="warning"
+            tasks={urgentTasks}
+            highlightedTaskId={highlightedTaskId}
+            onMarkDone={onMarkDone}
+            onAttachEvidence={onAttachEvidence}
+            onExport={onExport}
           />
         )}
 
@@ -208,7 +245,7 @@ function TaskGroup({
 }: {
   title: string
   description: string
-  tone: "info" | "warning"
+  tone: "info" | "warning" | "danger"
   tasks: CockpitTask[]
   highlightedTaskId?: string | null
   onMarkDone: (id: string) => void
@@ -218,7 +255,9 @@ function TaskGroup({
   const toneClass =
     tone === "info"
       ? "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
-      : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+      : tone === "danger"
+        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+        : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
 
   return (
     <div className="space-y-3">

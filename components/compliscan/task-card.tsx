@@ -144,6 +144,14 @@ function nextActionLabel(task: CockpitTask) {
   return task.steps[0] ?? task.fixPreview ?? task.summary
 }
 
+function auditBlockerLabel(task: CockpitTask) {
+  if (!task.attachedEvidence) return "Lipseste dovada pentru inchidere si audit."
+  if (task.validationStatus === "failed") return "Ultima verificare a respins task-ul si cere revenire."
+  if (task.validationStatus === "needs_review") return "Task-ul cere confirmare umana inainte de inchidere."
+  if (task.status === "done") return "Task-ul este inchis si poate fi verificat separat in Vault."
+  return "Nu exista blocaje majore vizibile pentru task-ul curent."
+}
+
 export function TaskCard({
   task,
   highlighted,
@@ -162,6 +170,7 @@ export function TaskCard({
     : null
   const hasDistinctFixPreview = hasDistinctTaskCopy(task.summary, task.fixPreview)
   const nextAction = nextActionLabel(task)
+  const auditBlocker = auditBlockerLabel(task)
   const visiblePrinciples = task.principles.slice(0, 2)
   const hiddenPrinciples = task.principles.slice(visiblePrinciples.length)
   const hiddenPrinciplesLabel = hiddenPrinciples
@@ -226,10 +235,13 @@ export function TaskCard({
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Urmatoarea actiune
+                  Primul pas
                 </p>
                 <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
                   {nextAction}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+                  {auditBlocker}
                 </p>
               </div>
             </div>
@@ -245,9 +257,13 @@ export function TaskCard({
                 >
                   {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
                 </Badge>
-                <Badge className={validationTone(task.validationStatus)}>
-                  {validationLabel(task.validationStatus)}
-                </Badge>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Blocaj acum
+                </p>
+                <p className="mt-1 text-sm text-[var(--color-on-surface)]">{auditBlocker}</p>
               </div>
 
               <div className="mt-4 space-y-2">
@@ -392,28 +408,16 @@ export function TaskCard({
 
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
               <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                Verificare rapida
+                Blocaj de audit
               </p>
               <p className="mt-2 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
-                {task.validationMessage || "Task-ul nu a fost validat inca."}
+                {auditBlocker}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {task.validationBasis ? (
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    baza: {validationBasisLabel(task.validationBasis)}
-                  </Badge>
-                ) : null}
-                {task.validationConfidence ? (
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    {validationConfidenceLabel(task.validationConfidence)}
-                  </Badge>
-                ) : null}
-                {task.validatedAtLabel ? (
-                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                    {task.validatedAtLabel}
-                  </Badge>
-                ) : null}
-              </div>
+              {task.validationMessage ? (
+                <p className="mt-3 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+                  {task.validationMessage}
+                </p>
+              ) : null}
             </div>
           </section>
 
