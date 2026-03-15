@@ -1936,6 +1936,37 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de UX runtime - `Auditor Vault wave 1` page-shell declutter:
+
+- `app/dashboard/rapoarte/auditor-vault/page.tsx`
+  - scurteaza `PageIntro` si muta accentul pe readiness real, nu pe framing doctrinar
+  - aside-ul urca acum starea utila:
+    - `ready / review`
+    - drift activ
+    - gap de dovada
+  - `SummaryStrip` este mai direct:
+    - `Ce sustii acum in audit`
+  - `SectionBoundary` nu mai cara `VaultGuideCard`
+  - `HandoffCard` si bannerul de export folosesc copy mai dura si mai orientata pe rol
+
+Efect:
+
+- `Auditor Vault` se simte mai clar ca ledger de audit si mai putin ca pagina care se explica singura
+- statusul si iesirea spre pagina corecta bat explicatia redundanta
+- pasul nu schimba business logic, exporturile sau matricea de trasabilitate
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte/auditor-vault`
+  - inainte: `8.03 kB / 181 kB first load`
+  - dupa: `7.74 kB / 181 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Control wave 1` component density pass:
 
 - `components/compliscan/ai-discovery-panel.tsx`

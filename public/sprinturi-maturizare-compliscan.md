@@ -924,6 +924,22 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba shell-ul paginii
   - reduce densitatea fara sa piarda trasabilitatea
 
+Actualizare suplimentara 2026-03-15:
+
+- `Auditor Vault` a primit `wave 1` la nivel de page shell
+- asta inseamna:
+  - intro mai scurt
+  - statusul de audit mai sus
+  - mai putin ghidaj redundant
+  - handoff mai clar intre:
+    - ledger intern
+    - executie
+    - livrabil
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba traceability sau export
+  - intareste rolul de `ledger + trasabilitate`
+
 - `Dashboard` a primit si un al doilea pass scurt de austeritate pe home:
   - `Traseu rapid` mai scurt si mai dur
   - `Stare curenta` in loc de `Snapshot rapid`

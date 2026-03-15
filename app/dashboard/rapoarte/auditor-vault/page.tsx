@@ -179,12 +179,12 @@ export default function AuditorVaultPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Vault"
-        title="Aici legi dovada, trasabilitatea si schimbarea intr-o vedere audit-ready"
-        description="Vault nu este board de executie si nici pagina de export. Este vederea in care sursele, articolele, dovezile si schimbarile recente se leaga intr-un loc sustenabil intern sau extern."
+        title="Ledger-ul in care verifici daca auditul chiar se sustine"
+        description="Aici vezi daca dovada, trasabilitatea si schimbarea recentă tin impreuna. Daca apare un gap, revii in executie sau finalizezi in Audit si export."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              ledger audit-ready
+              audit ledger
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
               trasabilitate
@@ -194,10 +194,14 @@ export default function AuditorVaultPage() {
         aside={
           <div className="space-y-2">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Snapshot vault
+              Stare vault
             </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+            <p className="text-2xl font-semibold text-eos-text">
+              {auditReadiness === "audit_ready" ? "ready" : "review"}
+            </p>
+            <p className="text-sm text-eos-text-muted">
+              drift {activeDrifts.length} · gap dovezi {evidenceMissingTasks.length}
+            </p>
           </div>
         }
         actions={
@@ -220,33 +224,32 @@ export default function AuditorVaultPage() {
 
       <PillarTabs sectionId="dovada" />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Vault"
-            title="Readiness, dovezi si trasabilitate"
-            description="Vezi rapid daca pachetul poate fi sustinut in audit sau daca trebuie sa revii in executie ori in livrabil."
+            title="Ce sustii acum in audit"
+            description="Vezi rapid daca pachetul e sustenabil sau daca trebuie sa revii in executie."
             items={summaryItems}
           />
         </CardContent>
       </Card>
 
       <SectionBoundary
-        eyebrow="Flux canonic"
-        title="Vault-ul ramane ledger-ul complet, nu board de lucru si nu export surface"
-        description="Aici verifici legaturile dintre control, dovada, articole si drift. Daca lipseste ceva, revii in Remediere sau finalizezi in Audit si export."
-        support={<VaultGuideCard />}
+        eyebrow="Acum"
+        title="Vault-ul iti spune daca povestea de audit tine"
+        description="Verifici legatura dintre control, dovada, articole si drift. Daca lipseste ceva, iesi spre pagina potrivita."
       />
 
       <div className="grid gap-4 xl:grid-cols-2">
         <VaultQuickActionsCard />
         <HandoffCard
-          title="Daca vezi gap-uri, iesi spre pagina potrivita"
-          description="Vault-ul centralizeaza povestea. Executia ramane in Remediere, iar distribuirea externa ramane in Audit si export."
+          title="Cand vezi gap-uri, iesi direct spre pagina corecta"
+          description="Vault-ul centralizeaza ledger-ul. Executia ramane in Remediere, iar livrabilul final ramane in Audit si export."
           destinationLabel="remediere / livrabil"
           checklist={[
             "nu inchizi task-uri direct din vault",
-            "nu tratezi exportul final ca pe un ledger",
+            "nu tratezi exportul final ca ledger intern",
             "validezi uman inainte de orice pachet extern",
           ]}
           actions={
@@ -265,10 +268,10 @@ export default function AuditorVaultPage() {
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-[var(--color-on-surface)]">
-            Audit Pack v2 aduna intr-un singur loc sumarul executiv, sistemele, controalele, dovezile si drift-ul.
+            Audit Pack v2 aduna intr-un singur loc sumarul executiv, controalele, dovezile si drift-ul.
           </p>
           <p className="text-sm text-[var(--color-on-surface-muted)]">
-            Foloseste varianta pentru client cand vrei un livrabil clar, iar JSON-ul cand ai nevoie de schimb tehnic.
+            Client pack pentru stakeholderi. JSON sau ZIP cand ai nevoie de schimb tehnic sau dosar complet.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -383,58 +386,19 @@ export default function AuditorVaultPage() {
   )
 }
 
-function VaultGuideCard() {
-  const steps = [
-    {
-      title: "1. Vezi ce s-a analizat",
-      detail:
-        "Snapshot-ul curent iti arata sursele, sistemele si findings-urile care intra in pachetul de audit.",
-    },
-    {
-      title: "2. Verifici dovada pentru fiecare task",
-      detail:
-        "Nu inchizi doar task-uri. Verifici si ce dovada trebuie pastrata pentru a sustine remedierea.",
-    },
-    {
-      title: "3. Explici schimbarea, nu doar scorul",
-      detail:
-        "Daca exista drift, vezi exact ce s-a schimbat fata de baseline si de ce merita atentia auditului.",
-    },
-  ]
-
-  return (
-    <div className="grid gap-3 lg:grid-cols-3">
-      {steps.map((step) => (
-        <div
-          key={step.title}
-          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
-        >
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-            {step.detail}
-          </p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function VaultQuickActionsCard() {
   const items = [
     {
       title: "Ce verifici acum",
-      detail:
-        "Mai intai te uiti la gap-urile de dovada, drift-ul deschis si controalele care cer confirmare manuala.",
+      detail: "Mai intai vezi gap-urile de dovada, drift-ul deschis si controalele care cer confirmare.",
     },
     {
       title: "Ce poti confirma aici",
-      detail:
-        "Confirma pe control, pe articol sau pe familie doar dupa ce ai o dovada buna si un snapshot pe care il poti sustine.",
+      detail: "Confirmi doar dupa ce ai dovada buna si un snapshot pe care il poti sustine.",
     },
     {
       title: "Cand folosesti exportul extern",
-      detail:
-        "Abia dupa ce vezi green pe dovezi si nu mai ai drift blocant care opreste auditul sau baseline-ul.",
+      detail: "Doar dupa ce dovezile sunt verzi si nu mai ai drift blocant pentru audit.",
     },
   ]
 

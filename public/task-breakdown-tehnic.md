@@ -1174,3 +1174,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Auditor Vault wave 1` page-shell declutter
+  - `PageIntro` mai scurt si mai dur
+  - aside orientat pe readiness, drift si gap de dovada
+  - `SummaryStrip` cu focus pe ce sustii acum in audit
+  - `SectionBoundary` fara `VaultGuideCard`
+  - handoff si export banner cu copy mai clar pe rol
+- [x] efect confirmat in build:
+  - `/dashboard/rapoarte/auditor-vault` a coborat la `7.74 kB / 181 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

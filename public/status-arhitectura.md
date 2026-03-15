@@ -1188,6 +1188,31 @@ Asta este sanatos arhitectural pentru ca:
 - aplica `summary / detail / action` si la nivel de componente
 - nu schimba shell-ul paginii si nu schimba business logic
 
+## Actualizare 2026-03-15 - `Auditor Vault wave 1` page-shell declutter
+
+- `Auditor Vault` a primit un pass scurt de austeritate la nivel de shell
+- `PageIntro` este mai scurt si mai orientat pe:
+  - readiness real
+  - gap-uri
+  - handoff
+- aside-ul nu mai arata scor generic, ci stare utila pentru audit:
+  - `ready / review`
+  - drift activ
+  - gap de dovada
+- `SummaryStrip` si `SectionBoundary` sunt mai dure:
+  - mai putin framing
+  - fara `VaultGuideCard`
+- handoff-ul si bannerul de export sunt mai clare pe rol:
+  - ledger intern
+  - livrabil extern
+  - executie in `Remediere`
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Auditor Vault` ramane ledger + trasabilitate, nu mini-dashboard si nici export surface
+- starea si urmatorul pas bat explicatia lunga
+- pasul nu atinge logica de export, traceability sau business rules
+
 ## Actualizare 2026-03-15 - `Setari` component austerity pass
 
 - `Setari` a primit si lotul component-level, separat de shell-ul paginii
