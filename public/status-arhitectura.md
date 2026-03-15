@@ -1061,6 +1061,28 @@ Efect masurabil in build:
   - inainte: `7.89 kB` / `179 kB first load`
   - dupa: `6.13 kB` / `177 kB first load`
 
+## Actualizare 2026-03-15 - `Setari wave 1` page-shell austerity
+
+- `Setari` nu mai foloseste un shell prea narativ pentru o pagina administrativa
+- `PageIntro` este mai scurt si mai sobru
+- aside-ul nu mai afiseaza `score / risk` ca un pseudo-dashboard, ci un snapshot administrativ relevant
+- `SummaryStrip` este mai direct
+- blocul de `Flux canonic` este comprimat fara cele 3 carduri de framing
+- handoff-ul ramane clar spre produs, dar fara explicatie redundanta
+
+Asta este sanatos arhitectural pentru ca:
+
+- pastreaza `Setari` in rolul de admin / operational
+- nu o impinge spre overview executiv
+- lasa ownership-ul component-level pentru lotul separat
+- aplica directiva `starea si urmatorul pas bat explicatia`
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: `7.73 kB` / `184 kB first load`
+  - dupa: `7.35 kB` / `183 kB first load`
+
 ## Actualizare 2026-03-15 - verdict de runtime UX
 
 CompliScan are acum o fundatie de produs mai matura decat lasa sa se vada runtime-ul.
