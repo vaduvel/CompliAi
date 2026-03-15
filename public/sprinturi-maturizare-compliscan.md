@@ -850,3 +850,14 @@ Verdict de etapa:
 - frontul activ valid ramane:
   - convergenta UX / UI / functionalitate
   - hardening operational incremental
+
+Actualizare suplimentara 2026-03-15:
+
+- `Audit si export` a primit si component-level density pass, separat de shell:
+  - export dominant mai clar
+  - suport pentru audit mai compact
+  - detaliul tehnic coborat sub disclosure
+- pasul este sanatos pentru ca:
+  - nu introduce logic nou
+  - nu muta pagina spre executie
+  - intareste rolul de `snapshot + livrabil`

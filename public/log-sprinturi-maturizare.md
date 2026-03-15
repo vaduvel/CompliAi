@@ -2054,6 +2054,34 @@ Validare dupa pas:
 Pas de performanta - `Scanare`:
 
 - `app/dashboard/scanari/page.tsx` pastreaza `flow` ca vedere initiala, dar nu mai cara upfront si zonele `Verdicts` si `Istoric`
+
+Pas de UX runtime - `Audit si export` component density pass:
+
+- `components/compliscan/export-center.tsx` foloseste acum ierarhie mai dura:
+  - `Raport PDF` ramane exportul dominant
+  - `audit / review` raman secundare
+  - zona `tehnica` sta sub disclosure local
+- `components/compliscan/rapoarte/reports-support-panels.tsx` compacteaza panourile suport:
+  - `ExportArtifactsCard` grupeaza artefactele pe rol
+  - `RecentDriftCard` urca mai clar:
+    - ce intra in snapshot
+    - de ce conteaza
+    - ce urmeaza
+  - contextul operational detaliat sta sub disclosure
+- pasul nu schimba business logic si nu schimba shell-ul paginii
+- efect:
+  - `Audit si export` se simte mai clar ca `snapshot + livrabil`
+  - scade senzatia ca toate optiunile si toate explicatiile au greutate egala
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Observatie:
+
+- nu exista regresie de route budget pe `/dashboard/rapoarte`
 - taburile non-initiale au fost extrase in componente dedicate:
   - `components/compliscan/scanari/scan-verdicts-tab.tsx`
   - `components/compliscan/scanari/scan-history-tab.tsx`
