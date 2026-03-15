@@ -84,27 +84,27 @@ const SETTINGS_VIEW_TABS = [
   {
     value: "workspace",
     label: "Workspace",
-    description: "Org, baseline si configuratie locala de lucru.",
+    description: "Org, baseline si context local.",
   },
   {
     value: "integrari",
     label: "Integrari",
-    description: "Supabase, repo sync si traseele tehnice conectate.",
+    description: "Conexiuni si status extern.",
   },
   {
     value: "acces",
     label: "Acces",
-    description: "Membri, roluri si separarea responsabilitatilor.",
+    description: "Membri, roluri si ownership.",
   },
   {
     value: "operational",
     label: "Operational",
-    description: "Health check si verdictul de release readiness.",
+    description: "Health check si readiness.",
   },
   {
     value: "avansat",
     label: "Avansat",
-    description: "Politici locale de drift si reset de workspace.",
+    description: "Politici locale si reset.",
   },
 ] as const
 
@@ -289,25 +289,24 @@ export default function SetariPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Setari"
-        title="Aici administrezi contextul operational, nu executia produsului"
-        description="Configurezi workspace-ul, verifici integrari si acces, iar apoi revii in fluxurile de lucru reale. Setari ramane zona administrativa, nu locul in care faci scanare, control sau dovada."
+        title="Aici administrezi contextul operational"
+        description="Fixezi workspace-ul, accesul si starea operationala, apoi revii in fluxurile reale de lucru."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               operational admin
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              role-aware surfaces
             </Badge>
           </>
         }
         aside={
           <div className="space-y-2">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Snapshot workspace
+              Snapshot admin
             </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.workspace.orgName}</p>
+            <p className="text-sm text-eos-text-muted">
+              {currentUser ? formatMemberRole(currentUser.role) : "rol in verificare"}
+            </p>
           </div>
         }
         actions={
@@ -326,38 +325,22 @@ export default function SetariPage() {
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Setari"
-            title="Context operational si disciplina de administrare"
-            description="Vezi rapid starea workspace-ului, baseline-ul, accesul curent si readiness-ul operational fara sa amesteci configurarea cu executia produsului."
+            title="Vezi rapid starea administrativa"
+            description="Context, baseline, acces si readiness operational."
             items={summaryItems}
           />
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+      <div className="grid gap-4">
         <SectionBoundary
-          eyebrow="Flux canonic"
-          title="Setari ramane zona de administrare si apoi iti da handoff inapoi in produs"
-          description="Aici fixezi contextul corect de lucru, verifici cine are acces si confirmi ca integrările sunt sanatoase. Dupa aceea revii in Dashboard, Control sau Dovada pentru munca reala."
-          support={
-            <div className="grid gap-4 md:grid-cols-3">
-              <SettingsFlowHint
-                title="1. Fixezi contextul"
-                detail="Workspace, baseline si org-ul activ trebuie sa fie clare inainte sa interpretezi drift sau readiness."
-              />
-              <SettingsFlowHint
-                title="2. Verifici operarea"
-                detail="Integrarile, accesul si release readiness-ul stau aici, nu in paginile de executie."
-              />
-              <SettingsFlowHint
-                title="3. Revii in produs"
-                detail="Dupa administrare, te intorci in Dashboard, Control sau Dovada pentru lucru efectiv."
-              />
-            </div>
-          }
+          eyebrow="Handoff"
+          title="Configurezi aici, lucrezi in produs"
+          description="Setari ramane zona administrativa. Dupa context, acces si operare, revii in Dashboard, Control sau Dovada."
         />
         <HandoffCard
           title="Setari nu inlocuieste fluxul principal"
-          description="Dupa ce ai verificat contextul si sanatatea operationala, revii in zona potrivita de lucru. Dashboard ramane orientare, iar Control si Dovada raman workspaces reale."
+          description="Dupa configurare si verificare operationala, revii in zona potrivita de lucru."
           destinationLabel="dashboard / control / dovada"
           checklist={[
             "nu tratezi Setari ca overview executiv",
@@ -745,13 +728,4 @@ export default function SetariPage() {
       setUpdatingMembershipId(null)
     }
   }
-}
-
-function SettingsFlowHint({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
-    </div>
-  )
 }

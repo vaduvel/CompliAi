@@ -861,3 +861,14 @@ Actualizare suplimentara 2026-03-15:
   - nu introduce logic nou
   - nu muta pagina spre executie
   - intareste rolul de `snapshot + livrabil`
+
+Actualizare suplimentara 2026-03-15:
+
+- `Setari` a primit primul pass de `page-shell austerity`
+- asta inseamna:
+  - mai putin framing
+  - ton mai sobru
+  - mai putin sentiment de mini-dashboard paralel
+- ownership-ul ramas:
+  - Codex principal = shell si compozitie de pagina
+  - Codex 2 = densitate in componentele interne din `Setari`

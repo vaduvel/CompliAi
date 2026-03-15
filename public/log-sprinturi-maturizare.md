@@ -1936,6 +1936,38 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de UX runtime - `Setari wave 1` page-shell austerity:
+
+- `app/dashboard/setari/page.tsx` foloseste acum un shell mai sobru si mai clar administrativ
+- `PageIntro` nu mai vorbeste ca un mini-dashboard:
+  - titlu mai scurt
+  - descriere mai directa
+  - un singur badge relevant
+  - aside orientat pe `admin snapshot`, nu pe scor si risc
+- `SummaryStrip` este mai scurt si mai operational
+- blocul mare de `Flux canonic` a fost comprimat:
+  - fara grid-ul cu 3 carduri explicative
+  - handoff-ul ramane clar, dar fara framing inutil
+- etichetele taburilor au fost comprimate pentru scanare mai rapida
+
+Efect:
+
+- `Setari` se simte mai clar ca zona administrativa
+- scade senzatia de mini-dashboard paralel
+- starea si handoff-ul bat mai bine explicatia
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: `7.73 kB / 184 kB first load`
+  - dupa: `7.35 kB / 183 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Actualizare de directie - `runtime UX declutter`:
 
 - evaluarea curenta este acum explicita:

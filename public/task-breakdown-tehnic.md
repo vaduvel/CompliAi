@@ -1113,3 +1113,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Setari wave 1` page-shell austerity
+  - `PageIntro` scurt si admin-first
+  - `admin snapshot` in aside, nu `score / risk`
+  - `SummaryStrip` mai direct
+  - blocul de `Flux canonic` comprimat fara cardurile de framing
+  - descrierile taburilor comprimate pentru scanare mai rapida
+- [x] efect confirmat in build:
+  - `/dashboard/setari` a coborat la `7.35 kB / 183 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
