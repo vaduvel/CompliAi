@@ -1052,6 +1052,9 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - empty-state si stare populata prin `scan` real au fost verificate la nivel de payload + route shell
   - exista acum si kit local de test pentru flow-ul principal de user nou:
     - `public/flow-test-kit-user-nou-document-2026-03-15/`
+  - exista acum si audit executabil pentru flow-ul principal:
+    - `tests/flow-test-kit-user-nou.test.ts`
+    - `npm run test:flow-kit`
   - verdict curent:
     - `Dashboard` tine directia buna
     - urmatoarea densitate reala ramasă este in `Checklists`
@@ -1270,3 +1273,18 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] harness executabil pentru flow-ul principal de user nou
+  - test dedicat:
+    - `tests/flow-test-kit-user-nou.test.ts`
+  - script dedicat:
+    - `npm run test:flow-kit`
+  - acopera:
+    - `Scanare`
+    - populare state
+    - `Dashboard payload`
+    - `Remediere` derivata din findings
+- [x] validare dupa pas:
+  - `npm run test:flow-kit`
+  - `npm test`
+  - `npm run lint`

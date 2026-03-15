@@ -1963,6 +1963,26 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de audit executabil - `flow test kit` pentru user nou:
+
+- a fost adaugat testul:
+  - `tests/flow-test-kit-user-nou.test.ts`
+- a fost adaugat si scriptul:
+  - `npm run test:flow-kit`
+- testul ruleaza direct pe route handlers, fara browser si fara server HTTP separat
+- acopera flow-ul canonic cu kitul:
+  - `public/flow-test-kit-user-nou-document-2026-03-15/`
+- verdictul verificat in test:
+  - `Scanare` produce findings reale pe bundle-ul de recrutare high-risk
+  - `Dashboard payload` ramane coerent cu state-ul populat
+  - `Remediere` se genereaza din findings fara sa cerem input manual suplimentar
+
+Validare dupa pas:
+
+- `npm run test:flow-kit` -> verde
+- `npm test` -> verde
+- `npm run lint` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

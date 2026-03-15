@@ -1035,3 +1035,18 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba modelul de auth
   - nu promite invitatii externe complete
   - inchide administrarea minima peste workspace-ul local
+
+Actualizare suplimentara 2026-03-15:
+
+- exista acum un harness executabil pentru flow-ul principal de user nou
+- asta inseamna:
+  - kitul de test nu mai este doar documentatie
+  - `npm run test:flow-kit` valideaza direct:
+    - `Scanare`
+    - state populat
+    - `Dashboard payload`
+    - `Remediere` derivata
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu depinde de browser sau sesiuni locale fragile
+  - accelereaza auditul repetabil pe flow-ul canonic

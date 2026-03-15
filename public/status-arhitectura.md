@@ -1400,3 +1400,22 @@ Asta este sanatos arhitectural pentru ca:
 - pastreaza separarea intre:
   - admin local de membri
   - backlogul ulterior pentru invitatii externe complete
+
+## Actualizare 2026-03-15 - harness executabil pentru flow-ul principal
+
+- exista acum un test dedicat pentru flow-ul principal de user nou:
+  - `tests/flow-test-kit-user-nou.test.ts`
+- testul foloseste kitul:
+  - `public/flow-test-kit-user-nou-document-2026-03-15/`
+- executie rapida:
+  - `npm run test:flow-kit`
+
+Asta este sanatos arhitectural pentru ca:
+
+- browser auditul ramane util, dar nu mai este singura forma de verificare a flow-ului principal
+- avem acum o verificare repetabila pentru:
+  - `Scanare`
+  - popularea state-ului
+  - `Dashboard payload`
+  - derivarea de `Remediere`
+- scade dependenta de sesiuni locale fragile si de verificari manuale cap-coada
