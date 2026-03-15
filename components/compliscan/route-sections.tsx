@@ -196,7 +196,6 @@ export function OverviewPageSections({
         <DashboardGuideCard
           activeRiskCount={activeRiskCount}
           openAlertsCount={openAlerts.length}
-          hasEvidence={hasEvidence}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
           latestDocumentScan={latestDocumentScan}
           latestManifestScan={latestManifestScan}
@@ -559,14 +558,12 @@ function formatScanMoment(scan: ScanRecord | null) {
 export function DashboardGuideCard({
   activeRiskCount,
   openAlertsCount,
-  hasEvidence,
   hasValidatedBaseline,
   latestDocumentScan,
   latestManifestScan,
 }: {
   activeRiskCount: number
   openAlertsCount: number
-  hasEvidence: boolean
   hasValidatedBaseline: boolean
   latestDocumentScan: ScanRecord | null
   latestManifestScan: ScanRecord | null
@@ -611,14 +608,8 @@ export function DashboardGuideCard({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle className="text-xl">Unde continui</CardTitle>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
-              Dashboard-ul te orienteaza. Lucrul real continua in pagina potrivita.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-              {hasEvidence ? "workspace activ" : "pornire initiala"}
-            </Badge>
             <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
               {openAlertsCount} drifturi deschise
             </Badge>
@@ -646,8 +637,8 @@ export function DashboardGuideCard({
                 <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
               </div>
               <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
-              <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
+              <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
             </Link>
           )
         })}
@@ -698,9 +689,6 @@ export function SnapshotStatusCard({
         <div className="flex items-start justify-between gap-4">
           <div>
             <CardTitle className="text-xl">Snapshot rapid</CardTitle>
-            <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-              Verifici ultimele surse, baseline-ul si ultimul semnal fara sa parasesti orientarea.
-            </p>
           </div>
           <Badge
             className={

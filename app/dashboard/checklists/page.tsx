@@ -95,29 +95,7 @@ export default function RemediationPage() {
         onExport={cockpitActions.handleTaskExport}
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardContent className="px-5 py-5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Ritm de lucru
-            </p>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <FlowHint
-                title="1. Triage rapid"
-                detail="Gasesti task-ul deschis si clarifici daca este remediere rapida sau structurala."
-              />
-              <FlowHint
-                title="2. Dovada minima"
-                detail="Atasezi fisierul, captura sau extrasul care sustine inchiderea reala."
-              />
-              <FlowHint
-                title="3. Verificare separata"
-                detail="Abia dupa executie sari in Vault sau in Audit si export pentru ledger si livrabil."
-              />
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-4">
         <HandoffCard
           title="Cand termini board-ul, mergi in paginile read-only"
           description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
@@ -145,15 +123,6 @@ export default function RemediationPage() {
           }
         />
       </div>
-    </div>
-  )
-}
-
-function FlowHint({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
     </div>
   )
 }
