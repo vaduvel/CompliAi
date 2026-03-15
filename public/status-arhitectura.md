@@ -1207,3 +1207,22 @@ Asta este sanatos arhitectural pentru ca:
 - statusul operational si urmatorul pas bat explicatia
 - detaliul tehnic ramane disponibil, dar nu mai concureaza cu verdictul principal
 - pasul nu schimba shell-ul paginii si nu schimba business logic
+
+## Actualizare 2026-03-15 - `Control wave 1` page-shell pass
+
+- `Control` a primit primul pass scurt de austeritate la nivel de page shell
+- `PageIntro` este mai scurt si mai direct
+- `Overview` nu mai tine framing-ul greu de intrare:
+  - `Snapshot control` -> `Ce ceri sa confirmi acum`
+  - `SectionBoundary` foloseste actiuni directe, nu carduri didactice
+  - handoff-ul a ramas pe doua directii clare:
+    - `Sisteme`
+    - `Drift`
+- `Review` a primit si el microcopy mai dura, fara sa schimbe logica
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Control` se apropie mai clar de rolul de workspace de confirmare
+- starea si traseul bat explicatia lunga
+- integrarile raman in `Setari`, executia ramane in `Dovada`
+- pasul nu schimba business logic si nu intra peste lotul component-level
