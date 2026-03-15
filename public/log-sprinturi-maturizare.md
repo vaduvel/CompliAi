@@ -2417,3 +2417,24 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Pas de UX runtime - `Scanare` micro-pass:
+
+- `app/dashboard/scanari/page.tsx` lasa selectorul sursei si fluxul activ sa urce inaintea ghidajului lung
+- `ScanWorkflowGuideCard` nu mai blocheaza intrarea in modul `flow`; ramane dupa zona de lucru ca handoff si clarificare
+- `components/evidence-os/ScanFlowOverviewCard.tsx` nu mai explica generic cum citesti pagina si spune direct unde continui dupa analiza:
+  - `Control` pentru surse tehnice
+  - `Dovada` pentru documente si text
+- pasul nu schimba business logic si nu schimba wiring-ul dintre scanare, control si dovada
+
+Efect masurabil in build:
+
+- `/dashboard/scanari`
+  - inainte: `9.12 kB / 180 kB first load`
+  - dupa: `8.53 kB / 179 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde

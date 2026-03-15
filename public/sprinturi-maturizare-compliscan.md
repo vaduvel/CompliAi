@@ -1009,3 +1009,17 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu schimba modelul de produs
   - reduce haosul operational si costul de context
+
+Actualizare suplimentara 2026-03-15:
+
+- `Scanare` a primit un micro-pass de shell
+- asta inseamna:
+  - selectorul sursei ramane sus, langa intrarea reala in lucru
+  - ghidajul lung coboara dupa fluxul activ
+  - sumarul spune direct unde continui dupa analiza:
+    - `Control`
+    - `Dovada`
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba modelul de produs
+  - intareste regula `executia bate framing-ul`

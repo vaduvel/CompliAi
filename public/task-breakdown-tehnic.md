@@ -1237,3 +1237,17 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Scanare` micro-pass de shell
+  - selectorul sursei si fluxul activ urca inaintea ghidajului lung
+  - `ScanWorkflowGuideCard` coboara dupa zona de lucru si ramane doar ca handoff / clarificare
+  - `ScanFlowOverviewCard` spune acum direct unde continui dupa analiza:
+    - `Control`
+    - `Dovada`
+  - pasul nu schimba business logic si nu adauga concepte noi
+- [x] efect confirmat in build:
+  - `/dashboard/scanari` a coborat la `8.53 kB / 179 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

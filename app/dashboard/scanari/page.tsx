@@ -19,7 +19,6 @@ import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewC
 import { ScanSourceTypeSelector, type ScanSourceType } from "@/components/evidence-os/ScanSourceTypeSelector"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
-import { SourceModeGuideCard } from "@/components/evidence-os/SourceModeGuideCard"
 import {
   LoadingScreen,
   ScanWorkspace,
@@ -192,8 +191,8 @@ export default function ScanariPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Scanare"
-        title="Pornesti fluxul de analiza din sursa potrivita"
-        description="Aici adaugi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente."
+        title="Pornesti analiza din sursa potrivita"
+        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -248,11 +247,13 @@ export default function ScanariPage() {
         locked={agentFlow.agentModeActive}
       />
 
-      <ScanWorkflowGuideCard
-        sourceType={sourceType}
-        viewMode={viewMode}
-        agentModeActive={agentFlow.agentModeActive}
-      />
+      {viewMode !== "flow" ? (
+        <ScanWorkflowGuideCard
+          sourceType={sourceType}
+          viewMode={viewMode}
+          agentModeActive={agentFlow.agentModeActive}
+        />
+      ) : null}
 
       {agentFlow.agentModeActive ? (
         <AgentWorkspace
@@ -274,8 +275,6 @@ export default function ScanariPage() {
         <>
           {viewMode !== "history" && (
             <>
-              <SourceModeGuideCard sourceType={sourceType} />
-
               <ScanSourceTypeSelector
                 value={sourceType}
                 onValueChange={(nextSourceType) => {
@@ -362,6 +361,19 @@ export default function ScanariPage() {
                   />
                 </div>
               )}
+
+              <ScanFlowOverviewCard
+                sourceType={sourceType}
+                latestDocumentScan={latestDocumentScan}
+                latestManifestScan={latestManifestScan}
+                latestYamlScan={latestYamlScan}
+              />
+
+              <ScanWorkflowGuideCard
+                sourceType={sourceType}
+                viewMode={viewMode}
+                agentModeActive={agentFlow.agentModeActive}
+              />
             </>
           )}
 

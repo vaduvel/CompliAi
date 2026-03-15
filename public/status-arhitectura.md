@@ -1365,3 +1365,19 @@ Asta este sanatos arhitectural pentru ca:
 - sursa de adevar ramane mai clara
 - contextul incarcat in implementare devine mai mic si mai consistent
 - scade riscul ca un audit istoric sau un task intern sa bata canonul operational
+
+## Actualizare 2026-03-15 - `Scanare` micro-pass de shell
+
+- `Scanare` lasa acum intrarea in lucru sa bata ghidajul:
+  - selectorul sursei ramane imediat dupa tabs
+  - fluxul activ porneste inaintea cardurilor explicative
+- `ScanWorkflowGuideCard` nu mai sta in fata executiei cand utilizatorul este deja in `flow`
+- `ScanFlowOverviewCard` nu mai explica generic cum se citeste pagina; spune direct unde continui dupa analiza:
+  - `Control` pentru manifest / YAML
+  - `Dovada` pentru document / text
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Scanare` ramane poarta de intrare pentru executie, nu pagina care concureaza cu propriul flux
+- `starea si urmatorul pas` bat explicatia redundanta
+- pasul nu schimba business logic si nu introduce produs paralel

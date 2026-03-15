@@ -35,16 +35,19 @@ export function ScanFlowOverviewCard({
 
   const resultLabel =
     sourceType === "manifest"
-      ? "Ultimul rezultat de repo"
+      ? "Ultimul rezultat repo"
       : sourceType === "yaml"
         ? "Ultimul rezultat YAML"
         : "Ultimul rezultat document"
+
+  const nextDestination =
+    sourceType === "manifest" || sourceType === "yaml" ? "Control" : "Dovada"
 
   const items: SummaryStripItem[] = [
     {
       label: "Lucrezi acum in",
       value: currentSourceLabel,
-      hint: "Zona de sus este singurul loc unde pornesti scanarea sau validarea.",
+      hint: "Aici pornesti scanarea sau validarea pentru sursa curenta.",
       tone: "accent",
     },
     {
@@ -55,10 +58,12 @@ export function ScanFlowOverviewCard({
         : "Rezultatul apare dupa primul scan pentru acest tip de sursa.",
     },
     {
-      label: "Cum citesti pagina",
-      value: "sus lucrezi · jos verifici",
+      label: "Continui dupa analiza",
+      value: nextDestination,
       hint:
-        "Pastram separat work queue-ul de sumarul ultimului rezultat ca sa nu para doua scanari diferite.",
+        nextDestination === "Control"
+          ? "Acolo confirmi inventarul, baseline-ul si drift-ul pentru sursa tehnica."
+          : "Acolo transformi verdictul in task-uri, dovezi si livrabil separat.",
     },
   ]
 
