@@ -1124,3 +1124,24 @@ Asta este sanatos arhitectural pentru ca:
 - home-ul se apropie de rolul de orientare, nu de pagina explicativa
 - `Control drift` nu mai sta in plan secund cand utilizatorul cauta blocajul real
 - `Unde continui` ramane util, dar nu mai concureaza cu `next action`
+
+## Actualizare 2026-03-15 - `Audit si export` component density pass
+
+- `ExportCenter` nu mai lasa toate exporturile la aceeasi greutate
+- `Raport PDF` este mai clar exportul dominant
+- `audit / review` raman secundare
+- zona `tehnica` este mutata sub disclosure local
+- panourile suport din `reports-support-panels` sunt mai compacte si mai utile:
+  - artefactele sunt grupate dupa rol
+  - driftul inclus in snapshot arata mai clar:
+    - de ce intra
+    - de ce conteaza
+    - ce urmeaza
+  - contextul operational detaliat ramane disponibil, dar nu mai concureaza cu mesajul principal
+
+Asta este sanatos arhitectural pentru ca:
+
+- intareste doctrina `snapshot + livrabil`
+- nu muta `Audit si export` spre executie
+- aplica `summary / detail / action` si la nivel de componente
+- nu schimba shell-ul paginii si nu schimba business logic

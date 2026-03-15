@@ -1095,3 +1095,21 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Drift deschis`
   - `Baseline`
 - [ ] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`
+
+- [x] `Audit si export` component density pass
+  - `Raport PDF` este clar exportul principal
+  - `audit / review` raman secundare
+  - `tehnic` sta sub disclosure local
+  - `ExportArtifactsCard` este grupat pe rolul artefactului
+  - `RecentDriftCard` separa mai clar:
+    - ce intra in snapshot
+    - de ce conteaza
+    - ce urmeaza
+- [x] pasul nu schimba:
+  - shell-ul paginii
+  - business logic
+  - wiring-ul exporturilor
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

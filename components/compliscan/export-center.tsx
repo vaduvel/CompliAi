@@ -2,6 +2,7 @@
 
 import {
   type LucideIcon,
+  ChevronDown,
   ClipboardCheck,
   FileBraces,
   FileCheck2,
@@ -50,11 +51,11 @@ export function ExportCenter({
     {
       key: "pdf",
       label: "Raport PDF",
-      hint: "Livrabilul standard pentru management si control.",
+      hint: "Livrabilul standard pe care il trimiti primul.",
       icon: FileCheck2,
       onClick: onGeneratePdf,
       className:
-        "min-h-11 h-auto justify-start rounded-xl bg-[var(--color-primary)] px-4 py-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]",
+        "min-h-12 h-auto justify-start rounded-xl bg-[var(--color-primary)] px-4 py-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]",
       variant: undefined,
     },
   ]
@@ -65,7 +66,7 @@ export function ExportCenter({
           {
             key: "audit-pdf",
             label: "Audit PDF",
-            hint: "Varianta extinsa pentru audit si due diligence.",
+            hint: "Varianta extinsa pentru audit.",
             icon: FolderKanban,
             onClick: onGenerateAuditPack,
             variant: "outline" as const,
@@ -77,7 +78,7 @@ export function ExportCenter({
           {
             key: "annex",
             label: "Annex IV",
-            hint: "Rezumat pentru maparea AI Act.",
+            hint: "Rezumat AI Act.",
             icon: FileStack,
             onClick: onGenerateAnnexLite,
             variant: "outline" as const,
@@ -87,7 +88,7 @@ export function ExportCenter({
     {
       key: "checklist",
       label: "Checklist",
-      hint: "Lista pentru inchidere si follow-up.",
+      hint: "Lista pentru inchidere.",
       icon: ClipboardCheck,
       onClick: onExportChecklist,
       variant: "outline" as const,
@@ -95,7 +96,7 @@ export function ExportCenter({
     {
       key: "share",
       label: "Trimite spre review",
-      hint: "Partajeaza rapid pentru revizie externa.",
+      hint: "Partajare pentru review extern.",
       icon: Mail,
       onClick: onShare,
       variant: "outline" as const,
@@ -120,7 +121,7 @@ export function ExportCenter({
           {
             key: "json",
             label: "Snapshot JSON",
-            hint: "Export `compliscan.json` pentru integrare.",
+            hint: "Export pentru integrare.",
             icon: FileBraces,
             onClick: onExportCompliScanJson,
             variant: "outline" as const,
@@ -132,7 +133,7 @@ export function ExportCenter({
           {
             key: "yaml",
             label: "Snapshot YAML",
-            hint: "Export `compliscan.yaml` pentru trasabilitate.",
+            hint: "Export pentru trasabilitate.",
             icon: FileCode,
             onClick: onExportCompliScanYaml,
             variant: "outline" as const,
@@ -148,12 +149,12 @@ export function ExportCenter({
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+          <div className="space-y-2">
             <CardTitle className="text-lg text-[var(--color-on-surface)]">
               Export si dovada
             </CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
-              Incepi cu raportul principal, apoi mergi spre audit sau snapshot tehnic doar cand este necesar.
+            <p className="text-sm text-[var(--color-on-surface-muted)]">
+              Aici inchizi snapshot-ul curent si alegi doar artefactul potrivit pentru livrare.
             </p>
           </div>
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-1 text-xs text-[var(--color-on-surface-muted)]">
@@ -163,23 +164,33 @@ export function ExportCenter({
       </CardHeader>
 
       <CardContent className="space-y-5 pt-4">
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Principal
-              </p>
-              <Badge variant="success">trimite primul</Badge>
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Trimite acum
+                </p>
+                <Badge variant="success">principal</Badge>
+              </div>
+              <div>
+                <p className="text-base font-semibold text-[var(--color-on-surface)]">Raport PDF</p>
+                <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                  Livrabilul standard pentru management, control si handoff initial.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-[var(--color-muted)]">Raportul standard pentru management si control</p>
+            <p className="max-w-xs text-xs text-[var(--color-muted)]">
+              Daca nu ai nevoie de artefacte speciale, acesta este exportul corect.
+            </p>
           </div>
-          <div className="grid gap-3">
+          <div className="mt-4 grid gap-3">
             {primaryActions.map((action) => (
               <Button
                 key={action.key}
                 onClick={action.onClick}
                 variant={action.variant}
-                className={`${action.className} items-start gap-3 text-left`}
+                className={`${action.className} items-start gap-3 text-left shadow-none`}
               >
                 <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
                 <span className="min-w-0 text-left">
@@ -191,15 +202,19 @@ export function ExportCenter({
               </Button>
             ))}
           </div>
-        </div>
+        </section>
 
         {secondaryActions.length > 0 && (
-          <div className="space-y-3">
+          <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Audit si review
-              </p>
-              <p className="text-xs text-[var(--color-muted)]">Anexe, pachete extinse si partajare</p>
+              <div className="space-y-1">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Suport pentru audit si review
+                </p>
+                <p className="text-sm text-[var(--color-on-surface-muted)]">
+                  Folosesti aceste exporturi doar cand livrabilul principal nu este suficient.
+                </p>
+              </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {secondaryActions.map((action) => (
@@ -219,24 +234,37 @@ export function ExportCenter({
                 </Button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {technicalActions.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Tehnic
-              </p>
-              <p className="text-xs text-[var(--color-muted)]">Pentru integrare, suport sau arhivare</p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+          <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+            <summary className="cursor-pointer list-none">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                    Tehnic
+                  </p>
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    Snapshoturi si arhive pentru integrare, suport sau arhivare.
+                  </p>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    Deschizi aceasta zona doar cand ai nevoie de artefacte tehnice.
+                  </p>
+                </div>
+                <ChevronDown
+                  className="mt-1 size-4 shrink-0 text-[var(--color-muted)]"
+                  strokeWidth={2.25}
+                />
+              </div>
+            </summary>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {technicalActions.map((action) => (
                 <Button
                   key={action.key}
                   onClick={action.onClick}
                   variant={action.variant}
-                  className="min-h-11 h-auto items-start justify-start gap-3 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                  className="min-h-10 h-auto items-start justify-start gap-3 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
                 >
                   <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
                   <span className="min-w-0 text-left">
@@ -248,7 +276,7 @@ export function ExportCenter({
                 </Button>
               ))}
             </div>
-          </div>
+          </details>
         )}
       </CardContent>
     </Card>
