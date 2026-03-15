@@ -56,8 +56,8 @@ function ManifestMetric({
   tone: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-sm font-semibold ${tone}`}>{value}</p>
     </div>
   )
@@ -73,44 +73,44 @@ function ScanDriftCard({
   const guidance = getDriftPolicyFromRecord(drift)
 
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">{drift.summary}</p>
-          <p className="mt-2 text-xs text-[var(--color-muted)]">
+          <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
+          <p className="mt-2 text-xs text-eos-text-muted">
             {formatDriftTypeLabel(drift.type)}
             {drift.systemLabel ? ` · ${drift.systemLabel}` : ""}
           </p>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+          <p className="mt-3 text-sm leading-6 text-eos-text-muted">
             {guidance.impactSummary}
           </p>
         </div>
         <Badge variant={driftSeverityVariant(drift.severity)}>{drift.severity}</Badge>
       </div>
       <div className={`mt-4 grid gap-3 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
             De ce conteaza
           </p>
-          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+          <p className="mt-2 text-sm font-medium text-eos-text">
             {guidance.lawReference}
           </p>
-          <p className="mt-1 text-xs text-[var(--color-muted)]">{guidance.severityReason}</p>
+          <p className="mt-1 text-xs text-eos-text-muted">{guidance.severityReason}</p>
         </div>
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
             Ce faci acum
           </p>
-          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+          <p className="mt-2 text-sm font-medium text-eos-text">
             {guidance.nextAction}
           </p>
         </div>
         {!compact && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+            <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
               Dovada
             </p>
-            <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+            <p className="mt-2 text-sm font-medium text-eos-text">
               {guidance.evidenceRequired}
             </p>
           </div>
@@ -140,12 +140,12 @@ function LatestYamlSection({
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="text-[28px] leading-tight">Ultimul compliscan.yaml validat</CardTitle>
-            <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-2 text-sm text-eos-text-muted">
               Vezi exact ce configuratie declarata a intrat in control, ce articole atinge si unde exista drift fata de baseline.
             </p>
           </div>
@@ -169,7 +169,7 @@ function LatestYamlSection({
         {latestYamlScan && (
           <>
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestYamlScan.documentName}
@@ -182,34 +182,34 @@ function LatestYamlSection({
                   <ManifestMetric
                     label="Sisteme declarate"
                     value={String(systems.length)}
-                    tone="text-[var(--color-on-surface)]"
+                    tone="text-eos-text"
                   />
                   <ManifestMetric
                     label="Findings"
                     value={String(findings.length)}
-                    tone={findings.length > 0 ? "text-[var(--color-warning)]" : "text-[var(--status-success-text)]"}
+                    tone={findings.length > 0 ? "text-eos-warning" : "text-eos-success"}
                   />
                   <ManifestMetric
                     label="Drift activ"
                     value={String(drifts.length)}
-                    tone={drifts.length > 0 ? "text-[var(--color-error)]" : "text-[var(--status-success-text)]"}
+                    tone={drifts.length > 0 ? "text-eos-error" : "text-eos-success"}
                   />
                 </div>
-                <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                     Preview config
                   </p>
-                  <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                  <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-eos-text-muted">
                     {latestYamlScan.contentPreview}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">Ce controlezi acum</p>
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                <p className="text-sm font-medium text-eos-text">Ce controlezi acum</p>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Articole mapate
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -220,27 +220,27 @@ function LatestYamlSection({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-sm text-[var(--color-on-surface-muted)]">
+                        <span className="text-sm text-eos-text-muted">
                           Inca nu exista articole mapate pentru configul curent.
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Ce urmeaza
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                    <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                       <li className="flex gap-2">
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" />
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-primary" />
                         Confirmi ca providerul, modelul si riscul declarat corespund implementarii reale.
                       </li>
                       <li className="flex gap-2">
-                        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-[var(--color-warning)]" />
+                        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-eos-warning" />
                         Atasezi dovada pentru findings-urile noi si actualizezi baseline-ul dupa review uman.
                       </li>
                       <li className="flex gap-2">
-                        <Clock3 className="mt-0.5 size-4 shrink-0 text-[var(--color-info)]" />
+                        <Clock3 className="mt-0.5 size-4 shrink-0 text-eos-info" />
                         Revii in Auditor Vault pentru exportul de audit si controlul drift-ului.
                       </li>
                     </ul>
@@ -250,8 +250,8 @@ function LatestYamlSection({
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">Findings generate din YAML</p>
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                <p className="text-sm font-medium text-eos-text">Findings generate din YAML</p>
                 <div className="mt-4 space-y-3">
                   {findings.length === 0 && (
                     <EmptyState
@@ -263,14 +263,14 @@ function LatestYamlSection({
                   {findings.map((finding) => (
                     <div
                       key={finding.id}
-                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
+                      className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                          <p className="text-sm font-semibold text-eos-text">
                             {finding.title}
                           </p>
-                          <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                          <p className="mt-1 text-sm text-eos-text-muted">
                             {finding.detail}
                           </p>
                           <FindingVerdictMeta finding={finding} className="mt-3" />
@@ -284,8 +284,8 @@ function LatestYamlSection({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">Drift pentru config</p>
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                <p className="text-sm font-medium text-eos-text">Drift pentru config</p>
                 <div className="mt-4 space-y-3">
                   {drifts.length === 0 && (
                     <EmptyState
@@ -320,12 +320,12 @@ function LatestManifestSection({
   const frameworks = [...new Set(systems.flatMap((system) => system.frameworks))].slice(0, 6)
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="text-[28px] leading-tight">Ultimul manifest procesat</CardTitle>
-            <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-2 text-sm text-eos-text-muted">
               Rezultatul este legat explicit de manifestul pe care l-ai încărcat, nu de un document generic.
             </p>
           </div>
@@ -349,7 +349,7 @@ function LatestManifestSection({
         {latestManifestScan && (
           <>
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestManifestScan.documentName}
@@ -362,40 +362,40 @@ function LatestManifestSection({
                   <ManifestMetric
                     label="Sisteme propuse"
                     value={String(systems.length)}
-                    tone="text-[var(--color-on-surface)]"
+                    tone="text-eos-text"
                   />
                   <ManifestMetric
                     label="Provideri"
                     value={providers.length > 0 ? providers.join(", ") : "Necunoscut"}
-                    tone="text-[var(--color-info)]"
+                    tone="text-eos-info"
                   />
                   <ManifestMetric
                     label="Drift activ"
                     value={String(drifts.length)}
                     tone={
                       drifts.length > 0
-                        ? "text-[var(--color-warning)]"
-                        : "text-[var(--status-success-text)]"
+                        ? "text-eos-warning"
+                        : "text-eos-success"
                     }
                   />
                 </div>
-                <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                     Preview sursa
                   </p>
-                  <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                  <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-eos-text-muted">
                     {latestManifestScan.contentPreview}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                <p className="text-sm font-medium text-eos-text">
                   Rezumat tehnic detectat
                 </p>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Framework-uri
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -406,27 +406,27 @@ function LatestManifestSection({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-sm text-[var(--color-on-surface-muted)]">
+                        <span className="text-sm text-eos-text-muted">
                           Niciun framework AI clar.
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Ce faci acum
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                    <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                       <li className="flex gap-2">
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" />
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-primary" />
                         Revizuiești sistemele propuse și corectezi scopul înainte de confirmare.
                       </li>
                       <li className="flex gap-2">
-                        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-[var(--color-warning)]" />
+                        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-eos-warning" />
                         Confirmi doar ce intră real în inventarul AI.
                       </li>
                       <li className="flex gap-2">
-                        <Clock3 className="mt-0.5 size-4 shrink-0 text-[var(--color-info)]" />
+                        <Clock3 className="mt-0.5 size-4 shrink-0 text-eos-info" />
                         Fixezi baseline-ul în `Setări` când snapshot-ul este validat uman.
                       </li>
                     </ul>
@@ -435,8 +435,8 @@ function LatestManifestSection({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-sm font-medium text-eos-text">
                 Rezultatul pentru acest manifest
               </p>
               <div className="mt-4 space-y-3">
@@ -450,14 +450,14 @@ function LatestManifestSection({
                 {systems.map((system) => (
                   <div
                     key={system.id}
-                    className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
+                    className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                        <p className="text-sm font-semibold text-eos-text">
                           {system.name}
                         </p>
-                        <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                        <p className="mt-1 text-sm text-eos-text-muted">
                           {system.vendor} · {formatPurposeLabel(system.purpose)}
                         </p>
                       </div>
@@ -478,8 +478,8 @@ function LatestManifestSection({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-sm font-medium text-eos-text">
                 Drift legat de acest manifest
               </p>
               <div className="mt-4 space-y-3">

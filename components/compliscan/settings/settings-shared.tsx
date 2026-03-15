@@ -116,10 +116,10 @@ export function SettingsTabIntro({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
         {title}
       </p>
-      <p className="max-w-2xl text-sm leading-6 text-[var(--color-on-surface-muted)]">
+      <p className="max-w-2xl text-sm leading-6 text-eos-text-muted">
         {description}
       </p>
     </div>
@@ -136,14 +136,14 @@ export function SettingsTile({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3.5">
-      <div className="flex items-center gap-2 text-[var(--color-muted)]">
-        <span className="grid size-7 place-items-center rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)]">
+    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3.5">
+      <div className="flex items-center gap-2 text-eos-text-muted">
+        <span className="grid size-7 place-items-center rounded-xl border border-eos-border bg-eos-bg-inset">
           <Icon className="size-3.5" strokeWidth={2.25} />
         </span>
         <p className="text-[11px] uppercase tracking-[0.18em]">{label}</p>
       </div>
-      <p className="mt-3 text-sm font-semibold leading-5 text-[var(--color-on-surface)]">{value}</p>
+      <p className="mt-3 text-sm font-semibold leading-5 text-eos-text">{value}</p>
     </div>
   )
 }
@@ -158,12 +158,12 @@ export function EndpointRow({
   badge: string
 }) {
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+    <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm font-medium text-[var(--color-on-surface)]">{label}</span>
+        <span className="text-sm font-medium text-eos-text">{label}</span>
         <Badge variant="outline">{badge}</Badge>
       </div>
-      <p className="mt-2 break-all text-xs leading-5 text-[var(--color-on-surface-muted)]">{value}</p>
+      <p className="mt-2 break-all text-xs leading-5 text-eos-text-muted">{value}</p>
     </div>
   )
 }
@@ -173,7 +173,7 @@ export function OperationalLoadingCard({ children }: { children: React.ReactNode
     <div
       role="status"
       aria-live="polite"
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]"
+      className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted"
     >
       {children}
     </div>
@@ -192,11 +192,11 @@ export function SettingsStatusBlock({
   children?: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">{eyebrow}</p>
-      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{title}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
+      <p className="mt-2 text-sm font-semibold text-eos-text">{title}</p>
       {description ? (
-        <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{description}</p>
+        <p className="mt-2 text-sm leading-6 text-eos-text-muted">{description}</p>
       ) : null}
       {children ? <div className="mt-3">{children}</div> : null}
     </div>
@@ -216,14 +216,14 @@ export function SettingsSignalCard({
 }) {
   const toneClass =
     tone === "destructive"
-      ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+      ? "border-eos-error-border bg-eos-error-soft text-eos-error"
       : tone === "warning"
-        ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-        : "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+        ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+        : "border-eos-border bg-eos-primary-soft text-eos-success"
 
   return (
     <div className={`rounded-2xl border p-4 text-sm ${toneClass}`}>
-      <p className="font-semibold text-[var(--color-on-surface)]">{title}</p>
+      <p className="font-semibold text-eos-text">{title}</p>
       {items.length > 0 ? (
         <ul className="mt-2 space-y-1.5">
           {items.map((item) => (
@@ -249,20 +249,20 @@ export function SettingsDisclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+    <details className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
       <summary className="cursor-pointer list-none">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
               {eyebrow}
             </p>
-            <p className="mt-1 text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+            <p className="mt-1 text-sm font-medium text-eos-text">{title}</p>
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
               {description}
             </p>
           </div>
           <ChevronDown
-            className="mt-1 size-4 shrink-0 text-[var(--color-muted)]"
+            className="mt-1 size-4 shrink-0 text-eos-text-muted"
             strokeWidth={2.25}
           />
         </div>

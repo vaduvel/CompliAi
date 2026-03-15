@@ -147,7 +147,7 @@ export default function AuditExportPage() {
 
       <PillarTabs sectionId="dovada" />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Audit si export"
@@ -252,10 +252,10 @@ function ReportsGuideCard() {
       {steps.map((step) => (
         <div
           key={step.title}
-          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+          className="rounded-2xl border border-eos-border bg-eos-surface p-4"
         >
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+          <p className="text-sm font-medium text-eos-text">{step.title}</p>
+          <p className="mt-2 text-sm leading-6 text-eos-text-muted">
             {step.detail}
           </p>
         </div>
@@ -274,12 +274,12 @@ function RemediationHandoffCard({
   driftCount: number
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="text-xl">Unde continui munca reala</CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-1 text-sm text-eos-text-muted">
               `Audit si export` ramane read-only pentru livrabil. Daca mai ai task-uri deschise sau gap-uri de dovada, revii in paginile de executie.
             </p>
           </div>
@@ -289,9 +289,9 @@ function RemediationHandoffCard({
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 pt-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">Remediere</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+          <p className="text-sm font-medium text-eos-text">Remediere</p>
+          <p className="mt-2 text-sm leading-6 text-eos-text-muted">
             Acolo inchizi task-uri, atasezi dovezi si rulezi `Mark as fixed & rescan`.
           </p>
           <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
@@ -301,9 +301,9 @@ function RemediationHandoffCard({
             </Link>
           </Button>
         </div>
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">Auditor Vault</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+          <p className="text-sm font-medium text-eos-text">Auditor Vault</p>
+          <p className="mt-2 text-sm leading-6 text-eos-text-muted">
             Acolo verifici trasabilitatea, calitatea dovezii si povestea completa care sustine auditul.
           </p>
           <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
@@ -320,11 +320,11 @@ function RemediationHandoffCard({
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+    <Card className="border-eos-border bg-eos-bg-inset">
+      <CardHeader className="border-b border-eos-border pb-4">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+      <CardContent className="pt-4 text-sm text-eos-text-muted">
         {detail}
       </CardContent>
     </Card>
@@ -343,35 +343,35 @@ function ReportsStatusGrid({
   hasBaseline: boolean
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Ce intră în livrabil</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-4">
         <StatusTile
           label="Task-uri deschise"
           value={openTasks}
-          tone="text-[var(--color-warning)]"
+          tone="text-eos-warning"
           hint="Încă afectează riscul și recomandările."
         />
         <StatusTile
           label="Task-uri închise"
           value={doneTasks}
-          tone="text-[var(--status-success-text)]"
+          tone="text-eos-success"
           hint="Au dovadă sau au fost marcate ca rezolvate."
         />
         <StatusTile
           label="Drift activ"
           value={activeDrifts}
           tone={
-            activeDrifts > 0 ? "text-[var(--color-error)]" : "text-[var(--status-success-text)]"
+            activeDrifts > 0 ? "text-eos-error" : "text-eos-success"
           }
           hint="Va apărea și în snapshot dacă există."
         />
         <StatusTile
           label="Baseline validat"
           value={hasBaseline ? 1 : 0}
-          tone={hasBaseline ? "text-[var(--color-info)]" : "text-[var(--color-muted)]"}
+          tone={hasBaseline ? "text-eos-info" : "text-eos-text-muted"}
           hint={hasBaseline ? "Comparăm cu baseline-ul salvat." : "Comparăm doar cu ultimul snapshot."}
         />
       </CardContent>
@@ -403,12 +403,12 @@ function SnapshotStatusCard({
   driftCount: number
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="text-xl">Snapshot curent</CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-1 text-sm text-eos-text-muted">
               Exporturile `compliscan.json` și `compliscan.yaml` pornesc de aici.
             </p>
           </div>
@@ -438,14 +438,14 @@ function SnapshotStatusCard({
 
         {latestSnapshot && (
           <>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Generat
               </p>
-              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+              <p className="mt-2 text-sm font-semibold text-eos-text">
                 {new Date(latestSnapshot.generatedAt).toLocaleString("ro-RO")}
               </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
+              <p className="mt-2 text-xs text-eos-text-muted">
                 {formatRelativeRomanian(latestSnapshot.generatedAt)} · {latestSnapshot.snapshotId}
               </p>
             </div>
@@ -457,16 +457,16 @@ function SnapshotStatusCard({
               <SnapshotMeta label="Drift inclus" value={driftCount} />
             </div>
 
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline">
                   comparat cu
                 </Badge>
-                <span className="text-sm text-[var(--color-on-surface)]">
+                <span className="text-sm text-eos-text">
                   {latestSnapshot.comparedToSnapshotId || "fără comparație"}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
+              <p className="mt-3 text-sm text-eos-text-muted">
                 {validatedBaseline
                   ? `Baseline validat activ: ${validatedBaseline.snapshotId}`
                   : "Nu există baseline validat. Snapshot-ul compară cu ultimul snapshot disponibil."}
@@ -501,19 +501,19 @@ function StatusTile({
   hint: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-      <p className="text-sm text-[var(--color-muted)]">{label}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+      <p className="text-sm text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-semibold ${tone}`}>{value}</p>
-      <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">{hint}</p>
+      <p className="mt-2 text-xs leading-5 text-eos-text-muted">{hint}</p>
     </div>
   )
 }
 
 function SnapshotMeta({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{value}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>
   )
 }

@@ -686,7 +686,7 @@ Progres recent pe punctul acesta:
   - `DropdownMenu`
   - `Toaster`
   - pentru `app/*`, `components/*` si `lib/compliance/*`
-- `components/ui/*` nu mai este suprafata de authoring pentru runtime; a ramas doar detaliu intern in spatele wrapper-elor `Evidence OS`
+- `components/ui/*` nu mai este suprafata de authoring pentru runtime; a ramas doar strat de compatibilitate peste `Evidence OS`, fara logica UI concurenta
 - `PageHeader` a fost eliminat din `route-sections`:
   - runtime-ul activ nu mai foloseste doua scheme paralele de compozitie pentru pagini
 - hook-ul central `use-cockpit` a intrat in cleanup structural:
@@ -1511,6 +1511,19 @@ Asta este sanatos arhitectural pentru ca:
 - inchide auditul final intr-o forma repetabila, nu doar vizuala sau contextuala
 - leaga runtime UX de payload si handoff real
 - reduce dependenta de sesiuni locale fragile pentru verificarea fluxului principal
+
+## Actualizare 2026-03-15 - `Evidence OS` este acum stratul unic de authoring vizibil
+
+- `app/*`, `components/*` si `lib/compliance/*` nu mai importa direct `components/ui/*`
+- `components/ui/*` a ramas doar alias de compatibilitate peste `components/evidence-os/*`
+- `Dashboard` nu mai foloseste doar token-uri migrate; shell-ul si hero-ul principal sunt acum compuse explicit in vocabular `Evidence OS`
+- exporturile client-facing (`Annex IV lite`, `Audit Pack`) folosesc si ele token-uri `eos-*`, nu vechiul vocabular separat pentru suprafete si status
+
+Asta este sanatos arhitectural pentru ca:
+
+- reduce la o singura poarta de intrare pentru UI-ul produsului
+- elimina competitia dintre doua sisteme de authoring
+- face convergenta vizibila atat in runtime, cat si in livrabilele HTML generate server-side
 
 ## Actualizare 2026-03-15 - `Checklists` primeste un pass mai dur pe autoritatea de executie
 

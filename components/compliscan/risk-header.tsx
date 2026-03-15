@@ -2,18 +2,17 @@
 
 import {
   ArrowRight,
-  Bell,
   Clock3,
   Scan,
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react"
 
-import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 
 type RiskHeaderProps = {
@@ -39,10 +38,9 @@ function headerState(
   if (isOnboarding) {
     return {
       isOnboarding,
-      ring: "var(--color-info)",
       badge:
-        "border-[var(--status-info-border)] bg-[var(--status-info-bg-soft)] text-[var(--status-info-text)]",
-      emphasis: "text-[var(--status-info-text)]",
+        "border-eos-border bg-eos-primary-soft text-eos-primary",
+      emphasis: "text-eos-primary",
       eyebrow: "Punct de start",
       statusLabel: "Fara baseline",
       scoreLabel: "scor de control curent",
@@ -54,17 +52,15 @@ function headerState(
       actionHint:
         "Flux: colectezi dovezi, primesti recomandare AI, apoi validezi uman.",
       ctaLabel: "Scaneaza primul document",
-      ringLabel: "Pregatire",
     }
   }
 
   if (activeRiskCount === 0) {
     return {
       isOnboarding,
-      ring: "var(--color-risk-low)",
       badge:
-        "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]",
-      emphasis: "text-[var(--color-success)]",
+        "border-eos-border bg-eos-success-soft text-eos-success",
+      emphasis: "text-eos-success",
       eyebrow: "Baseline stabil",
       statusLabel: "0 riscuri active",
       scoreLabel: "scor curent de risc activ",
@@ -76,17 +72,15 @@ function headerState(
       actionHint:
         "Istoricul ramane salvat. Rescanezi doar la o versiune noua sau la o schimbare reala.",
       ctaLabel: "Mergi la Scanari",
-      ringLabel: "Nicio problema activa",
     }
   }
 
   if (score === 0 || lower.includes("ridicat")) {
     return {
       isOnboarding,
-      ring: "var(--color-risk-high)",
       badge:
-        "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]",
-      emphasis: "text-[var(--color-error)]",
+        "border-eos-error-border bg-eos-error-soft text-eos-error",
+      emphasis: "text-eos-error",
       eyebrow: "Risc prioritar",
       statusLabel: riskLabel,
       scoreLabel: "scor curent de risc",
@@ -97,17 +91,15 @@ function headerState(
         "Nu deschide mai multe fronturi. Inchide mai intai cauza care blocheaza scorul, apoi reconfirma starea cu un nou scan.",
       actionHint: "Mai intai remediere, apoi un nou scan si verificare umana.",
       ctaLabel: "Scaneaza dupa remediere",
-      ringLabel: riskLabel,
     }
   }
 
   if (lower.includes("mediu")) {
     return {
       isOnboarding,
-      ring: "var(--color-risk-medium)",
       badge:
-        "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]",
-      emphasis: "text-[var(--color-warning)]",
+        "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
+      emphasis: "text-eos-warning",
       eyebrow: "Atentie moderata",
       statusLabel: riskLabel,
       scoreLabel: "scor curent de risc",
@@ -118,16 +110,14 @@ function headerState(
         "Concentreaza-te pe documentul cel mai recent sau pe alerta deschisa cu impact real. Inchide un risc complet, apoi treci la urmatorul.",
       actionHint: "Mai putine scanari, mai multa claritate pe fiecare risc deschis.",
       ctaLabel: "Scaneaza documente",
-      ringLabel: riskLabel,
     }
   }
 
   return {
     isOnboarding,
-    ring: "var(--color-risk-low)",
     badge:
-      "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]",
-    emphasis: "text-[var(--color-success)]",
+      "border-eos-border bg-eos-success-soft text-eos-success",
+    emphasis: "text-eos-success",
     eyebrow: "Control bun",
     statusLabel: riskLabel,
     scoreLabel: "scor curent de risc",
@@ -138,7 +128,6 @@ function headerState(
       "Foloseste scanari noi doar pentru schimbari reale, apoi valideaza uman rezultatul si exporta dovada necesara.",
     actionHint: "Analizezi schimbarea, validezi manual, apoi exporti dovada.",
     ctaLabel: "Scaneaza documente",
-    ringLabel: riskLabel,
   }
 }
 
@@ -181,7 +170,7 @@ export function RiskHeader({
       icon: Clock3,
       value: lastScanMeta(lastScanLabel),
       meta: hasEvidence ? "ultimul reper operational salvat" : "porneste primul scan",
-      valueClassName: "text-[var(--color-on-surface)]",
+      valueClassName: "text-eos-text",
     },
     {
       id: "open-risks",
@@ -193,7 +182,7 @@ export function RiskHeader({
           ? "un risc cere inchidere"
           : `${state.statusLabel.toLowerCase()}`
         : "asteapta primul document analizat",
-      valueClassName: hasEvidence && activeRiskCount > 0 ? state.emphasis : "text-[var(--color-on-surface)]",
+      valueClassName: hasEvidence && activeRiskCount > 0 ? state.emphasis : "text-eos-text",
     },
     {
       id: "operating-principle",
@@ -204,136 +193,104 @@ export function RiskHeader({
         activeRiskCount === 0
           ? "rescanezi doar la schimbari reale"
           : "validarea umana inchide decizia oficiala",
-      valueClassName: "text-[var(--color-on-surface)]",
+      valueClassName: "text-eos-text",
     },
   ] as const
 
+  const summaryItems: SummaryStripItem[] = headerHighlights.map((item) => ({
+    label: item.label,
+    value: item.value,
+    hint: item.meta,
+    tone:
+      item.id === "open-risks" && hasEvidence && activeRiskCount > 0
+        ? score === 0 || riskLabel.toLowerCase().includes("ridicat")
+          ? "danger"
+          : "warning"
+        : item.id === "operating-principle" && activeRiskCount === 0
+          ? "success"
+          : "neutral",
+  }))
+
   return (
-    <Card className="overflow-hidden border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--card-bg))] shadow-[var(--shadow-xl)]">
-      <CardContent className="px-5 py-5 md:px-8 md:py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-border)] pb-5">
-          <CompliScanLogoLockup
-            variant="flat"
-            size="lg"
-            subtitle="prioritizare AI cu validare umana"
-            titleClassName="text-[var(--color-on-surface)]"
-            subtitleClassName="text-[var(--color-muted)]"
-          />
-
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right md:block">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                {activeWorkspace.workspaceLabel}
-              </p>
-              <p className="mt-1 text-base font-semibold text-[var(--color-on-surface)]">
-                {activeWorkspace.workspaceOwner}
-              </p>
-              <p className="text-sm text-[var(--color-muted)]">{activeWorkspace.orgName}</p>
-            </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)]"
-              aria-label="Notificari"
-            >
-              <Bell className="size-4" strokeWidth={2.25} />
-            </Button>
-            <Avatar
-              size="lg"
-              className="border border-[var(--color-border)] bg-[var(--color-surface-variant)]"
-            >
-              <AvatarFallback className="bg-transparent text-[var(--color-on-surface)]">
-                {activeWorkspace.workspaceInitials}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,380px)]">
+    <section className="space-y-4">
+      <PageIntro
+        eyebrow="Dashboard"
+        badges={
+          <>
+            <Badge className="border-eos-border bg-eos-surface-variant px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
+              {state.eyebrow}
+            </Badge>
+            <Badge className={state.badge}>{state.statusLabel}</Badge>
+            <Badge className="border-eos-border bg-transparent text-eos-text-muted">
+              scor {score}/100
+            </Badge>
+            {!state.isOnboarding ? (
+              <Badge className="border-eos-border bg-transparent text-eos-text-muted">
+                validare umana
+              </Badge>
+            ) : null}
+          </>
+        }
+        title={state.actionTitle}
+        description={state.primaryMessage}
+        aside={
           <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  {state.eyebrow}
-                </Badge>
-                <Badge className={state.badge}>{state.statusLabel}</Badge>
-                {!state.isOnboarding && (
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
-                    validare umana
-                  </Badge>
-                )}
+            <div className="flex items-center gap-3">
+              <Avatar size="lg" className="border border-eos-border bg-eos-surface-variant">
+                <AvatarFallback className="bg-transparent text-eos-text">
+                  {activeWorkspace.workspaceInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  {activeWorkspace.workspaceLabel}
+                </p>
+                <p className="mt-1 truncate text-base font-semibold text-eos-text">
+                  {activeWorkspace.workspaceOwner}
+                </p>
+                <p className="truncate text-sm text-eos-text-muted">{activeWorkspace.orgName}</p>
               </div>
+            </div>
 
-              <div className="max-w-4xl space-y-2.5">
-                <div className="flex flex-wrap items-end gap-3 md:gap-5">
-                  <h1 className="text-[38px] font-semibold leading-none tracking-tight text-[var(--color-on-surface)] md:text-[54px]">
-                    {score}
-                    <span className="ml-1 text-[0.42em] text-[var(--color-muted)]">/100</span>
-                  </h1>
-                  <div className="space-y-1 pb-2">
-                    <p className="text-sm text-[var(--color-muted)] md:text-lg">
-                      {state.scoreLabel}
-                    </p>
-                    <p className={`text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
-                  </div>
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
+                {state.scoreLabel}
+              </p>
+              <div className="mt-3 flex items-end gap-2">
+                <div className="text-4xl font-semibold leading-none tracking-tight text-eos-text">
+                  {score}
                 </div>
-
-                <p className="max-w-3xl text-sm leading-6 text-[var(--color-on-surface-muted)] md:text-lg md:leading-7">
-                  {state.primaryMessage}
-                </p>
+                <div className="pb-1 text-sm text-eos-text-muted">/100</div>
               </div>
+              <p className={`mt-2 text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
+            </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                {headerHighlights.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4"
-                    >
-                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                        <Icon className="size-4" strokeWidth={2.25} />
-                        {item.label}
-                      </div>
-                      <p className={`mt-2.5 text-base font-medium ${item.valueClassName}`}>{item.value}</p>
-                      <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{item.meta}</p>
-                    </div>
-                  )
-                })}
-              </div>
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
+                Pasul urmator
+              </p>
+              <p className="mt-2 text-sm leading-6 text-eos-text-muted">{state.actionDescription}</p>
+              <p className="mt-2 text-xs leading-5 text-eos-text-tertiary">{state.actionHint}</p>
             </div>
           </div>
+        }
+        actions={
+          <Button
+            onClick={onScan}
+            className="h-11 w-full rounded-xl bg-eos-primary px-5 font-semibold text-eos-primary-text hover:bg-eos-primary-hover sm:w-auto"
+          >
+            <Scan className="size-4" strokeWidth={2.25} />
+            {state.ctaLabel}
+            <ArrowRight className="size-4" strokeWidth={2.25} />
+          </Button>
+        }
+      />
 
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 shadow-[inset_0_1px_0_0_var(--border-subtle)]">
-            <div className="flex h-full flex-col justify-between gap-4">
-              <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Pasul urmator
-                </p>
-                <h2 className="text-lg font-semibold leading-snug text-[var(--color-on-surface)] md:text-xl">
-                  {state.actionTitle}
-                </h2>
-                <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                  {state.actionDescription}
-                </p>
-                <p className="text-xs leading-5 text-[var(--color-muted)]">
-                  {state.actionHint}
-                </p>
-              </div>
-
-              <Button
-                onClick={onScan}
-                className="h-11 w-full rounded-xl bg-[var(--color-primary)] px-5 font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] sm:w-auto"
-              >
-                <Scan className="size-4" strokeWidth={2.25} />
-                {state.ctaLabel}
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      <SummaryStrip
+        eyebrow="Indicatori de orientare"
+        title="Ce urmaresti inainte sa deschizi un nou front"
+        items={summaryItems}
+      />
+    </section>
   )
 }

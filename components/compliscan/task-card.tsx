@@ -35,20 +35,20 @@ type TaskCardProps = {
 function priorityTone(priority: CockpitTask["priority"]) {
   if (priority === "P1") {
     return {
-      badge: "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]",
-      accent: "border-l-[var(--color-error)]",
+      badge: "border-eos-error-border bg-eos-error-soft text-eos-error",
+      accent: "border-l-eos-error",
     }
   }
   if (priority === "P2") {
     return {
-      badge: "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]",
-      accent: "border-l-[var(--color-warning)]",
+      badge: "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
+      accent: "border-l-eos-warning",
     }
   }
   return {
     badge:
-      "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]",
-    accent: "border-l-[var(--color-info)]",
+      "border-eos-border bg-eos-surface-variant text-eos-text-muted",
+    accent: "border-l-eos-primary",
   }
 }
 
@@ -60,15 +60,15 @@ function confidenceLabel(confidence: CockpitTask["confidence"]) {
 
 function validationTone(status: CockpitTask["validationStatus"]) {
   if (status === "passed") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "border-eos-border bg-eos-success-soft text-eos-success"
   }
   if (status === "failed") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    return "border-eos-error-border bg-eos-error-soft text-eos-error"
   }
   if (status === "needs_review") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
 }
 
 function validationLabel(status: CockpitTask["validationStatus"]) {
@@ -101,12 +101,12 @@ function severityLabel(severity: CockpitTask["severity"]) {
 
 function severityTone(severity: CockpitTask["severity"]) {
   if (severity === "critical" || severity === "high") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    return "border-eos-error-border bg-eos-error-soft text-eos-error"
   }
   if (severity === "medium") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
 }
 
 function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
@@ -115,12 +115,12 @@ function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
 
 function evidenceQualityTone(status?: EvidenceQualityAssessment["status"]) {
   if (status === "sufficient") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "border-eos-border bg-eos-success-soft text-eos-success"
   }
   if (status === "weak") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
-  return "border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-bg-inset text-eos-text-muted"
 }
 
 function normalizeTaskCopy(value: string) {
@@ -196,8 +196,8 @@ export function TaskCard({
   return (
     <Card
       id={`task-${task.id}`}
-      className={`border-[var(--color-border)] bg-[var(--color-surface)] [box-shadow:var(--shadow-md)] transition ${
-        highlighted ? "ring-1 ring-[var(--border-strong)] ring-offset-2 ring-offset-[var(--color-bg)]" : ""
+      className={`border-eos-border bg-eos-surface shadow-sm transition ${
+        highlighted ? "ring-1 ring-eos-border-strong ring-offset-2 ring-offset-eos-bg" : ""
       }`}
     >
       <CardContent className={`border-l-4 px-5 py-5 ${tone.accent}`}>
@@ -212,64 +212,64 @@ export function TaskCard({
                     {validationLabel(task.validationStatus)}
                   </Badge>
                   {task.status === "done" ? (
-                    <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] uppercase tracking-[0.24em] text-[11px] text-[var(--color-muted)]">
+                    <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.24em] text-[11px] text-eos-text-muted">
                       inchis
                     </Badge>
                   ) : null}
                 </div>
 
-                <h3 className="break-words text-lg font-semibold text-[var(--color-on-surface)]">
+                <h3 className="break-words text-lg font-semibold text-eos-text">
                   {task.title}
                 </h3>
-                <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+                <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                   {task.summary}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
                 <span>Responsabil: {task.owner}</span>
                 <span>Termen: {task.dueDate}</span>
                 <span>Tip: {remediationModeLabel(task.remediationMode)}</span>
                 <span>{task.effortLabel}</span>
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                   Primul pas
                 </p>
-                <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                <p className="mt-2 text-sm font-medium text-eos-text">
                   {nextAction}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+                <p className="mt-2 text-xs leading-5 text-eos-text-muted">
                   {auditBlocker}
                 </p>
               </div>
             </div>
 
-            <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+            <section className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge
                   className={
                     task.attachedEvidence
                       ? evidenceQualityTone(task.attachedEvidence.quality?.status)
-                      : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
+                      : "border-eos-border bg-eos-surface text-eos-text-muted"
                   }
                 >
                   {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
                 </Badge>
               </div>
 
-              <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              <div className="mt-3 rounded-xl border border-eos-border bg-eos-surface px-3 py-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                   Blocaj acum
                 </p>
-                <p className="mt-1 text-sm text-[var(--color-on-surface)]">{auditBlocker}</p>
+                <p className="mt-1 text-sm text-eos-text">{auditBlocker}</p>
               </div>
 
               <div className="mt-4 space-y-2">
                 <Button
                   onClick={() => onMarkDone(task.id)}
-                  className="h-11 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                  className="h-11 w-full rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                 >
                   {task.status === "done" ? (
                     <CheckCircle2 className="size-4" strokeWidth={2.25} />
@@ -286,7 +286,7 @@ export function TaskCard({
                       setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
                     }
                     aria-label="Tipul de dovada"
-                    className="h-10 min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-on-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    className="h-10 min-w-0 rounded-xl border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none transition-[border-color,box-shadow] focus:border-eos-primary focus:ring-2 focus:ring-[var(--eos-accent-primary-subtle)]"
                   >
                     {task.evidenceKinds.map((kind) => (
                       <option key={`${task.id}-${kind}`} value={kind}>
@@ -297,7 +297,7 @@ export function TaskCard({
                   <Button
                     onClick={() => evidenceInputRef.current?.click()}
                     variant="outline"
-                    className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                    className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                   >
                     <Paperclip className="size-4" strokeWidth={2.25} />
                     {task.attachedEvidence ? "Actualizeaza dovada" : "Adauga dovada"}
@@ -305,37 +305,37 @@ export function TaskCard({
                 </div>
               </div>
 
-              <details className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-on-surface-muted)]">
+              <details className="mt-3 rounded-xl border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
                 <summary className="cursor-pointer list-none">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                         Dovada si utilitare
                       </p>
-                      <p className="text-xs text-[var(--color-on-surface-muted)]">
+                      <p className="text-xs text-eos-text-muted">
                         {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
+                    <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
                   </div>
                 </summary>
                 <div className="mt-3 space-y-3">
-                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                  <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
                     {task.attachedEvidence ? (
                       <div className="space-y-2">
-                        <p className="font-medium text-[var(--color-on-surface)]">Dovada curenta</p>
+                        <p className="font-medium text-eos-text">Dovada curenta</p>
                         <div className="flex flex-wrap items-center gap-2">
                           {evidenceHref ? (
                             <a
                               href={evidenceHref}
                               target="_blank"
                               rel="noreferrer"
-                              className="max-w-full break-all text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                              className="max-w-full break-all text-eos-info underline decoration-eos-border underline-offset-4"
                             >
                               {task.attachedEvidence.fileName}
                             </a>
                           ) : (
-                            <span className="break-all text-[var(--color-on-surface)]">
+                            <span className="break-all text-eos-text">
                               {task.attachedEvidence.fileName}
                             </span>
                           )}
@@ -354,25 +354,25 @@ export function TaskCard({
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <p className="font-medium text-[var(--color-on-surface)]">Dovada lipseste</p>
+                        <p className="font-medium text-eos-text">Dovada lipseste</p>
                         <p>Ataseaza fisierul sau extrasul relevant inainte sa inchizi task-ul.</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--bg-inset)] px-3 py-2">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-eos-border bg-eos-bg-inset px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                         Utilitar
                       </p>
-                      <p className="text-xs text-[var(--color-on-surface-muted)]">
+                      <p className="text-xs text-eos-text-muted">
                         Export separat pentru acest task.
                       </p>
                     </div>
                     <Button
                       onClick={() => onExport(task.id)}
                       variant="outline"
-                      className="h-9 shrink-0 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                      className="h-9 shrink-0 rounded-xl border-eos-border bg-eos-surface px-3 text-xs text-eos-text hover:bg-eos-secondary-hover"
                     >
                       <FileDown className="size-4" strokeWidth={2.25} />
                       Export task
@@ -384,20 +384,20 @@ export function TaskCard({
           </div>
 
           <section className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(280px,0.92fr)]">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                 Ce faci acum
               </p>
               {hasDistinctFixPreview ? (
-                <p className="mt-2 break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                <p className="mt-2 break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text [overflow-wrap:anywhere]">
                   {task.fixPreview}
                 </p>
               ) : null}
-              <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+              <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                 {task.steps.slice(0, 3).map((step, index) => (
                   <li key={`${task.id}-${index}`} className="flex gap-2">
                     <ShieldCheck
-                      className="mt-0.5 size-4 shrink-0 text-[var(--icon-secondary)]"
+                      className="mt-0.5 size-4 shrink-0 text-eos-text-muted"
                       strokeWidth={2.25}
                     />
                     <span>{step}</span>
@@ -406,15 +406,15 @@ export function TaskCard({
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                 Blocaj de audit
               </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+              <p className="mt-2 text-sm text-eos-text [overflow-wrap:anywhere]">
                 {auditBlocker}
               </p>
               {task.validationMessage ? (
-                <p className="mt-3 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+                <p className="mt-3 text-xs leading-5 text-eos-text-muted">
                   {task.validationMessage}
                 </p>
               ) : null}
@@ -428,31 +428,31 @@ export function TaskCard({
               subtitle="Detaliile care explica de ce exista task-ul."
             >
               <div className="space-y-3">
-                <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+                <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                   {task.why}
                 </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
                   <span>Sursa: {task.source}</span>
                   <span>Incredere: {confidenceLabel(task.confidence)}</span>
                   <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <p className="text-sm font-medium text-eos-text">
                     {task.triggerLabel}
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface-muted)]">
+                  <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
                     {task.triggerSnippet ?? "Nu exista excerpt salvat pentru acest task."}
                   </p>
                 </div>
                 {task.legalSummary ? (
-                  <p className="text-xs text-[var(--color-on-surface-muted)]">{task.legalSummary}</p>
+                  <p className="text-xs text-eos-text-muted">{task.legalSummary}</p>
                 ) : null}
                 {task.principles.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {visiblePrinciples.map((principle) => (
                       <Badge
                         key={`${task.id}-${principle}`}
-                        className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+                        className="border-eos-border bg-eos-bg-inset text-eos-text-muted"
                       >
                         {formatPrincipleLabel(principle)}
                       </Badge>
@@ -460,7 +460,7 @@ export function TaskCard({
                     {hiddenPrinciples.length > 0 ? (
                       <Badge
                         title={hiddenPrinciplesLabel}
-                        className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]"
+                        className="border-eos-border bg-eos-bg-inset text-eos-text-muted"
                       >
                         +{hiddenPrinciples.length}
                       </Badge>
@@ -479,12 +479,12 @@ export function TaskCard({
                 <Button
                   onClick={() => void handleCopyReadyText()}
                   variant="outline"
-                  className="h-9 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                  className="h-9 rounded-xl border-eos-border bg-eos-bg-inset text-eos-text hover:bg-eos-secondary-hover"
                 >
                   <Copy className="size-4" strokeWidth={2.25} />
                   Copiaza
                 </Button>
-                <pre className="whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                <pre className="whitespace-pre-wrap break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text [overflow-wrap:anywhere]">
                   {task.readyText}
                 </pre>
               </div>
@@ -496,46 +496,46 @@ export function TaskCard({
               subtitle="Mesajele detaliate de verificare si suport."
             >
               <div className="space-y-3">
-                <p className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+                <p className="rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text-muted [overflow-wrap:anywhere]">
                   {task.evidenceSnippet}
                 </p>
                 {task.rescanHint ? (
-                  <p className="text-xs leading-5 text-[var(--color-muted)]">{task.rescanHint}</p>
+                  <p className="text-xs leading-5 text-eos-text-muted">{task.rescanHint}</p>
                 ) : null}
                 {(task.validationMessage || task.validatedAtLabel) ? (
-                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                  <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
                     <div className="flex items-start gap-3">
                       {task.validationStatus === "passed" ? (
                         <CheckCircle2
-                          className="mt-0.5 size-4 shrink-0 text-[var(--status-success-text)]"
+                          className="mt-0.5 size-4 shrink-0 text-eos-success"
                           strokeWidth={2.25}
                         />
                       ) : (
                         <AlertTriangle
-                          className="mt-0.5 size-4 shrink-0 text-[var(--color-warning)]"
+                          className="mt-0.5 size-4 shrink-0 text-eos-warning"
                           strokeWidth={2.25}
                         />
                       )}
                       <div className="space-y-1">
-                        <p className="text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                        <p className="text-sm text-eos-text [overflow-wrap:anywhere]">
                           {task.validationMessage || "Task-ul nu a fost validat inca."}
                         </p>
                         {task.validationBasis || task.validationConfidence ? (
                           <div className="flex flex-wrap gap-2 pt-1">
                             {task.validationBasis ? (
-                              <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+                              <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
                                 baza: {validationBasisLabel(task.validationBasis)}
                               </Badge>
                             ) : null}
                             {task.validationConfidence ? (
-                              <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+                              <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
                                 {validationConfidenceLabel(task.validationConfidence)}
                               </Badge>
                             ) : null}
                           </div>
                         ) : null}
                         {task.validatedAtLabel ? (
-                          <p className="text-xs text-[var(--color-muted)]">
+                          <p className="text-xs text-eos-text-muted">
                             Ultima verificare: {task.validatedAtLabel}
                           </p>
                         ) : null}
@@ -572,19 +572,19 @@ function TaskDisclosure({
   children: ReactNode
 }) {
   return (
-    <details className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+    <details className="group rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
       <summary className="cursor-pointer list-none">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
           {eyebrow}
         </p>
         <div className="mt-2 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+            <p className="text-sm font-medium text-eos-text">{title}</p>
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
               {subtitle}
             </p>
           </div>
-          <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
+          <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
         </div>
       </summary>
       <div className="mt-4">{children}</div>

@@ -75,35 +75,35 @@ export function ExportArtifactsCard() {
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Ce exporta fiecare artefact</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {artifactGroups.map((group) => (
           <section
             key={group.label}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
           >
-            <div className="border-b border-[var(--color-border)] pb-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+            <div className="border-b border-eos-border pb-3">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                 {group.label}
               </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+              <p className="mt-2 text-sm text-eos-text-muted">
                 {group.description}
               </p>
             </div>
             <div className="mt-3 space-y-3">
               {group.items.map((artifact) => (
-                <div key={artifact.title} className="flex items-start gap-3 rounded-xl bg-[var(--bg-inset)] p-3">
-                  <span className="grid size-9 place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)]">
+                <div key={artifact.title} className="flex items-start gap-3 rounded-xl bg-eos-bg-inset p-3">
+                  <span className="grid size-9 place-items-center rounded-2xl border border-eos-border bg-eos-surface text-eos-text">
                     <artifact.icon className="size-4" strokeWidth={2.25} />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="text-sm font-medium text-eos-text">
                       {artifact.title}
                     </p>
-                    <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                    <p className="mt-1 text-sm text-eos-text-muted">
                       {artifact.detail}
                     </p>
                   </div>
@@ -135,10 +135,10 @@ function DriftDetailBlock({
   detail: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">{eyebrow}</p>
-      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{detail}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
+      <p className="mt-2 text-sm font-medium text-eos-text">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-eos-text-muted">{detail}</p>
     </div>
   )
 }
@@ -149,8 +149,8 @@ export function RecentDriftCard({
   drifts: ComplianceDriftRecord[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Drift inclus in snapshot</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
@@ -168,14 +168,14 @@ export function RecentDriftCard({
           return (
             <div
               key={drift.id}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <p className="text-sm font-medium text-eos-text">
                     {drift.summary}
                   </p>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     {formatDriftTypeLabel(drift.type)} · {formatRelativeRomanian(drift.detectedAtISO)}
                   </p>
                 </div>
@@ -217,19 +217,19 @@ export function RecentDriftCard({
                 />
               </div>
 
-              <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+              <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
                 <summary className="cursor-pointer list-none">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                         Context operational
                       </p>
-                      <p className="mt-1 text-sm font-medium text-[var(--color-on-surface)]">
+                      <p className="mt-1 text-sm font-medium text-eos-text">
                         Escalare, owner si update-uri de stare
                       </p>
                     </div>
                     <ChevronDown
-                      className="mt-1 size-4 shrink-0 text-[var(--color-muted)]"
+                      className="mt-1 size-4 shrink-0 text-eos-text-muted"
                       strokeWidth={2.25}
                     />
                   </div>

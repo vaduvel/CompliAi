@@ -315,7 +315,7 @@ function ControlOverview({
 
   return (
     <div className="space-y-6">
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Stare curenta"
@@ -450,7 +450,7 @@ function ControlSystemsWorkspace({
 
       {active === "discovery" && (
         <div className="space-y-6">
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardContent className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Discovery"
@@ -504,7 +504,7 @@ function ControlSystemsWorkspace({
 
       {active === "inventory" && (
         <div className="space-y-6">
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardContent className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Inventar oficial"
@@ -533,8 +533,8 @@ function ControlSystemsWorkspace({
             </CardContent>
           </Card>
 
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-            <CardHeader className="border-b border-[var(--color-border)] pb-5">
+          <Card className="border-eos-border bg-eos-surface">
+            <CardHeader className="border-b border-eos-border pb-5">
               <CardTitle className="text-xl">Inventar confirmat recent</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -542,18 +542,18 @@ function ControlSystemsWorkspace({
                 <EmptyState
                   title="Inca nu exista sisteme confirmate"
                   label="Confirmi mai intai o detectie din Discovery sau adaugi manual un sistem nou daca sursa tehnica lipseste."
-                  className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+                  className="border-eos-border bg-eos-surface-variant py-8"
                 />
               )}
               {recentInventory.map((system) => (
                 <div
                   key={system.id}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">{system.name}</p>
-                      <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                      <p className="text-sm font-semibold text-eos-text">{system.name}</p>
+                      <p className="mt-1 text-sm text-eos-text-muted">
                         {system.vendor} · {formatPurposeLabel(system.purpose)}
                       </p>
                     </div>
@@ -569,7 +569,7 @@ function ControlSystemsWorkspace({
                       {system.riskLevel}
                     </Badge>
                   </div>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
                   </p>
                 </div>
@@ -583,7 +583,7 @@ function ControlSystemsWorkspace({
 
       {active === "baseline" && (
         <div className="space-y-6">
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardContent className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Baseline"
@@ -700,7 +700,7 @@ function ControlSystemsWorkspace({
             <EmptyState
               title="Compliance Pack indisponibil"
               label="Solicita payload-ul complet sau confirma mai intai suficiente sisteme pentru review de control."
-              className="border-[var(--color-border)] bg-[var(--color-surface)] py-10"
+              className="border-eos-border bg-eos-surface py-10"
             />
           )}
         </div>
@@ -729,7 +729,7 @@ function ControlDriftWorkspace({
 }) {
   return (
     <div className="space-y-6">
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Drift"
@@ -790,8 +790,8 @@ function ControlDriftWorkspace({
         }
       />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-5">
           <CardTitle className="text-xl">Drift recent pe inventar</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
@@ -799,18 +799,18 @@ function ControlDriftWorkspace({
             <EmptyState
               title="Nu exista drift deschis"
               label="Inventarul confirmat este stabil fata de baseline-ul curent."
-              className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+              className="border-eos-border bg-eos-surface-variant py-8"
             />
           )}
           {recentDrifts.map((drift) => (
             <div
               key={drift.id}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">{drift.summary}</p>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     {drift.systemLabel || drift.sourceDocument || "Inventar AI"} · {formatRelativeRomanian(drift.detectedAtISO)}
                   </p>
                 </div>
@@ -883,7 +883,7 @@ function ControlReviewWorkspace({
 
   return (
     <div className="space-y-6">
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Review"
@@ -1004,14 +1004,14 @@ function ControlPrimaryTabs({
             onClick={() => onChange(tab.id)}
             className={`rounded-2xl border p-4 text-left transition ${
               isActive
-                ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]"
+                ? "border-eos-border-subtle bg-eos-surface-active"
+                : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-[var(--color-on-surface)]">{tab.title}</p>
-                <p className="mt-1 text-sm leading-6 text-[var(--color-on-surface-muted)]">{tab.description}</p>
+                <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
+                <p className="mt-1 text-sm leading-6 text-eos-text-muted">{tab.description}</p>
               </div>
               <Badge variant="outline" className="rounded-full px-2.5 py-1 normal-case tracking-normal">
                 {tab.badge}
@@ -1069,12 +1069,12 @@ function SystemsSubTabs({
             onClick={() => onChange(tab.id)}
             className={`rounded-2xl border px-4 py-3 text-left transition ${
               isActive
-                ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]"
+                ? "border-eos-border-subtle bg-eos-surface-active"
+                : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
             }`}
           >
-            <p className="text-sm font-semibold text-[var(--color-on-surface)]">{tab.title}</p>
-            <p className="mt-1 text-xs leading-5 text-[var(--color-on-surface-muted)]">{tab.description}</p>
+            <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">{tab.description}</p>
           </button>
         )
       })}
@@ -1097,8 +1097,8 @@ function ControlPackageHighlightsCard({
   }>
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Pachete de control dominante</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
@@ -1106,17 +1106,17 @@ function ControlPackageHighlightsCard({
           <EmptyState
             title="Inca nu exista suficiente semnale pentru grupuri dominante"
             label="Confirmi mai intai suficiente sisteme sau completezi campurile lipsa din pack, apoi aici vei vedea ce bundle domina pe fiecare categorie."
-            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+            className="border-eos-border bg-eos-surface-variant py-8"
           />
         )}
         <div className="grid gap-4 xl:grid-cols-3">
           {highlights.map((highlight) => (
             <div
               key={highlight.groupKey}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[var(--color-on-surface)]">{highlight.groupLabel}</p>
+                <p className="text-sm font-semibold text-eos-text">{highlight.groupLabel}</p>
                 <div className="flex flex-wrap gap-2">
                   <Badge
                     variant={
@@ -1132,18 +1132,18 @@ function ControlPackageHighlightsCard({
                   <Badge variant="outline">{highlight.systemsCount} sisteme</Badge>
                 </div>
               </div>
-              <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">{highlight.businessImpact}</p>
-              <p className="mt-3 text-xs text-[var(--color-muted)]">
-                <span className="font-medium text-[var(--color-on-surface)]">Owner route:</span>{" "}
+              <p className="mt-3 text-sm leading-6 text-eos-text-muted">{highlight.businessImpact}</p>
+              <p className="mt-3 text-xs text-eos-text-muted">
+                <span className="font-medium text-eos-text">Owner route:</span>{" "}
                 {highlight.ownerRoute}
               </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
-                <span className="font-medium text-[var(--color-on-surface)]">Bundle util:</span>{" "}
+              <p className="mt-2 text-xs text-eos-text-muted">
+                <span className="font-medium text-eos-text">Bundle util:</span>{" "}
                 {highlight.bundleHint}
               </p>
               {highlight.familyLabels.length > 0 && (
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  <span className="font-medium text-[var(--color-on-surface)]">Familii:</span>{" "}
+                <p className="mt-2 text-xs text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Familii:</span>{" "}
                   {highlight.familyLabels.join(" · ")}
                 </p>
               )}

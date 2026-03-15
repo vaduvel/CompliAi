@@ -25,13 +25,13 @@ export function ScanHistoryTab({
         description="Vezi toate scanarile recente intr-o singura lista si sari direct la rezultatul relevant."
       />
       <RecentScansCard scans={scans} tasks={tasks} />
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
           <div>
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">
+            <p className="text-sm font-medium text-eos-text">
               Istoricul complet ramane in Documente
             </p>
-            <p className="text-xs text-[var(--color-on-surface-muted)]">
+            <p className="text-xs text-eos-text-muted">
               Acolo gasesti toate scanarile, nu doar cele recente.
             </p>
           </div>

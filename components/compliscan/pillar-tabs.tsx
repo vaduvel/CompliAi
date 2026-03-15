@@ -21,7 +21,7 @@ export function PillarTabs({ sectionId, className }: PillarTabsProps) {
 
   return (
     <div className={`space-y-2 ${className ?? ""}`}>
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
         {section.label}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -33,14 +33,14 @@ export function PillarTabs({ sectionId, className }: PillarTabsProps) {
               href={item.href}
               className={`ring-focus inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition ${
                 active
-                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
-                  : "border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)] hover:bg-[var(--color-surface-hover)]"
+                  ? "border-eos-border-subtle bg-eos-surface-active text-eos-text"
+                  : "border-eos-border-subtle bg-eos-surface text-eos-text-muted hover:bg-eos-secondary-hover"
               }`}
               aria-current={active ? "page" : undefined}
             >
               <item.icon
                 className={`size-3.5 ${
-                  active ? "text-[var(--text-primary)]" : "text-[var(--icon-secondary)]"
+                  active ? "text-eos-text" : "text-eos-text-muted"
                 }`}
                 strokeWidth={2.2}
               />

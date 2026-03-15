@@ -55,7 +55,7 @@ export function ExportCenter({
       icon: FileCheck2,
       onClick: onGeneratePdf,
       className:
-        "min-h-12 h-auto justify-start rounded-xl bg-[var(--color-primary)] px-4 py-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]",
+        "min-h-12 h-auto justify-start rounded-xl bg-eos-primary px-4 py-3 text-eos-primary-text hover:bg-eos-primary-hover",
       variant: undefined,
     },
   ]
@@ -146,41 +146,41 @@ export function ExportCenter({
     primaryActions.length + secondaryActions.length + technicalActions.length
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <CardTitle className="text-lg text-[var(--color-on-surface)]">
+            <CardTitle className="text-lg text-eos-text">
               Export si dovada
             </CardTitle>
-            <p className="text-sm text-[var(--color-on-surface-muted)]">
+            <p className="text-sm text-eos-text-muted">
               Aici inchizi snapshot-ul curent si alegi doar artefactul potrivit pentru livrare.
             </p>
           </div>
-          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 py-1 text-xs text-[var(--color-on-surface-muted)]">
+          <span className="rounded-full border border-eos-border bg-eos-surface-variant px-3 py-1 text-xs text-eos-text-muted">
             {totalActions} optiuni
           </span>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-5 pt-4">
-        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+        <section className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                   Trimite acum
                 </p>
                 <Badge variant="success">principal</Badge>
               </div>
               <div>
-                <p className="text-base font-semibold text-[var(--color-on-surface)]">Raport PDF</p>
-                <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                <p className="text-base font-semibold text-eos-text">Raport PDF</p>
+                <p className="mt-1 text-sm text-eos-text-muted">
                   Livrabilul standard pentru management, control si handoff initial.
                 </p>
               </div>
             </div>
-            <p className="max-w-xs text-xs text-[var(--color-muted)]">
+            <p className="max-w-xs text-xs text-eos-text-muted">
               Daca nu ai nevoie de artefacte speciale, acesta este exportul corect.
             </p>
           </div>
@@ -208,10 +208,10 @@ export function ExportCenter({
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                   Suport pentru audit si review
                 </p>
-                <p className="text-sm text-[var(--color-on-surface-muted)]">
+                <p className="text-sm text-eos-text-muted">
                   Folosesti aceste exporturi doar cand livrabilul principal nu este suficient.
                 </p>
               </div>
@@ -222,12 +222,12 @@ export function ExportCenter({
                   key={action.key}
                   onClick={action.onClick}
                   variant={action.variant}
-                  className="min-h-11 h-auto items-start justify-start gap-3 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3 text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                  className="min-h-11 h-auto items-start justify-start gap-3 rounded-xl border-eos-border bg-eos-surface-variant px-4 py-3 text-eos-text hover:bg-eos-secondary-hover"
                 >
                   <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
                   <span className="min-w-0 text-left">
                     <span className="block whitespace-normal leading-5">{action.label}</span>
-                    <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-[var(--color-muted)]">
+                    <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-eos-text-muted">
                       {action.hint}
                     </span>
                   </span>
@@ -238,22 +238,22 @@ export function ExportCenter({
         )}
 
         {technicalActions.length > 0 && (
-          <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+          <details className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
             <summary className="cursor-pointer list-none">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                     Tehnic
                   </p>
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <p className="text-sm font-medium text-eos-text">
                     Snapshoturi si arhive pentru integrare, suport sau arhivare.
                   </p>
-                  <p className="text-xs text-[var(--color-muted)]">
+                  <p className="text-xs text-eos-text-muted">
                     Deschizi aceasta zona doar cand ai nevoie de artefacte tehnice.
                   </p>
                 </div>
                 <ChevronDown
-                  className="mt-1 size-4 shrink-0 text-[var(--color-muted)]"
+                  className="mt-1 size-4 shrink-0 text-eos-text-muted"
                   strokeWidth={2.25}
                 />
               </div>
@@ -264,12 +264,12 @@ export function ExportCenter({
                   key={action.key}
                   onClick={action.onClick}
                   variant={action.variant}
-                  className="min-h-10 h-auto items-start justify-start gap-3 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3 text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                  className="min-h-10 h-auto items-start justify-start gap-3 rounded-xl border-eos-border bg-eos-bg-inset px-4 py-3 text-eos-text hover:bg-eos-secondary-hover"
                 >
                   <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
                   <span className="min-w-0 text-left">
                     <span className="block whitespace-normal leading-5">{action.label}</span>
-                    <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-[var(--color-muted)]">
+                    <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-eos-text-muted">
                       {action.hint}
                     </span>
                   </span>

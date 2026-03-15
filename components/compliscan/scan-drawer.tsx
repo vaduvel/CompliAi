@@ -24,13 +24,13 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full border-l border-[var(--color-border)] bg-[var(--color-surface)] p-0 sm:max-w-xl"
+        className="w-full border-l border-eos-border bg-eos-surface p-0 sm:max-w-xl"
       >
-        <SheetHeader className="border-b border-[var(--color-border)] p-6">
-          <SheetTitle className="text-[var(--color-on-surface)]">
+        <SheetHeader className="border-b border-eos-border p-6">
+          <SheetTitle className="text-eos-text">
             {scan?.documentName ?? "Detalii scan"}
           </SheetTitle>
-          <SheetDescription className="text-[var(--color-muted)]">
+          <SheetDescription className="text-eos-text-muted">
             {scan
               ? `Scanat la ${new Date(scan.createdAtISO).toLocaleString("ro-RO")}`
               : "Selecteaza un document din lista recenta."}
@@ -38,41 +38,41 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
         </SheetHeader>
 
         <div className="space-y-6 p-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-on-surface)]">
-              <FileText className="size-4 text-[var(--icon-secondary)]" strokeWidth={2.25} />
+          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-eos-text">
+              <FileText className="size-4 text-eos-text-muted" strokeWidth={2.25} />
               Rezumat scan
             </div>
-            <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-3 text-sm text-eos-text-muted">
               {scan?.contentPreview || "Nu exista preview pentru acest document."}
             </p>
           </div>
 
           <div>
-            <div className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--color-on-surface)]">
-              <ShieldAlert className="size-4 text-[var(--color-warning)]" strokeWidth={2.25} />
+            <div className="mb-3 flex items-center gap-2 text-sm font-medium text-eos-text">
+              <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2.25} />
               Task-uri asociate
             </div>
             <div className="space-y-3">
               {tasks.length === 0 && (
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
                   Nu exista task-uri generate pentru acest scan.
                 </div>
               )}
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                    <p className="text-sm font-semibold text-eos-text">
                       {task.title}
                     </p>
-                    <span className="text-xs text-[var(--color-muted)]">{task.priority}</span>
+                    <span className="text-xs text-eos-text-muted">{task.priority}</span>
                   </div>
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{task.summary}</p>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">{task.triggerLabel}</p>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+                  <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     {task.source} · {task.lawReference}
                   </p>
                 </div>

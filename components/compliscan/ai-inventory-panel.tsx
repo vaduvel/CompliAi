@@ -87,7 +87,7 @@ const PURPOSE_OPTIONS: Array<{
 function riskTone(level: AISystemRecord["riskLevel"]) {
   if (level === "high") {
     return {
-      badge: "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]",
+      badge: "border-eos-error-border bg-eos-error-soft text-eos-error",
       icon: ShieldAlert,
       label: "High-risk",
     }
@@ -95,14 +95,14 @@ function riskTone(level: AISystemRecord["riskLevel"]) {
   if (level === "limited") {
     return {
       badge:
-        "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]",
+        "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
       icon: ShieldMinus,
       label: "Limited-risk",
     }
   }
   return {
     badge:
-      "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]",
+      "border-eos-border bg-eos-success-soft text-eos-success",
     icon: ShieldCheck,
     label: "Minimal-risk",
   }
@@ -179,11 +179,11 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(340px,0.82fr)_minmax(0,1.18fr)]">
       {/* INVENTORY FLOW */}
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-5">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="text-xl">Flux inventar AI</CardTitle>
-            <span className="text-xs text-[var(--color-muted)]">
+            <span className="text-xs text-eos-text-muted">
               {step} / 4 — {STEP_LABELS[step]}
             </span>
           </div>
@@ -192,7 +192,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <div
                 key={s}
                 className={`h-1 flex-1 rounded-full transition-all ${
-                  s <= step ? "bg-[var(--color-primary)]" : "bg-[var(--color-surface-variant)]"
+                  s <= step ? "bg-eos-primary" : "bg-eos-surface-variant"
                 }`}
               />
             ))}
@@ -202,27 +202,27 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
         <CardContent className="space-y-5 pt-6">
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Identifica sistemul pe care il confirmi acum in inventar.
               </p>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nume sistem AI (ex: ChatBot Clienti, ScoreRisc v2)"
-                className="ring-focus h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+                className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
               />
               <div className="grid gap-4 md:grid-cols-2">
                 <input
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
                   placeholder="Furnizor (ex: OpenAI, intern)"
-                  className="ring-focus h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+                  className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
                 <input
                   value={modelType}
                   onChange={(e) => setModelType(e.target.value)}
                   placeholder="Tip model (ex: LLM, reguli, ML)"
-                  className="ring-focus h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+                  className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
           {step === 2 && (
             <div className="space-y-3">
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Alege scopul dominant ca sa fixam clasa de risc.
               </p>
               <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
@@ -239,8 +239,8 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     key={opt.value}
                     className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
                       purpose === opt.value
-                        ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                        : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:bg-[var(--color-surface-hover)]"
+                        ? "border-eos-border-subtle bg-eos-surface-active"
+                        : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
                     }`}
                   >
                     <input
@@ -249,20 +249,20 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                       value={opt.value}
                       checked={purpose === opt.value}
                       onChange={() => setPurpose(opt.value)}
-                      className="mt-0.5 accent-[var(--color-primary)]"
+                      className="mt-0.5 accent-eos-primary"
                     />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                        <span className="text-sm font-medium text-eos-text">
                           {opt.label}
                         </span>
                         {opt.defaultRisk === "high" && (
-                          <span className="rounded-full border border-[var(--color-error)] bg-[var(--color-error-muted)] px-2 py-0.5 text-xs text-[var(--color-error)]">
+                          <span className="rounded-full border border-eos-error-border bg-eos-error-soft px-2 py-0.5 text-xs text-eos-error">
                             Potential high-risk
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-xs text-[var(--color-muted)]">{opt.hint}</p>
+                      <p className="mt-1 text-xs text-eos-text-muted">{opt.hint}</p>
                     </div>
                   </label>
                 ))}
@@ -272,7 +272,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
           {step === 3 && (
             <div className="space-y-3">
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Marcheaza doar semnalele care schimba riscul sau obligatiile de control.
               </p>
               {[
@@ -305,21 +305,21 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                   key={item.label}
                   className={`flex cursor-pointer items-start justify-between gap-4 rounded-2xl border p-4 transition ${
                     item.checked
-                      ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                      : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:bg-[var(--color-surface-hover)]"
+                      ? "border-eos-border-subtle bg-eos-surface-active"
+                      : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
                   }`}
                 >
                   <div className="min-w-0">
-                    <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                    <span className="text-sm font-medium text-eos-text">
                       {item.label}
                     </span>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">{item.hint}</p>
+                    <p className="mt-1 text-xs text-eos-text-muted">{item.hint}</p>
                   </div>
                   <input
                     type="checkbox"
                     checked={item.checked}
                     onChange={(e) => item.onChecked(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-eos-primary"
                   />
                 </label>
               ))}
@@ -328,39 +328,39 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
           {step === 4 && (
             <div className="space-y-4">
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Rezultatul pe care il vei confirma in inventar.
               </p>
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={previewTone.badge}>
                     <PreviewIcon className="size-3.5" strokeWidth={2.25} />
                     {previewTone.label}
                   </Badge>
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                     {formatPurposeLabel(purpose)}
                   </Badge>
                 </div>
-                <p className="mt-3 text-lg font-semibold text-[var(--color-on-surface)]">{name}</p>
-                <p className="text-sm text-[var(--color-on-surface-muted)]">
+                <p className="mt-3 text-lg font-semibold text-eos-text">{name}</p>
+                <p className="text-sm text-eos-text-muted">
                   {vendor} · {modelType}
                 </p>
                 {previewClassification.annexIIIHint && (
-                  <p className="mt-2 text-sm text-[var(--color-warning)]">
+                  <p className="mt-2 text-sm text-eos-warning">
                     {previewClassification.annexIIIHint}
                   </p>
                 )}
               </div>
 
-              <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+              <details className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Urmatorii pasi recomandati
                 </summary>
-                <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                   {previewClassification.recommendedActions.map((action, i) => (
                     <li key={i} className="flex gap-2">
                       <Bot
-                        className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]"
+                        className="mt-0.5 size-4 shrink-0 text-eos-primary"
                         strokeWidth={2.25}
                       />
                       <span>{action}</span>
@@ -376,7 +376,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <Button
                 onClick={() => setStep((s) => (s - 1) as InventoryFlowStep)}
                 variant="outline"
-                className="h-11 flex-1 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                className="h-11 flex-1 rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
               >
                 <ChevronLeft className="size-4" />
                 Inapoi
@@ -387,7 +387,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <Button
                 onClick={() => setStep((s) => (s + 1) as InventoryFlowStep)}
                 disabled={!canGoNext}
-                className="h-11 flex-1 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                className="h-11 flex-1 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
               >
                 Continua
                 <ChevronRight className="size-4" />
@@ -396,7 +396,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <Button
                 onClick={() => void handleSubmit()}
                 disabled={busy}
-                className="h-11 flex-1 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                className="h-11 flex-1 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
               >
                 <BrainCircuit className="size-4" strokeWidth={2.25} />
                 Adauga in inventar
@@ -414,13 +414,13 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           <SummaryCard title="Minimal-risk" value={minimalCount} tone="success" />
         </div>
 
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-          <CardHeader className="border-b border-[var(--color-border)] pb-5">
+        <Card className="border-eos-border bg-eos-surface">
+          <CardHeader className="border-b border-eos-border pb-5">
             <CardTitle className="text-xl">Sisteme AI inventariate</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             {systems.length === 0 && (
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
                 Inca nu exista sisteme AI inventariate. Fluxul de mai sus este primul pas real
                 catre clasificare AI Act.
               </div>
@@ -433,7 +433,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               return (
                 <div
                   key={system.id}
-                  className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5"
+                  className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-2">
@@ -442,37 +442,37 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                           <Icon className="size-3.5" strokeWidth={2.25} />
                           {tone.label}
                         </Badge>
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {formatPurposeLabel(system.purpose)}
                         </Badge>
                       </div>
-                      <p className="text-lg font-semibold text-[var(--color-on-surface)]">
+                      <p className="text-lg font-semibold text-eos-text">
                         {system.name}
                       </p>
-                      <p className="text-sm text-[var(--color-on-surface-muted)]">
+                      <p className="text-sm text-eos-text-muted">
                         {system.vendor} · {system.modelType}
                       </p>
                       {system.annexIIIHint && (
-                        <p className="text-sm text-[var(--color-warning)]">{system.annexIIIHint}</p>
+                        <p className="text-sm text-eos-warning">{system.annexIIIHint}</p>
                       )}
                     </div>
 
                     <div className="flex flex-col items-end gap-3">
                       <div className="flex flex-wrap justify-end gap-2">
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {system.usesPersonalData ? "Date personale" : "Fara date personale"}
                         </Badge>
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {system.makesAutomatedDecisions ? "Decizie automata" : "Asistenta"}
                         </Badge>
-                        <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                        <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
                         </Badge>
                       </div>
                       <button
                         onClick={() => void handleRemove(system.id)}
                         disabled={removingId === system.id || busy}
-                        className="flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-error)] hover:bg-[var(--color-error-muted)] disabled:opacity-40"
+                        className="flex items-center gap-1.5 rounded-xl border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-error hover:bg-eos-error-soft disabled:opacity-40"
                       >
                         <Trash2 className="size-3.5" strokeWidth={2.25} />
                         Sterge
@@ -480,15 +480,15 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     </div>
                   </div>
 
-                  <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Urmatorii pasi
                     </summary>
-                    <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                    <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                       {system.recommendedActions.map((item, index) => (
                         <li key={`${system.id}-${index}`} className="flex gap-2">
                           <Bot
-                            className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]"
+                            className="mt-0.5 size-4 shrink-0 text-eos-primary"
                             strokeWidth={2.25}
                           />
                           <span>{item}</span>
@@ -517,15 +517,15 @@ function SummaryCard({
 }) {
   const color =
     tone === "error"
-      ? "text-[var(--color-error)]"
+      ? "text-eos-error"
       : tone === "warning"
-        ? "text-[var(--color-warning)]"
-        : "text-[var(--color-success)]"
+        ? "text-eos-warning"
+        : "text-eos-success"
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardContent className="p-5">
-        <p className="text-sm text-[var(--color-muted)]">{title}</p>
+        <p className="text-sm text-eos-text-muted">{title}</p>
         <p className={`mt-3 text-3xl font-semibold ${color}`}>{value}</p>
       </CardContent>
     </Card>

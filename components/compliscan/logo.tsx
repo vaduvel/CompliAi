@@ -88,9 +88,9 @@ export function CompliScanLogoMark({
     variant === "gradient"
       ? `url(#${gradientId})`
       : variant === "flat"
-        ? "var(--action-primary-bg)"
+        ? "var(--eos-accent-primary)"
         : "currentColor"
-  const segmentFill = variant === "mono" ? "currentColor" : "var(--text-primary)"
+  const segmentFill = variant === "mono" ? "currentColor" : "var(--eos-text-primary)"
   const tileOpacity = variant === "mono" ? 0.14 : 1
 
   return (
@@ -107,9 +107,9 @@ export function CompliScanLogoMark({
       {variant === "gradient" && (
         <defs>
           <linearGradient id={gradientId} x1="26" y1="20" x2="226" y2="236" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="var(--action-primary-bg-hover)" />
-            <stop offset="0.55" stopColor="var(--action-primary-bg)" />
-            <stop offset="1" stopColor="var(--chart-series-2)" />
+            <stop offset="0" stopColor="var(--eos-accent-primary-hover)" />
+            <stop offset="0.55" stopColor="var(--eos-accent-primary)" />
+            <stop offset="1" stopColor="var(--eos-accent-secondary)" />
           </linearGradient>
           <radialGradient id={shineId} cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 86) rotate(90) scale(126)">
             <stop offset="0" stopColor="white" stopOpacity="0.26" />
@@ -160,7 +160,7 @@ export function CompliScanLogoLockup({
           CompliScan
         </div>
         {subtitle ? (
-          <div className={cn("mt-1 text-[var(--color-muted)]", sizeClass.subtitle, subtitleClassName)}>
+          <div className={cn("mt-1 text-eos-text-muted", sizeClass.subtitle, subtitleClassName)}>
             {subtitle}
           </div>
         ) : null}

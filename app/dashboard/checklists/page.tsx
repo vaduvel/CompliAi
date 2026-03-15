@@ -91,7 +91,7 @@ export default function RemediationPage() {
 
       <PillarTabs sectionId="dovada" />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Snapshot de executie"

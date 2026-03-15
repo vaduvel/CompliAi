@@ -11,14 +11,14 @@ function verdictBasisLabel(basis?: VerdictBasis) {
 
 function verdictBasisTone(basis?: VerdictBasis) {
   if (basis === "direct_signal") {
-    return "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
+    return "border-eos-border bg-eos-primary-soft text-eos-info"
   }
 
   if (basis === "inferred_signal") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
 
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
 }
 
 function verdictConfidenceLabel(confidence?: ScanFinding["verdictConfidence"]) {
@@ -30,18 +30,18 @@ function verdictConfidenceLabel(confidence?: ScanFinding["verdictConfidence"]) {
 
 function verdictConfidenceTone(confidence?: ScanFinding["verdictConfidence"]) {
   if (confidence === "high") {
-    return "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+    return "border-eos-border bg-eos-success-soft text-eos-success"
   }
 
   if (confidence === "medium") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
 
   if (confidence === "low") {
-    return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+    return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
   }
 
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
 }
 
 type FindingVerdictMetaProps = {
@@ -75,7 +75,7 @@ export function FindingVerdictMeta({
         )}
       </div>
       {showReason && finding.verdictConfidenceReason && (
-        <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">
+        <p className="mt-2 text-xs leading-6 text-eos-text-muted">
           {finding.verdictConfidenceReason}
         </p>
       )}

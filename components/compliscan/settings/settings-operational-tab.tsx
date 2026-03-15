@@ -62,7 +62,7 @@ export function SettingsOperationalTab({
         description="Aici verifici starea instalatiei si decizi daca build-ul poate fi promovat controlat."
       />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
@@ -78,7 +78,7 @@ export function SettingsOperationalTab({
                         : "Degradat"}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+              <p className="max-w-2xl text-sm text-eos-text-muted">
                 Semnal operational pentru sesiune, backend-uri, fallback si traseul cloud principal.
               </p>
             </div>
@@ -90,7 +90,7 @@ export function SettingsOperationalTab({
               Verificam starea aplicatiei si preflight-ul operational...
             </OperationalLoadingCard>
           ) : appHealthError ? (
-            <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+            <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
               {appHealthError}
             </div>
           ) : appHealth ? (
@@ -118,22 +118,22 @@ export function SettingsOperationalTab({
                   title={appHealth.summary}
                   description="Acesta este verdictul agregat pentru operarea curenta a aplicatiei."
                 >
-                  <div className="space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <div className="space-y-2 text-sm text-eos-text-muted">
                     <p>
                       Auth:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {formatBackendLabel(appHealth.config.authBackend)}
                       </span>
                     </p>
                     <p>
                       Date:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {formatBackendLabel(appHealth.config.dataBackend)}
                       </span>
                     </p>
                     <p>
                       Fallback local:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {appHealth.config.localFallbackAllowed ? "Permis" : "Blocat"}
                       </span>
                     </p>
@@ -146,7 +146,7 @@ export function SettingsOperationalTab({
                     title={recommendedHealthAction(appHealth)}
                     description="Starea si urmatorul pas bat explicatia detaliata."
                   >
-                    <p className="text-xs text-[var(--color-muted)]">
+                    <p className="text-xs text-eos-text-muted">
                       Endpoint intern: <code>/api/health</code>
                     </p>
                   </SettingsStatusBlock>
@@ -178,7 +178,7 @@ export function SettingsOperationalTab({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
@@ -202,7 +202,7 @@ export function SettingsOperationalTab({
                           : "Revizuire"}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+              <p className="max-w-2xl text-sm text-eos-text-muted">
                 Verdictul care spune daca build-ul poate fi promovat ca release controlat.
               </p>
             </div>
@@ -222,7 +222,7 @@ export function SettingsOperationalTab({
           ) : releaseReadinessLoading ? (
             <OperationalLoadingCard>Verificam release readiness...</OperationalLoadingCard>
           ) : releaseReadinessError ? (
-            <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+            <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
               {releaseReadinessError}
             </div>
           ) : releaseReadiness ? (
@@ -257,7 +257,7 @@ export function SettingsOperationalTab({
                     title={recommendedReleaseAction(releaseReadiness)}
                     description="Promovezi doar dupa ce verdictul si semnalele sunt curate."
                   >
-                    <div className="space-y-1.5 text-xs text-[var(--color-muted)]">
+                    <div className="space-y-1.5 text-xs text-eos-text-muted">
                       <p>
                         Endpoint intern: <code>/api/release-readiness</code>
                       </p>
@@ -305,14 +305,14 @@ export function SettingsOperationalTab({
                 title="Semnale si verificari de readiness"
                 description="Deschizi aceasta zona cand ai nevoie de context suplimentar pentru verdict."
               >
-                <div className="space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                <div className="space-y-3 text-sm text-eos-text-muted">
                   <p>{releaseReadiness.summary}</p>
                   {releaseReadiness.warnings.length > 0 ? (
-                    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-                      <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    <div className="rounded-xl border border-eos-border bg-eos-surface p-3">
+                      <p className="text-sm font-medium text-eos-text">
                         Avertismente curente
                       </p>
-                      <ul className="mt-2 space-y-1.5 text-sm text-[var(--color-on-surface-muted)]">
+                      <ul className="mt-2 space-y-1.5 text-sm text-eos-text-muted">
                         {releaseReadiness.warnings.map((warning) => (
                           <li key={warning}>• {warning}</li>
                         ))}

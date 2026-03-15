@@ -30,18 +30,18 @@ export function EFacturaValidatorCard({
   }
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Validator e-Factura XML</CardTitle>
-        <p className="text-sm text-[var(--color-on-surface-muted)]">
+        <p className="text-sm text-eos-text-muted">
           Valideaza rapid structura UBL de baza inainte sa trimiti XML-ul spre fluxul ANAF.
         </p>
       </CardHeader>
       <CardContent className="grid gap-6 pt-6 xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)]">
         <div className="space-y-4">
-          <label className="ring-focus flex min-h-[108px] cursor-pointer items-center justify-center rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-variant)] px-5 text-center text-sm text-[var(--color-on-surface-muted)] hover:bg-[var(--color-surface-hover)]">
+          <label className="ring-focus flex min-h-[108px] cursor-pointer items-center justify-center rounded-2xl border border-dashed border-eos-border-strong bg-eos-surface-variant px-5 text-center text-sm text-eos-text-muted hover:bg-eos-secondary-hover">
             <span>
-              <FileCode2 className="mx-auto mb-3 size-5 text-[var(--color-primary)]" strokeWidth={2.25} />
+              <FileCode2 className="mx-auto mb-3 size-5 text-eos-primary" strokeWidth={2.25} />
               Incarca un fisier XML sau lipeste continutul mai jos
             </span>
             <input
@@ -58,7 +58,7 @@ export function EFacturaValidatorCard({
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             placeholder="Nume fisier XML"
-            className="ring-focus h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+            className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
 
           <textarea
@@ -66,13 +66,13 @@ export function EFacturaValidatorCard({
             onChange={(event) => setXml(event.target.value)}
             rows={14}
             placeholder="<Invoice>...</Invoice>"
-            className="ring-focus min-h-[280px] w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+            className="ring-focus min-h-[280px] w-full rounded-2xl border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
 
           <Button
             onClick={() => void onValidate({ documentName, xml })}
             disabled={!xml.trim() || busy}
-            className="h-11 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+            className="h-11 w-full rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
           >
             Valideaza XML-ul
           </Button>
@@ -80,25 +80,25 @@ export function EFacturaValidatorCard({
 
         <div className="space-y-4">
           {!latestValidation && (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
               Inca nu exista validari rulate. Primul pas util este sa verifici daca XML-ul are blocurile minime pentru un flux e-Factura coerent.
             </div>
           )}
 
           {latestValidation && (
             <>
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge
                     className={
                       latestValidation.valid
-                        ? "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
-                        : "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+                        ? "border-eos-border bg-eos-success-soft text-eos-success"
+                        : "border-eos-error-border bg-eos-error-soft text-eos-error"
                     }
                   >
                     {latestValidation.valid ? "Structura valida" : "Structura invalida"}
                   </Badge>
-                  <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-on-surface-muted)]">
+                  <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                     {latestValidation.documentName}
                   </Badge>
                 </div>
@@ -135,9 +135,9 @@ export function EFacturaValidatorCard({
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
-      <p className="mt-2 text-sm text-[var(--color-on-surface)]">{value}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="mt-2 text-sm text-eos-text">{value}</p>
     </div>
   )
 }
@@ -154,25 +154,25 @@ function IssueList({
   tone: "error" | "warning"
 }) {
   const iconClass =
-    tone === "error" ? "text-[var(--color-error)]" : "text-[var(--color-warning)]"
+    tone === "error" ? "text-eos-error" : "text-eos-warning"
   const Icon = tone === "error" ? AlertTriangle : CheckCircle2
 
   return (
-    <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+    <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
       <div className="flex items-center gap-2">
         <Icon className={`size-4 ${iconClass}`} strokeWidth={2.25} />
-        <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+        <p className="text-sm font-medium text-eos-text">{title}</p>
       </div>
-      <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+      <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
         {items.length === 0 && (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
             {emptyText}
           </div>
         )}
         {items.map((item, index) => (
           <div
             key={`${title}-${index}`}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
           >
             {item}
           </div>

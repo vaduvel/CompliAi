@@ -454,14 +454,14 @@ function ScanViewTabs({
               disabled={disabled}
               className={`rounded-2xl border p-4 text-left transition ${
                 isActive
-                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                  : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]"
+                  ? "border-eos-border-subtle bg-eos-surface-active"
+                  : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
               } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-[var(--color-on-surface)]">{tab.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                  <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-muted">
                     {tab.description}
                   </p>
                 </div>
@@ -486,11 +486,11 @@ function ScanViewTabs({
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+    <Card className="border-eos-border bg-eos-bg-inset">
+      <CardHeader className="border-b border-eos-border pb-4">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+      <CardContent className="pt-4 text-sm text-eos-text-muted">
         {detail}
       </CardContent>
     </Card>
@@ -565,17 +565,17 @@ function ScanWorkflowGuideCard({
         }
         support={
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Rolul paginii</p>
-              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Rolul paginii</p>
+              <p className="mt-2 text-sm font-semibold text-eos-text">
                 {agentModeActive
                   ? "Workspace-ul agentului propune, dar omul valideaza."
                   : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Regula de citire</p>
-              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Regula de citire</p>
+              <p className="mt-2 text-sm font-semibold text-eos-text">
                 Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata.
               </p>
             </div>

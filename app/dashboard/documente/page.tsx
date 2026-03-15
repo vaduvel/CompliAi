@@ -115,7 +115,7 @@ export default function DocumentePage() {
 
       <PillarTabs sectionId="scanare" />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Documente"
@@ -185,9 +185,9 @@ export default function DocumentePage() {
 
 function DocumentFlowHint({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-sm font-medium text-eos-text">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>
   )
 }

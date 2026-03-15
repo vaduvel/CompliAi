@@ -224,7 +224,7 @@ export default function AuditorVaultPage() {
 
       <PillarTabs sectionId="dovada" />
 
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Vault"
@@ -265,19 +265,19 @@ export default function AuditorVaultPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">
+          <p className="text-sm font-medium text-eos-text">
             Audit Pack v2 aduna intr-un singur loc sumarul executiv, controalele, dovezile si drift-ul.
           </p>
-          <p className="text-sm text-[var(--color-on-surface-muted)]">
+          <p className="text-sm text-eos-text-muted">
             Client pack pentru stakeholderi. JSON sau ZIP cand ai nevoie de schimb tehnic sau dosar complet.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button
             asChild
-            className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+            className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
           >
             <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
               Audit Pack client
@@ -319,25 +319,25 @@ export default function AuditorVaultPage() {
           label="Dovezi atasate"
           value={evidenceReadyTasks.length}
           hint="Task-uri care au dovada atasata si au trecut verificarea prin rescan."
-          tone="text-[var(--status-success-text)]"
+          tone="text-eos-success"
         />
         <VaultMetric
           label="Gap-uri de dovada"
           value={evidenceMissingTasks.length}
           hint="Task-uri deschise care inca cer dovada la audit."
-          tone={evidenceMissingTasks.length > 0 ? "text-[var(--color-warning)]" : "text-[var(--status-success-text)]"}
+          tone={evidenceMissingTasks.length > 0 ? "text-eos-warning" : "text-eos-success"}
         />
         <VaultMetric
           label="Mapari legale"
           value={legalMappedTasks.length}
           hint="Task-uri legate clar de articole si obligatii."
-          tone="text-[var(--color-info)]"
+          tone="text-eos-info"
         />
         <VaultMetric
           label="Drift activ"
           value={activeDrifts.length}
           hint="Schimbari noi care trebuie explicate sau remediate."
-          tone={activeDrifts.length > 0 ? "text-[var(--color-error)]" : "text-[var(--status-success-text)]"}
+          tone={activeDrifts.length > 0 ? "text-eos-error" : "text-eos-success"}
         />
       </div>
 
@@ -403,16 +403,16 @@ function VaultQuickActionsCard() {
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardContent className="space-y-4 p-5">
         <div className="grid gap-4 lg:grid-cols-3">
         {items.map((item) => (
           <div
             key={item.title}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
           >
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">{item.title}</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+            <p className="text-sm font-medium text-eos-text">{item.title}</p>
+            <p className="mt-2 text-sm leading-6 text-eos-text-muted">
               {item.detail}
             </p>
           </div>
@@ -449,11 +449,11 @@ function VaultMetric({
   tone: string
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardContent className="space-y-2 p-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
+        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
         <p className={`text-2xl font-semibold ${tone}`}>{value}</p>
-        <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">{hint}</p>
+        <p className="text-sm leading-6 text-eos-text-muted">{hint}</p>
       </CardContent>
     </Card>
   )
@@ -467,15 +467,15 @@ function EvidenceLedgerCard({
   evidenceMissingTasks: CockpitTask[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Registru dovezi</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-[var(--status-success-text)]" strokeWidth={2.25} />
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">Dovezi deja atasate</p>
+            <ShieldCheck className="size-4 text-eos-success" strokeWidth={2.25} />
+            <p className="text-sm font-medium text-eos-text">Dovezi deja atasate</p>
           </div>
           <div className="mt-4 space-y-3">
             {evidenceReadyTasks.length === 0 && (
@@ -488,12 +488,12 @@ function EvidenceLedgerCard({
             {evidenceReadyTasks.slice(0, 6).map((task) => (
               <div
                 key={task.id}
-                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+                className="rounded-2xl border border-eos-border bg-eos-surface p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-on-surface)]">{task.title}</p>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    <p className="text-sm font-semibold text-eos-text">{task.title}</p>
+                    <p className="mt-1 text-xs text-eos-text-muted">
                       {task.source} · {task.lawReference}
                     </p>
                   </div>
@@ -501,7 +501,7 @@ function EvidenceLedgerCard({
                     pregatit
                   </Badge>
                 </div>
-                <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
+                <p className="mt-3 text-sm text-eos-text-muted">
                   {(() => {
                     const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
                     if (evidenceHref && task.attachedEvidence) {
@@ -510,7 +510,7 @@ function EvidenceLedgerCard({
                           href={evidenceHref}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                          className="text-eos-info underline decoration-eos-border underline-offset-4"
                         >
                           {task.attachedEvidence.fileName}
                         </a>
@@ -521,16 +521,16 @@ function EvidenceLedgerCard({
                   })()}
                 </p>
                 {task.attachedEvidence && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     Tip dovada: {formatEvidenceKind(task.attachedEvidence.kind)}
                   </p>
                 )}
                 {task.validationMessage && (
-                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Detaliu validare
                     </summary>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">{task.validationMessage}</p>
+                    <p className="mt-2 text-xs text-eos-text-muted">{task.validationMessage}</p>
                   </details>
                 )}
               </div>
@@ -538,10 +538,10 @@ function EvidenceLedgerCard({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="size-4 text-[var(--color-warning)]" strokeWidth={2.25} />
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">Gap-uri de dovada</p>
+            <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2.25} />
+            <p className="text-sm font-medium text-eos-text">Gap-uri de dovada</p>
           </div>
           <div className="mt-4 space-y-3">
             {evidenceMissingTasks.length === 0 && (
@@ -554,12 +554,12 @@ function EvidenceLedgerCard({
             {evidenceMissingTasks.slice(0, 6).map((task) => (
               <div
                 key={task.id}
-                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+                className="rounded-2xl border border-eos-border bg-eos-surface p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-on-surface)]">{task.title}</p>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    <p className="text-sm font-semibold text-eos-text">{task.title}</p>
+                    <p className="mt-1 text-xs text-eos-text-muted">
                       {task.source} · {task.lawReference}
                     </p>
                   </div>
@@ -567,15 +567,15 @@ function EvidenceLedgerCard({
                     {task.attachedEvidence ? "validare in asteptare" : "dovada necesara"}
                   </Badge>
                 </div>
-                <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
+                <p className="mt-3 text-sm text-eos-text-muted">
                   {task.validationMessage || task.evidenceSnippet}
                 </p>
                 {task.validationMessage && task.evidenceSnippet && task.validationMessage !== task.evidenceSnippet && (
-                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Dovada asteptata
                     </summary>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">{task.evidenceSnippet}</p>
+                    <p className="mt-2 text-xs text-eos-text-muted">{task.evidenceSnippet}</p>
                   </details>
                 )}
               </div>
@@ -593,12 +593,12 @@ function LegalMatrixCard({
   tasks: CockpitTask[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <CardTitle className="text-xl">Matrice de mapare legala</CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-1 text-sm text-eos-text-muted">
               Vezi articolul relevant, dovada ceruta si momentul in care revii in executie.
             </p>
           </div>
@@ -620,39 +620,39 @@ function LegalMatrixCard({
         {tasks.slice(0, 10).map((task) => (
           <div
             key={task.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">
                 {task.priority}
               </Badge>
-              <Badge className="border-[var(--color-border)] bg-transparent text-[var(--color-muted)]">
+              <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                 {task.lawReference}
               </Badge>
             </div>
-            <p className="mt-3 text-sm font-semibold text-[var(--color-on-surface)]">{task.title}</p>
-            <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{task.why}</p>
-            <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+            <p className="mt-3 text-sm font-semibold text-eos-text">{task.title}</p>
+            <p className="mt-2 text-sm text-eos-text-muted">{task.why}</p>
+            <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                 Dovada si urmatorul pas
               </summary>
               {task.legalSummary && (
-                <p className="mt-3 text-xs text-[var(--color-muted)]">{task.legalSummary}</p>
+                <p className="mt-3 text-xs text-eos-text-muted">{task.legalSummary}</p>
               )}
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Dovada ceruta
                 </p>
-                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                <p className="mt-2 text-sm text-eos-text-muted">
                   {task.evidenceSnippet}
                 </p>
               </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Cand revii
                 </p>
-                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                <p className="mt-2 text-sm text-eos-text-muted">
                   {task.rescanHint || "Dupa ce actualizezi textul sau controlul tehnic relevant."}
                 </p>
               </div>
@@ -673,8 +673,8 @@ function SnapshotAuditCard({
   validatedBaseline: CompliScanSnapshot | undefined
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Snapshot si baseline</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
@@ -686,14 +686,14 @@ function SnapshotAuditCard({
         )}
         {latestSnapshot && (
           <>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Snapshot curent
               </p>
-              <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+              <p className="mt-2 text-sm font-semibold text-eos-text">
                 {latestSnapshot.snapshotId}
               </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
+              <p className="mt-2 text-xs text-eos-text-muted">
                 {formatRelativeRomanian(latestSnapshot.generatedAt)}
               </p>
             </div>
@@ -703,11 +703,11 @@ function SnapshotAuditCard({
               <MiniMeta label="Findings" value={latestSnapshot.findings.length} />
               <MiniMeta label="Compared to" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
             </div>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Baseline validat
               </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+              <p className="mt-2 text-sm text-eos-text-muted">
                 {validatedBaseline
                   ? `${validatedBaseline.snapshotId} · ${formatRelativeRomanian(validatedBaseline.generatedAt)}`
                   : "Nu exista baseline validat inca."}
@@ -726,8 +726,8 @@ function DriftWatchCard({
   drifts: ComplianceDriftRecord[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Monitor drift</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
@@ -745,17 +745,17 @@ function DriftWatchCard({
             return (
               <div
                 key={drift.id}
-                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="text-sm font-medium text-eos-text">
                       {drift.summary}
                     </p>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">
+                    <p className="mt-2 text-xs text-eos-text-muted">
                       {formatDriftTypeLabel(drift.type)} · {formatRelativeRomanian(drift.detectedAtISO)}
                     </p>
-                    <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                    <p className="mt-3 text-sm leading-6 text-eos-text-muted">
                       {guidance.impactSummary}
                     </p>
                   </div>
@@ -774,52 +774,52 @@ function DriftWatchCard({
                   </Badge>
                 )}
               </div>
-                <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                  <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                     Impact si escalare
                   </summary>
                 <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       De ce conteaza
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="mt-2 text-sm font-medium text-eos-text">
                       {guidance.lawReference}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    <p className="mt-1 text-xs text-eos-text-muted">
                       {guidance.severityReason}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Ce faci acum
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="mt-2 text-sm font-medium text-eos-text">
                       {guidance.nextAction}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Dovada
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="mt-2 text-sm font-medium text-eos-text">
                       {guidance.evidenceRequired}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Escalare
                     </p>
-                    <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                    <p className="mt-2 text-sm font-medium text-eos-text">
                       {drift.escalationOwner || guidance.ownerSuggestion}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    <p className="mt-1 text-xs text-eos-text-muted">
                       {formatDriftEscalationTier(drift.escalationTier || guidance.escalationTier)} · până la{" "}
                       {formatDriftEscalationDeadline(
                         drift.escalationDueAtISO || guidance.escalationDueAtISO
                       )}
                     </p>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">
+                    <p className="mt-2 text-xs text-eos-text-muted">
                       {[
                         drift.blocksAudit ? "blochează auditul" : null,
                         drift.blocksBaseline ? "blochează baseline-ul" : null,
@@ -829,7 +829,7 @@ function DriftWatchCard({
                         .join(" · ") || "review operațional recomandat"}
                     </p>
                     {(drift.acknowledgedBy || drift.lastStatusUpdatedAtISO) && (
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      <p className="mt-2 text-xs text-eos-text-muted">
                         {drift.acknowledgedBy ? `Owner: ${drift.acknowledgedBy}` : "Ultima actualizare"} ·{" "}
                         {formatRelativeRomanian(
                           drift.lastStatusUpdatedAtISO || drift.acknowledgedAtISO || drift.detectedAtISO
@@ -867,8 +867,8 @@ function ValidationLedgerCard({
   entries: ValidationEntry[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Registru validari</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
@@ -881,14 +881,14 @@ function ValidationLedgerCard({
         {entries.slice(0, 8).map((entry) => (
           <div
             key={entry.taskId}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                <p className="text-sm font-medium text-eos-text">
                   {entry.taskTitle}
                 </p>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                <p className="mt-1 text-xs text-eos-text-muted">
                   {entry.lawReference}
                   {entry.checkedSource ? ` · sursă verificată: ${entry.checkedSource}` : ""}
                 </p>
@@ -916,14 +916,14 @@ function ValidationLedgerCard({
               </div>
             )}
             {(entry.message || entry.evidence || entry.validatedAtISO) && (
-              <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Detalii validare
                 </summary>
                 {entry.message && (
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{entry.message}</p>
+                  <p className="mt-2 text-sm text-eos-text-muted">{entry.message}</p>
                 )}
-                <div className="mt-3 flex flex-wrap gap-3 text-xs text-[var(--color-muted)]">
+                <div className="mt-3 flex flex-wrap gap-3 text-xs text-eos-text-muted">
                   {entry.evidence && <span>Dovadă: {entry.evidence}</span>}
                   {entry.validatedAtISO && (
                     <span>Ultima verificare: {formatRelativeRomanian(entry.validatedAtISO)}</span>
@@ -944,8 +944,8 @@ function AuditTimelineCard({
   events: ComplianceEvent[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Cronologie audit</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
@@ -958,39 +958,39 @@ function AuditTimelineCard({
         {events.map((event) => (
           <div
             key={event.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex items-start gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)]">
+              <span className="grid size-9 shrink-0 place-items-center rounded-2xl border border-eos-border bg-eos-bg-inset text-eos-text">
                 <EventIcon type={event.type} />
               </span>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <p className="text-sm font-medium text-eos-text">
                     {event.message}
                   </p>
                   <Badge variant={eventBadgeVariant(event.type)}>
                     {formatEventLabel(event.type)}
                   </Badge>
                 </div>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                <p className="mt-2 text-xs text-eos-text-muted">
                   {event.entityType} · {formatRelativeRomanian(event.createdAtISO)}
                 </p>
                 {(event.metadata?.validationMessage ||
                   event.metadata?.fileName ||
                   event.metadata?.checkedSource ||
                   event.actorLabel) && (
-                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Detalii eveniment
                     </summary>
                     {event.metadata?.validationMessage && (
-                      <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                      <p className="mt-2 text-sm text-eos-text-muted">
                         {String(event.metadata.validationMessage)}
                       </p>
                     )}
                     {(event.metadata?.fileName || event.metadata?.checkedSource) && (
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      <p className="mt-2 text-xs text-eos-text-muted">
                         {event.metadata?.fileName ? `Dovadă: ${String(event.metadata.fileName)}` : ""}
                         {event.metadata?.fileName && event.metadata?.checkedSource ? " · " : ""}
                         {event.metadata?.checkedSource
@@ -999,7 +999,7 @@ function AuditTimelineCard({
                       </p>
                     )}
                     {event.actorLabel && (
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      <p className="mt-2 text-xs text-eos-text-muted">
                         Actor: {formatEventActor(event)}
                       </p>
                     )}
@@ -1026,11 +1026,11 @@ function VaultEmptyState({
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--bg-inset)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-4">
+    <Card className="border-eos-border bg-eos-bg-inset">
+      <CardHeader className="border-b border-eos-border pb-4">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 text-sm text-[var(--color-on-surface-muted)]">
+      <CardContent className="pt-4 text-sm text-eos-text-muted">
         {detail}
       </CardContent>
     </Card>
@@ -1043,9 +1043,9 @@ function formatEventActor(event: ComplianceEvent) {
 
 function MiniMeta({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{value}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>
   )
 }

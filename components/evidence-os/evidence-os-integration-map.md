@@ -116,11 +116,16 @@ Consecință:
     - `app/*`
     - `components/*`
     - `lib/compliance/*`
+- `DashboardShell` și `RiskHeader` folosesc acum compoziție `Evidence OS` explicită, nu doar token-uri migrate
+- exporturile client-facing:
+  - `lib/server/annex-lite-client.ts`
+  - `lib/server/audit-pack-client.ts`
+  folosesc acum același vocabular `eos-*` pentru suprafețe, text, border și status
 
 Ce NU înseamnă încă:
 
-- nu avem încă o autoritate unică absolută pentru toate token-urile și toate suprafețele repo-ului
-- `components/ui/*` nu mai este folosit direct în runtime, dar există încă drept strat intern pentru unele wrapper-e `Evidence OS`
+- aliasurile `components/ui/*` rămân doar pentru compatibilitate, dar nu mai există logică UI concurentă acolo
+- exporturile HTML server-side rămân implementări separate ca markup, însă nu mai folosesc un vocabular vizual concurent
 
 ## Drift-uri identificate
 

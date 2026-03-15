@@ -147,7 +147,7 @@ export default function DriftPage() {
 
       <PillarTabs sectionId="control" />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Drift"
@@ -203,10 +203,10 @@ export default function DriftPage() {
       </div>
 
       {openDrifts.length > 0 && (
-        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <Card className="border-eos-border bg-eos-surface">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Compliance drift</CardTitle>
-            <p className="text-sm text-[var(--color-on-surface-muted)]">
+            <p className="text-sm text-eos-text-muted">
               Schimbari detectate fata de snapshot-ul anterior validat intern.
             </p>
           </CardHeader>
@@ -223,8 +223,8 @@ export default function DriftPage() {
                 detail="Drift-uri care au trecut de termenul din matricea de escaladare."
                 tone={
                   breachedDrifts > 0
-                    ? "text-[var(--color-error)]"
-                    : "text-[var(--status-success-text)]"
+                    ? "text-eos-error"
+                    : "text-eos-success"
                 }
               />
               <DriftStatusTile
@@ -243,7 +243,7 @@ export default function DriftPage() {
               return (
                 <div
                   key={drift.id}
-                  className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5"
+                  className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <button
@@ -256,7 +256,7 @@ export default function DriftPage() {
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-base font-semibold text-[var(--color-on-surface)]">
+                            <p className="text-base font-semibold text-eos-text">
                               {drift.summary}
                             </p>
                             {isExpanded ? (
@@ -265,16 +265,16 @@ export default function DriftPage() {
                               </Badge>
                             ) : null}
                           </div>
-                          <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                          <p className="mt-2 text-sm text-eos-text-muted">
                             {formatDriftTypeLabel(drift.type)} · {drift.change}
                           </p>
-                          <p className="mt-2 text-xs text-[var(--color-muted)]">
+                          <p className="mt-2 text-xs text-eos-text-muted">
                             {[
                               drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
                               formatRelativeRomanian(drift.detectedAtISO),
                             ].join(" · ")}
                           </p>
-                          <p className="mt-3 text-sm leading-6 text-[var(--color-on-surface-muted)] line-clamp-2">
+                          <p className="mt-3 text-sm leading-6 text-eos-text-muted line-clamp-2">
                             {guidance.impactSummary}
                           </p>
                         </div>
@@ -303,47 +303,47 @@ export default function DriftPage() {
                   {isExpanded ? (
                     <>
                       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             De ce conteaza
                           </p>
-                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                          <p className="mt-2 text-sm font-medium text-eos-text">
                             {guidance.lawReference}
                           </p>
-                          <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          <p className="mt-1 text-xs text-eos-text-muted">
                             {guidance.severityReason}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Ce faci acum
                           </p>
-                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                          <p className="mt-2 text-sm font-medium text-eos-text">
                             {guidance.nextAction}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Dovada
                           </p>
-                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                          <p className="mt-2 text-sm font-medium text-eos-text">
                             {guidance.evidenceRequired}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Escalare
                           </p>
-                          <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                          <p className="mt-2 text-sm font-medium text-eos-text">
                             {drift.escalationOwner || guidance.ownerSuggestion}
                           </p>
-                          <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          <p className="mt-1 text-xs text-eos-text-muted">
                             {formatDriftEscalationTier(drift.escalationTier || guidance.escalationTier)} · până la{" "}
                             {formatDriftEscalationDeadline(
                               drift.escalationDueAtISO || guidance.escalationDueAtISO
                             )}
                           </p>
-                          <p className="mt-2 text-xs text-[var(--color-muted)]">
+                          <p className="mt-2 text-xs text-eos-text-muted">
                             {[
                               drift.blocksAudit ? "blochează auditul" : null,
                               drift.blocksBaseline ? "blochează baseline-ul" : null,
@@ -355,7 +355,7 @@ export default function DriftPage() {
                         </div>
                       </div>
                       {(drift.systemLabel || drift.sourceDocument) && (
-                        <p className="mt-3 text-xs text-[var(--color-muted)]">
+                        <p className="mt-3 text-xs text-eos-text-muted">
                           {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
                         </p>
                       )}
@@ -386,7 +386,7 @@ export default function DriftPage() {
                             <Button
                               onClick={() => void handleDriftAction(drift.id, "resolve")}
                               disabled={cockpit.busy || isActing}
-                              className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                              className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                             >
                               Marchează rezolvat
                             </Button>
@@ -394,7 +394,7 @@ export default function DriftPage() {
                               onClick={() => void handleDriftAction(drift.id, "waive")}
                               disabled={cockpit.busy || isActing}
                               variant="outline"
-                              className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-warning)] hover:bg-[var(--color-warning-muted)]"
+                              className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
                             >
                               Waive cu justificare
                             </Button>
@@ -413,7 +413,7 @@ export default function DriftPage() {
                       </div>
                     </>
                   ) : (
-                    <p className="mt-3 text-xs text-[var(--color-muted)]">
+                    <p className="mt-3 text-xs text-eos-text-muted">
                       {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")} · owner:{" "}
                       {drift.escalationOwner || guidance.ownerSuggestion} ·{" "}
                       {formatDriftEscalationDeadline(
@@ -442,9 +442,9 @@ export default function DriftPage() {
 
 function DriftFlowHint({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-sm font-medium text-eos-text">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>
   )
 }
@@ -453,7 +453,7 @@ function DriftStatusTile({
   label,
   value,
   detail,
-  tone = "text-[var(--color-on-surface)]",
+  tone = "text-eos-text",
 }: {
   label: string
   value: number
@@ -461,10 +461,10 @@ function DriftStatusTile({
   tone?: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <p className={`mt-3 text-2xl font-semibold ${tone}`}>{value}</p>
-      <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{detail}</p>
+      <p className="mt-2 text-sm text-eos-text-muted">{detail}</p>
     </div>
   )
 }

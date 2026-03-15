@@ -872,7 +872,7 @@ Actualizare 2026-03-15:
     - `components/dashboard/*`
     - `components/mode-toggle.tsx`
     - `lib/compliance/*`
-  - `components/ui/*` ramane doar strat intern de implementare pentru wrapper-ele `Evidence OS`
+  - `components/ui/*` ramane doar strat de compatibilitate peste `Evidence OS`, fara logica vizuala concurenta
   - `use-cockpit` nu mai are doua stiluri concurente de mutatii
   - riscul principal ramas nu mai este de arhitectura de baza, ci de polish final si performanta
 
@@ -1136,3 +1136,15 @@ Actualizare suplimentara 2026-03-15:
   - `Urgente P1` raman imediat dupa ele
   - `TaskCard` tine sus primul pas si blocajul curent
   - utilitarele si rationale-ul raman sub disclosure
+
+Actualizare suplimentara 2026-03-15:
+
+- convergenta `Evidence OS` este inchisa operational pentru runtime-ul activ
+- asta inseamna:
+  - `components/ui/*` a ramas doar strat de compatibilitate
+  - `Dashboard` foloseste acum shell si hero compuse explicit in `Evidence OS`
+  - exporturile client-facing (`Annex IV lite`, `Audit Pack`) folosesc acelasi vocabular `eos-*`
+- pasul este sanatos pentru ca:
+  - lasa produsul cu un singur sistem real de authoring vizual
+  - face noul UI vizibil pe suprafata principala, nu doar in namespace-ul de import
+  - reduce drift-ul dintre runtime si exporturile HTML

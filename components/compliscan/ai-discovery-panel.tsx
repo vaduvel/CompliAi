@@ -253,21 +253,21 @@ export function AIDiscoveryPanel({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,0.78fr)_minmax(0,1.22fr)]">
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-5">
           <CardTitle className="text-xl">{modeContent.title}</CardTitle>
-          <p className="text-sm text-[var(--color-on-surface-muted)]">
+          <p className="text-sm text-eos-text-muted">
             {modeContent.description}
           </p>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Acum
                 </p>
-                <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                <p className="mt-2 text-sm font-medium text-eos-text">
                   {modeContent.detectionTitle}
                 </p>
               </div>
@@ -280,7 +280,7 @@ export function AIDiscoveryPanel({
                 </Badge>
               </div>
             </div>
-            <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+            <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
               {modeContent.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
@@ -294,12 +294,12 @@ export function AIDiscoveryPanel({
           </div>
 
           {(confirmedCount > 0 || rejectedCount > 0) && (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              <p className="font-medium text-[var(--color-on-surface)]">Flux curat de review</p>
+            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
+              <p className="font-medium text-eos-text">Flux curat de review</p>
               <p className="mt-2">
                 Confirmatele merg in inventar, respinsele raman in istoric. Aici vezi doar ce mai cere validare umana.
               </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">Confirmate: {confirmedCount} · Respinse: {rejectedCount}</p>
+              <p className="mt-2 text-xs text-eos-text-muted">Confirmate: {confirmedCount} · Respinse: {rejectedCount}</p>
             </div>
           )}
 
@@ -307,21 +307,21 @@ export function AIDiscoveryPanel({
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             placeholder={modeContent.namePlaceholder}
-            className="ring-focus h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+            className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
           <textarea
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={10}
             placeholder={modeContent.contentPlaceholder}
-            className="ring-focus rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+            className="ring-focus rounded-2xl border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
 
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
-              className="h-11 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+              className="h-11 rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
             >
               <FileCode2 className="size-4" strokeWidth={2.25} />
               {modeContent.pickerLabel}
@@ -329,7 +329,7 @@ export function AIDiscoveryPanel({
             <Button
               onClick={() => void handleDiscover()}
               disabled={!documentName.trim() || !content.trim() || busy}
-              className="h-11 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+              className="h-11 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
             >
               <SearchCode className="size-4" strokeWidth={2.25} />
               {modeContent.buttonLabel}
@@ -351,12 +351,12 @@ export function AIDiscoveryPanel({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-5">
           <CardTitle className="text-xl">Sisteme detectate automat</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
             Aici ramane doar lista de lucru activa: detectii care mai cer review sau confirmare.
           </div>
           {systems.length === 0 && (
@@ -380,7 +380,7 @@ export function AIDiscoveryPanel({
             return (
               <div
                 key={system.id}
-                className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5"
+                className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
@@ -400,8 +400,8 @@ export function AIDiscoveryPanel({
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-[var(--color-on-surface)]">{system.name}</p>
-                      <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+                      <p className="text-lg font-semibold text-eos-text">{system.name}</p>
+                      <p className="mt-1 text-sm text-eos-text-muted">
                         {system.vendor} · {system.modelType}
                       </p>
                     </div>
@@ -417,14 +417,14 @@ export function AIDiscoveryPanel({
                       ))}
                     </div>
                     {relatedDrifts.length > 0 && (
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
+                      <div className="rounded-2xl border border-eos-border bg-eos-bg-inset px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-eos-text-muted">
                           <Badge variant="warning">
                             {relatedDrifts.length} drift activ
                           </Badge>
                           <span>Detalii in Control / Drift.</span>
                           <a
-                            className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                            className="text-eos-info underline decoration-eos-border underline-offset-4"
                             href="/dashboard/alerte"
                           >
                             Deschide Drift
@@ -432,21 +432,21 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
-                    <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
-                      <summary className="cursor-pointer text-sm font-medium text-[var(--color-on-surface)]">
+                    <details className="rounded-2xl border border-eos-border bg-eos-bg-inset px-4 py-3">
+                      <summary className="cursor-pointer text-sm font-medium text-eos-text">
                         Detalii detectie si evidenta
                       </summary>
-                      <div className="mt-3 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                      <div className="mt-3 space-y-3 text-sm text-eos-text-muted">
                         <p>{detectionStatusHint(system.detectionStatus)}</p>
-                        <p className="text-xs text-[var(--color-muted)]">
+                        <p className="text-xs text-eos-text-muted">
                           Sursa: {system.sourceDocument || "manifest necunoscut"}
                         </p>
                         <div>
-                          <p className="font-medium text-[var(--color-on-surface)]">Evidenta detectiei</p>
+                          <p className="font-medium text-eos-text">Evidenta detectiei</p>
                           <ul className="mt-3 space-y-2">
                             {system.evidence.slice(0, 5).map((item, index) => (
                               <li key={`${system.id}-evidence-${index}`} className="flex gap-2">
-                                <Sparkles className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" strokeWidth={2.25} />
+                                <Sparkles className="mt-0.5 size-4 shrink-0 text-eos-primary" strokeWidth={2.25} />
                                 <span>{item}</span>
                               </li>
                             ))}
@@ -455,8 +455,8 @@ export function AIDiscoveryPanel({
                       </div>
                     </details>
                     {isEditing && (
-                      <div className="grid gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                        <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                      <div className="grid gap-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <p className="text-sm font-medium text-eos-text">
                           Ajusteaza detectia inainte de confirmare
                         </p>
                         <div className="grid gap-3 md:grid-cols-2">
@@ -467,7 +467,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, name: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                             placeholder="Nume sistem"
                           />
                           <input
@@ -477,7 +477,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, vendor: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                             placeholder="Provider"
                           />
                           <select
@@ -492,7 +492,7 @@ export function AIDiscoveryPanel({
                                   : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                           >
                             {PURPOSE_OPTIONS.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -507,7 +507,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, modelType: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                             placeholder="Model / stack"
                           />
                           <select
@@ -522,7 +522,7 @@ export function AIDiscoveryPanel({
                                   : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                           >
                             <option value="low">Confidence low</option>
                             <option value="medium">Confidence medium</option>
@@ -535,7 +535,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, frameworks: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-on-surface)] outline-none"
+                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
                             placeholder="Framework-uri separate prin virgula"
                           />
                         </div>
@@ -547,7 +547,7 @@ export function AIDiscoveryPanel({
                             )
                           }
                           rows={4}
-                          className="ring-focus rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-on-surface)] outline-none"
+                          className="ring-focus rounded-2xl border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text outline-none"
                           placeholder="O evidenta pe linie"
                         />
                         <div className="grid gap-2 md:grid-cols-4">
@@ -594,7 +594,7 @@ export function AIDiscoveryPanel({
                           <Button
                             onClick={() => void saveEditing(system.id)}
                             disabled={busy}
-                            className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                            className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                           >
                             Salveaza ajustarea
                           </Button>
@@ -602,7 +602,7 @@ export function AIDiscoveryPanel({
                             onClick={cancelEditing}
                             disabled={busy}
                             variant="outline"
-                            className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                            className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                           >
                             Renunta
                           </Button>
@@ -627,7 +627,7 @@ export function AIDiscoveryPanel({
                       <Button
                         onClick={() => void onUpdateStatus(system.id, "confirm")}
                         disabled={busy}
-                        className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                        className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                       >
                         <CheckCheck className="size-4" strokeWidth={2.25} />
                         Confirma in inventar
@@ -638,7 +638,7 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "review")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                       >
                         <Bot className="size-4" strokeWidth={2.25} />
                         Marcheaza review
@@ -649,7 +649,7 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "reject")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-error)] hover:bg-[var(--color-error-muted)]"
+                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
                       >
                         <X className="size-4" strokeWidth={2.25} />
                         Respinge detectia
@@ -660,14 +660,14 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "restore")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                       >
                         <RotateCcw className="size-4" strokeWidth={2.25} />
                         Repune in lucru
                       </Button>
                     )}
                     {system.detectionStatus === "confirmed" && (
-                      <div className="rounded-2xl border border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] p-3 text-sm text-[var(--status-success-text)]">
+                      <div className="rounded-2xl border border-eos-border bg-eos-success-soft p-3 text-sm text-eos-success">
                         Detectia a fost confirmata si mutata in inventarul oficial.
                       </div>
                     )}
@@ -692,9 +692,9 @@ export function AIDiscoveryPanel({
 
 function SummaryTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-      <p className="text-sm text-[var(--color-muted)]">{label}</p>
-      <p className="mt-2 text-3xl font-semibold text-[var(--color-on-surface)]">{value}</p>
+    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+      <p className="text-sm text-eos-text-muted">{label}</p>
+      <p className="mt-2 text-3xl font-semibold text-eos-text">{value}</p>
     </div>
   )
 }
@@ -709,13 +709,13 @@ function ToggleField({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-on-surface-muted)]">
+    <label className="flex items-center justify-between rounded-2xl border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
       <span>{label}</span>
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="size-4 accent-[var(--color-primary)]"
+        className="size-4 accent-eos-primary"
       />
     </label>
   )

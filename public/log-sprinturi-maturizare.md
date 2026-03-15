@@ -1845,6 +1845,10 @@ Verdict actualizat:
   - `components/mode-toggle.tsx`
   - `lib/compliance/*`
 - `components/ui/*` a ramas doar strat intern pentru wrapper-ele `Evidence OS`
+- pass final de convergenta `Evidence OS` pe runtime:
+  - shell-ul vizibil (`DashboardShell`, `RiskHeader`, `route-sections`, `login`, `home`) foloseste acum token-uri `eos-*`
+  - componentele hibride ramase din `components/compliscan/*` au fost mutate pe clase si semantica `Evidence OS`
+  - `components/ui/*` a fost redus la alias de compatibilitate peste `components/evidence-os/*`, fara logica vizuala veche
 
 Validare dupa inchiderea `Val 3`:
 
@@ -1938,6 +1942,24 @@ Efect masurabil in build:
 - `/dashboard/rapoarte/auditor-vault`
   - inainte: `17.3 kB / 189 kB first load`
   - dupa: `9.69 kB / 181 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Convergenta completa `Evidence OS`:
+
+- runtime-ul activ foloseste acum exclusiv namespace-ul `components/evidence-os/*` ca strat canonic de authoring, iar `components/ui/*` a ramas doar alias de compatibilitate
+- `Dashboard` a primit si pass-ul vizibil final:
+  - `components/compliscan/risk-header.tsx`
+  - `components/compliscan/dashboard-shell.tsx`
+  - hero-ul si rail-ul lateral folosesc acum compozitie `Evidence OS`, nu doar token-uri migrate
+- exporturile client-facing au iesit si ele din vechiul vocabular de token-uri:
+  - `lib/server/annex-lite-client.ts`
+  - `lib/server/audit-pack-client.ts`
+  - folosesc acum aceeasi familie `eos-*` pentru suprafete, text, border si status
 
 Validare dupa pas:
 

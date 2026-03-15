@@ -104,7 +104,11 @@ Checkpoint-ul curent din implementare:
 - [x] primitivele concurente `components/ui/*` au iesit din cockpit-ul runtime:
   - `app/dashboard/*`, `components/compliscan/*` si `lib/compliance/*` folosesc acum `Badge`, `Button` si `Card` din `Evidence OS`
   - `app/page.tsx`, `app/login/page.tsx`, shell-urile legacy si utilitarele globale folosesc acum tot namespace-ul `components/evidence-os/*`
-  - `components/ui/*` a ramas doar detaliu intern de implementare pentru wrapper-ele `Evidence OS`, nu suprafata canonica de authoring
+  - `components/ui/*` a fost redus la alias de compatibilitate peste `components/evidence-os/*`, fara logica vizuala concurenta
+- [x] convergenta `Evidence OS` este acum si vizibila, nu doar structurala:
+  - `DashboardShell` si `RiskHeader` folosesc compozitie `Evidence OS`, nu shell vechi cu token-uri mutate
+  - `Annex IV lite` si `Audit Pack` folosesc acelasi vocabular `eos-*` pentru exporturile client-facing
+  - nu mai exista vocabular vizual concurent in runtime-ul activ si in livrabilele HTML principale
 - [x] primul cleanup structural pe cockpit client:
   - derivarile pure mutate din `use-cockpit` in modul separat
   - compatibilitate publica pastrata pentru consumatorii existenti

@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-const evidenceBadgeVariants = cva(
+const badgeVariants = cva(
   "inline-flex max-w-full items-center justify-center gap-1 rounded-eos-sm border px-2 py-1 text-center text-[12px] font-medium uppercase leading-4 tracking-[0.01em] [overflow-wrap:anywhere] transition-[color,background,border-color,box-shadow]",
   {
     variants: {
@@ -23,21 +23,28 @@ const evidenceBadgeVariants = cva(
   }
 )
 
+export interface BadgeProps
+  extends React.ComponentProps<"span">,
+    VariantProps<typeof badgeVariants> {
+  asChild?: boolean
+}
+
 export function Badge({
   className,
   variant = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof evidenceBadgeVariants> & { asChild?: boolean }) {
+}: BadgeProps) {
   const Comp = asChild ? Slot : "span"
 
   return (
     <Comp
       data-slot="evidence-badge"
       data-variant={variant}
-      className={cn(evidenceBadgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant }), className)}
       {...props}
     />
   )
 }
+
+export { badgeVariants }

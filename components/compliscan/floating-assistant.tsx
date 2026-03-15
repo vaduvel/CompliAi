@@ -109,7 +109,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
         aria-label="Asistent AI"
         aria-expanded={open}
         aria-controls={panelId}
-        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg [box-shadow:var(--shadow-lg)] md:bottom-6 md:right-6 ${
+        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl shadow-[var(--eos-shadow-md)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg md:bottom-6 md:right-6 ${
           open
             ? "border border-eos-border bg-eos-surface text-eos-text-muted"
             : "border border-transparent bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
@@ -126,7 +126,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
       {open && (
         <div
           id={panelId}
-          className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--shadow-xl)] sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-20 md:right-6 xl:w-[26rem]"
+          className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--eos-shadow-lg)] sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-20 md:right-6 xl:w-[26rem]"
         >
           <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
             <div className="flex items-start gap-3">

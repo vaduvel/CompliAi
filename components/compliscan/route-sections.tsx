@@ -50,8 +50,8 @@ import { formatRelativeRomanian } from "@/lib/compliance/engine"
 export function LoadingScreen({ variant = "page" }: { variant?: "page" | "section" }) {
   const containerClass =
     variant === "page"
-      ? "grid min-h-screen place-items-center bg-[var(--color-bg)] text-[var(--color-on-surface)]"
-      : "grid min-h-[40vh] place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)]"
+      ? "grid min-h-screen place-items-center bg-eos-bg text-eos-text"
+      : "grid min-h-[40vh] place-items-center rounded-2xl border border-eos-border bg-eos-surface text-eos-text"
 
   return (
     <div className={containerClass}>
@@ -96,7 +96,7 @@ export function DashboardTop({
       />
 
       {error && (
-        <Alert className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+        <Alert className="border-eos-error-border bg-eos-error-soft text-eos-error">
           <AlertTriangle className="size-4" />
           <AlertTitle>Eroare</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
@@ -268,7 +268,7 @@ function OverviewSummaryStrip({
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardContent className="px-5 py-5">
         <SummaryStrip
           eyebrow="Stare curenta"
@@ -282,14 +282,14 @@ function OverviewSummaryStrip({
 
 function driftSeverityClasses(severity: ComplianceDriftRecord["severity"]) {
   if (severity === "critical" || severity === "high") {
-    return "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+    return "border-eos-error-border bg-eos-error-soft text-eos-error"
   }
 
   if (severity === "medium") {
-    return "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+    return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
   }
 
-  return "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+  return "border-eos-border bg-eos-surface-variant text-eos-text-muted"
 }
 
 function driftSeverityLabel(severity: ComplianceDriftRecord["severity"]) {
@@ -331,16 +331,16 @@ export function DriftCommandCenter({
   }, [activeDrifts])
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle className="text-xl">Control drift</CardTitle>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-2 max-w-2xl text-sm text-eos-text-muted">
               Vezi rapid schimbarea principala, impactul ei si urmatorul pas clar.
             </p>
           </div>
-          <Badge className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"}>
+          <Badge className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-eos-border bg-eos-surface-variant text-eos-text-muted"}>
             {activeDrifts.length > 0 ? `${activeDrifts.length} drift activ` : "control stabil"}
           </Badge>
         </div>
@@ -362,30 +362,30 @@ export function DriftCommandCenter({
                     onClick={() => setSelectedDriftId(drift.id)}
                     className={`w-full rounded-2xl border p-4 text-left transition ${
                       isSelected
-                        ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                        : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:bg-[var(--color-surface-hover)]"
+                        ? "border-eos-border-strong bg-eos-bg-inset"
+                        : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
                     }`}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                          <p className="text-sm font-semibold text-eos-text">
                             {drift.summary}
                           </p>
                           {isSelected ? (
-                            <Badge className="border-[var(--border-subtle)] bg-[var(--bg-inset)] text-[var(--text-primary)]">
+                            <Badge className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
                               selectat
                             </Badge>
                           ) : null}
                         </div>
-                        <p className="mt-1 text-xs text-[var(--color-muted)]">
+                        <p className="mt-1 text-xs text-eos-text-muted">
                           {[
                             formatDriftTypeLabel(drift.type),
                             drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
                             formatRelativeRomanian(drift.detectedAtISO),
                           ].join(" · ")}
                         </p>
-                        <p className="mt-2 text-sm text-[var(--color-on-surface-muted)] line-clamp-2">
+                        <p className="mt-2 text-sm text-eos-text-muted line-clamp-2">
                           {guidance.nextAction}
                         </p>
                       </div>
@@ -393,11 +393,11 @@ export function DriftCommandCenter({
                         <Badge className={driftSeverityClasses(drift.severity)}>
                           {driftSeverityLabel(drift.severity)}
                         </Badge>
-                        <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                        <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
                           {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
                         </Badge>
                         {breached ? (
-                          <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                          <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
                             SLA depășit
                           </Badge>
                         ) : null}
@@ -409,37 +409,37 @@ export function DriftCommandCenter({
             </div>
 
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Impact principal</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Impact principal</p>
+                <p className="mt-2 text-sm font-semibold text-eos-text">
                   {selectedGuidance?.lawReference || "revizie legala / operationala"}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
                   {selectedDrift.severityReason}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Pasul urmator</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Pasul urmator</p>
+                <p className="mt-2 text-sm font-semibold text-eos-text">
                   {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
                   {selectedGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Escalare si baseline</p>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Escalare si baseline</p>
+                <p className="mt-2 text-sm font-semibold text-eos-text">
                   {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
                 </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  <span className="font-medium text-[var(--color-on-surface)]">Owner:</span>{" "}
+                <p className="mt-2 text-xs text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Owner:</span>{" "}
                   {selectedDrift.escalationOwner || selectedGuidance?.ownerSuggestion || "in curs de confirmare"}
                 </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  <span className="font-medium text-[var(--color-on-surface)]">Escalare:</span>{" "}
+                <p className="mt-2 text-xs text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Escalare:</span>{" "}
                   {formatDriftEscalationTier(
                     selectedDrift.escalationTier || selectedGuidance?.escalationTier || "watch"
                   )}{" "}
@@ -448,8 +448,8 @@ export function DriftCommandCenter({
                     selectedDrift.escalationDueAtISO || selectedGuidance?.escalationDueAtISO
                   )}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
-                  <span className="font-medium text-[var(--color-on-surface)]">Impact operational:</span>{" "}
+                <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Impact operational:</span>{" "}
                   {[
                     selectedDrift.blocksAudit ? "blocheaza auditul" : null,
                     selectedDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
@@ -458,8 +458,8 @@ export function DriftCommandCenter({
                     .filter(Boolean)
                     .join(" · ") || "nu blocheaza auditul daca review-ul este documentat"}
                 </p>
-                <p className="mt-2 text-xs text-[var(--color-muted)]">
-                  <span className="font-medium text-[var(--color-on-surface)]">Sursa reper:</span>{" "}
+                <p className="mt-2 text-xs text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Sursa reper:</span>{" "}
                   {latestSource ? sourceLabel(latestSource) : "Porneste un scan nou din Scanare."}
                 </p>
               </div>
@@ -468,29 +468,29 @@ export function DriftCommandCenter({
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/dashboard/alerte"
-                className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+                className="inline-flex h-10 items-center rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text transition hover:bg-eos-secondary-hover"
               >
                 Vezi drifturile
               </Link>
               <Link
                 href="/dashboard/checklists"
-                className="inline-flex h-10 items-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
+                className="inline-flex h-10 items-center rounded-xl bg-eos-primary px-4 text-sm font-medium text-eos-primary-text transition hover:bg-eos-primary-hover"
               >
                 Deschide remedierea
               </Link>
               <Link
                 href="/dashboard/sisteme"
-                className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+                className="inline-flex h-10 items-center rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text transition hover:bg-eos-secondary-hover"
               >
                 Vezi controlul
               </Link>
               {selectedBreached ? (
-                <Badge className="h-10 rounded-xl border-[var(--color-error)] bg-[var(--color-error-muted)] px-4 text-[var(--color-error)]">
+                <Badge className="h-10 rounded-xl border-eos-error-border bg-eos-error-soft px-4 text-eos-error">
                   Driftul selectat a depasit SLA-ul
                 </Badge>
               ) : null}
               {breachedCount > 1 ? (
-                <Badge className="h-10 rounded-xl border-[var(--color-warning)] bg-[var(--color-warning-muted)] px-4 text-[var(--color-warning)]">
+                <Badge className="h-10 rounded-xl border-eos-warning-border bg-eos-warning-soft px-4 text-eos-warning">
                   {breachedCount} drift-uri depasesc SLA-ul
                 </Badge>
               ) : null}
@@ -498,11 +498,11 @@ export function DriftCommandCenter({
           </>
         ) : (
           <>
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-lg font-semibold text-[var(--color-on-surface)]">
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-lg font-semibold text-eos-text">
                 Nu există drift deschis acum
               </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+              <p className="mt-2 text-sm text-eos-text-muted">
                 {hasValidatedBaseline
                   ? "Controlul este stabil. Rescanezi doar cand apare o schimbare reala."
                   : "Confirma mai intai baseline-ul, apoi urmareste drift-ul pe schimbari reale."}
@@ -512,13 +512,13 @@ export function DriftCommandCenter({
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/dashboard/sisteme"
-                className="inline-flex h-10 items-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
+                className="inline-flex h-10 items-center rounded-xl bg-eos-primary px-4 text-sm font-medium text-eos-primary-text transition hover:bg-eos-primary-hover"
               >
                 {hasValidatedBaseline ? "Verifică controlul" : "Validează baseline-ul"}
               </Link>
               <Link
                 href="/dashboard/scanari"
-                className="inline-flex h-10 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+                className="inline-flex h-10 items-center rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text transition hover:bg-eos-secondary-hover"
               >
                 Rulează un scan nou
               </Link>
@@ -611,13 +611,13 @@ export function DashboardGuideCard({
   })
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle className="text-xl">Unde continui</CardTitle>
           </div>
-          <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+          <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
             {openAlertsCount > 0 ? `${openAlertsCount} drifturi cer review` : "fara blocaj urgent"}
           </Badge>
         </div>
@@ -632,26 +632,26 @@ export function DashboardGuideCard({
               href={step.href}
               className={`group rounded-2xl border p-4 transition ${
                 isCurrentStep
-                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)]"
-                  : "border-[var(--color-border)] bg-[var(--color-surface-variant)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]"
+                  ? "border-eos-border-strong bg-eos-bg-inset"
+                  : "border-eos-border bg-eos-surface-variant hover:border-eos-border-strong hover:bg-eos-secondary-hover"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="grid size-10 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
+                <div className="grid size-10 place-items-center rounded-2xl bg-eos-bg text-eos-text-muted">
                   <Icon className="size-4" strokeWidth={2.25} />
                 </div>
                 <div className="flex items-center gap-2">
                   {isCurrentStep ? (
-                    <Badge className="border-[var(--border-subtle)] bg-[var(--bg-inset)] text-[var(--text-primary)]">
+                    <Badge className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
                       acum
                     </Badge>
                   ) : null}
-                  <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
+                  <ArrowRight className="size-4 text-eos-text-muted transition group-hover:text-eos-primary" strokeWidth={2.25} />
                 </div>
               </div>
-              <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
-              <p className="mt-3 text-xs leading-5 text-[var(--color-muted)]">{step.meta}</p>
+              <p className="mt-3 text-base font-semibold text-eos-text">{step.title}</p>
+              <p className="mt-2 text-sm text-eos-text-muted">{step.description}</p>
+              <p className="mt-3 text-xs leading-5 text-eos-text-muted">{step.meta}</p>
             </Link>
           )
         })}
@@ -711,8 +711,8 @@ export function SnapshotStatusCard({
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <CardTitle className="text-xl">Stare curenta</CardTitle>
@@ -720,8 +720,8 @@ export function SnapshotStatusCard({
           <Badge
             className={
               openDriftCount > 0
-                ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
-                : "border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
+                ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+                : "border-eos-border bg-eos-surface-variant text-eos-text-muted"
             }
           >
             {openDriftCount > 0 ? `${openDriftCount} drift deschis` : "fara drift deschis"}
@@ -733,22 +733,22 @@ export function SnapshotStatusCard({
           {statusItems.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
             >
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">{item.label}</p>
-              <p className="mt-2 break-words text-sm font-semibold text-[var(--color-on-surface)]">{item.value}</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{item.meta}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">{item.label}</p>
+              <p className="mt-2 break-words text-sm font-semibold text-eos-text">{item.value}</p>
+              <p className="mt-1 text-xs leading-5 text-eos-text-muted">{item.meta}</p>
             </div>
           ))}
         </div>
 
         {latestEvent ? (
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">Ultimul semnal</p>
-            <p className="mt-2 break-words text-sm font-semibold text-[var(--color-on-surface)]">
+          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Ultimul semnal</p>
+            <p className="mt-2 break-words text-sm font-semibold text-eos-text">
               {latestEvent.message}
             </p>
-            <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
               {latestEvent.entityType} · {formatRelativeRomanian(latestEvent.createdAtISO)}
             </p>
           </div>
@@ -756,21 +756,21 @@ export function SnapshotStatusCard({
           <EmptyState
             title="Nu exista evenimente in jurnal"
             label="Activitatea va aparea aici dupa primul scan sau dupa prima schimbare confirmata."
-            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+            className="border-eos-border bg-eos-surface-variant py-8"
           />
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href={primaryAction.href}
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-eos-primary px-4 text-sm font-medium text-eos-primary-text transition hover:bg-eos-primary-hover"
           >
             {primaryAction.label}
           </Link>
           {secondaryAction ? (
             <Link
               href={secondaryAction.href}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text transition hover:bg-eos-secondary-hover"
             >
               {secondaryAction.label}
             </Link>
@@ -815,101 +815,101 @@ export function ModulesGrid({
 
   return (
     <section className="grid gap-6 md:grid-cols-2 2xl:grid-cols-4">
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg">EU AI Act</CardTitle>
-            <Layers className="size-5 text-[var(--icon-secondary)]" strokeWidth={2.25} />
+            <Layers className="size-5 text-eos-text-muted" strokeWidth={2.25} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
           <div className="space-y-2 text-sm">
-            <p className="text-[var(--color-on-surface-muted)]">
+            <p className="text-eos-text-muted">
               {aiHighRisk > 0
                 ? `${aiHighRisk} sisteme high-risk cer review prioritar.`
                 : "Inventarul nu are sisteme high-risk deschise."}
             </p>
-            <div className="flex items-center justify-between text-[var(--color-muted)]">
+            <div className="flex items-center justify-between text-eos-text-muted">
               <span>High-risk (inventar)</span>
-              <span className="font-semibold text-[var(--color-error)]">{aiHighRisk}</span>
+              <span className="font-semibold text-eos-error">{aiHighRisk}</span>
             </div>
-            <div className="flex items-center justify-between text-[var(--color-muted)]">
+            <div className="flex items-center justify-between text-eos-text-muted">
               <span>Low-risk (inventar)</span>
-              <span className="font-semibold text-[var(--color-success)]">{aiLowRisk}</span>
+              <span className="font-semibold text-eos-success">{aiLowRisk}</span>
             </div>
           </div>
           <Link
             href="/dashboard/sisteme"
-            className="flex h-10 w-full items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] text-sm text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+            className="flex h-10 w-full items-center justify-center rounded-xl border border-eos-border bg-eos-surface-variant text-sm text-eos-text hover:bg-eos-secondary-hover"
           >
             Vezi inventarul
           </Link>
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg">e-Factura</CardTitle>
-            <FileText className="size-5 text-[var(--color-warning)]" strokeWidth={2.25} />
+            <FileText className="size-5 text-eos-warning" strokeWidth={2.25} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
           <div>
             {state.efacturaConnected ? (
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Azi: {validatedInvoicesToday} facturi validate si {efacturaErrorsToday} erori.
               </p>
             ) : state.efacturaSignalsCount > 0 ? (
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Semnale detectate in {state.efacturaSignalsCount} documente, dar integrarea nu este conectata.
               </p>
             ) : (
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
+              <p className="text-sm text-eos-text-muted">
                 Integrarea nu este conectata. Poti porni un sync local cand esti pregatit.
               </p>
             )}
-            <p className="mt-2 text-sm text-[var(--color-muted)]">
+            <p className="mt-2 text-sm text-eos-text-muted">
               Ultima sincronizare: {formatRelativeRomanian(state.efacturaSyncedAtISO)}
             </p>
           </div>
           <Progress
             value={efacturaProgress}
-            className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-info)]"
+            className="bg-eos-surface-variant [&_[data-slot=progress-indicator]]:bg-eos-primary"
           />
           <Button
             onClick={onSyncNow}
             disabled={busy}
-            className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+            className="h-10 w-full rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
           >
             {state.efacturaConnected ? "Trimite la ANAF" : "Porneste sync local"}
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg">GDPR quick fixes</CardTitle>
-            <CheckCircle2 className="size-5 text-[var(--color-success)]" strokeWidth={2.25} />
+            <CheckCircle2 className="size-5 text-eos-success" strokeWidth={2.25} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
           <div className="flex items-end gap-3">
             <span className="text-4xl font-semibold">{state.gdprProgress}%</span>
-            <span className="pb-1 text-sm text-[var(--color-success)]">conform</span>
+            <span className="pb-1 text-sm text-eos-success">conform</span>
           </div>
           <Progress
             value={state.gdprProgress}
-            className="bg-[var(--color-surface-variant)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]"
+            className="bg-eos-surface-variant [&_[data-slot=progress-indicator]]:bg-eos-success"
           />
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3">
-            <p className="text-sm font-medium text-[var(--color-on-surface)]">
+          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant px-4 py-3">
+            <p className="text-sm font-medium text-eos-text">
               {gdprQuickFixes.length > 0
                 ? `${gdprQuickFixes.length} quick fix${gdprQuickFixes.length !== 1 ? "-uri" : ""} deschise`
                 : "Fara quick fix-uri deschise"}
             </p>
-            <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
               {gdprQuickFixes.length > 0
                 ? "Inchizi rapid remedierea scurta, fara sa pierzi contextul de control."
                 : "Nu exista blocaje rapide care sa ceara interventie imediata."}
@@ -918,21 +918,21 @@ export function ModulesGrid({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-lg">Sandbox</CardTitle>
-            <ShieldPlus className="size-5 text-[var(--icon-secondary)]" strokeWidth={2.25} />
+            <ShieldPlus className="size-5 text-eos-text-muted" strokeWidth={2.25} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-2">
-          <p className="text-sm text-[var(--color-on-surface-muted)]">
+          <p className="text-sm text-eos-text-muted">
             Testeaza o schimbare de politica, banner sau flux AI inainte de rollout.
           </p>
           <Button
             onClick={onSandbox}
             variant="outline"
-            className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+            className="h-10 w-full rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
           >
             Deschide Sandbox
           </Button>
@@ -982,10 +982,10 @@ export function ScanWorkspace({
   const isTextMode = sourceMode === "text"
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-[28px] leading-tight">Flux scanare</CardTitle>
-        <p className="text-sm text-[var(--color-on-surface-muted)]">
+        <p className="text-sm text-eos-text-muted">
           {isTextMode
             ? "Lipeste textul integral sau un extras relevant. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura fara sa mai incarci un fisier."
             : "Incarca un document PDF, imagine sau completeaza textul daca OCR-ul are nevoie de clarificari. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura."}
@@ -995,19 +995,19 @@ export function ScanWorkspace({
       <CardContent className="space-y-6 pt-6">
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-4">
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-sm font-medium text-eos-text">
                 {isTextMode ? "Pasul 1: denumeste analiza" : "Pasul 1: alege sursa"}
               </p>
               <div className="mt-4">
                 {isTextMode ? (
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
                     Foloseste acest mod cand ai deja textul copiat din politica, contract, ToS sau procedura interna si nu vrei OCR.
                   </div>
                 ) : (
-                  <label className="ring-focus flex min-h-[112px] cursor-pointer items-center justify-center rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-bg)] px-5 text-center text-sm text-[var(--color-on-surface-muted)] hover:bg-[var(--color-surface-hover)]">
+                  <label className="ring-focus flex min-h-[112px] cursor-pointer items-center justify-center rounded-2xl border border-dashed border-eos-border-strong bg-eos-bg px-5 text-center text-sm text-eos-text-muted hover:bg-eos-secondary-hover">
                     <span>
-                      <Upload className="mx-auto mb-3 size-5 text-[var(--color-primary)]" strokeWidth={2.25} />
+                      <Upload className="mx-auto mb-3 size-5 text-eos-primary" strokeWidth={2.25} />
                       {documentFile
                         ? `Fisier selectat: ${documentFile.name}`
                         : "Click aici pentru a incarca PDF / PNG / JPG"}
@@ -1027,14 +1027,14 @@ export function ScanWorkspace({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">Pasul 2: context si scope</p>
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-sm font-medium text-eos-text">Pasul 2: context si scope</p>
               <div className="mt-4 grid gap-4">
                 <input
                   value={documentName}
                   onChange={(event) => setDocumentName(event.target.value)}
                   placeholder="Nume document"
-                  className="ring-focus h-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+                  className="ring-focus h-12 rounded-xl border border-eos-border bg-eos-bg px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
                 <textarea
                   value={documentContent}
@@ -1045,24 +1045,24 @@ export function ScanWorkspace({
                       ? "Lipeste aici textul pe care vrei sa-l analizam."
                       : "Paste text manual daca nu ai fisier. Daca ai PDF, lasa aici gol."
                   }
-                  className="ring-focus rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-on-surface)] outline-none placeholder:text-[var(--color-muted)]"
+                  className="ring-focus rounded-2xl border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">Pasul 3: extrage si revizuieste</p>
-              <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Document</p>
-                  <p className="mt-2 text-sm text-[var(--color-on-surface)]">
+            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <p className="text-sm font-medium text-eos-text">Pasul 3: extrage si revizuieste</p>
+              <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
+                <div className="rounded-2xl border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Document</p>
+                  <p className="mt-2 text-sm text-eos-text">
                     {documentName || "Inca nu ai setat numele documentului."}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Sursa</p>
+                <div className="rounded-2xl border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Sursa</p>
                   <p className="mt-2">
                     {isTextMode
                       ? documentContent.trim()
@@ -1075,8 +1075,8 @@ export function ScanWorkspace({
                           : "Nicio sursa"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Scope implicit</p>
+                <div className="rounded-2xl border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Scope implicit</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">GDPR</Badge>
                     <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">EU AI Act</Badge>
@@ -1084,15 +1084,15 @@ export function ScanWorkspace({
                   </div>
                 </div>
                 {pendingScanId && (
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-bg p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Text extras pentru review
                     </p>
                     <textarea
                       value={pendingExtractedText}
                       onChange={(event) => setPendingExtractedText(event.target.value)}
                       rows={8}
-                      className="ring-focus mt-3 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-3 text-sm text-[var(--color-on-surface)] outline-none"
+                      className="ring-focus mt-3 w-full rounded-2xl border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none"
                     />
                   </div>
                 )}
@@ -1104,7 +1104,7 @@ export function ScanWorkspace({
                     <Button
                       onClick={onAnalyze}
                       disabled={scanning}
-                      className="h-12 w-full rounded-xl bg-[var(--color-primary)] text-base font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
+                      className="h-12 w-full rounded-xl bg-eos-primary text-base font-semibold text-eos-primary-text hover:bg-eos-primary-hover disabled:opacity-40"
                     >
                       {scanning ? (
                         <>
@@ -1118,7 +1118,7 @@ export function ScanWorkspace({
                     <button
                       onClick={onExtract}
                       disabled={!canStartScan || scanning}
-                      className="text-sm text-[var(--color-muted)] underline-offset-2 hover:text-[var(--color-on-surface)] hover:underline disabled:opacity-40"
+                      className="text-sm text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline disabled:opacity-40"
                     >
                       Extrage din nou textul
                     </button>
@@ -1127,7 +1127,7 @@ export function ScanWorkspace({
                   <Button
                     onClick={onExtract}
                     disabled={!canStartScan || scanning}
-                    className="h-12 w-full rounded-xl bg-[var(--color-primary)] text-base font-semibold text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
+                    className="h-12 w-full rounded-xl bg-eos-primary text-base font-semibold text-eos-primary-text hover:bg-eos-primary-hover disabled:opacity-40"
                   >
                     {scanning ? (
                       <>
@@ -1142,12 +1142,12 @@ export function ScanWorkspace({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              <p className="font-medium text-[var(--color-on-surface)]">Status flux</p>
+            <div className="rounded-2xl border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
+              <p className="font-medium text-eos-text">Status flux</p>
               <p className="mt-2">
                 {scanInfo || "In asteptare. Incarca sursa si porneste fluxul."}
               </p>
-              <p className="mt-3 text-xs text-[var(--color-muted)]">
+              <p className="mt-3 text-xs text-eos-text-muted">
                 Total documente scanate: {scannedDocuments}
               </p>
             </div>
@@ -1175,12 +1175,12 @@ export function LatestDocumentSection({
 
   return (
     <>
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardHeader className="border-b border-[var(--color-border)] pb-5">
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <CardTitle className="text-[28px] leading-tight">Ultimul document analizat</CardTitle>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+              <p className="mt-2 text-sm text-eos-text-muted">
                 Rezultatul este legat explicit de documentul tocmai scanat.
               </p>
             </div>
@@ -1188,7 +1188,7 @@ export function LatestDocumentSection({
               <Button
                 onClick={() => setOpenText(true)}
                 variant="outline"
-                className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                className="h-10 rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
               >
                 Vezi text extras
               </Button>
@@ -1208,7 +1208,7 @@ export function LatestDocumentSection({
           {latestScan && (
             <>
               <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
+                <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
                   <div className="flex flex-wrap items-center gap-3">
                     <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                       {latestScan.documentName}
@@ -1221,19 +1221,19 @@ export function LatestDocumentSection({
                     {latestScanInsights.map((insight) => (
                       <div
                         key={insight.id}
-                        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4"
+                        className="rounded-2xl border border-eos-border bg-eos-bg p-4"
                       >
-                        <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                           {insight.label}
                         </p>
-                        <p className="mt-2 text-sm text-[var(--color-on-surface)]">{insight.value}</p>
+                        <p className="mt-2 text-sm text-eos-text">{insight.value}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                  <p className="text-sm font-medium text-eos-text">
                     De ce a fost detectat
                   </p>
                   <div className="mt-4 space-y-3">
@@ -1247,7 +1247,7 @@ export function LatestDocumentSection({
                     {latestScanFindings.slice(0, 3).map((finding) => (
                       <div
                         key={finding.id}
-                        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4"
+                        className="rounded-2xl border border-eos-border bg-eos-bg p-4"
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
@@ -1259,10 +1259,10 @@ export function LatestDocumentSection({
                             </Badge>
                           )}
                         </div>
-                        <p className="mt-3 text-sm font-semibold text-[var(--color-on-surface)]">
+                        <p className="mt-3 text-sm font-semibold text-eos-text">
                           {finding.title}
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+                        <p className="mt-2 text-sm leading-6 text-eos-text-muted">
                           {finding.provenance?.excerpt || finding.detail}
                         </p>
                         <FindingVerdictMeta finding={finding} className="mt-3" />
@@ -1272,8 +1272,8 @@ export function LatestDocumentSection({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">
+              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+                <p className="text-sm font-medium text-eos-text">
                   Rezultatul pentru acest document
                 </p>
                 <div className="mt-4 space-y-3">
@@ -1287,17 +1287,17 @@ export function LatestDocumentSection({
                   {latestScanTasks.slice(0, 3).map((task) => (
                       <div
                         key={task.id}
-                        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4"
+                        className="rounded-2xl border border-eos-border bg-eos-bg p-4"
                       >
                         <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                        <p className="text-sm font-semibold text-eos-text">
                           {task.title}
                           </p>
-                          <span className="text-xs text-[var(--color-muted)]">{task.priority}</span>
+                          <span className="text-xs text-eos-text-muted">{task.priority}</span>
                         </div>
-                      <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{task.summary}</p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">{task.triggerLabel}</p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+                      <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+                      <p className="mt-2 text-xs text-eos-text-muted">
                         {task.effortLabel} · {task.source}
                       </p>
                     </div>
@@ -1305,7 +1305,7 @@ export function LatestDocumentSection({
                 </div>
               </div>
 
-              <Separator className="bg-[var(--color-border)]" />
+              <Separator className="bg-eos-border" />
             </>
           )}
         </CardContent>
@@ -1329,18 +1329,18 @@ export function RecentScansCard({
   tasks: CockpitTask[]
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <CardTitle className="text-xl">Surse recente analizate</CardTitle>
-            <p className="text-sm text-[var(--color-on-surface-muted)]">
+            <p className="text-sm text-eos-text-muted">
               Documentele si manifestele raman separate ca sa vezi rapid ce ai scanat si unde continui.
             </p>
           </div>
           <Link
             href="/dashboard/scanari"
-            className="text-sm font-medium text-[var(--color-on-surface)] transition hover:text-[var(--color-primary)]"
+            className="text-sm font-medium text-eos-text transition hover:text-eos-primary"
           >
             Mergi la Scanari
           </Link>
@@ -1351,11 +1351,11 @@ export function RecentScansCard({
           <EmptyState
             title="Nu exista surse scanate inca"
             label="Mergi la Scanari pentru a adauga primul document sau primul manifest."
-            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+            className="border-eos-border bg-eos-surface-variant py-8"
             actions={
               <Link
                 href="/dashboard/scanari"
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-eos-primary px-4 text-sm font-medium text-eos-primary-text transition hover:bg-eos-primary-hover"
               >
                 Deschide Scanari
               </Link>
@@ -1376,22 +1376,22 @@ export function RecentScansCard({
             <Link
               key={scan.id}
               href={targetHref}
-              className="group flex flex-col gap-4 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 transition hover:border-[var(--border-strong)] hover:bg-[var(--color-surface-hover)] md:flex-row md:items-center md:justify-between"
+              className="group flex flex-col gap-4 rounded-3xl border border-eos-border bg-eos-surface-variant p-5 transition hover:border-eos-border-strong hover:bg-eos-secondary-hover md:flex-row md:items-center md:justify-between"
             >
               <div className="flex min-w-0 items-center gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-eos-bg text-eos-text-muted">
                   <FileText className="size-5" strokeWidth={2.25} />
                 </div>
                 <div className="min-w-0">
-                  <p className="break-words text-base font-semibold text-[var(--color-on-surface)] md:truncate">
+                  <p className="break-words text-base font-semibold text-eos-text md:truncate">
                     {scan.documentName}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <Badge className="border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-on-surface-muted)]">
+                    <Badge className="border-eos-border bg-eos-bg text-eos-text-muted">
                       {sourceLabel(scan)}
                     </Badge>
                   </div>
-                  <p className="mt-0.5 text-sm text-[var(--color-muted)]">
+                  <p className="mt-0.5 text-sm text-eos-text-muted">
                     Scanat pe {new Date(scan.createdAtISO).toLocaleString("ro-RO")}
                   </p>
                 </div>
@@ -1401,14 +1401,14 @@ export function RecentScansCard({
                 <Badge
                   className={
                     needsReview
-                      ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+                      ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
                       : isManifest
-                      ? "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
+                      ? "border-eos-border bg-eos-primary-soft text-eos-primary"
                       : isYaml
-                      ? "border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
+                      ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
                       : hasIssues
-                      ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-                      : "border-[var(--status-success-border)] bg-[var(--status-success-bg-soft)] text-[var(--status-success-text)]"
+                      ? "border-eos-error-border bg-eos-error-soft text-eos-error"
+                      : "border-eos-border bg-eos-success-soft text-eos-success"
                   }
                 >
                   {needsReview
@@ -1422,14 +1422,14 @@ export function RecentScansCard({
                       : "Fara probleme"}
                 </Badge>
                 {p1Count > 0 && (
-                  <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                  <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
                     {p1Count} P1
                   </Badge>
                 )}
-                <span className="text-sm text-[var(--color-muted)]">
+                <span className="text-sm text-eos-text-muted">
                   {sourceActionLabel(scan)}
                 </span>
-                <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
+                <ArrowRight className="size-4 text-eos-text-muted transition group-hover:text-eos-primary" strokeWidth={2.25} />
               </div>
             </Link>
           )
@@ -1441,16 +1441,16 @@ export function RecentScansCard({
 
 export function RecentActivityCard({ events }: { events: ComplianceEvent[] }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="text-lg">Activitate recenta</CardTitle>
-            <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-1 text-sm text-eos-text-muted">
               Ultimele actiuni confirmate, fara zgomotul din istoricul complet.
             </p>
           </div>
-          <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+          <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
             {events.length > 0 ? `${Math.min(events.length, 5)} recente` : "fara activitate"}
           </Badge>
         </div>
@@ -1460,21 +1460,21 @@ export function RecentActivityCard({ events }: { events: ComplianceEvent[] }) {
           <EmptyState
             title="Inca nu exista activitate"
             label="Primele schimbari confirmate si actiuni de operator vor aparea aici."
-            className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
+            className="border-eos-border bg-eos-surface-variant py-8"
           />
         )}
         {events.slice(0, 5).map((eventItem) => (
           <div
             key={eventItem.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3"
+            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3"
           >
-            <p className="break-words text-sm font-medium text-[var(--color-on-surface)]">{eventItem.message}</p>
+            <p className="break-words text-sm font-medium text-eos-text">{eventItem.message}</p>
             {eventItem.actorLabel && (
-              <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
+              <p className="mt-2 text-xs leading-5 text-eos-text-muted">
                 Actor: {eventItem.actorRole ? `${eventItem.actorLabel} (${eventItem.actorRole})` : eventItem.actorLabel}
               </p>
             )}
-            <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
+            <p className="mt-2 text-xs leading-5 text-eos-text-muted">
               {eventItem.type} · {formatRelativeRomanian(eventItem.createdAtISO)}
             </p>
           </div>
@@ -1488,12 +1488,12 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--color-on-surface-muted)]">
+        <p className="text-sm text-eos-text-muted">
           {tasks.length} actiuni deschise generate din drift
         </p>
         <Link
           href="/dashboard/rapoarte"
-          className="text-sm text-[var(--color-primary)] hover:underline"
+          className="text-sm text-eos-primary hover:underline"
         >
           Rezolva in Remediere →
         </Link>
@@ -1501,25 +1501,25 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+          className="rounded-3xl border border-eos-border bg-eos-surface p-5"
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-lg font-semibold text-[var(--color-on-surface)]">{task.title}</p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{task.summary}</p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">{task.triggerLabel}</p>
+              <p className="text-lg font-semibold text-eos-text">{task.title}</p>
+              <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+              <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
             </div>
-            <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+            <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
               {task.priority}
             </Badge>
           </div>
-          <p className="mt-3 text-xs text-[var(--color-muted)]">
+          <p className="mt-3 text-xs text-eos-text-muted">
             {task.source} · {task.lawReference}
           </p>
           <div className="mt-4">
             <Link
               href="/dashboard/rapoarte"
-              className="inline-flex h-9 items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+              className="inline-flex h-9 items-center rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text hover:bg-eos-secondary-hover"
             >
               Vezi task si dovezi →
             </Link>
@@ -1538,10 +1538,10 @@ export function EmptyStateCard({
   description: string
 }) {
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+    <Card className="border-eos-border bg-eos-surface">
       <CardContent className="p-8">
-        <p className="text-lg font-semibold text-[var(--color-on-surface)]">{title}</p>
-        <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{description}</p>
+        <p className="text-lg font-semibold text-eos-text">{title}</p>
+        <p className="mt-2 text-sm text-eos-text-muted">{description}</p>
       </CardContent>
     </Card>
   )

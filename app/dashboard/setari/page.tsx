@@ -324,7 +324,7 @@ export default function SetariPage() {
         }
       />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Setari"
@@ -365,19 +365,19 @@ export default function SetariPage() {
 
       <Tabs defaultValue="workspace" className="space-y-6">
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
             Zone Setari
           </p>
           <div className="overflow-x-auto pb-1">
-            <TabsList className="min-w-max gap-0 border-b border-[var(--color-border)] text-[var(--color-on-surface-muted)]">
+            <TabsList className="min-w-max gap-0 border-b border-eos-border text-eos-text-muted">
               {SETTINGS_VIEW_TABS.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="min-h-14 min-w-[152px] items-start px-4 py-3 text-left data-[state=active]:border-[var(--color-primary)] data-[state=active]:text-[var(--color-on-surface)]"
+                  className="min-h-14 min-w-[152px] items-start px-4 py-3 text-left data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
-                  <span className="mt-1 whitespace-normal text-xs font-normal leading-5 text-[var(--color-muted)]">
+                  <span className="mt-1 whitespace-normal text-xs font-normal leading-5 text-eos-text-muted">
                     {tab.description}
                   </span>
                 </TabsTrigger>
@@ -392,33 +392,33 @@ export default function SetariPage() {
             description="Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază."
           />
 
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardHeader>
               <CardTitle className="text-xl">Setari workspace</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-sm text-[var(--color-muted)]">Workspace activ</p>
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-sm text-eos-text-muted">Workspace activ</p>
                 <p className="mt-2 text-lg font-semibold">
                   {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
                 </p>
               </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-sm text-[var(--color-muted)]">Motor OCR</p>
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-sm text-eos-text-muted">Motor OCR</p>
                 <p className="mt-2 text-lg font-semibold">Google Vision API</p>
               </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-sm text-[var(--color-muted)]">Scor de risc curent</p>
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-sm text-eos-text-muted">Scor de risc curent</p>
                 <p className="mt-2 text-lg font-semibold">{cockpit.data.summary.score}%</p>
               </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-sm text-[var(--color-muted)]">Ultimul scan</p>
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <p className="text-sm text-eos-text-muted">Ultimul scan</p>
                 <p className="mt-2 text-lg font-semibold">{cockpit.lastScanLabel}</p>
               </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 md:col-span-2">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 md:col-span-2">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-sm text-[var(--color-muted)]">Baseline validat pentru drift</p>
+                    <p className="text-sm text-eos-text-muted">Baseline validat pentru drift</p>
                     <p className="mt-2 text-lg font-semibold">
                       {validatedBaseline
                         ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
@@ -429,7 +429,7 @@ export default function SetariPage() {
                         {validatedBaseline ? "Baseline activ" : "Cere baseline"}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm text-[var(--color-muted)]">
+                    <p className="mt-1 text-sm text-eos-text-muted">
                       {validatedBaseline
                         ? "Drift-ul compara starea curenta cu acest snapshot pana il schimbi sau il elimini."
                         : activeSnapshot
@@ -476,12 +476,12 @@ export default function SetariPage() {
             description="Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare."
           />
 
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardHeader>
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <CardTitle className="text-xl">Membri si roluri</CardTitle>
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <p className="mt-2 text-sm text-eos-text-muted">
                     Owner-ul poate ajusta rolurile. Compliance vede lista pentru audit si separarea responsabilitatilor.
                   </p>
                 </div>
@@ -494,13 +494,13 @@ export default function SetariPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {currentUser?.role === "owner" ? (
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                      <p className="text-sm font-semibold text-eos-text">
                         Adauga utilizator existent din workspace
                       </p>
-                      <p className="mt-1 text-xs leading-6 text-[var(--color-muted)]">
+                      <p className="mt-1 text-xs leading-6 text-eos-text-muted">
                         Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
                       </p>
                     </div>
@@ -513,10 +513,10 @@ export default function SetariPage() {
                       value={newMemberEmail}
                       onChange={(event) => setNewMemberEmail(event.target.value)}
                       placeholder="coleg@companie.ro"
-                      className="h-11 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                      className="h-11 rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                     />
                     <select
-                      className="h-11 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                      className="h-11 rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                       value={newMemberRole}
                       onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
                     >
@@ -536,7 +536,7 @@ export default function SetariPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
                   Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
                 </div>
               )}
@@ -544,7 +544,7 @@ export default function SetariPage() {
               {membersLoading ? (
                 <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
               ) : membersError ? (
-                <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+                <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                   {membersError}
                 </div>
               ) : membersData?.members.length ? (
@@ -556,13 +556,13 @@ export default function SetariPage() {
                     return (
                       <div
                         key={member.membershipId}
-                        className="grid gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
+                        className="grid gap-4 rounded-2xl border border-eos-border bg-eos-surface-variant p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
                       >
                         <div>
-                          <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                          <p className="text-sm font-semibold text-eos-text">
                             {member.email}
                           </p>
-                          <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          <p className="mt-1 text-xs text-eos-text-muted">
                             Adaugat pe {new Date(member.createdAtISO).toLocaleString("ro-RO")}
                           </p>
                         </div>
@@ -581,7 +581,7 @@ export default function SetariPage() {
                         <div className="flex items-center justify-start lg:justify-end">
                           {canManageRoles ? (
                             <select
-                              className="h-11 min-w-[180px] rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                              className="h-11 min-w-[180px] rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
                               value={member.role}
                               disabled={isSelf || updatingMembershipId === member.membershipId}
                               onChange={(event) =>
@@ -595,7 +595,7 @@ export default function SetariPage() {
                               ))}
                             </select>
                           ) : (
-                            <p className="text-xs text-[var(--color-muted)]">
+                            <p className="text-xs text-eos-text-muted">
                               Doar owner-ul poate schimba rolurile.
                             </p>
                           )}
@@ -634,12 +634,12 @@ export default function SetariPage() {
             description="Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces."
           />
 
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <Card className="border-eos-border bg-eos-surface">
             <CardHeader>
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <CardTitle className="text-xl">Drift severity policy</CardTitle>
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <p className="mt-2 text-sm text-eos-text-muted">
                     Override-uri de workspace pentru drift-urile care contează cel mai mult. Politica implicită rămâne activă pentru tot ce nu configurezi aici.
                   </p>
                 </div>
@@ -657,11 +657,11 @@ export default function SetariPage() {
               {DRIFT_OVERRIDE_FIELDS.map((item) => (
                 <label
                   key={item.change}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4"
+                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
                 >
-                  <span className="text-sm font-medium text-[var(--color-on-surface)]">{item.label}</span>
+                  <span className="text-sm font-medium text-eos-text">{item.label}</span>
                   <select
-                    className="mt-3 h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                    className="mt-3 h-11 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                     value={driftOverrides[item.change] ?? "default"}
                     onChange={(event) =>
                       setDriftOverrides((current) => ({
@@ -676,7 +676,7 @@ export default function SetariPage() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  <p className="mt-2 text-xs text-eos-text-muted">
                     Schimbi doar severitatea. Impactul, dovada cerută și acțiunea recomandată rămân unificate în politica de drift.
                   </p>
                 </label>
@@ -684,25 +684,25 @@ export default function SetariPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-[var(--color-error)] bg-[var(--color-surface)]">
+          <Card className="border-eos-error-border bg-eos-surface">
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-xl text-[var(--color-error)]">Reset workspace local</CardTitle>
+                <CardTitle className="text-xl text-eos-error">Reset workspace local</CardTitle>
                 <Badge variant="destructive">Actiune destructiva</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+              <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
                 Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
                 task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <p className="text-sm font-medium text-eos-text">
                     Vrei sa vezi exact experienta unui utilizator nou?
                   </p>
-                  <p className="mt-1 text-sm text-[var(--color-muted)]">
+                  <p className="mt-1 text-sm text-eos-text-muted">
                     Dupa reset, dashboard-ul revine la starea initiala de onboarding.
                   </p>
                 </div>

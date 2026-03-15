@@ -46,7 +46,7 @@ export function SettingsIntegrationsTab({
         description="Status operational pentru traseele externe si actiunile utile de administrare."
       />
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="space-y-2">
@@ -69,7 +69,7 @@ export function SettingsIntegrationsTab({
                       : "Cere revizuire"}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+              <p className="max-w-2xl text-sm text-eos-text-muted">
                 Verificare pentru auth, date si storage. Aici conteaza starea reala, nu doar configurarea.
               </p>
             </div>
@@ -86,7 +86,7 @@ export function SettingsIntegrationsTab({
               Verificam traseul Supabase pentru auth, data si storage...
             </OperationalLoadingCard>
           ) : supabaseStatusError ? (
-            <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
+            <div className="rounded-2xl border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
               {supabaseStatusError}
             </div>
           ) : supabaseStatus ? (
@@ -136,33 +136,33 @@ export function SettingsIntegrationsTab({
                     ? "Auth, metadata si storage pot sustine fluxul controlat curent."
                     : "Mai exista piese de configurat sau verificat inainte sa tratezi traseul cloud ca fundatie finala."}
                 >
-                  <div className="space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <div className="space-y-2 text-sm text-eos-text-muted">
                     <p>
                       Tabele sanatoase:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {supabaseStatus.summary.healthyTables}/{supabaseStatus.summary.totalTables}
                       </span>
                     </p>
                     <p>
                       Schema Sprint 5:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {supabaseStatus.summary.schemaReady ? "aplicata" : "incompleta"}
                       </span>
                     </p>
                     <p>
                       Bucket dovezi:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {supabaseStatus.summary.bucketReady ? "pregatit" : "lipseste / invalid"}
                       </span>
                     </p>
                     <p>
                       Auth:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {formatBackendLabel(supabaseStatus.authBackend)}
                       </span>
                       {" · "}
                       Date:{" "}
-                      <span className="font-semibold text-[var(--color-on-surface)]">
+                      <span className="font-semibold text-eos-text">
                         {formatBackendLabel(supabaseStatus.dataBackend)}
                       </span>
                     </p>
@@ -183,7 +183,7 @@ export function SettingsIntegrationsTab({
                         : "Poti continua cu operarea normala si verifici doar la schimbari de infrastructura."
                     }
                   >
-                    <div className="space-y-2 text-xs text-[var(--color-muted)]">
+                    <div className="space-y-2 text-xs text-eos-text-muted">
                       <p>
                         Endpoint intern: <code>/api/integrations/supabase/status</code>
                       </p>
@@ -216,18 +216,18 @@ export function SettingsIntegrationsTab({
                 description="Deschizi aceasta zona doar cand diagnostichezi configurarea sau storage-ul."
               >
                 <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                    <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                  <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                    <p className="text-sm font-medium text-eos-text">
                       Stare tabele critice
                     </p>
                     <div className="mt-4 space-y-3">
                       {Object.entries(supabaseStatus.tables).map(([table, status]) => (
                         <div
                           key={table}
-                          className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3"
+                          className="rounded-xl border border-eos-border bg-eos-bg-inset p-3"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                            <span className="text-sm font-medium text-eos-text">
                               {table}
                             </span>
                             <Badge variant={status.ok ? "success" : "warning"}>
@@ -238,7 +238,7 @@ export function SettingsIntegrationsTab({
                                   : "degradat"}
                             </Badge>
                           </div>
-                          <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
+                          <p className="mt-2 text-xs text-eos-text-muted">
                             {status.error || "Tabelul raspunde la verificarea operationala."}
                           </p>
                         </div>
@@ -248,20 +248,20 @@ export function SettingsIntegrationsTab({
 
                   <div className="space-y-4">
                     {supabaseStatus.bucket ? (
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                        <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                      <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                        <p className="text-sm font-medium text-eos-text">
                           Bucket dovezi
                         </p>
-                        <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                        <div className="mt-4 rounded-xl border border-eos-border bg-eos-bg-inset p-3">
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-[var(--color-on-surface)]">
+                            <span className="text-sm font-medium text-eos-text">
                               bucket:{supabaseStatus.bucket.name}
                             </span>
                             <Badge variant={supabaseStatus.bucket.ok ? "success" : "warning"}>
                               {supabaseStatus.bucket.ok ? "ok" : "lipsa / invalid"}
                             </Badge>
                           </div>
-                          <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
+                          <p className="mt-2 text-xs text-eos-text-muted">
                             {supabaseStatus.bucket.ok
                               ? "Bucket-ul privat pentru evidence este disponibil."
                               : supabaseStatus.bucket.error || "Bucket-ul nu este pregatit."}
@@ -277,7 +277,7 @@ export function SettingsIntegrationsTab({
         </CardContent>
       </Card>
 
-      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Card className="border-eos-border bg-eos-surface">
         <CardHeader>
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="space-y-2">
@@ -287,7 +287,7 @@ export function SettingsIntegrationsTab({
                   {repoSyncBadgeLabel(repoSyncStatus)}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+              <p className="max-w-2xl text-sm text-eos-text-muted">
                 Sincronizare dedicata pentru `compliscan.yaml` si manifests relevante, nu pentru scan complet de repository.
               </p>
             </div>
@@ -334,16 +334,16 @@ export function SettingsIntegrationsTab({
               }
               description="Folosesti acest traseu pentru manifests si snapshoturi controlate venite din engineering."
             >
-              <div className="space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+              <div className="space-y-2 text-sm text-eos-text-muted">
                 <p>
                   Header activ:{" "}
-                  <span className="font-semibold text-[var(--color-on-surface)]">
+                  <span className="font-semibold text-eos-text">
                     {repoSyncStatus?.headerName || "x-compliscan-sync-key"}
                   </span>
                 </p>
                 <p>
                   Endpoint generic:{" "}
-                  <span className="font-semibold text-[var(--color-on-surface)]">
+                  <span className="font-semibold text-eos-text">
                     {repoSyncStatus?.genericEndpoint || "Se incarca"}
                   </span>
                 </p>
@@ -355,7 +355,7 @@ export function SettingsIntegrationsTab({
               title="Trimite doar manifests relevante."
               description="Pornesti sync-ul din CI si validezi apoi snapshot-ul bun ca baseline."
             >
-              <ul className="space-y-1.5 text-sm text-[var(--color-on-surface-muted)]">
+              <ul className="space-y-1.5 text-sm text-eos-text-muted">
                 <li>Trimiti `compliscan.yaml` si fisierele de manifest relevante.</li>
                 <li>Dupa primul sync, confirmi sistemele AI reale si snapshot-ul bun.</li>
               </ul>
@@ -368,11 +368,11 @@ export function SettingsIntegrationsTab({
             description="Deschizi aceasta zona cand configurezi adapterele sau debughezi integrarea."
           >
             <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                <p className="text-sm font-medium text-eos-text">
                   Endpoint-uri disponibile
                 </p>
-                <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
                   <EndpointRow
                     label="Generic"
                     value={repoSyncStatus?.genericEndpoint || "Se incarca"}
@@ -391,11 +391,11 @@ export function SettingsIntegrationsTab({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                <p className="text-sm font-medium text-[var(--color-on-surface)]">
+              <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                <p className="text-sm font-medium text-eos-text">
                   Exemplu rapid de curl
                 </p>
-                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-xs leading-6 text-[var(--color-on-surface)]">
+                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-xs leading-6 text-eos-text">
                   {repoSyncStatus?.curlExample ||
                     'curl -X POST http://localhost:3001/api/integrations/repo-sync \\\n  -H "Content-Type: application/json" \\\n  -H "x-compliscan-sync-key: ${COMPLISCAN_SYNC_KEY}" \\\n  -d @repo-sync.json'}
                 </pre>

@@ -76,27 +76,27 @@ export function RemediationBoard({
   ).length
 
   return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="gap-4 border-b border-[var(--color-border)] pb-5">
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="gap-4 border-b border-eos-border pb-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-lg text-[var(--color-on-surface)]">Board de remediere</CardTitle>
-              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+              <CardTitle className="text-lg text-eos-text">Board de remediere</CardTitle>
+              <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
                 {visibleTasks.length} vizibile
               </Badge>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+              <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
                 {openCount} deschise
               </Badge>
               {openPriorityOneCount > 0 ? (
-                <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
                   {openPriorityOneCount} P1
                 </Badge>
               ) : null}
               {missingEvidenceCount > 0 ? (
-                <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+                <Badge className="border-eos-warning-border bg-eos-warning-soft text-eos-warning">
                   {missingEvidenceCount} fara dovada
                 </Badge>
               ) : null}
@@ -122,7 +122,7 @@ export function RemediationBoard({
           <EmptyState
             title="Nu exista task-uri pentru filtrul curent"
             label="Schimba filtrul sau ruleaza un scan nou pentru remedieri relevante."
-            className="border-[var(--color-border)] bg-[var(--color-surface-variant)]"
+            className="border-eos-border bg-eos-surface-variant"
           />
         )}
 
@@ -206,8 +206,8 @@ function FilterCluster({
   onFilterChange: (value: FilterValue) => void
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+    <div className="flex flex-col gap-2 rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
           const filter = filters.find((item) => item.value === value)
@@ -220,8 +220,8 @@ function FilterCluster({
               variant="outline"
               className={`h-8 rounded-xl px-3 text-xs ${
                 activeFilter === filter.value
-                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
-                  : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
+                  ? "border-eos-border-subtle bg-eos-surface-active text-eos-text"
+                  : "border-eos-border bg-eos-surface text-eos-text-muted"
               }`}
             >
               {filter.label}
@@ -254,21 +254,21 @@ function TaskGroup({
 }) {
   const toneClass =
     tone === "info"
-      ? "border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]"
+      ? "border-eos-border bg-eos-primary-soft text-eos-info"
       : tone === "danger"
-        ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
-        : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+        ? "border-eos-error-border bg-eos-error-soft text-eos-error"
+        : "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-2 border-b border-eos-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={toneClass}>{title}</Badge>
-          <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+          <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
             {tasks.length} task-uri
           </Badge>
         </div>
-        <p className="text-xs leading-5 text-[var(--color-on-surface-muted)] sm:max-w-xl sm:text-right">
+        <p className="text-xs leading-5 text-eos-text-muted sm:max-w-xl sm:text-right">
           {description}
         </p>
       </div>

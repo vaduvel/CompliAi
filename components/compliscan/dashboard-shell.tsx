@@ -3,7 +3,7 @@
 import { startTransition, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { LogOut, ChevronDown } from "lucide-react"
+import { Check, ChevronsUpDown, LogOut } from "lucide-react"
 import { toast } from "sonner"
 
 import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
@@ -14,6 +14,17 @@ import {
   isNavItemActive,
   mobileNavItems,
 } from "@/components/compliscan/navigation"
+import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
+import { Button } from "@/components/evidence-os/Button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/evidence-os/DropdownMenu"
 
 type CurrentUser = {
   email: string
@@ -43,7 +54,6 @@ export function DashboardShell({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [switchingMembershipId, setSwitchingMembershipId] = useState<string | null>(null)
   const currentUser = initialUser
   const memberships = initialMemberships
@@ -70,7 +80,6 @@ export function DashboardShell({
       toast.success("Organizatie schimbata", {
         description: payload.message || "Sesiunea a fost mutata pe organizatia selectata.",
       })
-      setUserMenuOpen(false)
       startTransition(() => {
         router.refresh()
       })
@@ -93,22 +102,22 @@ export function DashboardShell({
     : "CS"
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,var(--bg-subtle),var(--bg-canvas))] text-[var(--color-on-surface)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,var(--eos-accent-primary-subtle),transparent_28%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] text-eos-text">
       <div className="mx-auto flex max-w-[1680px]">
-        <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 border-r border-[var(--color-border)] bg-[var(--bg-subtle)] p-4 backdrop-blur-xl md:flex md:flex-col">
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <aside className="sticky top-0 hidden h-screen w-[264px] shrink-0 border-r border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-base))] px-4 py-5 md:flex md:flex-col">
+          <div className="border-b border-eos-border-subtle pb-5">
             <CompliScanLogoLockup
               variant="flat"
               size="md"
               subtitle="scanare, control si dovada cu validare umana"
-              titleClassName="text-[var(--color-on-surface)]"
-              subtitleClassName="text-[var(--color-muted)]"
+              titleClassName="text-eos-text"
+              subtitleClassName="text-eos-text-muted"
             />
           </div>
 
           <div className="mt-6 flex-1 overflow-y-auto pr-1">
             <div>
-              <p className="px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              <p className="px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
                 Flux principal
               </p>
               <nav className="mt-3 space-y-2">
@@ -118,117 +127,104 @@ export function DashboardShell({
                     <Link
                       key={item.id}
                       href={item.href}
-                      className={`group ring-focus flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm transition ${
+                      className={`group ring-focus flex w-full items-center gap-3 rounded-eos-lg border px-3 py-3 text-left text-sm transition ${
                         active
-                          ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
-                          : "border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                          ? "border-eos-border-strong bg-eos-surface-elevated text-eos-text shadow-[var(--eos-shadow-sm)]"
+                          : "border-transparent bg-transparent text-eos-text hover:border-eos-border-subtle hover:bg-eos-surface"
                       }`}
                     >
-                      <item.icon
-                        className={`size-4 transition-colors ${
+                      <span
+                        className={`grid size-9 shrink-0 place-items-center rounded-eos-md border transition-colors ${
                           active
-                            ? "text-[var(--text-primary)]"
-                            : "text-[var(--icon-secondary)] group-hover:text-[var(--text-secondary)]"
+                            ? "border-eos-primary/30 bg-eos-primary-soft text-eos-primary"
+                            : "border-eos-border-subtle bg-eos-surface text-eos-text-muted group-hover:border-eos-border"
                         }`}
-                        strokeWidth={2.25}
-                      />
+                      >
+                        <item.icon className="size-4" strokeWidth={2.25} />
+                      </span>
                       <div className="min-w-0 flex-1">
                         <span className="block font-medium">{item.label}</span>
-                        <span className="block truncate text-[11px] text-[var(--color-muted)]">
+                        <span className="mt-0.5 block truncate text-[11px] text-eos-text-muted">
                           {item.id === "dashboard"
-                            ? "Readiness, drift si urmatorul pas"
+                            ? "readiness, drift si pasul curent"
                             : item.id === "scanare"
-                            ? "Surse, verdict curent si istoric"
+                            ? "surse, verdict si istoric"
                             : item.id === "control"
-                              ? "Discovery, sisteme, baseline si drift"
+                              ? "discovery, baseline si drift"
                               : item.id === "dovada"
-                                ? "Remediere, dovezi si livrabil"
-                                : "Workspace, integrari, acces si operational"}
+                                ? "remediere, dovezi si livrabil"
+                                : "workspace, acces si operational"}
                         </span>
                       </div>
+                      {active ? (
+                        <span className="rounded-full bg-eos-primary px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-eos-primary-text">
+                          acum
+                        </span>
+                      ) : null}
                     </Link>
                   )
                 })}
               </nav>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-4 text-xs text-[var(--color-muted)]">
-              Sub-sectiunile apar ca tabs in fiecare pagina pentru a pastra fluxul clar.
+            <div className="mt-6 rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4 text-xs leading-6 text-eos-text-muted">
+              Sub-sectiunile raman in tabs locale, ca sa nu concureze cu traseul principal.
             </div>
           </div>
 
           <div className="mt-4">
             {currentUser ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen((v) => !v)}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-left hover:bg-[var(--color-surface-hover)]"
-                >
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-active)] text-sm font-semibold text-[var(--text-primary)]">
-                    {initials}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-[var(--color-on-surface)]">
-                      {currentUser.orgName}
-                    </p>
-                    <p className="truncate text-xs text-[var(--color-muted)]">
-                      {currentUser.email}
-                    </p>
-                  </div>
-                  <ChevronDown
-                    className={`size-4 shrink-0 text-[var(--color-muted)] transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
-                    strokeWidth={2}
-                  />
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg">
-                    {memberships.filter((membership) => membership.status === "active").length > 1 && (
-                      <div className="mb-2 border-b border-[var(--color-border)] pb-2">
-                        <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                          Organizatie activa
-                        </p>
-                        <div className="space-y-1">
-                          {memberships
-                            .filter((membership) => membership.status === "active")
-                            .map((membership) => {
-                              const active = membership.membershipId === currentUser?.membershipId
-                              return (
-                                <button
-                                  key={membership.membershipId}
-                                  onClick={() => void handleSwitchOrganization(membership.membershipId)}
-                                  disabled={active || switchingMembershipId === membership.membershipId}
-                                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  <div className="min-w-0">
-                                    <p className="truncate font-medium">{membership.orgName}</p>
-                                    <p className="truncate text-xs text-[var(--color-muted)]">
-                                      Rol: {membership.role}
-                                    </p>
-                                  </div>
-                                  {active ? (
-                                    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-primary)]">
-                                      Activ
-                                    </span>
-                                  ) : null}
-                                </button>
-                              )
-                            })}
-                        </div>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => void handleLogout()}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--color-error)] hover:bg-[var(--color-error-muted)]"
-                    >
-                      <LogOut className="size-4" strokeWidth={2.25} />
-                      Deconectare
-                    </button>
-                  </div>
-                )}
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex h-auto w-full items-center gap-3 rounded-eos-lg border-eos-border bg-eos-surface px-3 py-3 text-left hover:bg-eos-secondary-hover"
+                  >
+                    <Avatar size="default" className="border border-eos-border-strong bg-eos-bg-inset">
+                      <AvatarFallback className="bg-transparent text-eos-text">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-eos-text">{currentUser.orgName}</p>
+                      <p className="truncate text-xs text-eos-text-muted">{currentUser.email}</p>
+                    </div>
+                    <ChevronsUpDown className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="top" align="start" className="w-[248px]">
+                  <DropdownMenuLabel>Workspace activ</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    {memberships.filter((membership) => membership.status === "active").map((membership) => {
+                      const active = membership.membershipId === currentUser?.membershipId
+                      return (
+                        <DropdownMenuItem
+                          key={membership.membershipId}
+                          disabled={active || switchingMembershipId === membership.membershipId}
+                          onClick={() => void handleSwitchOrganization(membership.membershipId)}
+                          className="items-start py-2.5"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{membership.orgName}</p>
+                            <p className="truncate text-xs text-eos-text-muted">Rol: {membership.role}</p>
+                          </div>
+                          {active ? <Check className="mt-0.5 size-4 text-eos-primary" strokeWidth={2.25} /> : null}
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => void handleLogout()}
+                  >
+                    <LogOut className="size-4" strokeWidth={2.25} />
+                    Deconectare
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <div className="h-16 animate-pulse rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]" />
+              <div className="h-16 animate-pulse rounded-eos-lg border border-eos-border bg-eos-surface" />
             )}
           </div>
         </aside>
