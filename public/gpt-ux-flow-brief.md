@@ -12,6 +12,25 @@ This brief describes the approved information architecture and target user flow 
 - Do not introduce new top-level product concepts.
 - Dashboard is orientation, not an execution workspace.
 
+## Canonical page-governance doctrine
+Use this as the source of truth for page composition decisions:
+
+- `Progressive Disclosure`
+- `Trust Through Transparency`
+- `Role-Aware Surfaces`
+- `Tab-based sub-navigation`
+- `Summary / Detail / Action separation`
+- `One dominant page intent`
+
+Operational meaning:
+- one page = one dominant intent
+- local tabs, not competing sidebar shortcuts
+- summary, execution, and export must not sit on the same page as equal-intent blocks
+- users must understand:
+  - why they are seeing this
+  - what they should do now
+  - where they continue next
+
 ## Entry & auth flow
 - Entry page: `/login`.
 - After successful login/register: redirect to `/dashboard`.

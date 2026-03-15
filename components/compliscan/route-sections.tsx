@@ -16,7 +16,6 @@ import {
   Upload,
 } from "lucide-react"
 
-import { ExportCenter } from "@/components/compliscan/export-center"
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { RiskHeader } from "@/components/compliscan/risk-header"
@@ -26,6 +25,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Separator } from "@/components/evidence-os/Separator"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
@@ -113,35 +113,6 @@ export function DashboardTop({
   )
 }
 
-export function PageHeader({
-  title,
-  description,
-  score,
-  riskLabel,
-}: {
-  title: string
-  description?: string
-  score?: number
-  riskLabel?: string
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] pb-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-on-surface)]">{title}</h1>
-        {description && (
-          <p className="mt-1 text-sm text-[var(--color-muted)]">{description}</p>
-        )}
-      </div>
-      {score !== undefined && riskLabel && (
-        <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-2">
-          <span className="text-lg font-semibold text-[var(--color-on-surface)]">{score}</span>
-          <span className="text-sm text-[var(--color-muted)]">· {riskLabel}</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
 export function OverviewPageSections({
   summary,
   lastScanLabel,
@@ -149,17 +120,9 @@ export function OverviewPageSections({
   onResolveNow,
   onScan,
   onSandbox,
-  onGeneratePdf,
-  onExportChecklist,
-  onShare,
-  onSyncNow,
-  busy,
   state,
   activeDrifts,
   openAlerts,
-  gdprQuickFixes,
-  validatedInvoicesToday,
-  efacturaErrorsToday,
   scans,
   tasks,
   workspace,
@@ -171,11 +134,6 @@ export function OverviewPageSections({
   onResolveNow: () => void
   onScan: () => void
   onSandbox: () => void
-  onGeneratePdf: () => void
-  onExportChecklist: () => void
-  onShare: () => void
-  onSyncNow: () => void
-  busy: boolean
   state: {
     gdprProgress: number
     highRisk: number
@@ -189,9 +147,6 @@ export function OverviewPageSections({
   }
   activeDrifts: ComplianceDriftRecord[]
   openAlerts: { message: string }[]
-  gdprQuickFixes: { id: string }[]
-  validatedInvoicesToday: number
-  efacturaErrorsToday: number
   scans: ScanRecord[]
   tasks: CockpitTask[]
   workspace?: WorkspaceContext
@@ -202,13 +157,8 @@ export function OverviewPageSections({
   const openDriftCount = state.driftRecords.filter((record) => record.open).length
   const latestDocumentScan = scans.find((scan) => scan.sourceKind === "document") ?? null
   const latestManifestScan = scans.find((scan) => scan.sourceKind === "manifest") ?? null
-  const efacturaOverviewProgress = state.efacturaConnected
-    ? 74
-    : state.efacturaSignalsCount > 0
-      ? 28
-      : 12
-  const aiHighRisk = state.aiSystems.filter((s) => s.riskLevel === "high").length
-  const aiLowRisk = state.aiSystems.filter((s) => s.riskLevel !== "high").length
+  const activeTaskCount = tasks.filter((task) => task.status !== "done").length
+  const evidenceAttachedCount = tasks.filter((task) => Boolean(task.attachedEvidence)).length
 
   return (
     <div className="space-y-8">
@@ -223,26 +173,37 @@ export function OverviewPageSections({
         workspace={workspace}
       />
 
+      <OverviewSummaryStrip
+        score={summary.score}
+        riskLabel={summary.riskLabel}
+        lastScanLabel={lastScanLabel}
+        activeTaskCount={activeTaskCount}
+        openDriftCount={openDriftCount}
+        scanCount={scans.length}
+        evidenceAttachedCount={evidenceAttachedCount}
+        hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
+      />
+
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
-        <DriftCommandCenter
-          activeDrifts={activeDrifts}
-          hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
-          latestDocumentScan={latestDocumentScan}
-          latestManifestScan={latestManifestScan}
-        />
         <NextBestAction
           task={nextBestAction}
           onResolve={onResolveNow}
           hasEvidence={hasEvidence}
           activeRiskCount={activeRiskCount}
         />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <DashboardGuideCard
           activeRiskCount={activeRiskCount}
           openAlertsCount={openAlerts.length}
           hasEvidence={hasEvidence}
+          hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
+          latestDocumentScan={latestDocumentScan}
+          latestManifestScan={latestManifestScan}
+        />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <DriftCommandCenter
+          activeDrifts={activeDrifts}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
           latestDocumentScan={latestDocumentScan}
           latestManifestScan={latestManifestScan}
@@ -256,158 +217,79 @@ export function OverviewPageSections({
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.82fr)] 2xl:grid-cols-[minmax(0,1.72fr)_minmax(360px,0.76fr)]">
-        <div className="space-y-6">
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Rezumat operare</CardTitle>
-              <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Vezi rapid presiunea curenta pe fiecare verticala.
-              </p>
-            </CardHeader>
-            <CardContent className="grid gap-3 pt-2 text-sm text-[var(--color-on-surface-muted)] sm:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4 sm:col-span-2">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="font-medium text-[var(--color-on-surface)]">Probleme active</span>
-                  <span className="text-base font-semibold text-[var(--color-on-surface)]">{activeRiskCount}</span>
-                </div>
-                <p className="text-xs leading-5 text-[var(--color-muted)]">
-                  {activeRiskCount === 0
-                    ? "Istoricul ramane salvat, dar nu exista risc deschis."
-                    : "Semnalele ramase dupa task-urile inchise si validarile deja facute."}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span>GDPR</span>
-                  <span>{state.gdprProgress}%</span>
-                </div>
-                <Progress
-                  value={state.gdprProgress}
-                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-success)]"
-                />
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span>EU AI Act</span>
-                  <span>{Math.min(100, state.highRisk * 18 + state.lowRisk * 8)}%</span>
-                </div>
-                <Progress
-                  value={Math.min(100, state.highRisk * 18 + state.lowRisk * 8)}
-                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-warning)]"
-                />
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 py-4 sm:col-span-2">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <span>e-Factura</span>
-                  <span>{efacturaOverviewProgress}%</span>
-                </div>
-                <Progress
-                  value={efacturaOverviewProgress}
-                  className="bg-[var(--color-bg)] [&_[data-slot=progress-indicator]]:bg-[var(--color-info)]"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <ModulesGrid
-            state={state}
-            aiHighRisk={aiHighRisk}
-            aiLowRisk={aiLowRisk}
-            gdprQuickFixes={gdprQuickFixes}
-            validatedInvoicesToday={validatedInvoicesToday}
-            efacturaErrorsToday={efacturaErrorsToday}
-            busy={busy}
-            onSyncNow={onSyncNow}
-            onSandbox={onSandbox}
-          />
-
-          <RecentScansCard scans={scans.slice(0, 4)} tasks={tasks} />
-        </div>
-
-        <div className="space-y-6">
-          <ExportCenter
-            onGeneratePdf={onGeneratePdf}
-            onExportChecklist={onExportChecklist}
-            onShare={onShare}
-          />
-
-          <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-            <CardHeader className="pb-2">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg">Drift activ</CardTitle>
-                  <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
-                    Pastrezi vizibile doar semnalele care cer atentie rapida.
-                  </p>
-                </div>
-                <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-                  {activeDrifts.length > 0 ? `${activeDrifts.length} deschise` : "fara drift"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2.5 pt-2">
-              {activeDrifts.slice(0, 3).map((drift) => {
-                const guidance = getDriftPolicyFromRecord(drift)
-                const breached = isDriftSlaBreached(drift)
-
-                return (
-                  <Link
-                    key={drift.id}
-                    href="/dashboard/alerte"
-                    className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3 transition hover:bg-[var(--color-surface-hover)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-[var(--color-on-surface)]">
-                          {drift.summary}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--color-muted)]">
-                          {[
-                            formatDriftTypeLabel(drift.type),
-                            drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
-                            formatRelativeRomanian(drift.detectedAtISO),
-                          ].join(" · ")}
-                        </p>
-                        <p className="mt-2 text-xs leading-5 text-[var(--color-on-surface-muted)] line-clamp-2">
-                          {guidance.nextAction}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge className={driftSeverityClasses(drift.severity)}>
-                          {driftSeverityLabel(drift.severity)}
-                        </Badge>
-                        {breached ? (
-                          <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
-                            SLA depășit
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-              {activeDrifts.length === 0 && (
-                <EmptyState
-                  title="Nu exista drift deschis"
-                  label="Cand apare un drift, o problema de conformitate sau o abatere de proces, o vezi aici."
-                  className="border-[var(--color-border)] bg-[var(--color-surface-variant)] py-8"
-                />
-              )}
-              <Link
-                href="/dashboard/alerte"
-                className="inline-flex items-center gap-2 pt-1 text-sm font-medium text-[var(--color-on-surface)] transition hover:text-[var(--color-primary)]"
-              >
-                Vezi tot drift-ul
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </CardContent>
-          </Card>
-
-          <RecentActivityCard events={events} />
-        </div>
-      </div>
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+        <RecentActivityCard events={events} />
+        <RecentScansCard scans={scans.slice(0, 4)} tasks={tasks} />
+      </section>
     </div>
+  )
+}
+
+function OverviewSummaryStrip({
+  score,
+  riskLabel,
+  lastScanLabel,
+  activeTaskCount,
+  openDriftCount,
+  scanCount,
+  evidenceAttachedCount,
+  hasValidatedBaseline,
+}: {
+  score: number
+  riskLabel: string
+  lastScanLabel: string
+  activeTaskCount: number
+  openDriftCount: number
+  scanCount: number
+  evidenceAttachedCount: number
+  hasValidatedBaseline: boolean
+}) {
+  const items: SummaryStripItem[] = [
+    {
+      label: "Readiness",
+      value: `${score}`,
+      hint: riskLabel,
+      tone: "accent",
+    },
+    {
+      label: "Task-uri active",
+      value: `${activeTaskCount}`,
+      hint:
+        activeTaskCount > 0 ? "merg in Remediere / Dovada" : "nu exista actiuni deschise acum",
+      tone: activeTaskCount > 0 ? "warning" : "success",
+    },
+    {
+      label: "Drift deschis",
+      value: `${openDriftCount}`,
+      hint:
+        openDriftCount > 0 ? "urmareste doar semnalele reale" : "control stabil in acest moment",
+      tone: openDriftCount > 0 ? "danger" : "success",
+    },
+    {
+      label: "Dovezi atasate",
+      value: `${evidenceAttachedCount}`,
+      hint:
+        scanCount > 0 ? `${scanCount} surse scanate pana acum` : "inca lipsesc surse analizate",
+    },
+    {
+      label: "Audit readiness",
+      value: hasValidatedBaseline ? "gata" : "in curs",
+      hint: hasValidatedBaseline ? lastScanLabel : "valideaza baseline-ul in Control",
+      tone: hasValidatedBaseline ? "success" : "neutral",
+    },
+  ]
+
+  return (
+    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+      <CardContent className="px-5 py-5">
+        <SummaryStrip
+          eyebrow="Snapshot"
+          title="Orientare rapida"
+          description="Vezi doar semnalele care te trimit spre pagina unde continui lucrul real."
+          items={items}
+        />
+      </CardContent>
+    </Card>
   )
 }
 

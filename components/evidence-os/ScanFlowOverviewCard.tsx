@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/evidence-os/Card"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { ScanRecord } from "@/lib/compliance/types"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 import type { ScanSourceType } from "@/components/evidence-os/ScanSourceTypeSelector"
@@ -39,47 +40,33 @@ export function ScanFlowOverviewCard({
         ? "Ultimul rezultat YAML"
         : "Ultimul rezultat document"
 
+  const items: SummaryStripItem[] = [
+    {
+      label: "Lucrezi acum in",
+      value: currentSourceLabel,
+      hint: "Zona de sus este singurul loc unde pornesti scanarea sau validarea.",
+      tone: "accent",
+    },
+    {
+      label: resultLabel,
+      value: latestResult?.documentName ?? "inca lipseste",
+      hint: latestResult
+        ? `Procesat ${formatRelativeRomanian(latestResult.createdAtISO)}`
+        : "Rezultatul apare dupa primul scan pentru acest tip de sursa.",
+    },
+    {
+      label: "Cum citesti pagina",
+      value: "sus lucrezi · jos verifici",
+      hint:
+        "Pastram separat work queue-ul de sumarul ultimului rezultat ca sa nu para doua scanari diferite.",
+    },
+  ]
+
   return (
     <Card className="border-eos-border-subtle bg-eos-bg-panel">
-      <CardContent className="grid gap-4 p-5 lg:grid-cols-3">
-        <FlowStatusItem
-          label="Lucrezi acum in"
-          value={currentSourceLabel}
-          hint="Zona de sus este singurul loc unde pornești scanarea sau validarea."
-        />
-        <FlowStatusItem
-          label={resultLabel}
-          value={latestResult?.documentName ?? "inca lipseste"}
-          hint={
-            latestResult
-              ? `Procesat ${formatRelativeRomanian(latestResult.createdAtISO)}`
-              : "Rezultatul apare dupa primul scan pentru acest tip de sursa."
-          }
-        />
-        <FlowStatusItem
-          label="Cum citesti pagina"
-          value="sus lucrezi · jos verifici"
-          hint="Pastram separat work queue-ul de sumarul ultimului rezultat ca sa nu para doua scanari diferite."
-        />
+      <CardContent className="p-5">
+        <SummaryStrip items={items} />
       </CardContent>
     </Card>
-  )
-}
-
-function FlowStatusItem({
-  label,
-  value,
-  hint,
-}: {
-  label: string
-  value: string
-  hint: string
-}) {
-  return (
-    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-bg-inset p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-eos-text-tertiary">{label}</p>
-      <p className="mt-3 text-sm font-semibold text-eos-text">{value}</p>
-      <p className="mt-2 text-xs leading-6 text-eos-text-muted">{hint}</p>
-    </div>
   )
 }

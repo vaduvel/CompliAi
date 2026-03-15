@@ -640,6 +640,43 @@ Progres recent pe punctul acesta:
 - pagina `/dashboard/sisteme` se prezinta acum ca workspace de `Control`
 - pasul 3 din `Dashboard` trimite spre `Dovada` ca loc de executie, nu direct spre export
 - `Documente` se prezinta explicit ca istoric separat de fluxul activ de scanare
+- `Dovada` a fost dusa pe page governance explicit:
+  - `Remediere` = executie
+  - `Audit si export` = readiness + livrabil
+  - `Auditor Vault` = ledger + trasabilitate
+  - paginile folosesc acum `PageIntro`, `SummaryStrip`, `SectionBoundary` si `HandoffCard` pentru a separa sumarul de actiune si de livrabil
+- `Setari` a fost adusa pe aceeasi schema:
+  - administrare operationala
+  - tabs locale clare
+  - handoff explicit inapoi in `Dashboard`, `Control` si `Dovada`
+  - pagina foloseste acum `PageIntro`, `SummaryStrip`, `SectionBoundary` si `HandoffCard`, fara sa schimbe wiring-ul functional
+- shell-ul `dashboard` este acum marcat explicit ca zona dinamica autentificata:
+  - `app/dashboard/layout.tsx` foloseste `dynamic = "force-dynamic"`
+  - asta elimina ambiguitatea dintre shell autenticat si incercarile de prerender static
+  - warning-urile de `dynamic server usage` nu mai polueaza build-ul pentru rutele dashboard
+- `Documente` si `Asistent` nu mai stau pe `PageHeader` legacy:
+  - `Documente` isi asuma clar rolul de istoric read-only si handoff spre `Scanare` sau `Dovada`
+  - `Asistent` isi asuma clar rolul de utilitar global si orientare, cu validare umana explicita
+  - ambele folosesc acum primitivele canonice de compozitie din `Evidence OS`
+- `Drift` foloseste acum aceeasi schema canonica de pagina ca restul pilonilor:
+  - `PageIntro`
+  - `SummaryStrip`
+  - `SectionBoundary`
+  - `HandoffCard`
+  - asta lasa board-ul si actiunile de drift mai jos in pagina, sub intentia dominanta, nu amestecate chiar din header
+- `PageHeader` a fost eliminat din `route-sections`:
+  - runtime-ul activ nu mai foloseste doua scheme paralele de compozitie pentru pagini
+- hook-ul central `use-cockpit` a intrat in cleanup structural:
+  - derivarile pure pentru task-uri, insights si formatare au fost extrase in `components/compliscan/cockpit-derivations.ts`
+  - separarea dintre orchestrare client-side si logica pura este acum mai clara
+  - comportamentul public a ramas compatibil pentru paginile existente
+- efectele de browser din `use-cockpit` au fost si ele separate:
+  - `components/compliscan/cockpit-browser.ts`
+  - asta reduce amestecul dintre mutatii de produs si helper-ele de preview/download/share
+- `use-cockpit` foloseste acum si helper-e interne de orchestrare:
+  - operatiile `busy` sunt mai coerente
+  - aplicarea payload-ului de dashboard este mai consistenta
+  - asta reduce boilerplate-ul fara sa schimbe contractul public al cockpit-ului
 
 ### 2. Severitate si principii
 
@@ -899,3 +936,21 @@ Nu inseamna:
 Arhitectura buna pentru CompliScan acum este:
 
 **o singura arhitectura operationala, centrata pe sursa -> verdict -> remediere -> dovada -> audit**
+
+## Actualizare 2026-03-15 - cockpit store cleanup inchis
+
+- `components/compliscan/use-cockpit.tsx` foloseste acum consecvent doua reguli interne pentru mutatii:
+  - `withBusyOperation(...)` pentru orchestrarea starii `busy`
+  - `applyDashboardPayload(...)` pentru aplicarea uniforma a `DashboardPayload`
+- nu mai exista in blocul principal de mutatii pattern-uri paralele de tip:
+  - `setBusy(true) -> try/finally`
+  - `setData(payload)` repetat manual in fiecare operatie
+- efectul nu este doar cosmetic:
+  - reduce divergenta intre mutatiile de scanare, control, dovada si drift
+  - face store-ul central mai auditabil si mai usor de separat in pasi viitori
+  - muta produsul din zona de "hook mare, greu de controlat" spre orchestrare mai explicita
+
+Verdict:
+
+- cleanup-ul structural pentru `use-cockpit` este inchis operational
+- pasii urmatori pot intra deja in polish / split incremental, nu in reparatie de baza

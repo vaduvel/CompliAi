@@ -15,8 +15,12 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import type { ComplianceDriftRecord } from "@/lib/compliance/types"
 import {
@@ -54,19 +58,123 @@ export default function AuditExportPage() {
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const doneTasks = cockpit.tasks.filter((task) => task.status === "done")
   const activeDrifts = cockpit.activeDrifts
+  const summaryItems: SummaryStripItem[] = [
+    {
+      label: "Task-uri deschise",
+      value: `${openTasks.length}`,
+      hint: "daca raman deschise, livrabilul ramane incomplet",
+      tone: openTasks.length > 0 ? "warning" : "success",
+    },
+    {
+      label: "Task-uri inchise",
+      value: `${doneTasks.length}`,
+      hint: "actiuni deja trecute prin executie",
+      tone: doneTasks.length > 0 ? "success" : "neutral",
+    },
+    {
+      label: "Drift activ",
+      value: `${activeDrifts.length}`,
+      hint: activeDrifts.length > 0 ? "intra in snapshot si cere explicatie" : "snapshot curat pe acest front",
+      tone: activeDrifts.length > 0 ? "danger" : "success",
+    },
+    {
+      label: "Baseline",
+      value: validatedBaseline ? "validat" : "inca nevalidat",
+      hint: validatedBaseline ? "comparatia are reper stabil" : "fara baseline, explicatia ramane mai slaba",
+      tone: validatedBaseline ? "success" : "warning",
+    },
+  ]
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Audit si export"
-        description="Snapshot exportabil, readiness de audit si artefacte curate de livrare"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
+      <PageIntro
+        eyebrow="Dovada / Audit Pack"
+        title="Aici pregatesti livrabilul, nu executia"
+        description="Verifici snapshot-ul, readiness-ul si artefactele de livrare. Daca mai exista munca reala, revii in Remediere sau in Auditor Vault."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              read-only pentru livrabil
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              validare umana obligatorie
+            </Badge>
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot export
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/dashboard/checklists">
+                Remediere
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/rapoarte/auditor-vault">
+                Auditor Vault
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+          </>
+        }
       />
 
       <PillarTabs sectionId="dovada" />
 
-      <ReportsGuideCard />
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardContent className="px-5 py-5">
+          <SummaryStrip
+            eyebrow="Audit si export"
+            title="Readiness de livrabil"
+            description="Vezi rapid ce mai intra in snapshot inainte sa generezi artefactul extern potrivit."
+            items={summaryItems}
+          />
+        </CardContent>
+      </Card>
+
+      <SectionBoundary
+        eyebrow="Flux canonic"
+        title="Livrabilul sta separat de executie si de ledger-ul complet"
+        description="Pagina asta nu mai este board de lucru. Verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat."
+        support={<ReportsGuideCard />}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <RemediationHandoffCard
+          openTasks={openTasks.length}
+          doneTasks={doneTasks.length}
+          driftCount={activeDrifts.length}
+        />
+        <HandoffCard
+          title="Daca lipseste ceva, revii in pagina potrivita"
+          description="Audit si export ramane suprafata de finalizare. Remedierea ramane pentru actiune, iar Auditor Vault pentru trasabilitate si verificare audit-ready."
+          destinationLabel="remediere / vault"
+          checklist={[
+            "nu inchizi task-uri din aceasta pagina",
+            "nu tratezi ledger-ul complet aici",
+            "generezi artefactul abia dupa verificare umana",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/checklists">Deschide Remediere</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/rapoarte/auditor-vault">Deschide Auditor Vault</Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <div className="space-y-6">
@@ -75,11 +183,6 @@ export default function AuditExportPage() {
             doneTasks={doneTasks.length}
             activeDrifts={activeDrifts.length}
             hasBaseline={Boolean(validatedBaseline)}
-          />
-          <RemediationHandoffCard
-            openTasks={openTasks.length}
-            doneTasks={doneTasks.length}
-            driftCount={activeDrifts.length}
           />
           <ExportArtifactsCard />
         </div>
@@ -128,34 +231,19 @@ function ReportsGuideCard() {
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--color-surface))]">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)]">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-            Flux de export
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
-            Snapshot, readiness si export fara amestec cu executia
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            Pagina asta nu mai este board de lucru. Aici verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat. Remedierea ramane in pagina ei, iar dovezile detaliate stau in Auditor Vault.
+    <div className="grid gap-3 lg:grid-cols-3">
+      {steps.map((step) => (
+        <div
+          key={step.title}
+          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+        >
+          <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+            {step.detail}
           </p>
         </div>
-        <div className="grid gap-3">
-          {steps.map((step) => (
-            <div
-              key={step.title}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
-            >
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                {step.detail}
-              </p>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   )
 }
 

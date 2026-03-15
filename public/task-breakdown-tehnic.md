@@ -79,6 +79,33 @@ Checkpoint-ul curent din implementare:
   - subtitle de brand aliniat cu pozitionarea curenta
 - [x] cleanup minim pe componente legacy pentru etichetele vechi ramase in cod
   - tipuri si componente interne curate (`InventoryFlowStep`, `RemediationPage`, `AuditExportPage`)
+- [x] `UX Wave 1` page governance aplicat in runtime:
+  - `Dashboard` ca orientare
+  - `Scanare` ca poarta de intrare
+  - `Control` ca workspace de confirmare
+  - `Dovada` separata explicit intre:
+    - `Remediere`
+    - `Audit si export`
+    - `Auditor Vault`
+  - `Evidence OS` foloseste acum primitive de compozitie de pagina:
+    - `PageIntro`
+    - `SummaryStrip`
+    - `SectionBoundary`
+    - `HandoffCard`
+- [x] `Setari` aliniata la acelasi sistem:
+  - administrare operationala clara
+  - tabs oficiale de produs
+  - handoff explicit inapoi in fluxurile reale
+- [x] ultimele suprafete utilitare / istoric vizibile au iesit din zona hibrida:
+  - `Documente` ca istoric read-only
+  - `Asistent` ca utilitar global de orientare
+- [x] `Drift` a fost aliniat la aceeasi compozitie canonica de pagina
+- [x] helper-ul legacy `PageHeader` a fost eliminat din runtime-ul activ
+- [x] primul cleanup structural pe cockpit client:
+  - derivarile pure mutate din `use-cockpit` in modul separat
+  - compatibilitate publica pastrata pentru consumatorii existenti
+- [x] helper-ele de browser/export mutate din `use-cockpit` in modul separat
+- [x] boilerplate-ul principal din `use-cockpit` a fost redus prin helper-e locale de orchestrare
 - [x] QA riguroasa + dry run (auth, manifest, baseline, compliscan.yaml, drift lifecycle, exporturi audit)
 
 Observatie:
@@ -919,3 +946,22 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] controale sugerate și mai fine pe grupuri de sisteme / familii de controale
 - [x] îmbunătățește reuse bundle la nivel de familie cu policy explicită per fișier și per control
 - [x] du `Audit Pack` client-facing spre format de dosar executiv extern (cover + anexă + decizii)
+
+### Actualizare 2026-03-15 - cockpit cleanup
+
+- [x] toate mutatiile ramase din `use-cockpit` au fost trecute pe helper-ele comune:
+  - `withBusyOperation`
+  - `applyDashboardPayload`
+- [x] au fost inchise mutatiile pentru:
+  - sisteme detectate
+  - baseline
+  - drift severity / drift lifecycle
+  - compliance pack
+  - traceability review
+  - family evidence reuse
+  - reset workspace
+  - validare XML e-Factura
+- [x] validare completa dupa cleanup:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

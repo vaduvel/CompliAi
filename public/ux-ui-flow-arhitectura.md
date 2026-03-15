@@ -19,6 +19,48 @@ Data: 2026-03-14
 
 ## 1) Arhitectura UX tinta (din Evidence OS)
 
+### Doctrina canonica de page governance
+
+Aceasta sectiune devine sursa de adevar pentru compozitia paginilor mari din produs.
+
+Daca alt document intra in conflict cu aceste reguli, aceasta sectiune castiga.
+
+Combo-ul canonic este:
+
+- `Progressive Disclosure`
+- `Trust Through Transparency`
+- `Role-Aware Surfaces`
+- `Tab-based sub-navigation`
+- `Summary / Detail / Action separation`
+- `One dominant page intent`
+
+Ce inseamna operational:
+
+1. o pagina mare are o singura intentie dominanta
+   - `Dashboard` = orientare
+   - `Scanare` = intake + analiza
+   - `Control` = confirmare + baseline + drift
+   - `Dovada` = remediere + dovada + livrabil
+   - `Setari` = administrare operationala
+
+2. complexitatea se scoate in straturi, nu se afiseaza simultan
+   - summary
+   - detail
+   - drill-down
+
+3. userul trebuie sa inteleaga de ce vede ceva si ce urmeaza dupa
+   - provenance
+   - rationale
+   - owner / validare umana
+   - handoff clar spre pagina urmatoare
+
+4. sub-sectiunile stau in tabs locale, nu in shortcut-uri persistente concurente
+
+5. sumarul, executia si exportul nu se amesteca pe aceeasi pagina ca intentii egale
+
+6. `Evidence OS` nu este doar component library
+   - este si sistem de arhitectura informationala pentru paginile mari
+
 ### IA top-level aprobata
 
 - Dashboard

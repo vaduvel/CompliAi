@@ -258,6 +258,72 @@ Lista exacta pentru commitul Codex secundar:
 - `components/evidence-os/evidence-os-worklog.md`
 - `components/evidence-os/ui-audit-backlog.md`
 
+## Actualizare activa - UX Wave 1 / 2026-03-14
+
+Context nou:
+
+- `Evidence OS` este DS oficial dominant
+- problema ramasa nu mai este lipsa de componente locale
+- problema ramasa este lipsa unui `page system` suficient de clar peste cockpitul mare
+
+Consecinta:
+
+- Codex principal tine in continuare:
+  - arhitectura UX de pagina
+  - integrarea reala in `app/dashboard/*`
+  - navigatia
+  - `use-cockpit`
+  - wiring-ul de produs
+- Codex secundar intra doar pe fundatia reutilizabila pentru `UX Wave 1`
+
+Delegarea activa de acum este:
+
+- `public/task-codex-2-ux-wave-1-page-recipes-2026-03-14.md`
+
+Aceasta delegare inlocuieste ca instructiune activa orice extindere mai veche pe:
+
+- `app/dashboard/asistent/page.tsx`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/next-best-action.tsx`
+- `components/compliscan/floating-assistant.tsx`
+- `components/compliscan/remediation-board.tsx`
+- `components/compliscan/export-center.tsx`
+
+Pentru `UX Wave 1`, Codex secundar poate modifica doar:
+
+- `components/evidence-os/*`
+- `app/evidence-os.css`
+- `public/evidence-os-design-system-v1.md`
+- `components/evidence-os/ui-audit-backlog.md`
+- `components/evidence-os/evidence-os-worklog.md`
+- `public/legacy-dashboard-ui-map-2026-03-14.md`
+
+Optional, strict pentru documentare:
+
+- `components/dashboard/*`
+  - doar markeri sau comentarii de legacy
+  - fara redesign
+  - fara refactor
+
+Pentru `UX Wave 1`, Codex secundar NU intra in:
+
+- `app/dashboard/*`
+- `components/compliscan/navigation.ts`
+- `components/compliscan/dashboard-shell.tsx`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/use-cockpit.tsx`
+- `components/compliscan/ai-discovery-panel.tsx`
+- `app/api/*`
+- `lib/server/*`
+- orice fisier de runtime critic din `lib/compliance/*`
+
+Rezumat operational:
+
+- Codex principal construieste si impune retetele de pagina in produsul real
+- Codex secundar pregateste primitivele si regulile de compozitie `Evidence OS` necesare pentru acele retete
+- integrarea in paginile mari ramane doar la Codex principal
+
 Ramas explicit in lotul Codex principal:
 
 - `app/dashboard/alerte/page.tsx`

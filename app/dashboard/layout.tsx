@@ -6,6 +6,8 @@ import { SESSION_COOKIE, listUserMemberships, verifySessionToken } from "@/lib/s
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
 import { readState } from "@/lib/server/mvp-store"
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardLayout({
   children,
 }: {

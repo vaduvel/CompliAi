@@ -5,11 +5,15 @@ import { useEffect, useState } from "react"
 import { Cloud, Database, FileCode2, KeyRound, ShieldCheck, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
-import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
@@ -295,15 +299,148 @@ export default function SetariPage() {
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
+  const releaseReadinessLabel = canViewReleaseReadiness
+    ? releaseReadiness?.state === "ready"
+      ? "pregatit"
+      : releaseReadiness?.state === "blocked"
+        ? "blocat"
+        : releaseReadiness?.state === "review"
+          ? "review"
+          : releaseReadinessLoading
+            ? "in verificare"
+            : releaseReadinessError
+              ? "indisponibil"
+              : "in verificare"
+    : "rol fara acces"
+  const summaryItems: SummaryStripItem[] = [
+    {
+      label: "Workspace activ",
+      value: cockpit.data.workspace.orgName,
+      hint: "organizatia activa si contextul operational curent",
+      tone: "neutral",
+    },
+    {
+      label: "Baseline",
+      value: validatedBaseline ? "validat" : "lipseste",
+      hint: validatedBaseline
+        ? "drift-ul are un reper stabil"
+        : "fara baseline, comparatia si drift-ul raman mai slabe",
+      tone: validatedBaseline ? "success" : "warning",
+    },
+    {
+      label: "Acces curent",
+      value: currentUser ? formatMemberRole(currentUser.role) : "in verificare",
+      hint: currentUser
+        ? "rolul tau defineste ce poti valida, modifica sau exporta"
+        : "sesiunea si rolul se verifica in sumarul operational",
+      tone: currentUser ? "accent" : "neutral",
+    },
+    {
+      label: "Operational",
+      value: releaseReadinessLabel,
+      hint: canViewReleaseReadiness
+        ? releaseReadiness?.summary ?? "release readiness-ul ramane checkpoint separat de configurare"
+        : "health si readiness raman vizibile doar rolurilor administrative potrivite",
+      tone:
+        releaseReadiness?.state === "ready"
+          ? "success"
+          : releaseReadiness?.state === "blocked"
+            ? "danger"
+            : "warning",
+    },
+  ]
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Setari"
-        description="Workspace, integrari, acces si readiness operational pentru organizatia activa"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
+      <PageIntro
+        eyebrow="Setari"
+        title="Aici administrezi contextul operational, nu executia produsului"
+        description="Configurezi workspace-ul, verifici integrari si acces, iar apoi revii in fluxurile de lucru reale. Setari ramane zona administrativa, nu locul in care faci scanare, control sau dovada."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              operational admin
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              role-aware surfaces
+            </Badge>
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot workspace
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/sisteme">Control</Link>
+            </Button>
+          </>
+        }
       />
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardContent className="px-5 py-5">
+          <SummaryStrip
+            eyebrow="Setari"
+            title="Context operational si disciplina de administrare"
+            description="Vezi rapid starea workspace-ului, baseline-ul, accesul curent si readiness-ul operational fara sa amesteci configurarea cu executia produsului."
+            items={summaryItems}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <SectionBoundary
+          eyebrow="Flux canonic"
+          title="Setari ramane zona de administrare si apoi iti da handoff inapoi in produs"
+          description="Aici fixezi contextul corect de lucru, verifici cine are acces si confirmi ca integrările sunt sanatoase. Dupa aceea revii in Dashboard, Control sau Dovada pentru munca reala."
+          support={
+            <div className="grid gap-4 md:grid-cols-3">
+              <SettingsFlowHint
+                title="1. Fixezi contextul"
+                detail="Workspace, baseline si org-ul activ trebuie sa fie clare inainte sa interpretezi drift sau readiness."
+              />
+              <SettingsFlowHint
+                title="2. Verifici operarea"
+                detail="Integrarile, accesul si release readiness-ul stau aici, nu in paginile de executie."
+              />
+              <SettingsFlowHint
+                title="3. Revii in produs"
+                detail="Dupa administrare, te intorci in Dashboard, Control sau Dovada pentru lucru efectiv."
+              />
+            </div>
+          }
+        />
+        <HandoffCard
+          title="Setari nu inlocuieste fluxul principal"
+          description="Dupa ce ai verificat contextul si sanatatea operationala, revii in zona potrivita de lucru. Dashboard ramane orientare, iar Control si Dovada raman workspaces reale."
+          destinationLabel="dashboard / control / dovada"
+          checklist={[
+            "nu tratezi Setari ca overview executiv",
+            "nu inchizi task-uri si nu exporti din aceasta pagina",
+            "folosesti Setari pentru context, acces si operare",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard">Deschide Dashboard</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       <Tabs defaultValue="workspace" className="space-y-6">
         <div className="space-y-3">
@@ -1188,6 +1325,15 @@ function SettingsTabIntro({
         {title}
       </p>
       <p className="max-w-3xl text-sm text-[var(--color-on-surface-muted)]">{description}</p>
+    </div>
+  )
+}
+
+function SettingsFlowHint({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
     </div>
   )
 }

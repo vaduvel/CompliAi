@@ -21,8 +21,12 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { LoadingScreen } from "@/components/compliscan/route-sections"
 import {
   AICompliancePackEntriesCard,
   AICompliancePackSummaryCard,
@@ -111,24 +115,129 @@ export default function AuditorVaultPage() {
     validatedBaseline && activeDrifts.length === 0 && evidenceMissingTasks.length === 0
       ? "audit_ready"
       : "review_required"
+  const summaryItems: SummaryStripItem[] = [
+    {
+      label: "Audit readiness",
+      value: (
+        <EvidenceReadinessBadge
+          readiness={auditReadiness === "audit_ready" ? "ready" : "partial"}
+        />
+      ),
+      hint:
+        auditReadiness === "audit_ready"
+          ? "poti sustine pachetul in audit"
+          : "mai sunt pasi de validare inainte de audit",
+      tone: auditReadiness === "audit_ready" ? "success" : "warning",
+    },
+    {
+      label: "Baseline",
+      value: validatedBaseline ? "validat" : "lipseste",
+      hint: validatedBaseline ? "comparatia are reper stabil" : "confirma un snapshot ca baseline",
+      tone: validatedBaseline ? "success" : "warning",
+    },
+    {
+      label: "Drift activ",
+      value: `${activeDrifts.length}`,
+      hint: activeDrifts.length > 0 ? "schimbari care cer explicatie" : "nu exista drift deschis",
+      tone: activeDrifts.length > 0 ? "danger" : "success",
+    },
+    {
+      label: "Gap dovada",
+      value: `${evidenceMissingTasks.length}`,
+      hint:
+        evidenceMissingTasks.length > 0
+          ? "controale fara dovada sau validare completa"
+          : "dovezile sunt acoperite",
+      tone: evidenceMissingTasks.length > 0 ? "warning" : "success",
+    },
+  ]
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Auditor Vault"
-        description="Vedere audit-ready pentru dovezi, trasabilitate, snapshot, baseline si drift"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
+      <PageIntro
+        eyebrow="Dovada / Vault"
+        title="Aici legi dovada, trasabilitatea si schimbarea intr-o vedere audit-ready"
+        description="Vault nu este board de executie si nici pagina de export. Este vederea in care sursele, articolele, dovezile si schimbarile recente se leaga intr-un loc sustenabil intern sau extern."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              ledger audit-ready
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              trasabilitate
+            </Badge>
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot vault
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/dashboard/checklists">
+                Remediere
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/rapoarte">
+                Audit si export
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+          </>
+        }
       />
 
       <PillarTabs sectionId="dovada" />
 
-      <VaultRapidSummaryCard
-        auditReadiness={auditReadiness}
-        baselineReady={Boolean(validatedBaseline)}
-        activeDrifts={activeDrifts.length}
-        evidenceGaps={evidenceMissingTasks.length}
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardContent className="px-5 py-5">
+          <SummaryStrip
+            eyebrow="Vault"
+            title="Readiness, dovezi si trasabilitate"
+            description="Vezi rapid daca pachetul poate fi sustinut in audit sau daca trebuie sa revii in executie ori in livrabil."
+            items={summaryItems}
+          />
+        </CardContent>
+      </Card>
+
+      <SectionBoundary
+        eyebrow="Flux canonic"
+        title="Vault-ul ramane ledger-ul complet, nu board de lucru si nu export surface"
+        description="Aici verifici legaturile dintre control, dovada, articole si drift. Daca lipseste ceva, revii in Remediere sau finalizezi in Audit si export."
+        support={<VaultGuideCard />}
       />
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <VaultQuickActionsCard />
+        <HandoffCard
+          title="Daca vezi gap-uri, iesi spre pagina potrivita"
+          description="Vault-ul centralizeaza povestea. Executia ramane in Remediere, iar distribuirea externa ramane in Audit si export."
+          destinationLabel="remediere / livrabil"
+          checklist={[
+            "nu inchizi task-uri direct din vault",
+            "nu tratezi exportul final ca pe un ledger",
+            "validezi uman inainte de orice pachet extern",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/checklists">Deschide Remediere</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/rapoarte">Deschide Audit si export</Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
@@ -169,9 +278,6 @@ export default function AuditorVaultPage() {
           </Button>
         </div>
       </div>
-
-      <VaultGuideCard />
-      <VaultQuickActionsCard />
 
       <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
 
@@ -253,34 +359,19 @@ function VaultGuideCard() {
   ]
 
   return (
-    <Card className="border-[var(--color-border)] bg-[linear-gradient(180deg,var(--bg-panel-2),var(--color-surface))]">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(400px,0.95fr)]">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
-            Audit-ready view
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-[var(--color-on-surface)]">
-            Podul dintre tehnic, remediation si audit
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-on-surface-muted)]">
-            Auditor Vault nu este board de executie si nici pagina de export. Este vederea in care toate sursele, articolele, dovezile si schimbarile recente se leaga intr-un loc usor de sustinut intern sau extern.
+    <div className="grid gap-3 lg:grid-cols-3">
+      {steps.map((step) => (
+        <div
+          key={step.title}
+          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+        >
+          <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
+            {step.detail}
           </p>
         </div>
-        <div className="grid gap-3">
-          {steps.map((step) => (
-            <div
-              key={step.title}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4"
-            >
-              <p className="text-sm font-medium text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">
-                {step.detail}
-              </p>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   )
 }
 
@@ -335,73 +426,6 @@ function VaultQuickActionsCard() {
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function VaultRapidSummaryCard({
-  auditReadiness,
-  baselineReady,
-  activeDrifts,
-  evidenceGaps,
-}: {
-  auditReadiness: "audit_ready" | "review_required"
-  baselineReady: boolean
-  activeDrifts: number
-  evidenceGaps: number
-}) {
-  return (
-    <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardContent className="grid gap-3 p-5 md:grid-cols-4">
-        <RapidSummaryItem
-          label="Audit readiness"
-          value={
-            <EvidenceReadinessBadge
-              readiness={auditReadiness === "audit_ready" ? "ready" : "partial"}
-            />
-          }
-          tone={auditReadiness === "audit_ready" ? "text-[var(--status-success-text)]" : "text-[var(--color-warning)]"}
-          hint={auditReadiness === "audit_ready" ? "Poți pregăti distribuirea externă." : "Mai sunt pași de validare înainte de audit."}
-        />
-        <RapidSummaryItem
-          label="Baseline"
-          value={baselineReady ? "validat" : "lipsește"}
-          tone={baselineReady ? "text-[var(--status-success-text)]" : "text-[var(--color-warning)]"}
-          hint={baselineReady ? "Comparația are punct de referință stabil." : "Confirmă un snapshot ca baseline."}
-        />
-        <RapidSummaryItem
-          label="Drift activ"
-          value={String(activeDrifts)}
-          tone={activeDrifts > 0 ? "text-[var(--color-error)]" : "text-[var(--status-success-text)]"}
-          hint={activeDrifts > 0 ? "Schimbări care cer explicație." : "Nu există drift deschis."}
-        />
-        <RapidSummaryItem
-          label="Gap dovadă"
-          value={String(evidenceGaps)}
-          tone={evidenceGaps > 0 ? "text-[var(--color-warning)]" : "text-[var(--status-success-text)]"}
-          hint={evidenceGaps > 0 ? "Controale fără dovadă validată." : "Dovezile sunt acoperite."}
-        />
-      </CardContent>
-    </Card>
-  )
-}
-
-function RapidSummaryItem({
-  label,
-  value,
-  hint,
-  tone,
-}: {
-  label: string
-  value: React.ReactNode
-  hint: string
-  tone: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
-      <div className={`mt-2 text-sm font-semibold ${tone}`}>{value}</div>
-      <p className="mt-2 text-xs leading-6 text-[var(--color-on-surface-muted)]">{hint}</p>
-    </div>
   )
 }
 

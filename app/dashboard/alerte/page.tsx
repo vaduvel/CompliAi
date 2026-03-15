@@ -1,6 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useState } from "react"
+import { ArrowRight } from "lucide-react"
 
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
@@ -9,7 +11,11 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { AlertsList, LoadingScreen, PageHeader } from "@/components/compliscan/route-sections"
+import { AlertsList, LoadingScreen } from "@/components/compliscan/route-sections"
+import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import {
   formatDriftEscalationDeadline,
@@ -45,6 +51,33 @@ export default function DriftPage() {
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const breachedDrifts = openDrifts.filter((drift) => isDriftSlaBreached(drift)).length
+  const driftTasks = openTasks.filter((task) => task.relatedDriftIds.length > 0)
+  const summaryItems: SummaryStripItem[] = [
+    {
+      label: "Drift activ",
+      value: `${openDrifts.length}`,
+      hint: "schimbari fata de baseline care cer decizie umana",
+      tone: openDrifts.length > 0 ? "warning" : "success",
+    },
+    {
+      label: "SLA depasit",
+      value: `${breachedDrifts}`,
+      hint: breachedDrifts > 0 ? "drift-uri iesite din fereastra de escalare" : "fara escalari depasite acum",
+      tone: breachedDrifts > 0 ? "danger" : "success",
+    },
+    {
+      label: "Task-uri din drift",
+      value: `${driftTasks.length}`,
+      hint: "actiuni generate deja din semnalele de drift",
+      tone: driftTasks.length > 0 ? "accent" : "neutral",
+    },
+    {
+      label: "Validare",
+      value: "umana",
+      hint: "drift-ul cere decizie si explicatie umana, nu inchidere automata",
+      tone: "warning",
+    },
+  ]
 
   async function handleDriftAction(
     driftId: string,
@@ -71,14 +104,103 @@ export default function DriftPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Drift"
-        description="Semnale de drift si actiuni deschise care cer decizie umana"
-        score={cockpit.data.summary.score}
-        riskLabel={cockpit.data.summary.riskLabel}
+      <PageIntro
+        eyebrow="Control / Drift"
+        title="Aici tratezi schimbarea fata de baseline, nu inventarul si nu exportul"
+        description="Drift-ul ramane workspace-ul in care explici schimbarea, o preiei, o escalezi sau o inchizi. Inventarul si baseline-ul raman in Control, iar executia si dovada raman in Dovada."
+        badges={
+          <>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              drift workspace
+            </Badge>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              decizie umana
+            </Badge>
+          </>
+        }
+        aside={
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Snapshot drift
+            </p>
+            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
+            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
+          </div>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/dashboard/sisteme">
+                Control
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/checklists">
+                Dovada
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
+          </>
+        }
       />
 
       <PillarTabs sectionId="control" />
+
+      <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardContent className="px-5 py-5">
+          <SummaryStrip
+            eyebrow="Drift"
+            title="Semnal, escalare si actiune"
+            description="Vezi rapid cate schimbari sunt active, ce a depasit SLA-ul si cate task-uri au fost deja deschise din drift."
+            items={summaryItems}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <SectionBoundary
+          eyebrow="Flux canonic"
+          title="Drift-ul ramane separat de inventar, baseline si dovada"
+          description="Aici tratezi schimbarea fata de baseline si alegi daca o preiei, o remediezi sau o explici. Daca trebuie sa inchizi munca reala sau sa atasezi dovada, continui in Dovada."
+          support={
+            <div className="grid gap-4 md:grid-cols-3">
+              <DriftFlowHint
+                title="1. Vezi schimbarea"
+                detail="Identifici ce s-a schimbat fata de baseline si de ce conteaza."
+              />
+              <DriftFlowHint
+                title="2. Iei decizia"
+                detail="Preiei, escaladezi, rezolvi sau waive-uiesti cu justificare."
+              />
+              <DriftFlowHint
+                title="3. Continui corect"
+                detail="Pentru executie si dovada revii in Dovada, nu transformi pagina de drift in remediation board."
+              />
+            </div>
+          }
+        />
+        <HandoffCard
+          title="Drift-ul nu inlocuieste restul pilonului de Control"
+          description="Inventarul si baseline-ul raman in Control, iar remedierea ramane in Dovada. Pagina asta trebuie sa ramana clara pe schimbare, escalare si decizie."
+          destinationLabel="control / dovada"
+          checklist={[
+            "nu amesteci inventarul cu drift-ul activ",
+            "nu tratezi exportul ca rezolvare de drift",
+            "folosesti Dovada pentru executie si dovada propriu-zisa",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/sisteme">Deschide Control</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
 
       {openDrifts.length > 0 && (
         <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -314,6 +436,15 @@ export default function DriftPage() {
       ) : openTasks.length > 0 ? (
         <AlertsList tasks={openTasks} />
       ) : null}
+    </div>
+  )
+}
+
+function DriftFlowHint({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+      <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
     </div>
   )
 }

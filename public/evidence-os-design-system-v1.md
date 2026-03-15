@@ -28,6 +28,39 @@
 | **Motion** | Purposeful, fast (150-250ms) | Bouncy, decorative, slow |
 | **Language** | Romanian-first UI labels | Mixed or inconsistent language |
 
+### 1.3 Page Governance Doctrine
+
+The principles above become operational only when they are applied together as a page-composition doctrine.
+
+This doctrine is not optional. It is the canonical rule for large product surfaces.
+
+Core doctrine:
+
+- **Progressive Disclosure**
+- **Trust Through Transparency**
+- **Role-Aware Surfaces**
+- **Tab-based sub-navigation**
+- **Summary / Detail / Action separation**
+- **One dominant page intent**
+
+What this means in practice:
+
+- one large page has one dominant intent
+- sub-sections stay in local tabs, not as competing sidebar shortcuts
+- summary, execution, and export are not allowed to compete equally on the same surface
+- the user must understand:
+  - why the system shows this
+  - what the current action is
+  - what the next handoff is
+
+Approved dominant intents:
+
+- `Dashboard` = orientation
+- `Scanare` = intake + analysis
+- `Control` = confirmation + baseline + drift
+- `Dovada` = remediation + evidence + delivery
+- `Setari` = operational administration
+
 ---
 
 ## 2. Color System
@@ -589,6 +622,7 @@ Important:
 - `Setari` is operational/admin surface, not an execution pillar
 - `Asistent` is a global utility and may be opened from a global trigger or separate history page
 - sidebar must not expose old operational shortcuts as if they were parallel products
+- `components/dashboard/*` is a legacy demo layer and must not be used as source of truth for new work
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -774,6 +808,47 @@ The agent review interface uses a **tri-column layout**:
 │          │  └──────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+#### Canonical Page Recipes
+
+To function as a page system, Evidence OS needs page-level recipes, not only primitive controls.
+
+The canonical recipe layer is:
+
+| Primitive | Purpose | Rules |
+|-----------|---------|-------|
+| `PageIntro` | Single page opening block for title, description, badges and optional actions | Max 1 per page. No metrics grid inside it. No tutorial essay. |
+| `SummaryStrip` | Compact row of 2-4 current-state summaries | Use for state, not onboarding. No primary CTA inside summary items. |
+| `ActionCluster` | Grouping for page-level CTAs | Max 1 primary action and up to 2 secondary actions. |
+| `HandoffCard` | Explicit delegation to the next pillar or route | Use only when a page hands work off elsewhere. |
+| `SectionBoundary` | Boundary between major sections on the same page | One message, one title, one context block. Replaces ad-hoc guide banners. |
+
+Composition rules:
+
+- `Dashboard` and `Setari` may use `PageIntro` + `SummaryStrip` as their top recipe.
+- Execution pages use `PageIntro`, then tabs, then a `SectionBoundary` above the active workspace.
+- `SummaryStrip` and `HandoffCard` must not explain the same concept twice on the same page.
+- A page may have multiple `SectionBoundary` blocks, but only one `PageIntro`.
+- If a page needs more than one intro or more than one guide card before action, the IA is wrong.
+- Guide content should become either `SectionBoundary` or `HandoffCard`, never a bespoke freeform hero.
+
+#### Legacy Dashboard Boundary
+
+`components/dashboard/*` is explicitly **legacy**.
+
+Reasons:
+
+- it was built as a demo shell, not as the current runtime source of truth
+- it uses hard-coded mock data and placeholder toasts
+- it still depends on `components/ui/*` instead of canonical `components/evidence-os/*`
+- it does not follow the approved IA for `Dashboard / Scanare / Control / Dovada / Setari`
+- it competes mentally with the real runtime if reused or referenced as a live pattern
+
+Rules:
+
+- do not build new surfaces from `components/dashboard/*`
+- do not copy layout patterns from it into runtime pages
+- treat it as audit material / migration residue until Codex principal retires or isolates it
 
 ### 8.2 Pillar-Specific Templates
 
@@ -1093,7 +1168,12 @@ module.exports = {
   ├── layout/                  # Shell & navigation
   │   ├── AppShell.tsx         # Sidebar + main content
   │   ├── Sidebar.tsx          # Collapsible sidebar
-  │   ├── PageHeader.tsx       # Title + description + actions
+  │   ├── PageIntro.tsx        # Title + description + badges + action cluster
+  │   ├── SummaryStrip.tsx     # Compact page-level summary row
+  │   ├── ActionCluster.tsx    # Canonical CTA grouping
+  │   ├── HandoffCard.tsx      # Explicit route/pillar handoff
+  │   ├── SectionBoundary.tsx  # Section title + context boundary
+  │   ├── PageHeader.tsx       # Legacy alias during migration
   │   ├── Toolbar.tsx          # Search + filters + view toggle
   │   └── Breadcrumb.tsx       # Navigation breadcrumb
   │

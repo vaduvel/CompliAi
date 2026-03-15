@@ -1184,3 +1184,79 @@ Pentru fiecare batch nou pe `Evidence OS`, acest fișier trebuie actualizat cu:
 - în ce fișiere
 - de ce
 - ce validare a fost rulată
+
+### 2026-03-14 42
+
+Am deschis `UX Wave 1` strict in inelul permis pentru `Evidence OS`, cu scopul de a muta sistemul din zona de primitive locale spre un `page system` canonic.
+
+Fișiere atinse:
+
+- `app/evidence-os.css`
+- `components/evidence-os/ActionCluster.tsx`
+- `components/evidence-os/PageIntro.tsx`
+- `components/evidence-os/SummaryStrip.tsx`
+- `components/evidence-os/HandoffCard.tsx`
+- `components/evidence-os/SectionBoundary.tsx`
+- `components/evidence-os/SectionDividerCard.tsx`
+- `components/evidence-os/ScanFlowOverviewCard.tsx`
+- `public/evidence-os-design-system-v1.md`
+- `public/legacy-dashboard-ui-map-2026-03-14.md`
+- `components/evidence-os/ui-audit-backlog.md`
+- `components/evidence-os/evidence-os-worklog.md`
+
+Ce s-a schimbat:
+
+- am introdus recipe-urile canonice lipsa pentru compoziție de pagină:
+  - `PageIntro`
+  - `SummaryStrip`
+  - `ActionCluster`
+  - `HandoffCard`
+  - `SectionBoundary`
+- am adăugat token-uri și utility classes minime pentru page layout în `app/evidence-os.css`:
+  - `--eos-page-max-width`
+  - `--eos-page-rail-width`
+  - `--eos-page-section-gap`
+  - `--eos-page-cluster-gap`
+  - `--eos-page-summary-item-min`
+  - `.eos-page-shell`
+  - `.eos-page-stack`
+  - `.eos-page-cluster`
+  - `.eos-summary-strip-grid`
+- `SectionDividerCard` nu mai este un shell local izolat; devine alias subțire peste `SectionBoundary`
+- `ScanFlowOverviewCard` nu mai compune trei blocuri bespoke; consumă acum `SummaryStrip` ca recipe generic de summary row
+- am actualizat `Evidence OS v1` cu reguli explicite de page composition și cu regula clară că `components/dashboard/*` este legacy/demo, nu sursă canonică pentru lucru nou
+- am creat document public separat care mapează zona legacy `components/dashboard/*` și explică de ce nu trebuie reutilizată
+
+De ce:
+
+- backlog-ul cerea explicit `canonizare de page recipes`, dar până acum DS-ul controla mai ales primitive și shell-uri locale
+- fără aceste rețete, `Evidence OS` risca să rămână un strat de look and feel, nu o disciplină de structură de pagină
+- am vrut să pregătim terenul pentru Codex principal ca paginile mari să poată fi simplificate folosind piese canonice, nu încă un val de markup bespoke
+
+Ce NU am atins:
+
+- `app/dashboard/*`
+- `components/compliscan/navigation.ts`
+- `components/compliscan/route-sections.tsx`
+- `components/compliscan/use-cockpit.tsx`
+- `app/api/*`
+- `lib/server/*`
+- orice runtime critic sau flow de business
+
+Validare:
+
+- `npm run lint` a trecut
+- `npm run build` a trecut după curățarea `.next`
+
+Rezidual observat la build, în afara lotului curent:
+
+- warning `SUPABASE_ORG_STATE_REQUIRED`
+- raportat pe `/dashboard/documente`
+- cauza este `dynamic server usage` pe fetch `no-store` către Supabase
+- rămâne pentru Codex principal, fiind pe o suprafață interzisă pentru acest lot
+
+Rezultat:
+
+- `Evidence OS` are acum un strat canonic de page recipes reutilizabile
+- DS-ul documentează explicit cum se compun paginile și unde se opresc suprafețele legacy
+- lotul pregătește convergența de structură pentru paginile mari, fără să intre peste ele direct

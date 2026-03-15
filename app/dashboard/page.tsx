@@ -25,17 +25,9 @@ export default function DashboardPage() {
         onResolveNow={() => router.push("/dashboard/checklists")}
         onScan={() => router.push("/dashboard/scanari")}
         onSandbox={cockpitActions.handleSandbox}
-        onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
-        onExportChecklist={() => void cockpitActions.handleChecklistExport()}
-        onShare={() => void cockpitActions.handleShareWithAccountant()}
-        onSyncNow={() => void cockpitActions.handleSyncNow()}
-        busy={cockpit.busy}
         state={cockpit.data.state}
         activeDrifts={cockpit.activeDrifts}
         openAlerts={cockpit.openAlerts}
-        gdprQuickFixes={cockpit.gdprQuickFixes}
-        validatedInvoicesToday={cockpit.validatedInvoicesToday}
-        efacturaErrorsToday={cockpit.efacturaErrorsToday}
         scans={cockpit.data.state.scans}
         tasks={cockpit.tasks}
         events={cockpit.recentEvents}

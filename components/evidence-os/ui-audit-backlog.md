@@ -16,6 +16,49 @@ Principiu:
 - compactăm doar unde claritatea și viteza de operare cresc
 - păstrăm explicația acolo unde utilizatorul ia o decizie reală
 
+## Actualizare 2026-03-14 - UX Wave 1 page system foundation
+
+Închis local în acest lot, strict pe suprafața permisă `Evidence OS`:
+
+- `9. Canonizare de page recipes`
+  - închis în stratul canonic pentru:
+    - `page intro`
+    - `summary strip`
+    - `action cluster`
+    - `handoff`
+    - `section boundary`
+  - închis prin:
+    - `components/evidence-os/PageIntro.tsx`
+    - `components/evidence-os/SummaryStrip.tsx`
+    - `components/evidence-os/ActionCluster.tsx`
+    - `components/evidence-os/HandoffCard.tsx`
+    - `components/evidence-os/SectionBoundary.tsx`
+    - `components/evidence-os/SectionDividerCard.tsx`
+    - `components/evidence-os/ScanFlowOverviewCard.tsx`
+  - rezultat:
+    - `Evidence OS` poate descrie și impune compoziție de pagină, nu doar primitive
+    - `SectionDividerCard` nu mai este un shell izolat, ci un alias peste recipe-ul canonic de boundary
+    - `ScanFlowOverviewCard` folosește acum un recipe generic de summary strip
+- documentare de sistem
+  - închis în:
+    - `public/evidence-os-design-system-v1.md`
+    - `public/legacy-dashboard-ui-map-2026-03-14.md`
+  - rezultat:
+    - DS-ul include reguli explicite de page composition
+    - `components/dashboard/*` este marcat clar drept legacy/demo și exclus din baza canonică pentru lucrări noi
+
+Rămas deschis intenționat pentru Codex principal:
+
+- adoptarea recipe-urilor noi în:
+  - `components/compliscan/route-sections.tsx`
+  - `app/dashboard/page.tsx`
+  - `app/dashboard/scanari/page.tsx`
+  - `app/dashboard/sisteme/page.tsx`
+  - `app/dashboard/rapoarte/*`
+  - `app/dashboard/setari/page.tsx`
+- demontarea efectivă a shell-urilor și cardurilor redundant-introductive din paginile mari
+- izolarea fizică sau eliminarea finală a `components/dashboard/*` din repo
+
 ## Actualizare 2026-03-14 - lot safe polish
 
 Închis în acest lot, pe suprafața permisă:
