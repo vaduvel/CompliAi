@@ -1936,6 +1936,30 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de performanta - `Audit si export`:
+
+- `app/dashboard/rapoarte/page.tsx` pastreaza shell-ul de readiness si exportul principal, dar nu mai tine upfront toate panourile suport
+- blocurile suport au fost extrase in:
+  - `components/compliscan/rapoarte/reports-support-panels.tsx`
+- si sunt incarcate local prin `dynamic import`:
+  - `ExportArtifactsCard`
+  - `RecentDriftCard`
+- efect:
+  - snapshot-ul si centrul de export pornesc mai repede
+  - explicatia artefactelor si lista de drift raman disponibile, dar nu mai stau in bundle-ul initial al paginii
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte`
+  - inainte: `7.89 kB / 179 kB first load`
+  - dupa: `6.13 kB / 177 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de performanta - `Scanare`:
 
 - `app/dashboard/scanari/page.tsx` pastreaza `flow` ca vedere initiala, dar nu mai cara upfront si zonele `Verdicts` si `Istoric`

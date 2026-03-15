@@ -1038,3 +1038,25 @@ Efect masurabil in build:
 - `/dashboard/scanari`
   - inainte: `11.2 kB` / `182 kB first load`
   - dupa: `9.12 kB` / `180 kB first load`
+
+## Actualizare 2026-03-15 - `Audit si export` lazy-load pentru panourile suport
+
+- `Audit si export` isi pastreaza intentia dominanta:
+  - readiness de livrabil
+  - snapshot curent
+  - export center
+- panourile suport care explica artefactele si sumarizeaza driftul nu mai stau in bundle-ul initial
+- acestea au fost mutate intr-un modul separat:
+  - `components/compliscan/rapoarte/reports-support-panels.tsx`
+
+Asta este sanatos arhitectural pentru ca:
+
+- pastreaza `Audit si export` pe finalizare si livrabil
+- tine `support detail` separat de `primary action surface`
+- reduce greutatea initiala fara sa schimbe workflow-ul sau business logic
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte`
+  - inainte: `7.89 kB` / `179 kB first load`
+  - dupa: `6.13 kB` / `177 kB first load`
