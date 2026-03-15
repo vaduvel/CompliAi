@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
@@ -9,12 +10,6 @@ import {
   Sparkles,
 } from "lucide-react"
 
-import { AIDiscoveryPanel } from "@/components/compliscan/ai-discovery-panel"
-import {
-  AICompliancePackEntriesCard,
-  AICompliancePackSummaryCard,
-} from "@/components/compliscan/ai-compliance-pack-card"
-import { AIInventoryPanel } from "@/components/compliscan/ai-inventory-panel"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -31,9 +26,40 @@ import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 
-
 type ControlPrimaryViewMode = "overview" | "systems" | "drift" | "review"
 type SystemsSubViewMode = "inventory" | "discovery" | "baseline" | "pack"
+type UpdateCompliancePackFieldInput = {
+  systemId: string
+  field: AICompliancePackEntry["prefill"]["fieldStatus"][number]["field"]
+  value?: string | null
+  action: "save" | "confirm" | "clear"
+}
+
+const AIDiscoveryPanel = dynamic(
+  () => import("@/components/compliscan/ai-discovery-panel").then((mod) => mod.AIDiscoveryPanel),
+  { loading: () => <LoadingScreen variant="section" /> }
+)
+
+const AIInventoryPanel = dynamic(
+  () => import("@/components/compliscan/ai-inventory-panel").then((mod) => mod.AIInventoryPanel),
+  { loading: () => <LoadingScreen variant="section" /> }
+)
+
+const AICompliancePackSummaryCard = dynamic(
+  () =>
+    import("@/components/compliscan/ai-compliance-pack-card").then(
+      (mod) => mod.AICompliancePackSummaryCard
+    ),
+  { loading: () => <LoadingScreen variant="section" /> }
+)
+
+const AICompliancePackEntriesCard = dynamic(
+  () =>
+    import("@/components/compliscan/ai-compliance-pack-card").then(
+      (mod) => mod.AICompliancePackEntriesCard
+    ),
+  { loading: () => <LoadingScreen variant="section" /> }
+)
 
 export default function SistemePage() {
   const cockpit = useCockpitData()
@@ -432,7 +458,7 @@ function ControlSystemsWorkspace({
   discoveryPanel: React.ReactNode
   inventoryPanel: React.ReactNode
   compliancePack: AICompliancePack | null
-  onUpdateCompliancePackField: Parameters<typeof AICompliancePackEntriesCard>[0]["onUpdateField"]
+  onUpdateCompliancePackField: (input: UpdateCompliancePackFieldInput) => Promise<unknown>
   busy: boolean
   onOpenReview: () => void
   onOpenDrift: () => void

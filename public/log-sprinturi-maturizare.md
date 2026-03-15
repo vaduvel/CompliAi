@@ -1882,3 +1882,32 @@ Validare dupa inchiderea lotului:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Audit final PR - UX clarity / mixed intent:
+
+- auditul final pe branch-ul curent nu a gasit blocaje noi de `mixed intent`
+- doctrinele canonice raman respectate pe runtime:
+  - o pagina = o intentie dominanta
+  - `summary / detail / action` sunt separate
+  - tabs locale tin sub-sectiunile in pilon, nu in sidebar
+- riscul ramas este acum mai degraba de greutate pe suprafete client-heavy, nu de arhitectura de intentie:
+  - `Setari`
+  - `Auditor Vault`
+  - `Control > Sisteme`
+
+Pas de performanta aplicat imediat dupa audit:
+
+- `app/dashboard/sisteme/page.tsx` foloseste acum `dynamic import` pentru panourile grele:
+  - `AIDiscoveryPanel`
+  - `AIInventoryPanel`
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+- efect:
+  - `Control > Sisteme` nu mai aduce aceste panouri in bundle-ul initial daca userul intra doar pe overview sau pe alte sub-vizualizari
+  - dimensiunea rutei a coborat de la `17.3 kB / 195 kB first load` la `9.31 kB / 181 kB first load`
+
+Validare dupa code-splitting:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde

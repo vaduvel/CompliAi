@@ -965,3 +965,17 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+### Actualizare 2026-03-15 - audit PR + performance
+
+- [x] audit final pe branch pentru:
+  - `UX clarity`
+  - `mixed intent`
+- [x] fara blocaje noi la nivel de intentie de pagina
+- [x] code-splitting pe `Control > Sisteme` pentru panourile grele:
+  - `AIDiscoveryPanel`
+  - `AIInventoryPanel`
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+- [x] efect confirmat in build:
+  - `/dashboard/sisteme` a coborat la `9.31 kB / 181 kB first load`

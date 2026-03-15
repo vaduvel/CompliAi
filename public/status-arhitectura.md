@@ -954,3 +954,27 @@ Verdict:
 
 - cleanup-ul structural pentru `use-cockpit` este inchis operational
 - pasii urmatori pot intra deja in polish / split incremental, nu in reparatie de baza
+
+## Actualizare 2026-03-15 - audit final PR si code-splitting pe Control
+
+- auditul final pe branch-ul activ nu a gasit blocaje noi de `mixed intent`
+- principalele reguli canonice sunt respectate in runtime:
+  - `Dashboard` ramane orientare
+  - `Control` ramane confirmare
+  - `Dovada` ramane separata intre executie, ledger si livrabil
+- riscul ramas a coborat din zona de arhitectura in zona de greutate pe suprafete client-heavy
+
+Pas tehnic aplicat:
+
+- `app/dashboard/sisteme/page.tsx` face acum code-splitting pentru:
+  - `AIDiscoveryPanel`
+  - `AIInventoryPanel`
+  - `AICompliancePackSummaryCard`
+  - `AICompliancePackEntriesCard`
+- asta inseamna ca `Control > Sisteme` nu mai forteaza incarcarea tuturor workspace-urilor grele la intrarea initiala in pagina
+
+Efect masurabil in build:
+
+- `/dashboard/sisteme`
+  - inainte: `17.3 kB` / `195 kB first load`
+  - dupa: `9.31 kB` / `181 kB first load`
