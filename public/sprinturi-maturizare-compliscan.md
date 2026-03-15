@@ -541,6 +541,11 @@ Starea si dovezile trebuie sa stea pe o fundatie mai solida.
 - graful de tenancy poate fi acum seed-uit controlat in backend `supabase`:
   - daca `organizations / profiles / memberships` nu exista in cloud, aplicatia le poate impinge din local
   - dupa seed, citirea revine pe cloud-first
+- shell-ul dashboard si sumarul de sesiune folosesc acum membership-ul curent ca refresh:
+  - `auth/me`
+  - `auth/summary`
+  - `app/dashboard/layout.tsx`
+  - asta reduce riscul de rol sau org stale dupa schimbari de membership in backend
 - suita curenta dupa verificarea operationala Supabase este acum la:
   - `54` fisiere de test
   - `186` teste verzi

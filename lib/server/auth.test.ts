@@ -16,6 +16,8 @@ import {
   loadOrganizations,
   listUserMemberships,
   readSessionFromRequest,
+  readFreshSessionFromRequest,
+  refreshSessionPayload,
   registerUser,
   resolveUserForMembership,
   requireRole,
@@ -525,6 +527,135 @@ describe("lib/server/auth", () => {
         orgId: "org-2",
         orgName: "Org Beta",
         role: "reviewer",
+      })
+    )
+  })
+
+  it("re-hidrateaza sesiunea din membership-ul curent si foloseste rolul actualizat", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "reviewer",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const staleSession = {
+      userId: "user-1",
+      orgId: "org-1",
+      email: "owner@example.com",
+      orgName: "Org Alpha",
+      role: "owner" as const,
+      membershipId: "membership-1",
+      exp: Date.now() + 60_000,
+    }
+
+    const refreshed = await refreshSessionPayload(staleSession)
+
+    expect(refreshed).toEqual(
+      expect.objectContaining({
+        userId: "user-1",
+        orgId: "org-1",
+        role: "reviewer",
+        membershipId: "membership-1",
+      })
+    )
+  })
+
+  it("invalideaza sesiunea cand membership-ul nu mai exista", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+
+    const staleSession = {
+      userId: "user-1",
+      orgId: "org-1",
+      email: "owner@example.com",
+      orgName: "Org Alpha",
+      role: "owner" as const,
+      membershipId: "membership-missing",
+      exp: Date.now() + 60_000,
+    }
+
+    await expect(refreshSessionPayload(staleSession)).resolves.toBeNull()
+  })
+
+  it("poate citi sesiunea fresh direct din request", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "compliance",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const token = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "owner@example.com",
+      orgName: "Org Alpha",
+      role: "viewer",
+      membershipId: "membership-1",
+    })
+
+    const request = new Request("http://localhost/api/auth/me", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    const session = await readFreshSessionFromRequest(request)
+
+    expect(session).toEqual(
+      expect.objectContaining({
+        role: "compliance",
+        membershipId: "membership-1",
       })
     )
   })

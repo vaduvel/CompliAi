@@ -5,6 +5,16 @@ import { NextRequest } from "next/server"
 import { initialComplianceState } from "@/lib/compliance/engine"
 
 const mocks = vi.hoisted(() => ({
+  AuthzErrorMock: class AuthzError extends Error {
+    status: number
+    code: string
+
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
   buildCompliScanFileNameMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
@@ -13,6 +23,7 @@ const mocks = vi.hoisted(() => ({
   getSessionCookieOptionsMock: vi.fn(),
   hashPasswordMock: vi.fn(),
   mutateStateMock: vi.fn(),
+  readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   readStateMock: vi.fn(),
   requireRoleMock: vi.fn(),
@@ -20,10 +31,12 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
+  AuthzError: mocks.AuthzErrorMock,
   createSessionToken: mocks.createSessionTokenMock,
   findUserByEmail: mocks.findUserByEmailMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
   hashPassword: mocks.hashPasswordMock,
+  readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
   requireRole: mocks.requireRoleMock,
   SESSION_COOKIE: "compliscan_session",
@@ -70,6 +83,14 @@ describe("api smoke flow", () => {
     })
     mocks.hashPasswordMock.mockReturnValue("hashed")
     mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      email: "demo@site.ro",
+      orgId: "org-1",
+      orgName: "Org Demo",
+      role: "owner",
+      exp: Date.now() + 1000,
+    })
+    mocks.readFreshSessionFromRequestMock.mockResolvedValue({
       userId: "user-1",
       email: "demo@site.ro",
       orgId: "org-1",

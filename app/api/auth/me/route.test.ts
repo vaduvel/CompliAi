@@ -11,12 +11,12 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  readSessionFromRequestMock: vi.fn(),
+  readFreshSessionFromRequestMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
 }))
 
 import { GET } from "./route"
@@ -32,11 +32,11 @@ describe("GET /api/auth/me", () => {
 
     expect(response.status).toBe(200)
     expect(payload.user).toBeNull()
-    expect(mocks.readSessionFromRequestMock).toHaveBeenCalledTimes(1)
+    expect(mocks.readFreshSessionFromRequestMock).toHaveBeenCalledTimes(1)
   })
 
   it("returneaza user null pentru token invalid", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValueOnce(null)
+    mocks.readFreshSessionFromRequestMock.mockResolvedValueOnce(null)
 
     const response = await GET(
       new Request("http://localhost/api/auth/me", {
@@ -50,7 +50,7 @@ describe("GET /api/auth/me", () => {
   })
 
   it("returneaza userul din sesiune valida", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValueOnce({
+    mocks.readFreshSessionFromRequestMock.mockResolvedValueOnce({
       email: "demo@site.ro",
       orgId: "org-1",
       orgName: "Org Demo",
@@ -75,9 +75,9 @@ describe("GET /api/auth/me", () => {
   })
 
   it("mapeaza erorile neasteptate", async () => {
-    mocks.readSessionFromRequestMock.mockImplementationOnce(() => {
-      throw new Error("token verify crashed")
-    })
+    mocks.readFreshSessionFromRequestMock.mockRejectedValueOnce(
+      new Error("token verify crashed")
+    )
 
     const response = await GET(
       new Request("http://localhost/api/auth/me", {
@@ -92,9 +92,9 @@ describe("GET /api/auth/me", () => {
   })
 
   it("mapeaza erorile de autorizare controlat", async () => {
-    mocks.readSessionFromRequestMock.mockImplementationOnce(() => {
-      throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
-    })
+    mocks.readFreshSessionFromRequestMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
+    )
 
     const response = await GET(
       new Request("http://localhost/api/auth/me", {

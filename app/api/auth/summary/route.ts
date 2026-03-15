@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 
-import { AuthzError, listUserMemberships, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, listUserMemberships, readFreshSessionFromRequest } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
+    const session = await readFreshSessionFromRequest(request)
     if (!session) {
       return NextResponse.json({
         user: null,

@@ -955,6 +955,50 @@ export function readSessionFromRequest(request: Request): SessionPayload | null 
   return verifySessionToken(token)
 }
 
+export async function refreshSessionPayload(
+  session: SessionPayload
+): Promise<SessionPayload | null> {
+  try {
+    const resolvedUser = session.membershipId
+      ? await resolveUserForMembership(session.userId, session.membershipId)
+      : await findUserById(session.userId)
+
+    if (!resolvedUser) {
+      return null
+    }
+
+    return {
+      userId: resolvedUser.id,
+      orgId: resolvedUser.orgId,
+      email: resolvedUser.email,
+      orgName: resolvedUser.orgName,
+      role: resolvedUser.role,
+      membershipId: resolvedUser.membershipId,
+      exp: session.exp,
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "MEMBERSHIP_NOT_FOUND" ||
+        error.message === "USER_NOT_FOUND" ||
+        error.message === "ORGANIZATION_NOT_FOUND"
+      ) {
+        return null
+      }
+    }
+
+    throw error
+  }
+}
+
+export async function readFreshSessionFromRequest(
+  request: Request
+): Promise<SessionPayload | null> {
+  const session = readSessionFromRequest(request)
+  if (!session) return null
+  return refreshSessionPayload(session)
+}
+
 export function requireAuthenticatedSession(request: Request, action?: string): SessionPayload {
   const session = readSessionFromRequest(request)
   if (!session) {

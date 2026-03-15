@@ -246,6 +246,9 @@ Progres deja pornit:
     - `profiles`
     - `memberships`
     - dupa initializare, citirea ramane cloud-first
+  - shell-ul dashboard si endpoint-urile de sesiune nu mai expun orb rolul sau org-ul din cookie:
+    - sesiunea este re-hidratata din membership-ul curent
+    - daca membership-ul dispare, sesiunea vizibila cade la `null`
   - exista si target state explicit pentru "100%":
     - `public/target-state-100-compliscan.md`
   - exista si checklist formal de inchidere Sprint 5:

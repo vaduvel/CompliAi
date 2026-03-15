@@ -1958,6 +1958,29 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de hardening - sesiune re-hidratata din tenancy curent:
+
+- a fost adaugat un helper nou in `lib/server/auth.ts`:
+  - `refreshSessionPayload(...)`
+  - `readFreshSessionFromRequest(...)`
+- `auth/me`, `auth/summary` si `app/dashboard/layout.tsx` nu mai expun orb rolul si org-ul din cookie
+- shell-ul dashboard si endpoint-urile de sesiune re-valideaza acum:
+  - `membershipId`
+  - `orgId`
+  - `orgName`
+  - `role`
+  pe baza membership-ului curent
+- efect:
+  - daca rolul se schimba in backend, suprafetele vizibile reflecta acum rolul curent
+  - daca membership-ul dispare, sesiunea vizibila cade la `null`, nu ramane stale in shell
+
+Validare dupa pas:
+
+- `npm test -- 'lib/server/auth.test.ts' 'app/api/auth/me/route.test.ts' 'app/api/auth/summary/route.test.ts'` -> verde
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas operational - `Setari / Acces` pentru membri existenti din workspace:
 
 - `lib/server/auth.ts` poate adauga acum un utilizator deja existent in workspace in organizatia curenta:

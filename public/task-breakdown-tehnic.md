@@ -189,6 +189,7 @@ Fronturile active acum:
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB
   - fallback-ul local este acum controlat explicit prin:
     - `COMPLISCAN_ALLOW_LOCAL_FALLBACK`
+  - shell-ul dashboard si endpoint-urile de sesiune (`auth/me`, `auth/summary`) re-hidrateaza acum rolul si organizatia din membership-ul curent, nu doar din cookie
   - in productie, traseul cloud poate fi fortat fara degradare tacuta
 - [x] health check unificat pentru aplicatie
   - helper dedicat:
