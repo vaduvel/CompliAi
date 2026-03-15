@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   ArrowRight,
   GitBranch,
-  Bell,
   CheckCircle2,
   FileText,
   Layers,
@@ -96,12 +95,6 @@ export function DashboardTop({
         workspace={workspace}
       />
 
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-xs text-[var(--color-on-surface-muted)]">
-        <Bell className="size-4 text-[var(--color-warning)]" />
-        <span className="font-medium text-[var(--color-on-surface)]">Asistent AI, nu verdict final.</span>
-        <span>Verifica uman inainte de orice raport sau decizie oficiala.</span>
-      </div>
-
       {error && (
         <Alert className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
           <AlertTriangle className="size-4" />
@@ -184,26 +177,26 @@ export function OverviewPageSections({
         hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
       />
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)]">
         <NextBestAction
           task={nextBestAction}
           onResolve={onResolveNow}
           hasEvidence={hasEvidence}
           activeRiskCount={activeRiskCount}
         />
-        <DashboardGuideCard
-          activeRiskCount={activeRiskCount}
-          openAlertsCount={openAlerts.length}
-          hasEvidence={hasEvidence}
+        <DriftCommandCenter
+          activeDrifts={activeDrifts}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
           latestDocumentScan={latestDocumentScan}
           latestManifestScan={latestManifestScan}
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <DriftCommandCenter
-          activeDrifts={activeDrifts}
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
+        <DashboardGuideCard
+          activeRiskCount={activeRiskCount}
+          openAlertsCount={openAlerts.length}
+          hasEvidence={hasEvidence}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
           latestDocumentScan={latestDocumentScan}
           latestManifestScan={latestManifestScan}
@@ -252,10 +245,9 @@ function OverviewSummaryStrip({
       tone: "accent",
     },
     {
-      label: "Task-uri active",
+      label: "Urmatoarele actiuni",
       value: `${activeTaskCount}`,
-      hint:
-        activeTaskCount > 0 ? "merg in Remediere / Dovada" : "nu exista actiuni deschise acum",
+      hint: activeTaskCount > 0 ? "mergi direct in Remediere" : "nu exista lucru urgent acum",
       tone: activeTaskCount > 0 ? "warning" : "success",
     },
     {
@@ -266,15 +258,13 @@ function OverviewSummaryStrip({
       tone: openDriftCount > 0 ? "danger" : "success",
     },
     {
-      label: "Dovezi atasate",
-      value: `${evidenceAttachedCount}`,
-      hint:
-        scanCount > 0 ? `${scanCount} surse scanate pana acum` : "inca lipsesc surse analizate",
-    },
-    {
-      label: "Audit readiness",
+      label: "Baseline",
       value: hasValidatedBaseline ? "gata" : "in curs",
-      hint: hasValidatedBaseline ? lastScanLabel : "valideaza baseline-ul in Control",
+      hint: hasValidatedBaseline
+        ? `ultimul control: ${lastScanLabel}`
+        : scanCount > 0 || evidenceAttachedCount > 0
+          ? "valideaza baseline-ul in Control"
+          : "incepi din Scanare si Control",
       tone: hasValidatedBaseline ? "success" : "neutral",
     },
   ]
@@ -284,8 +274,8 @@ function OverviewSummaryStrip({
       <CardContent className="px-5 py-5">
         <SummaryStrip
           eyebrow="Snapshot"
-          title="Orientare rapida"
-          description="Vezi doar semnalele care te trimit spre pagina unde continui lucrul real."
+          title="Vezi instant ce faci acum"
+          description="Starea si urmatorul pas trebuie sa bata explicatia."
           items={items}
         />
       </CardContent>
@@ -584,9 +574,8 @@ export function DashboardGuideCard({
   const guideSteps = [
     {
       id: "step-scan",
-      title: "1. Scanezi sursa",
-      description:
-        "Pornesti din Scanari si alegi sursa pentru analiza.",
+      title: "Scanare",
+      description: "Pornesti analiza pe sursa noua.",
       href: "/dashboard/scanari",
       icon: FileText,
       meta: latestDocumentScan
@@ -595,9 +584,8 @@ export function DashboardGuideCard({
     },
     {
       id: "step-confirm",
-      title: "2. Confirmi controlul",
-      description:
-        "Revizuiesti inventarul AI si fixezi baseline-ul pentru drift.",
+      title: "Control",
+      description: "Revizuiesti baseline-ul si drift-ul.",
       href: "/dashboard/sisteme",
       icon: GitBranch,
       meta: hasValidatedBaseline
@@ -606,9 +594,8 @@ export function DashboardGuideCard({
     },
     {
       id: "step-close",
-      title: "3. Executi in Dovada",
-      description:
-        "Inchizi task-urile in Remediere, verifici dovezile in Vault si livrezi separat din Audit si export.",
+      title: "Dovada",
+      description: "Inchizi task-uri si verifici livrabilul.",
       href: "/dashboard/checklists",
       icon: ListChecks,
       meta:
@@ -623,9 +610,9 @@ export function DashboardGuideCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Flux principal</CardTitle>
+            <CardTitle className="text-xl">Unde continui</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
-              Overview-ul te trimite direct spre pagina unde continui lucrul real.
+              Dashboard-ul te orienteaza. Lucrul real continua in pagina potrivita.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -659,7 +646,7 @@ export function DashboardGuideCard({
                 <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
               </div>
               <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-1 text-sm leading-6 text-[var(--color-on-surface-muted)]">{step.description}</p>
+              <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
               <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
             </Link>
           )
@@ -710,9 +697,9 @@ export function SnapshotStatusCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Snapshot si schimbari recente</CardTitle>
+            <CardTitle className="text-xl">Snapshot rapid</CardTitle>
             <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-              Vezi rapid sursele recente, baseline-ul si ultimul semnal important.
+              Verifici ultimele surse, baseline-ul si ultimul semnal fara sa parasesti orientarea.
             </p>
           </div>
           <Badge
@@ -763,13 +750,13 @@ export function SnapshotStatusCard({
             href="/dashboard/scanari"
             className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
           >
-            Continua in Scanari
+            Deschide Scanari
           </Link>
           <Link
-            href="/dashboard/rapoarte"
+            href="/dashboard/sisteme"
             className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
           >
-            Vezi snapshot complet
+            Verifica Control
           </Link>
         </div>
       </CardContent>

@@ -1109,3 +1109,18 @@ Asta este sanatos arhitectural pentru ca:
   - `Audit si export`
   - `Auditor Vault`
 - lasa component-level density pass-ul pentru lotul separat, fara sa amestece shell-ul cu cardurile
+
+## Actualizare 2026-03-15 - `Dashboard` este mai aproape de orientare pura
+
+- `Dashboard` nu mai consuma atata spatiu pe explicatii despre sine
+- ierarhia principala este acum mai apropiata de doctrina:
+  - `next action`
+  - drift / blocked state
+  - snapshot scurt
+- ghidajul ramas este mai compact si mai utilitar
+
+Asta este sanatos arhitectural pentru ca:
+
+- home-ul se apropie de rolul de orientare, nu de pagina explicativa
+- `Control drift` nu mai sta in plan secund cand utilizatorul cauta blocajul real
+- `Unde continui` ramane util, dar nu mai concureaza cu `next action`

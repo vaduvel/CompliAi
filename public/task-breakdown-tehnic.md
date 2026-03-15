@@ -1081,3 +1081,17 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [ ] component-level density pass ramas pentru:
   - `components/compliscan/remediation-board.tsx`
   - `components/compliscan/task-card.tsx`
+
+### Actualizare 2026-03-15 - `Dashboard` executive declutter pornit
+
+- [x] `Dashboard` nu mai foloseste bannerul didactic care concura cu starea operationala
+- [x] `NextBestAction` si `Control drift` au urcat in ierarhia principala a paginii
+- [x] blocul de orientare a fost comprimat:
+  - `Flux principal` -> `Unde continui`
+  - descrieri mai scurte
+  - orientare mai dura spre pagina potrivita
+- [x] `Snapshot` foloseste acum limbaj mai direct:
+  - `Urmatoarele actiuni`
+  - `Drift deschis`
+  - `Baseline`
+- [ ] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`

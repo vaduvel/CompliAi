@@ -2005,6 +2005,28 @@ Pornire executie - `Checklists wave 1` page shell:
   - `npm test` -> verde
   - `npm run lint` -> verde
 
+Pornire executie - `Dashboard` executive declutter:
+
+- `components/compliscan/route-sections.tsx` a fost compactat pentru homepage-ul operational
+- `Dashboard` pune acum mai sus:
+  - `NextBestAction`
+  - `Control drift`
+- ghidajul a fost comprimat:
+  - bannerul didactic `Asistent AI, nu verdict final` a fost eliminat
+  - `Flux principal` a devenit `Unde continui`
+  - descrierile cardurilor de orientare sunt mai scurte si mai utilitare
+- `Snapshot` este mai scurt si mai orientat pe ce faci acum:
+  - `Urmatoarele actiuni`
+  - `Drift deschis`
+  - `Baseline`
+- scopul pasului:
+  - `Dashboard` sa se simta orientare pura
+  - starea si urmatorul pas sa bata explicatia
+- validare dupa pas:
+  - `npm test` -> verde
+  - `npm run lint` -> verde
+  - `npm run build` -> verde
+
 Pas de performanta - `Audit si export`:
 
 - `app/dashboard/rapoarte/page.tsx` pastreaza shell-ul de readiness si exportul principal, dar nu mai tine upfront toate panourile suport
