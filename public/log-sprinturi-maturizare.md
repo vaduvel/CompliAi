@@ -2021,6 +2021,24 @@ Validare dupa pas:
 
 - `npm run verify:supabase:rls` -> verde
 
+Pas de guardrail - `Agent Evidence OS` cere acum review uman explicit la commit:
+
+- `app/api/agent/commit/route.ts` respinge acum:
+  - `reviewState = needs_review`
+  - loturile goale dupa review
+- `lib/compliance/agent-workspace.tsx` seteaza acum explicit:
+  - `confirmed`
+  - `partially_confirmed`
+  - `rejected`
+- a fost adaugat si test dedicat:
+  - `app/api/agent/commit/route.test.ts`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

@@ -1451,3 +1451,18 @@ Asta este sanatos arhitectural pentru ca:
 - inchide operational itemul minim de RLS multi-org
 - lasa `org_state` source of truth intr-o pozitie mai credibila pentru mediu cloud
 - reduce diferenta dintre modelul din documente si verificarea live reala
+
+## Actualizare 2026-03-15 - `Agent Evidence OS` cere confirmare umana explicita la commit
+
+- `app/api/agent/commit/route.ts` accepta acum doar loturi cu:
+  - `reviewState = confirmed`
+  - `reviewState = partially_confirmed`
+- loturile cu `reviewState = needs_review` sunt respinse
+- loturile goale dupa review sunt respinse
+- `lib/compliance/agent-workspace.tsx` seteaza acum explicit review state-ul final in functie de decizia umana
+
+Asta este sanatos arhitectural pentru ca:
+
+- pastreaza `Agent OS` ca layer de propuneri, nu writer direct in state-ul oficial
+- muta regula `omul valideaza` din documente in runtime
+- evita commituri accidentale cu propuneri neconfirmate

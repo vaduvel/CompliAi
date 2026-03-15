@@ -1072,3 +1072,15 @@ Actualizare suplimentara 2026-03-15:
   - citire izolata pentru `org_state`
   - citire izolata pentru `evidence_objects`
   - `viewer` nu poate modifica `org_state`
+
+Actualizare suplimentara 2026-03-15:
+
+- `Agent Evidence OS` nu mai poate face commit fara confirmare umana explicita
+- runtime-ul accepta acum doar:
+  - `confirmed`
+  - `partially_confirmed`
+- lotul gol dupa review este respins
+- asta tine directia corecta:
+  - layer peste produsul actual
+  - fara produs paralel
+  - fara intrare directa in starea oficiala fara review

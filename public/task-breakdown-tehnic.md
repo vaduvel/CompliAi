@@ -1108,10 +1108,15 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
     - `deschise`
     - `P1`
     - `fara dovada`
-- [ ] orice pas nou pe `Agent Evidence OS` ramane sub regula:
+- [x] orice pas nou pe `Agent Evidence OS` ramane sub regula:
   - layer peste produsul actual
   - fara produs paralel
   - fara concurenta cu declutter-ul de runtime
+  - `commit` cere acum confirmare explicita de review uman:
+    - `confirmed`
+    - `partially_confirmed`
+  - `needs_review` nu mai poate intra in starea oficiala
+  - lotul gol dupa review nu mai poate fi commit-uit
 
 ### Actualizare 2026-03-15 - execution split pentru sprintul scurt
 

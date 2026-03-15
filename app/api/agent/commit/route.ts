@@ -62,6 +62,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const bundle = (await request.json()) as AgentProposalBundle
+    const remainingProposalCount =
+      (bundle.intake?.proposedSystems.length ?? 0) +
+      (bundle.findings?.length ?? 0) +
+      (bundle.drifts?.length ?? 0)
+
+    if (bundle.reviewState !== "confirmed" && bundle.reviewState !== "partially_confirmed") {
+      return jsonError(
+        "Commitul Agent OS cere confirmare explicita in review uman.",
+        422,
+        "AGENT_REVIEW_REQUIRED",
+        undefined,
+        context
+      )
+    }
+
+    if (remainingProposalCount === 0) {
+      return jsonError(
+        "Nu exista propuneri confirmate pentru commit.",
+        422,
+        "AGENT_NOTHING_CONFIRMED",
+        undefined,
+        context
+      )
+    }
+
     const nowISO = new Date().toISOString()
     await mutateState((state) => {
       // Deduplication sets to prevent data corruption on retries

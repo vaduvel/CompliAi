@@ -32,6 +32,7 @@ export function AgentWorkspace({
   const activeSystems = bundle?.intake?.proposedSystems.filter((system) => !rejectedIds.has(system.tempId)) ?? []
   const activeFindings = bundle?.findings?.filter((finding) => !rejectedIds.has(finding.findingId)) ?? []
   const activeDrifts = bundle?.drifts?.filter((drift) => !rejectedIds.has(drift.driftId)) ?? []
+  const remainingTotal = activeSystems.length + activeFindings.length + activeDrifts.length
   const rejectedCount =
     (bundle?.intake?.proposedSystems.length ?? 0) -
     activeSystems.length +
@@ -55,6 +56,8 @@ export function AgentWorkspace({
 
     const finalBundle: AgentProposalBundle = {
       ...bundle,
+      reviewState:
+        remainingTotal === 0 ? "rejected" : rejectedCount > 0 ? "partially_confirmed" : "confirmed",
       intake: bundle.intake
         ? {
             ...bundle.intake,
@@ -104,7 +107,7 @@ export function AgentWorkspace({
           reviewState={bundle?.reviewState}
           onConfirm={handleCommit}
           onReject={onCancel}
-          disabled={!bundle || loading}
+          disabled={!bundle || loading || remainingTotal === 0}
           className="min-h-[24rem] xl:h-full"
         />
       }
