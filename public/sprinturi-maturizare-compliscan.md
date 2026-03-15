@@ -885,3 +885,13 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu schimba shell-ul de pagina
   - intareste rolul de suprafata administrativa sobra
+
+- `Dashboard` a primit si un al doilea pass scurt de austeritate pe home:
+  - `Traseu rapid` mai scurt si mai dur
+  - `Stare curenta` in loc de `Snapshot rapid`
+  - CTA-uri scurtate la `Scanare` / `Control`
+  - mai putin framing decorativ
+- pasul este sanatos pentru ca:
+  - nu schimba modelul de produs
+  - nu muta home-ul spre executie
+  - intareste rolul de orientare pura

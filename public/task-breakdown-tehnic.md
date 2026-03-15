@@ -1094,6 +1094,11 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Urmatoarele actiuni`
   - `Drift deschis`
   - `Baseline`
+- [x] al doilea pass scurt de austeritate pe orientare:
+  - `Unde continui` -> `Traseu rapid`
+  - badge-ul decorativ pentru ultimul manifest a fost scos
+  - `Snapshot rapid` -> `Stare curenta`
+  - CTA-urile secundare au fost scurtate la `Scanare` / `Control`
 - [ ] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`
 
 - [x] `Audit si export` component density pass
