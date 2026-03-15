@@ -674,6 +674,12 @@ Progres recent pe punctul acesta:
   - `SectionBoundary`
   - `HandoffCard`
   - asta lasa board-ul si actiunile de drift mai jos in pagina, sub intentia dominanta, nu amestecate chiar din header
+- primitivele de baza din cockpit au fost si ele aduse sub `Evidence OS`:
+  - `Badge`
+  - `Button`
+  - `Card`
+  - pentru `app/dashboard/*`, `components/compliscan/*` si `lib/compliance/*`
+- primitivele `components/ui/*` mai raman doar pe suprafete publice care nu fac parte din cockpit-ul operational
 - `PageHeader` a fost eliminat din `route-sections`:
   - runtime-ul activ nu mai foloseste doua scheme paralele de compozitie pentru pagini
 - hook-ul central `use-cockpit` a intrat in cleanup structural:

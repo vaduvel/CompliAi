@@ -9,9 +9,9 @@ import type {
   AICompliancePackEntry,
 } from "@/lib/compliance/ai-compliance-pack"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 const COMMON_RESIDENCIES = [
   "eu-central-1",

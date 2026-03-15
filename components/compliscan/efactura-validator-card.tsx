@@ -4,9 +4,9 @@ import { useState } from "react"
 import { AlertTriangle, CheckCircle2, FileCode2 } from "lucide-react"
 
 import type { EFacturaValidationRecord } from "@/lib/compliance/types"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 type EFacturaValidatorCardProps = {
   validations: EFacturaValidationRecord[]

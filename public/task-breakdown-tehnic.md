@@ -101,6 +101,11 @@ Checkpoint-ul curent din implementare:
   - `Asistent` ca utilitar global de orientare
 - [x] `Drift` a fost aliniat la aceeasi compozitie canonica de pagina
 - [x] helper-ul legacy `PageHeader` a fost eliminat din runtime-ul activ
+- [x] primitivele concurente `components/ui/*` au iesit din cockpit-ul runtime:
+  - `app/dashboard/*`, `components/compliscan/*` si `lib/compliance/*` folosesc acum `Badge`, `Button` si `Card` din `Evidence OS`
+  - primitivele `components/ui/*` mai raman doar pe suprafete in afara cockpit-ului:
+    - `app/page.tsx`
+    - `app/login/page.tsx`
 - [x] primul cleanup structural pe cockpit client:
   - derivarile pure mutate din `use-cockpit` in modul separat
   - compatibilitate publica pastrata pentru consumatorii existenti

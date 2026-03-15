@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/evidence-os/Badge"
 import type { ScanFinding } from "@/lib/compliance/types"
 
 type VerdictBasis = "direct_signal" | "inferred_signal" | undefined

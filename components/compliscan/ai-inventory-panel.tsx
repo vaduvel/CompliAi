@@ -15,9 +15,9 @@ import {
 import { classifyAISystem, formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { AISystemDraft } from "@/lib/compliance/ai-inventory"
 import type { AISystemPurpose, AISystemRecord } from "@/lib/compliance/types"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 type AIInventoryPanelProps = {
   systems: AISystemRecord[]

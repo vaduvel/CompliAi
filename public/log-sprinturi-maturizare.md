@@ -1836,6 +1836,13 @@ Verdict actualizat:
 - `Val 2` -> inchis
 - `Val 3` -> inchis operational
 - `Evidence OS` -> DS oficial dominant in produs
+- cockpit-ul runtime nu mai depinde de primitive `components/ui/*` pentru:
+  - `app/dashboard/*`
+  - `components/compliscan/*`
+  - `lib/compliance/*`
+- suprafetele ramase in afara convergentei sunt explicit non-cockpit:
+  - `app/page.tsx`
+  - `app/login/page.tsx`
 
 Validare dupa inchiderea `Val 3`:
 

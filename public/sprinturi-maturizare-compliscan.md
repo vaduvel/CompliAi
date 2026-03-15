@@ -853,6 +853,14 @@ Actualizare 2026-03-15:
 - frontul post Sprint 7 a inchis si cleanup-ul structural pentru store-ul central de cockpit
 - asta inseamna ca:
   - `Evidence OS` domina deja pagina si compozitia suprafetelor mari
+  - `Evidence OS` domina acum si primitivele de baza din cockpit-ul runtime:
+    - `Badge`
+    - `Button`
+    - `Card`
+  - `components/ui/*` nu mai este folosit in:
+    - `app/dashboard/*`
+    - `components/compliscan/*`
+    - `lib/compliance/*`
   - `use-cockpit` nu mai are doua stiluri concurente de mutatii
   - riscul principal ramas nu mai este de arhitectura de baza, ci de polish final si performanta
 

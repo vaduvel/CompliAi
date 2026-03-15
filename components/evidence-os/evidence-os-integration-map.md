@@ -90,6 +90,34 @@ Avem acum un strat canonic dominant pentru UI-ul agentic:
 În acest punct, `Evidence OS` este deja sursa unică de adevăr pentru vizualul principal al workspace-ului agentic.
 Ce mai rămâne local în runtime este selecția item-urilor respinse și commit-ul final.
 
+## Extensie 2026-03-15 - cockpit runtime
+
+În zona operațională principală a produsului:
+
+- `app/dashboard/*`
+- `components/compliscan/*`
+- `lib/compliance/*`
+
+primitivele de bază concurente `components/ui/*` pentru:
+
+- `Badge`
+- `Button`
+- `Card`
+
+au fost eliminate din traseul activ și înlocuite cu primitivele canonice din `components/evidence-os/*`.
+
+Consecință:
+
+- `Evidence OS` este acum:
+  - sursa de adevăr pentru arhitectura de pagină
+  - sursa de adevăr pentru workspace-ul agentic
+  - stratul dominant de primitive UI în cockpit-ul runtime
+
+Ce NU înseamnă încă:
+
+- nu avem încă o autoritate unică absolută pentru toate token-urile și toate suprafețele repo-ului
+- `app/page.tsx` și `app/login/page.tsx` rămân în afara convergenței cockpit
+
 ## Drift-uri identificate
 
 ### Drift 1. Multiple token systems
