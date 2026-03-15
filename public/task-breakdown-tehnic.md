@@ -455,7 +455,17 @@ Sprint 5 trebuie sa atace direct riscurile:
   - endpoint-uri corecte in `/api/agent/run` si `/api/agent/commit`
   - `Scanari` foloseste un singur hook coerent pentru agent flow
   - workspace-ul agentilor nu mai blocheaza `test + lint + build`
-- [ ] RLS minim pentru datele multi-org
+- [x] RLS minim pentru datele multi-org
+  - verificarea live trece din nou la data:
+    - `2026-03-15T18:40:34.973Z`
+  - confirma:
+    - izolare pentru `organizations`
+    - izolare pentru `memberships`
+    - citire izolata pentru `org_state`
+    - citire izolata pentru `evidence_objects`
+    - `viewer` nu poate modifica `org_state`
+  - script:
+    - `npm run verify:supabase:rls`
 - [~] dovezi mutate din `public/evidence-uploads` in storage privat
   - upload-urile noi sunt acum in `.data/evidence-uploads`
   - accesul se face prin route controlat

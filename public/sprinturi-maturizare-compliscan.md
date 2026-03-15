@@ -1059,3 +1059,16 @@ Actualizare suplimentara 2026-03-15:
 - in backend `supabase`, daca `org_state` lipseste, legacy-ul este migrat in `org_state`
 - runtime-ul curent nu mai scrie in `app_state`
 - asta inchide ambiguitatea ramasa din Sprint 5 fara sa rupa compatibilitatea cu datele vechi
+
+Actualizare suplimentara 2026-03-15:
+
+- verificarea live RLS a fost rulata din nou si trece:
+  - `npm run verify:supabase:rls`
+  - timestamp:
+    - `2026-03-15T18:40:34.973Z`
+- confirma operational:
+  - izolare pe `organizations`
+  - izolare pe `memberships`
+  - citire izolata pentru `org_state`
+  - citire izolata pentru `evidence_objects`
+  - `viewer` nu poate modifica `org_state`

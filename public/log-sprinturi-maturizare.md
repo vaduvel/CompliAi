@@ -2004,6 +2004,23 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas operational - verificare RLS live re-rulata:
+
+- `npm run verify:supabase:rls` a fost rulat din nou la:
+  - `2026-03-15T18:40:34.973Z`
+- verdict:
+  - `ready = true`
+- confirma din nou:
+  - izolare pentru `organizations`
+  - izolare pentru `memberships`
+  - citire izolata pentru `org_state`
+  - citire izolata pentru `evidence_objects`
+  - `viewer` nu poate modifica `org_state`
+
+Validare dupa pas:
+
+- `npm run verify:supabase:rls` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

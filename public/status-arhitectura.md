@@ -1434,3 +1434,20 @@ Asta este sanatos arhitectural pentru ca:
 - elimina ambiguitatea intre doua tabele cloud pentru acelasi state operational
 - pastreaza compatibilitatea cu datele legacy fara sa le lase in traseul curent
 - face mai clara trecerea spre RLS si spre un source of truth unic in cloud
+
+## Actualizare 2026-03-15 - verificarea RLS live este proaspata
+
+- `npm run verify:supabase:rls` a fost rulat din nou la:
+  - `2026-03-15T18:40:34.973Z`
+- verificarea confirma din nou:
+  - izolare pentru `organizations`
+  - izolare pentru `memberships`
+  - citire izolata pentru `org_state`
+  - citire izolata pentru `evidence_objects`
+  - blocarea scrierii in `org_state` pentru `viewer`
+
+Asta este sanatos arhitectural pentru ca:
+
+- inchide operational itemul minim de RLS multi-org
+- lasa `org_state` source of truth intr-o pozitie mai credibila pentru mediu cloud
+- reduce diferenta dintre modelul din documente si verificarea live reala
