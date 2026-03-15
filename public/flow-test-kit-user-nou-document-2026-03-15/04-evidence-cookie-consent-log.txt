@@ -1,0 +1,15 @@
+Titlu: Dovada control consimtamant cookies
+
+Data verificare: 2026-03-15
+Canal: web production
+Owner: marketing operations
+
+Observatii:
+- Bannerul de consimtamant blocheaza analytics si tracking pana la accept explicit.
+- Categoriile neesentiale sunt dezactivate by default.
+- Preferintele sunt salvate cu timestamp si versiune de text legal.
+
+Artefacte mentionate:
+- screenshot banner versiunea 3.2
+- export log preferinte din consent manager
+- nota de verificare semnata de owner operational

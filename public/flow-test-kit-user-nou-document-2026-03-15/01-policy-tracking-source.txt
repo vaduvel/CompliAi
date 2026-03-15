@@ -1,0 +1,7 @@
+Politica de confidentialitate pentru magazinul online
+
+Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.
+Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.
+Consimtamantul trebuie colectat inainte de activarea scripturilor neesentiale.
+
+Pentru sistemele automate cu impact asupra utilizatorului final, decizia finala trebuie validata de un operator uman.

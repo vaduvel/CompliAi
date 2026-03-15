@@ -1,0 +1,19 @@
+Titlu: Procedura de human review pentru fluxuri automate
+
+Data actualizare: 2026-03-10
+Owner: compliance lead
+
+Reguli:
+- niciun rezultat cu impact asupra utilizatorului nu este trimis extern fara review uman
+- operatorul poate face override si trebuie sa lase motivul deciziei
+- toate exceptiile sunt jurnalizate cu data, reviewer si motiv
+
+Roluri:
+- reviewer primar: compliance analyst
+- reviewer secundar: operations lead
+- escalare: legal / DPO
+
+Control minim:
+- validare a scorului automat
+- confirmare sursa datelor
+- confirmare motivatie finala

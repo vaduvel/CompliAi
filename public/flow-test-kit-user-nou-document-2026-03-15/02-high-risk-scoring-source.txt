@@ -1,0 +1,6 @@
+Procedura de eligibilitate pentru serviciu digital
+
+Acest flux foloseste scoring automat pentru eligibilitate si decizie automata asupra solicitarilor.
+Rezultatul poate influenta accesul utilizatorului la servicii si necesita validare umana inainte de decizia finala.
+
+Sistemul produce un scor intern care este folosit pentru prioritizare si verificare operationala.

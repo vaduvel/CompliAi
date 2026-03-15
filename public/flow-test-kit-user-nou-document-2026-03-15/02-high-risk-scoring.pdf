@@ -1,0 +1,42 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 832 >>
+stream
+BT /F1 18 Tf 1 0 0 1 56 780 Tm (High Risk Scoring Test Document) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 752 Tm ( ) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 736 Tm (Procedura de eligibilitate pentru serviciu digital) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 720 Tm ( ) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 704 Tm (Acest flux foloseste scoring automat pentru eligibilitate si decizie automata) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 688 Tm (asupra solicitarilor.) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 672 Tm (Rezultatul poate influenta accesul utilizatorului la servicii si necesita) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 656 Tm (validare umana inainte de decizia finala.) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 640 Tm ( ) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 624 Tm (Sistemul produce un scor intern care este folosit pentru prioritizare si) Tj ET
+BT /F1 12 Tf 1 0 0 1 56 608 Tm (verificare operationala.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000185 00000 n 
+0000001067 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1193
+%%EOF

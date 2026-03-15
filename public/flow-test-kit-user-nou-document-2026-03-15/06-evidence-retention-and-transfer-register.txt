@@ -1,0 +1,19 @@
+Titlu: Registru minim retentie si transfer international
+
+Data revizie: 2026-03-12
+Owner: privacy office
+
+Retentie:
+- CV-uri si documente candidati: 365 zile
+- loguri de decizie si audit trail: 365 zile
+- stergere sau anonimizare la expirarea termenului operational
+
+Transfer international:
+- inferenta auxiliara poate folosi resurse in us-east-1
+- exista standard contractual clauses pentru transfer
+- exceptiile sunt notate in registrul de transfer international
+
+Controale:
+- verificare trimestriala a furnizorilor
+- verificare locatie de procesare
+- audit intern pe retention si deletion workflow
