@@ -198,7 +198,6 @@ export function OverviewPageSections({
           openAlertsCount={openAlerts.length}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
           latestDocumentScan={latestDocumentScan}
-          latestManifestScan={latestManifestScan}
         />
         <SnapshotStatusCard
           latestDocumentScan={latestDocumentScan}
@@ -272,9 +271,9 @@ function OverviewSummaryStrip({
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardContent className="px-5 py-5">
         <SummaryStrip
-          eyebrow="Snapshot"
-          title="Vezi instant ce faci acum"
-          description="Starea si urmatorul pas trebuie sa bata explicatia."
+          eyebrow="Stare curenta"
+          title="Ce e blocat si unde mergi"
+          description="Vezi imediat ce cere actiune."
           items={items}
         />
       </CardContent>
@@ -560,45 +559,43 @@ export function DashboardGuideCard({
   openAlertsCount,
   hasValidatedBaseline,
   latestDocumentScan,
-  latestManifestScan,
 }: {
   activeRiskCount: number
   openAlertsCount: number
   hasValidatedBaseline: boolean
   latestDocumentScan: ScanRecord | null
-  latestManifestScan: ScanRecord | null
 }) {
   const guideSteps = [
     {
       id: "step-scan",
       title: "Scanare",
-      description: "Pornesti analiza pe sursa noua.",
+      description: "Adaugi sursa noua.",
       href: "/dashboard/scanari",
       icon: FileText,
       meta: latestDocumentScan
         ? `Ultimul document: ${latestDocumentScan.documentName}`
-        : "Inca nu exista documente analizate",
+        : "Inca lipseste sursa initiala",
     },
     {
       id: "step-confirm",
       title: "Control",
-      description: "Revizuiesti baseline-ul si drift-ul.",
+      description: "Confirmi baseline si drift.",
       href: "/dashboard/sisteme",
       icon: GitBranch,
       meta: hasValidatedBaseline
-        ? "Baseline validat si gata pentru comparatii"
-        : "Baseline inca nevalidat",
+        ? "Baseline validat"
+        : "Baseline nevalidat",
     },
     {
       id: "step-close",
       title: "Dovada",
-      description: "Inchizi task-uri si verifici livrabilul.",
+      description: "Inchizi taskul si pregatesti livrabilul.",
       href: "/dashboard/checklists",
       icon: ListChecks,
       meta:
         activeRiskCount > 0
-          ? `${activeRiskCount} riscuri active cer remediere`
-          : "Poti verifica dovada si pregati livrabilul",
+          ? `${activeRiskCount} riscuri active cer inchidere`
+          : "Dovada este gata de verificare",
     },
   ]
 
@@ -607,18 +604,11 @@ export function DashboardGuideCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Unde continui</CardTitle>
+            <CardTitle className="text-xl">Traseu rapid</CardTitle>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-              {openAlertsCount} drifturi deschise
-            </Badge>
-            {latestManifestScan && (
-              <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
-                ultim manifest procesat
-              </Badge>
-            )}
-          </div>
+          <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+            {openAlertsCount} drifturi deschise
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="grid gap-3 pt-5 md:grid-cols-3">
@@ -637,8 +627,8 @@ export function DashboardGuideCard({
                 <ArrowRight className="size-4 text-[var(--color-muted)] transition group-hover:text-[var(--color-primary)]" strokeWidth={2.25} />
               </div>
               <p className="mt-3 text-base font-semibold text-[var(--color-on-surface)]">{step.title}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">{step.meta}</p>
-              <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{step.description}</p>
+              <p className="mt-3 text-xs leading-5 text-[var(--color-muted)]">{step.meta}</p>
             </Link>
           )
         })}
@@ -688,7 +678,7 @@ export function SnapshotStatusCard({
       <CardHeader className="border-b border-[var(--color-border)] pb-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Snapshot rapid</CardTitle>
+            <CardTitle className="text-xl">Stare curenta</CardTitle>
           </div>
           <Badge
             className={
@@ -738,13 +728,13 @@ export function SnapshotStatusCard({
             href="/dashboard/scanari"
             className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-hover)]"
           >
-            Deschide Scanari
+            Scanare
           </Link>
           <Link
             href="/dashboard/sisteme"
             className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-4 text-sm text-[var(--color-on-surface)] transition hover:bg-[var(--color-surface-hover)]"
           >
-            Verifica Control
+            Control
           </Link>
         </div>
       </CardContent>

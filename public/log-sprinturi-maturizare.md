@@ -2081,6 +2081,24 @@ Pornire executie - `Dashboard` executive declutter:
   - `npm run lint` -> verde
   - `npm run build` -> verde
 
+Pas suplimentar - `Dashboard` orientation hardening:
+
+- `components/compliscan/route-sections.tsx` a primit un al doilea pass scurt de austeritate
+- `SummaryStrip` spune acum mai direct:
+  - ce este blocat
+  - unde mergi
+- cardul de orientare a fost comprimat suplimentar:
+  - `Unde continui` -> `Traseu rapid`
+  - meta-ul ramane, dar descrierile au devenit mai scurte si mai imperative
+  - badge-ul decorativ pentru ultimul manifest a fost scos
+- `Snapshot rapid` a devenit `Stare curenta`
+- CTA-urile secundare au fost scurtate la:
+  - `Scanare`
+  - `Control`
+- scopul pasului:
+  - `Dashboard` sa se simta si mai clar ca home operational
+  - starea si traseul sa bata framing-ul ramas
+
 Pas de performanta - `Audit si export`:
 
 - `app/dashboard/rapoarte/page.tsx` pastreaza shell-ul de readiness si exportul principal, dar nu mai tine upfront toate panourile suport

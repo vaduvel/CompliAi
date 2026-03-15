@@ -1147,6 +1147,26 @@ Asta este sanatos arhitectural pentru ca:
 - `Control drift` nu mai sta in plan secund cand utilizatorul cauta blocajul real
 - `Unde continui` ramane util, dar nu mai concureaza cu `next action`
 
+## Actualizare 2026-03-15 - `Dashboard` orientation hardening
+
+- `Dashboard` a primit un al doilea pass scurt de austeritate, fara schimbare de logic
+- `SummaryStrip` pune acum explicit accent pe:
+  - ce este blocat
+  - unde mergi
+- cardul de orientare a fost compactat suplimentar:
+  - `Unde continui` -> `Traseu rapid`
+  - badge-ul decorativ pentru ultimul manifest a fost scos
+  - descrierile pasilor sunt mai scurte si mai imperative
+- cardul de stare a fost si el intarit:
+  - `Snapshot rapid` -> `Stare curenta`
+  - CTA-urile au fost scurtate la `Scanare` / `Control`
+
+Asta este sanatos arhitectural pentru ca:
+
+- home-ul se apropie si mai mult de rolul de orientare executiva
+- framing-ul ramas nu mai concureaza cu blocajul si traseul
+- pasul ramane strict de UX hierarchy, fara schimbare de business logic
+
 ## Actualizare 2026-03-15 - `Audit si export` component density pass
 
 - `ExportCenter` nu mai lasa toate exporturile la aceeasi greutate
