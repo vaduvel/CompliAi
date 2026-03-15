@@ -872,3 +872,16 @@ Actualizare suplimentara 2026-03-15:
 - ownership-ul ramas:
   - Codex principal = shell si compozitie de pagina
   - Codex 2 = densitate in componentele interne din `Setari`
+
+Actualizare suplimentara 2026-03-15:
+
+- `Setari` a primit si component-level austerity pass pe lot stacked
+- asta inseamna:
+  - verdictul operational urca mai sus
+  - actiunea recomandata este mai clara
+  - semnalele active sunt separate de detaliul tehnic
+  - disclosure-ul local tine suportul tehnic jos, fara sa-l ascunda
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba shell-ul de pagina
+  - intareste rolul de suprafata administrativa sobra

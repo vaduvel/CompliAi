@@ -1,6 +1,6 @@
 "use client"
 
-import type { LucideIcon } from "lucide-react"
+import { ChevronDown, type LucideIcon } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 
@@ -115,11 +115,13 @@ export function SettingsTabIntro({
   description: string
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
         {title}
       </p>
-      <p className="max-w-3xl text-sm text-[var(--color-on-surface-muted)]">{description}</p>
+      <p className="max-w-2xl text-sm leading-6 text-[var(--color-on-surface-muted)]">
+        {description}
+      </p>
     </div>
   )
 }
@@ -134,12 +136,14 @@ export function SettingsTile({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-3.5">
       <div className="flex items-center gap-2 text-[var(--color-muted)]">
-        <Icon className="size-4" strokeWidth={2.25} />
-        <p className="text-sm">{label}</p>
+        <span className="grid size-7 place-items-center rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)]">
+          <Icon className="size-3.5" strokeWidth={2.25} />
+        </span>
+        <p className="text-[11px] uppercase tracking-[0.18em]">{label}</p>
       </div>
-      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{value}</p>
+      <p className="mt-3 text-sm font-semibold leading-5 text-[var(--color-on-surface)]">{value}</p>
     </div>
   )
 }
@@ -155,11 +159,11 @@ export function EndpointRow({
 }) {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium text-[var(--color-on-surface)]">{label}</span>
         <Badge variant="outline">{badge}</Badge>
       </div>
-      <p className="mt-2 break-all text-xs text-[var(--color-on-surface-muted)]">{value}</p>
+      <p className="mt-2 break-all text-xs leading-5 text-[var(--color-on-surface-muted)]">{value}</p>
     </div>
   )
 }
@@ -173,6 +177,98 @@ export function OperationalLoadingCard({ children }: { children: React.ReactNode
     >
       {children}
     </div>
+  )
+}
+
+export function SettingsStatusBlock({
+  eyebrow,
+  title,
+  description,
+  children,
+}: {
+  eyebrow: string
+  title: string
+  description?: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">{eyebrow}</p>
+      <p className="mt-2 text-sm font-semibold text-[var(--color-on-surface)]">{title}</p>
+      {description ? (
+        <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{description}</p>
+      ) : null}
+      {children ? <div className="mt-3">{children}</div> : null}
+    </div>
+  )
+}
+
+export function SettingsSignalCard({
+  title,
+  items,
+  tone,
+  emptyMessage,
+}: {
+  title: string
+  items: string[]
+  tone: "success" | "warning" | "destructive"
+  emptyMessage?: string
+}) {
+  const toneClass =
+    tone === "destructive"
+      ? "border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]"
+      : tone === "warning"
+        ? "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
+        : "border-[var(--color-success)] bg-[var(--color-primary-muted)] text-[var(--color-success)]"
+
+  return (
+    <div className={`rounded-2xl border p-4 text-sm ${toneClass}`}>
+      <p className="font-semibold text-[var(--color-on-surface)]">{title}</p>
+      {items.length > 0 ? (
+        <ul className="mt-2 space-y-1.5">
+          {items.map((item) => (
+            <li key={item}>• {item}</li>
+          ))}
+        </ul>
+      ) : emptyMessage ? (
+        <p className="mt-2">{emptyMessage}</p>
+      ) : null}
+    </div>
+  )
+}
+
+export function SettingsDisclosure({
+  eyebrow,
+  title,
+  description,
+  children,
+}: {
+  eyebrow: string
+  title: string
+  description: string
+  children: React.ReactNode
+}) {
+  return (
+    <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+      <summary className="cursor-pointer list-none">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              {eyebrow}
+            </p>
+            <p className="mt-1 text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+              {description}
+            </p>
+          </div>
+          <ChevronDown
+            className="mt-1 size-4 shrink-0 text-[var(--color-muted)]"
+            strokeWidth={2.25}
+          />
+        </div>
+      </summary>
+      <div className="mt-4">{children}</div>
+    </details>
   )
 }
 

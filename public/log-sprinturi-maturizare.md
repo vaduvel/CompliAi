@@ -1936,6 +1936,28 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas component-level - `Setari` austerity pass:
+
+- lotul component-level delegat lui Codex 2 a fost absorbit pe branch stacked curat
+- fisierele atinse:
+  - `components/compliscan/settings/settings-integrations-tab.tsx`
+  - `components/compliscan/settings/settings-operational-tab.tsx`
+  - `components/compliscan/settings/settings-shared.tsx`
+- `Integrari` foloseste acum mai clar:
+  - `stare curenta`
+  - `actiune recomandata`
+  - blocaje / avertismente sub semnal dedicat
+  - detaliul tehnic sub disclosure local
+- `Operational` foloseste aceeasi ierarhie:
+  - health / release verdict sus
+  - urmatorul pas explicit
+  - suportul tehnic sub disclosure
+- scopul pasului:
+  - `Setari` sa se simta mai sobru si mai operational
+  - statusul si urmatorul pas sa bata explicatia
+- efect:
+  - `/dashboard/setari` ramane stabil la `7.75 kB / 183 kB first load`
+
 Pas de UX runtime - `Setari wave 1` page-shell austerity:
 
 - `app/dashboard/setari/page.tsx` foloseste acum un shell mai sobru si mai clar administrativ
