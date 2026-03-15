@@ -511,6 +511,7 @@ Starea si dovezile trebuie sa stea pe o fundatie mai solida.
   - in backend `supabase`, upload-ul esueaza explicit daca metadata-ul nu poate fi sincronizat
 - `public.evidence_objects` este acum si consumat ca registru operational:
   - route-ul de citire a dovezii poate hidrata metadata din cloud inainte de stream sau redirect semnat
+  - route-ul poate face acum si lookup sigur pe `org_id + task_id + attachment_id` cand metadata locala lipseste
   - `Audit Pack` bundle foloseste acelasi registru pe traseul de copiere
 - `DashboardPayload` hidrateaza acum `taskState.attachedEvidenceMeta` din `public.evidence_objects`:
   - UI-ul si exporturile server-side care pornesc din payload vad metadata de evidence actualizata din DB

@@ -5,6 +5,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getStoredEvidenceSignedUrl, readStoredEvidenceFile } from "@/lib/server/evidence-storage"
 import { readState } from "@/lib/server/mvp-store"
+import { loadTaskEvidenceObjectFromSupabase } from "@/lib/server/supabase-evidence-read"
 
 export const runtime = "nodejs"
 
@@ -26,8 +27,25 @@ export async function GET(
       return jsonError("Task-ul nu mai există în starea curentă.", 404, "TASK_NOT_FOUND")
     }
 
-    const evidence = state.taskState[id]?.attachedEvidenceMeta
-    if (!evidence || evidence.id !== evidenceId) {
+    const stateEvidence = state.taskState[id]?.attachedEvidenceMeta
+    const cloudEvidence = await loadTaskEvidenceObjectFromSupabase({
+      orgId: session.orgId,
+      taskId: id,
+      attachmentId: evidenceId,
+    })
+    const evidence =
+      stateEvidence?.id === evidenceId
+        ? cloudEvidence
+          ? {
+              ...stateEvidence,
+              ...cloudEvidence,
+              accessPath: cloudEvidence.accessPath ?? stateEvidence.accessPath,
+              publicPath: cloudEvidence.publicPath ?? stateEvidence.publicPath,
+            }
+          : stateEvidence
+        : cloudEvidence
+
+    if (!evidence) {
       return jsonError("Dovada cerută nu mai există pentru acest task.", 404, "EVIDENCE_NOT_FOUND")
     }
 

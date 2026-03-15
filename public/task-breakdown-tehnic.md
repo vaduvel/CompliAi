@@ -182,7 +182,8 @@ Fronturile active acum:
 - [~] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud
-  - mai ramane extinderea consumului in UI / traceability / views specializate
+  - route-ul controlat de access la dovada face acum lookup sigur si prin `org_id + task_id + attachment_id` cand metadata locala lipseste sau este invechita
+  - mai ramane extinderea consumului in UI / traceability / views specializate care nu pornesc deja din payload-ul server-side
 - [~] source of truth cloud pentru tenancy
   - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB

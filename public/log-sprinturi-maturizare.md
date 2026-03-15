@@ -1936,6 +1936,28 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de hardening - route controlat pentru evidence cloud:
+
+- `GET /api/tasks/[id]/evidence/[evidenceId]` nu mai depinde doar de metadata ramasa local in `taskState`
+- route-ul foloseste acum si registrul `public.evidence_objects` prin lookup sigur pe:
+  - `org_id`
+  - `task_id`
+  - `attachment_id`
+- asta inchide un gap ramas intre:
+  - upload / mirror in cloud
+  - payload server-side hidratat
+  - traseul specializat de access la dovada
+- efect:
+  - dovada poate fi servita sau redirectata corect si cand metadata locala lipseste, dar asocierea task-dovada exista deja in registrul cloud
+  - se reduce riscul de `EVIDENCE_NOT_FOUND` fals pe traseele cu storage privat `supabase`
+
+Validare dupa pas:
+
+- `npm test -- 'app/api/tasks/[id]/evidence/[evidenceId]/route.test.ts' 'lib/server/supabase-evidence-read.test.ts'` -> verde
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas operational - `Setari / Acces` pentru membri existenti din workspace:
 
 - `lib/server/auth.ts` poate adauga acum un utilizator deja existent in workspace in organizatia curenta:

@@ -226,6 +226,7 @@ Progres deja pornit:
     - in backend `supabase`, esecul sincronizarii blocheaza upload-ul
   - `public.evidence_objects` este acum folosit si la citire:
     - access route-ul de evidence poate hidrata metadata din registrul cloud
+    - access route-ul poate face acum si lookup sigur pe `org_id + task_id + attachment_id`, nu doar pe metadata ramasa local in state
     - `Audit Pack` bundle foloseste acelasi registru pentru copierea dovezilor
   - `DashboardPayload` hidrateaza acum `taskState.attachedEvidenceMeta` din registrul cloud:
     - dashboard-ul, traceability-ul si exporturile server-side vad metadata operationala actualizata

@@ -20,6 +20,7 @@ vi.mock("@/lib/server/supabase-rest", () => ({
 import {
   hydrateEvidenceAttachmentsFromSupabase,
   loadEvidenceObjectFromSupabase,
+  loadTaskEvidenceObjectFromSupabase,
   shouldReadEvidenceRegistryFromSupabase,
 } from "@/lib/server/supabase-evidence-read"
 
@@ -119,6 +120,45 @@ describe("lib/server/supabase-evidence-read", () => {
           status: "weak",
         }),
       })
+    )
+  })
+
+  it("citeste un obiect de evidence pentru task-ul corect din registrul cloud", async () => {
+    mocks.getConfiguredDataBackendMock.mockReturnValue("supabase")
+    mocks.supabaseSelectMock.mockResolvedValueOnce([
+      {
+        attachment_id: "evidence-1",
+        task_id: "rem-task-1",
+        file_name: "proof.pdf",
+        mime_type: "application/pdf",
+        size_bytes: 111,
+        kind: "document_bundle",
+        storage_provider: "supabase_private",
+        storage_key: "org-1/task-1/proof.pdf",
+        uploaded_at: "2026-03-13T11:00:00.000Z",
+        metadata: {
+          accessPath: "/api/tasks/rem-task-1/evidence/evidence-1",
+        },
+      },
+    ])
+
+    const result = await loadTaskEvidenceObjectFromSupabase({
+      orgId: "org-1",
+      taskId: "rem-task-1",
+      attachmentId: "evidence-1",
+    })
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: "evidence-1",
+        storageProvider: "supabase_private",
+        accessPath: "/api/tasks/rem-task-1/evidence/evidence-1",
+      })
+    )
+    expect(mocks.supabaseSelectMock).toHaveBeenCalledWith(
+      "evidence_objects",
+      "select=attachment_id,task_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.org-1&task_id=eq.rem-task-1&attachment_id=eq.evidence-1&limit=1",
+      "public"
     )
   })
 

@@ -9,6 +9,7 @@ import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
 
 type EvidenceObjectRow = {
   attachment_id: string
+  task_id?: string
   file_name: string
   mime_type: string
   size_bytes: number
@@ -39,6 +40,29 @@ export async function loadEvidenceObjectFromSupabase(input: {
   const rows = await supabaseSelect<EvidenceObjectRow>(
     "evidence_objects",
     `select=attachment_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.${input.orgId}&attachment_id=eq.${input.attachmentId}&limit=1`,
+    "public"
+  )
+
+  const row = rows[0]
+  if (!row) {
+    return null
+  }
+
+  return mapEvidenceObjectRow(row)
+}
+
+export async function loadTaskEvidenceObjectFromSupabase(input: {
+  orgId: string
+  taskId: string
+  attachmentId: string
+}): Promise<TaskEvidenceAttachment | null> {
+  if (!shouldReadEvidenceRegistryFromSupabase()) {
+    return null
+  }
+
+  const rows = await supabaseSelect<EvidenceObjectRow>(
+    "evidence_objects",
+    `select=attachment_id,task_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.${input.orgId}&task_id=eq.${input.taskId}&attachment_id=eq.${input.attachmentId}&limit=1`,
     "public"
   )
 
