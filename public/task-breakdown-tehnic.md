@@ -1049,6 +1049,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - verdict curent:
     - `Dashboard` tine directia buna
     - urmatoarea densitate reala ramasă este in `Checklists`
+- [x] `Doc governance pass` pentru `public/*.md`
+  - exista acum harta explicita:
+    - `public/doc-governance-map-2026-03-15.md`
+  - `Tier 0` / `Tier 1` / `Tier 2` / `Tier 3` / `Tier 4` separa:
+    - canonul
+    - referintele active
+    - working docs conditionale
+    - auditul istoric
+    - delegarea / memo-urile interne
+  - scopul este reducerea context noise-ului si a incarcarii inutile in sesiuni lungi
 - [x] `Checklists wave 1`
   - compactare a zonei de deasupra board-ului
   - ierarhie mai clara pentru filtre

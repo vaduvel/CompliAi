@@ -997,3 +997,15 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu schimba wiring-ul taskurilor
   - intareste regula `executia bate framing-ul`
+
+Actualizare suplimentara 2026-03-15:
+
+- a fost facut un `doc governance pass` pentru `public/*.md`
+- asta inseamna:
+  - exista o singura harta de clasificare a documentelor
+  - canonul si documentele active sunt separate explicit de audituri istorice si memo-uri interne
+  - incarcam mai putin context inutil in sesiunile de implementare
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba modelul de produs
+  - reduce haosul operational si costul de context

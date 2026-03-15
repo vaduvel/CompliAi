@@ -2250,6 +2250,23 @@ Audit runtime local - `browser audit` partial:
   - urmatoarea densitate reala a ramas in `Checklists`
 - auditul vizual complet in browser ramane deschis, dar nu mai lucram in orb
 
+Pas de guvernanta - `doc governance pass`:
+
+- a fost adaugat:
+  - `public/doc-governance-map-2026-03-15.md`
+- documentul separa explicit:
+  - `Tier 0` = canon oficial
+  - `Tier 1` = referinte active de produs / runtime
+  - `Tier 2` = working docs conditionale
+  - `Tier 3` = input / audit istoric / backlog auxiliar
+  - `Tier 4` = delegare / coordonare / memo-uri interne
+- efect:
+  - reducem context noise-ul din `public/*.md`
+  - nu mai incarcam implicit audituri istorice, PR brief-uri si task-uri delegate
+  - scade costul de context pentru sesiunile lungi si pentru noii agenti
+- validare:
+  - `npm run lint`
+
 Pas suplimentar - `Checklists wave 2` signal pass:
 
 - `app/dashboard/checklists/page.tsx`

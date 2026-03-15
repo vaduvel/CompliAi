@@ -1348,3 +1348,20 @@ Asta este sanatos arhitectural pentru ca:
 - `Remediere` ramane pagina de executie, nu mini-dashboard statistic
 - blocajul de audit este vizibil mai devreme
 - `summary / detail / action` este aplicat si pe partea de executie, nu doar pe orientare
+
+## Actualizare 2026-03-15 - `doc governance pass`
+
+- repo-ul are acum o harta explicita pentru `public/*.md`:
+  - `public/doc-governance-map-2026-03-15.md`
+- documentatia este separata pe tier-uri:
+  - canon
+  - referinte active
+  - working docs conditionale
+  - input / audit istoric
+  - memo-uri de coordonare
+
+Asta este sanatos arhitectural pentru ca:
+
+- sursa de adevar ramane mai clara
+- contextul incarcat in implementare devine mai mic si mai consistent
+- scade riscul ca un audit istoric sau un task intern sa bata canonul operational
