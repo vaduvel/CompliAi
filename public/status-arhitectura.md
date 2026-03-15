@@ -1167,3 +1167,23 @@ Asta este sanatos arhitectural pentru ca:
 - nu muta `Audit si export` spre executie
 - aplica `summary / detail / action` si la nivel de componente
 - nu schimba shell-ul paginii si nu schimba business logic
+
+## Actualizare 2026-03-15 - `Setari` component austerity pass
+
+- `Setari` a primit si lotul component-level, separat de shell-ul paginii
+- taburile `Integrari` si `Operational` folosesc acum o ierarhie mai dura:
+  - `stare curenta`
+  - `actiune recomandata`
+  - semnale active
+  - detaliu tehnic sub disclosure
+- `settings-shared` ofera acum primitive locale pentru:
+  - `SettingsStatusBlock`
+  - `SettingsSignalCard`
+  - `SettingsDisclosure`
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Setari` ramane pagina administrativa, nu mini-dashboard paralel
+- statusul operational si urmatorul pas bat explicatia
+- detaliul tehnic ramane disponibil, dar nu mai concureaza cu verdictul principal
+- pasul nu schimba shell-ul paginii si nu schimba business logic

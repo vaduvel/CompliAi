@@ -1120,8 +1120,18 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `SummaryStrip` mai direct
   - blocul de `Flux canonic` comprimat fara cardurile de framing
   - descrierile taburilor comprimate pentru scanare mai rapida
+- [x] `Setari` component-level austerity pass
+  - `Integrari` foloseste:
+    - `stare curenta`
+    - `actiune recomandata`
+    - semnale active
+    - detaliu tehnic sub disclosure
+  - `Operational` foloseste aceeasi ierarhie pentru:
+    - `health`
+    - `release readiness`
+  - `settings-shared` are primitive locale noi pentru compozitie si disclosure
 - [x] efect confirmat in build:
-  - `/dashboard/setari` a coborat la `7.35 kB / 183 kB first load`
+  - `/dashboard/setari` ramane in zona `7.75 kB / 183 kB first load` pe lotul stacked curent
 - [x] validare completa dupa pas:
   - `npm test`
   - `npm run lint`

@@ -11,11 +11,30 @@ import {
   healthBadgeVariant,
   OperationalLoadingCard,
   releaseBadgeVariant,
+  SettingsDisclosure,
+  SettingsSignalCard,
+  SettingsStatusBlock,
   SettingsTabIntro,
   SettingsTile,
   type ApplicationHealthStatus,
   type ReleaseReadinessStatus,
 } from "@/components/compliscan/settings/settings-shared"
+
+function recommendedHealthAction(appHealth: ApplicationHealthStatus) {
+  if (!appHealth) return "Se verifica starea aplicatiei."
+  if (appHealth.blockers.length > 0) return "Inchide blocajele inainte de operare critica."
+  if (appHealth.warnings.length > 0) return "Revizuieste avertismentele si confirma traseul cloud."
+  return "Nu este nevoie de actiune imediata."
+}
+
+function recommendedReleaseAction(releaseReadiness: ReleaseReadinessStatus) {
+  if (!releaseReadiness) return "Se verifica verdictul de release."
+  if (releaseReadiness.state === "blocked") return "Nu promova build-ul pana cand blocajele sunt inchise."
+  if (releaseReadiness.warnings.length > 0 || releaseReadiness.state === "review") {
+    return "Verifica avertismentele inainte de promovare."
+  }
+  return "Build-ul poate fi promovat controlat."
+}
 
 export function SettingsOperationalTab({
   currentUserResolved,
@@ -40,27 +59,29 @@ export function SettingsOperationalTab({
     <div className="space-y-6">
       <SettingsTabIntro
         title="Operational"
-        description="Aici decizi dacă instalația este sănătoasă și dacă build-ul poate fi promovat controlat."
+        description="Aici verifici starea instalatiei si decizi daca build-ul poate fi promovat controlat."
       />
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <CardTitle className="text-xl">Health check aplicatie</CardTitle>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Rezumat rapid pentru starea de operare: sesiune, backend-uri, fallback și traseul cloud principal.
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <CardTitle className="text-xl">Health check aplicatie</CardTitle>
+                <Badge variant={healthBadgeVariant(appHealth?.state, appHealthLoading)}>
+                  {appHealthLoading
+                    ? "Se verifica"
+                    : appHealth?.state === "healthy"
+                      ? "Sanatos"
+                      : appHealth?.state === "blocked"
+                        ? "Blocat"
+                        : "Degradat"}
+                </Badge>
+              </div>
+              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+                Semnal operational pentru sesiune, backend-uri, fallback si traseul cloud principal.
               </p>
             </div>
-            <Badge variant={healthBadgeVariant(appHealth?.state, appHealthLoading)}>
-              {appHealthLoading
-                ? "Se verifica"
-                : appHealth?.state === "healthy"
-                  ? "Sanatos"
-                  : appHealth?.state === "blocked"
-                    ? "Blocat"
-                    : "Degradat"}
-            </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,7 +99,13 @@ export function SettingsOperationalTab({
                 {appHealth.checks.map((check) => (
                   <SettingsTile
                     key={check.key}
-                    icon={check.key === "session_secret" ? KeyRound : check.key === "supabase_operational" ? Cloud : ShieldCheck}
+                    icon={
+                      check.key === "session_secret"
+                        ? KeyRound
+                        : check.key === "supabase_operational"
+                          ? Cloud
+                          : ShieldCheck
+                    }
                     label={check.label}
                     value={formatHealthCheckSummary(check.state, check.summary)}
                   />
@@ -86,12 +113,12 @@ export function SettingsOperationalTab({
               </div>
 
               <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
-                    Rezumat operational
-                  </p>
-                  <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
-                    <p>{appHealth.summary}</p>
+                <SettingsStatusBlock
+                  eyebrow="Stare curenta"
+                  title={appHealth.summary}
+                  description="Acesta este verdictul agregat pentru operarea curenta a aplicatiei."
+                >
+                  <div className="space-y-2 text-sm text-[var(--color-on-surface-muted)]">
                     <p>
                       Auth:{" "}
                       <span className="font-semibold text-[var(--color-on-surface)]">
@@ -110,36 +137,39 @@ export function SettingsOperationalTab({
                         {appHealth.config.localFallbackAllowed ? "Permis" : "Blocat"}
                       </span>
                     </p>
+                  </div>
+                </SettingsStatusBlock>
+
+                <div className="space-y-4">
+                  <SettingsStatusBlock
+                    eyebrow="Actiune recomandata"
+                    title={recommendedHealthAction(appHealth)}
+                    description="Starea si urmatorul pas bat explicatia detaliata."
+                  >
                     <p className="text-xs text-[var(--color-muted)]">
                       Endpoint intern: <code>/api/health</code>
                     </p>
-                  </div>
-                </div>
+                  </SettingsStatusBlock>
 
-                <div className="space-y-4">
                   {appHealth.blockers.length > 0 ? (
-                    <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
-                      <p className="font-semibold text-[var(--color-on-surface)]">Blocaje active</p>
-                      <ul className="mt-2 space-y-1">
-                        {appHealth.blockers.map((blocker) => (
-                          <li key={blocker}>• {blocker}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  {appHealth.warnings.length > 0 ? (
-                    <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
-                      <p className="font-semibold text-[var(--color-on-surface)]">Avertismente</p>
-                      <ul className="mt-2 space-y-1">
-                        {appHealth.warnings.map((warning) => (
-                          <li key={warning}>• {warning}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    <SettingsSignalCard
+                      title="Blocaje active"
+                      items={appHealth.blockers}
+                      tone="destructive"
+                    />
+                  ) : appHealth.warnings.length > 0 ? (
+                    <SettingsSignalCard
+                      title="Avertismente"
+                      items={appHealth.warnings}
+                      tone="warning"
+                    />
                   ) : (
-                    <div className="rounded-2xl border border-[var(--color-success)] bg-[var(--color-primary-muted)] p-4 text-sm text-[var(--color-success)]">
-                      Aplicatia trece health check-ul curent fara blocaje sau avertismente operationale majore.
-                    </div>
+                    <SettingsSignalCard
+                      title="Fara semnale majore"
+                      items={[]}
+                      tone="success"
+                      emptyMessage="Aplicatia trece health check-ul curent fara blocaje sau avertismente operationale majore."
+                    />
                   )}
                 </div>
               </div>
@@ -150,30 +180,32 @@ export function SettingsOperationalTab({
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <CardTitle className="text-xl">Pregatire release</CardTitle>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Rezumat clar pentru a decide daca build-ul poate fi promovat ca release controlat.
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <CardTitle className="text-xl">Pregatire release</CardTitle>
+                <Badge
+                  variant={
+                    currentUserResolved && !canViewReleaseReadiness
+                      ? "outline"
+                      : releaseBadgeVariant(releaseReadiness?.state, releaseReadinessLoading)
+                  }
+                >
+                  {currentUserResolved && !canViewReleaseReadiness
+                    ? "Restrictionat"
+                    : releaseReadinessLoading
+                      ? "Se verifica"
+                      : releaseReadiness?.state === "ready"
+                        ? "Pregatit"
+                        : releaseReadiness?.state === "blocked"
+                          ? "Blocat"
+                          : "Revizuire"}
+                </Badge>
+              </div>
+              <p className="max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
+                Verdictul care spune daca build-ul poate fi promovat ca release controlat.
               </p>
             </div>
-            <Badge
-              variant={
-                currentUserResolved && !canViewReleaseReadiness
-                  ? "outline"
-                  : releaseBadgeVariant(releaseReadiness?.state, releaseReadinessLoading)
-              }
-            >
-              {currentUserResolved && !canViewReleaseReadiness
-                ? "Restrictionat"
-                : releaseReadinessLoading
-                  ? "Se verifica"
-                  : releaseReadiness?.state === "ready"
-                    ? "Pregatit"
-                    : releaseReadiness?.state === "blocked"
-                      ? "Blocat"
-                      : "Revizuire"}
-            </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -195,22 +227,17 @@ export function SettingsOperationalTab({
             </div>
           ) : releaseReadiness ? (
             <>
-              {releaseReadiness.state === "blocked" ? (
-                <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
-                  <p className="font-semibold text-[var(--color-on-surface)]">Release blocat</p>
-                  <p className="mt-2 text-[var(--color-error)]">
-                    Build-ul nu trebuie promovat pana cand blocajele operationale sunt inchise.
-                  </p>
-                  <p className="mt-3 text-xs text-[var(--color-on-surface-muted)]">
-                    Ruleaza <code>npm run preflight:release</code> si verifica <code>/api/release-readiness</code> dupa fixuri.
-                  </p>
-                </div>
-              ) : null}
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {releaseReadiness.checks.map((check) => (
                   <SettingsTile
                     key={check.key}
-                    icon={check.key.includes("supabase") ? Cloud : check.key === "session_secret" ? KeyRound : ShieldCheck}
+                    icon={
+                      check.key.includes("supabase")
+                        ? Cloud
+                        : check.key === "session_secret"
+                          ? KeyRound
+                          : ShieldCheck
+                    }
                     label={check.label}
                     value={formatHealthCheckSummary(check.state, check.summary)}
                   />
@@ -218,46 +245,82 @@ export function SettingsOperationalTab({
               </div>
 
               <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                  <p className="text-sm font-medium text-[var(--color-on-surface)]">Rezumat</p>
-                  <div className="mt-4 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
-                    <p>{releaseReadiness.summary}</p>
-                    <p className="text-xs text-[var(--color-muted)]">
-                      Endpoint intern: <code>/api/release-readiness</code>
-                    </p>
-                    <p className="text-xs text-[var(--color-muted)]">
-                      Preflight local: <code>npm run preflight:release</code>
-                    </p>
-                  </div>
-                </div>
+                <SettingsStatusBlock
+                  eyebrow="Stare curenta"
+                  title={releaseReadiness.summary}
+                  description="Acesta este verdictul agregat pentru promovarea build-ului."
+                />
 
                 <div className="space-y-4">
-                  {releaseReadiness.blockers.length > 0 ? (
-                    <div className="rounded-2xl border border-[var(--color-error)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
-                      <p className="font-semibold text-[var(--color-on-surface)]">Blocaje active</p>
-                      <ul className="mt-2 space-y-1">
-                        {releaseReadiness.blockers.map((blocker) => (
-                          <li key={blocker}>• {blocker}</li>
-                        ))}
-                      </ul>
+                  <SettingsStatusBlock
+                    eyebrow="Actiune recomandata"
+                    title={recommendedReleaseAction(releaseReadiness)}
+                    description="Promovezi doar dupa ce verdictul si semnalele sunt curate."
+                  >
+                    <div className="space-y-1.5 text-xs text-[var(--color-muted)]">
+                      <p>
+                        Endpoint intern: <code>/api/release-readiness</code>
+                      </p>
+                      <p>
+                        Preflight local: <code>npm run preflight:release</code>
+                      </p>
                     </div>
-                  ) : null}
+                  </SettingsStatusBlock>
+
+                  {releaseReadiness.blockers.length > 0 ? (
+                    <SettingsSignalCard
+                      title="Blocaje active"
+                      items={releaseReadiness.blockers}
+                      tone="destructive"
+                    />
+                  ) : releaseReadiness.warnings.length > 0 ? (
+                    <SettingsSignalCard
+                      title="Avertismente"
+                      items={releaseReadiness.warnings}
+                      tone="warning"
+                    />
+                  ) : (
+                    <SettingsSignalCard
+                      title="Fara semnale majore"
+                      items={[]}
+                      tone="success"
+                      emptyMessage="Release readiness nu raporteaza avertismente majore."
+                    />
+                  )}
+                </div>
+              </div>
+
+              {releaseReadiness.state === "blocked" ? (
+                <SettingsSignalCard
+                  title="Release blocat"
+                  items={[
+                    "Build-ul nu trebuie promovat pana cand blocajele operationale sunt inchise.",
+                  ]}
+                  tone="destructive"
+                />
+              ) : null}
+
+              <SettingsDisclosure
+                eyebrow="Detalii suport"
+                title="Semnale si verificari de readiness"
+                description="Deschizi aceasta zona cand ai nevoie de context suplimentar pentru verdict."
+              >
+                <div className="space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                  <p>{releaseReadiness.summary}</p>
                   {releaseReadiness.warnings.length > 0 ? (
-                    <div className="rounded-2xl border border-[var(--color-warning)] bg-[var(--color-warning-muted)] p-4 text-sm text-[var(--color-warning)]">
-                      <p className="font-semibold text-[var(--color-on-surface)]">Avertismente</p>
-                      <ul className="mt-2 space-y-1">
+                    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                      <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                        Avertismente curente
+                      </p>
+                      <ul className="mt-2 space-y-1.5 text-sm text-[var(--color-on-surface-muted)]">
                         {releaseReadiness.warnings.map((warning) => (
                           <li key={warning}>• {warning}</li>
                         ))}
                       </ul>
                     </div>
-                  ) : (
-                    <div className="rounded-2xl border border-[var(--color-success)] bg-[var(--color-primary-muted)] p-4 text-sm text-[var(--color-success)]">
-                      Release readiness nu raporteaza avertismente majore.
-                    </div>
-                  )}
+                  ) : null}
                 </div>
-              </div>
+              </SettingsDisclosure>
             </>
           ) : null}
         </CardContent>
