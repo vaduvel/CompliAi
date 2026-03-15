@@ -30,6 +30,12 @@ const filters: Array<{ value: FilterValue; label: string }> = [
   { value: "DONE", label: "Inchise" },
 ]
 
+const filterGroups: Array<{ label: string; values: FilterValue[] }> = [
+  { label: "Status", values: ["ALL", "DONE"] },
+  { label: "Tip remediere", values: ["RAPID", "STRUCTURAL"] },
+  { label: "Prioritate", values: ["P1", "P2", "P3"] },
+]
+
 export function RemediationBoard({
   tasks,
   activeFilter,
@@ -56,40 +62,73 @@ export function RemediationBoard({
   const openStructuralCount = tasks.filter(
     (task) => task.remediationMode === "structural" && task.status !== "done"
   ).length
+  const openCount = tasks.filter((task) => task.status !== "done").length
+  const doneCount = tasks.filter((task) => task.status === "done").length
 
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
-      <CardHeader className="flex flex-col gap-4 border-b border-[var(--color-border)] pb-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <CardTitle className="text-lg text-[var(--color-on-surface)]">Remediere</CardTitle>
-          <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-            Task-uri de executat, grupate intre inchideri rapide si schimbari structurale.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <Badge className="border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]">
-              {openRapidCount} rapide deschise
-            </Badge>
-            <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
-              {openStructuralCount} structurale deschise
-            </Badge>
+      <CardHeader className="gap-4 border-b border-[var(--color-border)] pb-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <CardTitle className="text-lg text-[var(--color-on-surface)]">Remediere</CardTitle>
+              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                {visibleTasks.length} vizibile
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                {openCount} deschise
+              </Badge>
+              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                {doneCount} inchise
+              </Badge>
+              <Badge className="border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]">
+                {openRapidCount} rapide
+              </Badge>
+              <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+                {openStructuralCount} structurale
+              </Badge>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          {filters.map((filter) => (
-            <Button
-              key={filter.value}
-              onClick={() => onFilterChange(filter.value)}
-              variant="outline"
-              className={`h-9 rounded-xl border-[var(--color-border)] px-3.5 text-xs sm:px-4 sm:text-sm ${
-                activeFilter === filter.value
-                  ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
-                  : "bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]"
-              }`}
-            >
-              {filter.label}
-            </Button>
-          ))}
+          <div className="grid gap-3 md:grid-cols-3 xl:min-w-[42rem]">
+            {filterGroups.map((group) => (
+              <div
+                key={group.label}
+                className={`rounded-2xl border p-3 ${
+                  group.values.includes(activeFilter)
+                    ? "border-[var(--border-subtle)] bg-[var(--bg-inset)]"
+                    : "border-[var(--color-border)] bg-[var(--color-surface-variant)]"
+                }`}
+              >
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  {group.label}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {group.values.map((value) => {
+                    const filter = filters.find((item) => item.value === value)
+                    if (!filter) return null
+
+                    return (
+                      <Button
+                        key={filter.value}
+                        onClick={() => onFilterChange(filter.value)}
+                        variant="outline"
+                        className={`h-8 rounded-xl px-3 text-xs ${
+                          activeFilter === filter.value
+                            ? "border-[var(--border-subtle)] bg-[var(--bg-active)] text-[var(--text-primary)]"
+                            : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
+                        }`}
+                      >
+                        {filter.label}
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </CardHeader>
 
@@ -105,7 +144,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && rapidTasks.length > 0 && (
           <TaskGroup
             title="Remedieri rapide"
-            description="Schimbari mici de text, setare sau dovada pe care le poti valida rapid."
+            description="Schimbari mici pe care le poti inchide si valida rapid."
             tone="info"
             tasks={rapidTasks}
             highlightedTaskId={highlightedTaskId}
@@ -118,7 +157,7 @@ export function RemediationBoard({
         {activeFilter === "ALL" && structuralTasks.length > 0 && (
           <TaskGroup
             title="Remedieri structurale"
-            description="Schimbari de proces, control operational sau configurare persistenta care cer coordonare."
+            description="Schimbari persistente care cer coordonare si dovada mai riguroasa."
             tone="warning"
             tasks={structuralTasks}
             highlightedTaskId={highlightedTaskId}
@@ -169,17 +208,17 @@ function TaskGroup({
       : "border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]"
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className={toneClass}>{title}</Badge>
-            <Badge className="border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]">
-              {tasks.length} task-uri
-            </Badge>
-          </div>
-          <p className="text-sm leading-6 text-[var(--color-on-surface-muted)]">{description}</p>
+    <div className="space-y-3">
+      <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={toneClass}>{title}</Badge>
+          <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+            {tasks.length} task-uri
+          </Badge>
         </div>
+        <p className="text-xs leading-5 text-[var(--color-on-surface-muted)] sm:max-w-xl sm:text-right">
+          {description}
+        </p>
       </div>
 
       {tasks.map((task) => (

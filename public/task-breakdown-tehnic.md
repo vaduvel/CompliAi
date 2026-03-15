@@ -1028,3 +1028,70 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+### Actualizare 2026-03-15 - urmatorul val dupa integrare
+
+- [x] directiva de runtime UX a fost fixata explicit:
+  - `public/runtime-ux-declutter-directive-2026-03-15.md`
+- [x] concluzia curenta este:
+  - produsul nu cere feature noi
+  - produsul cere ierarhie mai dura in runtime
+- [ ] `Browser audit` pe firul canonic dupa merge:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Dovada / Remediere`
+  - `Dovada / Audit si export`
+  - `Dovada / Auditor Vault`
+  - `Setari`
+- [ ] `Checklists wave 1`
+  - compactare a zonei de deasupra board-ului
+  - ierarhie mai clara pentru filtre
+  - `TaskCard` mai usor de scanat
+  - CTA primar mai dominant
+- [ ] `Dashboard` cleanup suplimentar
+  - orientare pura
+  - blocaj + urmatorul pas dominante
+  - fara competitie cu proof si panouri suport
+- [ ] orice pas nou pe `Agent Evidence OS` ramane sub regula:
+  - layer peste produsul actual
+  - fara produs paralel
+  - fara concurenta cu declutter-ul de runtime
+
+### Actualizare 2026-03-15 - execution split pentru sprintul scurt
+
+- [x] a fost fixata harta de executie pentru sprintul de `cockpit declutter si autoritate operationala`:
+  - `public/cockpit-authority-execution-map-2026-03-15.md`
+- [x] ownership-ul este separat explicit:
+  - Codex principal = page-level governance + integrare + runtime shell
+  - Codex 2 = densitate si ierarhie in componentele operationale din `Checklists`
+- [x] lotul serios permis pentru Codex 2 este documentat in:
+  - `public/task-codex-2-checklists-wave-1-components-2026-03-15.md`
+- [ ] executie efectiva dupa merge:
+  - `Checklists wave 1`
+  - `Dashboard` executive declutter
+
+### Actualizare 2026-03-15 - `Checklists wave 1` pornit la nivel de page shell
+
+- [x] `app/dashboard/checklists/page.tsx` nu mai tine board-ul sub prea mult framing de intrare
+- [x] `PageIntro` este mai scurt si mai orientat pe executie
+- [x] `SummaryStrip` nu mai concureaza cu board-ul prin ton doctrinar
+- [x] blocul mare de `Flux canonic` a fost scos din zona de deasupra board-ului
+- [x] handoff-ul spre `Auditor Vault` si `Audit si export` a fost coborat dupa zona de lucru
+- [ ] component-level density pass ramas pentru:
+  - `components/compliscan/remediation-board.tsx`
+  - `components/compliscan/task-card.tsx`
+
+### Actualizare 2026-03-15 - `Dashboard` executive declutter pornit
+
+- [x] `Dashboard` nu mai foloseste bannerul didactic care concura cu starea operationala
+- [x] `NextBestAction` si `Control drift` au urcat in ierarhia principala a paginii
+- [x] blocul de orientare a fost comprimat:
+  - `Flux principal` -> `Unde continui`
+  - descrieri mai scurte
+  - orientare mai dura spre pagina potrivita
+- [x] `Snapshot` foloseste acum limbaj mai direct:
+  - `Urmatoarele actiuni`
+  - `Drift deschis`
+  - `Baseline`
+- [ ] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`

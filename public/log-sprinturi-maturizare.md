@@ -1936,6 +1936,97 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Actualizare de directie - `runtime UX declutter`:
+
+- evaluarea curenta este acum explicita:
+  - produsul este mai bun decat pare
+  - problema dominanta nu mai este lipsa de feature-uri, ci ierarhia de runtime
+- am fixat directiva operationala in:
+  - `public/runtime-ux-declutter-directive-2026-03-15.md`
+- regula activa pentru urmatoarele valuri este:
+  - starea si urmatorul pas trebuie sa bata explicatia
+- prioritatea de lucru dupa integrarea PR-urilor ramane:
+  1. browser audit
+  2. `Checklists wave 1`
+  3. cleanup suplimentar pe `Dashboard`
+- `Agent Evidence OS` continua doar ca layer peste produsul actual, fara produs paralel si fara sa concureze cu declutter-ul de runtime
+
+Triage nou - `feedback.md` + imagini concurenta:
+
+- partea noua din `feedback.md` a fost triata separat de backlog-ul curent
+- folderul nou cu imagini si auditul aferent confirma aceeasi directie:
+  - produsul este real
+  - concurenta cistiga mai ales prin ierarhie dura si home scanabil
+  - runtime-ul CompliScan sub-vinde produsul prin over-framing
+- a fost extras backlog dedicat in:
+  - `public/backlog-sprint-din-feedback-si-concurenta-2026-03-15.md`
+- din partea noua a `feedback.md` au fost separate explicit:
+  - semnalele bune pentru sprintul imediat:
+    - declutter cockpit
+    - dominanta workspace-ului
+    - review uman obligatoriu
+    - layer disciplinat pentru `Agent Evidence OS`
+  - semnalele bune doar pentru roadmap:
+    - `Trust OS`
+    - `Digital Twin`
+    - `Cross-border engine`
+    - `AI Black Box`
+    - `Live Trust Seal`
+
+Execution split dupa auditul mare:
+
+- concluziile auditului mare au fost transformate in:
+  - harta de executie:
+    - `public/cockpit-authority-execution-map-2026-03-15.md`
+  - task serios si neinterferent pentru Codex 2:
+    - `public/task-codex-2-checklists-wave-1-components-2026-03-15.md`
+- directia valida ramane:
+  1. integrare
+  2. browser audit
+  3. `Checklists wave 1`
+  4. `Dashboard` executive declutter
+- splitul de ownership este acum explicit:
+  - Codex principal tine page shell, canonul si integrarea
+  - Codex 2 poate accelera doar component-level density pass pe `Checklists`
+
+Pornire executie - `Checklists wave 1` page shell:
+
+- `app/dashboard/checklists/page.tsx` a fost compactata la nivel de shell
+- board-ul de remediere urca mai sus in pagina
+- au fost taiate sau coborate elementele care explicau prea mult inainte de executie:
+  - `PageIntro` mai scurt
+  - `SummaryStrip` mai direct
+  - blocul mare `Flux canonic` a fost eliminat din zona de deasupra board-ului
+  - handoff-ul spre `Auditor Vault` / `Audit si export` a fost mutat dupa board
+- scopul pasului:
+  - `Remediere` sa se simta mai clar ca pagina de lucru
+  - actiunea sa bata framing-ul
+- validare dupa pas:
+  - `npm test` -> verde
+  - `npm run lint` -> verde
+
+Pornire executie - `Dashboard` executive declutter:
+
+- `components/compliscan/route-sections.tsx` a fost compactat pentru homepage-ul operational
+- `Dashboard` pune acum mai sus:
+  - `NextBestAction`
+  - `Control drift`
+- ghidajul a fost comprimat:
+  - bannerul didactic `Asistent AI, nu verdict final` a fost eliminat
+  - `Flux principal` a devenit `Unde continui`
+  - descrierile cardurilor de orientare sunt mai scurte si mai utilitare
+- `Snapshot` este mai scurt si mai orientat pe ce faci acum:
+  - `Urmatoarele actiuni`
+  - `Drift deschis`
+  - `Baseline`
+- scopul pasului:
+  - `Dashboard` sa se simta orientare pura
+  - starea si urmatorul pas sa bata explicatia
+- validare dupa pas:
+  - `npm test` -> verde
+  - `npm run lint` -> verde
+  - `npm run build` -> verde
+
 Pas de performanta - `Audit si export`:
 
 - `app/dashboard/rapoarte/page.tsx` pastreaza shell-ul de readiness si exportul principal, dar nu mai tine upfront toate panourile suport
