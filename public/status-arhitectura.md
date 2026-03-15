@@ -1020,3 +1020,21 @@ Efect masurabil in build:
 - `/dashboard/setari`
   - inainte: aproximativ `11.7 kB` / `185 kB first load`
   - dupa: `7.73 kB` / `184 kB first load`
+
+## Actualizare 2026-03-15 - `Scanare` lazy-load pentru `Verdicts` si `Istoric`
+
+- `Scanare` ramane pagina de executie initiala
+- `flow` continua sa porneasca direct, fara sa astepte explicarea verdictului sau lista istorica
+- `Verdicts` si `Istoric documente` au fost extrase in componente locale si incarcate prin `dynamic import`
+
+Asta e sanatos arhitectural pentru ca:
+
+- tine intentia dominanta a paginii pe executie
+- muta `read-only explanation` si `lookup` in chunk-uri secundare
+- respecta mai bine regula `summary / detail / action`, fara ca zonele non-initiale sa stea in bundle-ul de intrare
+
+Efect masurabil in build:
+
+- `/dashboard/scanari`
+  - inainte: `11.2 kB` / `182 kB first load`
+  - dupa: `9.12 kB` / `180 kB first load`

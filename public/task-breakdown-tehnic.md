@@ -1003,3 +1003,15 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Scanare` nu mai tine `Verdicts` si `Istoric` in bundle-ul initial
+  - `flow` ramane vederea initiala de executie
+  - taburile secundare au fost mutate in:
+    - `components/compliscan/scanari/scan-verdicts-tab.tsx`
+    - `components/compliscan/scanari/scan-history-tab.tsx`
+- [x] efect confirmat in build:
+  - `/dashboard/scanari` a coborat la `9.12 kB / 180 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
