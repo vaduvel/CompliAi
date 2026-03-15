@@ -850,3 +850,16 @@ Verdict de etapa:
 - frontul activ valid ramane:
   - convergenta UX / UI / functionalitate
   - hardening operational incremental
+
+Actualizare suplimentara 2026-03-15:
+
+- verdictul nou de runtime UX este acum explicit:
+  - produsul este mai bun decat pare
+  - problema dominanta este ierarhia de runtime, nu lipsa de feature-uri
+- directiva noua este:
+  - starea si urmatorul pas trebuie sa bata explicatia
+- asta muta ordinea sanatoasa dupa integrare in:
+  1. browser audit
+  2. `Checklists wave 1`
+  3. cleanup suplimentar pe `Dashboard`
+- `Agent Evidence OS` continua doar ca layer peste produsul actual, fara produs paralel

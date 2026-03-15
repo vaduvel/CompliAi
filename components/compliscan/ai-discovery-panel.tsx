@@ -125,6 +125,19 @@ function detectionStatusHint(status: DetectedAISystemRecord["detectionStatus"]) 
   return "Sistemul a fost detectat automat si asteapta validare umana."
 }
 
+function nextDiscoveryActionLabel(system: DetectedAISystemRecord) {
+  if (system.detectionStatus === "reviewed") {
+    return "Confirma sistemul in inventar sau ajusteaza detectia inainte de confirmare."
+  }
+  if (system.detectionStatus === "confirmed") {
+    return "Sistemul este deja mutat in inventarul oficial."
+  }
+  if (system.detectionStatus === "rejected") {
+    return "Repune detectia in lucru doar daca exista semnal nou sau clarificare umana."
+  }
+  return "Confirma sistemul real in inventar sau marcheaza review dupa verificare."
+}
+
 type AIDiscoveryPanelProps = {
   mode?: "manifest" | "yaml"
   systems: DetectedAISystemRecord[]
@@ -255,39 +268,73 @@ export function AIDiscoveryPanel({
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,0.78fr)_minmax(0,1.22fr)]">
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">{modeContent.title}</CardTitle>
-          <p className="text-sm text-[var(--color-on-surface-muted)]">
-            {modeContent.description}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-2">
+              <CardTitle className="text-xl">{modeContent.title}</CardTitle>
+              <p className="max-w-xl text-sm text-[var(--color-on-surface-muted)]">
+                {modeContent.description}
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+              {activeSystems.length} candidate active
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            <p className="font-medium text-[var(--color-on-surface)]">{modeContent.detectionTitle}</p>
+          <div className="grid gap-4 md:grid-cols-3">
+            <SummaryTile label="Cer validare" value={activeSystems.length} />
+            <SummaryTile label="Revizuite" value={reviewedCount} />
+            <SummaryTile label="Drift activ" value={drifts.length} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                Actiunea principala
+              </p>
+              <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                {modeContent.buttonLabel}
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                {mode === "yaml"
+                  ? "Incarci configuratia declarata, validezi semnalele reale si confirmi doar sistemele care trebuie sa intre in Control."
+                  : "Rulezi autodiscovery pe manifest si confirmi doar sistemele reale care trebuie sa intre in inventar."}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                Coada de lucru
+              </p>
+              <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                {activeSystems.length > 0
+                  ? `${activeSystems.length} candidate raman in review activ.`
+                  : "Nu exista candidate active in acest moment."}
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                Confirmate: {confirmedCount} · Respinse: {rejectedCount} · Detectate noi: {pendingCount}
+              </p>
+            </div>
+          </div>
+
+          <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+            <summary className="cursor-pointer list-none">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium text-[var(--color-on-surface)]">{modeContent.detectionTitle}</p>
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    Detalii suport despre ce validam in aceasta etapa.
+                  </p>
+                </div>
+                <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
+              </div>
+            </summary>
             <ul className="mt-3 space-y-2">
               {modeContent.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <SummaryTile label="Detectate" value={pendingCount} />
-            <SummaryTile label="Revizuite" value={reviewedCount} />
-            <SummaryTile label="Drift activ" value={drifts.length} />
-          </div>
-
-          {(confirmedCount > 0 || rejectedCount > 0) && (
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              <p className="font-medium text-[var(--color-on-surface)]">Ce nu mai apare aici</p>
-              <p className="mt-2">
-                Detectiile confirmate sunt mutate in inventarul oficial, iar cele respinse raman in istoric,
-                dar nu mai aglomereaza lista de lucru.
-              </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
-                Confirmate: {confirmedCount} · Respinse: {rejectedCount}
-              </p>
-            </div>
-          )}
+          </details>
 
           <input
             value={documentName}
@@ -339,13 +386,14 @@ export function AIDiscoveryPanel({
 
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardHeader className="border-b border-[var(--color-border)] pb-5">
-          <CardTitle className="text-xl">Sisteme detectate automat</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-xl">Sisteme detectate automat</CardTitle>
+            <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+              {activeSystems.length} active
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Aici ramane doar fluxul activ de lucru: detectii care mai cer review sau confirmare.
-            Ce este deja confirmat traieste separat in inventarul oficial, iar drift-ul ramane centralizat in panoul dedicat.
-          </div>
           {systems.length === 0 && (
             <EmptyState
               title={mode === "yaml" ? "Fara rezultate din YAML" : "Fara detectii automate"}
@@ -391,12 +439,20 @@ export function AIDiscoveryPanel({
                       <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
                         {system.vendor} · {system.modelType}
                       </p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
-                        Sursa: {system.sourceDocument || "manifest necunoscut"}
-                      </p>
-                      <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
-                        {detectionStatusHint(system.detectionStatus)}
-                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
+                        <span>Sursa: {system.sourceDocument || "manifest necunoscut"}</span>
+                        {relatedDrifts.length > 0 ? (
+                          <>
+                            <Badge variant="warning">{relatedDrifts.length} drift activ</Badge>
+                            <a
+                              className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                              href="/dashboard/alerte"
+                            >
+                              Deschide Drift
+                            </a>
+                          </>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {system.frameworks.map((framework) => (
@@ -409,22 +465,14 @@ export function AIDiscoveryPanel({
                         </Badge>
                       ))}
                     </div>
-                    {relatedDrifts.length > 0 && (
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
-                          <Badge variant="warning">
-                            {relatedDrifts.length} drift activ
-                          </Badge>
-                          <span>Detalii in Control / Drift.</span>
-                          <a
-                            className="text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
-                            href="/dashboard/alerte"
-                          >
-                            Deschide Drift
-                          </a>
-                        </div>
-                      </div>
-                    )}
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        Acum
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                        {nextDiscoveryActionLabel(system)}
+                      </p>
+                    </div>
                     {isEditing && (
                       <div className="grid gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
                         <p className="text-sm font-medium text-[var(--color-on-surface)]">
@@ -580,8 +628,21 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                      <p className="font-medium text-[var(--color-on-surface)]">Evidenta detectiei</p>
+                    <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
+                      <summary className="cursor-pointer list-none">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-[var(--color-on-surface)]">Context si evidenta</p>
+                            <p className="mt-1 text-xs text-[var(--color-muted)]">
+                              Detalii suport pentru review si confirmare.
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
+                        </div>
+                      </summary>
+                      <p className="mt-3 text-xs text-[var(--color-on-surface-muted)]">
+                        {detectionStatusHint(system.detectionStatus)}
+                      </p>
                       <ul className="mt-3 space-y-2">
                         {system.evidence.slice(0, 5).map((item, index) => (
                           <li key={`${system.id}-evidence-${index}`} className="flex gap-2">
@@ -590,10 +651,20 @@ export function AIDiscoveryPanel({
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </details>
                   </div>
 
                   <div className="flex min-w-[220px] flex-col gap-2">
+                    {(system.detectionStatus === "detected" || system.detectionStatus === "reviewed") && (
+                      <Button
+                        onClick={() => void onUpdateStatus(system.id, "confirm")}
+                        disabled={busy}
+                        className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                      >
+                        <CheckCheck className="size-4" strokeWidth={2.25} />
+                        Confirma in inventar
+                      </Button>
+                    )}
                     {system.detectionStatus !== "confirmed" && (
                       <Button
                         onClick={() => startEditing(system)}
@@ -603,16 +674,6 @@ export function AIDiscoveryPanel({
                       >
                         <PencilLine className="size-4" strokeWidth={2.25} />
                         Editeaza detectia
-                      </Button>
-                    )}
-                    {(system.detectionStatus === "detected" || system.detectionStatus === "reviewed") && (
-                      <Button
-                        onClick={() => void onUpdateStatus(system.id, "confirm")}
-                        disabled={busy}
-                        className="h-10 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-                      >
-                        <CheckCheck className="size-4" strokeWidth={2.25} />
-                        Confirma in inventar
                       </Button>
                     )}
                     {system.detectionStatus === "detected" && (
@@ -631,7 +692,7 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "reject")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-error)] hover:bg-[var(--color-error-muted)]"
+                        className="h-9 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-error)] hover:bg-[var(--color-error-muted)]"
                       >
                         <X className="size-4" strokeWidth={2.25} />
                         Respinge detectia

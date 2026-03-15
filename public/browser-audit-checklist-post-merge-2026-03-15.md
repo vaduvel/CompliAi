@@ -37,6 +37,7 @@ Data: 2026-03-15
 - detaliul vine dupa
 - actiunea sau handoff-ul vine clar la final sau lateral
 - nu exista concurenta egala intre toate
+- starea si urmatorul pas bat explicatia
 
 ### 4. Handoff-ul este clar?
 

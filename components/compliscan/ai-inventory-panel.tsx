@@ -108,6 +108,10 @@ function riskTone(level: AISystemRecord["riskLevel"]) {
   }
 }
 
+function inventoryNextAction(system: AISystemRecord) {
+  return system.recommendedActions[0] ?? "Confirma clasificarea si continua cu controlul relevant."
+}
+
 const STEP_LABELS: Record<InventoryFlowStep, string> = {
   1: "Informatii de baza",
   2: "Scop principal",
@@ -187,6 +191,9 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               {step} / 4 — {STEP_LABELS[step]}
             </span>
           </div>
+          <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+            Adaugi un sistem nou in 4 pasi si verifici verdictul inainte sa il salvezi.
+          </p>
           <div className="mt-3 flex gap-1.5">
             {([1, 2, 3, 4] as InventoryFlowStep[]).map((s) => (
               <div
@@ -203,7 +210,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 1 && (
             <div className="space-y-4">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Identifica sistemul pe care vrei sa-l clasifici.
+                Identifica sistemul pe care il clasifici.
               </p>
               <input
                 value={name}
@@ -231,7 +238,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 2 && (
             <div className="space-y-3">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Care este scopul principal al sistemului?
+                Alege scopul dominant al sistemului.
               </p>
               <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
                 {PURPOSE_OPTIONS.map((opt) => (
@@ -273,7 +280,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 3 && (
             <div className="space-y-3">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Raspunde la urmatoarele intrebari pentru a rafina clasificarea.
+                Marcheaza factorii reali de risc.
               </p>
               {[
                 {
@@ -329,7 +336,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           {step === 4 && (
             <div className="space-y-4">
               <p className="text-sm text-[var(--color-on-surface-muted)]">
-                Clasificarea sistemului bazata pe raspunsurile tale.
+                Verifica verdictul inainte sa salvezi sistemul.
               </p>
               <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -416,13 +423,17 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
         <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
           <CardHeader className="border-b border-[var(--color-border)] pb-5">
-            <CardTitle className="text-xl">Sisteme AI inventariate</CardTitle>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <CardTitle className="text-xl">Sisteme AI inventariate</CardTitle>
+              <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
+                {systems.length} sisteme
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             {systems.length === 0 && (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-5 text-sm text-[var(--color-on-surface-muted)]">
-                Inca nu exista sisteme AI inventariate. Fluxul de mai sus este primul pas real
-                catre clasificare AI Act.
+                Inca nu exista sisteme AI inventariate. Foloseste fluxul din stanga pentru primul sistem confirmat.
               </div>
             )}
 
@@ -452,33 +463,51 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                       <p className="text-sm text-[var(--color-on-surface-muted)]">
                         {system.vendor} · {system.modelType}
                       </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                          {system.usesPersonalData ? "date personale" : "fara date personale"}
+                        </Badge>
+                        <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                          {system.makesAutomatedDecisions
+                            ? "decizie automata"
+                            : "fara decizie automata"}
+                        </Badge>
+                        <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                          {system.hasHumanReview ? "cu review uman" : "fara review uman"}
+                        </Badge>
+                      </div>
                       {system.annexIIIHint && (
                         <p className="text-sm text-[var(--color-warning)]">{system.annexIIIHint}</p>
                       )}
                     </div>
 
-                    <div className="flex flex-col items-end gap-3">
-                      <div className="grid gap-1.5 text-right text-sm text-[var(--color-muted)]">
-                        <span>
-                          {system.usesPersonalData ? "Date personale" : "Fara date personale"}
-                        </span>
-                        <span>
-                          {system.makesAutomatedDecisions
-                            ? "Decizie automata"
-                            : "Asistenta, fara decizie automata"}
-                        </span>
-                        <span>
-                          {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
-                        </span>
+                    <div className="space-y-3 lg:w-[18rem]">
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                          Acum
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                          {inventoryNextAction(system)}
+                        </p>
                       </div>
-                      <button
-                        onClick={() => void handleRemove(system.id)}
-                        disabled={removingId === system.id || busy}
-                        className="flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-error)] hover:bg-[var(--color-error-muted)] disabled:opacity-40"
-                      >
-                        <Trash2 className="size-3.5" strokeWidth={2.25} />
-                        Sterge
-                      </button>
+                      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                            Utilitar
+                          </p>
+                          <p className="text-xs text-[var(--color-on-surface-muted)]">
+                            Stergere rara din inventar.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => void handleRemove(system.id)}
+                          disabled={removingId === system.id || busy}
+                          className="flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 py-2 text-xs text-[var(--color-error)] hover:bg-[var(--color-error-muted)] disabled:opacity-40"
+                        >
+                          <Trash2 className="size-3.5" strokeWidth={2.25} />
+                          Sterge
+                        </button>
+                      </div>
                     </div>
                   </div>
 
