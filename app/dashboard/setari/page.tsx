@@ -119,6 +119,9 @@ export default function SetariPage() {
   const [membersLoading, setMembersLoading] = useState(true)
   const [membersError, setMembersError] = useState<string | null>(null)
   const [updatingMembershipId, setUpdatingMembershipId] = useState<string | null>(null)
+  const [newMemberEmail, setNewMemberEmail] = useState("")
+  const [newMemberRole, setNewMemberRole] = useState<OrganizationMember["role"]>("reviewer")
+  const [creatingMember, setCreatingMember] = useState(false)
   const [supabaseStatus, setSupabaseStatus] = useState<SupabaseOperationalStatus>(null)
   const [supabaseStatusLoading, setSupabaseStatusLoading] = useState(true)
   const [supabaseStatusError, setSupabaseStatusError] = useState<string | null>(null)
@@ -490,6 +493,54 @@ export default function SetariPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {currentUser?.role === "owner" ? (
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-on-surface)]">
+                        Adauga utilizator existent din workspace
+                      </p>
+                      <p className="mt-1 text-xs leading-6 text-[var(--color-muted)]">
+                        Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
+                      </p>
+                    </div>
+                    <Badge variant="outline">owner-only</Badge>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
+                    <input
+                      type="email"
+                      value={newMemberEmail}
+                      onChange={(event) => setNewMemberEmail(event.target.value)}
+                      placeholder="coleg@companie.ro"
+                      className="h-11 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                    />
+                    <select
+                      className="h-11 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-sm text-[var(--color-on-surface)] outline-none"
+                      value={newMemberRole}
+                      onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
+                    >
+                      {MEMBER_ROLE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      className="h-11 rounded-xl px-5"
+                      disabled={creatingMember || !newMemberEmail.trim()}
+                      onClick={() => void handleAddMember()}
+                    >
+                      Adauga membru
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4 text-sm text-[var(--color-muted)]">
+                  Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
+                </div>
+              )}
+
               {membersLoading ? (
                 <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
               ) : membersError ? (
@@ -726,6 +777,55 @@ export default function SetariPage() {
       toast.error("Actualizarea a esuat", { description: message })
     } finally {
       setUpdatingMembershipId(null)
+    }
+  }
+
+  async function handleAddMember() {
+    const email = newMemberEmail.trim().toLowerCase()
+    if (!email) return
+
+    setCreatingMember(true)
+    setMembersError(null)
+
+    try {
+      const response = await fetch("/api/auth/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role: newMemberRole }),
+      })
+
+      const payload = (await response.json()) as {
+        ok?: boolean
+        error?: string
+        member?: OrganizationMember
+      }
+
+      if (!response.ok || !payload.member) {
+        throw new Error(payload.error || "Membrul nu a putut fi adaugat.")
+      }
+
+      setMembersData((current) => {
+        if (!current) return current
+        return {
+          ...current,
+          members: [
+            payload.member!,
+            ...current.members.filter((member) => member.membershipId !== payload.member!.membershipId),
+          ],
+        }
+      })
+      setNewMemberEmail("")
+      setNewMemberRole("reviewer")
+
+      toast.success("Membru adaugat", {
+        description: `${payload.member.email} a fost adaugat ca ${formatMemberRole(payload.member.role)}.`,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Membrul nu a putut fi adaugat."
+      setMembersError(message)
+      toast.error("Adaugarea a esuat", { description: message })
+    } finally {
+      setCreatingMember(false)
     }
   }
 }

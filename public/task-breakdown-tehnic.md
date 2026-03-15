@@ -140,7 +140,10 @@ Fronturile active acum:
   - listare membership-uri pentru userul curent
   - switch de organizatie activa din sesiune
 - [x] stabilizare controlata pentru firul paralel `Agent Evidence OS`, fara sa rupa runtime-ul principal
-- [ ] invitare / administrare membri peste workspace-ul local
+- [x] administrare membri peste workspace-ul local
+  - owner-ul poate adauga acum utilizatori existenti in workspace in organizatia curenta
+  - rolul se seteaza la intrare, in acelasi flux cu administrarea rolurilor
+  - flow-ul ramane explicit local-first; invitatiile externe complete raman pas separat
 - [x] tenancy citit din DB ca sursa primara in backend `supabase`:
   - `organizations`
   - `memberships`
@@ -241,7 +244,8 @@ Fronturile active acum:
 Verdict Sprint 4:
 
 - [x] Sprint 4 poate fi considerat inchis operational
-- [ ] invitare / administrare membri ramane backlog secundar, nu blocaj pentru Sprint 5
+- [x] administrare membri peste workspace-ul local nu mai este blocaj pentru Sprint 5
+  - invitatiile externe complete raman backlog ulterior
 
 Verdict Sprint 7:
 
@@ -1046,6 +1050,8 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Setari`
   - audit runtime local partial rulat pe org temporar autentificat
   - empty-state si stare populata prin `scan` real au fost verificate la nivel de payload + route shell
+  - exista acum si kit local de test pentru flow-ul principal de user nou:
+    - `public/flow-test-kit-user-nou-document-2026-03-15/`
   - verdict curent:
     - `Dashboard` tine directia buna
     - urmatoarea densitate reala ramasă este in `Checklists`
@@ -1247,6 +1253,19 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - pasul nu schimba business logic si nu adauga concepte noi
 - [x] efect confirmat in build:
   - `/dashboard/scanari` a coborat la `8.53 kB / 179 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
+- [x] `Setari / Acces` poate adauga membri existenti din workspace
+  - `POST /api/auth/members` adauga un utilizator deja existent in workspace in organizatia curenta
+  - owner-ul alege rolul direct din `Setari`
+  - evenimentul intra in jurnalul de compliance:
+    - `auth.member-added`
+  - pasul nu promite invitatii externe complete si nu schimba modelul de auth
+- [x] efect confirmat in build:
+  - `/dashboard/setari` urca controlat la `8.14 kB / 184 kB first load`
 - [x] validare completa dupa pas:
   - `npm test`
   - `npm run lint`

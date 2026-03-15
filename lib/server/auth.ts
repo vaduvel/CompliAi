@@ -143,6 +143,12 @@ function normalizeEmail(email: string) {
   return email.toLowerCase().trim()
 }
 
+function isLikelyUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  )
+}
+
 function displayNameToEmail(displayName: string | undefined, id: string) {
   const normalized =
     displayName
@@ -626,6 +632,83 @@ export async function updateOrganizationMemberRole(
   if (!user) {
     throw new Error("MEMBERSHIP_USER_NOT_FOUND")
   }
+
+  return {
+    membershipId: resolvedMembership.id,
+    userId: user.id,
+    email: normalizeEmail(user.email),
+    role: resolvedMembership.role,
+    createdAtISO: resolvedMembership.createdAtISO,
+    orgId: organization.id,
+    orgName: organization.name,
+  }
+}
+
+export async function addOrganizationMemberByEmail(
+  orgId: string,
+  email: string,
+  role: UserRole
+): Promise<OrganizationMember> {
+  const graph = await loadAuthGraph()
+  const organization = graph.organizations.find((entry) => entry.id === orgId)
+  if (!organization) {
+    throw new Error("ORGANIZATION_NOT_FOUND")
+  }
+
+  const emailNorm = normalizeEmail(email)
+  const user = graph.users.find((entry) => normalizeEmail(entry.email) === emailNorm)
+  if (!user) {
+    throw new Error("USER_NOT_FOUND")
+  }
+
+  if (
+    shouldUseSupabaseTenancyAsPrimary() &&
+    !(user.authProvider === "supabase" && isLikelyUuid(user.id))
+  ) {
+    throw new Error("USER_NOT_SYNCABLE")
+  }
+
+  const membershipIndex = graph.memberships.findIndex(
+    (membership) => membership.userId === user.id && membership.orgId === orgId
+  )
+
+  let resolvedMembership: OrganizationMembershipRecord
+  const nextMemberships = [...graph.memberships]
+
+  if (membershipIndex !== -1) {
+    const existingMembership = graph.memberships[membershipIndex]
+    if (existingMembership.status !== "inactive") {
+      throw new Error("MEMBER_ALREADY_EXISTS")
+    }
+
+    resolvedMembership = {
+      ...existingMembership,
+      role,
+      status: "active",
+    }
+    nextMemberships[membershipIndex] = resolvedMembership
+  } else {
+    resolvedMembership = {
+      id: `membership-${user.id}-${orgId}`,
+      userId: user.id,
+      orgId,
+      role,
+      createdAtISO: new Date().toISOString(),
+      status: "active",
+    }
+    nextMemberships.push(resolvedMembership)
+  }
+
+  const syncResult = await syncOrganizationTenancyToSupabase({
+    orgId,
+    users: graph.users,
+    organizations: graph.organizations,
+    memberships: nextMemberships,
+  })
+  if (shouldUseSupabaseTenancyAsPrimary() && !syncResult.synced) {
+    throw new Error(syncResult.reason)
+  }
+  await saveMemberships(nextMemberships)
 
   return {
     membershipId: resolvedMembership.id,

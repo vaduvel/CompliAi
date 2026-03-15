@@ -6,6 +6,7 @@ import path from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
+  addOrganizationMemberByEmail,
   createSessionToken,
   findUserByEmail,
   findUserById,
@@ -366,6 +367,114 @@ describe("lib/server/auth", () => {
         role: "reviewer",
       })
     )
+  })
+
+  it("adauga un utilizator existent in organizatia curenta", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+      {
+        id: "user-2",
+        email: "reviewer@example.com",
+        passwordHash: "hash-2",
+        salt: "salt-2",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const member = await addOrganizationMemberByEmail("org-1", "reviewer@example.com", "reviewer")
+
+    expect(member).toEqual(
+      expect.objectContaining({
+        email: "reviewer@example.com",
+        role: "reviewer",
+        orgId: "org-1",
+      })
+    )
+
+    const nextMemberships = await loadMemberships()
+    expect(nextMemberships).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userId: "user-2",
+          orgId: "org-1",
+          role: "reviewer",
+          status: "active",
+        }),
+      ])
+    )
+  })
+
+  it("nu dubleaza un membru deja activ in organizatie", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "owner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+      {
+        id: "user-2",
+        email: "reviewer@example.com",
+        passwordHash: "hash-2",
+        salt: "salt-2",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Org Alpha", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+      {
+        id: "membership-2",
+        userId: "user-2",
+        orgId: "org-1",
+        role: "reviewer",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    await expect(
+      addOrganizationMemberByEmail("org-1", "reviewer@example.com", "reviewer")
+    ).rejects.toThrow("MEMBER_ALREADY_EXISTS")
   })
 
   it("rezolva utilizatorul pe membership selectat pentru switch de organizatie", async () => {

@@ -13,17 +13,38 @@ const mocks = vi.hoisted(() => ({
   },
   requireRoleMock: vi.fn(),
   listOrganizationMembersMock: vi.fn(),
+  addOrganizationMemberByEmailMock: vi.fn(),
+  mutateStateMock: vi.fn(),
+  appendComplianceEventsMock: vi.fn(),
+  createComplianceEventMock: vi.fn(),
+  eventActorFromSessionMock: vi.fn(),
+  formatEventActorLabelMock: vi.fn(),
+}))
+
+vi.mock("@/lib/compliance/events", () => ({
+  appendComplianceEvents: mocks.appendComplianceEventsMock,
+  createComplianceEvent: mocks.createComplianceEventMock,
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   requireRole: mocks.requireRoleMock,
   listOrganizationMembers: mocks.listOrganizationMembersMock,
+  addOrganizationMemberByEmail: mocks.addOrganizationMemberByEmailMock,
 }))
 
-import { GET } from "./route"
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateState: mocks.mutateStateMock,
+}))
 
-describe("GET /api/auth/members", () => {
+vi.mock("@/lib/server/event-actor", () => ({
+  eventActorFromSession: mocks.eventActorFromSessionMock,
+  formatEventActorLabel: mocks.formatEventActorLabelMock,
+}))
+
+import { GET, POST } from "./route"
+
+describe("/api/auth/members", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.requireRoleMock.mockReturnValue({
@@ -32,6 +53,19 @@ describe("GET /api/auth/members", () => {
       orgName: "Org Demo",
       email: "owner@site.ro",
       role: "owner",
+    })
+    mocks.eventActorFromSessionMock.mockReturnValue({
+      id: "user-1",
+      label: "owner@site.ro",
+      role: "owner",
+      source: "session",
+    })
+    mocks.formatEventActorLabelMock.mockReturnValue("owner@site.ro (owner)")
+    mocks.createComplianceEventMock.mockReturnValue({ id: "evt-1" })
+    mocks.appendComplianceEventsMock.mockReturnValue([{ id: "evt-1" }])
+    mocks.mutateStateMock.mockImplementation(async (updater: (current: { events: unknown[] }) => unknown) => {
+      updater({ events: [] })
+      return { events: [] }
     })
   })
 
@@ -67,5 +101,67 @@ describe("GET /api/auth/members", () => {
 
     expect(response.status).toBe(403)
     expect(payload.code).toBe("AUTH_ROLE_FORBIDDEN")
+  })
+
+  it("adauga un membru existent din workspace", async () => {
+    mocks.addOrganizationMemberByEmailMock.mockResolvedValueOnce({
+      membershipId: "membership-2",
+      userId: "user-2",
+      email: "reviewer@site.ro",
+      role: "reviewer",
+      createdAtISO: "2026-03-15T10:00:00.000Z",
+      orgId: "org-1",
+      orgName: "Org Demo",
+    })
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "reviewer@site.ro", role: "reviewer" }),
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(payload.ok).toBe(true)
+    expect(payload.member.email).toBe("reviewer@site.ro")
+    expect(mocks.addOrganizationMemberByEmailMock).toHaveBeenCalledWith(
+      "org-1",
+      "reviewer@site.ro",
+      "reviewer"
+    )
+    expect(mocks.mutateStateMock).toHaveBeenCalledTimes(1)
+    expect(mocks.createComplianceEventMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("valideaza emailul pentru adaugare", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/auth/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "invalid", role: "reviewer" }),
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("AUTH_INVALID_EMAIL")
+  })
+
+  it("respinge utilizatorul inexistent in workspace", async () => {
+    mocks.addOrganizationMemberByEmailMock.mockRejectedValueOnce(new Error("USER_NOT_FOUND"))
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "nou@site.ro", role: "viewer" }),
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(404)
+    expect(payload.code).toBe("AUTH_MEMBER_USER_NOT_FOUND")
   })
 })

@@ -1023,3 +1023,15 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu schimba modelul de produs
   - intareste regula `executia bate framing-ul`
+
+Actualizare suplimentara 2026-03-15:
+
+- `Setari / Acces` poate administra acum membri existenti din workspace
+- asta inseamna:
+  - owner-ul poate adauga un utilizator deja existent in workspace in organizatia curenta
+  - rolul este ales direct la intrare
+  - fiecare adaugare intra in event log ca `auth.member-added`
+- pasul este sanatos pentru ca:
+  - nu schimba modelul de auth
+  - nu promite invitatii externe complete
+  - inchide administrarea minima peste workspace-ul local

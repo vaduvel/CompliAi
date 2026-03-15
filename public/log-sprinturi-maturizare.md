@@ -1936,6 +1936,33 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas operational - `Setari / Acces` pentru membri existenti din workspace:
+
+- `lib/server/auth.ts` poate adauga acum un utilizator deja existent in workspace in organizatia curenta:
+  - fara organizatie noua
+  - fara produs paralel de invitatii
+  - cu protectie pentru modul cloud-first
+- `app/api/auth/members/route.ts` expune acum si `POST /api/auth/members`
+- `app/dashboard/setari/page.tsx` are un formular owner-only pentru:
+  - email existent in workspace
+  - rol initial
+  - adaugare directa in organizatia curenta
+- fiecare adaugare scrie si eveniment de compliance:
+  - `auth.member-added`
+- pasul inchide administrarea minima peste workspace-ul local, fara sa pretinda invitatii externe complete
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: `7.70 kB / 184 kB first load`
+  - dupa: `8.14 kB / 184 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`

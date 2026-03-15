@@ -1381,3 +1381,22 @@ Asta este sanatos arhitectural pentru ca:
 - `Scanare` ramane poarta de intrare pentru executie, nu pagina care concureaza cu propriul flux
 - `starea si urmatorul pas` bat explicatia redundanta
 - pasul nu schimba business logic si nu introduce produs paralel
+
+## Actualizare 2026-03-15 - administrare membri peste workspace-ul local
+
+- `Setari / Acces` poate adauga acum utilizatori deja existenti in workspace in organizatia curenta
+- pasul foloseste:
+  - helper nou in `lib/server/auth.ts`
+  - `POST /api/auth/members`
+  - UI owner-only in `app/dashboard/setari/page.tsx`
+- fiecare adaugare scrie eveniment de compliance:
+  - `auth.member-added`
+
+Asta este sanatos arhitectural pentru ca:
+
+- inchide administrarea minima de membri peste workspace-ul local fara sa inventeze un sistem nou de invitatii
+- respecta regula cloud-first:
+  - utilizatorii nesincronizabili nu sunt promisi ca membri valizi in modul strict
+- pastreaza separarea intre:
+  - admin local de membri
+  - backlogul ulterior pentru invitatii externe complete
