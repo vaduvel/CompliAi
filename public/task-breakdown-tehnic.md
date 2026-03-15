@@ -1187,3 +1187,14 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Auditor Vault wave 1` component density pass
+  - `EvidenceLedgerCard`, `LegalMatrixCard`, `DriftWatchCard`, `ValidationLedgerCard`, `AuditTimelineCard`
+  - verdictul si starea raman sus
+  - metadata si explicatia coboara sub disclosure
+- [x] build stabil dupa pas:
+  - `/dashboard/rapoarte/auditor-vault` ramane in zona `181 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

@@ -940,6 +940,18 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba traceability sau export
   - intareste rolul de `ledger + trasabilitate`
 
+Actualizare suplimentara 2026-03-15:
+
+- `Auditor Vault` a primit si lotul component-level pentru `wave 1`
+- asta inseamna:
+  - verdictul ramane sus in carduri
+  - metadata lunga coboara sub disclosure
+  - driftul, validarea si timeline-ul raman scanabile
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba shell-ul paginii
+  - intareste regula `starea bate explicatia`
+
 - `Dashboard` a primit si un al doilea pass scurt de austeritate pe home:
   - `Traseu rapid` mai scurt si mai dur
   - `Stare curenta` in loc de `Snapshot rapid`

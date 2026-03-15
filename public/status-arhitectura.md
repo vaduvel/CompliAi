@@ -1213,6 +1213,24 @@ Asta este sanatos arhitectural pentru ca:
 - starea si urmatorul pas bat explicatia lunga
 - pasul nu atinge logica de export, traceability sau business rules
 
+## Actualizare 2026-03-15 - `Auditor Vault wave 1` component density pass
+
+- cardurile locale din Vault au primit disclosure mai dur:
+  - `EvidenceLedgerCard`
+  - `LegalMatrixCard`
+  - `DriftWatchCard`
+  - `ValidationLedgerCard`
+  - `AuditTimelineCard`
+- regula aplicata este constanta:
+  - verdictul si starea raman sus
+  - metadata si explicatia secundara coboara sub disclosure
+
+Asta este sanatos arhitectural pentru ca:
+
+- intareste rolul de ledger scanabil
+- pastreaza trasabilitatea fara sa o lase sa concureze cu verdictul
+- nu schimba shell-ul paginii si nu schimba business logic
+
 ## Actualizare 2026-03-15 - `Setari` component austerity pass
 
 - `Setari` a primit si lotul component-level, separat de shell-ul paginii
