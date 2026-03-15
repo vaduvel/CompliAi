@@ -12,7 +12,6 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -54,15 +53,12 @@ export default function RemediationPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Remediere"
-        title="Aici se face executia reala"
-        description="Inchizi task-uri, atasezi dovada si rulezi rescan. Livrabilul si ledger-ul audit-ready raman in paginile lor dedicate."
+        title="Executi, atasezi dovada si validezi"
+        description="Remedierea ramane pagina de lucru. Ledger-ul si livrabilul final se verifica separat, dupa ce ai inchis task-ul corect."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               executie
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              validare umana obligatorie
             </Badge>
           </>
         }
@@ -75,22 +71,6 @@ export default function RemediationPage() {
             <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
           </div>
         }
-        actions={
-          <>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/rapoarte/auditor-vault">
-                Auditor Vault
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link href="/dashboard/rapoarte">
-                Audit si export
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </Button>
-          </>
-        }
       />
 
       <PillarTabs sectionId="dovada" />
@@ -98,57 +78,13 @@ export default function RemediationPage() {
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardContent className="px-5 py-5">
           <SummaryStrip
-            eyebrow="Remediere"
-            title="Executie cu dovada, nu doar status update"
-            description="Task-ul nu este cu adevarat inchis pana nu ai si dovada, si validarea potrivita prin rescan sau review uman."
+            eyebrow="Snapshot de executie"
+            title="Intri direct in board"
+            description="Folosesti board-ul pentru triere, dovada si inchidere. Vault si Audit si export raman pasi de verificare, nu primul ecran de lucru."
             items={items}
           />
         </CardContent>
       </Card>
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
-        <SectionBoundary
-          eyebrow="Flux canonic"
-          title="Remedierea este locul unde lucrezi, nu locul unde exporti"
-          description="Aici prioritizezi, inchizi si probezi actiunile reale. Dupa executie, sari in Vault sau in Audit si export pentru verificare si livrabil."
-          support={
-            <div className="grid gap-4 md:grid-cols-3">
-              <FlowHint
-                title="1. Lucrezi pe task"
-                detail="Prioritizezi, completezi si inchizi actiunile reale care reduc riscul."
-              />
-              <FlowHint
-                title="2. Atasezi dovada"
-                detail="Pastrezi fisierul, captura sau extrasul care sustine remedierea."
-              />
-              <FlowHint
-                title="3. Verifici audit-ready"
-                detail="Dupa executie, sari in Vault sau Audit si export pentru verificare si livrabil."
-              />
-            </div>
-          }
-        />
-        <HandoffCard
-          title="Dupa executie continui in paginile read-only"
-          description="Remediere ramane pagina de actiune. Auditor Vault iti arata ledger-ul si trasabilitatea, iar Audit si export iti pregateste livrabilul final."
-          destinationLabel="vault / audit pack"
-          checklist={[
-            "executi si inchizi task-ul aici",
-            "atasezi dovada inainte sa declari inchiderea reala",
-            "verifici separat ledger-ul si livrabilul",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/rapoarte/auditor-vault">Auditor Vault</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/dashboard/rapoarte">Audit si export</Link>
-              </Button>
-            </>
-          }
-        />
-      </div>
 
       <RemediationBoard
         tasks={cockpit.tasks}
@@ -158,6 +94,57 @@ export default function RemediationPage() {
         onAttachEvidence={cockpitActions.attachEvidence}
         onExport={cockpitActions.handleTaskExport}
       />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
+          <CardContent className="px-5 py-5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Ritm de lucru
+            </p>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <FlowHint
+                title="1. Triage rapid"
+                detail="Gasesti task-ul deschis si clarifici daca este remediere rapida sau structurala."
+              />
+              <FlowHint
+                title="2. Dovada minima"
+                detail="Atasezi fisierul, captura sau extrasul care sustine inchiderea reala."
+              />
+              <FlowHint
+                title="3. Verificare separata"
+                detail="Abia dupa executie sari in Vault sau in Audit si export pentru ledger si livrabil."
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <HandoffCard
+          title="Cand termini board-ul, mergi in paginile read-only"
+          description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
+          destinationLabel="vault / audit pack"
+          checklist={[
+            "inchizi task-ul si atasezi dovada aici",
+            "verifici ledger-ul separat in Auditor Vault",
+            "pregatesti livrabilul final in Audit si export",
+          ]}
+          actions={
+            <>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/rapoarte/auditor-vault">
+                  Auditor Vault
+                  <ArrowRight className="size-4" strokeWidth={2.25} />
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/rapoarte">
+                  Audit si export
+                  <ArrowRight className="size-4" strokeWidth={2.25} />
+                </Link>
+              </Button>
+            </>
+          }
+        />
+      </div>
     </div>
   )
 }

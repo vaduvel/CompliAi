@@ -1060,3 +1060,52 @@ Efect masurabil in build:
 - `/dashboard/rapoarte`
   - inainte: `7.89 kB` / `179 kB first load`
   - dupa: `6.13 kB` / `177 kB first load`
+
+## Actualizare 2026-03-15 - verdict de runtime UX
+
+CompliScan are acum o fundatie de produs mai matura decat lasa sa se vada runtime-ul.
+
+Verdictul corect este:
+
+- problema dominanta nu mai este lipsa de feature-uri
+- problema dominanta este ca UX-ul runtime nu are inca suficienta autoritate
+
+Asta inseamna:
+
+- produsul explica prea mult
+- prea multe blocuri par egale in ierarhie
+- executia, sumarul si proof-ul concureaza inca prea des pe aceeasi pagina
+
+Directiva activa devine:
+
+- starea si urmatorul pas trebuie sa bata explicatia
+
+Implicații:
+
+- `Checklists` este urmatorul val sanatos dupa integrare si browser audit
+- `Dashboard` trebuie curatat in continuare spre orientare pura
+- `Agent Evidence OS` continua doar ca layer peste produsul actual:
+  - fara produs paralel
+  - fara scriere directa in state final
+  - cu human review obligatoriu
+
+Sursa operationala pentru aceasta directie:
+
+- `public/runtime-ux-declutter-directive-2026-03-15.md`
+
+## Actualizare 2026-03-15 - `Checklists wave 1` a pornit corect
+
+- prima taietura a fost facuta la nivel de page shell, nu de business logic
+- `Remediere` a devenit mai clara ca pagina de executie:
+  - board-ul urca mai sus
+  - handoff-ul coboara dupa zona de lucru
+  - framing-ul explicativ nu mai concureaza la acelasi nivel cu actiunea
+
+Asta este sanatos arhitectural pentru ca:
+
+- respecta regula `starea si urmatorul pas trebuie sa bata explicatia`
+- nu schimba separarea dintre:
+  - `Remediere`
+  - `Audit si export`
+  - `Auditor Vault`
+- lasa component-level density pass-ul pentru lotul separat, fara sa amestece shell-ul cu cardurile
