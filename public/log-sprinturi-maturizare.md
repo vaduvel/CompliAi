@@ -2095,6 +2095,27 @@ Pas suplimentar - `Dashboard` orientation hardening:
 - CTA-urile secundare au fost scurtate la:
   - `Scanare`
   - `Control`
+
+Pornire executie - `Control wave 1` page shell:
+
+- `app/dashboard/sisteme/page.tsx` a primit primul pass de austeritate pe shell
+- schimbarea merge pe:
+  - `PageIntro` mai scurt
+  - `Overview` mai direct
+  - `SectionBoundary` fara suportul didactic greu
+  - handoff mai scurt spre `Sisteme` / `Drift` / `Setari`
+- ce a fost taiat:
+  - cardurile explicative `ActionRow` din overview
+  - un card de handoff redundant despre integrari
+- scopul pasului:
+  - `Control` sa citeasca mai repede ca workspace de confirmare
+  - starea si traseul sa bata framing-ul
+- efect in build:
+  - `/dashboard/sisteme` a coborat la `9.28 kB / 179 kB first load`
+- validare dupa pas:
+  - `npm test` -> verde
+  - `npm run lint` -> verde
+  - `npm run build` -> verde
 - scopul pasului:
   - `Dashboard` sa se simta si mai clar ca home operational
   - starea si traseul sa bata framing-ul ramas

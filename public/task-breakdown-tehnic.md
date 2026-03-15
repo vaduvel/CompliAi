@@ -1141,3 +1141,18 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Control wave 1` page-shell pass
+  - `PageIntro` mai scurt si mai direct
+  - `Overview` mai clar orientat pe confirmare
+  - `SectionBoundary` fara suportul didactic greu
+  - handoff redus la directiile reale:
+    - `Sisteme`
+    - `Drift`
+    - `Setari`
+- [x] efect confirmat in build:
+  - `/dashboard/sisteme` a coborat la `9.28 kB / 179 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

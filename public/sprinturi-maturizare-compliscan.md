@@ -886,6 +886,18 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba shell-ul de pagina
   - intareste rolul de suprafata administrativa sobra
 
+Actualizare suplimentara 2026-03-15:
+
+- `Control` a pornit cu `wave 1` la nivel de page shell
+- asta inseamna:
+  - mai putin framing doctrinar in overview
+  - traseu mai clar spre `Sisteme`, `Drift` si `Setari`
+  - mai putin spatiu ocupat de suportul didactic
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu muta `Control` spre executie
+  - intareste rolul de workspace de confirmare
+
 - `Dashboard` a primit si un al doilea pass scurt de austeritate pe home:
   - `Traseu rapid` mai scurt si mai dur
   - `Stare curenta` in loc de `Snapshot rapid`

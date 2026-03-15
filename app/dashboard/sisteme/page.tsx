@@ -5,9 +5,6 @@ import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
-  CheckCircle2,
-  Radar,
-  Sparkles,
 } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
@@ -108,7 +105,7 @@ export default function SistemePage() {
       <PageIntro
         eyebrow="Control"
         title="Confirmi ce intra in inventarul oficial si ce devine drift real"
-        description="Control ramane workspace-ul de confirmare umana: candidatele devin sisteme asumate, baseline-ul devine reper, iar drift-ul ramane separat de remediere si export."
+        description="Aici validezi candidatele, reperul si drift-ul real. Executia ramane in Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -134,11 +131,11 @@ export default function SistemePage() {
         actions={
           <>
             <Button variant="outline" onClick={() => setPrimaryView("systems")}>
-              Continua in Sisteme
+              Sisteme
             </Button>
             <Button asChild>
               <Link href="/dashboard/alerte">
-                Vezi drift complet
+                Drift
                 <ArrowRight className="size-4" strokeWidth={2.25} />
               </Link>
             </Button>
@@ -321,53 +318,41 @@ function ControlOverview({
       <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardContent className="px-5 py-5">
           <SummaryStrip
-            eyebrow="Overview"
-            title="Snapshot control"
-            description="Aici vezi starea curenta si alegi unde continui confirmarea reala: candidate, inventar, baseline sau drift."
+            eyebrow="Stare curenta"
+            title="Ce ceri sa confirmi acum"
+            description="Alegi zona unde continui confirmarea reala."
             items={items}
           />
         </CardContent>
       </Card>
 
       <SectionBoundary
-        eyebrow="Flux canon"
-        title="Control inseamna confirmare, nu executie si nu export"
-        description="Aici verifici si validezi ce intra in inventar, baseline si drift. Remedierea ramane in Dovada, iar integrările operationale raman in Setari."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              confirmare umana
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              baseline + drift
-            </Badge>
-          </>
-        }
+        eyebrow="Control"
+        title="Confirmare umana, fara executie aici"
+        description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
+        badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
         support={
-          <div className="grid gap-3 lg:grid-cols-3">
-            <ActionRow
-              icon={Sparkles}
-              title="Descoperi sursele reale"
-              detail="Pornesti din manifest sau lockfile, nu din memorie, ca sa obtii candidate reale si explicabile."
-            />
-            <ActionRow
-              icon={CheckCircle2}
-              title="Confirmi ce intra in inventar"
-              detail="Scopul, modelul si nivelul de incredere trebuie validate uman inainte de asumare operationala."
-            />
-            <ActionRow
-              icon={Radar}
-              title="Separi schimbarea reala de zgomot"
-              detail="Fixezi baseline-ul si urmaresti drift-ul fata de un reper validat, nu fata de ultima impresie din echipa."
-            />
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={onOpenDiscovery}>
+              Discovery
+            </Button>
+            <Button variant="outline" onClick={onOpenBaseline}>
+              Baseline
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/setari">
+                Setari
+                <ArrowRight className="size-4" strokeWidth={2.25} />
+              </Link>
+            </Button>
           </div>
         }
       />
 
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="grid gap-4 xl:grid-cols-2">
         <HandoffCard
           title="Continui in Sisteme"
-          description="Aici lucrezi pe candidate, inventar, compliance pack si baseline, fara sa amesteci drift-ul cu restul."
+          description="Aici lucrezi pe candidate, inventar, compliance pack si baseline."
           destinationLabel="workspace principal"
           checklist={[
             "incepi cu Discovery daca ai candidate noi",
@@ -378,38 +363,19 @@ function ControlOverview({
         />
         <HandoffCard
           title="Drift-ul sta separat"
-          description="Cand ai schimbari fata de baseline, le investighezi separat ca sa nu incarci inventarul cu semnale operationale."
+          description="Cand ai schimbari fata de baseline, le investighezi separat si trimiti doar ce merita in remediere."
           destinationLabel="investigatie"
           checklist={[
             "vezi ce s-a schimbat fata de baseline",
             "decizi daca merge spre remediere",
             "nu inchizi auditul direct din Control",
           ]}
-          actions={<Button onClick={onOpenDrift}>Deschide Drift</Button>}
-        />
-        <HandoffCard
-          title="Integrarile nu concureaza cu Control"
-          description="e-Factura si restul setarilor operationale raman in Setari, ca sa nu incarcam aceeasi pagina cu intentii concurente."
-          destinationLabel="operational"
-          checklist={[
-            "integrarile stau in Setari",
-            "Control ramane pe confirmare si baseline",
-            "executia si exportul stau in Dovada",
-          ]}
           actions={
             <>
-              <Button variant="outline" onClick={onOpenDiscovery}>
-                Revino la Discovery
-              </Button>
               <Button variant="outline" onClick={onOpenBaseline}>
-                Vezi Baseline
+                Baseline
               </Button>
-              <Button asChild>
-                <Link href="/dashboard/setari">
-                  Mergi la Setari
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
-                </Link>
-              </Button>
+              <Button onClick={onOpenDrift}>Drift</Button>
             </>
           }
         />
@@ -922,7 +888,7 @@ function ControlReviewWorkspace({
           <SummaryStrip
             eyebrow="Review"
             title="Queue-ul de validare umana"
-            description="Aici vezi ce trebuie verificat inainte ca Control sa poata impinge mai departe un model credibil in produs."
+            description="Aici vezi ce mai cere confirmare inainte sa impingi mai departe."
             items={reviewItems}
           />
         </CardContent>
@@ -931,7 +897,7 @@ function ControlReviewWorkspace({
       <div className="grid gap-4 xl:grid-cols-3">
         <HandoffCard
           title="Review pentru candidate"
-          description="Candidatele detectate automat trebuie validate sau respinse explicit, nu lasate intr-o stare ambigua."
+          description="Candidatele detectate automat trebuie validate sau respinse explicit."
           destinationLabel="systems / discovery"
           checklist={[
             "verifici providerul, scopul si modelul",
@@ -942,7 +908,7 @@ function ControlReviewWorkspace({
         />
         <HandoffCard
           title="Review pentru Compliance Pack"
-          description="Campurile precompletate si pachetele dominante cer inca validare umana inainte de a merge spre dovada si export."
+          description="Campurile precompletate cer validare umana inainte sa mearga spre dovada si export."
           destinationLabel="systems / compliance pack"
           checklist={[
             "verifici campurile sensibile",
@@ -953,7 +919,7 @@ function ControlReviewWorkspace({
         />
         <HandoffCard
           title="Review pentru baseline si drift"
-          description="Baseline-ul si drift-ul raman surse de adevar pentru schimbare. Daca nu sunt curate, restul controlului devine zgomotos."
+          description="Daca baseline-ul si drift-ul nu sunt curate, restul controlului devine zgomotos."
           destinationLabel="baseline / drift"
           checklist={[
             "validezi snapshot-ul corect",
@@ -1112,30 +1078,6 @@ function SystemsSubTabs({
           </button>
         )
       })}
-    </div>
-  )
-}
-
-function ActionRow({
-  icon: Icon,
-  title,
-  detail,
-}: {
-  icon: typeof Sparkles
-  title: string
-  detail: string
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 grid size-9 place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)]">
-          <Icon className="size-4" strokeWidth={2.25} />
-        </span>
-        <div>
-          <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-on-surface-muted)]">{detail}</p>
-        </div>
-      </div>
     </div>
   )
 }
