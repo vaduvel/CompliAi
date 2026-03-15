@@ -2235,6 +2235,46 @@ Inchidere executie - `Dashboard` cleanup suplimentar:
   - `npm run lint`
   - `npm run build`
 
+Audit runtime local - `browser audit` partial:
+
+- a fost creat un org temporar autentificat local pentru verificare reala de runtime
+- a fost rulat un `scan` real pe documentul `policy-tracking.txt`
+- payload-ul populat confirma lantul real:
+  - `scan`
+  - `finding`
+  - `alert`
+  - `remediationPlan`
+  - `traceabilityMatrix`
+- verdictul partial este:
+  - `Dashboard` a ramas coerent dupa pasurile de declutter
+  - urmatoarea densitate reala a ramas in `Checklists`
+- auditul vizual complet in browser ramane deschis, dar nu mai lucram in orb
+
+Pas suplimentar - `Checklists wave 2` signal pass:
+
+- `app/dashboard/checklists/page.tsx`
+  - `Snapshot de executie` spune acum `Ce inchizi acum`
+  - sumarul urca semnalele actionabile:
+    - `Task-uri deschise`
+    - `P1 deschise`
+    - `Fara dovada`
+  - copy-ul de intrare este mai scurt si mai dur
+- `components/compliscan/remediation-board.tsx`
+  - header-ul board-ului tine sus doar:
+    - `deschise`
+    - `P1`
+    - `fara dovada`
+  - count-urile mai putin actionabile au coborat din header
+- efect:
+  - executia incepe mai repede din zona urgenta
+  - blocajul de audit prin lipsa dovezii este mai vizibil
+  - build-ul ramane stabil:
+    - `/dashboard/checklists` in zona `7.13 kB / 179 kB first load`
+- validare:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 Pornire executie - `Control wave 1` page shell:
 
 - `app/dashboard/sisteme/page.tsx` a primit primul pass de austeritate pe shell

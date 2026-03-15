@@ -1044,6 +1044,11 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Dovada / Audit si export`
   - `Dovada / Auditor Vault`
   - `Setari`
+  - audit runtime local partial rulat pe org temporar autentificat
+  - empty-state si stare populata prin `scan` real au fost verificate la nivel de payload + route shell
+  - verdict curent:
+    - `Dashboard` tine directia buna
+    - urmatoarea densitate reala ramasă este in `Checklists`
 - [x] `Checklists wave 1`
   - compactare a zonei de deasupra board-ului
   - ierarhie mai clara pentru filtre
@@ -1055,6 +1060,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - fara competitie cu proof si panouri suport
   - `Unde continui` ridica si marcheaza pasul curent
   - `Stare curenta` trimite spre actiunea dominanta, nu generic spre aceleasi doua zone
+- [x] `Checklists wave 2` signal pass
+  - `Snapshot de executie` spune acum mai direct ce inchizi acum
+  - sumarul urca:
+    - `Task-uri deschise`
+    - `P1 deschise`
+    - `Fara dovada`
+  - header-ul board-ului reduce zgomotul si tine sus:
+    - `deschise`
+    - `P1`
+    - `fara dovada`
 - [ ] orice pas nou pe `Agent Evidence OS` ramane sub regula:
   - layer peste produsul actual
   - fara produs paralel

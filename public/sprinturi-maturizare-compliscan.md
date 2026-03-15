@@ -985,3 +985,15 @@ Actualizare suplimentara 2026-03-15:
   - nu schimba logic nou
   - nu schimba modelul de produs
   - intareste rolul de `Dashboard = orientare pura`
+
+Actualizare suplimentara 2026-03-15:
+
+- `Checklists wave 2` a primit un signal pass scurt
+- asta inseamna:
+  - semnalul `P1` urca in snapshotul de executie
+  - lipsa dovezii urca explicit ca blocaj operational
+  - header-ul board-ului pierde count-urile mai putin actionabile
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba wiring-ul taskurilor
+  - intareste regula `executia bate framing-ul`

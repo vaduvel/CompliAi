@@ -56,14 +56,13 @@ export function RemediationBoard({
   })
   const rapidTasks = visibleTasks.filter((task) => task.remediationMode === "rapid")
   const structuralTasks = visibleTasks.filter((task) => task.remediationMode === "structural")
-  const openRapidCount = tasks.filter(
-    (task) => task.remediationMode === "rapid" && task.status !== "done"
-  ).length
-  const openStructuralCount = tasks.filter(
-    (task) => task.remediationMode === "structural" && task.status !== "done"
-  ).length
   const openCount = tasks.filter((task) => task.status !== "done").length
-  const doneCount = tasks.filter((task) => task.status === "done").length
+  const openPriorityOneCount = tasks.filter(
+    (task) => task.status !== "done" && task.priority === "P1"
+  ).length
+  const missingEvidenceCount = tasks.filter(
+    (task) => task.status !== "done" && !task.attachedEvidence
+  ).length
 
   return (
     <Card className="border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -71,7 +70,7 @@ export function RemediationBoard({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-lg text-[var(--color-on-surface)]">Remediere</CardTitle>
+              <CardTitle className="text-lg text-[var(--color-on-surface)]">Board de remediere</CardTitle>
               <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
                 {visibleTasks.length} vizibile
               </Badge>
@@ -80,15 +79,16 @@ export function RemediationBoard({
               <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
                 {openCount} deschise
               </Badge>
-              <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
-                {doneCount} inchise
-              </Badge>
-              <Badge className="border-[var(--color-info)] bg-[var(--color-info-muted)] text-[var(--color-info)]">
-                {openRapidCount} rapide
-              </Badge>
-              <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
-                {openStructuralCount} structurale
-              </Badge>
+              {openPriorityOneCount > 0 ? (
+                <Badge className="border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]">
+                  {openPriorityOneCount} P1
+                </Badge>
+              ) : null}
+              {missingEvidenceCount > 0 ? (
+                <Badge className="border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+                  {missingEvidenceCount} fara dovada
+                </Badge>
+              ) : null}
             </div>
           </div>
 

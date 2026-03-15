@@ -26,26 +26,30 @@ export default function RemediationPage() {
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
-  const doneTasks = cockpit.tasks.filter((task) => task.status === "done")
   const evidenceAttached = cockpit.tasks.filter((task) => Boolean(task.attachedEvidence))
+  const openPriorityOneTasks = openTasks.filter((task) => task.priority === "P1")
+  const tasksMissingEvidence = openTasks.filter((task) => !task.attachedEvidence)
   const items: SummaryStripItem[] = [
     {
       label: "Task-uri deschise",
       value: `${openTasks.length}`,
-      hint: "actiuni care inca cer executie sau dovada",
+      hint: "executie activa in board",
       tone: openTasks.length > 0 ? "warning" : "success",
     },
     {
-      label: "Task-uri inchise",
-      value: `${doneTasks.length}`,
-      hint: "trecute prin executie si inchise operational",
-      tone: doneTasks.length > 0 ? "success" : "neutral",
+      label: "P1 deschise",
+      value: `${openPriorityOneTasks.length}`,
+      hint: openPriorityOneTasks.length > 0 ? "intri mai intai in urgente" : "nu ai urgente acum",
+      tone: openPriorityOneTasks.length > 0 ? "danger" : "success",
     },
     {
-      label: "Dovezi atasate",
-      value: `${evidenceAttached.length}`,
-      hint: "dovezi adaugate in timpul executiei, nu doar la final",
-      tone: evidenceAttached.length > 0 ? "accent" : "neutral",
+      label: "Fara dovada",
+      value: `${tasksMissingEvidence.length}`,
+      hint:
+        tasksMissingEvidence.length > 0
+          ? "task-uri care tin auditul blocat"
+          : `${evidenceAttached.length} au dovada atasata`,
+      tone: tasksMissingEvidence.length > 0 ? "warning" : "accent",
     },
   ]
 
@@ -54,7 +58,7 @@ export default function RemediationPage() {
       <PageIntro
         eyebrow="Dovada / Remediere"
         title="Executi, atasezi dovada si validezi"
-        description="Remedierea ramane pagina de lucru. Ledger-ul si livrabilul final se verifica separat, dupa ce ai inchis task-ul corect."
+        description="Aici inchizi taskul corect. Vault si Audit si export raman pasi de verificare separati."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -79,8 +83,7 @@ export default function RemediationPage() {
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Snapshot de executie"
-            title="Intri direct in board"
-            description="Folosesti board-ul pentru triere, dovada si inchidere. Vault si Audit si export raman pasi de verificare, nu primul ecran de lucru."
+            title="Ce inchizi acum"
             items={items}
           />
         </CardContent>

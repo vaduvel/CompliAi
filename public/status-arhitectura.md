@@ -1333,3 +1333,18 @@ Asta este sanatos arhitectural pentru ca:
 - `Dashboard` ramane orientare pura, nu home explicativ
 - actiunea principala domina fara sa deschidem produs paralel
 - `summary / detail / action` este aplicat si la nivelul home-ului operational
+
+## Actualizare 2026-03-15 - `Checklists wave 2` signal pass
+
+- `Checklists` foloseste acum mai direct regula `urgenta + lipsa dovezii`
+- snapshot-ul de sus nu mai consuma spatiu pe semnale mai putin actionabile
+- board-ul urca explicit:
+  - taskurile deschise
+  - `P1`
+  - taskurile fara dovada
+
+Asta este sanatos arhitectural pentru ca:
+
+- `Remediere` ramane pagina de executie, nu mini-dashboard statistic
+- blocajul de audit este vizibil mai devreme
+- `summary / detail / action` este aplicat si pe partea de executie, nu doar pe orientare
