@@ -999,3 +999,24 @@ Efect masurabil in build:
 - `/dashboard/rapoarte/auditor-vault`
   - inainte: `17.3 kB` / `189 kB first load`
   - dupa: `9.69 kB` / `181 kB first load`
+
+## Actualizare 2026-03-15 - `Setari` code-splitting pentru taburile grele
+
+- `Setari` ramane pilon operational/admin, dar nu mai aduce in bundle-ul initial toate diagnosticele tehnice
+- `Integrari` si `Operational` au fost extrase in componente dedicate si incarcate local prin `dynamic import`
+- tipurile si helper-ele reutilizabile au fost mutate intr-un modul comun:
+  - `components/compliscan/settings/settings-shared.tsx`
+
+Asta este sanatos arhitectural pentru ca:
+
+- pastreaza `Setari` ca shell de orchestrare, nu ca ecran monolitic
+- lasa taburile usoare (`Workspace`, `Acces`, `Avansat`) sa porneasca rapid
+- impinge diagnosticele grele doar in momentul in care utilizatorul intra explicit pe:
+  - `Integrari`
+  - `Operational`
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: aproximativ `11.7 kB` / `185 kB first load`
+  - dupa: `7.73 kB` / `184 kB first load`

@@ -989,3 +989,17 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `TraceabilityMatrixCard`
 - [x] efect confirmat in build:
   - `/dashboard/rapoarte/auditor-vault` a coborat la `9.69 kB / 181 kB first load`
+
+- [x] `Setari` nu mai tine `Integrari` si `Operational` in bundle-ul initial
+  - shell-ul de pagina ramane in `app/dashboard/setari/page.tsx`
+  - taburile grele au fost mutate in:
+    - `components/compliscan/settings/settings-integrations-tab.tsx`
+    - `components/compliscan/settings/settings-operational-tab.tsx`
+- [x] helper-ele si tipurile comune pentru `Setari` au fost extrase in:
+  - `components/compliscan/settings/settings-shared.tsx`
+- [x] efect confirmat in build:
+  - `/dashboard/setari` a coborat la `7.73 kB / 184 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

@@ -1935,3 +1935,28 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Pas de performanta - `Setari`:
+
+- `app/dashboard/setari/page.tsx` nu mai tine in modulul initial toata logica pentru taburile grele `Integrari` si `Operational`
+- taburile au fost extrase in componente dedicate:
+  - `components/compliscan/settings/settings-integrations-tab.tsx`
+  - `components/compliscan/settings/settings-operational-tab.tsx`
+- tipurile, helper-ele si loading shell-urile comune au fost mutate in:
+  - `components/compliscan/settings/settings-shared.tsx`
+- efect:
+  - shell-ul `Setari` pastreaza orchestration-ul si intentia paginii
+  - diagnosticele de infrastructura si release readiness intra doar cand utilizatorul deschide taburile respective
+  - pagina ramane aliniata cu doctrina `summary / detail / action`, fara sa incarce upfront tot contextul operational
+
+Efect masurabil in build:
+
+- `/dashboard/setari`
+  - inainte: aproximativ `11.7 kB / 185 kB first load`
+  - dupa: `7.73 kB / 184 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
