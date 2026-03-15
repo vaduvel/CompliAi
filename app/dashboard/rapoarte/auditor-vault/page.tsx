@@ -526,7 +526,12 @@ function EvidenceLedgerCard({
                   </p>
                 )}
                 {task.validationMessage && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">{task.validationMessage}</p>
+                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      Detaliu validare
+                    </summary>
+                    <p className="mt-2 text-xs text-[var(--color-muted)]">{task.validationMessage}</p>
+                  </details>
                 )}
               </div>
             ))}
@@ -565,6 +570,14 @@ function EvidenceLedgerCard({
                 <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
                   {task.validationMessage || task.evidenceSnippet}
                 </p>
+                {task.validationMessage && task.evidenceSnippet && task.validationMessage !== task.evidenceSnippet && (
+                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      Dovada asteptata
+                    </summary>
+                    <p className="mt-2 text-xs text-[var(--color-muted)]">{task.evidenceSnippet}</p>
+                  </details>
+                )}
               </div>
             ))}
           </div>
@@ -586,7 +599,7 @@ function LegalMatrixCard({
           <div>
             <CardTitle className="text-xl">Matrice de mapare legala</CardTitle>
             <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
-              Pentru fiecare task vezi articolul, de ce conteaza si ce dovada trebuie tinuta.
+              Vezi articolul relevant, dovada ceruta si momentul in care revii in executie.
             </p>
           </div>
           <Button asChild variant="outline" className="h-10 rounded-xl">
@@ -619,10 +632,14 @@ function LegalMatrixCard({
             </div>
             <p className="mt-3 text-sm font-semibold text-[var(--color-on-surface)]">{task.title}</p>
             <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{task.why}</p>
-            {task.legalSummary && (
-              <p className="mt-3 text-xs text-[var(--color-muted)]">{task.legalSummary}</p>
-            )}
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                Dovada si urmatorul pas
+              </summary>
+              {task.legalSummary && (
+                <p className="mt-3 text-xs text-[var(--color-muted)]">{task.legalSummary}</p>
+              )}
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
                 <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">
                   Dovada ceruta
@@ -639,7 +656,8 @@ function LegalMatrixCard({
                   {task.rescanHint || "Dupa ce actualizezi textul sau controlul tehnic relevant."}
                 </p>
               </div>
-            </div>
+              </div>
+            </details>
           </div>
         ))}
       </CardContent>
@@ -750,13 +768,17 @@ function DriftWatchCard({
                       SLA depășit
                     </Badge>
                   )}
-                  {drift.requiresHumanApproval && (
-                    <Badge variant="warning">
-                      cere aprobare umană
-                    </Badge>
-                  )}
-                </div>
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {drift.requiresHumanApproval && (
+                  <Badge variant="warning">
+                    cere aprobare umană
+                  </Badge>
+                )}
+              </div>
+                <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                  <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                    Impact si escalare
+                  </summary>
+                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
                     <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
                       De ce conteaza
@@ -816,6 +838,7 @@ function DriftWatchCard({
                     )}
                   </div>
                 </div>
+                </details>
               </div>
             )
           })()
@@ -892,15 +915,22 @@ function ValidationLedgerCard({
                 )}
               </div>
             )}
-            {entry.message && (
-              <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">{entry.message}</p>
+            {(entry.message || entry.evidence || entry.validatedAtISO) && (
+              <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Detalii validare
+                </summary>
+                {entry.message && (
+                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">{entry.message}</p>
+                )}
+                <div className="mt-3 flex flex-wrap gap-3 text-xs text-[var(--color-muted)]">
+                  {entry.evidence && <span>Dovadă: {entry.evidence}</span>}
+                  {entry.validatedAtISO && (
+                    <span>Ultima verificare: {formatRelativeRomanian(entry.validatedAtISO)}</span>
+                  )}
+                </div>
+              </details>
             )}
-            <div className="mt-3 flex flex-wrap gap-3 text-xs text-[var(--color-muted)]">
-              {entry.evidence && <span>Dovadă: {entry.evidence}</span>}
-              {entry.validatedAtISO && (
-                <span>Ultima verificare: {formatRelativeRomanian(entry.validatedAtISO)}</span>
-              )}
-            </div>
           </div>
         ))}
       </CardContent>
@@ -943,28 +973,38 @@ function AuditTimelineCard({
                     {formatEventLabel(event.type)}
                   </Badge>
                 </div>
-                {event.metadata?.validationMessage && (
-                  <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                    {String(event.metadata.validationMessage)}
-                  </p>
-                )}
-                {(event.metadata?.fileName || event.metadata?.checkedSource) && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
-                    {event.metadata?.fileName ? `Dovadă: ${String(event.metadata.fileName)}` : ""}
-                    {event.metadata?.fileName && event.metadata?.checkedSource ? " · " : ""}
-                    {event.metadata?.checkedSource
-                      ? `Sursă verificată: ${String(event.metadata.checkedSource)}`
-                      : ""}
-                  </p>
-                )}
-                {event.actorLabel && (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
-                    Actor: {formatEventActor(event)}
-                  </p>
-                )}
                 <p className="mt-2 text-xs text-[var(--color-muted)]">
                   {event.entityType} · {formatRelativeRomanian(event.createdAtISO)}
                 </p>
+                {(event.metadata?.validationMessage ||
+                  event.metadata?.fileName ||
+                  event.metadata?.checkedSource ||
+                  event.actorLabel) && (
+                  <details className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      Detalii eveniment
+                    </summary>
+                    {event.metadata?.validationMessage && (
+                      <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                        {String(event.metadata.validationMessage)}
+                      </p>
+                    )}
+                    {(event.metadata?.fileName || event.metadata?.checkedSource) && (
+                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                        {event.metadata?.fileName ? `Dovadă: ${String(event.metadata.fileName)}` : ""}
+                        {event.metadata?.fileName && event.metadata?.checkedSource ? " · " : ""}
+                        {event.metadata?.checkedSource
+                          ? `Sursă verificată: ${String(event.metadata.checkedSource)}`
+                          : ""}
+                      </p>
+                    )}
+                    {event.actorLabel && (
+                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                        Actor: {formatEventActor(event)}
+                      </p>
+                    )}
+                  </details>
+                )}
               </div>
             </div>
           </div>

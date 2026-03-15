@@ -1936,6 +1936,41 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de UX runtime - `Auditor Vault wave 1` component density pass:
+
+- `EvidenceLedgerCard`
+  - lasa verdictul vizibil
+  - muta sub disclosure mesajele lungi de validare si dovada asteptata
+- `LegalMatrixCard`
+  - pastreaza sus articolul si motivul
+  - muta `legal summary`, dovada ceruta si momentul de revenire sub disclosure local
+- `DriftWatchCard`
+  - lasa sus driftul, severitatea si badge-urile active
+  - muta blocurile `impact + escalare` sub disclosure
+- `ValidationLedgerCard`
+  - lasa sus statusul, baza si confidence
+  - muta mesajul si metadata de validare sub disclosure
+- `AuditTimelineCard`
+  - lasa sus mesajul si tipul evenimentului
+  - muta metadata mai grea sub disclosure
+
+Efect:
+
+- `Auditor Vault` se scaneaza mai usor
+- verdictul si semnalul operational bat metadata de suport
+- trasabilitatea ramane accesibila fara sa aglomereze ecranul initial
+
+Efect in build:
+
+- `/dashboard/rapoarte/auditor-vault` ramane stabil in zona `181 kB first load`
+- shell-ul rutei urca usor la `7.92 kB`, deci castigul aici este de claritate, nu de bundle trim
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` page-shell declutter:
 
 - `app/dashboard/rapoarte/auditor-vault/page.tsx`
