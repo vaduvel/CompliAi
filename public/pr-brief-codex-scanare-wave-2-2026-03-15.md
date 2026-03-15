@@ -9,7 +9,8 @@ Data: 2026-03-15
 ## Branch
 
 - source: `codex/scanare-wave-2`
-- target: `main`
+- target recomandat acum: `codex/evidence-os-agent-workspace`
+- target final dupa intrarea bazei: `main`
 
 ## Summary scurt
 
@@ -71,9 +72,20 @@ Ambele pasi raman strict in zona de UX/performance. Nu schimba business logic si
 
 ## Verdict de merge
 
-PR-ul este `merge-ready` fata de `main`:
+PR-ul este `merge-ready` ca stacked follow-up peste `codex/evidence-os-agent-workspace`:
 
+- este `0 behind / 3 ahead` fata de baza lui
+- `git diff --check` pe delta fata de baza este curat
 - scope mic si clar, chiar daca include doua pagini vecine
 - validare completa trecuta local
 - efect masurabil pozitiv pe first load pentru ambele rute
 - nu schimba flow-ul canonic al produsului, doar il clarifica
+
+## Nota de integrare
+
+Ordinea sanatoasa este:
+
+1. intra `codex/evidence-os-agent-workspace`
+2. apoi intra `codex/scanare-wave-2`
+
+Cat timp baza nu este inca in `main`, PR-ul pentru acest branch trebuie tratat ca stacked PR.
