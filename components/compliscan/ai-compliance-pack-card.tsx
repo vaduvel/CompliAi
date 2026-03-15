@@ -91,7 +91,7 @@ export function AICompliancePackSummaryCard({
           <div>
             <CardTitle className="text-xl">AI Compliance Pack</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-[var(--color-on-surface-muted)]">
-              Unifică ce știm din documente, manifests și `compliscan.yaml` într-un singur obiect de control, review și audit.
+              Unifica sursele, controalele si dovada intr-un obiect unic de review si audit.
             </p>
           </div>
           <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
@@ -176,16 +176,10 @@ export function AICompliancePackSummaryCard({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Source coverage
+                Snapshot pack
               </p>
               <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Documente: {pack.summary.sourceCoverage.document} · Manifests: {pack.summary.sourceCoverage.manifest} · YAML: {pack.summary.sourceCoverage.yaml}
-              </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Confidence model: detected {pack.summary.confidenceCoverage.detected} · inferred {pack.summary.confidenceCoverage.inferred} · confirmed {pack.summary.confidenceCoverage.confirmedByUser}
-              </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Field confidence: confirmed {pack.summary.fieldConfidenceCoverage.confirmed} · inferred {pack.summary.fieldConfidenceCoverage.inferred} · missing {pack.summary.fieldConfidenceCoverage.missing}
+                Documente {pack.summary.sourceCoverage.document} · Manifests {pack.summary.sourceCoverage.manifest} · YAML {pack.summary.sourceCoverage.yaml}
               </p>
               <p className="mt-2 text-xs text-[var(--color-muted)]">
                 Snapshot: {pack.snapshotId || "încă lipsă"} {pack.comparedToSnapshotId ? `· compare to ${pack.comparedToSnapshotId}` : ""}
@@ -206,6 +200,19 @@ export function AICompliancePackSummaryCard({
               </Button>
             </div>
           </div>
+          <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+            <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+              Coverage details
+            </summary>
+            <div className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+              <p>
+                Confidence model: detected {pack.summary.confidenceCoverage.detected} · inferred {pack.summary.confidenceCoverage.inferred} · confirmed {pack.summary.confidenceCoverage.confirmedByUser}
+              </p>
+              <p>
+                Field confidence: confirmed {pack.summary.fieldConfidenceCoverage.confirmed} · inferred {pack.summary.fieldConfidenceCoverage.inferred} · missing {pack.summary.fieldConfidenceCoverage.missing}
+              </p>
+            </div>
+          </details>
         </div>
       </CardContent>
     </Card>
@@ -239,7 +246,7 @@ export function AICompliancePackEntriesCard({
           <div>
             <CardTitle className="text-xl">{title}</CardTitle>
             <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-              Fiecare intrare leagă identitatea sistemului, controalele, dovezile și următorul pas clar.
+              Fiecare intrare leaga identitatea sistemului de starea curenta, controale si urmatorul pas.
             </p>
           </div>
           <Button asChild variant="outline" className="h-10 rounded-xl">
@@ -332,12 +339,6 @@ export function AICompliancePackEntriesCard({
               </p>
             </div>
 
-            {entry.sources.length > 0 && (
-              <p className="mt-4 text-xs text-[var(--color-muted)]">
-                Prefill din: {entry.sources.map((source) => `${source.origin}:${source.name}`).join(" · ")}
-              </p>
-            )}
-
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
@@ -367,7 +368,7 @@ export function AICompliancePackEntriesCard({
                       </p>
                     )}
                     <div className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
-                      {entry.prefill.fieldStatus.slice(0, 4).map((field) => (
+                      {entry.prefill.fieldStatus.slice(0, 2).map((field) => (
                         <p key={`${entry.id}-${field.field}-reason`}>
                           <span className="font-medium text-[var(--color-on-surface)]">{field.label}</span>: {field.confidenceModel.reason}
                         </p>
@@ -377,24 +378,31 @@ export function AICompliancePackEntriesCard({
                 )}
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                  Source signals
-                </p>
-                <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
-                  Capabilități: {entry.sourceSignals.capabilities.join(", ") || "în curs de inferare"}
-                </p>
-                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                  Date: {entry.sourceSignals.dataCategories.join(", ") || "neconfirmate încă"}
-                </p>
-                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                  Rezidență: {entry.sourceSignals.residencySignals.join(", ") || "fără semnal clar"}
-                </p>
-              </div>
+              <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Semnale si surse
+                </summary>
+                <div className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                  <p>
+                    Capabilitati: {entry.sourceSignals.capabilities.join(", ") || "in curs de inferare"}
+                  </p>
+                  <p>Date: {entry.sourceSignals.dataCategories.join(", ") || "neconfirmate inca"}</p>
+                  <p>Rezidenta: {entry.sourceSignals.residencySignals.join(", ") || "fara semnal clar"}</p>
+                  {entry.sources.length > 0 && (
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Prefill din: {entry.sources.map((source) => `${source.origin}:${source.name}`).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              </details>
             </div>
 
             {entry.compliance.requiredControls.length > 0 && (
-              <div className="mt-4 grid gap-4 xl:grid-cols-2">
+              <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Controale, bundle si trace
+                </summary>
+                <div className="mt-4 grid gap-4 xl:grid-cols-2">
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
                   <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
                     Controale cerute
@@ -564,70 +572,75 @@ export function AICompliancePackEntriesCard({
                     </div>
                   )}
                 </div>
-              </div>
+                </div>
+              </details>
             )}
 
-            <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Trace summary
-              </p>
-              <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
-                {entry.traceSummary.controlsCovered} controale · {entry.traceSummary.linkedFindings} findings · {entry.traceSummary.linkedDrifts} drift · {entry.traceSummary.linkedLegalReferences} referințe legale
-              </p>
-              <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
-                Baseline: {entry.traceSummary.baselineLinked ? "legat de baseline validat" : "încă fără baseline validat"} · status: {entry.traceSummary.traceStatus}
-              </p>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                Annex IV lite draft
-              </p>
-              <div className="mt-3 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
-                <DraftSection
-                  label="System description"
-                  content={entry.annexLiteDraft.systemDescription}
-                />
-                <DraftSection
-                  label="System scope"
-                  content={entry.annexLiteDraft.systemScope}
-                />
-                <DraftSection
-                  label="Intended users & affected persons"
-                  content={entry.annexLiteDraft.intendedUsersAndAffectedPersons}
-                />
-                <DraftSection
-                  label="Intended purpose"
-                  content={entry.annexLiteDraft.intendedPurpose}
-                />
-                <DraftSection
-                  label="Data & governance"
-                  content={entry.annexLiteDraft.dataAndGovernance}
-                />
-                <DraftSection
-                  label="Risk & rights impact"
-                  content={entry.annexLiteDraft.riskAndRightsImpact}
-                />
-                <DraftSection
-                  label="Human oversight"
-                  content={entry.annexLiteDraft.humanOversight}
-                />
-                <DraftSection
-                  label="Technical dependencies"
-                  content={entry.annexLiteDraft.technicalDependencies}
-                />
-                <DraftSection
-                  label="Monitoring & controls"
-                  content={entry.annexLiteDraft.monitoringAndControls}
-                />
-                <DraftSection
-                  label="Evidence & validation"
-                  content={entry.annexLiteDraft.evidenceAndValidation}
-                />
+            <details className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                Trace si Annex IV lite
+              </summary>
+              <div className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Trace summary
+                </p>
+                <p className="mt-3 text-sm text-[var(--color-on-surface-muted)]">
+                  {entry.traceSummary.controlsCovered} controale · {entry.traceSummary.linkedFindings} findings · {entry.traceSummary.linkedDrifts} drift · {entry.traceSummary.linkedLegalReferences} referinte legale
+                </p>
+                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)]">
+                  Baseline: {entry.traceSummary.baselineLinked ? "legat de baseline validat" : "inca fara baseline validat"} · status: {entry.traceSummary.traceStatus}
+                </p>
               </div>
-            </div>
+              <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Annex IV lite draft
+                </p>
+                <div className="mt-3 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                  <DraftSection
+                    label="System description"
+                    content={entry.annexLiteDraft.systemDescription}
+                  />
+                  <DraftSection
+                    label="System scope"
+                    content={entry.annexLiteDraft.systemScope}
+                  />
+                  <DraftSection
+                    label="Intended users & affected persons"
+                    content={entry.annexLiteDraft.intendedUsersAndAffectedPersons}
+                  />
+                  <DraftSection
+                    label="Intended purpose"
+                    content={entry.annexLiteDraft.intendedPurpose}
+                  />
+                  <DraftSection
+                    label="Data & governance"
+                    content={entry.annexLiteDraft.dataAndGovernance}
+                  />
+                  <DraftSection
+                    label="Risk & rights impact"
+                    content={entry.annexLiteDraft.riskAndRightsImpact}
+                  />
+                  <DraftSection
+                    label="Human oversight"
+                    content={entry.annexLiteDraft.humanOversight}
+                  />
+                  <DraftSection
+                    label="Technical dependencies"
+                    content={entry.annexLiteDraft.technicalDependencies}
+                  />
+                  <DraftSection
+                    label="Monitoring & controls"
+                    content={entry.annexLiteDraft.monitoringAndControls}
+                  />
+                  <DraftSection
+                    label="Evidence & validation"
+                    content={entry.annexLiteDraft.evidenceAndValidation}
+                  />
+                </div>
+              </div>
+            </details>
 
-            <p className="mt-4 text-sm text-[var(--color-on-surface-muted)]">
+            <p className="mt-4 text-sm font-medium text-[var(--color-on-surface-muted)]">
               {entry.suggestedNextStep}
             </p>
           </div>

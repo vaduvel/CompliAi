@@ -898,6 +898,32 @@ Actualizare suplimentara 2026-03-15:
   - nu muta `Control` spre executie
   - intareste rolul de workspace de confirmare
 
+Actualizare suplimentara 2026-03-15:
+
+- `Control` a primit si lotul component-level pentru `wave 1`
+- asta inseamna:
+  - `Discovery` arata mai clar:
+    - ce e activ
+    - ce cere validare
+    - detaliul detectiei sub disclosure
+  - `Inventar` e mai usor de triat:
+    - semnalele operationale urca in badge-uri
+    - `Urmatorii pasi` coboara sub disclosure
+  - `Compliance Pack` tine sus:
+    - snapshot
+    - prefill status
+    - confidence
+    - next step
+  - blocurile grele coboara sub disclosure:
+    - source coverage
+    - source signals
+    - controls + bundle + trace
+    - Annex IV lite
+- pasul este sanatos pentru ca:
+  - nu schimba logic nou
+  - nu schimba shell-ul paginii
+  - reduce densitatea fara sa piarda trasabilitatea
+
 - `Dashboard` a primit si un al doilea pass scurt de austeritate pe home:
   - `Traseu rapid` mai scurt si mai dur
   - `Stare curenta` in loc de `Snapshot rapid`

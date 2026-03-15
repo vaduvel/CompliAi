@@ -1936,6 +1936,33 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de UX runtime - `Control wave 1` component density pass:
+
+- `components/compliscan/ai-discovery-panel.tsx`
+  - pastreaza sus doar contextul de review activ si metrcii utile
+  - muta `sursa + status hint + evidenta detectiei` sub disclosure local
+  - lasa detectia activa mai scanabila si mai orientata pe confirmare
+- `components/compliscan/ai-inventory-panel.tsx`
+  - comprima copy-ul din wizard
+  - muta `urmatorii pasi` sub disclosure in preview si in cardurile din lista
+  - transforma semnalele de risc din coloana dreapta in badge-uri mai usor de triat
+- `components/compliscan/ai-compliance-pack-card.tsx`
+  - ridica in fata `snapshot pack`, `prefill status` si `suggested next step`
+  - muta `coverage details`, `semnale si surse`, `controale + bundle + trace` si `Annex IV lite` sub disclosure
+  - pastreaza pagina in rolul de control, nu de dump documentar
+
+Efect:
+
+- `Control` se simte mai clar ca workspace de confirmare si triere
+- detaliul ramane disponibil, dar nu mai concureaza cu verdictul si actiunea
+- pasul nu schimba business logic si nu schimba shell-ul paginii
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas component-level - `Setari` austerity pass:
 
 - lotul component-level delegat lui Codex 2 a fost absorbit pe branch stacked curat

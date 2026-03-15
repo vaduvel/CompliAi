@@ -261,9 +261,26 @@ export function AIDiscoveryPanel({
           </p>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            <p className="font-medium text-[var(--color-on-surface)]">{modeContent.detectionTitle}</p>
-            <ul className="mt-3 space-y-2">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  Acum
+                </p>
+                <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                  {modeContent.detectionTitle}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                  active {activeSystems.length}
+                </Badge>
+                <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                  drift {drifts.length}
+                </Badge>
+              </div>
+            </div>
+            <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
               {modeContent.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
@@ -278,14 +295,11 @@ export function AIDiscoveryPanel({
 
           {(confirmedCount > 0 || rejectedCount > 0) && (
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-              <p className="font-medium text-[var(--color-on-surface)]">Ce nu mai apare aici</p>
+              <p className="font-medium text-[var(--color-on-surface)]">Flux curat de review</p>
               <p className="mt-2">
-                Detectiile confirmate sunt mutate in inventarul oficial, iar cele respinse raman in istoric,
-                dar nu mai aglomereaza lista de lucru.
+                Confirmatele merg in inventar, respinsele raman in istoric. Aici vezi doar ce mai cere validare umana.
               </p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
-                Confirmate: {confirmedCount} · Respinse: {rejectedCount}
-              </p>
+              <p className="mt-2 text-xs text-[var(--color-muted)]">Confirmate: {confirmedCount} · Respinse: {rejectedCount}</p>
             </div>
           )}
 
@@ -343,8 +357,7 @@ export function AIDiscoveryPanel({
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-            Aici ramane doar fluxul activ de lucru: detectii care mai cer review sau confirmare.
-            Ce este deja confirmat traieste separat in inventarul oficial, iar drift-ul ramane centralizat in panoul dedicat.
+            Aici ramane doar lista de lucru activa: detectii care mai cer review sau confirmare.
           </div>
           {systems.length === 0 && (
             <EmptyState
@@ -391,12 +404,6 @@ export function AIDiscoveryPanel({
                       <p className="mt-1 text-sm text-[var(--color-on-surface-muted)]">
                         {system.vendor} · {system.modelType}
                       </p>
-                      <p className="mt-2 text-xs text-[var(--color-muted)]">
-                        Sursa: {system.sourceDocument || "manifest necunoscut"}
-                      </p>
-                      <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
-                        {detectionStatusHint(system.detectionStatus)}
-                      </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {system.frameworks.map((framework) => (
@@ -425,6 +432,28 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
+                    <details className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] px-4 py-3">
+                      <summary className="cursor-pointer text-sm font-medium text-[var(--color-on-surface)]">
+                        Detalii detectie si evidenta
+                      </summary>
+                      <div className="mt-3 space-y-3 text-sm text-[var(--color-on-surface-muted)]">
+                        <p>{detectionStatusHint(system.detectionStatus)}</p>
+                        <p className="text-xs text-[var(--color-muted)]">
+                          Sursa: {system.sourceDocument || "manifest necunoscut"}
+                        </p>
+                        <div>
+                          <p className="font-medium text-[var(--color-on-surface)]">Evidenta detectiei</p>
+                          <ul className="mt-3 space-y-2">
+                            {system.evidence.slice(0, 5).map((item, index) => (
+                              <li key={`${system.id}-evidence-${index}`} className="flex gap-2">
+                                <Sparkles className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" strokeWidth={2.25} />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </details>
                     {isEditing && (
                       <div className="grid gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
                         <p className="text-sm font-medium text-[var(--color-on-surface)]">
@@ -580,17 +609,6 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-on-surface-muted)]">
-                      <p className="font-medium text-[var(--color-on-surface)]">Evidenta detectiei</p>
-                      <ul className="mt-3 space-y-2">
-                        {system.evidence.slice(0, 5).map((item, index) => (
-                          <li key={`${system.id}-evidence-${index}`} className="flex gap-2">
-                            <Sparkles className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" strokeWidth={2.25} />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
                   </div>
 
                   <div className="flex min-w-[220px] flex-col gap-2">
