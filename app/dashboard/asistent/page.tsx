@@ -16,7 +16,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/evidence-os/ScrollArea"
 import type { ChatMessage } from "@/lib/compliance/types"
 
 const assistantSuggestions = [

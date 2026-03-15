@@ -857,10 +857,22 @@ Actualizare 2026-03-15:
     - `Badge`
     - `Button`
     - `Card`
-  - `components/ui/*` nu mai este folosit in:
+    - `Alert`
+    - `Progress`
+    - `ScrollArea`
+    - `Sheet`
+    - `Avatar`
+    - `DropdownMenu`
+    - `Toaster`
+  - authoring-ul runtime trece acum prin `components/evidence-os/*` in:
     - `app/dashboard/*`
+    - `app/page.tsx`
+    - `app/login/page.tsx`
     - `components/compliscan/*`
+    - `components/dashboard/*`
+    - `components/mode-toggle.tsx`
     - `lib/compliance/*`
+  - `components/ui/*` ramane doar strat intern de implementare pentru wrapper-ele `Evidence OS`
   - `use-cockpit` nu mai are doua stiluri concurente de mutatii
   - riscul principal ramas nu mai este de arhitectura de baza, ci de polish final si performanta
 

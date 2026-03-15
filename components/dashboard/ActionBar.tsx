@@ -4,7 +4,7 @@ import * as React from "react"
 import { FileDownIcon, MessageSquareTextIcon, ScanTextIcon } from "lucide-react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/evidence-os/Button"
 
 export function ActionBar() {
   return (

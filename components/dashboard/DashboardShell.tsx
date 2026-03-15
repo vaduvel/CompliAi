@@ -9,14 +9,14 @@ import { DashboardCards } from "@/components/dashboard/DashboardCards"
 import { DashboardFooterDisclaimer } from "@/components/dashboard/DashboardFooterDisclaimer"
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 import { SidebarNav } from "@/components/dashboard/SidebarNav"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/evidence-os/Button"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/evidence-os/Sheet"
 
 export function DashboardShell() {
   const [mobileOpen, setMobileOpen] = React.useState(false)

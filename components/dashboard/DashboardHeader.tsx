@@ -3,9 +3,9 @@
 import * as React from "react"
 
 import { ModeToggle } from "@/components/mode-toggle"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Separator } from "@/components/evidence-os/Separator"
 import { BrandMark } from "@/components/dashboard/BrandMark"
 import { RiskScoreCircle } from "@/components/dashboard/RiskScoreCircle"
 

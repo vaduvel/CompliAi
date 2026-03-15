@@ -112,11 +112,15 @@ Consecință:
   - sursa de adevăr pentru arhitectura de pagină
   - sursa de adevăr pentru workspace-ul agentic
   - stratul dominant de primitive UI în cockpit-ul runtime
+  - namespace-ul canonic de authoring pentru runtime-ul produsului:
+    - `app/*`
+    - `components/*`
+    - `lib/compliance/*`
 
 Ce NU înseamnă încă:
 
 - nu avem încă o autoritate unică absolută pentru toate token-urile și toate suprafețele repo-ului
-- `app/page.tsx` și `app/login/page.tsx` rămân în afara convergenței cockpit
+- `components/ui/*` nu mai este folosit direct în runtime, dar există încă drept strat intern pentru unele wrapper-e `Evidence OS`
 
 ## Drift-uri identificate
 

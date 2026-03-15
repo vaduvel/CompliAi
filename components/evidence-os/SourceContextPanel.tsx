@@ -6,7 +6,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Separator } from "@/components/evidence-os/Separator"
 import { SignalBadgeList } from "@/components/evidence-os/SignalBadgeList"
 import { SourceEnvelopeCard } from "@/components/evidence-os/SourceEnvelopeCard"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/evidence-os/ScrollArea"
 import { cn } from "@/lib/utils"
 import type { SourceEnvelope } from "@/lib/compliance/agent-os"
 

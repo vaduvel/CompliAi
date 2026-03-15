@@ -11,7 +11,7 @@ import { IntakeSystemCard } from "@/components/evidence-os/IntakeSystemCard"
 import { ProposalBundlePanel } from "@/components/evidence-os/ProposalBundlePanel"
 import { ProposalSectionHeader } from "@/components/evidence-os/ProposalSectionHeader"
 import { TabsContent } from "@/components/evidence-os/Tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/evidence-os/ScrollArea"
 import type { AgentProposalBundle } from "@/lib/compliance/agent-os"
 
 interface AgentProposalTabsProps {

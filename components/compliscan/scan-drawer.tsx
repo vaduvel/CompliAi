@@ -8,7 +8,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/evidence-os/Sheet"
 import type { CockpitTask } from "@/components/compliscan/types"
 import type { ScanRecord } from "@/lib/compliance/types"
 

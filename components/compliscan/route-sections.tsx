@@ -26,8 +26,8 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Separator } from "@/components/evidence-os/Separator"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { CockpitTask } from "@/components/compliscan/types"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription, AlertTitle } from "@/components/evidence-os/Alert"
+import { Progress } from "@/components/evidence-os/Progress"
 import {
   formatDriftEscalationDeadline,
   formatDriftEscalationTier,

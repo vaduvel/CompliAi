@@ -6,8 +6,8 @@ import { Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/evidence-os/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 type Mode = "login" | "register"
 

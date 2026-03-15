@@ -8,7 +8,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/evidence-os/Sheet"
 
 type TextExtractDrawerProps = {
   open: boolean

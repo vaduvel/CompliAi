@@ -11,9 +11,9 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/evidence-os/Alert"
+import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
 import {
   Card,
   CardContent,
@@ -21,8 +21,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/evidence-os/Card"
+import { Progress } from "@/components/evidence-os/Progress"
 import { cn } from "@/lib/utils"
 
 const cardBase =

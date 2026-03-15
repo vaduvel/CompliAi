@@ -103,9 +103,8 @@ Checkpoint-ul curent din implementare:
 - [x] helper-ul legacy `PageHeader` a fost eliminat din runtime-ul activ
 - [x] primitivele concurente `components/ui/*` au iesit din cockpit-ul runtime:
   - `app/dashboard/*`, `components/compliscan/*` si `lib/compliance/*` folosesc acum `Badge`, `Button` si `Card` din `Evidence OS`
-  - primitivele `components/ui/*` mai raman doar pe suprafete in afara cockpit-ului:
-    - `app/page.tsx`
-    - `app/login/page.tsx`
+  - `app/page.tsx`, `app/login/page.tsx`, shell-urile legacy si utilitarele globale folosesc acum tot namespace-ul `components/evidence-os/*`
+  - `components/ui/*` a ramas doar detaliu intern de implementare pentru wrapper-ele `Evidence OS`, nu suprafata canonica de authoring
 - [x] primul cleanup structural pe cockpit client:
   - derivarile pure mutate din `use-cockpit` in modul separat
   - compatibilitate publica pastrata pentru consumatorii existenti

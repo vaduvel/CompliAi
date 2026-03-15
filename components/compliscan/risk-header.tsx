@@ -13,7 +13,7 @@ import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 
 type RiskHeaderProps = {

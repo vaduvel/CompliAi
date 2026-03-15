@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/evidence-os/Toaster";
 
 export const metadata: Metadata = {
   title: "CompliScan – Dashboard",

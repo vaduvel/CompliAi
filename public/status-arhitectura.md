@@ -678,8 +678,15 @@ Progres recent pe punctul acesta:
   - `Badge`
   - `Button`
   - `Card`
-  - pentru `app/dashboard/*`, `components/compliscan/*` si `lib/compliance/*`
-- primitivele `components/ui/*` mai raman doar pe suprafete publice care nu fac parte din cockpit-ul operational
+  - `Alert`
+  - `Progress`
+  - `ScrollArea`
+  - `Sheet`
+  - `Avatar`
+  - `DropdownMenu`
+  - `Toaster`
+  - pentru `app/*`, `components/*` si `lib/compliance/*`
+- `components/ui/*` nu mai este suprafata de authoring pentru runtime; a ramas doar detaliu intern in spatele wrapper-elor `Evidence OS`
 - `PageHeader` a fost eliminat din `route-sections`:
   - runtime-ul activ nu mai foloseste doua scheme paralele de compozitie pentru pagini
 - hook-ul central `use-cockpit` a intrat in cleanup structural:
