@@ -1003,3 +1003,28 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm test`
   - `npm run lint`
   - `npm run build`
+
+- [x] `Scanare` nu mai tine `Verdicts` si `Istoric` in bundle-ul initial
+  - `flow` ramane vederea initiala de executie
+  - taburile secundare au fost mutate in:
+    - `components/compliscan/scanari/scan-verdicts-tab.tsx`
+    - `components/compliscan/scanari/scan-history-tab.tsx`
+- [x] efect confirmat in build:
+  - `/dashboard/scanari` a coborat la `9.12 kB / 180 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
+- [x] `Audit si export` nu mai tine panourile suport in bundle-ul initial
+  - panourile mutate in:
+    - `components/compliscan/rapoarte/reports-support-panels.tsx`
+  - lazy-load pentru:
+    - `ExportArtifactsCard`
+    - `RecentDriftCard`
+- [x] efect confirmat in build:
+  - `/dashboard/rapoarte` a coborat la `6.13 kB / 177 kB first load`
+- [x] validare completa dupa pas:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

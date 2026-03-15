@@ -1936,6 +1936,55 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de performanta - `Audit si export`:
+
+- `app/dashboard/rapoarte/page.tsx` pastreaza shell-ul de readiness si exportul principal, dar nu mai tine upfront toate panourile suport
+- blocurile suport au fost extrase in:
+  - `components/compliscan/rapoarte/reports-support-panels.tsx`
+- si sunt incarcate local prin `dynamic import`:
+  - `ExportArtifactsCard`
+  - `RecentDriftCard`
+- efect:
+  - snapshot-ul si centrul de export pornesc mai repede
+  - explicatia artefactelor si lista de drift raman disponibile, dar nu mai stau in bundle-ul initial al paginii
+
+Efect masurabil in build:
+
+- `/dashboard/rapoarte`
+  - inainte: `7.89 kB / 179 kB first load`
+  - dupa: `6.13 kB / 177 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
+Pas de performanta - `Scanare`:
+
+- `app/dashboard/scanari/page.tsx` pastreaza `flow` ca vedere initiala, dar nu mai cara upfront si zonele `Verdicts` si `Istoric`
+- taburile non-initiale au fost extrase in componente dedicate:
+  - `components/compliscan/scanari/scan-verdicts-tab.tsx`
+  - `components/compliscan/scanari/scan-history-tab.tsx`
+- acestea sunt incarcate local prin `dynamic import`, doar cand utilizatorul intra in:
+  - `Verdicts`
+  - `Istoric documente`
+- efect:
+  - `Scanare` ramane poarta de intrare pentru executie
+  - explicarea ultimului rezultat si lookup-ul istoric nu mai concureaza cu bundle-ul initial al fluxului activ
+
+Efect masurabil in build:
+
+- `/dashboard/scanari`
+  - inainte: `11.2 kB / 182 kB first load`
+  - dupa: `9.12 kB / 180 kB first load`
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde
+
 Pas de performanta - `Setari`:
 
 - `app/dashboard/setari/page.tsx` nu mai tine in modulul initial toata logica pentru taburile grele `Integrari` si `Operational`

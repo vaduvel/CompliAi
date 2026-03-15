@@ -13,7 +13,7 @@ Data: 2026-03-14
 
 ## Scope
 
-Acest PR unifica trei loturi validate local:
+Acest PR unifica lotul mare de convergenta UX + Evidence OS validat local:
 
 1. clarificare IA oficiala in produs:
    - `Dashboard / Scanare / Control / Dovada / Setari`
@@ -44,6 +44,12 @@ Acest PR unifica trei loturi validate local:
    - carduri canonice
    - review decision panel
 
+4. hardening si performance pe suprafetele grele:
+   - cleanup structural in `use-cockpit`
+   - code-splitting pe `Control > Sisteme`
+   - loading local pentru `Auditor Vault`
+   - code-splitting pe `Setari`
+
 ## Ce s-a integrat din lotul Codex 2
 
 Commitul deja validat:
@@ -65,6 +71,11 @@ A acoperit:
 - `a111aa5` `Polish Evidence OS safe surfaces`
 - `70b8ded` `Align dashboard IA and advance agent workspace`
 - `563433e` `Align navigation map with systems label`
+- `5d1c395` `Add PR brief for agent workspace branch`
+- `bd991d3` `Advance UX wave 1 and stabilize cockpit store`
+- `8744c6b` `Split heavy control panels from initial bundle`
+- `861b4b9` `Defer heavy vault sections behind local loading`
+- `00c7881` `Split heavy settings tabs from initial route bundle`
 
 ## Validare locala
 
@@ -79,8 +90,8 @@ Snapshot validat:
 
 ## Observatii cunoscute
 
-- `next build` raporteaza in continuare warning-uri cunoscute de `dynamic server usage` pentru pagini dashboard care citesc `org_state` prin fetch `no-store` din Supabase
-- build-ul se inchide cu succes; warning-ul nu este introdus de acest PR
+- PR-ul este mare si cere review disciplinat pe zone
+- riscul ramas este mai degraba de dimensiune de diff, nu de blocaj functional confirmat local
 
 ## Zone de review recomandate
 
@@ -111,7 +122,13 @@ Snapshot validat:
      - findings
      - drift
 
-5. documentatie
+5. `Performance / hardening`
+   - `components/compliscan/use-cockpit.tsx`
+   - `app/dashboard/sisteme/page.tsx`
+   - `app/dashboard/rapoarte/auditor-vault/page.tsx`
+   - `app/dashboard/setari/page.tsx`
+
+6. documentatie
    - IA oficiala
    - coordonare paralela
    - harta de navigare si task-urile delegate
@@ -121,7 +138,7 @@ Snapshot validat:
 Branch-ul este merge-ready fata de `main`:
 
 - `0` behind
-- `2` commit-uri functionale + `1` commit mic de consistenta documentara
+- `7` commit-uri functionale + `1` commit de PR brief
 - `git diff --check` curat
 
 ## Checklist scurt pentru reviewer
