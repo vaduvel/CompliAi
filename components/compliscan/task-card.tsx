@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, type ChangeEvent } from "react"
+import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
 import {
   AlertTriangle,
   CheckCircle2,
@@ -15,7 +15,6 @@ import { toast } from "sonner"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
-import { Separator } from "@/components/evidence-os/Separator"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
 import type { EvidenceQualityAssessment, TaskEvidenceKind } from "@/lib/compliance/types"
@@ -80,17 +79,17 @@ function validationLabel(status: CockpitTask["validationStatus"]) {
 }
 
 function validationConfidenceLabel(confidence?: CockpitTask["validationConfidence"]) {
-  if (confidence === "high") return "încredere mare"
-  if (confidence === "medium") return "încredere medie"
-  if (confidence === "low") return "încredere redusă"
-  return "încredere n/a"
+  if (confidence === "high") return "incredere mare"
+  if (confidence === "medium") return "incredere medie"
+  if (confidence === "low") return "incredere redusa"
+  return "incredere n/a"
 }
 
 function validationBasisLabel(basis?: CockpitTask["validationBasis"]) {
   if (basis === "direct_signal") return "semnal direct"
   if (basis === "inferred_signal") return "semnal inferat"
-  if (basis === "operational_state") return "stare operațională"
-  return "bază n/a"
+  if (basis === "operational_state") return "stare operationala"
+  return "baza n/a"
 }
 
 function severityLabel(severity: CockpitTask["severity"]) {
@@ -141,6 +140,10 @@ function hasDistinctTaskCopy(primary: string, secondary: string) {
   )
 }
 
+function nextActionLabel(task: CockpitTask) {
+  return task.steps[0] ?? task.fixPreview ?? task.summary
+}
+
 export function TaskCard({
   task,
   highlighted,
@@ -158,9 +161,12 @@ export function TaskCard({
     ? getEvidenceQualitySummary(task.attachedEvidence)
     : null
   const hasDistinctFixPreview = hasDistinctTaskCopy(task.summary, task.fixPreview)
+  const nextAction = nextActionLabel(task)
   const visiblePrinciples = task.principles.slice(0, 2)
   const hiddenPrinciples = task.principles.slice(visiblePrinciples.length)
-  const hiddenPrinciplesLabel = hiddenPrinciples.map((principle) => formatPrincipleLabel(principle)).join(", ")
+  const hiddenPrinciplesLabel = hiddenPrinciples
+    .map((principle) => formatPrincipleLabel(principle))
+    .join(", ")
 
   async function handleCopyReadyText() {
     try {
@@ -186,64 +192,247 @@ export function TaskCard({
       }`}
     >
       <CardContent className={`border-l-4 px-5 py-5 ${tone.accent}`}>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className={tone.badge}>{task.priority}</Badge>
-                <Badge className={severityTone(task.severity)}>{severityLabel(task.severity)}</Badge>
-                <Badge className={validationTone(task.validationStatus)}>
-                  {validationLabel(task.validationStatus)}
-                </Badge>
-                {task.status === "done" ? (
-                  <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] uppercase tracking-[0.24em] text-[11px] text-[var(--color-muted)]">
-                    inchis
+        <div className="flex flex-col gap-5">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(280px,0.92fr)]">
+            <div className="min-w-0 space-y-4">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className={tone.badge}>{task.priority}</Badge>
+                  <Badge className={severityTone(task.severity)}>{severityLabel(task.severity)}</Badge>
+                  <Badge className={validationTone(task.validationStatus)}>
+                    {validationLabel(task.validationStatus)}
                   </Badge>
-                ) : null}
+                  {task.status === "done" ? (
+                    <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] uppercase tracking-[0.24em] text-[11px] text-[var(--color-muted)]">
+                      inchis
+                    </Badge>
+                  ) : null}
+                </div>
+
+                <h3 className="break-words text-lg font-semibold text-[var(--color-on-surface)]">
+                  {task.title}
+                </h3>
+                <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+                  {task.summary}
+                </p>
               </div>
-              <h3 className="break-words text-lg font-semibold text-[var(--color-on-surface)]">
-                {task.title}
-              </h3>
-              <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
-                {task.summary}
-              </p>
+
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+                <span>Responsabil: {task.owner}</span>
+                <span>Termen: {task.dueDate}</span>
                 <span>Tip: {remediationModeLabel(task.remediationMode)}</span>
-                <span>Sursa: {task.source}</span>
-                <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Urmatoarea actiune
+                </p>
+                <p className="mt-2 text-sm font-medium text-[var(--color-on-surface)]">
+                  {nextAction}
+                </p>
               </div>
             </div>
 
-            <div className="min-w-0 md:w-[18rem]">
-              <div className="grid gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4 text-sm text-[var(--color-muted)]">
+            <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-4">
+              <div className="grid gap-2 text-sm text-[var(--color-muted)]">
                 <span>Responsabil: {task.owner}</span>
                 <span>Termen: {task.dueDate}</span>
                 <span>{task.effortLabel}</span>
-                <span>Incredere: {confidenceLabel(task.confidence)}</span>
               </div>
-            </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Badge
+                  className={
+                    task.attachedEvidence
+                      ? evidenceQualityTone(task.attachedEvidence.quality?.status)
+                      : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface-muted)]"
+                  }
+                >
+                  {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
+                </Badge>
+                <Badge className={validationTone(task.validationStatus)}>
+                  {validationLabel(task.validationStatus)}
+                </Badge>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                <Button
+                  onClick={() => onMarkDone(task.id)}
+                  className="h-11 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
+                >
+                  {task.status === "done" ? (
+                    <CheckCircle2 className="size-4" strokeWidth={2.25} />
+                  ) : (
+                    <RefreshCcw className="size-4" strokeWidth={2.25} />
+                  )}
+                  {task.status === "done" ? "Redeschide taskul" : "Valideaza si rescaneaza"}
+                </Button>
+
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <select
+                    value={selectedEvidenceKind}
+                    onChange={(event) =>
+                      setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
+                    }
+                    aria-label="Tipul de dovada"
+                    className="h-10 min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-on-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                  >
+                    {task.evidenceKinds.map((kind) => (
+                      <option key={`${task.id}-${kind}`} value={kind}>
+                        {formatEvidenceKind(kind)}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    onClick={() => evidenceInputRef.current?.click()}
+                    variant="outline"
+                    className="h-10 rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                  >
+                    <Paperclip className="size-4" strokeWidth={2.25} />
+                    {task.attachedEvidence ? "Actualizeaza dovada" : "Adauga dovada"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-on-surface-muted)]">
+                {task.attachedEvidence ? (
+                  <div className="space-y-2">
+                    <p className="font-medium text-[var(--color-on-surface)]">Dovada curenta</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {evidenceHref ? (
+                        <a
+                          href={evidenceHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="max-w-full break-all text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
+                        >
+                          {task.attachedEvidence.fileName}
+                        </a>
+                      ) : (
+                        <span className="break-all text-[var(--color-on-surface)]">
+                          {task.attachedEvidence.fileName}
+                        </span>
+                      )}
+                      <span>·</span>
+                      <span>{formatEvidenceKind(task.attachedEvidence.kind)}</span>
+                      {task.attachedEvidence.quality ? (
+                        <>
+                          <span>·</span>
+                          <Badge className={evidenceQualityTone(task.attachedEvidence.quality.status)}>
+                            dovada {formatEvidenceQualityStatus(task.attachedEvidence.quality.status)}
+                          </Badge>
+                        </>
+                      ) : null}
+                    </div>
+                    {evidenceQualitySummary ? <p>{evidenceQualitySummary}</p> : null}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="font-medium text-[var(--color-on-surface)]">Dovada lipseste</p>
+                    <p>Ataseaza fisierul sau extrasul relevant inainte sa inchizi task-ul.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                    Utilitar
+                  </p>
+                  <p className="text-xs text-[var(--color-on-surface-muted)]">
+                    Export separat pentru acest task.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => onExport(task.id)}
+                  variant="outline"
+                  className="h-9 shrink-0 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] px-3 text-xs text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                >
+                  <FileDown className="size-4" strokeWidth={2.25} />
+                  Export task
+                </Button>
+              </div>
+            </section>
           </div>
 
-          <Separator className="bg-[var(--color-border)]" />
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(280px,0.92fr)]">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                Ce faci acum
+              </p>
+              {hasDistinctFixPreview ? (
+                <p className="mt-2 break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                  {task.fixPreview}
+                </p>
+              ) : null}
+              <ul className="mt-3 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
+                {task.steps.slice(0, 3).map((step, index) => (
+                  <li key={`${task.id}-${index}`} className="flex gap-2">
+                    <ShieldCheck
+                      className="mt-0.5 size-4 shrink-0 text-[var(--icon-secondary)]"
+                      strokeWidth={2.25}
+                    />
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-            <div className="space-y-4">
-              <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Context si motivare
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                Verificare rapida
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+                {task.validationMessage || "Task-ul nu a fost validat inca."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {task.validationBasis ? (
+                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                    baza: {validationBasisLabel(task.validationBasis)}
+                  </Badge>
+                ) : null}
+                {task.validationConfidence ? (
+                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                    {validationConfidenceLabel(task.validationConfidence)}
+                  </Badge>
+                ) : null}
+                {task.validatedAtLabel ? (
+                  <Badge className="border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface-muted)]">
+                    {task.validatedAtLabel}
+                  </Badge>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-3 xl:grid-cols-3">
+            <TaskDisclosure
+              eyebrow="Context"
+              title="Context si motivare"
+              subtitle="Detaliile care explica de ce exista task-ul."
+            >
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+                  {task.why}
                 </p>
-                <p className="mt-2 text-sm text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">{task.why}</p>
-                <p className="mt-3 text-sm font-medium text-[var(--color-on-surface)]">{task.triggerLabel}</p>
-                <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface-muted)]">
-                  {task.triggerSnippet ?? "Nu exista excerpt salvat pentru acest task."}
-                </p>
-                {task.legalSummary && (
-                  <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
-                    {task.legalSummary}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+                  <span>Sursa: {task.source}</span>
+                  <span>Incredere: {confidenceLabel(task.confidence)}</span>
+                  <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-on-surface)]">
+                    {task.triggerLabel}
                   </p>
-                )}
-                {task.principles.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface-muted)]">
+                    {task.triggerSnippet ?? "Nu exista excerpt salvat pentru acest task."}
+                  </p>
+                </div>
+                {task.legalSummary ? (
+                  <p className="text-xs text-[var(--color-on-surface-muted)]">{task.legalSummary}</p>
+                ) : null}
+                {task.principles.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
                     {visiblePrinciples.map((principle) => (
                       <Badge
                         key={`${task.id}-${principle}`}
@@ -261,71 +450,44 @@ export function TaskCard({
                       </Badge>
                     ) : null}
                   </div>
-                )}
-              </section>
+                ) : null}
+              </div>
+            </TaskDisclosure>
 
-              <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    {task.readyTextLabel}
-                  </p>
-                  <Button
-                    onClick={() => void handleCopyReadyText()}
-                    variant="outline"
-                    className="h-9 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
-                  >
-                    <Copy className="size-4" strokeWidth={2.25} />
-                    Copiaza
-                  </Button>
-                </div>
-                <pre className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
+            <TaskDisclosure
+              eyebrow="Suport"
+              title={task.readyTextLabel}
+              subtitle="Textul pregatit pentru copy-paste sau handoff."
+            >
+              <div className="space-y-3">
+                <Button
+                  onClick={() => void handleCopyReadyText()}
+                  variant="outline"
+                  className="h-9 rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)]"
+                >
+                  <Copy className="size-4" strokeWidth={2.25} />
+                  Copiaza
+                </Button>
+                <pre className="whitespace-pre-wrap break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
                   {task.readyText}
                 </pre>
-              </section>
-            </div>
+              </div>
+            </TaskDisclosure>
 
-            <div className="space-y-4">
-              <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Plan de remediere
-                </p>
-                <p className="mt-2 text-xs text-[var(--color-on-surface-muted)]">
-                  {task.remediationMode === "rapid"
-                    ? "Schimbare mica de text, setare sau dovada care poate fi validata imediat."
-                    : "Actualizare de procedura sau configurare persistenta, cu efect stabil in control."}
-                </p>
-                {hasDistinctFixPreview ? (
-                  <p className="mt-3 break-words rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
-                    {task.fixPreview}
-                  </p>
-                ) : null}
-                <div className="mt-3">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    {hasDistinctFixPreview ? "Pasii imediati" : "Ce faci acum"}
-                  </p>
-                  <ul className="mt-2 space-y-2 text-sm text-[var(--color-on-surface-muted)]">
-                    {task.steps.slice(0, 3).map((step, index) => (
-                      <li key={`${task.id}-${index}`} className="flex gap-2">
-                        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--icon-secondary)]" strokeWidth={2.25} />
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  Dovada si verificare
-                </p>
-                <p className="mt-2 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
+            <TaskDisclosure
+              eyebrow="Verificare"
+              title="Dovada si rationale"
+              subtitle="Mesajele detaliate de verificare si suport."
+            >
+              <div className="space-y-3">
+                <p className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3 text-sm leading-6 text-[var(--color-on-surface-muted)] [overflow-wrap:anywhere]">
                   {task.evidenceSnippet}
                 </p>
-                {task.rescanHint && (
-                  <p className="mt-3 text-xs leading-5 text-[var(--color-muted)]">{task.rescanHint}</p>
-                )}
-                {(task.validationMessage || task.validatedAtLabel) && (
-                  <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
+                {task.rescanHint ? (
+                  <p className="text-xs leading-5 text-[var(--color-muted)]">{task.rescanHint}</p>
+                ) : null}
+                {(task.validationMessage || task.validatedAtLabel) ? (
+                  <div className="rounded-xl border border-[var(--color-border)] bg-[var(--bg-inset)] p-3">
                     <div className="flex items-start gap-3">
                       {task.validationStatus === "passed" ? (
                         <CheckCircle2
@@ -342,119 +504,33 @@ export function TaskCard({
                         <p className="text-sm text-[var(--color-on-surface)] [overflow-wrap:anywhere]">
                           {task.validationMessage || "Task-ul nu a fost validat inca."}
                         </p>
-                        {(task.validationBasis || task.validationConfidence) && (
+                        {task.validationBasis || task.validationConfidence ? (
                           <div className="flex flex-wrap gap-2 pt-1">
-                            {task.validationBasis && (
+                            {task.validationBasis ? (
                               <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
                                 baza: {validationBasisLabel(task.validationBasis)}
                               </Badge>
-                            )}
-                            {task.validationConfidence && (
+                            ) : null}
+                            {task.validationConfidence ? (
                               <Badge className="border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface-muted)]">
                                 {validationConfidenceLabel(task.validationConfidence)}
                               </Badge>
-                            )}
+                            ) : null}
                           </div>
-                        )}
-                        {task.validatedAtLabel && (
+                        ) : null}
+                        {task.validatedAtLabel ? (
                           <p className="text-xs text-[var(--color-muted)]">
                             Ultima verificare: {task.validatedAtLabel}
                           </p>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>
-                )}
-              </section>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0 text-xs text-[var(--color-muted)]">
-              {task.attachedEvidence ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span>Dovada atasata:</span>
-                  {evidenceHref ? (
-                    <a
-                      href={evidenceHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="max-w-full break-all text-[var(--color-info)] underline decoration-[color:var(--color-border)] underline-offset-4"
-                    >
-                      {task.attachedEvidence.fileName}
-                    </a>
-                  ) : (
-                    <span className="break-all text-[var(--color-on-surface-muted)]">
-                      {task.attachedEvidence.fileName}
-                    </span>
-                  )}
-                  <span>·</span>
-                  <span>{formatEvidenceKind(task.attachedEvidence.kind)}</span>
-                  {task.attachedEvidence.quality && (
-                    <>
-                      <span>·</span>
-                      <Badge className={evidenceQualityTone(task.attachedEvidence.quality.status)}>
-                        dovadă {formatEvidenceQualityStatus(task.attachedEvidence.quality.status)}
-                      </Badge>
-                    </>
-                  )}
-                  {evidenceQualitySummary && (
-                    <span className="basis-full text-[var(--color-on-surface-muted)]">
-                      {evidenceQualitySummary}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                "Nu exista dovada atasata inca."
-              )}
-            </div>
-
-            <div className="flex w-full flex-col gap-2 lg:w-auto lg:min-w-[22rem]">
-              <Button
-                onClick={() => onMarkDone(task.id)}
-                className="h-10 w-full rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]"
-              >
-                {task.status === "done" ? (
-                  <CheckCircle2 className="size-4" strokeWidth={2.25} />
-                ) : (
-                  <RefreshCcw className="size-4" strokeWidth={2.25} />
-                )}
-                {task.status === "done" ? "Redeschide taskul" : "Valideaza si rescaneaza"}
-              </Button>
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-                <select
-                  value={selectedEvidenceKind}
-                  onChange={(event) =>
-                    setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
-                  }
-                  aria-label="Tipul de dovada"
-                  className="h-10 w-full min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] px-3 text-sm text-[var(--color-on-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-40"
-                >
-                  {task.evidenceKinds.map((kind) => (
-                    <option key={`${task.id}-${kind}`} value={kind}>
-                      {formatEvidenceKind(kind)}
-                    </option>
-                  ))}
-                </select>
-                <Button
-                  onClick={() => evidenceInputRef.current?.click()}
-                  variant="outline"
-                  className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--color-surface-variant)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
-                >
-                  <Paperclip className="size-4" strokeWidth={2.25} />
-                  {task.attachedEvidence ? "Actualizeaza dovada" : "Adauga dovada"}
-                </Button>
-                <Button
-                  onClick={() => onExport(task.id)}
-                  variant="outline"
-                  className="h-10 w-full rounded-xl border-[var(--color-border)] bg-[var(--bg-inset)] text-[var(--color-on-surface)] hover:bg-[var(--color-surface-hover)] sm:w-auto"
-                >
-                  <FileDown className="size-4" strokeWidth={2.25} />
-                  Export task
-                </Button>
+                ) : null}
               </div>
-            </div>
+            </TaskDisclosure>
           </div>
+
           <input
             ref={evidenceInputRef}
             type="file"
@@ -465,6 +541,38 @@ export function TaskCard({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function TaskDisclosure({
+  eyebrow,
+  title,
+  subtitle,
+  children,
+}: {
+  eyebrow: string
+  title: string
+  subtitle: string
+  children: ReactNode
+}) {
+  return (
+    <details className="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-variant)] p-4">
+      <summary className="cursor-pointer list-none">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--color-muted)]">
+          {eyebrow}
+        </p>
+        <div className="mt-2 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-[var(--color-on-surface)]">{title}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-on-surface-muted)]">
+              {subtitle}
+            </p>
+          </div>
+          <span className="shrink-0 text-xs text-[var(--color-muted)]">Detalii</span>
+        </div>
+      </summary>
+      <div className="mt-4">{children}</div>
+    </details>
   )
 }
 
