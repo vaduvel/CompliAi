@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "test:canonical-audit": "vitest run tests/canonical-runtime-audit.test.ts",
     "test:flow-kit": "vitest run tests/flow-test-kit-user-nou.test.ts",
     "test:watch": "vitest",
     "verify:supabase:sprint5": "node scripts/verify-supabase-sprint5.mjs",

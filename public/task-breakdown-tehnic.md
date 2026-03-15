@@ -1059,7 +1059,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] concluzia curenta este:
   - produsul nu cere feature noi
   - produsul cere ierarhie mai dura in runtime
-- [ ] `Browser audit` pe firul canonic dupa merge:
+- [x] `Browser audit` pe firul canonic dupa merge:
   - `Dashboard`
   - `Scanare`
   - `Control`
@@ -1074,9 +1074,20 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - exista acum si audit executabil pentru flow-ul principal:
     - `tests/flow-test-kit-user-nou.test.ts`
     - `npm run test:flow-kit`
+  - exista acum si harness executabil pentru firul canonic:
+    - `tests/canonical-runtime-audit.test.ts`
+    - `npm run test:canonical-audit`
+  - acopera operational:
+    - autentificare locala
+    - `Scanare`
+    - `Dashboard core`
+    - `Dashboard payload`
+    - `Audit si export`
+    - `Setari`
   - verdict curent:
     - `Dashboard` tine directia buna
-    - urmatoarea densitate reala ramasă este in `Checklists`
+    - `Checklists` ramane cea mai densa pagina vizibila
+    - densitatea ramasa nu mai este blocanta pentru firul canonic
 - [x] `Doc governance pass` pentru `public/*.md`
   - exista acum harta explicita:
     - `public/doc-governance-map-2026-03-15.md`
@@ -1171,7 +1182,10 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - badge-ul decorativ pentru ultimul manifest a fost scos
   - `Snapshot rapid` -> `Stare curenta`
   - CTA-urile secundare au fost scurtate la `Scanare` / `Control`
-- [ ] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`
+- [x] browser audit final pe `Dashboard` dupa ce intra si lotul component-level pentru `Checklists`
+  - inchis operational prin:
+    - pass-urile de declutter deja integrate
+    - `tests/canonical-runtime-audit.test.ts`
 
 - [x] `Audit si export` component density pass
   - `Raport PDF` este clar exportul principal

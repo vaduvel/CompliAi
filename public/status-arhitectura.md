@@ -1466,3 +1466,25 @@ Asta este sanatos arhitectural pentru ca:
 - pastreaza `Agent OS` ca layer de propuneri, nu writer direct in state-ul oficial
 - muta regula `omul valideaza` din documente in runtime
 - evita commituri accidentale cu propuneri neconfirmate
+
+## Actualizare 2026-03-15 - auditul final pe firul canonic este inchis operational
+
+- exista acum un harness executabil pentru firul canonic:
+  - `tests/canonical-runtime-audit.test.ts`
+  - `npm run test:canonical-audit`
+- harnessul leaga operational:
+  - autentificare locala
+  - `Scanare`
+  - `Dashboard core`
+  - `Dashboard payload`
+  - `Audit si export`
+  - `Setari`
+- verdictul ramas este acum mai clar:
+  - `Dashboard` tine directia buna
+  - `Checklists` ramane cea mai densa pagina vizibila, dar nu mai blocheaza firul canonic
+
+Asta este sanatos arhitectural pentru ca:
+
+- inchide auditul final intr-o forma repetabila, nu doar vizuala sau contextuala
+- leaga runtime UX de payload si handoff real
+- reduce dependenta de sesiuni locale fragile pentru verificarea fluxului principal

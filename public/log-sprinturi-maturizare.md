@@ -2039,6 +2039,30 @@ Validare dupa pas:
 - `npm run lint` -> verde
 - `npm run build` -> verde
 
+Pas de audit executabil - firul canonic:
+
+- a fost adaugat harnessul:
+  - `tests/canonical-runtime-audit.test.ts`
+- a fost adaugat si scriptul:
+  - `npm run test:canonical-audit`
+- harnessul trece prin:
+  - autentificare locala
+  - `Scanare`
+  - `Dashboard core`
+  - `Dashboard payload`
+  - `Audit si export`
+  - `Setari`
+- verdictul ramas dupa pas:
+  - `Dashboard` tine directia buna
+  - `Checklists` ramane cea mai densa pagina vizibila
+  - densitatea ramasa nu mai blocheaza firul canonic
+
+Validare dupa pas:
+
+- `npm run test:canonical-audit` -> verde
+- `npm test` -> verde
+- `npm run lint` -> verde
+
 Pas de UX runtime - `Auditor Vault wave 1` component density pass:
 
 - `EvidenceLedgerCard`
