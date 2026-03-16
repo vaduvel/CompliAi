@@ -10,7 +10,7 @@ export function ActionBar() {
   return (
     <div className="fixed inset-x-0 bottom-16 z-40">
       <div className="w-full px-4 md:px-6">
-        <div className="flex flex-col gap-2 rounded-2xl border border-zinc-800/70 bg-zinc-950/55 p-2 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <div className="flex flex-col gap-2 rounded-2xl border border-eos-border-subtle bg-eos-surface/70 p-2 backdrop-blur supports-[backdrop-filter]:bg-eos-surface/55 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <Button
             size="lg"
             className="w-full sm:w-auto"
@@ -59,4 +59,3 @@ export function ActionBar() {
     </div>
   )
 }
-

@@ -1544,3 +1544,9 @@ Asta este sanatos arhitectural pentru ca:
 - muta `Checklists` mai aproape de un cockpit de executie, nu de o pagina de explicatii
 - face dovada lipsa si urgenta P1 dominante fata de framing
 - pastreaza separarea intre actiune si suport
+
+## Actualizare 2026-03-16 - Evidence OS vizual unificat pe suprafetele legacy
+
+- componentele legacy din `components/dashboard/*` folosesc acum exclusiv clase `eos-*`
+- accentul vechi `emerald` a fost eliminat din UI-ul runtime
+- layout-ul legacy nu mai concureaza vizual cu noul Evidence OS, ci il respecta

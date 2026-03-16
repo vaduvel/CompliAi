@@ -2682,3 +2682,15 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Actualizare 2026-03-16 - Evidence OS vizual unificat (legacy dashboard)
+
+- `components/dashboard/*` nu mai foloseste `emerald / zinc / amber / rose / sky`
+- `components/mode-toggle.tsx` foloseste acum clase `eos-*`
+- `RiskScoreCircle` foloseste `var(--eos-accent-primary)` pentru gradient si text
+- `app/globals.css` mapeaza complet paleta legacy pe `eos-*`
+- efect: verdele legacy dispare chiar si in suprafetele vechi
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

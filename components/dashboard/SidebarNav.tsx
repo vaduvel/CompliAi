@@ -45,9 +45,9 @@ export function SidebarNav({
         const base =
           "w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors"
         const activeCls =
-          "bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/12"
+          "bg-eos-primary-soft text-eos-primary hover:bg-eos-primary-soft"
         const idleCls =
-          "text-zinc-300 hover:bg-zinc-900/60 hover:text-zinc-50"
+          "text-eos-text-muted hover:bg-eos-surface hover:text-eos-text"
 
         if (item.comingSoon) {
           return (
@@ -65,7 +65,7 @@ export function SidebarNav({
             >
               <item.icon className="size-4 opacity-80" />
               <span className="flex-1 text-left">{item.label}</span>
-              <span className="rounded-full border border-zinc-800 bg-zinc-950/40 px-2 py-0.5 text-[10px] text-zinc-400">
+              <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2 py-0.5 text-[10px] text-eos-text-tertiary">
                 În curând
               </span>
             </Button>

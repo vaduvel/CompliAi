@@ -25,14 +25,14 @@ export function RiskScoreCircle({
         width="112"
         height="112"
         viewBox="0 0 112 112"
-        className="drop-shadow-[0_12px_36px_rgba(16,185,129,0.12)]"
+        className="drop-shadow-[0_12px_36px_rgba(72,99,255,0.16)]"
         role="img"
         aria-label={`Scor de risc general ${clamped}% (${label})`}
       >
         <defs>
           <linearGradient id="riskGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="1" />
-            <stop offset="100%" stopColor="#22c55e" stopOpacity="1" />
+            <stop offset="0%" stopColor="var(--eos-accent-primary)" stopOpacity="1" />
+            <stop offset="100%" stopColor="var(--eos-accent-primary-hover)" stopOpacity="1" />
           </linearGradient>
         </defs>
         <circle
@@ -40,7 +40,7 @@ export function RiskScoreCircle({
           cy="56"
           r={radius}
           fill="transparent"
-          stroke="rgba(63,63,70,0.8)"
+          stroke="var(--eos-border-default)"
           strokeWidth={stroke}
         />
         <circle
@@ -59,16 +59,15 @@ export function RiskScoreCircle({
 
       <div className="absolute inset-0 grid place-items-center">
         <div className="text-center">
-          <div className="text-2xl font-semibold tabular-nums text-emerald-200">
+          <div className="text-2xl font-semibold tabular-nums text-eos-text">
             {clamped}%
           </div>
-          <div className="text-[11px] font-medium text-emerald-200/90">
+          <div className="text-[11px] font-medium text-eos-text-muted">
             {label}
           </div>
-          <div className="mt-1 text-[10px] text-zinc-400">Scor de risc</div>
+          <div className="mt-1 text-[10px] text-eos-text-tertiary">Scor de risc</div>
         </div>
       </div>
     </div>
   )
 }
-

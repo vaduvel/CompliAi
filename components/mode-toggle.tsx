@@ -21,7 +21,7 @@ export function ModeToggle() {
         <Button
           variant="outline"
           size="icon"
-          className="border-zinc-800 bg-zinc-950/40 hover:bg-zinc-900/60"
+          className="border-eos-border bg-eos-surface hover:bg-eos-surface-elevated"
         >
           <SunIcon className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <MoonIcon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -42,4 +42,3 @@ export function ModeToggle() {
     </DropdownMenu>
   )
 }
-

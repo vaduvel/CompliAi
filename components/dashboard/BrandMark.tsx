@@ -14,8 +14,8 @@ export function BrandMark({
       variant="flat"
       size={size}
       subtitle={size === "md" ? "AI Risk Scanner" : undefined}
-      titleClassName={cn(size === "sm" ? "text-zinc-100" : "text-zinc-50")}
-      subtitleClassName="text-zinc-400"
+      titleClassName={cn(size === "sm" ? "text-eos-text" : "text-eos-text")}
+      subtitleClassName="text-eos-text-muted"
     />
   )
 }

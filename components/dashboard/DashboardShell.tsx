@@ -22,16 +22,16 @@ export function DashboardShell() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   return (
-    <div className="min-h-dvh bg-zinc-950 text-zinc-50">
+    <div className="min-h-dvh bg-[radial-gradient(circle_at_top_left,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] text-eos-text">
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <div className="flex min-h-dvh w-full">
-          <aside className="hidden w-72 shrink-0 flex-col border-r border-zinc-800/60 bg-zinc-950/60 backdrop-blur md:flex">
+          <aside className="hidden w-72 shrink-0 flex-col border-r border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-base))] backdrop-blur md:flex">
             <div className="p-4">
               <BrandMark />
             </div>
             <SidebarNav className="px-2" />
             <div className="mt-auto p-4">
-              <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/30 p-3 text-xs text-zinc-400">
+              <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-3 text-xs text-eos-text-muted">
                 Scor de risc · recomandare AI · verifică uman
               </div>
             </div>
@@ -44,7 +44,7 @@ export function DashboardShell() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="border-zinc-800 bg-zinc-950/40 hover:bg-zinc-900/60"
+                    className="border-eos-border bg-eos-surface hover:bg-eos-surface-elevated"
                   >
                     <MenuIcon className="size-4" />
                     <span className="sr-only">Deschide meniul</span>
@@ -55,10 +55,10 @@ export function DashboardShell() {
 
             <SheetContent
               side="left"
-              className="border-zinc-800 bg-zinc-950 p-0 text-zinc-50"
+              className="border-eos-border bg-eos-surface-base p-0 text-eos-text"
             >
-              <SheetHeader className="border-b border-zinc-800/70">
-                <SheetTitle className="text-zinc-50">
+              <SheetHeader className="border-b border-eos-border-subtle">
+                <SheetTitle className="text-eos-text">
                   <BrandMark />
                 </SheetTitle>
               </SheetHeader>
@@ -69,10 +69,10 @@ export function DashboardShell() {
 
             <main className="px-4 py-6 pb-40 md:px-6">
               <div className="mb-5">
-                <h1 className="text-lg font-semibold tracking-tight text-zinc-100">
+                <h1 className="text-lg font-semibold tracking-tight text-eos-text">
                   Dashboard
                 </h1>
-                <p className="mt-1 text-sm text-zinc-400">
+                <p className="mt-1 text-sm text-eos-text-muted">
                   Asistent AI care îți arată un scor de risc și o recomandare AI.
                   Verifică uman înainte de orice raport oficial.
                 </p>
@@ -89,4 +89,3 @@ export function DashboardShell() {
     </div>
   )
 }
-

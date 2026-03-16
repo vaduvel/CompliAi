@@ -1355,3 +1355,9 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `npm run test:flow-kit`
   - `npm test`
   - `npm run lint`
+
+- [x] eliminare UI legacy din suprafetele vechi ale dashboard-ului
+  - `components/dashboard/*` folosesc acum doar clase `eos-*`
+  - `components/mode-toggle.tsx` foloseste `eos-*`
+  - `RiskScoreCircle` foloseste accent `eos`
+  - `npm run lint` trece

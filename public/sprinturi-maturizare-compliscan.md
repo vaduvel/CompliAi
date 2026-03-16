@@ -1148,3 +1148,10 @@ Actualizare suplimentara 2026-03-15:
   - lasa produsul cu un singur sistem real de authoring vizual
   - face noul UI vizibil pe suprafata principala, nu doar in namespace-ul de import
   - reduce drift-ul dintre runtime si exporturile HTML
+
+Actualizare suplimentara 2026-03-16:
+
+- convergenta vizuala `Evidence OS` este inchisa si pe suprafetele legacy
+- `components/dashboard/*` nu mai folosesc paleta `emerald / zinc / amber / rose / sky`
+- `app/globals.css` mapeaza complet paleta legacy pe tokenii `eos-*`
+- rezultatul este ca nu mai exista UI vechi vizibil in runtime
