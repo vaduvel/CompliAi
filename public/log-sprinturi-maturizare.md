@@ -2694,3 +2694,15 @@ Actualizare 2026-03-16 - Evidence OS vizual unificat (legacy dashboard)
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
+
+- `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK
+- org-ul este upsertat o singura data, apoi `org_state` se persista normal
+- previne crash-ul dashboard-ului pentru workspace-uri create local dar neinregistrate in Supabase
+
+Validare dupa pas:
+
+- `npm test` -> verde
+- `npm run lint` -> verde
+- `npm run build` -> verde

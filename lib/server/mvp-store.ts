@@ -15,6 +15,7 @@ import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallba
 import {
   hasSupabaseConfig,
   supabaseSelect,
+  supabaseUpsert,
 } from "@/lib/server/supabase-rest"
 import {
   loadOrgStateFromSupabase,
@@ -36,11 +37,11 @@ function getDataFile(orgId: string): string {
 }
 
 export async function readState(): Promise<ComplianceState> {
-  const { orgId } = await getOrgContext()
+  const { orgId, orgName } = await getOrgContext()
 
   if (!initializedOrgs.has(orgId)) {
     initializedOrgs.add(orgId)
-    const loaded = normalizeComplianceState(await loadState(orgId))
+    const loaded = normalizeComplianceState(await loadState(orgId, orgName))
     memoryStates.set(orgId, loaded)
   }
 
@@ -51,11 +52,11 @@ export async function readState(): Promise<ComplianceState> {
 }
 
 export async function writeState(nextState: ComplianceState): Promise<void> {
-  const { orgId } = await getOrgContext()
+  const { orgId, orgName } = await getOrgContext()
   const normalized = normalizeComplianceState(structuredClone(nextState))
   const enriched = await enrichStateWithSnapshots(normalized)
   memoryStates.set(orgId, enriched)
-  await persistState(orgId, enriched)
+  await persistState(orgId, orgName, enriched)
 }
 
 export async function mutateState(
@@ -113,7 +114,7 @@ function uid(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 }
 
-async function loadState(orgId: string): Promise<ComplianceState> {
+async function loadState(orgId: string, orgName?: string): Promise<ComplianceState> {
   const dataBackend = getConfiguredDataBackend()
 
   if (shouldUseSupabaseOrgStateAsPrimary()) {
@@ -123,12 +124,12 @@ async function loadState(orgId: string): Promise<ComplianceState> {
 
       const legacyCloudState = await loadLegacyCloudAppState(orgId)
       if (legacyCloudState) {
-        await persistOrgStateToSupabase(orgId, legacyCloudState)
+        await persistOrgStateSafe(orgId, orgName, legacyCloudState)
         return structuredClone(legacyCloudState)
       }
 
       const initialCloudState = normalizeComplianceState(initialComplianceState)
-      await persistOrgStateToSupabase(orgId, initialCloudState)
+      await persistOrgStateSafe(orgId, orgName, initialCloudState)
       return structuredClone(initialCloudState)
     } catch (error) {
       if (!isLocalFallbackAllowedForCloudPrimary()) {
@@ -144,7 +145,7 @@ async function loadState(orgId: string): Promise<ComplianceState> {
   const diskState = await loadFromDisk(orgId)
   if (dataBackend === "supabase") {
     try {
-      await persistOrgStateToSupabase(orgId, diskState)
+      await persistOrgStateSafe(orgId, orgName, diskState)
     } catch (error) {
       if (!isLocalFallbackAllowedForCloudPrimary()) {
         throw new Error(
@@ -158,13 +159,17 @@ async function loadState(orgId: string): Promise<ComplianceState> {
   return diskState
 }
 
-async function persistState(orgId: string, state: ComplianceState): Promise<void> {
+async function persistState(
+  orgId: string,
+  orgName: string | undefined,
+  state: ComplianceState
+): Promise<void> {
   const dataBackend = getConfiguredDataBackend()
   const keepLocalCopy = dataBackend !== "supabase"
 
   if (shouldUseSupabaseOrgStateAsPrimary()) {
     try {
-      const mirrored = await persistOrgStateToSupabase(orgId, state)
+      const mirrored = await persistOrgStateSafe(orgId, orgName, state)
       if (mirrored.synced) return
     } catch (error) {
       if (!isLocalFallbackAllowedForCloudPrimary()) {
@@ -181,7 +186,7 @@ async function persistState(orgId: string, state: ComplianceState): Promise<void
   }
 
   try {
-    await persistOrgStateToSupabase(orgId, state)
+    await persistOrgStateSafe(orgId, orgName, state)
   } catch {
     // Falls back to local store if public org_state mirror is not available.
   }
@@ -205,6 +210,55 @@ async function loadLegacyCloudAppState(orgId: string): Promise<ComplianceState |
   } catch {
     return null
   }
+}
+
+function isMissingOrgForeignKey(error: unknown) {
+  const text = error instanceof Error ? error.message : String(error)
+  return (
+    text.includes("23503") &&
+    (text.includes("org_state_org_id_fkey") || text.includes("org_id") || text.includes("organizations"))
+  )
+}
+
+async function ensureSupabaseOrganization(orgId: string, orgName?: string) {
+  if (!hasSupabaseConfig()) return
+
+  const name = orgName?.trim() || "Organizatie"
+  const now = new Date().toISOString()
+  await supabaseUpsert(
+    "organizations",
+    {
+      id: orgId,
+      name,
+      slug: slugify(name),
+      created_at: now,
+      updated_at: now,
+    },
+    "public"
+  )
+}
+
+async function persistOrgStateSafe(orgId: string, orgName: string | undefined, state: ComplianceState) {
+  try {
+    return await persistOrgStateToSupabase(orgId, state)
+  } catch (error) {
+    if (isMissingOrgForeignKey(error)) {
+      await ensureSupabaseOrganization(orgId, orgName)
+      return await persistOrgStateToSupabase(orgId, state)
+    }
+    throw error
+  }
+}
+
+function slugify(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 120) || null
+  )
 }
 
 async function enrichStateWithSnapshots(nextState: ComplianceState): Promise<ComplianceState> {

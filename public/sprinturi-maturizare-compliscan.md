@@ -1155,3 +1155,9 @@ Actualizare suplimentara 2026-03-16:
 - `components/dashboard/*` nu mai folosesc paleta `emerald / zinc / amber / rose / sky`
 - `app/globals.css` mapeaza complet paleta legacy pe tokenii `eos-*`
 - rezultatul este ca nu mai exista UI vechi vizibil in runtime
+
+Actualizare suplimentara 2026-03-16:
+
+- `org_state` nu mai poate cadea pe FK lipsa in Supabase
+- runtime-ul asigura upsert pentru `organizations` cand lipseste org-ul
+- dashboard-ul porneste fara crash chiar daca org-ul nu exista in cloud

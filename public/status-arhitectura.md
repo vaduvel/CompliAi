@@ -1550,3 +1550,8 @@ Asta este sanatos arhitectural pentru ca:
 - componentele legacy din `components/dashboard/*` folosesc acum exclusiv clase `eos-*`
 - accentul vechi `emerald` a fost eliminat din UI-ul runtime
 - layout-ul legacy nu mai concureaza vizual cu noul Evidence OS, ci il respecta
+
+## Actualizare 2026-03-16 - Org state nu mai cade pe FK missing
+
+- `mvp-store` creeaza automat org-ul lipsa in `public.organizations` atunci cand `org_state` esueaza pe FK
+- previne blocajul runtime pentru workspace-uri locale / nou create

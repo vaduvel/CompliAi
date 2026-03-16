@@ -1361,3 +1361,8 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `components/mode-toggle.tsx` foloseste `eos-*`
   - `RiskScoreCircle` foloseste accent `eos`
   - `npm run lint` trece
+
+- [x] protectie org_state pentru org lipsa in Supabase
+  - `mvp-store` incearca upsert in `public.organizations` cand FK-ul lipseste
+  - `mvp-store.test.ts` acopera cazul cu `code=23503`
+  - validare: `npm test`, `npm run lint`, `npm run build`

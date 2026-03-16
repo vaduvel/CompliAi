@@ -122,6 +122,28 @@ describe("lib/server/mvp-store", () => {
     expect(mocks.supabaseUpsertMock).not.toHaveBeenCalled()
   })
 
+  it("sincronizeaza organizatia in supabase daca org_state esueaza pe foreign key", async () => {
+    mocks.persistOrgStateToSupabaseMock
+      .mockRejectedValueOnce(
+        new Error(
+          "Supabase error 409: {\"code\":\"23503\",\"details\":\"Key (org_id)=(org-1) is not present in table \\\"organizations\\\"\",\"message\":\"insert or update on table \\\"org_state\\\" violates foreign key constraint \\\"org_state_org_id_fkey\\\"\"}"
+        )
+      )
+      .mockResolvedValueOnce({ synced: true })
+
+    const { readState } = await import("@/lib/server/mvp-store")
+
+    const state = await readState()
+
+    expect(state).toEqual(expect.objectContaining(initialComplianceState))
+    expect(mocks.supabaseUpsertMock).toHaveBeenCalledWith(
+      "organizations",
+      expect.objectContaining({ id: "org-1", name: "Org 1", slug: "org-1" }),
+      "public"
+    )
+    expect(mocks.persistOrgStateToSupabaseMock).toHaveBeenCalledTimes(2)
+  })
+
   it("oglindeste doar org_state in modul hibrid si nu mai scrie app_state legacy", async () => {
     mocks.getConfiguredDataBackendMock.mockReturnValue("hybrid")
     mocks.shouldUseSupabaseOrgStateAsPrimaryMock.mockReturnValue(false)
