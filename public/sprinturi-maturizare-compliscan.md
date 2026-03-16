@@ -1237,3 +1237,10 @@ Actualizare suplimentara 2026-03-16:
 - au fost eliminate suprascrierile legacy de radius (`rounded-2xl`, `rounded-3xl`)
 - badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
 - filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA-urile cu verb lung au fost scurtate pe suprafetele cele mai dense:
+  - `Alerte` (drift actions)
+  - `NextBestAction`
+  - `TaskCard`

@@ -378,7 +378,7 @@ export default function DriftPage() {
                             variant="outline"
                             size="default"
                           >
-                            Preia drift-ul
+                            Preia drift
                           </Button>
                         )}
                         {(drift.lifecycleStatus === "open" ||
@@ -389,7 +389,7 @@ export default function DriftPage() {
                             variant="outline"
                             size="default"
                           >
-                            Marchează în lucru
+                            În lucru
                           </Button>
                         )}
                         {drift.open && (
@@ -400,7 +400,7 @@ export default function DriftPage() {
                               size="default"
                               className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                             >
-                              Marchează rezolvat
+                              Rezolvă
                             </Button>
                             <Button
                               onClick={() => void handleDriftAction(drift.id, "waive")}
@@ -409,7 +409,7 @@ export default function DriftPage() {
                               size="default"
                               className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
                             >
-                              Waive cu justificare
+                              Waive
                             </Button>
                           </>
                         )}

@@ -153,7 +153,7 @@ export function NextBestAction({
             size="lg"
             className="w-full gap-2 lg:w-auto"
           >
-            Deschide taskul
+            Deschide
             <ArrowRight className="size-5" strokeWidth={2} />
           </Button>
         </div>

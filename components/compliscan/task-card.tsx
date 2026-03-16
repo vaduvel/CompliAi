@@ -277,7 +277,7 @@ export function TaskCard({
                   ) : (
                     <RefreshCcw className="size-5" strokeWidth={2} />
                   )}
-                  {task.status === "done" ? "Redeschide taskul" : "Valideaza si rescaneaza"}
+                  {task.status === "done" ? "Redeschide" : "Validează + rescanează"}
                 </Button>
 
                 <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">

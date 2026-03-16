@@ -1607,6 +1607,16 @@ Pass 2 `Val 3` - convergenta pe badge semantics:
 Validare dupa pass:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - CTA label cleanup (Val 3)
+
+- `Alerte`: actiunile de drift au etichete mai scurte si mai clare (`Preia drift`, `În lucru`, `Rezolvă`, `Waive`)
+- `NextBestAction`: CTA principal scurtat la `Deschide`
+- `TaskCard`: CTA principal scurtat la `Validează + rescanează`, iar starea `done` foloseste `Redeschide`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
 - `npm run build` -> verde
 - `npm test` -> verde
 

@@ -1621,3 +1621,9 @@ Asta este sanatos arhitectural pentru ca:
 - au fost eliminate suprascrierile legacy de radius (`rounded-3xl`, `rounded-2xl`, `rounded-xl`)
 - badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
 - filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+## Actualizare 2026-03-16 - CTA label cleanup
+
+- `Alerte`: etichete mai scurte pe actiunile de drift
+- `NextBestAction`: CTA principal scurtat
+- `TaskCard`: CTA principal scurtat, starea `done` foloseste `Redeschide`
