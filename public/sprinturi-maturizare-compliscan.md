@@ -1324,4 +1324,8 @@ Actualizare suplimentara 2026-03-16:
 
 Actualizare suplimentara 2026-03-16:
 
+- `DenseListItem` adoptat in `ScanVerdictsTab` (YAML findings + manifest systems)
+
+Actualizare suplimentara 2026-03-16:
+
 - `references/source-of-truth.md` adaugat ca index pentru docurile canonice

@@ -1444,6 +1444,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - adoptat in `DriftCommandCenter` si `Alerte`
   - adoptat in `RecentScansCard` si `AlertsList`
   - adoptat in `LatestDocumentSection` (findings + task-uri)
+  - adoptat in `ScanVerdictsTab` (YAML findings + manifest systems)
 - [~] `Summary + actions` recipe
   - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`
 - [~] `ActionCluster` in `DriftCommandCenter`

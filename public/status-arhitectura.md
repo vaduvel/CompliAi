@@ -1702,3 +1702,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - Index sursa de adevar
 
 - `references/source-of-truth.md` defineste explicit docurile canonice
+
+## Actualizare 2026-03-16 - DenseListItem ScanVerdictsTab
+
+- `ScanVerdictsTab` foloseste `DenseListItem` pentru YAML findings si sistemele din manifest
