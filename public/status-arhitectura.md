@@ -1568,3 +1568,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Remediere` foloseste acum semnalul de calitate a dovezii in summary strip
 - `Dashboard` foloseste semnalul de calitate a dovezii in summary strip
 - `Control` foloseste semnalul de calitate a dovezii in overview
+- `Documente` foloseste lazy load pentru sectiunile grele (latest + recent)

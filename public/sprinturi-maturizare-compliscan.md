@@ -1174,3 +1174,4 @@ Actualizare suplimentara 2026-03-16:
 - `Remediere` afiseaza semnalul de calitate a dovezii in summary strip
 - `Dashboard` afiseaza semnalul de calitate a dovezii in `Stare curenta`
 - `Control` afiseaza semnalul de calitate a dovezii in overview
+- `Documente` incarca lazy sectiunile istorice pentru un load initial mai rapid

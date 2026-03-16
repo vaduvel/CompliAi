@@ -2726,6 +2726,7 @@ Actualizare 2026-03-16 - Registru evidence alimentat din Supabase (Auditor Vault
 - `Remediere` foloseste semnalul din `evidenceLedger` pentru calitatea dovezii in summary strip
 - `Dashboard` expune calitatea dovezii in `Stare curenta` folosind `evidenceLedger`
 - `Control` (Overview) expune calitatea dovezii ca semnal operational
+- `Documente` incarca lazy `LatestDocumentSection` si `RecentScansCard` pentru un payload initial mai usor
 - test dedicat pentru ledger in `supabase-evidence-read.test.ts`
 
 Validare dupa pas:

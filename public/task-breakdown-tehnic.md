@@ -199,6 +199,7 @@ Fronturile active acum:
   - `Remediere` foloseste semnalul de calitate a dovezii in summary strip
   - `Dashboard` foloseste semnalul de calitate a dovezii in `Stare curenta`
   - `Control` foloseste semnalul de calitate a dovezii in overview
+  - `Documente` incarca lazy sectiunile istorice grele pentru a reduce bundle-ul initial
 - [~] source of truth cloud pentru tenancy
   - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB

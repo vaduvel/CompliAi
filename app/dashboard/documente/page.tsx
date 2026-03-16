@@ -1,10 +1,11 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { LatestDocumentSection, LoadingScreen, RecentScansCard } from "@/components/compliscan/route-sections"
+import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { buildScanInsights, useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -13,6 +14,21 @@ import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
+
+const LatestDocumentSection = dynamic(
+  () =>
+    import("@/components/compliscan/route-sections").then((mod) => mod.LatestDocumentSection),
+  {
+    loading: () => <LoadingScreen variant="section" />,
+  }
+)
+
+const RecentScansCard = dynamic(
+  () => import("@/components/compliscan/route-sections").then((mod) => mod.RecentScansCard),
+  {
+    loading: () => <LoadingScreen variant="section" />,
+  }
+)
 
 export default function DocumentePage() {
   const cockpit = useCockpitData()
