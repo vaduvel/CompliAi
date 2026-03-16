@@ -1173,3 +1173,4 @@ Actualizare suplimentara 2026-03-16:
 - `Audit Pack` JSON include sumarul `evidenceLedgerSummary` pentru dovada
 - `Remediere` afiseaza semnalul de calitate a dovezii in summary strip
 - `Dashboard` afiseaza semnalul de calitate a dovezii in `Stare curenta`
+- `Control` afiseaza semnalul de calitate a dovezii in overview

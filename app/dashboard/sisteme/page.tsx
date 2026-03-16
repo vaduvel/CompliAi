@@ -99,6 +99,13 @@ export default function SistemePage() {
   const recentInventory = data.state.aiSystems.slice(0, 4)
   const recentDrifts = cockpit.activeDrifts.slice(0, 4)
   const reviewQueueCount = detectedActiveCount + recentDrifts.length + (validatedBaseline ? 0 : 1)
+  const evidenceLedger = data.evidenceLedger ?? []
+  const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
+  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = Math.max(
+    0,
+    evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
+  )
 
   return (
     <div className="space-y-8">
@@ -168,6 +175,10 @@ export default function SistemePage() {
               ? `validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
               : "inca nevalidat"
           }
+          evidenceLedgerTotal={evidenceLedger.length}
+          evidenceLedgerReady={ledgerReadyCount}
+          evidenceLedgerWeak={ledgerWeakCount}
+          evidenceLedgerUnrated={ledgerUnratedCount}
           onOpenSystems={() => setPrimaryView("systems")}
           onOpenDiscovery={() => {
             setPrimaryView("systems")
@@ -261,9 +272,12 @@ function ControlOverview({
   summary,
   confirmedCount,
   detectedActiveCount,
-  reviewedCount,
   recentDriftsCount,
   validatedBaselineLabel,
+  evidenceLedgerTotal,
+  evidenceLedgerReady,
+  evidenceLedgerWeak,
+  evidenceLedgerUnrated,
   onOpenSystems,
   onOpenDiscovery,
   onOpenBaseline,
@@ -272,14 +286,18 @@ function ControlOverview({
   summary: { score: number; riskLabel: string }
   confirmedCount: number
   detectedActiveCount: number
-  reviewedCount: number
   recentDriftsCount: number
   validatedBaselineLabel: string
+  evidenceLedgerTotal: number
+  evidenceLedgerReady: number
+  evidenceLedgerWeak: number
+  evidenceLedgerUnrated: number
   onOpenSystems: () => void
   onOpenDiscovery: () => void
   onOpenBaseline: () => void
   onOpenDrift: () => void
 }) {
+  const hasEvidenceLedger = evidenceLedgerTotal > 0
   const items: SummaryStripItem[] = [
     {
       label: "Inventar confirmat",
@@ -294,9 +312,28 @@ function ControlOverview({
       tone: detectedActiveCount > 0 ? "warning" : "neutral",
     },
     {
-      label: "Review in curs",
-      value: `${reviewedCount}`,
-      hint: "candidate ajustate, dar inca neconfirmate",
+      label: "Calitate dovada",
+      value: hasEvidenceLedger
+        ? evidenceLedgerWeak > 0
+          ? `${evidenceLedgerWeak} slabe`
+          : evidenceLedgerUnrated > 0
+            ? `${evidenceLedgerUnrated} neevaluate`
+            : `${evidenceLedgerReady} verificate`
+        : "fara registru",
+      hint: hasEvidenceLedger
+        ? evidenceLedgerWeak > 0
+          ? "inlocuiesti dovezile slabe in Dovada"
+          : evidenceLedgerUnrated > 0
+            ? "complementezi review-ul de dovada"
+            : "registru curat"
+        : "apare dupa primul upload de dovada",
+      tone: hasEvidenceLedger
+        ? evidenceLedgerWeak > 0
+          ? "warning"
+          : evidenceLedgerUnrated > 0
+            ? "accent"
+            : "success"
+        : "neutral",
     },
     {
       label: "Baseline",

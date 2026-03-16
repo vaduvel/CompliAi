@@ -1567,3 +1567,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Audit Pack` JSON expune sumarul de calitate al registrului de dovezi
 - `Remediere` foloseste acum semnalul de calitate a dovezii in summary strip
 - `Dashboard` foloseste semnalul de calitate a dovezii in summary strip
+- `Control` foloseste semnalul de calitate a dovezii in overview
