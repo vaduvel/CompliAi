@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
+  AlertCircle,
   ArrowRight,
   FileText,
   Loader2,
@@ -45,6 +46,44 @@ export function LoadingScreen({ variant = "page" }: { variant?: "page" | "sectio
   return (
     <div className={containerClass}>
       <Loader2 className="size-6 animate-spin" />
+    </div>
+  )
+}
+
+export function ErrorScreen({
+  message,
+  onRetry,
+  variant = "section",
+}: {
+  message?: string
+  onRetry?: () => void
+  variant?: "page" | "section"
+}) {
+  const containerClass =
+    variant === "page"
+      ? "grid min-h-screen place-items-center bg-eos-bg text-eos-text"
+      : "grid min-h-[40vh] place-items-center rounded-eos-md border border-eos-error-border bg-eos-error-soft text-eos-text"
+
+  return (
+    <div className={containerClass}>
+      <div className="flex flex-col items-center gap-3 px-6 text-center">
+        <AlertCircle className="size-8 text-eos-error" strokeWidth={1.5} />
+        <p className="text-sm font-medium text-eos-text">
+          {message ?? "Dashboard-ul nu a putut fi incarcat."}
+        </p>
+        <p className="text-xs text-eos-text-muted">
+          Verifica conexiunea si incearca din nou.
+        </p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2 text-sm text-eos-text transition-colors hover:bg-eos-surface-variant"
+          >
+            Incearca din nou
+          </button>
+        )}
+      </div>
     </div>
   )
 }

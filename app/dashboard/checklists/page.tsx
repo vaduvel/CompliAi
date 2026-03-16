@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react"
 
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
@@ -24,6 +24,7 @@ export default function RemediationPage() {
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
   const [showHandoff, setShowHandoff] = useState(false)
 
+  if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
@@ -83,7 +84,8 @@ export default function RemediationPage() {
     })
   }
 
-  const shouldShowHandoff = showHandoff || openTasks.length === 0
+  const allTasksDone = cockpit.tasks.length > 0 && openTasks.length === 0
+  const shouldShowHandoff = showHandoff || allTasksDone
 
   return (
     <div className="space-y-8">
@@ -129,14 +131,33 @@ export default function RemediationPage() {
         </CardContent>
       </Card>
 
-      <RemediationBoard
-        tasks={cockpit.tasks}
-        activeFilter={taskFilter}
-        onFilterChange={setTaskFilter}
-        onMarkDone={cockpitActions.handleMarkDone}
-        onAttachEvidence={cockpitActions.attachEvidence}
-        onExport={cockpitActions.handleTaskExport}
-      />
+      {cockpit.tasks.length === 0 ? (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="flex flex-col gap-4 px-5 py-8 text-center sm:flex-row sm:items-center sm:text-left">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-eos-text">Niciun task generat inca</p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                Task-urile apar dupa primul scan. Scaneaza un document sau manifeste de configurare ca sa construim planul de remediere.
+              </p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="shrink-0 gap-2">
+              <Link href="/dashboard/scanari">
+                Deschide Scanari
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <RemediationBoard
+          tasks={cockpit.tasks}
+          activeFilter={taskFilter}
+          onFilterChange={setTaskFilter}
+          onMarkDone={cockpitActions.handleMarkDone}
+          onAttachEvidence={cockpitActions.attachEvidence}
+          onExport={cockpitActions.handleTaskExport}
+        />
+      )}
 
       <div className="grid gap-4">
         {openTasks.length > 0 ? (
@@ -157,7 +178,7 @@ export default function RemediationPage() {
 
         {shouldShowHandoff ? (
           <HandoffCard
-            title="Cand termini board-ul, mergi in paginile read-only"
+            title="Ai terminat board-ul — mergi in paginile read-only"
             description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
             destinationLabel="vault / audit pack"
             checklist={[
