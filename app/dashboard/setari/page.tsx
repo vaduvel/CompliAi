@@ -429,18 +429,17 @@ export default function SetariPage() {
                         {validatedBaseline ? "Baseline activ" : "Cere baseline"}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm text-eos-text-muted">
-                      {validatedBaseline
-                        ? "Drift-ul compara starea curenta cu acest snapshot pana il schimbi sau il elimini."
-                        : activeSnapshot
-                          ? "Poti valida snapshot-ul curent ca baseline stabil pentru comparatiile viitoare."
+                    {!validatedBaseline && (
+                      <p className="mt-1 text-sm text-eos-text-muted">
+                        {activeSnapshot
+                          ? "Poti valida snapshot-ul curent ca reper stabil pentru drift."
                           : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
-                    </p>
+                      </p>
+                    )}
                   </div>
                   <ActionCluster
                     eyebrow="Actiuni"
                     title="Baseline"
-                    description="Validezi sau elimini baseline-ul activ."
                     actions={
                       <>
                         <Button
@@ -647,7 +646,7 @@ export default function SetariPage() {
                 <div>
                   <CardTitle className="text-xl">Drift severity policy</CardTitle>
                   <p className="mt-2 text-sm text-eos-text-muted">
-                    Override-uri de workspace pentru drift-urile care contează cel mai mult. Politica implicită rămâne activă pentru tot ce nu configurezi aici.
+                    Schimbi doar severitatea per tip de schimbare. Impactul, dovada ceruta si actiunea recomandata raman in politica de drift. Politica implicita ramane activa pentru tot ce nu configurezi.
                   </p>
                 </div>
                 <Button
@@ -683,9 +682,6 @@ export default function SetariPage() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-eos-text-muted">
-                    Schimbi doar severitatea. Impactul, dovada cerută și acțiunea recomandată rămân unificate în politica de drift.
-                  </p>
                 </label>
               ))}
             </CardContent>
