@@ -454,6 +454,8 @@ Status curent:
 
 - `DenseListItem` adoptat in `RecentScansCard`, `AlertsList`, `LatestDocumentSection` (findings + tasks), `ScanVerdictsTab` (YAML findings + manifest systems), `ScanVerdictsTab` (drift list)
 - `ActionCluster` folosit pentru handoff-ul din `ScanHistoryTab`
+- `ScanWorkspace` + `LatestDocumentSection` — titlu scalat de la `text-[28px]` la `text-xl` (widget-level, nu page-level)
+- `EmptyStateCard` — eliminat (export dead, nicio pagina nu il folosea)
 
 ### 10. Reguli de densitate și copy
 
