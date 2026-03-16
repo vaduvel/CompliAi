@@ -2951,3 +2951,11 @@ Actualizare 2026-03-16 - DenseListItem adoption
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in Setari
+
+- actiunile de baseline sunt canonizate cu `ActionCluster`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

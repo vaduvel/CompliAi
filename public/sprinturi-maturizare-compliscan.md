@@ -1305,3 +1305,7 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - `DenseListItem` adoptat in `Scanare` (tab-uri) si `Control / Sisteme` (drift recent)
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat in `Setari` pentru actiunile de baseline

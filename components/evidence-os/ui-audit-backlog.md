@@ -192,6 +192,7 @@ Rămas deschis intenționat:
   - `Auditor Vault` (export)
   - `DriftCommandCenter` (quick actions)
   - `Control / Sisteme` (handoff + confirmare)
+  - `Setari` (baseline actions)
 
 Rămas deschis:
 

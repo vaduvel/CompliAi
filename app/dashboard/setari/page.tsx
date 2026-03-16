@@ -30,6 +30,7 @@ import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Default policy" },
@@ -436,24 +437,31 @@ export default function SetariPage() {
                           : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      variant="secondary"
-                      disabled={cockpit.busy || !activeSnapshot}
-                      size="default"
-                      onClick={() => void cockpitActions.setValidatedBaseline()}
-                    >
-                      Valideaza snapshot-ul curent
-                    </Button>
-                    <Button
-                      variant="outline"
-                      disabled={cockpit.busy || !validatedBaseline}
-                      size="default"
-                      onClick={() => void cockpitActions.clearValidatedBaseline()}
-                    >
-                      Elimina baseline-ul
-                    </Button>
-                  </div>
+                  <ActionCluster
+                    eyebrow="Actiuni"
+                    title="Baseline"
+                    description="Validezi sau elimini baseline-ul activ."
+                    actions={
+                      <>
+                        <Button
+                          variant="secondary"
+                          disabled={cockpit.busy || !activeSnapshot}
+                          size="default"
+                          onClick={() => void cockpitActions.setValidatedBaseline()}
+                        >
+                          Valideaza snapshot-ul curent
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={cockpit.busy || !validatedBaseline}
+                          size="default"
+                          onClick={() => void cockpitActions.clearValidatedBaseline()}
+                        >
+                          Elimina baseline-ul
+                        </Button>
+                      </>
+                    }
+                  />
                 </div>
               </div>
             </CardContent>
