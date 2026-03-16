@@ -7,7 +7,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { LoadingScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
+import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const cockpit = useCockpitData()
 
+  if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
