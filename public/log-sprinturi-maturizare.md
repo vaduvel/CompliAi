@@ -3013,6 +3013,19 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Overflow + ActionCluster sweep
+
+- wrapping extins pe:
+  - `ScanDrawer`
+  - `TextExtractDrawer`
+  - `Reports support panels`
+  - `e-Factura validator`
+- `Audit si export` foloseste `ActionCluster` pentru toggle-ul de detalii
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Index canon docuri
 
 - a fost adaugat `references/source-of-truth.md` ca index operational pentru docurile canonice

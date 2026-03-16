@@ -33,7 +33,7 @@ export function EFacturaValidatorCard({
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-xl">Validator e-Factura XML</CardTitle>
-        <p className="text-sm text-eos-text-muted">
+        <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">
           Valideaza rapid structura UBL de baza inainte sa trimiti XML-ul spre fluxul ANAF.
         </p>
       </CardHeader>
@@ -81,7 +81,7 @@ export function EFacturaValidatorCard({
 
         <div className="space-y-4">
           {!latestValidation && (
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
               Inca nu exista validari rulate. Primul pas util este sa verifici daca XML-ul are blocurile minime pentru un flux e-Factura coerent.
             </div>
           )}
@@ -99,7 +99,7 @@ export function EFacturaValidatorCard({
                   >
                     {latestValidation.valid ? "Structura valida" : "Structura invalida"}
                   </Badge>
-                  <Badge className="border-eos-border bg-transparent text-eos-text-muted">
+                  <Badge className="border-eos-border bg-transparent text-eos-text-muted [overflow-wrap:anywhere]">
                     {latestValidation.documentName}
                   </Badge>
                 </div>
@@ -138,7 +138,7 @@ function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
-      <p className="mt-2 text-sm text-eos-text">{value}</p>
+      <p className="mt-2 text-sm text-eos-text [overflow-wrap:anywhere]">{value}</p>
     </div>
   )
 }
@@ -166,14 +166,14 @@ function IssueList({
       </div>
       <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
         {items.length === 0 && (
-          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 [overflow-wrap:anywhere]">
             {emptyText}
           </div>
         )}
         {items.map((item, index) => (
           <div
             key={`${title}-${index}`}
-            className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 [overflow-wrap:anywhere]"
           >
             {item}
           </div>

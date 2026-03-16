@@ -388,7 +388,11 @@ Rezultat urmărit:
 
 Status curent:
 
-- wrapping aplicat in `floating-assistant`, `logo` si `task-card` pentru string-uri lungi
+- wrapping aplicat in `floating-assistant`, `logo`, `task-card`, `scan-drawer`, `text-extract-drawer`, `reports-support-panels`, `efactura-validator-card` pentru string-uri lungi
+
+Status curent (summary + actions):
+
+- `ActionCluster` folosit pentru toggle-ul de detalii din `Audit si export`
 
 ### 8. Curățare CTA labels
 

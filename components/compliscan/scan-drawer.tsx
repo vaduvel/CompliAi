@@ -27,10 +27,10 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
         className="w-full border-l border-eos-border bg-eos-surface p-0 sm:max-w-xl"
       >
         <SheetHeader className="border-b border-eos-border p-6">
-          <SheetTitle className="text-eos-text">
+          <SheetTitle className="break-words text-eos-text">
             {scan?.documentName ?? "Detalii scan"}
           </SheetTitle>
-          <SheetDescription className="text-eos-text-muted">
+          <SheetDescription className="text-eos-text-muted [overflow-wrap:anywhere]">
             {scan
               ? `Scanat la ${new Date(scan.createdAtISO).toLocaleString("ro-RO")}`
               : "Selecteaza un document din lista recenta."}
@@ -43,7 +43,7 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
               <FileText className="size-4 text-eos-text-muted" strokeWidth={2} />
               Rezumat scan
             </div>
-            <p className="mt-3 text-sm text-eos-text-muted">
+            <p className="mt-3 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
               {scan?.contentPreview || "Nu exista preview pentru acest document."}
             </p>
           </div>
@@ -65,14 +65,18 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
                   className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-eos-text">
+                    <p className="break-words text-sm font-semibold text-eos-text">
                       {task.title}
                     </p>
                     <span className="text-xs text-eos-text-muted">{task.priority}</span>
                   </div>
-                  <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
-                  <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
-                  <p className="mt-2 text-xs text-eos-text-muted">
+                  <p className="mt-2 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
+                    {task.summary}
+                  </p>
+                  <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+                    {task.triggerLabel}
+                  </p>
+                  <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
                     {task.source} · {task.lawReference}
                   </p>
                 </div>
