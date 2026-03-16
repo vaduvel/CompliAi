@@ -25,13 +25,13 @@ export function DashboardSegmentSkeleton({
               <span>Segmentul se pregateste pe server.</span>
             </div>
           </div>
-          <div className="h-11 w-28 animate-pulse rounded-2xl border border-eos-border bg-eos-bg-inset" />
+          <div className="h-9 w-28 animate-pulse rounded-eos-md border border-eos-border bg-eos-bg-inset" />
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <div className="h-10 w-36 animate-pulse rounded-2xl border border-eos-border bg-eos-surface" />
-          <div className="h-10 w-32 animate-pulse rounded-2xl border border-eos-border bg-eos-surface" />
-          <div className="h-10 w-40 animate-pulse rounded-2xl border border-eos-border bg-eos-surface" />
+          <div className="h-10 w-36 animate-pulse rounded-eos-md border border-eos-border bg-eos-surface" />
+          <div className="h-10 w-32 animate-pulse rounded-eos-md border border-eos-border bg-eos-surface" />
+          <div className="h-10 w-40 animate-pulse rounded-eos-md border border-eos-border bg-eos-surface" />
         </div>
       </section>
 
@@ -39,7 +39,7 @@ export function DashboardSegmentSkeleton({
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`metric-${index}`}
-            className="rounded-2xl border border-eos-border bg-eos-surface p-5"
+            className="rounded-eos-md border border-eos-border bg-eos-surface p-5"
           >
             <div className="h-3 w-28 animate-pulse rounded-full bg-eos-bg-inset" />
             <div className="mt-4 h-8 w-16 animate-pulse rounded-full bg-eos-bg-inset" />
@@ -50,13 +50,13 @@ export function DashboardSegmentSkeleton({
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
         <div className="space-y-6">
-          <div className="rounded-3xl border border-eos-border bg-eos-surface p-6">
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface p-6">
             <div className="h-5 w-48 animate-pulse rounded-full bg-eos-bg-inset" />
             <div className="mt-5 grid gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`primary-row-${index}`}
-                  className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
                 >
                   <div className="h-4 w-40 animate-pulse rounded-full bg-eos-surface" />
                   <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-eos-surface" />
@@ -68,13 +68,13 @@ export function DashboardSegmentSkeleton({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-3xl border border-eos-border bg-eos-surface p-6">
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface p-6">
             <div className="h-5 w-36 animate-pulse rounded-full bg-eos-bg-inset" />
             <div className="mt-5 space-y-3">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`secondary-row-${index}`}
-                  className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
                 >
                   <div className="h-4 w-28 animate-pulse rounded-full bg-eos-surface" />
                   <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-eos-surface" />

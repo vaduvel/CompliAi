@@ -1408,3 +1408,9 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - iconuri badge la 14px (size-3.5)
   - tabs cu padding standard 12/16
   - rows de status pe scala (py-2 / px-3)
+  - CTA-uri principale aliniate la sizing `lg` (44px), gap 8px, icon 20px, stroke 2px
+  - CTA-uri secundare aliniate la sizing `md`, fara override de `rounded-xl`
+  - container `Tabs` pe `surface-base` (bg-eos-bg)
+  - input-uri la sizing `md` (36px) cu radius `md` si padding standard
+  - `DashboardShell` aliniat la grid (max-width `1200px`, sidebar `240px`)
+  - eliminare suprascrieri de radius legacy (`rounded-2xl`, `rounded-3xl`)

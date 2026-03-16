@@ -170,13 +170,13 @@ export default function RemediationPage() {
                 <Button asChild variant="outline">
                   <Link href="/dashboard/rapoarte/auditor-vault">
                     Auditor Vault
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                    <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
                 <Button asChild>
                   <Link href="/dashboard/rapoarte">
                     Audit si export
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                    <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
               </>

@@ -103,8 +103,8 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,var(--eos-accent-primary-subtle),transparent_28%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] text-eos-text">
-      <div className="mx-auto flex max-w-[1680px]">
-        <aside className="sticky top-0 hidden h-screen w-[264px] shrink-0 border-r border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-base))] px-4 py-5 md:flex md:flex-col">
+      <div className="mx-auto flex max-w-[1200px]">
+        <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-base))] px-4 py-5 md:flex md:flex-col">
           <div className="border-b border-eos-border-subtle pb-5">
             <CompliScanLogoLockup
               variant="flat"
@@ -140,7 +140,7 @@ export function DashboardShell({
                             : "border-eos-border-subtle bg-eos-surface text-eos-text-muted group-hover:border-eos-border"
                         }`}
                       >
-                        <item.icon className="size-4" strokeWidth={2.25} />
+                        <item.icon className="size-4" strokeWidth={2} />
                       </span>
                       <div className="min-w-0 flex-1">
                         <span className="block font-medium">{item.label}</span>
@@ -208,7 +208,7 @@ export function DashboardShell({
                             <p className="truncate font-medium">{membership.orgName}</p>
                             <p className="truncate text-xs text-eos-text-muted">Rol: {membership.role}</p>
                           </div>
-                          {active ? <Check className="mt-0.5 size-4 text-eos-primary" strokeWidth={2.25} /> : null}
+                          {active ? <Check className="mt-0.5 size-4 text-eos-primary" strokeWidth={2} /> : null}
                         </DropdownMenuItem>
                       )
                     })}
@@ -218,7 +218,7 @@ export function DashboardShell({
                     variant="destructive"
                     onClick={() => void handleLogout()}
                   >
-                    <LogOut className="size-4" strokeWidth={2.25} />
+                    <LogOut className="size-4" strokeWidth={2} />
                     Deconectare
                   </DropdownMenuItem>
                 </DropdownMenuContent>

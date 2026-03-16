@@ -2695,6 +2695,19 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Evidence OS spacing + layout (pass final)
+
+- `Tabs` folosesc container `surface-base` (bg-eos-bg) conform spec
+- `DashboardShell` respecta gridul oficial (max-width `1200px`, sidebar `240px`)
+- input-urile runtime au revenit la sizing-ul canonic (inaltime `36px` md, radius `md` 8px, padding standardizat)
+- au fost eliminate suprascrierile legacy de radius (`rounded-3xl`, `rounded-2xl`, `rounded-xl`)
+- badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
+- filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Hotfix build (Control overview props)
 
 - `app/dashboard/sisteme/page.tsx` a eliminat `reviewedCount` din `ControlOverview` (prop neacceptat)

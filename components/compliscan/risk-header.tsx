@@ -277,11 +277,12 @@ export function RiskHeader({
         actions={
           <Button
             onClick={onScan}
-            className="h-11 w-full rounded-xl bg-eos-primary px-5 font-semibold text-eos-primary-text hover:bg-eos-primary-hover sm:w-auto"
+            size="lg"
+            className="w-full gap-2 sm:w-auto"
           >
-            <Scan className="size-4" strokeWidth={2.25} />
+            <Scan className="size-5" strokeWidth={2} />
             {state.ctaLabel}
-            <ArrowRight className="size-4" strokeWidth={2.25} />
+            <ArrowRight className="size-5" strokeWidth={2} />
           </Button>
         }
       />

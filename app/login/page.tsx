@@ -88,7 +88,7 @@ export default function LoginPage() {
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
                     placeholder="Ex: Magazin Online S.R.L."
-                    className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                   />
                 </div>
               )}
@@ -104,7 +104,7 @@ export default function LoginPage() {
                   placeholder="email@firma.ro"
                   required
                   autoComplete="email"
-                  className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
                     placeholder={mode === "register" ? "Minim 8 caractere" : "Parola ta"}
                     required
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
-                    className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                   />
                   <button
                     type="button"
@@ -135,7 +135,7 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <div className="rounded-xl border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
+                <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
                   {error}
                 </div>
               )}
@@ -143,7 +143,8 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-11 w-full rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                size="lg"
+                className="w-full gap-2"
               >
                 {loading ? (
                   <>

@@ -38,8 +38,8 @@ export function TraceabilityMatrixCard({
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-2xl border border-eos-border bg-eos-bg-inset text-eos-primary">
-            <ClipboardList className="size-4" strokeWidth={2.25} />
+          <div className="flex size-10 items-center justify-center rounded-eos-md border border-eos-border bg-eos-bg-inset text-eos-primary">
+            <ClipboardList className="size-4" strokeWidth={2} />
           </div>
           <div>
             <CardTitle className="text-xl">Matrice de trasabilitate</CardTitle>
@@ -57,7 +57,7 @@ export function TraceabilityMatrixCard({
           />
         )}
         {familyGroups.length > 0 && (
-          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
@@ -73,7 +73,7 @@ export function TraceabilityMatrixCard({
               {familyGroups.map((group) => (
                 <div
                   key={group.familyKey}
-                  className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -91,7 +91,7 @@ export function TraceabilityMatrixCard({
                   <p className="mt-3 text-sm leading-6 text-eos-text-muted">
                     {group.description}
                   </p>
-                  <div className="mt-3 grid gap-2 rounded-2xl border border-eos-border bg-eos-bg-inset p-3 text-xs text-eos-text-muted">
+                  <div className="mt-3 grid gap-2 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-xs text-eos-text-muted">
                     <p>
                       <span className="font-medium text-eos-text">De ce conteaza:</span>{" "}
                       {group.familyImpact}
@@ -129,7 +129,7 @@ export function TraceabilityMatrixCard({
                       }))
                     }
                     rows={3}
-                    className="mt-4 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
+                    className="mt-4 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
                     placeholder="Nota comuna pentru aceasta familie de controale."
                   />
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -188,7 +188,7 @@ export function TraceabilityMatrixCard({
           </div>
         )}
         {reviewGroups.length > 0 && (
-          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
@@ -204,7 +204,7 @@ export function TraceabilityMatrixCard({
               {reviewGroups.map((group) => (
                 <div
                   key={group.lawReference}
-                  className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -231,7 +231,7 @@ export function TraceabilityMatrixCard({
                       }))
                     }
                     rows={3}
-                    className="mt-4 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
+                    className="mt-4 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
                     placeholder="Nota comuna pentru toate controalele din acest articol."
                   />
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -279,14 +279,14 @@ export function TraceabilityMatrixCard({
           </div>
         )}
         {records.length > 3 && (
-          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset px-4 py-3 text-sm text-eos-text-muted">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3 text-sm text-eos-text-muted">
             Afisam primele 3 trasee de control ca sa ramana pagina usor de citit. Pentru restul, confirma mai intai pe familie sau pe articol si apoi revino pe controalele individuale.
           </div>
         )}
         {records.slice(0, 3).map((record) => (
           <div
             key={record.id}
-            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -370,7 +370,7 @@ export function TraceabilityMatrixCard({
               />
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                     Coverage pe control
@@ -399,7 +399,7 @@ export function TraceabilityMatrixCard({
                   </p>
                 )}
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Referinte si surse
                 </p>
@@ -413,7 +413,7 @@ export function TraceabilityMatrixCard({
                 </p>
               </div>
             </div>
-            <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Ce urmeaza
               </p>
@@ -433,7 +433,7 @@ export function TraceabilityMatrixCard({
                     }))
                   }
                   rows={3}
-                  className="w-full rounded-xl border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none ring-0"
+                  className="w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none ring-0"
                   placeholder="Noteaza de ce acest control este acceptat sau ce a fost validat manual."
                 />
                 <div className="flex flex-wrap gap-2">
@@ -662,7 +662,7 @@ function TraceMiniCard({
   hint: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-medium text-eos-text">{value}</p>
       <p className="mt-2 text-xs text-eos-text-muted">{hint}</p>
@@ -677,7 +677,7 @@ function VaultEmptyState({
   title: string
   description: string
 }) {
-  return <EmptyState title={title} label={description} className="rounded-2xl" />
+  return <EmptyState title={title} label={description} className="rounded-eos-md" />
 }
 
 function formatValidationBasis(value: NonNullable<ComplianceTraceRecord["evidence"]["validationBasis"]>) {

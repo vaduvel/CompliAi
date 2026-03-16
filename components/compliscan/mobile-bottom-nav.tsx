@@ -19,7 +19,7 @@ export function MobileBottomNav({ items, activeHref }: MobileBottomNavProps) {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl border px-2 py-2 text-[11px] ${
+              className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-eos-md border px-2 py-2 text-[11px] ${
                 active
                   ? "border-eos-border-subtle bg-eos-surface-active text-eos-text"
                   : "border-transparent text-eos-text-muted"
@@ -27,7 +27,7 @@ export function MobileBottomNav({ items, activeHref }: MobileBottomNavProps) {
             >
               <item.icon
                 className={`size-5 ${active ? "text-eos-text" : "text-eos-text-muted"}`}
-                strokeWidth={2.25}
+                strokeWidth={2}
               />
               <span>{item.label}</span>
             </Link>

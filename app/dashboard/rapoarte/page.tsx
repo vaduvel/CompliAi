@@ -153,13 +153,13 @@ export default function AuditExportPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/checklists">
                 Remediere
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/rapoarte/auditor-vault">
                 Auditor Vault
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -293,7 +293,7 @@ function ReportsGuideCard() {
       {steps.map((step) => (
         <div
           key={step.title}
-          className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+          className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
         >
           <p className="text-sm font-medium text-eos-text">{step.title}</p>
           <p className="mt-2 text-sm leading-6 text-eos-text-muted">
@@ -330,27 +330,27 @@ function RemediationHandoffCard({
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 pt-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
           <p className="text-sm font-medium text-eos-text">Remediere</p>
           <p className="mt-2 text-sm leading-6 text-eos-text-muted">
             Acolo inchizi task-uri, atasezi dovezi si rulezi `Mark as fixed & rescan`.
           </p>
-          <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="mt-4 gap-2">
             <Link href="/dashboard/checklists">
               Deschide Remediere
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
-        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
           <p className="text-sm font-medium text-eos-text">Auditor Vault</p>
           <p className="mt-2 text-sm leading-6 text-eos-text-muted">
             Acolo verifici trasabilitatea, calitatea dovezii si povestea completa care sustine auditul.
           </p>
-          <Button asChild variant="outline" className="mt-4 h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="mt-4 gap-2">
             <Link href="/dashboard/rapoarte/auditor-vault">
               Deschide Auditor Vault
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
@@ -463,7 +463,7 @@ function SnapshotStatusCard({
 
         {latestSnapshot && (
           <>
-            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Generat
               </p>
@@ -482,7 +482,7 @@ function SnapshotStatusCard({
               <SnapshotMeta label="Drift inclus" value={driftCount} />
             </div>
 
-            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline">
                   comparat cu
@@ -511,7 +511,7 @@ function ReportsEmptyState({
   title: string
   description: string
 }) {
-  return <EmptyState title={title} label={description} className="rounded-2xl" />
+  return <EmptyState title={title} label={description} className="rounded-eos-md" />
 }
 
 function StatusTile({
@@ -526,7 +526,7 @@ function StatusTile({
   hint: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <p className="text-sm text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-semibold ${tone}`}>{value}</p>
       <p className="mt-2 text-xs leading-5 text-eos-text-muted">{hint}</p>
@@ -536,7 +536,7 @@ function StatusTile({
 
 function SnapshotMeta({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>

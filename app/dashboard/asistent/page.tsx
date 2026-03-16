@@ -155,13 +155,13 @@ export default function AsistentPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard">
                 Dashboard
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/checklists">
                 Dovada
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -335,7 +335,7 @@ export default function AsistentPage() {
                 className="h-10 gap-2 rounded-eos-md px-4 sm:self-auto"
                 aria-label="Trimite mesajul"
               >
-                <Send className="size-4 shrink-0" strokeWidth={2.25} />
+                <Send className="size-4 shrink-0" strokeWidth={2} />
                 <span className="sm:hidden">Trimite</span>
               </Button>
             </form>
@@ -351,7 +351,7 @@ export default function AsistentPage() {
 
 function AssistantFlowHint({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-sm font-medium text-eos-text">{title}</p>
       <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>

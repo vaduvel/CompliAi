@@ -226,13 +226,13 @@ export default function AuditorVaultPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/checklists">
                 Remediere
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/rapoarte">
                 Audit si export
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -282,7 +282,7 @@ export default function AuditorVaultPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-eos-text">
             Audit Pack v2 aduna intr-un singur loc sumarul executiv, controalele, dovezile si drift-ul.
@@ -294,29 +294,30 @@ export default function AuditorVaultPage() {
         <div className="flex flex-wrap gap-3">
           <Button
             asChild
-            className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+            size="default"
+            className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
           >
             <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
               Audit Pack client
-              <Download className="size-4" strokeWidth={2.25} />
+              <Download className="size-4" strokeWidth={2} />
             </a>
           </Button>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
               Annex IV lite
-              <Download className="size-4" strokeWidth={2.25} />
+              <Download className="size-4" strokeWidth={2} />
             </a>
           </Button>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <a href="/api/exports/audit-pack">
               JSON Audit Pack
-              <Download className="size-4" strokeWidth={2.25} />
+              <Download className="size-4" strokeWidth={2} />
             </a>
           </Button>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <a href="/api/exports/audit-pack/bundle">
               Pachet ZIP
-              <Download className="size-4" strokeWidth={2.25} />
+              <Download className="size-4" strokeWidth={2} />
             </a>
           </Button>
         </div>
@@ -428,7 +429,7 @@ function VaultQuickActionsCard() {
         {items.map((item) => (
           <div
             key={item.title}
-            className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
           >
             <p className="text-sm font-medium text-eos-text">{item.title}</p>
             <p className="mt-2 text-sm leading-6 text-eos-text-muted">
@@ -438,16 +439,16 @@ function VaultQuickActionsCard() {
         ))}
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/checklists">
               Remediere
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/rapoarte">
               Audit si export
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
@@ -499,9 +500,9 @@ function EvidenceLedgerCard({
         <CardTitle className="text-xl">Registru dovezi</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
-        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex items-center gap-2">
-            <Paperclip className="size-4 text-eos-info" strokeWidth={2.25} />
+            <Paperclip className="size-4 text-eos-info" strokeWidth={2} />
             <p className="text-sm font-medium text-eos-text">Dovezi in registru</p>
           </div>
           <p className="mt-2 text-xs text-eos-text-muted">
@@ -529,7 +530,7 @@ function EvidenceLedgerCard({
                 return (
                   <div
                     key={entry.id}
-                    className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                    className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -573,13 +574,13 @@ function EvidenceLedgerCard({
                   <EmptyState
                     title="Nu exista inca dovezi validate"
                     label="Incepe din Remediere, ataseaza o dovada si ruleaza `Mark as fixed & rescan`, apoi revino aici."
-                    className="rounded-2xl py-8"
+                    className="rounded-eos-md py-8"
                   />
                 )}
                 {evidenceReadyTasks.slice(0, 6).map((task) => (
                   <div
                     key={task.id}
-                    className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                    className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -615,7 +616,7 @@ function EvidenceLedgerCard({
                       </p>
                     )}
                     {task.validationMessage && (
-                      <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                      <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                         <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                           Detaliu validare
                         </summary>
@@ -629,9 +630,9 @@ function EvidenceLedgerCard({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2.25} />
+            <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2} />
             <p className="text-sm font-medium text-eos-text">Gap-uri de dovada</p>
           </div>
           <div className="mt-4 space-y-3">
@@ -639,13 +640,13 @@ function EvidenceLedgerCard({
               <EmptyState
                 title="Nu exista gap-uri de dovada"
                 label="Toate task-urile deschise au deja dovada atasata sau validata in ultimul ciclu."
-                className="rounded-2xl py-8"
+                className="rounded-eos-md py-8"
               />
             )}
             {evidenceMissingTasks.slice(0, 6).map((task) => (
               <div
                 key={task.id}
-                className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -662,7 +663,7 @@ function EvidenceLedgerCard({
                   {task.validationMessage || task.evidenceSnippet}
                 </p>
                 {task.validationMessage && task.evidenceSnippet && task.validationMessage !== task.evidenceSnippet && (
-                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Dovada asteptata
                     </summary>
@@ -693,10 +694,10 @@ function LegalMatrixCard({
               Vezi articolul relevant, dovada ceruta si momentul in care revii in executie.
             </p>
           </div>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/rapoarte">
               Inapoi la rapoarte
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
@@ -711,7 +712,7 @@ function LegalMatrixCard({
         {tasks.slice(0, 10).map((task) => (
           <div
             key={task.id}
-            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">
@@ -723,7 +724,7 @@ function LegalMatrixCard({
             </div>
             <p className="mt-3 text-sm font-semibold text-eos-text">{task.title}</p>
             <p className="mt-2 text-sm text-eos-text-muted">{task.why}</p>
-            <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+            <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
               <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                 Dovada si urmatorul pas
               </summary>
@@ -731,7 +732,7 @@ function LegalMatrixCard({
                 <p className="mt-3 text-xs text-eos-text-muted">{task.legalSummary}</p>
               )}
               <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Dovada ceruta
                 </p>
@@ -739,7 +740,7 @@ function LegalMatrixCard({
                   {task.evidenceSnippet}
                 </p>
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Cand revii
                 </p>
@@ -777,7 +778,7 @@ function SnapshotAuditCard({
         )}
         {latestSnapshot && (
           <>
-            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Snapshot curent
               </p>
@@ -794,7 +795,7 @@ function SnapshotAuditCard({
               <MiniMeta label="Findings" value={latestSnapshot.findings.length} />
               <MiniMeta label="Compared to" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
             </div>
-            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                 Baseline validat
               </p>
@@ -836,7 +837,7 @@ function DriftWatchCard({
             return (
               <div
                 key={drift.id}
-                className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+                className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -865,12 +866,12 @@ function DriftWatchCard({
                   </Badge>
                 )}
               </div>
-                <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                   <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                     Impact si escalare
                   </summary>
                 <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       De ce conteaza
                     </p>
@@ -881,7 +882,7 @@ function DriftWatchCard({
                       {guidance.severityReason}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Ce faci acum
                     </p>
@@ -889,7 +890,7 @@ function DriftWatchCard({
                       {guidance.nextAction}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Dovada
                     </p>
@@ -897,7 +898,7 @@ function DriftWatchCard({
                       {guidance.evidenceRequired}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Escalare
                     </p>
@@ -972,7 +973,7 @@ function ValidationLedgerCard({
         {entries.slice(0, 8).map((entry) => (
           <div
             key={entry.taskId}
-            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -1007,7 +1008,7 @@ function ValidationLedgerCard({
               </div>
             )}
             {(entry.message || entry.evidence || entry.validatedAtISO) && (
-              <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Detalii validare
                 </summary>
@@ -1049,10 +1050,10 @@ function AuditTimelineCard({
         {events.map((event) => (
           <div
             key={event.id}
-            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="flex items-start gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-2xl border border-eos-border bg-eos-bg-inset text-eos-text">
+              <span className="grid size-9 shrink-0 place-items-center rounded-eos-md border border-eos-border bg-eos-bg-inset text-eos-text">
                 <EventIcon type={event.type} />
               </span>
               <div>
@@ -1071,7 +1072,7 @@ function AuditTimelineCard({
                   event.metadata?.fileName ||
                   event.metadata?.checkedSource ||
                   event.actorLabel) && (
-                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                  <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                       Detalii eveniment
                     </summary>
@@ -1112,7 +1113,7 @@ function VaultEmptyState({
   title: string
   description: string
 }) {
-  return <EmptyState title={title} label={description} className="rounded-2xl" />
+  return <EmptyState title={title} label={description} className="rounded-eos-md" />
 }
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
@@ -1134,7 +1135,7 @@ function formatEventActor(event: ComplianceEvent) {
 
 function MiniMeta({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>
@@ -1238,15 +1239,15 @@ function eventBadgeVariant(type: string) {
 
 function EventIcon({ type }: { type: string }) {
   if (type === "task.validated") {
-    return <RefreshCcw className="size-4" strokeWidth={2.25} />
+    return <RefreshCcw className="size-4" strokeWidth={2} />
   }
   if (type === "task.evidence-attached") {
-    return <Paperclip className="size-4" strokeWidth={2.25} />
+    return <Paperclip className="size-4" strokeWidth={2} />
   }
   if (type === "alert.auto-resolved") {
-    return <CheckCircle2 className="size-4" strokeWidth={2.25} />
+    return <CheckCircle2 className="size-4" strokeWidth={2} />
   }
-  return <FolderKanban className="size-4" strokeWidth={2.25} />
+  return <FolderKanban className="size-4" strokeWidth={2} />
 }
 
 function formatEvidenceKind(kind: string) {

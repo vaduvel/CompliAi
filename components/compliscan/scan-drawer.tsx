@@ -38,9 +38,9 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
         </SheetHeader>
 
         <div className="space-y-6 p-6">
-          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
             <div className="flex items-center gap-2 text-sm font-medium text-eos-text">
-              <FileText className="size-4 text-eos-text-muted" strokeWidth={2.25} />
+              <FileText className="size-4 text-eos-text-muted" strokeWidth={2} />
               Rezumat scan
             </div>
             <p className="mt-3 text-sm text-eos-text-muted">
@@ -50,19 +50,19 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
 
           <div>
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-eos-text">
-              <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2.25} />
+              <ShieldAlert className="size-4 text-eos-warning" strokeWidth={2} />
               Task-uri asociate
             </div>
             <div className="space-y-3">
               {tasks.length === 0 && (
-                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
                   Nu exista task-uri generate pentru acest scan.
                 </div>
               )}
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-eos-text">

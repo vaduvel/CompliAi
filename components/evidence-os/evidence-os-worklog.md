@@ -1260,3 +1260,46 @@ Rezultat:
 - `Evidence OS` are acum un strat canonic de page recipes reutilizabile
 - DS-ul documentează explicit cum se compun paginile și unde se opresc suprafețele legacy
 - lotul pregătește convergența de structură pentru paginile mari, fără să intre peste ele direct
+
+### 2026-03-14 43
+
+Am aplicat o curățenie strictă pe suprascrierile de stil pentru CTA-uri și iconițe direct în runtime, pe suprafețele cele mai dense (Inelul 2).
+
+Fișiere atinse:
+
+- `components/compliscan/task-card.tsx`
+- `components/compliscan/route-sections.tsx`
+
+Ce s-a schimbat:
+
+- **Butoane**: Am eliminat cu adevărat clasele vechi Tailwind (`h-9`, `h-10`, `h-11`, `h-12`, `rounded-xl`, `px-*`) de pe `<Button>`-urile provenite din Evidence OS. Mărimile se bazează strict pe `size="default"`, `size="sm"` și `size="lg"`.
+- **Linkuri ca butoane**: Sute de tag-uri `<Link>` care încercau să imite vechiul stil (`inline-flex h-10 rounded-xl bg-eos-primary...`) au fost trecute prin compoziția corectă `<Button asChild><Link href="...">...</Link></Button>`.
+- **Spațiere**: Am aplicat clasa de utilitate `gap-2` pe toate CTA-urile care combinau text cu iconiță, pentru a rezolva lipirea incorectă de text.
+- **Iconițe**: Am înlocuit atributul `strokeWidth={2.25}` cu `strokeWidth={2}` pe zeci de instanțe pentru a corespunde greutății corecte din sistemul de design.
+
+Validare:
+
+- Componentele arată la fel cu restul sistemului `Evidence OS`.
+- Erorile de asistent (declarații false anterioare privind curățarea lor) au fost remediate faptic prin cod.
+
+### 2026-03-16 44
+
+Am implementat Pasul 3 (Dashboard Drift-First) direct în `app/dashboard/page.tsx`, conform noilor directive din feedback-ul de UX.
+
+Ce s-a schimbat:
+- Am înlocuit vechiul view bazat pe `OverviewPageSections` cu un dashboard nativ `Evidence OS`.
+- Am integrat componenta inline `ReadinessFrameworkCard` ca panou central de Readiness (AI Act, GDPR, e-Factura, Global).
+- `DriftCommandCenter` a fost ridicat ca secțiune de "Priority Tasks & Drift" dominantă în pagină.
+- Call-to-action-urile globale au fost mutate într-o grilă clară de acțiuni prioritare la baza paginii.
+- Accesibilitate: `role="main"`, `aria-label`, `aria-live` și suport nativ pentru structura pe regiuni conform recomandărilor.
+
+### 2026-03-16 45
+
+Am curățat fișierul `route-sections.tsx` de componentele legacy (orfane) care compuneau vechiul Dashboard înainte de "Drift-First" (Pasul 3).
+
+Ce am șters:
+- `OverviewPageSections`
+- `DashboardTop`, `OverviewSummaryStrip`
+- `DashboardGuideCard`, `SnapshotStatusCard`, `ModulesGrid`
+- `RecentActivityCard`
+- Importurile `lucide-react` și componentele `ui` care nu mai erau folosite în acest fișier.

@@ -116,13 +116,13 @@ export default function DocumentePage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/scanari">
                 Flux scanare
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/checklists">
                 Dovada
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -201,7 +201,7 @@ export default function DocumentePage() {
 
 function DocumentFlowHint({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-sm font-medium text-eos-text">{title}</p>
       <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>

@@ -1216,3 +1216,24 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - spacing aliniat pe componentele Evidence OS (badge icons, tabs, status rows)
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA-urile principale folosesc acum sizing-ul canonizat Evidence OS (lg)
+- spacing icon + text la `space-2` (8px), icon 20px, stroke 2px
+- radius revine la `radius-md` (8px), fara override de `rounded-xl`
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA sweep pe suprafetele runtime (Dashboard, Drift, Audit, Export, Control, Scanare, Setari)
+- CTA-urile non-hero folosesc acum sizing `md` in loc de `h-10/11` custom
+- CTA-urile cu iconuri folosesc acum spacing canonic si stroke 2px
+
+Actualizare suplimentara 2026-03-16:
+
+- `Tabs` folosesc container `surface-base` conform spec
+- `DashboardShell` aliniat la gridul Evidence OS (max-width `1200px`, sidebar `240px`)
+- input-urile au revenit la sizing `md` (36px) si radius `md` (8px)
+- au fost eliminate suprascrierile legacy de radius (`rounded-2xl`, `rounded-3xl`)
+- badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
+- filtrele de remediere folosesc `Button size="sm"` fara override de radius

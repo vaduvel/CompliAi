@@ -206,7 +206,7 @@ function FilterCluster({
   onFilterChange: (value: FilterValue) => void
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+    <div className="flex flex-col gap-2 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
       <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
@@ -217,8 +217,9 @@ function FilterCluster({
             <Button
               key={filter.value}
               onClick={() => onFilterChange(filter.value)}
+              size="sm"
               variant="outline"
-              className={`h-8 rounded-xl px-3 text-xs ${
+              className={`${
                 activeFilter === filter.value
                   ? "border-eos-border-subtle bg-eos-surface-active text-eos-text"
                   : "border-eos-border bg-eos-surface text-eos-text-muted"

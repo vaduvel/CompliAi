@@ -109,16 +109,16 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
         aria-label="Asistent AI"
         aria-expanded={open}
         aria-controls={panelId}
-        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-2xl shadow-[var(--eos-shadow-md)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg md:bottom-6 md:right-6 ${
+        className={`fixed bottom-20 right-5 z-[80] grid h-13 w-13 place-items-center rounded-eos-md shadow-[var(--eos-shadow-md)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg md:bottom-6 md:right-6 ${
           open
             ? "border border-eos-border bg-eos-surface text-eos-text-muted"
             : "border border-transparent bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
         }`}
       >
         {open ? (
-          <X className="size-5" strokeWidth={2.25} />
+          <X className="size-5" strokeWidth={2} />
         ) : (
-          <MessageSquare className="size-5" strokeWidth={2.25} />
+          <MessageSquare className="size-5" strokeWidth={2} />
         )}
       </button>
 
@@ -224,7 +224,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
                 aria-label="Trimite mesajul"
                 title="Trimite mesajul"
               >
-                <Send className="size-4" strokeWidth={2.25} />
+                <Send className="size-4" strokeWidth={2} />
               </Button>
             </form>
             <p className="mt-2 text-[11px] text-eos-text-muted">

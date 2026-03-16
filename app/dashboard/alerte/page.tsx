@@ -143,13 +143,13 @@ export default function DriftPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/sisteme">
                 Control
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/checklists">
                 Dovada
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -254,7 +254,7 @@ export default function DriftPage() {
               return (
                 <div
                   key={drift.id}
-                  className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <button
@@ -306,7 +306,7 @@ export default function DriftPage() {
                         setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
                       }
                       variant="outline"
-                      className="h-10 rounded-xl"
+                      size="default"
                     >
                       {isExpanded ? "Restrange" : "Detalii"}
                     </Button>
@@ -314,7 +314,7 @@ export default function DriftPage() {
                   {isExpanded ? (
                     <>
                       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             De ce conteaza
                           </p>
@@ -325,7 +325,7 @@ export default function DriftPage() {
                             {guidance.severityReason}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Ce faci acum
                           </p>
@@ -333,7 +333,7 @@ export default function DriftPage() {
                             {guidance.nextAction}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Dovada
                           </p>
@@ -341,7 +341,7 @@ export default function DriftPage() {
                             {guidance.evidenceRequired}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Escalare
                           </p>
@@ -376,7 +376,7 @@ export default function DriftPage() {
                             onClick={() => void handleDriftAction(drift.id, "acknowledge")}
                             disabled={cockpit.busy || isActing}
                             variant="outline"
-                            className="h-10 rounded-xl"
+                            size="default"
                           >
                             Preia drift-ul
                           </Button>
@@ -387,7 +387,7 @@ export default function DriftPage() {
                             onClick={() => void handleDriftAction(drift.id, "start")}
                             disabled={cockpit.busy || isActing}
                             variant="outline"
-                            className="h-10 rounded-xl"
+                            size="default"
                           >
                             Marchează în lucru
                           </Button>
@@ -397,7 +397,8 @@ export default function DriftPage() {
                             <Button
                               onClick={() => void handleDriftAction(drift.id, "resolve")}
                               disabled={cockpit.busy || isActing}
-                              className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                              size="default"
+                              className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                             >
                               Marchează rezolvat
                             </Button>
@@ -405,7 +406,8 @@ export default function DriftPage() {
                               onClick={() => void handleDriftAction(drift.id, "waive")}
                               disabled={cockpit.busy || isActing}
                               variant="outline"
-                              className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
+                              size="default"
+                              className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
                             >
                               Waive cu justificare
                             </Button>
@@ -416,7 +418,7 @@ export default function DriftPage() {
                             onClick={() => void handleDriftAction(drift.id, "reopen")}
                             disabled={cockpit.busy || isActing}
                             variant="outline"
-                            className="h-10 rounded-xl"
+                            size="default"
                           >
                             Redeschide
                           </Button>
@@ -453,7 +455,7 @@ export default function DriftPage() {
 
 function DriftFlowHint({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-sm font-medium text-eos-text">{title}</p>
       <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>
@@ -472,7 +474,7 @@ function DriftStatusTile({
   tone?: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <p className={`mt-3 text-2xl font-semibold ${tone}`}>{value}</p>
       <p className="mt-2 text-sm text-eos-text-muted">{detail}</p>

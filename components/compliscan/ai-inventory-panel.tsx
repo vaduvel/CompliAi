@@ -209,20 +209,20 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nume sistem AI (ex: ChatBot Clienti, ScoreRisc v2)"
-                className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
               />
               <div className="grid gap-4 md:grid-cols-2">
                 <input
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
                   placeholder="Furnizor (ex: OpenAI, intern)"
-                  className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
                 <input
                   value={modelType}
                   onChange={(e) => setModelType(e.target.value)}
                   placeholder="Tip model (ex: LLM, reguli, ML)"
-                  className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
             </div>
@@ -237,7 +237,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                 {PURPOSE_OPTIONS.map((opt) => (
                   <label
                     key={opt.value}
-                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-eos-md border p-4 transition ${
                       purpose === opt.value
                         ? "border-eos-border-subtle bg-eos-surface-active"
                         : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
@@ -303,7 +303,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               ].map((item) => (
                 <label
                   key={item.label}
-                  className={`flex cursor-pointer items-start justify-between gap-4 rounded-2xl border p-4 transition ${
+                  className={`flex cursor-pointer items-start justify-between gap-4 rounded-eos-md border p-4 transition ${
                     item.checked
                       ? "border-eos-border-subtle bg-eos-surface-active"
                       : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
@@ -331,10 +331,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <p className="text-sm text-eos-text-muted">
                 Rezultatul pe care il vei confirma in inventar.
               </p>
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={previewTone.badge}>
-                    <PreviewIcon className="size-3.5" strokeWidth={2.25} />
+                    <PreviewIcon className="size-3.5" strokeWidth={2} />
                     {previewTone.label}
                   </Badge>
                   <Badge className="border-eos-border bg-transparent text-eos-text-muted">
@@ -352,7 +352,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                 )}
               </div>
 
-              <details className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                   Urmatorii pasi recomandati
                 </summary>
@@ -361,7 +361,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     <li key={i} className="flex gap-2">
                       <Bot
                         className="mt-0.5 size-4 shrink-0 text-eos-primary"
-                        strokeWidth={2.25}
+                        strokeWidth={2}
                       />
                       <span>{action}</span>
                     </li>
@@ -376,9 +376,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <Button
                 onClick={() => setStep((s) => (s - 1) as InventoryFlowStep)}
                 variant="outline"
-                className="h-11 flex-1 rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
+                size="lg"
+                className="flex-1 gap-2 border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft className="size-5" strokeWidth={2} />
                 Inapoi
               </Button>
             )}
@@ -387,18 +388,20 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <Button
                 onClick={() => setStep((s) => (s + 1) as InventoryFlowStep)}
                 disabled={!canGoNext}
-                className="h-11 flex-1 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                size="lg"
+                className="flex-1 gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
               >
                 Continua
-                <ChevronRight className="size-4" />
+                <ChevronRight className="size-5" strokeWidth={2} />
               </Button>
             ) : (
               <Button
                 onClick={() => void handleSubmit()}
                 disabled={busy}
-                className="h-11 flex-1 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                size="lg"
+                className="flex-1 gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
               >
-                <BrainCircuit className="size-4" strokeWidth={2.25} />
+                <BrainCircuit className="size-5" strokeWidth={2} />
                 Adauga in inventar
               </Button>
             )}
@@ -420,7 +423,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             {systems.length === 0 && (
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
                 Inca nu exista sisteme AI inventariate. Fluxul de mai sus este primul pas real
                 catre clasificare AI Act.
               </div>
@@ -433,13 +436,13 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               return (
                 <div
                   key={system.id}
-                  className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge className={tone.badge}>
-                          <Icon className="size-3.5" strokeWidth={2.25} />
+                          <Icon className="size-3.5" strokeWidth={2} />
                           {tone.label}
                         </Badge>
                         <Badge className="border-eos-border bg-transparent text-eos-text-muted">
@@ -469,18 +472,20 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                           {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
                         </Badge>
                       </div>
-                      <button
+                      <Button
                         onClick={() => void handleRemove(system.id)}
                         disabled={removingId === system.id || busy}
-                        className="flex items-center gap-1.5 rounded-xl border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-error hover:bg-eos-error-soft disabled:opacity-40"
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
                       >
-                        <Trash2 className="size-3.5" strokeWidth={2.25} />
+                        <Trash2 className="size-3.5" strokeWidth={2} />
                         Sterge
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
-                  <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Urmatorii pasi
                     </summary>
@@ -489,7 +494,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                         <li key={`${system.id}-${index}`} className="flex gap-2">
                           <Bot
                             className="mt-0.5 size-4 shrink-0 text-eos-primary"
-                            strokeWidth={2.25}
+                            strokeWidth={2}
                           />
                           <span>{item}</span>
                         </li>

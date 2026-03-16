@@ -143,7 +143,7 @@ export default function SistemePage() {
             <Button asChild>
               <Link href="/dashboard/alerte">
                 Drift
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -406,7 +406,7 @@ function ControlOverview({
                 <Button asChild>
                   <Link href="/dashboard/setari">
                     Setari
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                    <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
               </div>
@@ -614,7 +614,7 @@ function ControlSystemsWorkspace({
               {recentInventory.map((system) => (
                 <div
                   key={system.id}
-                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -713,7 +713,7 @@ function ControlSystemsWorkspace({
                 <Button asChild>
                   <Link href="/dashboard/setari">
                     Gestioneaza Baseline
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                    <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
               </>
@@ -756,7 +756,7 @@ function ControlSystemsWorkspace({
                   <Button asChild>
                     <Link href="/dashboard/rapoarte">
                       Mergi la Audit si export
-                      <ArrowRight className="size-4" strokeWidth={2.25} />
+                      <ArrowRight className="size-4" strokeWidth={2} />
                     </Link>
                   </Button>
                 }
@@ -843,7 +843,7 @@ function ControlDriftWorkspace({
             <Button asChild>
               <Link href="/dashboard/alerte">
                 Vezi drift complet
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button variant="outline" onClick={onOpenBaseline}>
@@ -871,7 +871,7 @@ function ControlDriftWorkspace({
           {recentDrifts.map((drift) => (
             <div
               key={drift.id}
-              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -1068,7 +1068,7 @@ function ControlPrimaryTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-2xl border p-4 text-left transition ${
+            className={`rounded-eos-md border p-4 text-left transition ${
               isActive
                 ? "border-eos-border-subtle bg-eos-surface-active"
                 : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
@@ -1133,7 +1133,7 @@ function SystemsSubTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-2xl border px-4 py-3 text-left transition ${
+            className={`rounded-eos-md border px-4 py-3 text-left transition ${
               isActive
                 ? "border-eos-border-subtle bg-eos-surface-active"
                 : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
@@ -1179,7 +1179,7 @@ function ControlPackageHighlightsCard({
           {highlights.map((highlight) => (
             <div
               key={highlight.groupKey}
-              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-eos-text">{highlight.groupLabel}</p>

@@ -459,7 +459,7 @@ function ScanViewTabs({
               type="button"
               onClick={() => onChange(tab.id)}
               disabled={disabled}
-              className={`rounded-2xl border p-4 text-left transition ${
+              className={`rounded-eos-md border p-4 text-left transition ${
                 isActive
                   ? "border-eos-border-subtle bg-eos-surface-active"
                   : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
@@ -473,7 +473,7 @@ function ScanViewTabs({
                   </p>
                 </div>
                 {tab.badge ? (
-                  <Badge variant="outline" className="rounded-full px-2.5 py-1 normal-case tracking-normal">
+                  <Badge variant="secondary" className="normal-case tracking-normal">
                     {tab.badge}
                   </Badge>
                 ) : null}
@@ -483,7 +483,7 @@ function ScanViewTabs({
         })}
       </div>
       {locked && (
-        <Badge variant="outline" className="rounded-xl px-3 py-2 text-xs">
+        <Badge variant="secondary" className="normal-case tracking-normal">
           Mod Agent activ: verdicts si istoric raman blocate pana iesi din workspace-ul agentului.
         </Badge>
       )}
@@ -572,7 +572,7 @@ function ScanWorkflowGuideCard({
         }
         support={
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Rolul paginii</p>
               <p className="mt-2 text-sm font-semibold text-eos-text">
                 {agentModeActive
@@ -580,7 +580,7 @@ function ScanWorkflowGuideCard({
                   : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."}
               </p>
             </div>
-            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Regula de citire</p>
               <p className="mt-2 text-sm font-semibold text-eos-text">
                 Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata.
@@ -623,7 +623,7 @@ function ScanWorkflowGuideCard({
           <Button asChild variant="outline">
             <Link href={nextStep.href}>
               {nextStep.cta}
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         }
