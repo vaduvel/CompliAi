@@ -24,9 +24,9 @@ const filters: Array<{ value: FilterValue; label: string }> = [
   { value: "ALL", label: "Deschise" },
   { value: "RAPID", label: "Rapide" },
   { value: "STRUCTURAL", label: "Structurale" },
-  { value: "P1", label: "P1" },
-  { value: "P2", label: "P2" },
-  { value: "P3", label: "P3" },
+  { value: "P1", label: "P1 · Urgente" },
+  { value: "P2", label: "P2 · Importante" },
+  { value: "P3", label: "P3 · Optionale" },
   { value: "DONE", label: "Inchise" },
 ]
 
