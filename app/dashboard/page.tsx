@@ -1,15 +1,14 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Layers, ShieldCheck } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { LoadingScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
+import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 
 export default function DashboardPage() {
@@ -18,7 +17,7 @@ export default function DashboardPage() {
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  const { data, activeDrifts, tasks } = cockpit
+  const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
   const state = data.state
   
   // Calculam Datele de Readiness
@@ -35,6 +34,8 @@ export default function DashboardPage() {
   const efacturaStatus = state.efacturaConnected ? "strong" : (state.efacturaSignalsCount > 0 ? "review" : "blocked")
 
   const overdueTasks = tasks.filter(t => t.status !== "done").length
+  const hasEvidence = state.scannedDocuments > 0 || state.scans.length > 0
+  const activeRiskCount = openAlerts.length
 
   return (
     <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
@@ -53,6 +54,15 @@ export default function DashboardPage() {
           </>
         }
       />
+
+      <section aria-label="Urmatorul pas recomandat" className="space-y-4">
+        <NextBestAction
+          task={nextBestAction}
+          onResolve={() => router.push("/dashboard/checklists")}
+          hasEvidence={hasEvidence}
+          activeRiskCount={activeRiskCount}
+        />
+      </section>
 
       <section aria-label="Readiness Overview" className="space-y-4">
         <h2 className="text-lg font-semibold text-eos-text">Readiness Overview</h2>
@@ -108,46 +118,6 @@ export default function DashboardPage() {
           latestManifestScan={state.scans.find((s) => s.sourceKind === "manifest") ?? null}
         />
       </section>
-
-      <section aria-label="Actiuni prioritare" className="space-y-4">
-        <h2 className="text-lg font-semibold text-eos-text">Actiuni prioritare</h2>
-        <div className="grid gap-4 md:grid-cols-3" role="group">
-          <Button asChild size="lg" className="w-full gap-2 text-base" aria-label="Incepe scanare noua">
-            <Link href="/dashboard/scanari">
-              Scan nou document
-              <ArrowRight className="size-5" strokeWidth={2} />
-            </Link>
-          </Button>
-          <Button asChild variant="secondary" size="lg" className="w-full gap-2 text-base" aria-label="Remediaza drift critic">
-            <Link href="/dashboard/checklists">
-              Remediaza drift critic
-              <ArrowRight className="size-5" strokeWidth={2} />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="w-full gap-2 text-base" aria-label="Genereaza Audit Pack">
-            <Link href="/dashboard/rapoarte">
-              Genereaza Audit Pack
-              <ArrowRight className="size-5" strokeWidth={2} />
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      <HandoffCard
-        title="Urmatorul pas recomandat in flux"
-        description="Verifica inventarul sistemelor AI sau inchide task-urile deschise din Remediere."
-        destinationLabel="Control / Dovada"
-        actions={
-          <>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/sisteme">Mergi la Control</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/dashboard/checklists">Mergi la Remediere</Link>
-            </Button>
-          </>
-        }
-      />
     </div>
   )
 }

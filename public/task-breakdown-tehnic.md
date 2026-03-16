@@ -1459,3 +1459,8 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] summary + actions sweep pentru `Audit si export` (toggle detalii)
 - [~] summary + actions sweep pentru `ScanVerdictsTab` (toggle detalii)
 - [~] dense list sweep pentru `Control / Sisteme` (inventar recent)
+
+### Actualizare 2026-03-16 - Dashboard action authority
+
+- `Dashboard` foloseste acum `NextBestAction` ca singur bloc dominant de actiune
+- CTA-urile duplicate si handoff-urile concurente au fost eliminate pentru a respecta regula `one dominant page intent`

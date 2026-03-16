@@ -3042,3 +3042,22 @@ Actualizare 2026-03-16 - Index canon docuri
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - UX audit vizual din capturi + backlog cleanup
+
+- document nou: `public/ux-audit-imagini-cleanup-2026-03-16.md`
+- backlog derivat din capturi pentru declutter si autoritate UX
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Dashboard: unificare actiune dominanta
+
+- `Dashboard` foloseste acum un singur bloc dominant pentru actiune (`NextBestAction`)
+- au fost eliminate duplicarile de CTA si handoff concurent
+- pasul reduce densitatea si intareste regula `one dominant page intent`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
