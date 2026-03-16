@@ -77,7 +77,7 @@ export function ExportCenter({
       ? [
           {
             key: "annex",
-            label: "Annex IV",
+            label: "Anexa IV",
             hint: "Rezumat AI Act.",
             icon: FileStack,
             onClick: onGenerateAnnexLite,

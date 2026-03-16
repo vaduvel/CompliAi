@@ -33,11 +33,11 @@ import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 
 const DRIFT_OVERRIDE_OPTIONS = [
-  { value: "default", label: "Default policy" },
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "critical", label: "Critical" },
+  { value: "default", label: "Politica implicita" },
+  { value: "low", label: "Scazut" },
+  { value: "medium", label: "Mediu" },
+  { value: "high", label: "Ridicat" },
+  { value: "critical", label: "Critic" },
 ] as const
 
 const DRIFT_OVERRIDE_FIELDS = [
@@ -100,7 +100,7 @@ const SETTINGS_VIEW_TABS = [
   {
     value: "operational",
     label: "Operational",
-    description: "Health check si readiness.",
+    description: "Health check si stare operationala.",
   },
   {
     value: "avansat",
@@ -275,7 +275,7 @@ export default function SetariPage() {
       tone: currentUser ? "accent" : "neutral",
     },
     {
-      label: "Operational",
+      label: "Stare operationala",
       value: releaseReadinessLabel,
       hint: canViewReleaseReadiness
         ? releaseReadiness?.summary ?? "release readiness-ul ramane checkpoint separat de configurare"
