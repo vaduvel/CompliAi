@@ -13,6 +13,8 @@ import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
+import { GuideCard } from "@/components/evidence-os/GuideCard"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -454,36 +456,35 @@ function ScanViewTabs({
           const disabled = locked && tab.id !== "flow"
 
           return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onChange(tab.id)}
-              disabled={disabled}
-              className={`rounded-2xl border p-4 text-left transition ${
-                isActive
-                  ? "border-eos-border-subtle bg-eos-surface-active"
-                  : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
-              } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-eos-text-muted">
-                    {tab.description}
-                  </p>
+            <DenseListItem key={tab.id} active={isActive} className={disabled ? "opacity-60" : ""}>
+              <button
+                type="button"
+                onClick={() => onChange(tab.id)}
+                disabled={disabled}
+                className={`w-full p-4 text-left transition ${
+                  isActive ? "" : "hover:bg-eos-secondary-hover"
+                } ${disabled ? "cursor-not-allowed" : ""}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-eos-text-muted">
+                      {tab.description}
+                    </p>
+                  </div>
+                  {tab.badge ? (
+                    <Badge variant="secondary" className="normal-case tracking-normal">
+                      {tab.badge}
+                    </Badge>
+                  ) : null}
                 </div>
-                {tab.badge ? (
-                  <Badge variant="outline" className="rounded-full px-2.5 py-1 normal-case tracking-normal">
-                    {tab.badge}
-                  </Badge>
-                ) : null}
-              </div>
-            </button>
+              </button>
+            </DenseListItem>
           )
         })}
       </div>
       {locked && (
-        <Badge variant="outline" className="rounded-xl px-3 py-2 text-xs">
+        <Badge variant="secondary" className="normal-case tracking-normal">
           Mod Agent activ: verdicts si istoric raman blocate pana iesi din workspace-ul agentului.
         </Badge>
       )}
@@ -572,20 +573,18 @@ function ScanWorkflowGuideCard({
         }
         support={
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Rolul paginii</p>
-              <p className="mt-2 text-sm font-semibold text-eos-text">
-                {agentModeActive
+            <GuideCard
+              title="Rolul paginii"
+              detail={
+                agentModeActive
                   ? "Workspace-ul agentului propune, dar omul valideaza."
-                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Regula de citire</p>
-              <p className="mt-2 text-sm font-semibold text-eos-text">
-                Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata.
-              </p>
-            </div>
+                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."
+              }
+            />
+            <GuideCard
+              title="Regula de citire"
+              detail="Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata."
+            />
           </div>
         }
       />
@@ -623,7 +622,7 @@ function ScanWorkflowGuideCard({
           <Button asChild variant="outline">
             <Link href={nextStep.href}>
               {nextStep.cta}
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         }

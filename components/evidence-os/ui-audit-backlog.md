@@ -174,6 +174,31 @@ Rămas deschis intenționat:
   - observat la `npm run build`
   - în afara lotului curent permis
 
+## Actualizare 2026-03-16 - Canonizare recipes (partial)
+
+Închis în acest lot:
+
+- rețete canonice introduse pentru:
+- `guide card` prin `components/evidence-os/GuideCard.tsx`
+  - `metrics row` prin `components/evidence-os/MetricTile.tsx`
+- `dense operational list` prin `components/evidence-os/DenseListItem.tsx`
+- adoptate deja în:
+  - `Auditor Vault` (indicatori detaliați + quick actions)
+  - `DriftCommandCenter` + `Alerte`
+  - `Scanare` (tab-uri)
+  - `Control / Sisteme` (drift recent)
+  - `Asistent` (flux canonic)
+- `summary + actions` prin `ActionCluster`:
+  - `Alerte` (drift actions)
+  - `Auditor Vault` (export)
+  - `DriftCommandCenter` (quick actions)
+  - `Control / Sisteme` (handoff + confirmare)
+  - `Setari` (baseline actions)
+
+Rămas deschis:
+
+- rețeta `summary + actions` pentru alte zone cu CTA multiple
+
 ## Val 1 - Ierarhie și compactare
 
 ### 1. Compactare `Overview`

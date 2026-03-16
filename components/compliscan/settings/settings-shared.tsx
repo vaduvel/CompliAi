@@ -136,10 +136,10 @@ export function SettingsTile({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3.5">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3.5">
       <div className="flex items-center gap-2 text-eos-text-muted">
-        <span className="grid size-7 place-items-center rounded-xl border border-eos-border bg-eos-bg-inset">
-          <Icon className="size-3.5" strokeWidth={2.25} />
+        <span className="grid size-7 place-items-center rounded-eos-md border border-eos-border bg-eos-bg-inset">
+          <Icon className="size-3.5" strokeWidth={2} />
         </span>
         <p className="text-[11px] uppercase tracking-[0.18em]">{label}</p>
       </div>
@@ -158,7 +158,7 @@ export function EndpointRow({
   badge: string
 }) {
   return (
-    <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium text-eos-text">{label}</span>
         <Badge variant="outline">{badge}</Badge>
@@ -173,7 +173,7 @@ export function OperationalLoadingCard({ children }: { children: React.ReactNode
     <div
       role="status"
       aria-live="polite"
-      className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted"
+      className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted"
     >
       {children}
     </div>
@@ -192,7 +192,7 @@ export function SettingsStatusBlock({
   children?: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{title}</p>
       {description ? (
@@ -222,7 +222,7 @@ export function SettingsSignalCard({
         : "border-eos-border bg-eos-primary-soft text-eos-success"
 
   return (
-    <div className={`rounded-2xl border p-4 text-sm ${toneClass}`}>
+    <div className={`rounded-eos-md border p-4 text-sm ${toneClass}`}>
       <p className="font-semibold text-eos-text">{title}</p>
       {items.length > 0 ? (
         <ul className="mt-2 space-y-1.5">
@@ -249,7 +249,7 @@ export function SettingsDisclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <summary className="cursor-pointer list-none">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -263,7 +263,7 @@ export function SettingsDisclosure({
           </div>
           <ChevronDown
             className="mt-1 size-4 shrink-0 text-eos-text-muted"
-            strokeWidth={2.25}
+            strokeWidth={2}
           />
         </div>
       </summary>

@@ -55,7 +55,7 @@ export function ExportCenter({
       icon: FileCheck2,
       onClick: onGeneratePdf,
       className:
-        "min-h-12 h-auto justify-start rounded-xl bg-eos-primary px-4 py-3 text-eos-primary-text hover:bg-eos-primary-hover",
+        "h-auto",
       variant: undefined,
     },
   ]
@@ -164,7 +164,7 @@ export function ExportCenter({
       </CardHeader>
 
       <CardContent className="space-y-5 pt-4">
-        <section className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+        <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -190,9 +190,10 @@ export function ExportCenter({
                 key={action.key}
                 onClick={action.onClick}
                 variant={action.variant}
-                className={`${action.className} items-start gap-3 text-left shadow-none`}
+                size="lg"
+                className={`${action.className ?? ""} items-start gap-3 text-left shadow-none`}
               >
-                <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
+                <action.icon className="mt-0.5 size-5 shrink-0" strokeWidth={2} />
                 <span className="min-w-0 text-left">
                   <span className="block whitespace-normal leading-5">{action.label}</span>
                   <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal opacity-80">
@@ -222,9 +223,10 @@ export function ExportCenter({
                   key={action.key}
                   onClick={action.onClick}
                   variant={action.variant}
-                  className="min-h-11 h-auto items-start justify-start gap-3 rounded-xl border-eos-border bg-eos-surface-variant px-4 py-3 text-eos-text hover:bg-eos-secondary-hover"
+                  size="lg"
+                  className="h-auto items-start justify-start gap-3 border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
                 >
-                  <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
+                  <action.icon className="mt-0.5 size-5 shrink-0" strokeWidth={2} />
                   <span className="min-w-0 text-left">
                     <span className="block whitespace-normal leading-5">{action.label}</span>
                     <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-eos-text-muted">
@@ -238,7 +240,7 @@ export function ExportCenter({
         )}
 
         {technicalActions.length > 0 && (
-          <details className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+          <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
             <summary className="cursor-pointer list-none">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
@@ -254,7 +256,7 @@ export function ExportCenter({
                 </div>
                 <ChevronDown
                   className="mt-1 size-4 shrink-0 text-eos-text-muted"
-                  strokeWidth={2.25}
+                  strokeWidth={2}
                 />
               </div>
             </summary>
@@ -264,9 +266,10 @@ export function ExportCenter({
                   key={action.key}
                   onClick={action.onClick}
                   variant={action.variant}
-                  className="min-h-10 h-auto items-start justify-start gap-3 rounded-xl border-eos-border bg-eos-bg-inset px-4 py-3 text-eos-text hover:bg-eos-secondary-hover"
+                  size="lg"
+                  className="h-auto items-start justify-start gap-3 border-eos-border bg-eos-bg-inset text-eos-text hover:bg-eos-secondary-hover"
                 >
-                  <action.icon className="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
+                  <action.icon className="mt-0.5 size-5 shrink-0" strokeWidth={2} />
                   <span className="min-w-0 text-left">
                     <span className="block whitespace-normal leading-5">{action.label}</span>
                     <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal text-eos-text-muted">

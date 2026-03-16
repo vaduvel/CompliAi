@@ -73,7 +73,7 @@ export function SettingsIntegrationsTab({
                 Verificare pentru auth, date si storage. Aici conteaza starea reala, nu doar configurarea.
               </p>
             </div>
-            <Button asChild variant="outline" className="h-10 rounded-xl px-4">
+            <Button asChild variant="outline" size="default">
               <Link href="/supabase-rls-verification-runbook.md" target="_blank">
                 Deschide runbook RLS
               </Link>
@@ -86,7 +86,7 @@ export function SettingsIntegrationsTab({
               Verificam traseul Supabase pentru auth, data si storage...
             </OperationalLoadingCard>
           ) : supabaseStatusError ? (
-            <div className="rounded-2xl border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
+            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
               {supabaseStatusError}
             </div>
           ) : supabaseStatus ? (
@@ -216,7 +216,7 @@ export function SettingsIntegrationsTab({
                 description="Deschizi aceasta zona doar cand diagnostichezi configurarea sau storage-ul."
               >
                 <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                  <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
                     <p className="text-sm font-medium text-eos-text">
                       Stare tabele critice
                     </p>
@@ -224,7 +224,7 @@ export function SettingsIntegrationsTab({
                       {Object.entries(supabaseStatus.tables).map(([table, status]) => (
                         <div
                           key={table}
-                          className="rounded-xl border border-eos-border bg-eos-bg-inset p-3"
+                          className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="text-sm font-medium text-eos-text">
@@ -248,11 +248,11 @@ export function SettingsIntegrationsTab({
 
                   <div className="space-y-4">
                     {supabaseStatus.bucket ? (
-                      <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+                      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
                         <p className="text-sm font-medium text-eos-text">
                           Bucket dovezi
                         </p>
-                        <div className="mt-4 rounded-xl border border-eos-border bg-eos-bg-inset p-3">
+                        <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="text-sm font-medium text-eos-text">
                               bucket:{supabaseStatus.bucket.name}
@@ -291,7 +291,7 @@ export function SettingsIntegrationsTab({
                 Sincronizare dedicata pentru `compliscan.yaml` si manifests relevante, nu pentru scan complet de repository.
               </p>
             </div>
-            <Button asChild variant="outline" className="h-10 rounded-xl px-4">
+            <Button asChild variant="outline" size="default">
               <Link href="/ghid-engineering-compliscan.md" target="_blank">
                 Deschide ghidul de engineering
               </Link>
@@ -368,7 +368,7 @@ export function SettingsIntegrationsTab({
             description="Deschizi aceasta zona cand configurezi adapterele sau debughezi integrarea."
           >
             <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
                 <p className="text-sm font-medium text-eos-text">
                   Endpoint-uri disponibile
                 </p>
@@ -391,11 +391,11 @@ export function SettingsIntegrationsTab({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
                 <p className="text-sm font-medium text-eos-text">
                   Exemplu rapid de curl
                 </p>
-                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-xs leading-6 text-eos-text">
+                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-xs leading-6 text-eos-text">
                   {repoSyncStatus?.curlExample ||
                     'curl -X POST http://localhost:3001/api/integrations/repo-sync \\\n  -H "Content-Type: application/json" \\\n  -H "x-compliscan-sync-key: ${COMPLISCAN_SYNC_KEY}" \\\n  -d @repo-sync.json'}
                 </pre>

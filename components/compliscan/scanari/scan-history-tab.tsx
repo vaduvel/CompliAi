@@ -45,10 +45,10 @@ export function ScanHistoryTab({
               Acolo gasesti toate scanarile, nu doar cele recente.
             </p>
           </div>
-          <Button asChild variant="outline" className="h-9 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/documente">
               Mergi la Documente
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </CardContent>

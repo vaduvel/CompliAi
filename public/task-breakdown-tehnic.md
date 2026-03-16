@@ -1404,7 +1404,48 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] micro-pass de copy pentru read-only vs executie
   - intro-urile clarifica explicit handoff-ul corect
 
+- [x] CTA label cleanup (Val 3)
+  - `Alerte` (drift actions)
+  - `NextBestAction`
+  - `TaskCard`
+
 - [x] Evidence OS spacing pass
   - iconuri badge la 14px (size-3.5)
   - tabs cu padding standard 12/16
   - rows de status pe scala (py-2 / px-3)
+  - CTA-uri principale aliniate la sizing `lg` (44px), gap 8px, icon 20px, stroke 2px
+  - CTA-uri secundare aliniate la sizing `md`, fara override de `rounded-xl`
+  - container `Tabs` pe `surface-base` (bg-eos-bg)
+  - input-uri la sizing `md` (36px) cu radius `md` si padding standard
+  - `DashboardShell` aliniat la grid (max-width `1200px`, sidebar `240px`)
+  - eliminare suprascrieri de radius legacy (`rounded-2xl`, `rounded-3xl`)
+- [x] `Overview` + `TaskCard` density trim
+  - `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+  - `TaskCard` afiseaza blocajul de audit o singura data
+- [x] `Drift` (Alerte) density pass
+  - listare compacta, `next action` vizibil
+  - metrics duplicate eliminate
+  - maxim 3 CTA-uri simultan
+- [x] `Audit si export` + `Auditor Vault` density pass
+  - hero mai scurt, badge unic
+  - indicatorii detaliati sunt sub disclosure
+  - exporturile tehnice sunt ascunse by default
+- [x] `Setari` density trim
+  - hero si summary mai scurte
+  - handoff administrativ compact
+- [x] `Floating Assistant` trim
+  - header si empty state mai scurte
+  - badge-uri reduse la esential
+- [~] `Evidence OS` page recipes (partial)
+  - `GuideCard`
+  - `MetricTile`
+  - adoptate in `Auditor Vault`
+- [~] `DenseListItem` pentru liste operationale
+  - adoptat in `DriftCommandCenter` si `Alerte`
+- [~] `Summary + actions` recipe
+  - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`
+- [~] `ActionCluster` in `DriftCommandCenter`
+- [~] `ActionCluster` in `Control / Sisteme`
+- [~] `DenseListItem` in `Scanare` si `Control / Sisteme`
+- [~] `ActionCluster` in `Setari` (baseline actions)
+- [~] `GuideCard` in `Scanare` si `Asistent`

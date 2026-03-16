@@ -90,7 +90,7 @@ export function SettingsOperationalTab({
               Verificam starea aplicatiei si preflight-ul operational...
             </OperationalLoadingCard>
           ) : appHealthError ? (
-            <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
+            <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
               {appHealthError}
             </div>
           ) : appHealth ? (
@@ -217,12 +217,12 @@ export function SettingsOperationalTab({
             <EmptyState
               title="Acces restrictionat"
               label="Verdictul complet de release readiness este vizibil doar pentru rolurile Owner si Responsabil conformitate."
-              className="rounded-2xl"
+              className="rounded-eos-md"
             />
           ) : releaseReadinessLoading ? (
             <OperationalLoadingCard>Verificam release readiness...</OperationalLoadingCard>
           ) : releaseReadinessError ? (
-            <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
+            <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
               {releaseReadinessError}
             </div>
           ) : releaseReadiness ? (
@@ -308,7 +308,7 @@ export function SettingsOperationalTab({
                 <div className="space-y-3 text-sm text-eos-text-muted">
                   <p>{releaseReadiness.summary}</p>
                   {releaseReadiness.warnings.length > 0 ? (
-                    <div className="rounded-xl border border-eos-border bg-eos-surface p-3">
+                    <div className="rounded-eos-md border border-eos-border bg-eos-surface p-3">
                       <p className="text-sm font-medium text-eos-text">
                         Avertismente curente
                       </p>

@@ -221,14 +221,6 @@ export function RiskHeader({
               {state.eyebrow}
             </Badge>
             <Badge className={state.badge}>{state.statusLabel}</Badge>
-            <Badge className="border-eos-border bg-transparent text-eos-text-muted">
-              scor {score}/100
-            </Badge>
-            {!state.isOnboarding ? (
-              <Badge className="border-eos-border bg-transparent text-eos-text-muted">
-                validare umana
-              </Badge>
-            ) : null}
           </>
         }
         title={state.actionTitle}
@@ -264,24 +256,17 @@ export function RiskHeader({
               </div>
               <p className={`mt-2 text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
             </div>
-
-            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
-                Pasul urmator
-              </p>
-              <p className="mt-2 text-sm leading-6 text-eos-text-muted">{state.actionDescription}</p>
-              <p className="mt-2 text-xs leading-5 text-eos-text-tertiary">{state.actionHint}</p>
-            </div>
           </div>
         }
         actions={
           <Button
             onClick={onScan}
-            className="h-11 w-full rounded-xl bg-eos-primary px-5 font-semibold text-eos-primary-text hover:bg-eos-primary-hover sm:w-auto"
+            size="lg"
+            className="w-full gap-2 sm:w-auto"
           >
-            <Scan className="size-4" strokeWidth={2.25} />
+            <Scan className="size-5" strokeWidth={2} />
             {state.ctaLabel}
-            <ArrowRight className="size-4" strokeWidth={2.25} />
+            <ArrowRight className="size-5" strokeWidth={2} />
           </Button>
         }
       />

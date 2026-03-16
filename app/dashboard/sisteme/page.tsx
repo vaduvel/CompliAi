@@ -14,6 +14,8 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
@@ -143,7 +145,7 @@ export default function SistemePage() {
             <Button asChild>
               <Link href="/dashboard/alerte">
                 Drift
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -373,17 +375,30 @@ function ControlOverview({
               Control ramane doar pentru confirmare. Executia ramane in Dovada.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={onOpenDiscovery}>
-              Discovery
-            </Button>
-            <Button variant="outline" onClick={onOpenBaseline}>
-              Baseline
-            </Button>
-            <Button onClick={onOpenSystems}>Sisteme</Button>
-            <Button variant="outline" onClick={() => setShowGuidance((current) => !current)}>
+          <div className="min-w-[240px] space-y-2">
+            <ActionCluster
+              eyebrow="Actiuni"
+              title="Unde continui"
+              description="Alegi zona de confirmare reala."
+              actions={
+                <>
+                  <Button variant="outline" onClick={onOpenDiscovery}>
+                    Discovery
+                  </Button>
+                  <Button variant="outline" onClick={onOpenBaseline}>
+                    Baseline
+                  </Button>
+                  <Button onClick={onOpenSystems}>Sisteme</Button>
+                </>
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setShowGuidance((current) => !current)}
+              className="text-xs text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline"
+            >
               {showGuidance ? "Ascunde ghidajul" : "Arata ghidajul"}
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -396,20 +411,27 @@ function ControlOverview({
             description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
             badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
             support={
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={onOpenDiscovery}>
-                  Discovery
-                </Button>
-                <Button variant="outline" onClick={onOpenBaseline}>
-                  Baseline
-                </Button>
-                <Button asChild>
-                  <Link href="/dashboard/setari">
-                    Setari
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
-                  </Link>
-                </Button>
-              </div>
+              <ActionCluster
+                eyebrow="Actiuni"
+                title="Handoff rapid"
+                description="Continui in zona potrivita."
+                actions={
+                  <>
+                    <Button variant="outline" onClick={onOpenDiscovery}>
+                      Discovery
+                    </Button>
+                    <Button variant="outline" onClick={onOpenBaseline}>
+                      Baseline
+                    </Button>
+                    <Button asChild>
+                      <Link href="/dashboard/setari">
+                        Setari
+                        <ArrowRight className="size-4" strokeWidth={2} />
+                      </Link>
+                    </Button>
+                  </>
+                }
+              />
             }
           />
 
@@ -614,7 +636,7 @@ function ControlSystemsWorkspace({
               {recentInventory.map((system) => (
                 <div
                   key={system.id}
-                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -713,7 +735,7 @@ function ControlSystemsWorkspace({
                 <Button asChild>
                   <Link href="/dashboard/setari">
                     Gestioneaza Baseline
-                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                    <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
               </>
@@ -756,7 +778,7 @@ function ControlSystemsWorkspace({
                   <Button asChild>
                     <Link href="/dashboard/rapoarte">
                       Mergi la Audit si export
-                      <ArrowRight className="size-4" strokeWidth={2.25} />
+                      <ArrowRight className="size-4" strokeWidth={2} />
                     </Link>
                   </Button>
                 }
@@ -839,20 +861,27 @@ function ControlDriftWorkspace({
           </>
         }
         support={
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/dashboard/alerte">
-                Vezi drift complet
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </Button>
-            <Button variant="outline" onClick={onOpenBaseline}>
-              Verifica Baseline
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/checklists">Deschide Remedierea</Link>
-            </Button>
-          </div>
+          <ActionCluster
+            eyebrow="Actiuni"
+            title="Handoff rapid"
+            description="Vezi driftul complet sau continua in Dovada."
+            actions={
+              <>
+                <Button asChild>
+                  <Link href="/dashboard/alerte">
+                    Vezi drift complet
+                    <ArrowRight className="size-4" strokeWidth={2} />
+                  </Link>
+                </Button>
+                <Button variant="outline" onClick={onOpenBaseline}>
+                  Verifica Baseline
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/checklists">Deschide Remedierea</Link>
+                </Button>
+              </>
+            }
+          />
         }
       />
 
@@ -869,10 +898,7 @@ function ControlDriftWorkspace({
             />
           )}
           {recentDrifts.map((drift) => (
-            <div
-              key={drift.id}
-              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
-            >
+            <DenseListItem key={drift.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
@@ -892,7 +918,7 @@ function ControlDriftWorkspace({
                   {drift.severity}
                 </Badge>
               </div>
-            </div>
+            </DenseListItem>
           ))}
         </CardContent>
       </Card>
@@ -1068,7 +1094,7 @@ function ControlPrimaryTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-2xl border p-4 text-left transition ${
+            className={`rounded-eos-md border p-4 text-left transition ${
               isActive
                 ? "border-eos-border-subtle bg-eos-surface-active"
                 : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
@@ -1133,7 +1159,7 @@ function SystemsSubTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-2xl border px-4 py-3 text-left transition ${
+            className={`rounded-eos-md border px-4 py-3 text-left transition ${
               isActive
                 ? "border-eos-border-subtle bg-eos-surface-active"
                 : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
@@ -1179,7 +1205,7 @@ function ControlPackageHighlightsCard({
           {highlights.map((highlight) => (
             <div
               key={highlight.groupKey}
-              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-eos-text">{highlight.groupLabel}</p>

@@ -57,7 +57,7 @@ function ManifestMetric({
   tone: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-sm font-semibold ${tone}`}>{value}</p>
     </div>
@@ -74,7 +74,7 @@ function ScanDriftCard({
   const guidance = getDriftPolicyFromRecord(drift)
 
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
@@ -89,7 +89,7 @@ function ScanDriftCard({
         <Badge variant={driftSeverityVariant(drift.severity)}>{drift.severity}</Badge>
       </div>
       <div className={`mt-4 grid gap-3 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
-        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
             De ce conteaza
           </p>
@@ -98,7 +98,7 @@ function ScanDriftCard({
           </p>
           <p className="mt-1 text-xs text-eos-text-muted">{guidance.severityReason}</p>
         </div>
-        <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
             Ce faci acum
           </p>
@@ -107,7 +107,7 @@ function ScanDriftCard({
           </p>
         </div>
         {!compact && (
-          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-3">
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
             <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
               Dovada
             </p>
@@ -150,10 +150,10 @@ function LatestYamlSection({
               Vezi exact ce configuratie declarata a intrat in control, ce articole atinge si unde exista drift fata de baseline.
             </p>
           </div>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/rapoarte/auditor-vault">
               Mergi la Auditor Vault
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
@@ -163,14 +163,14 @@ function LatestYamlSection({
           <EmptyState
             title="Niciun compliscan.yaml validat"
             label="Alege modul dedicat, valideaza configul si aici vei vedea ce a intrat in controlul operational."
-            className="items-start rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+            className="items-start rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
           />
         )}
 
         {latestYamlScan && (
           <>
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestYamlScan.documentName}
@@ -196,7 +196,7 @@ function LatestYamlSection({
                     tone={drifts.length > 0 ? "text-eos-error" : "text-eos-success"}
                   />
                 </div>
-                <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                     Preview config
                   </p>
@@ -206,10 +206,10 @@ function LatestYamlSection({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <p className="text-sm font-medium text-eos-text">Ce controlezi acum</p>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Articole mapate
                     </p>
@@ -227,7 +227,7 @@ function LatestYamlSection({
                       )}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Ce urmeaza
                     </p>
@@ -251,20 +251,20 @@ function LatestYamlSection({
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <p className="text-sm font-medium text-eos-text">Findings generate din YAML</p>
                 <div className="mt-4 space-y-3">
                   {findings.length === 0 && (
                     <EmptyState
                       title="Fara findings suplimentare"
                       label="Configul validat nu a generat findings noi in aceasta rulare."
-                      className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                      className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                     />
                   )}
                   {findings.map((finding) => (
                     <div
                       key={finding.id}
-                      className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
+                      className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -285,14 +285,14 @@ function LatestYamlSection({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <p className="text-sm font-medium text-eos-text">Drift pentru config</p>
                 <div className="mt-4 space-y-3">
                   {drifts.length === 0 && (
                     <EmptyState
                       title="Fara drift activ"
                       label="Nu exista drift activ fata de baseline pentru acest YAML."
-                      className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                      className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                     />
                   )}
                   {drifts.map((drift) => (
@@ -330,10 +330,10 @@ function LatestManifestSection({
               Rezultatul este legat explicit de manifestul pe care l-ai încărcat, nu de un document generic.
             </p>
           </div>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/sisteme">
               Mergi la inventar
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
@@ -343,14 +343,14 @@ function LatestManifestSection({
           <EmptyState
             title="Niciun manifest procesat"
             label="Alege `Repo / manifest`, ruleaza autodiscovery si aici vei vedea exact ce a iesit pentru sursa respectiva."
-            className="items-start rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+            className="items-start rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
           />
         )}
 
         {latestManifestScan && (
           <>
             <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                     {latestManifestScan.documentName}
@@ -380,7 +380,7 @@ function LatestManifestSection({
                     }
                   />
                 </div>
-                <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                     Preview sursa
                   </p>
@@ -390,12 +390,12 @@ function LatestManifestSection({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <p className="text-sm font-medium text-eos-text">
                   Rezumat tehnic detectat
                 </p>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Framework-uri
                     </p>
@@ -413,7 +413,7 @@ function LatestManifestSection({
                       )}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
                       Ce faci acum
                     </p>
@@ -436,7 +436,7 @@ function LatestManifestSection({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-sm font-medium text-eos-text">
                 Rezultatul pentru acest manifest
               </p>
@@ -445,13 +445,13 @@ function LatestManifestSection({
                   <EmptyState
                     title="Fara sisteme propuse"
                     label="Nu avem inca sisteme propuse pentru manifestul curent."
-                    className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                    className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                   />
                 )}
                 {systems.map((system) => (
                   <div
                     key={system.id}
-                    className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4"
+                    className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -479,7 +479,7 @@ function LatestManifestSection({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-sm font-medium text-eos-text">
                 Drift legat de acest manifest
               </p>
@@ -488,7 +488,7 @@ function LatestManifestSection({
                   <EmptyState
                     title="Fara drift activ"
                     label="Nu exista drift activ pentru aceasta sursa."
-                    className="rounded-2xl border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                    className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                   />
                 )}
                 {drifts.map((drift) => (

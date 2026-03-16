@@ -110,7 +110,7 @@ function SourceTypeOption({
                   : "border-eos-border-subtle bg-eos-bg-panel text-eos-text-muted"
               )}
             >
-              <Icon className="size-4" strokeWidth={2.25} aria-hidden="true" />
+              <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="text-base font-semibold">{title}</span>
           </div>

@@ -30,6 +30,7 @@ import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Default policy" },
@@ -292,8 +293,8 @@ export default function SetariPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Setari"
-        title="Aici administrezi contextul operational"
-        description="Fixezi workspace-ul, accesul si starea operationala. Executia ramane in Scanare, Control si Dovada."
+        title="Administrezi contextul operational"
+        description="Context, acces si operare. Executia ramane in Scanare, Control si Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -329,7 +330,7 @@ export default function SetariPage() {
           <SummaryStrip
             eyebrow="Setari"
             title="Vezi rapid starea administrativa"
-            description="Context, baseline, acces si readiness operational."
+            description="Context, baseline, acces si readiness."
             items={summaryItems}
           />
         </CardContent>
@@ -339,7 +340,7 @@ export default function SetariPage() {
         <SectionBoundary
           eyebrow="Handoff"
           title="Configurezi aici, lucrezi in produs"
-          description="Setari ramane zona administrativa. Dupa context, acces si operare, revii in Dashboard, Control sau Dovada."
+          description="Setari ramane zona administrativa. Dupa context si acces revii in Dashboard, Control sau Dovada."
         />
         <HandoffCard
           title="Setari nu inlocuieste fluxul principal"
@@ -347,7 +348,6 @@ export default function SetariPage() {
           destinationLabel="dashboard / control / dovada"
           checklist={[
             "nu tratezi Setari ca overview executiv",
-            "nu inchizi task-uri si nu exporti din aceasta pagina",
             "folosesti Setari pentru context, acces si operare",
           ]}
           actions={
@@ -397,25 +397,25 @@ export default function SetariPage() {
               <CardTitle className="text-xl">Setari workspace</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                 <p className="text-sm text-eos-text-muted">Workspace activ</p>
                 <p className="mt-2 text-lg font-semibold">
                   {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
                 </p>
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                 <p className="text-sm text-eos-text-muted">Motor OCR</p>
                 <p className="mt-2 text-lg font-semibold">Google Vision API</p>
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                 <p className="text-sm text-eos-text-muted">Scor de risc curent</p>
                 <p className="mt-2 text-lg font-semibold">{cockpit.data.summary.score}%</p>
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                 <p className="text-sm text-eos-text-muted">Ultimul scan</p>
                 <p className="mt-2 text-lg font-semibold">{cockpit.lastScanLabel}</p>
               </div>
-              <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 md:col-span-2">
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 md:col-span-2">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-sm text-eos-text-muted">Baseline validat pentru drift</p>
@@ -437,24 +437,31 @@ export default function SetariPage() {
                           : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      variant="secondary"
-                      disabled={cockpit.busy || !activeSnapshot}
-                      className="h-11 rounded-xl px-5"
-                      onClick={() => void cockpitActions.setValidatedBaseline()}
-                    >
-                      Valideaza snapshot-ul curent
-                    </Button>
-                    <Button
-                      variant="outline"
-                      disabled={cockpit.busy || !validatedBaseline}
-                      className="h-11 rounded-xl px-5"
-                      onClick={() => void cockpitActions.clearValidatedBaseline()}
-                    >
-                      Elimina baseline-ul
-                    </Button>
-                  </div>
+                  <ActionCluster
+                    eyebrow="Actiuni"
+                    title="Baseline"
+                    description="Validezi sau elimini baseline-ul activ."
+                    actions={
+                      <>
+                        <Button
+                          variant="secondary"
+                          disabled={cockpit.busy || !activeSnapshot}
+                          size="default"
+                          onClick={() => void cockpitActions.setValidatedBaseline()}
+                        >
+                          Valideaza snapshot-ul curent
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={cockpit.busy || !validatedBaseline}
+                          size="default"
+                          onClick={() => void cockpitActions.clearValidatedBaseline()}
+                        >
+                          Elimina baseline-ul
+                        </Button>
+                      </>
+                    }
+                  />
                 </div>
               </div>
             </CardContent>
@@ -494,7 +501,7 @@ export default function SetariPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {currentUser?.role === "owner" ? (
-                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-eos-text">
@@ -513,10 +520,10 @@ export default function SetariPage() {
                       value={newMemberEmail}
                       onChange={(event) => setNewMemberEmail(event.target.value)}
                       placeholder="coleg@companie.ro"
-                      className="h-11 rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                      className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                     />
                     <select
-                      className="h-11 rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                      className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                       value={newMemberRole}
                       onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
                     >
@@ -527,7 +534,7 @@ export default function SetariPage() {
                       ))}
                     </select>
                     <Button
-                      className="h-11 rounded-xl px-5"
+                      size="default"
                       disabled={creatingMember || !newMemberEmail.trim()}
                       onClick={() => void handleAddMember()}
                     >
@@ -536,7 +543,7 @@ export default function SetariPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
                   Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
                 </div>
               )}
@@ -544,7 +551,7 @@ export default function SetariPage() {
               {membersLoading ? (
                 <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
               ) : membersError ? (
-                <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
+                <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                   {membersError}
                 </div>
               ) : membersData?.members.length ? (
@@ -556,7 +563,7 @@ export default function SetariPage() {
                     return (
                       <div
                         key={member.membershipId}
-                        className="grid gap-4 rounded-2xl border border-eos-border bg-eos-surface-variant p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
+                        className="grid gap-4 rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
                       >
                         <div>
                           <p className="text-sm font-semibold text-eos-text">
@@ -581,7 +588,7 @@ export default function SetariPage() {
                         <div className="flex items-center justify-start lg:justify-end">
                           {canManageRoles ? (
                             <select
-                              className="h-11 min-w-[180px] rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                              className="h-9 min-w-[180px] rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
                               value={member.role}
                               disabled={isSelf || updatingMembershipId === member.membershipId}
                               onChange={(event) =>
@@ -608,7 +615,7 @@ export default function SetariPage() {
                 <EmptyState
                   title="Nu exista membri suplimentari"
                   label="Organizatia curenta are doar utilizatorii deja inregistrati in workspace."
-                  className="rounded-2xl"
+                  className="rounded-eos-md"
                 />
               )}
             </CardContent>
@@ -646,7 +653,7 @@ export default function SetariPage() {
                 <Button
                   variant="secondary"
                   disabled={cockpit.busy}
-                  className="h-11 rounded-xl px-5"
+                  size="default"
                   onClick={() => void cockpitActions.updateDriftSeverityOverrides(driftOverrides)}
                 >
                   Salvează severitatea drift
@@ -657,11 +664,11 @@ export default function SetariPage() {
               {DRIFT_OVERRIDE_FIELDS.map((item) => (
                 <label
                   key={item.change}
-                  className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
                 >
                   <span className="text-sm font-medium text-eos-text">{item.label}</span>
                   <select
-                    className="mt-3 h-11 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                    className="mt-3 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                     value={driftOverrides[item.change] ?? "default"}
                     onChange={(event) =>
                       setDriftOverrides((current) => ({
@@ -692,7 +699,7 @@ export default function SetariPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-2xl border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
                 Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
                 task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
               </div>
@@ -710,7 +717,8 @@ export default function SetariPage() {
                 <Button
                   variant="destructive"
                   disabled={cockpit.busy}
-                  className="h-11 rounded-xl px-5"
+                  size="lg"
+                  className="gap-2"
                   onClick={() => {
                     if (
                       !window.confirm(
@@ -723,7 +731,7 @@ export default function SetariPage() {
                     void cockpitActions.resetWorkspaceState()
                   }}
                 >
-                  <Trash2 className="size-4" strokeWidth={2.25} />
+                  <Trash2 className="size-5" strokeWidth={2} />
                   Sterge scanarile si reseteaza workspace-ul
                 </Button>
               </div>

@@ -172,7 +172,7 @@ export function AICompliancePackSummaryCard({
           />
         )}
 
-        <div className={`rounded-2xl border border-eos-border bg-eos-surface-variant p-4 ${compact ? "md:col-span-2 xl:col-span-4" : "md:col-span-2 xl:col-span-5"}`}>
+        <div className={`rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 ${compact ? "md:col-span-2 xl:col-span-4" : "md:col-span-2 xl:col-span-5"}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
@@ -186,21 +186,21 @@ export function AICompliancePackSummaryCard({
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button asChild variant="outline" className="h-10 rounded-xl">
+              <Button asChild variant="outline" size="default" className="gap-2">
                 <Link href="/dashboard/scanari">
                   Completează sursele
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
+                  <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
               </Button>
-              <Button asChild className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover">
+              <Button asChild size="default" className="gap-2">
                 <Link href="/dashboard/rapoarte/auditor-vault">
                   Vezi Auditor Vault
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
+                  <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
               </Button>
             </div>
           </div>
-          <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+          <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
               Coverage details
             </summary>
@@ -249,24 +249,24 @@ export function AICompliancePackEntriesCard({
               Fiecare intrare leaga identitatea sistemului de starea curenta, controale si urmatorul pas.
             </p>
           </div>
-          <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/sisteme">
               Mergi la Control
-              <ArrowRight className="size-4" strokeWidth={2.25} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {pack.entries.length === 0 && (
-          <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted">
             Încă nu există intrări în pack. Confirmă un sistem detectat sau încarcă `compliscan.yaml`.
           </div>
         )}
         {pack.entries.slice(0, limit).map((entry) => (
           <div
             key={entry.id}
-            className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -324,7 +324,7 @@ export function AICompliancePackEntriesCard({
               />
             </div>
 
-            <div className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                 Confidence model
               </p>
@@ -340,7 +340,7 @@ export function AICompliancePackEntriesCard({
             </div>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Prefill status
                 </p>
@@ -378,7 +378,7 @@ export function AICompliancePackEntriesCard({
                 )}
               </div>
 
-              <details className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Semnale si surse
                 </summary>
@@ -398,12 +398,12 @@ export function AICompliancePackEntriesCard({
             </div>
 
             {entry.compliance.requiredControls.length > 0 && (
-              <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Controale, bundle si trace
                 </summary>
                 <div className="mt-4 grid gap-4 xl:grid-cols-2">
-                <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                   <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                     Controale cerute
                   </p>
@@ -413,7 +413,7 @@ export function AICompliancePackEntriesCard({
                       .map((group) => (
                         <div
                           key={`${entry.id}-${group.groupKey}`}
-                          className="rounded-2xl border border-eos-border bg-eos-surface p-3"
+                          className="rounded-eos-md border border-eos-border bg-eos-surface p-3"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="text-sm font-medium text-eos-text">
@@ -452,7 +452,7 @@ export function AICompliancePackEntriesCard({
                             {group.controls.slice(0, 2).map((control) => (
                               <div
                                 key={control.key}
-                                className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3"
+                                className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3"
                               >
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                   <p className="text-sm font-medium text-eos-text">
@@ -485,7 +485,7 @@ export function AICompliancePackEntriesCard({
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                   <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                     Evidence bundle
                   </p>
@@ -503,7 +503,7 @@ export function AICompliancePackEntriesCard({
                       {entry.evidenceBundle.controls.slice(0, 3).map((control) => (
                         <div
                           key={control.taskId}
-                          className="rounded-2xl border border-eos-border bg-eos-surface p-3"
+                          className="rounded-eos-md border border-eos-border bg-eos-surface p-3"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="text-sm font-medium text-eos-text">
@@ -521,7 +521,7 @@ export function AICompliancePackEntriesCard({
                     </div>
                   )}
                   {entry.evidenceBundle.lawCoverage.length > 0 && (
-                    <div className="mt-4 rounded-2xl border border-eos-border bg-eos-surface p-3">
+                    <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-surface p-3">
                       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                         Acoperire pe articol
                       </p>
@@ -541,7 +541,7 @@ export function AICompliancePackEntriesCard({
                     </div>
                   )}
                   {entry.evidenceBundle.familyCoverage.length > 0 && (
-                    <div className="mt-4 rounded-2xl border border-eos-border bg-eos-surface p-3">
+                    <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-surface p-3">
                       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                         Bundle pe familie de controale
                       </p>
@@ -549,7 +549,7 @@ export function AICompliancePackEntriesCard({
                         {entry.evidenceBundle.familyCoverage.slice(0, 3).map((family) => (
                           <div
                             key={`${entry.id}-${family.familyKey}`}
-                            className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3"
+                            className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <p className="text-sm font-medium text-eos-text">
@@ -576,11 +576,11 @@ export function AICompliancePackEntriesCard({
               </details>
             )}
 
-            <details className="mt-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                 Trace si Annex IV lite
               </summary>
-              <div className="mt-3 rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Trace summary
                 </p>
@@ -591,7 +591,7 @@ export function AICompliancePackEntriesCard({
                   Baseline: {entry.traceSummary.baselineLinked ? "legat de baseline validat" : "inca fara baseline validat"} · status: {entry.traceSummary.traceStatus}
                 </p>
               </div>
-              <div className="mt-4 rounded-2xl border border-eos-border bg-eos-surface p-4">
+              <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-surface p-4">
                 <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                   Annex IV lite draft
                 </p>
@@ -707,7 +707,7 @@ function EditablePackFields({
           return (
             <div
               key={`${entry.id}-${field.field}-editable`}
-              className="rounded-2xl border border-eos-border bg-eos-surface p-3"
+              className="rounded-eos-md border border-eos-border bg-eos-surface p-3"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -826,7 +826,7 @@ function FieldEditor({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+        className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
       >
         <option value="">Alege clasa de risc</option>
         <option value="minimal">minimal</option>
@@ -841,7 +841,7 @@ function FieldEditor({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+        className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
       >
         <option value="">Alege statusul</option>
         <option value="yes">yes</option>
@@ -856,14 +856,14 @@ function FieldEditor({
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+          className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
         >
           <option value="">Alege starea de oversight</option>
           <option value="required + present">required + present</option>
           <option value="required + missing">required + missing</option>
           <option value="not required">not required</option>
         </select>
-        <div className="rounded-xl border border-eos-border bg-eos-surface-variant p-3 text-xs text-eos-text-muted">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3 text-xs text-eos-text-muted">
           Folosește `required + missing` când controlul trebuie să existe, dar încă nu ai dovada sau fluxul operațional confirmat.
         </div>
       </div>
@@ -879,7 +879,7 @@ function FieldEditor({
           step={1}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+          className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
           placeholder="Ex. 30"
         />
         <div className="flex flex-wrap gap-2">
@@ -907,7 +907,7 @@ function FieldEditor({
           list="data-residency-options"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+          className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
           placeholder="Ex. eu-central-1"
         />
         <datalist id="data-residency-options">
@@ -940,7 +940,7 @@ function FieldEditor({
           value={normalizeLegalMappingDraft(value)}
           onChange={(event) => onChange(event.target.value)}
           rows={5}
-          className="w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
+          className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text outline-none ring-0"
           placeholder={"Un articol pe linie\nEx. GDPR Art. 13\nEU AI Act Art. 52"}
         />
         <div className="flex flex-wrap gap-2">
@@ -965,7 +965,7 @@ function FieldEditor({
     <input
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full rounded-xl border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
+      className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none ring-0"
       placeholder="Introdu valoarea confirmată"
     />
   )
@@ -1029,7 +1029,7 @@ function PackMetric({
   tone: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-2xl font-semibold ${tone}`}>
         {value}
@@ -1185,7 +1185,7 @@ function PackMiniMeta({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
       <div className="flex items-center gap-2 text-eos-text-muted">
         <Icon className="size-4" strokeWidth={2.2} />
         <span className="text-xs uppercase tracking-[0.2em]">{label}</span>

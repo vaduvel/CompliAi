@@ -1612,3 +1612,81 @@ Asta este sanatos arhitectural pentru ca:
 - iconurile din badge-uri sunt aliniate la 14px conform spec
 - tab-urile Evidence OS respecta paddingul standard
 - micro-list items folosesc padding pe scala
+
+## Actualizare 2026-03-16 - Evidence OS spacing + layout (pass final)
+
+- `Tabs` folosesc container `surface-base` (bg-eos-bg) conform spec
+- `DashboardShell` respecta gridul oficial (max-width `1200px`, sidebar `240px`)
+- input-urile runtime au revenit la sizing-ul canonic (inaltime `36px` md, radius `md` 8px, padding standardizat)
+- au fost eliminate suprascrierile legacy de radius (`rounded-3xl`, `rounded-2xl`, `rounded-xl`)
+- badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
+- filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+## Actualizare 2026-03-16 - CTA label cleanup
+
+- `Alerte`: etichete mai scurte pe actiunile de drift
+- `NextBestAction`: CTA principal scurtat
+- `TaskCard`: CTA principal scurtat, starea `done` foloseste `Redeschide`
+
+## Actualizare 2026-03-16 - Overview + TaskCard density trim
+
+- `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+- hero-ul pastreaza un mesaj principal, scorul ramane in aside
+- `TaskCard` nu mai repeta blocajul de audit in mai multe zone
+
+## Actualizare 2026-03-16 - Drift density pass (Alerte)
+
+- listarea drift-urilor este compacta, cu `next action` vizibil
+- metrics duplicate au fost eliminate in favoarea SummaryStrip
+- CTA-urile sunt limitate la maxim 3 actiuni simultane
+
+## Actualizare 2026-03-16 - Export + Vault density pass
+
+- `Audit si export` are hero mai scurt si copy redus
+- `Auditor Vault` foloseste disclosure pentru indicatorii detaliati
+- exporturile tehnice sunt ascunse by default
+
+## Actualizare 2026-03-16 - Setari density trim
+
+- hero si summary mai scurte
+- handoff administrativ compact
+
+## Actualizare 2026-03-16 - Floating Assistant trim
+
+- header si empty state mai scurte
+- badge-uri reduse la esential
+
+## Actualizare 2026-03-16 - Canonizare recipes (partial)
+
+- `GuideCard` si `MetricTile` introduse in Evidence OS
+- adoptate in `Auditor Vault` pentru consistenta de recipe
+
+## Actualizare 2026-03-16 - Canonizare dense list
+
+- `DenseListItem` introdus pentru liste operationale
+- adoptat in `DriftCommandCenter` si `Alerte`
+
+## Actualizare 2026-03-16 - Summary + Actions recipe
+
+- `ActionCluster` folosit pentru zone cu CTA multiple
+- adoptat in `Alerte` si `Auditor Vault`
+
+## Actualizare 2026-03-16 - ActionCluster DriftCommandCenter
+
+- quick actions din `DriftCommandCenter` sunt canonizate cu `ActionCluster`
+
+## Actualizare 2026-03-16 - ActionCluster Control / Sisteme
+
+- `Control` (overview) foloseste `ActionCluster` pentru handoff
+
+## Actualizare 2026-03-16 - DenseListItem Scanare + Control
+
+- `Scanare` (tab-uri) si `Control / Sisteme` (drift recent) folosesc `DenseListItem`
+
+## Actualizare 2026-03-16 - ActionCluster Setari
+
+- actiunile de baseline folosesc `ActionCluster`
+
+## Actualizare 2026-03-16 - GuideCard Scanare + Asistent
+
+- `GuideCard` adoptat pentru contextul canonic in `Scanare` si `Asistent`

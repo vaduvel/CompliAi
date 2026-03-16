@@ -233,20 +233,17 @@ export function TaskCard({
                 <span>{task.effortLabel}</span>
               </div>
 
-              <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                   Primul pas
                 </p>
                 <p className="mt-2 text-sm font-medium text-eos-text">
                   {nextAction}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-eos-text-muted">
-                  {auditBlocker}
-                </p>
               </div>
             </div>
 
-            <section className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+            <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge
                   className={
@@ -259,24 +256,18 @@ export function TaskCard({
                 </Badge>
               </div>
 
-              <div className="mt-3 rounded-xl border border-eos-border bg-eos-surface px-3 py-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                  Blocaj acum
-                </p>
-                <p className="mt-1 text-sm text-eos-text">{auditBlocker}</p>
-              </div>
-
               <div className="mt-4 space-y-2">
                 <Button
                   onClick={() => onMarkDone(task.id)}
-                  className="h-11 w-full rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                  size="lg"
+                  className="w-full gap-2"
                 >
                   {task.status === "done" ? (
-                    <CheckCircle2 className="size-4" strokeWidth={2.25} />
+                    <CheckCircle2 className="size-5" strokeWidth={2} />
                   ) : (
-                    <RefreshCcw className="size-4" strokeWidth={2.25} />
+                    <RefreshCcw className="size-5" strokeWidth={2} />
                   )}
-                  {task.status === "done" ? "Redeschide taskul" : "Valideaza si rescaneaza"}
+                  {task.status === "done" ? "Redeschide" : "Validează + rescanează"}
                 </Button>
 
                 <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
@@ -286,7 +277,7 @@ export function TaskCard({
                       setSelectedEvidenceKind(event.target.value as TaskEvidenceKind)
                     }
                     aria-label="Tipul de dovada"
-                    className="h-10 min-w-0 rounded-xl border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none transition-[border-color,box-shadow] focus:border-eos-primary focus:ring-2 focus:ring-[var(--eos-accent-primary-subtle)]"
+                    className="h-9 min-w-0 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none transition-[border-color,box-shadow] focus:border-eos-primary focus:ring-2 focus:ring-[var(--eos-accent-primary-subtle)]"
                   >
                     {task.evidenceKinds.map((kind) => (
                       <option key={`${task.id}-${kind}`} value={kind}>
@@ -297,15 +288,15 @@ export function TaskCard({
                   <Button
                     onClick={() => evidenceInputRef.current?.click()}
                     variant="outline"
-                    className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
+                    className="gap-2"
                   >
-                    <Paperclip className="size-4" strokeWidth={2.25} />
+                    <Paperclip className="size-4" strokeWidth={2} />
                     {task.attachedEvidence ? "Actualizeaza dovada" : "Adauga dovada"}
                   </Button>
                 </div>
               </div>
 
-              <details className="mt-3 rounded-xl border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
+              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
                 <summary className="cursor-pointer list-none">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
@@ -320,7 +311,7 @@ export function TaskCard({
                   </div>
                 </summary>
                 <div className="mt-3 space-y-3">
-                  <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     {task.attachedEvidence ? (
                       <div className="space-y-2">
                         <p className="font-medium text-eos-text">Dovada curenta</p>
@@ -360,7 +351,7 @@ export function TaskCard({
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-eos-border bg-eos-bg-inset px-3 py-2">
+                  <div className="flex items-center justify-between gap-3 rounded-eos-md border border-dashed border-eos-border bg-eos-bg-inset px-3 py-2">
                     <div className="min-w-0">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                         Utilitar
@@ -372,9 +363,10 @@ export function TaskCard({
                     <Button
                       onClick={() => onExport(task.id)}
                       variant="outline"
-                      className="h-9 shrink-0 rounded-xl border-eos-border bg-eos-surface px-3 text-xs text-eos-text hover:bg-eos-secondary-hover"
+                      size="sm"
+                      className="shrink-0 gap-2"
                     >
-                      <FileDown className="size-4" strokeWidth={2.25} />
+                      <FileDown className="size-3.5" strokeWidth={2} />
                       Export task
                     </Button>
                   </div>
@@ -384,12 +376,12 @@ export function TaskCard({
           </div>
 
           <section className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(280px,0.92fr)]">
-            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
               <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                 Ce faci acum
               </p>
               {hasDistinctFixPreview ? (
-                <p className="mt-2 break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text [overflow-wrap:anywhere]">
+                <p className="mt-2 break-words rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text [overflow-wrap:anywhere]">
                   {task.fixPreview}
                 </p>
               ) : null}
@@ -398,7 +390,7 @@ export function TaskCard({
                   <li key={`${task.id}-${index}`} className="flex gap-2">
                     <ShieldCheck
                       className="mt-0.5 size-4 shrink-0 text-eos-text-muted"
-                      strokeWidth={2.25}
+                      strokeWidth={2}
                     />
                     <span>{step}</span>
                   </li>
@@ -406,7 +398,7 @@ export function TaskCard({
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
               <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
                 Blocaj de audit
               </p>
@@ -440,7 +432,7 @@ export function TaskCard({
                   <p className="text-sm font-medium text-eos-text">
                     {task.triggerLabel}
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
+                  <p className="mt-2 whitespace-pre-wrap break-words rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
                     {task.triggerSnippet ?? "Nu exista excerpt salvat pentru acest task."}
                   </p>
                 </div>
@@ -479,12 +471,13 @@ export function TaskCard({
                 <Button
                   onClick={() => void handleCopyReadyText()}
                   variant="outline"
-                  className="h-9 rounded-xl border-eos-border bg-eos-bg-inset text-eos-text hover:bg-eos-secondary-hover"
+                  size="sm"
+                  className="gap-2"
                 >
-                  <Copy className="size-4" strokeWidth={2.25} />
+                  <Copy className="size-3.5" strokeWidth={2} />
                   Copiaza
                 </Button>
-                <pre className="whitespace-pre-wrap break-words rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text [overflow-wrap:anywhere]">
+                <pre className="whitespace-pre-wrap break-words rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text [overflow-wrap:anywhere]">
                   {task.readyText}
                 </pre>
               </div>
@@ -496,24 +489,24 @@ export function TaskCard({
               subtitle="Mesajele detaliate de verificare si suport."
             >
               <div className="space-y-3">
-                <p className="rounded-xl border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text-muted [overflow-wrap:anywhere]">
+                <p className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm leading-6 text-eos-text-muted [overflow-wrap:anywhere]">
                   {task.evidenceSnippet}
                 </p>
                 {task.rescanHint ? (
                   <p className="text-xs leading-5 text-eos-text-muted">{task.rescanHint}</p>
                 ) : null}
                 {(task.validationMessage || task.validatedAtLabel) ? (
-                  <div className="rounded-xl border border-eos-border bg-eos-bg-inset p-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     <div className="flex items-start gap-3">
                       {task.validationStatus === "passed" ? (
                         <CheckCircle2
                           className="mt-0.5 size-4 shrink-0 text-eos-success"
-                          strokeWidth={2.25}
+                          strokeWidth={2}
                         />
                       ) : (
                         <AlertTriangle
                           className="mt-0.5 size-4 shrink-0 text-eos-warning"
-                          strokeWidth={2.25}
+                          strokeWidth={2}
                         />
                       )}
                       <div className="space-y-1">
@@ -572,7 +565,7 @@ function TaskDisclosure({
   children: ReactNode
 }) {
   return (
-    <details className="group rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <details className="group rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <summary className="cursor-pointer list-none">
         <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
           {eyebrow}

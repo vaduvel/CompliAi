@@ -112,7 +112,7 @@ export function NextBestAction({
 
       <CardContent className="pt-5">
         {hasDistinctNextStepCopy(task.summary, task.fixPreview) ? (
-          <div className="mb-4 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+          <div className="mb-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
               Pas recomandat
             </p>
@@ -129,31 +129,32 @@ export function NextBestAction({
             </p>
           </div>
 
-          <div className="grid gap-2 rounded-2xl border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted lg:justify-items-start">
+          <div className="grid gap-2 rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted lg:justify-items-start">
             <div className="flex items-center gap-2">
-              <Clock3 className="size-4 text-eos-text-muted" strokeWidth={2.25} />
+              <Clock3 className="size-4 text-eos-text-muted" strokeWidth={2} />
               <span>{task.effortLabel}</span>
             </div>
             <div className="flex items-center gap-2">
-              <UserRound className="size-4 text-eos-text-muted" strokeWidth={2.25} />
+              <UserRound className="size-4 text-eos-text-muted" strokeWidth={2} />
               <span>{task.owner}</span>
             </div>
             <div className="flex items-center gap-2">
-              <ShieldAlert className="size-4 text-eos-text-muted" strokeWidth={2.25} />
+              <ShieldAlert className="size-4 text-eos-text-muted" strokeWidth={2} />
               <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
             </div>
             <div className="flex items-center gap-2">
-              <ArrowRight className="size-4 text-eos-text-muted" strokeWidth={2.25} />
+              <ArrowRight className="size-4 text-eos-text-muted" strokeWidth={2} />
               <span>{remediationModeLabel(task.remediationMode)}</span>
             </div>
           </div>
 
           <Button
             onClick={onResolve}
-            className="h-11 w-full rounded-xl bg-eos-primary px-5 font-semibold text-eos-primary-text hover:bg-eos-primary-hover lg:w-auto"
+            size="lg"
+            className="w-full gap-2 lg:w-auto"
           >
-            Deschide taskul
-            <ArrowRight className="size-4" strokeWidth={2.25} />
+            Deschide
+            <ArrowRight className="size-5" strokeWidth={2} />
           </Button>
         </div>
       </CardContent>

@@ -24,7 +24,7 @@ function ReportsEmptyState({
   title: string
   description: string
 }) {
-  return <EmptyState title={title} label={description} className="rounded-2xl" />
+  return <EmptyState title={title} label={description} className="rounded-eos-md" />
 }
 
 export function ExportArtifactsCard() {
@@ -83,7 +83,7 @@ export function ExportArtifactsCard() {
         {artifactGroups.map((group) => (
           <section
             key={group.label}
-            className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="border-b border-eos-border pb-3">
               <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
@@ -95,9 +95,9 @@ export function ExportArtifactsCard() {
             </div>
             <div className="mt-3 space-y-3">
               {group.items.map((artifact) => (
-                <div key={artifact.title} className="flex items-start gap-3 rounded-xl bg-eos-bg-inset p-3">
-                  <span className="grid size-9 place-items-center rounded-2xl border border-eos-border bg-eos-surface text-eos-text">
-                    <artifact.icon className="size-4" strokeWidth={2.25} />
+                <div key={artifact.title} className="flex items-start gap-3 rounded-eos-md bg-eos-bg-inset p-3">
+                  <span className="grid size-9 place-items-center rounded-eos-md border border-eos-border bg-eos-surface text-eos-text">
+                    <artifact.icon className="size-4" strokeWidth={2} />
                   </span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-eos-text">
@@ -135,7 +135,7 @@ function DriftDetailBlock({
   detail: string
 }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
       <p className="mt-2 text-sm font-medium text-eos-text">{title}</p>
       <p className="mt-1 text-xs leading-5 text-eos-text-muted">{detail}</p>
@@ -168,7 +168,7 @@ export function RecentDriftCard({
           return (
             <div
               key={drift.id}
-              className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4"
+              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
@@ -217,7 +217,7 @@ export function RecentDriftCard({
                 />
               </div>
 
-              <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <summary className="cursor-pointer list-none">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -230,7 +230,7 @@ export function RecentDriftCard({
                     </div>
                     <ChevronDown
                       className="mt-1 size-4 shrink-0 text-eos-text-muted"
-                      strokeWidth={2.25}
+                      strokeWidth={2}
                     />
                   </div>
                 </summary>

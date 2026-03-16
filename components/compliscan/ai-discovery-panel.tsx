@@ -261,7 +261,7 @@ export function AIDiscoveryPanel({
           </p>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
@@ -294,7 +294,7 @@ export function AIDiscoveryPanel({
           </div>
 
           {(confirmedCount > 0 || rejectedCount > 0) && (
-            <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
+            <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
               <p className="font-medium text-eos-text">Flux curat de review</p>
               <p className="mt-2">
                 Confirmatele merg in inventar, respinsele raman in istoric. Aici vezi doar ce mai cere validare umana.
@@ -307,31 +307,33 @@ export function AIDiscoveryPanel({
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             placeholder={modeContent.namePlaceholder}
-            className="ring-focus h-11 w-full rounded-xl border border-eos-border bg-eos-surface-variant px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+            className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
           <textarea
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={10}
             placeholder={modeContent.contentPlaceholder}
-            className="ring-focus rounded-2xl border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+            className="ring-focus rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
 
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
-              className="h-11 rounded-xl border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
+              size="default"
+              className="gap-2 border-eos-border bg-eos-surface-variant text-eos-text hover:bg-eos-secondary-hover"
             >
-              <FileCode2 className="size-4" strokeWidth={2.25} />
+              <FileCode2 className="size-4" strokeWidth={2} />
               {modeContent.pickerLabel}
             </Button>
             <Button
               onClick={() => void handleDiscover()}
               disabled={!documentName.trim() || !content.trim() || busy}
-              className="h-11 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+              size="lg"
+              className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
             >
-              <SearchCode className="size-4" strokeWidth={2.25} />
+              <SearchCode className="size-5" strokeWidth={2} />
               {modeContent.buttonLabel}
             </Button>
           </div>
@@ -356,7 +358,7 @@ export function AIDiscoveryPanel({
           <CardTitle className="text-xl">Sisteme detectate automat</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
-          <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
             Aici ramane doar lista de lucru activa: detectii care mai cer review sau confirmare.
           </div>
           {systems.length === 0 && (
@@ -367,7 +369,7 @@ export function AIDiscoveryPanel({
                   ? "Inca nu avem rezultate din compliscan.yaml. Incarca fisierul, valideaza-l si apoi revino aici pentru review si confirmare."
                   : "Inca nu avem detectii automate. Ruleaza autodiscovery pe un manifest si apoi confirma doar sistemele utile in inventar."
               }
-              className="rounded-2xl border-eos-border bg-eos-surface-variant px-5 py-6"
+              className="rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-6"
             />
           )}
 
@@ -380,13 +382,13 @@ export function AIDiscoveryPanel({
             return (
               <div
                 key={system.id}
-                className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
+                className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant={tone.badge}>
-                        <Icon className="size-3.5" strokeWidth={2.25} />
+                        <Icon className="size-3.5" strokeWidth={2} />
                         {tone.label}
                       </Badge>
                       <Badge variant={statusTone(system.detectionStatus)}>
@@ -417,7 +419,7 @@ export function AIDiscoveryPanel({
                       ))}
                     </div>
                     {relatedDrifts.length > 0 && (
-                      <div className="rounded-2xl border border-eos-border bg-eos-bg-inset px-4 py-3">
+                      <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3">
                         <div className="flex flex-wrap items-center gap-2 text-xs text-eos-text-muted">
                           <Badge variant="warning">
                             {relatedDrifts.length} drift activ
@@ -432,7 +434,7 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
-                    <details className="rounded-2xl border border-eos-border bg-eos-bg-inset px-4 py-3">
+                    <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3">
                       <summary className="cursor-pointer text-sm font-medium text-eos-text">
                         Detalii detectie si evidenta
                       </summary>
@@ -446,7 +448,7 @@ export function AIDiscoveryPanel({
                           <ul className="mt-3 space-y-2">
                             {system.evidence.slice(0, 5).map((item, index) => (
                               <li key={`${system.id}-evidence-${index}`} className="flex gap-2">
-                                <Sparkles className="mt-0.5 size-4 shrink-0 text-eos-primary" strokeWidth={2.25} />
+                                <Sparkles className="mt-0.5 size-4 shrink-0 text-eos-primary" strokeWidth={2} />
                                 <span>{item}</span>
                               </li>
                             ))}
@@ -455,7 +457,7 @@ export function AIDiscoveryPanel({
                       </div>
                     </details>
                     {isEditing && (
-                      <div className="grid gap-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                      <div className="grid gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                         <p className="text-sm font-medium text-eos-text">
                           Ajusteaza detectia inainte de confirmare
                         </p>
@@ -467,7 +469,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, name: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                             placeholder="Nume sistem"
                           />
                           <input
@@ -477,7 +479,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, vendor: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                             placeholder="Provider"
                           />
                           <select
@@ -492,7 +494,7 @@ export function AIDiscoveryPanel({
                                   : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                           >
                             {PURPOSE_OPTIONS.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -507,7 +509,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, modelType: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                             placeholder="Model / stack"
                           />
                           <select
@@ -522,7 +524,7 @@ export function AIDiscoveryPanel({
                                   : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                           >
                             <option value="low">Confidence low</option>
                             <option value="medium">Confidence medium</option>
@@ -535,7 +537,7 @@ export function AIDiscoveryPanel({
                                 current ? { ...current, frameworks: event.target.value } : current
                               )
                             }
-                            className="ring-focus h-11 rounded-xl border border-eos-border bg-eos-surface px-4 text-sm text-eos-text outline-none"
+                            className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                             placeholder="Framework-uri separate prin virgula"
                           />
                         </div>
@@ -547,7 +549,7 @@ export function AIDiscoveryPanel({
                             )
                           }
                           rows={4}
-                          className="ring-focus rounded-2xl border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text outline-none"
+                          className="ring-focus rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none"
                           placeholder="O evidenta pe linie"
                         />
                         <div className="grid gap-2 md:grid-cols-4">
@@ -594,7 +596,8 @@ export function AIDiscoveryPanel({
                           <Button
                             onClick={() => void saveEditing(system.id)}
                             disabled={busy}
-                            className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                            size="default"
+                            className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                           >
                             Salveaza ajustarea
                           </Button>
@@ -602,7 +605,8 @@ export function AIDiscoveryPanel({
                             onClick={cancelEditing}
                             disabled={busy}
                             variant="outline"
-                            className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
+                            size="default"
+                            className="border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                           >
                             Renunta
                           </Button>
@@ -617,9 +621,10 @@ export function AIDiscoveryPanel({
                         onClick={() => startEditing(system)}
                         variant="secondary"
                         disabled={busy}
-                        className="h-10 rounded-xl"
+                        size="default"
+                        className="gap-2"
                       >
-                        <PencilLine className="size-4" strokeWidth={2.25} />
+                        <PencilLine className="size-4" strokeWidth={2} />
                         Editeaza detectia
                       </Button>
                     )}
@@ -627,9 +632,10 @@ export function AIDiscoveryPanel({
                       <Button
                         onClick={() => void onUpdateStatus(system.id, "confirm")}
                         disabled={busy}
-                        className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                        size="default"
+                        className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
                       >
-                        <CheckCheck className="size-4" strokeWidth={2.25} />
+                        <CheckCheck className="size-4" strokeWidth={2} />
                         Confirma in inventar
                       </Button>
                     )}
@@ -638,9 +644,10 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "review")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
+                        size="default"
+                        className="gap-2 border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                       >
-                        <Bot className="size-4" strokeWidth={2.25} />
+                        <Bot className="size-4" strokeWidth={2} />
                         Marcheaza review
                       </Button>
                     )}
@@ -649,9 +656,10 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "reject")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
+                        size="default"
+                        className="gap-2 border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
                       >
-                        <X className="size-4" strokeWidth={2.25} />
+                        <X className="size-4" strokeWidth={2} />
                         Respinge detectia
                       </Button>
                     )}
@@ -660,14 +668,15 @@ export function AIDiscoveryPanel({
                         onClick={() => void onUpdateStatus(system.id, "restore")}
                         variant="outline"
                         disabled={busy}
-                        className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
+                        size="default"
+                        className="gap-2 border-eos-border bg-eos-surface text-eos-text hover:bg-eos-secondary-hover"
                       >
-                        <RotateCcw className="size-4" strokeWidth={2.25} />
+                        <RotateCcw className="size-4" strokeWidth={2} />
                         Repune in lucru
                       </Button>
                     )}
                     {system.detectionStatus === "confirmed" && (
-                      <div className="rounded-2xl border border-eos-border bg-eos-success-soft p-3 text-sm text-eos-success">
+                      <div className="rounded-eos-md border border-eos-border bg-eos-success-soft p-3 text-sm text-eos-success">
                         Detectia a fost confirmata si mutata in inventarul oficial.
                       </div>
                     )}
@@ -681,7 +690,7 @@ export function AIDiscoveryPanel({
             <EmptyState
               title="Nicio detectie activa"
               label="Ce a fost confirmat este deja in inventarul oficial, iar ce a fost respins a ramas doar in istoric. Daca vrei un nou ciclu de review, ruleaza o scanare noua pentru sursa curenta."
-              className="rounded-2xl border-eos-border-subtle bg-eos-success-soft px-4 py-6"
+              className="rounded-eos-md border-eos-border-subtle bg-eos-success-soft px-3 py-6"
             />
           )}
         </CardContent>
@@ -692,7 +701,7 @@ export function AIDiscoveryPanel({
 
 function SummaryTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
       <p className="text-sm text-eos-text-muted">{label}</p>
       <p className="mt-2 text-3xl font-semibold text-eos-text">{value}</p>
     </div>
@@ -709,7 +718,7 @@ function ToggleField({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex items-center justify-between rounded-2xl border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
+    <label className="flex items-center justify-between rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text-muted">
       <span>{label}</span>
       <input
         type="checkbox"

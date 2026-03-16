@@ -1216,3 +1216,100 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - spacing aliniat pe componentele Evidence OS (badge icons, tabs, status rows)
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA-urile principale folosesc acum sizing-ul canonizat Evidence OS (lg)
+- spacing icon + text la `space-2` (8px), icon 20px, stroke 2px
+- radius revine la `radius-md` (8px), fara override de `rounded-xl`
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA sweep pe suprafetele runtime (Dashboard, Drift, Audit, Export, Control, Scanare, Setari)
+- CTA-urile non-hero folosesc acum sizing `md` in loc de `h-10/11` custom
+- CTA-urile cu iconuri folosesc acum spacing canonic si stroke 2px
+
+Actualizare suplimentara 2026-03-16:
+
+- `Tabs` folosesc container `surface-base` conform spec
+- `DashboardShell` aliniat la gridul Evidence OS (max-width `1200px`, sidebar `240px`)
+- input-urile au revenit la sizing `md` (36px) si radius `md` (8px)
+- au fost eliminate suprascrierile legacy de radius (`rounded-2xl`, `rounded-3xl`)
+- badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
+- filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+Actualizare suplimentara 2026-03-16:
+
+- CTA-urile cu verb lung au fost scurtate pe suprafetele cele mai dense:
+  - `Alerte` (drift actions)
+  - `NextBestAction`
+  - `TaskCard`
+
+Actualizare suplimentara 2026-03-16:
+
+- `Overview` + `TaskCard` au primit un density trim scurt:
+  - `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+  - `TaskCard` afiseaza blocajul de audit o singura data
+
+Actualizare suplimentara 2026-03-16:
+
+- `Drift` (Alerte) a primit un density pass:
+  - listare compacta cu `next action` vizibil
+  - metrics duplicate eliminate (SummaryStrip ramane sursa unica)
+  - CTA-urile sunt limitate la maxim 3 actiuni vizibile
+
+Actualizare suplimentara 2026-03-16:
+
+- `Audit si export` + `Auditor Vault` au primit un density pass:
+  - hero mai scurt, badge unic
+  - indicatorii detaliati sunt sub disclosure
+  - exporturile tehnice sunt ascunse by default
+
+Actualizare suplimentara 2026-03-16:
+
+- `Setari` a primit un trim de copy:
+  - hero si summary mai scurte
+  - handoff administrativ compact
+
+Actualizare suplimentara 2026-03-16:
+
+- `Floating Assistant` a primit un trim de copy:
+  - header si empty state mai scurte
+  - badge-uri reduse la esential
+
+Actualizare suplimentara 2026-03-16:
+
+- `Evidence OS` recipes partial canonizate:
+  - `GuideCard`
+  - `MetricTile`
+  - adoptate in `Auditor Vault`
+
+Actualizare suplimentara 2026-03-16:
+
+- `DenseListItem` canonizat pentru liste operationale
+  - adoptat in `DriftCommandCenter` si `Alerte`
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` folosit ca reteta canonica pentru summary + actions
+  - adoptat in `Alerte` si `Auditor Vault`
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat si in `DriftCommandCenter`
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat in `Control / Sisteme`
+
+Actualizare suplimentara 2026-03-16:
+
+- `DenseListItem` adoptat in `Scanare` (tab-uri) si `Control / Sisteme` (drift recent)
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat in `Setari` pentru actiunile de baseline
+
+Actualizare suplimentara 2026-03-16:
+
+- `GuideCard` adoptat in `Asistent` si `Scanare`

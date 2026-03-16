@@ -10,6 +10,8 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { AlertsList, LoadingScreen } from "@/components/compliscan/route-sections"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
@@ -117,13 +119,10 @@ export default function DriftPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Control / Drift"
-        title="Aici tratezi schimbarea fata de baseline, nu inventarul si nu exportul"
-        description="Drift-ul ramane workspace-ul in care explici schimbarea, o preiei, o escalezi sau o inchizi. Inventarul si baseline-ul raman in Control, iar executia si dovada raman in Dovada."
+        title="Tratezi schimbarea fata de baseline"
+        description="Preiei, escaladezi sau inchizi drift-ul aici. Inventarul si baseline-ul raman in Control, iar executia si dovada raman in Dovada."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              drift workspace
-            </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
               decizie umana
             </Badge>
@@ -143,13 +142,13 @@ export default function DriftPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/sisteme">
                 Control
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/checklists">
                 Dovada
-                <ArrowRight className="size-4" strokeWidth={2.25} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
@@ -162,8 +161,8 @@ export default function DriftPage() {
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Drift"
-            title="Semnal, escalare si actiune"
-            description="Vezi rapid cate schimbari sunt active, ce a depasit SLA-ul si cate task-uri au fost deja deschise din drift."
+            title="Semnal si actiune"
+            description="Cate schimbari sunt active, ce a depasit SLA-ul si ce task-uri au aparut din drift."
             items={summaryItems}
           />
         </CardContent>
@@ -172,32 +171,15 @@ export default function DriftPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
         <SectionBoundary
           eyebrow="Flux canonic"
-          title="Drift-ul ramane separat de inventar, baseline si dovada"
-          description="Aici tratezi schimbarea fata de baseline si alegi daca o preiei, o remediezi sau o explici. Daca trebuie sa inchizi munca reala sau sa atasezi dovada, continui in Dovada (executie)."
-          support={
-            <div className="grid gap-4 md:grid-cols-3">
-              <DriftFlowHint
-                title="1. Vezi schimbarea"
-                detail="Identifici ce s-a schimbat fata de baseline si de ce conteaza."
-              />
-              <DriftFlowHint
-                title="2. Iei decizia"
-                detail="Preiei, escaladezi, rezolvi sau waive-uiesti cu justificare."
-              />
-              <DriftFlowHint
-                title="3. Continui corect"
-                detail="Pentru executie si dovada revii in Dovada, nu transformi pagina de drift in remediation board."
-              />
-            </div>
-          }
+          title="Drift-ul ramane separat de inventar si dovada"
+          description="Aici tratezi schimbarea fata de baseline. Pentru executie si dovada continui in Dovada."
         />
         <HandoffCard
-          title="Drift-ul nu inlocuieste restul pilonului de Control"
-          description="Inventarul si baseline-ul raman in Control, iar remedierea ramane in Dovada. Pagina asta trebuie sa ramana clara pe schimbare, escalare si decizie."
+          title="Handoff corect intre Control si Dovada"
+          description="Pastrezi drift-ul clar pe schimbare si decizie, iar executia si dovada raman in Dovada."
           destinationLabel="control / dovada"
           checklist={[
             "nu amesteci inventarul cu drift-ul activ",
-            "nu tratezi exportul ca rezolvare de drift",
             "folosesti Dovada pentru executie si dovada propriu-zisa",
           ]}
           actions={
@@ -217,45 +199,18 @@ export default function DriftPage() {
         <Card className="border-eos-border bg-eos-surface">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Compliance drift</CardTitle>
-            <p className="text-sm text-eos-text-muted">
-              Schimbari detectate fata de snapshot-ul anterior validat intern.
-            </p>
+            <p className="text-sm text-eos-text-muted">Schimbari detectate fata de snapshot.</p>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <DriftStatusTile
-                label="Drift activ"
-                value={openDrifts.length}
-                detail="Schimbări care încă cer decizie sau remediere."
-              />
-              <DriftStatusTile
-                label="SLA depășit"
-                value={breachedDrifts}
-                detail="Drift-uri care au trecut de termenul din matricea de escaladare."
-                tone={
-                  breachedDrifts > 0
-                    ? "text-eos-error"
-                    : "text-eos-success"
-                }
-              />
-              <DriftStatusTile
-                label="Task-uri deschise"
-                value={openTasks.filter((task) => task.relatedDriftIds.length > 0).length}
-                detail="Remedieri deja generate din drift și încă neînchise."
-              />
-            </div>
-
             {openDrifts.map((drift) => {
               const guidance = getDriftPolicyFromRecord(drift)
               const breached = isDriftSlaBreached(drift)
               const isActing = actingDriftId === drift.id
               const isExpanded = expandedDriftId === drift.id
+              const lifecycleStatus = drift.lifecycleStatus ?? "open"
 
               return (
-                <div
-                  key={drift.id}
-                  className="rounded-3xl border border-eos-border bg-eos-surface-variant p-5"
-                >
+                <DenseListItem key={drift.id} active={isExpanded} className="p-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <button
                       type="button"
@@ -285,8 +240,8 @@ export default function DriftPage() {
                               formatRelativeRomanian(drift.detectedAtISO),
                             ].join(" · ")}
                           </p>
-                          <p className="mt-3 text-sm leading-6 text-eos-text-muted line-clamp-2">
-                            {guidance.impactSummary}
+                          <p className="mt-3 text-sm leading-6 text-eos-text-muted line-clamp-1">
+                            {guidance.nextAction}
                           </p>
                         </div>
                         <div className="flex flex-wrap justify-end gap-2">
@@ -306,15 +261,15 @@ export default function DriftPage() {
                         setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
                       }
                       variant="outline"
-                      className="h-10 rounded-xl"
+                      size="sm"
                     >
-                      {isExpanded ? "Restrange" : "Detalii"}
+                      {isExpanded ? "Ascunde" : "Detalii"}
                     </Button>
                   </div>
                   {isExpanded ? (
                     <>
                       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             De ce conteaza
                           </p>
@@ -325,7 +280,7 @@ export default function DriftPage() {
                             {guidance.severityReason}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Ce faci acum
                           </p>
@@ -333,7 +288,7 @@ export default function DriftPage() {
                             {guidance.nextAction}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Dovada
                           </p>
@@ -341,7 +296,7 @@ export default function DriftPage() {
                             {guidance.evidenceRequired}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
+                        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                             Escalare
                           </p>
@@ -370,58 +325,66 @@ export default function DriftPage() {
                           {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
                         </p>
                       )}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {(drift.lifecycleStatus === "open" || !drift.lifecycleStatus) && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "acknowledge")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            className="h-10 rounded-xl"
-                          >
-                            Preia drift-ul
-                          </Button>
-                        )}
-                        {(drift.lifecycleStatus === "open" ||
-                          drift.lifecycleStatus === "acknowledged") && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "start")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            className="h-10 rounded-xl"
-                          >
-                            Marchează în lucru
-                          </Button>
-                        )}
-                        {drift.open && (
+                      <ActionCluster
+                        eyebrow="Actiuni"
+                        title="Decizie pentru drift"
+                        description="Alege pasul urmator pentru acest drift."
+                        actions={
                           <>
-                            <Button
-                              onClick={() => void handleDriftAction(drift.id, "resolve")}
-                              disabled={cockpit.busy || isActing}
-                              className="h-10 rounded-xl bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
-                            >
-                              Marchează rezolvat
-                            </Button>
-                            <Button
-                              onClick={() => void handleDriftAction(drift.id, "waive")}
-                              disabled={cockpit.busy || isActing}
-                              variant="outline"
-                              className="h-10 rounded-xl border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
-                            >
-                              Waive cu justificare
-                            </Button>
+                            {(lifecycleStatus === "open") && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "acknowledge")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Preia drift
+                              </Button>
+                            )}
+                            {(lifecycleStatus === "open" || lifecycleStatus === "acknowledged") && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "start")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                În lucru
+                              </Button>
+                            )}
+                            {drift.open && lifecycleStatus === "in_progress" && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "resolve")}
+                                disabled={cockpit.busy || isActing}
+                                size="sm"
+                                className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                              >
+                                Rezolvă
+                              </Button>
+                            )}
+                            {drift.open && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "waive")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                                className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
+                              >
+                                Waive
+                              </Button>
+                            )}
+                            {!drift.open && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "reopen")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Redeschide
+                              </Button>
+                            )}
                           </>
-                        )}
-                        {!drift.open && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "reopen")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            className="h-10 rounded-xl"
-                          >
-                            Redeschide
-                          </Button>
-                        )}
-                      </div>
+                        }
+                      />
                     </>
                   ) : (
                     <p className="mt-3 text-xs text-eos-text-muted">
@@ -432,7 +395,7 @@ export default function DriftPage() {
                       )}
                     </p>
                   )}
-                </div>
+                </DenseListItem>
               )
             })}
           </CardContent>
@@ -447,35 +410,6 @@ export default function DriftPage() {
       ) : openTasks.length > 0 ? (
         <AlertsList tasks={openTasks} />
       ) : null}
-    </div>
-  )
-}
-
-function DriftFlowHint({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-sm font-medium text-eos-text">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
-    </div>
-  )
-}
-
-function DriftStatusTile({
-  label,
-  value,
-  detail,
-  tone = "text-eos-text",
-}: {
-  label: string
-  value: number
-  detail: string
-  tone?: string
-}) {
-  return (
-    <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
-      <p className={`mt-3 text-2xl font-semibold ${tone}`}>{value}</p>
-      <p className="mt-2 text-sm text-eos-text-muted">{detail}</p>
     </div>
   )
 }

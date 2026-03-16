@@ -1607,6 +1607,16 @@ Pass 2 `Val 3` - convergenta pe badge semantics:
 Validare dupa pass:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - CTA label cleanup (Val 3)
+
+- `Alerte`: actiunile de drift au etichete mai scurte si mai clare (`Preia drift`, `În lucru`, `Rezolvă`, `Waive`)
+- `NextBestAction`: CTA principal scurtat la `Deschide`
+- `TaskCard`: CTA principal scurtat la `Validează + rescanează`, iar starea `done` foloseste `Redeschide`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
 - `npm run build` -> verde
 - `npm test` -> verde
 
@@ -2695,6 +2705,19 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Evidence OS spacing + layout (pass final)
+
+- `Tabs` folosesc container `surface-base` (bg-eos-bg) conform spec
+- `DashboardShell` respecta gridul oficial (max-width `1200px`, sidebar `240px`)
+- input-urile runtime au revenit la sizing-ul canonic (inaltime `36px` md, radius `md` 8px, padding standardizat)
+- au fost eliminate suprascrierile legacy de radius (`rounded-3xl`, `rounded-2xl`, `rounded-xl`)
+- badge-urile de SLA si mesajele de blocaj folosesc acum variantele canonice
+- filtrele de remediere folosesc `Button size="sm"` fara override de radius
+
+Validare dupa pass:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Hotfix build (Control overview props)
 
 - `app/dashboard/sisteme/page.tsx` a eliminat `reviewedCount` din `ControlOverview` (prop neacceptat)
@@ -2819,6 +2842,128 @@ Actualizare 2026-03-16 - Dashboard progressive disclosure pentru detalii recente
 - `Dashboard` nu mai incarca vizual detaliile istorice la primul render
 - sectiunea `Detalii recente` este ascunsa by default si apare doar la cerere
 - reducere de densitate pe home + respect pentru regula summary -> detail -> action
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Overview + TaskCard density trim
+
+- `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+- hero-ul pastreaza un mesaj principal, scorul ramane doar in aside
+- `TaskCard` nu mai repeta blocajul de audit in mai multe zone
+- `Primul pas` ramane actiunea, iar blocajul apare o singura data
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Drift density pass (Alerte)
+
+- `Drift` foloseste listare mai compacta cu `next action` vizibil
+- a fost eliminata dublarea de metrics (SummaryStrip ramane sursa unica)
+- `Flux canonic` si `Handoff` sunt mai scurte, fara suport redundant
+- CTA-urile din drift raman sub maxim 3 actiuni vizibile simultan
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Export + Vault density pass
+
+- `Audit si export` are copy mai scurt si un singur badge in hero
+- `Auditor Vault` elimina dublarea de metrics (indicatorii detaliati apar la cerere)
+- exporturile tehnice sunt ascunse sub disclosure, CTA-urile vizibile raman sub 3
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Setari density trim
+
+- `Setari` are copy mai scurt in hero si summary
+- handoff-ul administrativ este mai compact, checklist redus
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Floating Assistant trim
+
+- header si empty state sunt mai scurte
+- badge-uri reduse la esential
+- footer de avertizare compact
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Canonizare recipes (partial)
+
+- retele canonice adaugate in Evidence OS:
+  - `GuideCard`
+  - `MetricTile`
+- adoptate in `Auditor Vault` pentru quick actions si indicatori detaliati
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Canonizare recipes (dense list)
+
+- `DenseListItem` introdus ca reteta canonica pentru liste operationale
+- adoptat in `DriftCommandCenter` si `Alerte`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Summary + Actions recipe
+
+- `ActionCluster` folosit ca reteta canonica pentru zone cu CTA multiple
+- aplicat in `Alerte` (drift actions) si `Auditor Vault` (export)
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in DriftCommandCenter
+
+- `DriftCommandCenter` foloseste `ActionCluster` pentru quick actions
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in Control / Sisteme
+
+- `Control` (overview) foloseste `ActionCluster` pentru handoff si confirmare
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem adoption
+
+- `Scanare` foloseste `DenseListItem` pentru tab-uri
+- `Control / Sisteme` foloseste `DenseListItem` pentru drift recent
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in Setari
+
+- actiunile de baseline sunt canonizate cu `ActionCluster`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - GuideCard adoption
+
+- `Asistent` foloseste `GuideCard` pentru fluxul canonic
+- `Scanare` foloseste `GuideCard` pentru context si regula de citire
 
 Validare dupa pas:
 
