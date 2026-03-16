@@ -3090,3 +3090,28 @@ Branch: `codex/ux-sprint-1-autoritate`
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+---
+
+Actualizare 2026-03-16 - Sprint UX-3: Control page — stepper liniar
+
+Branch: `codex/ux-sprint-2-control`
+
+### UX-3: SystemsSubTabs → SystemsLinearStepper
+
+- `app/dashboard/sisteme/page.tsx`: `SystemsSubTabs` (4 butoane flat fara ordine) inlocuit cu `SystemsLinearStepper`
+- Stepperul arata pasii in ordine: **1 Discovery → 2 Inventar → 3 Baseline → 4 Compliance Pack**
+- Fiecare pas are status vizual: `pending` (cerc gol cu numar), `active` (border puternic), `done` (cerc verde cu bifa)
+- Logica de completare bazata pe date reale:
+  - Discovery: done daca `detectedActiveCount === 0 && confirmedCount > 0`
+  - Inventar: done daca `confirmedCount > 0 && validatedBaseline`
+  - Baseline: done daca `validatedBaseline` exista
+  - Compliance Pack: done daca `compliancePack !== null`
+- Desktop: layout orizontal cu conector `h-px` intre pasi
+- Mobile: lista verticala cu buton per pas
+- Descrierea `SectionBoundary` actualizata: "Parcurgi pasii in ordine: mai intai descoperi, confirmi, fixezi reperul si revizuiesti pack-ul."
+- Navigarea libera intre pasi pastrata — stepperul nu blocheaza
+
+Validare dupa pas:
+
+- `tsc --noEmit` pe `sisteme/page.tsx` -> zero erori

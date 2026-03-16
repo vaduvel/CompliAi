@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
+  Check,
 } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
@@ -22,6 +23,7 @@ import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { AICompliancePack, AICompliancePackEntry } from "@/lib/compliance/ai-compliance-pack"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
+import { cn } from "@/lib/utils"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 
@@ -522,7 +524,7 @@ function ControlSystemsWorkspace({
       <SectionBoundary
         eyebrow="Sisteme"
         title="Candidatele, inventarul, compliance pack si baseline-ul stau pe acelasi fir de confirmare"
-        description="Sub-taburile de mai jos separa ce descoperi, ce confirmi, ce revizuiesti si ce fixezi ca reper."
+        description="Parcurgi pasii in ordine: mai intai descoperi, confirmi, fixezi reperul si revizuiesti pack-ul."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -533,7 +535,16 @@ function ControlSystemsWorkspace({
             </Badge>
           </>
         }
-        support={<SystemsSubTabs active={active} onChange={onChange} />}
+        support={
+          <SystemsLinearStepper
+            active={active}
+            onChange={onChange}
+            detectedActiveCount={detectedActiveCount}
+            confirmedCount={confirmedCount}
+            validatedBaseline={Boolean(validatedBaseline)}
+            compliancePack={compliancePack}
+          />
+        }
       />
 
       {active === "discovery" && (
@@ -1117,60 +1128,153 @@ function ControlPrimaryTabs({
   )
 }
 
-function SystemsSubTabs({
+function SystemsLinearStepper({
   active,
   onChange,
+  detectedActiveCount,
+  confirmedCount,
+  validatedBaseline,
+  compliancePack,
 }: {
   active: SystemsSubViewMode
   onChange: (next: SystemsSubViewMode) => void
+  detectedActiveCount: number
+  confirmedCount: number
+  validatedBaseline: boolean
+  compliancePack: AICompliancePack | null
 }) {
-  const tabs: Array<{
+  type StepStatus = "done" | "active" | "pending"
+
+  const steps: Array<{
     id: SystemsSubViewMode
+    step: number
     title: string
     description: string
+    done: boolean
   }> = [
     {
       id: "discovery",
+      step: 1,
       title: "Discovery",
-      description: "Candidate detectate automat si corectate inainte de confirmare.",
+      description: "Detectezi si revizuiesti candidatele automate.",
+      done: detectedActiveCount === 0 && confirmedCount > 0,
     },
     {
       id: "inventory",
+      step: 2,
       title: "Inventar",
-      description: "Sistemele oficiale asumate operational.",
+      description: "Confirmi sistemele oficiale.",
+      done: confirmedCount > 0 && validatedBaseline,
     },
     {
       id: "baseline",
+      step: 3,
       title: "Baseline",
-      description: "Snapshot-ul validat fata de care masuram drift-ul.",
+      description: "Fixezi reperul pentru drift.",
+      done: validatedBaseline,
     },
     {
       id: "pack",
+      step: 4,
       title: "Compliance Pack",
-      description: "Review pe campuri si pachete de control pentru sursele confirmate.",
+      description: "Revizuiesti pachetul pre-completat.",
+      done: compliancePack !== null,
     },
   ]
 
+  function stepStatus(step: (typeof steps)[number]): StepStatus {
+    if (step.id === active) return "active"
+    if (step.done) return "done"
+    return "pending"
+  }
+
   return (
-    <div className="grid gap-3 lg:grid-cols-4">
-      {tabs.map((tab) => {
-        const isActive = active === tab.id
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onChange(tab.id)}
-            className={`rounded-eos-md border px-4 py-3 text-left transition ${
-              isActive
-                ? "border-eos-border-subtle bg-eos-surface-active"
-                : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
-            }`}
-          >
-            <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
-            <p className="mt-1 text-xs leading-5 text-eos-text-muted">{tab.description}</p>
-          </button>
-        )
-      })}
+    <div className="space-y-2">
+      {/* Desktop: horizontal stepper */}
+      <div className="hidden items-start sm:flex">
+        {steps.map((step, index) => {
+          const status = stepStatus(step)
+          return (
+            <div key={step.id} className="flex min-w-0 flex-1 items-start">
+              <button
+                type="button"
+                onClick={() => onChange(step.id)}
+                className="group flex min-w-0 flex-1 flex-col items-center gap-2 px-2"
+              >
+                <div
+                  className={cn(
+                    "grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold transition",
+                    status === "done"
+                      ? "border-eos-success bg-eos-success-soft text-eos-success"
+                      : status === "active"
+                        ? "border-eos-border-strong bg-eos-surface-active text-eos-text"
+                        : "border-eos-border bg-eos-bg text-eos-text-muted"
+                  )}
+                >
+                  {status === "done" ? (
+                    <Check className="size-3.5" strokeWidth={2.5} />
+                  ) : (
+                    step.step
+                  )}
+                </div>
+                <div className="text-center">
+                  <p
+                    className={cn(
+                      "text-sm font-semibold transition",
+                      status === "active"
+                        ? "text-eos-text"
+                        : "text-eos-text-muted group-hover:text-eos-text"
+                    )}
+                  >
+                    {step.title}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-5 text-eos-text-muted">{step.description}</p>
+                </div>
+              </button>
+              {index < steps.length - 1 && (
+                <div className="mt-4 h-px w-6 shrink-0 self-start bg-eos-border" />
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Mobile: vertical step list */}
+      <div className="flex flex-col gap-2 sm:hidden">
+        {steps.map((step) => {
+          const status = stepStatus(step)
+          return (
+            <button
+              key={step.id}
+              type="button"
+              onClick={() => onChange(step.id)}
+              className={cn(
+                "flex items-start gap-3 rounded-eos-md border p-3 text-left transition",
+                status === "active"
+                  ? "border-eos-border-subtle bg-eos-surface-active"
+                  : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
+              )}
+            >
+              <div
+                className={cn(
+                  "grid size-7 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                  status === "done"
+                    ? "border-eos-success bg-eos-success-soft text-eos-success"
+                    : status === "active"
+                      ? "border-eos-border-strong bg-eos-surface-active text-eos-text"
+                      : "border-eos-border bg-eos-bg text-eos-text-muted"
+                )}
+              >
+                {status === "done" ? <Check className="size-3" strokeWidth={2.5} /> : step.step}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-eos-text">{step.title}</p>
+                <p className="mt-0.5 text-xs leading-5 text-eos-text-muted">{step.description}</p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
