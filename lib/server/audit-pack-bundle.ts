@@ -184,6 +184,7 @@ function buildExecutiveSummary(auditPack: AuditPackV2) {
     `Remediation open: ${auditPack.executiveSummary.remediationOpen}`,
     `Validated evidence items: ${auditPack.executiveSummary.validatedEvidenceItems}`,
     `Missing evidence items: ${auditPack.executiveSummary.missingEvidenceItems}`,
+    `Evidence ledger (verified/weak/unrated): ${auditPack.executiveSummary.evidenceLedgerSummary.sufficient}/${auditPack.executiveSummary.evidenceLedgerSummary.weak}/${auditPack.executiveSummary.evidenceLedgerSummary.unrated}`,
     "",
     "Decision gates:",
     `- Poți trimite extern: ${

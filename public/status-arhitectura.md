@@ -1564,3 +1564,4 @@ Asta este sanatos arhitectural pentru ca:
 - `SummaryStrip` din Vault afiseaza starea registrului ca semnal operational
 - `Audit si export` afiseaza sumarul registrului in zona de readiness
 - `Audit Pack` client-facing expune raportul de dovezi verificate din registru
+- `Audit Pack` JSON expune sumarul de calitate al registrului de dovezi

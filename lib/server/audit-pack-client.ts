@@ -28,7 +28,8 @@ export function buildClientAuditPackDocument(
 }
 
 function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string) {
-  const evidenceLedgerSummary = summarizeEvidenceLedger(auditPack.evidenceLedger)
+  const evidenceLedgerSummary =
+    auditPack.executiveSummary.evidenceLedgerSummary ?? summarizeEvidenceLedger(auditPack.evidenceLedger)
   const hasEvidenceLedger = auditPack.evidenceLedger.length > 0
   const summaryCards = [
     {

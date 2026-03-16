@@ -1170,3 +1170,4 @@ Actualizare suplimentara 2026-03-16:
 - `SummaryStrip` expune starea registrului ca semnal operational
 - `Audit si export` foloseste sumarul registrului in readiness
 - `Audit Pack` client-facing foloseste raportul de dovezi verificate din registru
+- `Audit Pack` JSON include sumarul `evidenceLedgerSummary` pentru dovada

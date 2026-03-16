@@ -2721,9 +2721,12 @@ Actualizare 2026-03-16 - Registru evidence alimentat din Supabase (Auditor Vault
   - dovezi neevaluate
 - `Audit si export` expune sumarul registrului in zona de readiness
 - `Audit Pack` client-facing reflecta acum raportul de dovezi verificate din registru
+- `Audit Pack` JSON include `evidenceLedgerSummary` (verificate / slabe / neevaluate)
+- `Audit Pack` bundle readme expune sumarul registrului de dovezi
 - test dedicat pentru ledger in `supabase-evidence-read.test.ts`
 
 Validare dupa pas:
 
 - `npm test` -> verde (`71` fisiere, `258` teste)
 - `npm run lint` -> verde
+- `npm run build` -> verde

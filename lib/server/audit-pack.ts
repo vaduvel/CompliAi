@@ -35,6 +35,7 @@ export function buildAuditPack({
   const auditQualityGates = buildAuditQualityGates({ state, remediationPlan, nowISO: generatedAt })
   const controlsMatrix = buildControlsMatrix(state, remediationPlan, auditQualityGates)
   const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
+  const evidenceLedgerSummary = summarizeEvidenceLedger(evidenceLedger)
   const validationLog = buildValidationLog(controlsMatrix)
   const traceabilityMatrix = buildComplianceTraceRecords({
     state,
@@ -66,6 +67,7 @@ export function buildAuditPack({
       remediationOpen: openControls,
       validatedEvidenceItems,
       missingEvidenceItems,
+      evidenceLedgerSummary,
       auditQualityDecision: auditQualityGates.decision,
       blockedQualityGates: auditQualityGates.blockedCount,
       reviewQualityGates: auditQualityGates.reviewCount,
@@ -425,6 +427,20 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
       }
     })
     .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+}
+
+function summarizeEvidenceLedger(ledger: AuditPackV2["evidenceLedger"]) {
+  return ledger.reduce(
+    (acc, entry) => {
+      const status = entry.evidenceQuality?.status
+      if (status === "sufficient") acc.sufficient += 1
+      else if (status === "weak") acc.weak += 1
+      else acc.unrated += 1
+      acc.total += 1
+      return acc
+    },
+    { total: 0, sufficient: 0, weak: 0, unrated: 0 }
+  )
 }
 
 function buildValidationLog(

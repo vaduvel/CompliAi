@@ -43,6 +43,12 @@ export type AuditPackV2 = {
     remediationOpen: number
     validatedEvidenceItems: number
     missingEvidenceItems: number
+    evidenceLedgerSummary: {
+      total: number
+      sufficient: number
+      weak: number
+      unrated: number
+    }
     auditQualityDecision: AuditQualityGateDecision
     blockedQualityGates: number
     reviewQualityGates: number
