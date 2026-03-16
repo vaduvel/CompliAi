@@ -90,7 +90,7 @@ export default function RemediationPage() {
       <PageIntro
         eyebrow="Dovada / Remediere"
         title="Executi, atasezi dovada si validezi"
-        description="Aici inchizi taskul corect. Vault si Audit si export raman pasi de verificare separati."
+        description="Aici inchizi taskul corect. Vault si Audit si export raman pasi de verificare separati, nu executie."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

@@ -293,7 +293,7 @@ export default function SetariPage() {
       <PageIntro
         eyebrow="Setari"
         title="Aici administrezi contextul operational"
-        description="Fixezi workspace-ul, accesul si starea operationala, apoi revii in fluxurile reale de lucru."
+        description="Fixezi workspace-ul, accesul si starea operationala. Executia ramane in Scanare, Control si Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

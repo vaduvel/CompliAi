@@ -173,7 +173,7 @@ export default function DriftPage() {
         <SectionBoundary
           eyebrow="Flux canonic"
           title="Drift-ul ramane separat de inventar, baseline si dovada"
-          description="Aici tratezi schimbarea fata de baseline si alegi daca o preiei, o remediezi sau o explici. Daca trebuie sa inchizi munca reala sau sa atasezi dovada, continui in Dovada."
+          description="Aici tratezi schimbarea fata de baseline si alegi daca o preiei, o remediezi sau o explici. Daca trebuie sa inchizi munca reala sau sa atasezi dovada, continui in Dovada (executie)."
           support={
             <div className="grid gap-4 md:grid-cols-3">
               <DriftFlowHint

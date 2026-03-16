@@ -1400,3 +1400,6 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] `Verdicts/Istoric` micro-claritate
   - detaliile din Verdicts apar doar la cerere
   - Istoric are empty state clar cand nu exista scanari
+
+- [x] micro-pass de copy pentru read-only vs executie
+  - intro-urile clarifica explicit handoff-ul corect

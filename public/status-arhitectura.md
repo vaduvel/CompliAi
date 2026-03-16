@@ -1601,3 +1601,8 @@ Asta este sanatos arhitectural pentru ca:
 
 - `Verdicts` afiseaza detaliile doar la cerere
 - `Istoric` are empty state clar pentru lipsa scanarilor
+
+## Actualizare 2026-03-16 - Micro-copy: executie vs read-only
+
+- paginile cheie mentioneaza explicit unde se executa si unde doar se verifica
+- handoff-ul este scris clar in intro-uri si descrieri scurte

@@ -91,7 +91,7 @@ export default function DocumentePage() {
       <PageIntro
         eyebrow="Scanare / Documente"
         title="Istoric documente si rezultate confirmate"
-        description="Aici vezi istoricul document-first si rezultatele deja extrase, separat de fluxul activ de scanare. Pagina ramane read-only pentru consultare si handoff."
+        description="Aici vezi istoricul document-first si rezultatele deja extrase, separat de fluxul activ de scanare. Pagina ramane read-only pentru consultare si handoff spre Dovada sau Control."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

@@ -2754,6 +2754,15 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Micro-pass copy (read-only vs executie)
+
+- `Scanare`, `Documente`, `Drift`, `Remediere`, `Audit si export`, `Setari`, `Asistent` clarifica explicit executia vs read-only
+- intareste regula: sumar / detaliu / actiune + handoff corect
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
 
 - `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK

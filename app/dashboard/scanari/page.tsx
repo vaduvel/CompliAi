@@ -194,7 +194,7 @@ export default function ScanariPage() {
       <PageIntro
         eyebrow="Scanare"
         title="Pornesti analiza din sursa potrivita"
-        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente."
+        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente. Dupa scanare continui in Control sau Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

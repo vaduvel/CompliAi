@@ -1207,3 +1207,8 @@ Actualizare suplimentara 2026-03-16:
 
 - `Verdicts` expune detaliile doar la cerere
 - `Istoric` are empty state clar cand nu exista scanari
+
+Actualizare suplimentara 2026-03-16:
+
+- micro-pass de copy pentru clarificarea read-only vs executie
+- handoff explicit in `Scanare`, `Documente`, `Drift`, `Remediere`, `Audit si export`, `Setari`, `Asistent`

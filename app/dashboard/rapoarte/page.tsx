@@ -128,7 +128,7 @@ export default function AuditExportPage() {
       <PageIntro
         eyebrow="Dovada / Audit Pack"
         title="Aici pregatesti livrabilul, nu executia"
-        description="Verifici snapshot-ul, readiness-ul si artefactele de livrare. Daca mai exista munca reala, revii in Remediere sau in Auditor Vault."
+        description="Verifici snapshot-ul, readiness-ul si artefactele de livrare. Daca mai exista munca reala, revii in Remediere sau in Auditor Vault pentru executie."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -184,7 +184,7 @@ export default function AuditExportPage() {
           <div>
             <p className="text-sm font-semibold text-eos-text">Detalii de livrabil</p>
             <p className="text-xs text-eos-text-muted">
-              Ghidajul complet si panourile suport apar doar la cerere.
+              Ghidajul complet si panourile suport apar doar la cerere, ca sa nu concureze cu livrabilul.
             </p>
           </div>
           <Button variant="outline" onClick={() => setShowSupport((current) => !current)}>

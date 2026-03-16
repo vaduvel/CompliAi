@@ -130,7 +130,7 @@ export default function AsistentPage() {
       <PageIntro
         eyebrow="Utilitar global / Asistent"
         title="Intrebari rapide despre risc, obligatii si pasul urmator"
-        description="Asistentul ramane utilitar global pentru clarificare si orientare. Nu este sursa de adevar finala si nu inlocuieste validarea umana sau fluxurile reale de lucru."
+        description="Asistentul ramane utilitar global pentru clarificare si orientare. Nu este sursa de adevar finala si nu inlocuieste validarea umana sau fluxurile reale de lucru. Executia ramane in Scanare, Control si Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
