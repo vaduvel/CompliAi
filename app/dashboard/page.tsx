@@ -42,7 +42,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Dashboard"
         title="Starea actuala a conformitatii tale"
-        description="Starea conformitatii organizatiei tale. Ce este blocat, ce cere atentie si ce faci acum."
+        description="Ce este blocat, ce cere atentie si ce faci acum."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -64,8 +64,8 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section aria-label="Readiness Overview" className="space-y-4">
-        <h2 className="text-lg font-semibold text-eos-text">Readiness Overview</h2>
+      <section aria-label="Conformitate pe cadru" className="space-y-4">
+        <h2 className="text-lg font-semibold text-eos-text">Conformitate pe cadru</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <ReadinessFrameworkCard
             framework="AI Act"
@@ -75,7 +75,7 @@ export default function DashboardPage() {
             description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
             icon={Layers}
             onViewDetails={() => router.push("/dashboard/sisteme")}
-            ariaLabel={`AI Act Readiness: ${aiActScore}%`}
+            ariaLabel={`AI Act: ${aiActScore}% pregatit`}
           />
           <ReadinessFrameworkCard
             framework="GDPR"
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             description="Conformitatea prelucrarii datelor"
             icon={CheckCircle2}
             onViewDetails={() => router.push("/dashboard/checklists")}
-            ariaLabel={`GDPR Readiness: ${gdprScore}%`}
+            ariaLabel={`GDPR: ${gdprScore}% pregatit`}
           />
           <ReadinessFrameworkCard
             framework="e-Factura"
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
             icon={FileText}
             onViewDetails={() => router.push("/dashboard/setari")}
-            ariaLabel={`e-Factura Readiness: ${efacturaScore}%`}
+            ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
           />
           <ReadinessFrameworkCard
             framework="Scor Global"
@@ -105,7 +105,7 @@ export default function DashboardPage() {
             description="Media controalelor validate"
             icon={ShieldCheck}
             onViewDetails={() => router.push("/dashboard/rapoarte/auditor-vault")}
-            ariaLabel={`Scor Global: ${data.summary.score}%`}
+            ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
           />
         </div>
       </section>
@@ -168,7 +168,7 @@ function ReadinessFrameworkCard({
         )}
         <div className="mt-5 flex items-end gap-2">
           <span className="text-3xl font-semibold text-eos-text">{percent}%</span>
-          <span className="mb-1 text-xs text-eos-text-muted">ready</span>
+          <span className="mb-1 text-xs text-eos-text-muted">pregatit</span>
         </div>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-eos-surface-variant">
           <div className="h-full bg-eos-primary transition-all duration-500" style={{ width: `${percent}%` }} />
