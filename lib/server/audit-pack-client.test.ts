@@ -142,6 +142,8 @@ function createState(
 function createOpenDrift(): ComplianceDriftRecord {
   return {
     id: "drift-1",
+    snapshotId: "snap-1",
+    comparedToSnapshotId: null,
     type: "compliance_drift",
     change: "tracking_detected",
     severity: "high",

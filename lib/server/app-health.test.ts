@@ -17,7 +17,7 @@ describe("getApplicationHealthStatus", () => {
     delete process.env.COMPLISCAN_AUTH_BACKEND
     delete process.env.COMPLISCAN_DATA_BACKEND
     delete process.env.COMPLISCAN_ALLOW_LOCAL_FALLBACK
-    process.env.NODE_ENV = "test"
+    ;(process.env as Record<string, string>).NODE_ENV = "test"
   })
 
   afterEach(() => {
@@ -83,7 +83,7 @@ describe("getApplicationHealthStatus", () => {
   })
 
   it("returns blocked in production when session secret is missing", async () => {
-    process.env.NODE_ENV = "production"
+    ;(process.env as Record<string, string>).NODE_ENV = "production"
     process.env.COMPLISCAN_AUTH_BACKEND = "local"
     process.env.COMPLISCAN_DATA_BACKEND = "local"
 

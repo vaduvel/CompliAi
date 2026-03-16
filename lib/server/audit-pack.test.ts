@@ -151,6 +151,8 @@ function createState(
 function createOpenDrift(): ComplianceDriftRecord {
   return {
     id: "drift-1",
+    snapshotId: "snap-1",
+    comparedToSnapshotId: null,
     type: "compliance_drift",
     change: "tracking_detected",
     severity: "high",
@@ -259,7 +261,7 @@ describe("lib/server/audit-pack", () => {
             gdprProgress: 100,
             efacturaConnected: true,
             scannedDocuments: 1,
-          } as ComplianceState["snapshotHistory"][number],
+          } as unknown as ComplianceState["snapshotHistory"][number],
         ],
         validatedBaselineSnapshotId: "snap-validated",
         taskState: {
