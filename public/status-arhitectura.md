@@ -1725,3 +1725,9 @@ Asta este sanatos arhitectural pentru ca:
 
 - `Control / Sisteme` foloseste `DenseListItem` pentru inventarul confirmat recent
 - `ScanVerdictsTab` foloseste `ActionCluster` pentru toggle-ul de detalii
+
+## Actualizare 2026-03-16 - Dashboard action authority
+
+- `Dashboard` foloseste acum un singur bloc dominant de actiune (`NextBestAction`)
+- duplicarile de CTA si handoff concurent au fost eliminate
+- pagina ramane orientare, iar actiunea dominanta este clara fara concurenta vizuala

@@ -1355,3 +1355,8 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - `references/source-of-truth.md` adaugat ca index pentru docurile canonice
+
+Actualizare 2026-03-16 - Dashboard action authority
+
+- `Dashboard` a fost simplificat la un singur bloc dominant pentru actiunea recomandata (`NextBestAction`)
+- CTA-urile duplicate si handoff-urile concurente au fost scoase pentru claritate

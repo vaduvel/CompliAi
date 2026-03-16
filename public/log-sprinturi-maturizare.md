@@ -3042,3 +3042,51 @@ Actualizare 2026-03-16 - Index canon docuri
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - UX audit vizual din capturi + backlog cleanup
+
+- document nou: `public/ux-audit-imagini-cleanup-2026-03-16.md`
+- backlog derivat din capturi pentru declutter si autoritate UX
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Dashboard: unificare actiune dominanta
+
+- `Dashboard` foloseste acum un singur bloc dominant pentru actiune (`NextBestAction`)
+- au fost eliminate duplicarile de CTA si handoff concurent
+- pasul reduce densitatea si intareste regula `one dominant page intent`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Sprint UX-1/2/5: autoritate operationala + progressive disclosure + error recovery
+
+Branch: `codex/ux-sprint-1-autoritate`
+
+### UX-1: Dashboard - limbaj accesibil
+
+- `app/dashboard/page.tsx`: PageIntro description simplificat — eliminat jargon in favoarea limbajului direct: "Ce este blocat, ce cere atentie si ce faci acum."
+- `app/dashboard/page.tsx`: aria-label pe sectiunea de drift corectat la `Schimbari si drift activ`
+
+### UX-5.3: RemediationBoard - filtre ascunse cand board e gol
+
+- `components/compliscan/remediation-board.tsx`: filter groups ascunse cand `openCount === 0`
+- Reduce densitatea vizuala la stare goala; empty state ramane singur pe suprafata
+
+### UX-5.1: AI Discovery - eroare inline persistenta
+
+- `components/compliscan/ai-discovery-panel.tsx`: adaugat `actionError` state local si `handleUpdateStatus` wrapper
+- Toast-ul efemer `Failed to fetch` inlocuit cu bloc persistent pe card: mesaj + buton `Incearca din nou`
+
+### UX-2.2: ScanSourceTypeSelector - progressive disclosure
+
+- `components/evidence-os/ScanSourceTypeSelector.tsx`: Document + Text manual mereu vizibile
+- Repo/manifest + compliscan.yaml sub `Surse tehnice avansate` expandabil
+- Daca sursa avansata e selectata, sectiunea ramane deschisa + badge `activa`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

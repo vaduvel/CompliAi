@@ -1,6 +1,7 @@
 "use client"
 
-import { FileCode2, FileText, ScanText, ShieldAlert, type LucideIcon } from "lucide-react"
+import { useState } from "react"
+import { ChevronDown, ChevronUp, FileCode2, FileText, ScanText, ShieldAlert, type LucideIcon } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -14,7 +15,7 @@ interface ScanSourceTypeSelectorProps {
   onValueChange: (value: ScanSourceType) => void
 }
 
-const sourceTypeOptions: Array<{
+const basicOptions: Array<{
   value: ScanSourceType
   icon: LucideIcon
   title: string
@@ -35,6 +36,15 @@ const sourceTypeOptions: Array<{
     description: "Cand ai deja continutul copiat si vrei analiza directa.",
     badge: "Rapid review",
   },
+]
+
+const advancedOptions: Array<{
+  value: ScanSourceType
+  icon: LucideIcon
+  title: string
+  description: string
+  badge: string
+}> = [
   {
     value: "manifest",
     icon: FileCode2,
@@ -52,20 +62,61 @@ const sourceTypeOptions: Array<{
 ]
 
 export function ScanSourceTypeSelector({ value, onValueChange }: ScanSourceTypeSelectorProps) {
+  const isAdvancedSelected = advancedOptions.some((opt) => opt.value === value)
+  const [showAdvanced, setShowAdvanced] = useState(isAdvancedSelected)
+
   return (
     <Card className="border-eos-border-subtle bg-eos-bg-panel">
-      <CardContent className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-4">
-        {sourceTypeOptions.map((option) => (
-          <SourceTypeOption
-            key={option.value}
-            active={value === option.value}
-            icon={option.icon}
-            title={option.title}
-            description={option.description}
-            badge={option.badge}
-            onClick={() => onValueChange(option.value)}
-          />
-        ))}
+      <CardContent className="space-y-4 p-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          {basicOptions.map((option) => (
+            <SourceTypeOption
+              key={option.value}
+              active={value === option.value}
+              icon={option.icon}
+              title={option.title}
+              description={option.description}
+              badge={option.badge}
+              onClick={() => onValueChange(option.value)}
+            />
+          ))}
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((prev) => !prev)}
+            className="flex items-center gap-2 text-xs font-medium text-eos-text-muted transition hover:text-eos-text"
+          >
+            {showAdvanced ? (
+              <ChevronUp className="size-3.5" strokeWidth={2} />
+            ) : (
+              <ChevronDown className="size-3.5" strokeWidth={2} />
+            )}
+            Surse tehnice avansate
+            {isAdvancedSelected && (
+              <Badge variant="outline" className="normal-case tracking-normal text-eos-primary">
+                activa
+              </Badge>
+            )}
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              {advancedOptions.map((option) => (
+                <SourceTypeOption
+                  key={option.value}
+                  active={value === option.value}
+                  icon={option.icon}
+                  title={option.title}
+                  description={option.description}
+                  badge={option.badge}
+                  onClick={() => onValueChange(option.value)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

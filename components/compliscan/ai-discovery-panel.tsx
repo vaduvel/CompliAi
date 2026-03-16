@@ -189,6 +189,7 @@ export function AIDiscoveryPanel({
   const [content, setContent] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null)
+  const [actionError, setActionError] = useState<{ systemId: string; message: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const activeSystems = systems.filter(
@@ -201,6 +202,18 @@ export function AIDiscoveryPanel({
 
   async function handleDiscover() {
     await onDiscover({ documentName, content })
+  }
+
+  async function handleUpdateStatus(systemId: string, action: Parameters<typeof onUpdateStatus>[1]) {
+    setActionError(null)
+    try {
+      await onUpdateStatus(systemId, action)
+    } catch {
+      setActionError({
+        systemId,
+        message: "Nu am putut salva actiunea. Verifica conexiunea si incearca din nou.",
+      })
+    }
   }
 
   async function handlePickFile(file: File) {
@@ -628,9 +641,22 @@ export function AIDiscoveryPanel({
                         Editeaza detectia
                       </Button>
                     )}
+                    {actionError?.systemId === system.id && (
+                      <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
+                        <p className="font-medium">Actiunea nu a fost salvata</p>
+                        <p className="mt-1">{actionError.message}</p>
+                        <button
+                          type="button"
+                          onClick={() => void handleUpdateStatus(system.id, "confirm")}
+                          className="mt-2 underline underline-offset-2 hover:no-underline"
+                        >
+                          Incearca din nou
+                        </button>
+                      </div>
+                    )}
                     {(system.detectionStatus === "detected" || system.detectionStatus === "reviewed") && (
                       <Button
-                        onClick={() => void onUpdateStatus(system.id, "confirm")}
+                        onClick={() => void handleUpdateStatus(system.id, "confirm")}
                         disabled={busy}
                         size="default"
                         className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
@@ -641,7 +667,7 @@ export function AIDiscoveryPanel({
                     )}
                     {system.detectionStatus === "detected" && (
                       <Button
-                        onClick={() => void onUpdateStatus(system.id, "review")}
+                        onClick={() => void handleUpdateStatus(system.id, "review")}
                         variant="outline"
                         disabled={busy}
                         size="default"
@@ -653,7 +679,7 @@ export function AIDiscoveryPanel({
                     )}
                     {system.detectionStatus !== "rejected" && system.detectionStatus !== "confirmed" && (
                       <Button
-                        onClick={() => void onUpdateStatus(system.id, "reject")}
+                        onClick={() => void handleUpdateStatus(system.id, "reject")}
                         variant="outline"
                         disabled={busy}
                         size="default"
