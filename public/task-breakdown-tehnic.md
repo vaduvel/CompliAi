@@ -1454,3 +1454,4 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] `ActionCluster` in `Setari` (baseline actions)
 - [~] `GuideCard` in `Scanare` si `Asistent`
 - [~] `ActionCluster` in `ScanHistoryTab` (handoff)
+- [~] overflow / wrapping pass pentru texte lungi

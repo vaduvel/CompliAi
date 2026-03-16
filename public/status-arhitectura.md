@@ -1711,3 +1711,7 @@ Asta este sanatos arhitectural pentru ca:
 
 - `ScanVerdictsTab` foloseste `DenseListItem` pentru drifturile din verdicts
 - `ScanHistoryTab` foloseste `ActionCluster` pentru handoff spre Documente
+
+## Actualizare 2026-03-16 - Overflow / wrapping pass
+
+- `Floating Assistant`, `Logo` si `TaskCard` trateaza corect string-uri lungi

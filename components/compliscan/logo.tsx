@@ -150,17 +150,23 @@ export function CompliScanLogoLockup({
   const sizeClass = sizeClasses(size)
 
   return (
-    <div className={cn("flex items-center", sizeClass.gap, className)}>
+    <div className={cn("flex min-w-0 items-center", sizeClass.gap, className)}>
       <CompliScanLogoMark
         variant={variant}
         className={cn(sizeClass.mark, markClassName)}
       />
-      <div className="leading-none">
-        <div className={cn("font-semibold tracking-tight", sizeClass.title, titleClassName)}>
+      <div className="min-w-0 leading-none">
+        <div className={cn("break-words font-semibold tracking-tight", sizeClass.title, titleClassName)}>
           CompliScan
         </div>
         {subtitle ? (
-          <div className={cn("mt-1 text-eos-text-muted", sizeClass.subtitle, subtitleClassName)}>
+          <div
+            className={cn(
+              "mt-1 break-words text-eos-text-muted [overflow-wrap:anywhere]",
+              sizeClass.subtitle,
+              subtitleClassName
+            )}
+          >
             {subtitle}
           </div>
         ) : null}

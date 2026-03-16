@@ -3003,6 +3003,16 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Overflow / wrapping pass
+
+- `Floating Assistant` foloseste wrapping defensiv pentru text lung
+- `Logo lockup` permite subtitle lung fara overflow
+- `TaskCard` protejeaza campurile lungi (owner, source, summary, legal refs)
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Index canon docuri
 
 - a fost adaugat `references/source-of-truth.md` ca index operational pentru docurile canonice
