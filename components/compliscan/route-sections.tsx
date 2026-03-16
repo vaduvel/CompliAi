@@ -361,7 +361,7 @@ export function ScanWorkspace({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-[28px] leading-tight">Flux scanare</CardTitle>
+        <CardTitle className="text-xl">Flux scanare</CardTitle>
         <p className="text-sm text-eos-text-muted">
           {isTextMode
             ? "Lipeste textul integral sau un extras relevant. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura fara sa mai incarci un fisier."
@@ -558,7 +558,7 @@ export function LatestDocumentSection({
         <CardHeader className="border-b border-eos-border pb-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <CardTitle className="text-[28px] leading-tight">Ultimul document analizat</CardTitle>
+              <CardTitle className="text-xl">Ultimul document analizat</CardTitle>
               <p className="mt-2 text-sm text-eos-text-muted">
                 Rezultatul este legat explicit de documentul tocmai scanat.
               </p>
@@ -856,22 +856,5 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
         </DenseListItem>
       ))}
     </div>
-  )
-}
-
-export function EmptyStateCard({
-  title,
-  description,
-}: {
-  title: string
-  description: string
-}) {
-  return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardContent className="p-8">
-        <p className="text-lg font-semibold text-eos-text">{title}</p>
-        <p className="mt-2 text-sm text-eos-text-muted">{description}</p>
-      </CardContent>
-    </Card>
   )
 }
