@@ -42,7 +42,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Dashboard"
         title="Starea actuala a conformitatii tale"
-        description="Vezi nivelul de pregatire pentru audit, drift-urile care necesita atentie si actiunile prioritare."
+        description="Starea conformitatii organizatiei tale. Ce este blocat, ce cere atentie si ce faci acum."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section aria-label="Priority Tasks & Drift" className="space-y-4" aria-live="polite">
+      <section aria-label="Schimbari si drift activ" className="space-y-4" aria-live="polite">
         <DriftCommandCenter
           activeDrifts={activeDrifts}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}

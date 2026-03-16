@@ -103,17 +103,19 @@ export function RemediationBoard({
             </div>
           </div>
 
-          <div className="space-y-3 xl:min-w-[42rem]">
-            {filterGroups.map((group) => (
-              <FilterCluster
-                key={group.label}
-                label={group.label}
-                activeFilter={activeFilter}
-                values={group.values}
-                onFilterChange={onFilterChange}
-              />
-            ))}
-          </div>
+          {openCount > 0 && (
+            <div className="space-y-3 xl:min-w-[42rem]">
+              {filterGroups.map((group) => (
+                <FilterCluster
+                  key={group.label}
+                  label={group.label}
+                  activeFilter={activeFilter}
+                  values={group.values}
+                  onFilterChange={onFilterChange}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </CardHeader>
 
