@@ -1448,3 +1448,4 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] `ActionCluster` in `Control / Sisteme`
 - [~] `DenseListItem` in `Scanare` si `Control / Sisteme`
 - [~] `ActionCluster` in `Setari` (baseline actions)
+- [~] `GuideCard` in `Scanare` si `Asistent`

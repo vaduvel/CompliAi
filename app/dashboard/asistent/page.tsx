@@ -11,6 +11,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { GuideCard } from "@/components/evidence-os/GuideCard"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
@@ -186,15 +187,15 @@ export default function AsistentPage() {
           description="Poti clarifica riscul, obligatia sau urmatorul pas, apoi revii in Dashboard, Scanare, Control sau Dovada pentru actiunea reala."
           support={
             <div className="grid gap-4 md:grid-cols-3">
-              <AssistantFlowHint
+              <GuideCard
                 title="1. Formulezi intrebarea"
                 detail="Pornesti cu o intrebare scurta despre risc, obligatii sau status."
               />
-              <AssistantFlowHint
+              <GuideCard
                 title="2. Clarifici contextul"
                 detail="Asistentul te ajuta sa intelegi problema si sa vezi urmatorul pas plauzibil."
               />
-              <AssistantFlowHint
+              <GuideCard
                 title="3. Revii in produs"
                 detail="Pentru executie, review sau dovada mergi inapoi in paginile principale."
               />
@@ -345,15 +346,6 @@ export default function AsistentPage() {
           </div>
         </div>
       </section>
-    </div>
-  )
-}
-
-function AssistantFlowHint({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-sm font-medium text-eos-text">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>
   )
 }

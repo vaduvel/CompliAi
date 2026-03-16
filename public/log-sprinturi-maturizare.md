@@ -2959,3 +2959,12 @@ Actualizare 2026-03-16 - ActionCluster in Setari
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - GuideCard adoption
+
+- `Asistent` foloseste `GuideCard` pentru fluxul canonic
+- `Scanare` foloseste `GuideCard` pentru context si regula de citire
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

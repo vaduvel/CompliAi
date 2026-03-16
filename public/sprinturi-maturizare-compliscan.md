@@ -1309,3 +1309,7 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - `ActionCluster` aplicat in `Setari` pentru actiunile de baseline
+
+Actualizare suplimentara 2026-03-16:
+
+- `GuideCard` adoptat in `Asistent` si `Scanare`

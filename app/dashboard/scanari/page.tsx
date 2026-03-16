@@ -14,6 +14,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
+import { GuideCard } from "@/components/evidence-os/GuideCard"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -572,20 +573,18 @@ function ScanWorkflowGuideCard({
         }
         support={
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Rolul paginii</p>
-              <p className="mt-2 text-sm font-semibold text-eos-text">
-                {agentModeActive
+            <GuideCard
+              title="Rolul paginii"
+              detail={
+                agentModeActive
                   ? "Workspace-ul agentului propune, dar omul valideaza."
-                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."}
-              </p>
-            </div>
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">Regula de citire</p>
-              <p className="mt-2 text-sm font-semibold text-eos-text">
-                Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata.
-              </p>
-            </div>
+                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."
+              }
+            />
+            <GuideCard
+              title="Regula de citire"
+              detail="Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata."
+            />
           </div>
         }
       />

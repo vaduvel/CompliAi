@@ -179,7 +179,7 @@ Rămas deschis intenționat:
 Închis în acest lot:
 
 - rețete canonice introduse pentru:
-  - `guide card` prin `components/evidence-os/GuideCard.tsx`
+- `guide card` prin `components/evidence-os/GuideCard.tsx`
   - `metrics row` prin `components/evidence-os/MetricTile.tsx`
 - `dense operational list` prin `components/evidence-os/DenseListItem.tsx`
 - adoptate deja în:
@@ -187,6 +187,7 @@ Rămas deschis intenționat:
   - `DriftCommandCenter` + `Alerte`
   - `Scanare` (tab-uri)
   - `Control / Sisteme` (drift recent)
+  - `Asistent` (flux canonic)
 - `summary + actions` prin `ActionCluster`:
   - `Alerte` (drift actions)
   - `Auditor Vault` (export)

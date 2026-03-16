@@ -1686,3 +1686,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - ActionCluster Setari
 
 - actiunile de baseline folosesc `ActionCluster`
+
+## Actualizare 2026-03-16 - GuideCard Scanare + Asistent
+
+- `GuideCard` adoptat pentru contextul canonic in `Scanare` si `Asistent`
