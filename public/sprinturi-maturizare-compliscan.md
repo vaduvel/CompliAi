@@ -1168,3 +1168,4 @@ Actualizare suplimentara 2026-03-16:
 - `Dashboard core payload` include `evidenceLedger` ca sursa pentru `Registru dovezi`
 - UI-ul afiseaza acum calitatea dovezii (`verificata / slaba / neevaluata`), nu doar task-urile
 - `SummaryStrip` expune starea registrului ca semnal operational
+- `Audit si export` foloseste sumarul registrului in readiness

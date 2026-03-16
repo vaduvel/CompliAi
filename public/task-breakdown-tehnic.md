@@ -193,6 +193,7 @@ Fronturile active acum:
   - route-ul controlat de access la dovada face acum lookup sigur si prin `org_id + task_id + attachment_id` cand metadata locala lipseste sau este invechita
   - `Auditor Vault` expune acum registrul real prin `evidenceLedger` in payload
   - `SummaryStrip` in Vault afiseaza acum health-ul registrului (verificate / slabe / neevaluate)
+  - `Audit si export` expune sumarul registrului in zona de readiness
 - [~] source of truth cloud pentru tenancy
   - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB

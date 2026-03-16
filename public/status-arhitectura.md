@@ -1562,3 +1562,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Auditor Vault` foloseste acum registrul real ca sursa vizibila, nu doar attach-urile din task-uri
 - indicatorii de calitate (`verificata / slaba / neevaluata`) sunt expusi in UI
 - `SummaryStrip` din Vault afiseaza starea registrului ca semnal operational
+- `Audit si export` afiseaza sumarul registrului in zona de readiness

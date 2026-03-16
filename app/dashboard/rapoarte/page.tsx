@@ -75,6 +75,19 @@ export default function AuditExportPage() {
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const doneTasks = cockpit.tasks.filter((task) => task.status === "done")
   const activeDrifts = cockpit.activeDrifts
+  const evidenceLedger = cockpit.data.evidenceLedger ?? []
+  const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
+  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = Math.max(
+    0,
+    evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
+  )
+  const ledgerHint =
+    evidenceLedger.length > 0
+      ? `${ledgerReadyCount} verificate · ${ledgerWeakCount} slabe · ${ledgerUnratedCount} neevaluate`
+      : "registrul se populeaza cand storage-ul de dovezi este activ"
+  const ledgerTone =
+    evidenceLedger.length === 0 ? "neutral" : ledgerWeakCount > 0 ? "warning" : "success"
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Task-uri deschise",
@@ -87,6 +100,12 @@ export default function AuditExportPage() {
       value: `${doneTasks.length}`,
       hint: "actiuni deja trecute prin executie",
       tone: doneTasks.length > 0 ? "success" : "neutral",
+    },
+    {
+      label: "Registru dovezi",
+      value: `${evidenceLedger.length}`,
+      hint: ledgerHint,
+      tone: ledgerTone,
     },
     {
       label: "Drift activ",
