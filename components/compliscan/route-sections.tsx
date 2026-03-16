@@ -120,7 +120,6 @@ export function DriftCommandCenter({
           <>
             <div className="space-y-3">
               {activeDrifts.map((drift) => {
-                const guidance = getDriftPolicyFromRecord(drift)
                 const breached = isDriftSlaBreached(drift)
                 const isSelected = drift.id === selectedDrift.id
 
@@ -151,9 +150,6 @@ export function DriftCommandCenter({
                               drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
                               formatRelativeRomanian(drift.detectedAtISO),
                             ].join(" · ")}
-                          </p>
-                          <p className="mt-2 text-sm text-eos-text-muted line-clamp-2">
-                            {guidance.nextAction}
                           </p>
                         </div>
                         <div className="flex flex-wrap justify-end gap-2">

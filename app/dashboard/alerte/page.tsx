@@ -231,17 +231,8 @@ export default function DriftPage() {
                               </Badge>
                             ) : null}
                           </div>
-                          <p className="mt-2 text-sm text-eos-text-muted">
-                            {formatDriftTypeLabel(drift.type)} · {drift.change}
-                          </p>
-                          <p className="mt-2 text-xs text-eos-text-muted">
-                            {[
-                              drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
-                              formatRelativeRomanian(drift.detectedAtISO),
-                            ].join(" · ")}
-                          </p>
-                          <p className="mt-3 text-sm leading-6 text-eos-text-muted line-clamp-1">
-                            {guidance.nextAction}
+                          <p className="mt-1 text-xs text-eos-text-muted">
+                            {formatDriftTypeLabel(drift.type)} · {formatRelativeRomanian(drift.detectedAtISO)}
                           </p>
                         </div>
                         <div className="flex flex-wrap justify-end gap-2">
@@ -320,11 +311,13 @@ export default function DriftPage() {
                           </p>
                         </div>
                       </div>
-                      {(drift.systemLabel || drift.sourceDocument) && (
-                        <p className="mt-3 text-xs text-eos-text-muted">
-                          {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
-                        </p>
-                      )}
+                      <p className="mt-3 text-xs text-eos-text-muted">
+                        {[
+                          drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
+                          drift.change,
+                          formatRelativeRomanian(drift.detectedAtISO),
+                        ].filter(Boolean).join(" · ")}
+                      </p>
                       <ActionCluster
                         eyebrow="Actiuni"
                         title="Decizie pentru drift"
