@@ -437,6 +437,10 @@ Rezultat urmărit:
 
 - DS-ul controlează nu doar look-ul, ci și claritatea structurală
 
+Status curent:
+
+- `DenseListItem` adoptat in `RecentScansCard` si `AlertsList` pentru liste operationale
+
 ### 10. Reguli de densitate și copy
 
 Suprafață:

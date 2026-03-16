@@ -2968,3 +2968,12 @@ Actualizare 2026-03-16 - GuideCard adoption
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem in listele de cockpit
+
+- `RecentScansCard` foloseste `DenseListItem` pentru sursele recente
+- `AlertsList` foloseste `DenseListItem` pentru actiunile generate din drift
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
