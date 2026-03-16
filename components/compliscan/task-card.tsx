@@ -161,6 +161,7 @@ export function TaskCard({
 }: TaskCardProps) {
   const tone = priorityTone(task.priority)
   const evidenceInputRef = useRef<HTMLInputElement | null>(null)
+  const [validating, setValidating] = useState(false)
   const [selectedEvidenceKind, setSelectedEvidenceKind] = useState<TaskEvidenceKind>(
     task.evidenceKinds[0] ?? "other"
   )
@@ -258,11 +259,14 @@ export function TaskCard({
 
               <div className="mt-4 space-y-2">
                 <Button
-                  onClick={() => onMarkDone(task.id)}
+                  onClick={() => { setValidating(true); onMarkDone(task.id) }}
+                  disabled={validating}
                   size="lg"
                   className="w-full gap-2"
                 >
-                  {task.status === "done" ? (
+                  {validating ? (
+                    <RefreshCcw className="size-5 animate-spin" strokeWidth={2} />
+                  ) : task.status === "done" ? (
                     <CheckCircle2 className="size-5" strokeWidth={2} />
                   ) : (
                     <RefreshCcw className="size-5" strokeWidth={2} />
@@ -397,6 +401,11 @@ export function TaskCard({
                     <span>{step}</span>
                   </li>
                 ))}
+                {task.steps.length > 3 && (
+                  <li className="pl-6 text-xs text-eos-text-muted/70">
+                    +{task.steps.length - 3} pasi in detaliile task-ului
+                  </li>
+                )}
               </ul>
             </div>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { ArrowRight, Clock3, ShieldAlert, UserRound } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -72,6 +73,12 @@ export function NextBestAction({
         ? "Nu exista probleme active. Rulezi un scan nou doar cand se schimba documentele, politicile sau fluxurile."
         : "Mai exista semnale active. Revizuieste alertele si inchide urmatorul risc cu impact real."
 
+    const ctaHref = !hasEvidence
+      ? "/dashboard/scanare"
+      : activeRiskCount > 0
+        ? "/dashboard/alerte"
+        : null
+
     return (
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="pb-0">
@@ -88,6 +95,14 @@ export function NextBestAction({
             label={emptyLabel}
             className="border-eos-border bg-eos-surface-variant py-8"
           />
+          {ctaHref && (
+            <Button asChild variant="outline" size="sm" className="mt-3 w-full gap-2">
+              <Link href={ctaHref}>
+                {!hasEvidence ? "Deschide Scanare" : "Revizuieste alertele"}
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </Button>
+          )}
         </CardContent>
       </Card>
     )

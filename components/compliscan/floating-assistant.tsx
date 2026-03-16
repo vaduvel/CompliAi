@@ -33,6 +33,8 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
+  const [lastSentText, setLastSentText] = useState("")
+  const [hasConnectionError, setHasConnectionError] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const panelId = useId()
@@ -55,6 +57,8 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
     if (!msg || sending) return
     setInput("")
     setSending(true)
+    setLastSentText(msg)
+    setHasConnectionError(false)
 
     setMessages((prev) => [
       ...prev,
@@ -86,12 +90,13 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
         ])
       }
     } catch {
+      setHasConnectionError(true)
       setMessages((prev) => [
         ...prev,
         {
           id: `e-${Date.now()}`,
           role: "assistant",
-          content: "Eroare de conexiune. Incearca din nou.",
+          content: "Eroare de conexiune.",
           createdAtISO: new Date().toISOString(),
         },
       ])
@@ -196,6 +201,19 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
               <div ref={bottomRef} />
             </div>
           </div>
+
+          {hasConnectionError && lastSentText && (
+            <div className="flex items-center justify-between border-t border-eos-border-subtle bg-eos-bg-panel px-3 py-2">
+              <span className="text-xs text-eos-text-muted">Mesajul nu a ajuns.</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => { void handleSend(lastSentText) }}
+              >
+                Reincearca
+              </Button>
+            </div>
+          )}
 
           <div className="border-t border-eos-border-subtle bg-eos-bg-panel p-3">
             <form
