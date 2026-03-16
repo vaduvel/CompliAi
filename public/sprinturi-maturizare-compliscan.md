@@ -1317,3 +1317,7 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - `DenseListItem` adoptat in `RecentScansCard` si `AlertsList`
+
+Actualizare suplimentara 2026-03-16:
+
+- `DenseListItem` adoptat in `LatestDocumentSection` pentru findings si task-uri

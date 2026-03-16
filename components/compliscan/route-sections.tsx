@@ -627,28 +627,27 @@ export function LatestDocumentSection({
                       />
                     )}
                     {latestScanFindings.slice(0, 3).map((finding) => (
-                      <div
-                        key={finding.id}
-                        className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
-                            {finding.provenance?.ruleId || "fara regula"}
-                          </Badge>
-                          {finding.provenance?.matchedKeyword && (
+                      <DenseListItem key={finding.id} className="bg-eos-bg">
+                        <div className="p-4">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
-                              keyword: {finding.provenance.matchedKeyword}
+                              {finding.provenance?.ruleId || "fara regula"}
                             </Badge>
-                          )}
+                            {finding.provenance?.matchedKeyword && (
+                              <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                                keyword: {finding.provenance.matchedKeyword}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="mt-3 text-sm font-semibold text-eos-text">
+                            {finding.title}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-eos-text-muted">
+                            {finding.provenance?.excerpt || finding.detail}
+                          </p>
+                          <FindingVerdictMeta finding={finding} className="mt-3" />
                         </div>
-                        <p className="mt-3 text-sm font-semibold text-eos-text">
-                          {finding.title}
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-eos-text-muted">
-                          {finding.provenance?.excerpt || finding.detail}
-                        </p>
-                        <FindingVerdictMeta finding={finding} className="mt-3" />
-                      </div>
+                      </DenseListItem>
                     ))}
                   </div>
                 </div>
@@ -667,22 +666,21 @@ export function LatestDocumentSection({
                     />
                   )}
                   {latestScanTasks.slice(0, 3).map((task) => (
-                      <div
-                        key={task.id}
-                        className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
-                      >
+                    <DenseListItem key={task.id} className="bg-eos-bg">
+                      <div className="p-4">
                         <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-eos-text">
-                          {task.title}
+                          <p className="text-sm font-semibold text-eos-text">
+                            {task.title}
                           </p>
                           <span className="text-xs text-eos-text-muted">{task.priority}</span>
                         </div>
-                      <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
-                      <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
-                      <p className="mt-2 text-xs text-eos-text-muted">
-                        {task.effortLabel} · {task.source}
-                      </p>
-                    </div>
+                        <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+                        <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+                        <p className="mt-2 text-xs text-eos-text-muted">
+                          {task.effortLabel} · {task.source}
+                        </p>
+                      </div>
+                    </DenseListItem>
                   ))}
                 </div>
               </div>

@@ -439,7 +439,7 @@ Rezultat urmărit:
 
 Status curent:
 
-- `DenseListItem` adoptat in `RecentScansCard` si `AlertsList` pentru liste operationale
+- `DenseListItem` adoptat in `RecentScansCard`, `AlertsList`, `LatestDocumentSection` (findings + tasks)
 
 ### 10. Reguli de densitate și copy
 

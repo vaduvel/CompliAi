@@ -2977,3 +2977,11 @@ Actualizare 2026-03-16 - DenseListItem in listele de cockpit
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem in rezultate recente
+
+- `LatestDocumentSection` foloseste `DenseListItem` pentru findings si task-uri recente
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

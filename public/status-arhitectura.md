@@ -1694,3 +1694,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - DenseListItem RecentScans + Alerts
 
 - `RecentScansCard` si `AlertsList` folosesc `DenseListItem` pentru liste operationale
+
+## Actualizare 2026-03-16 - DenseListItem LatestDocumentSection
+
+- `LatestDocumentSection` foloseste `DenseListItem` pentru findings si task-uri recente
