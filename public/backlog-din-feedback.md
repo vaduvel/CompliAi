@@ -1,6 +1,6 @@
 # CompliScan - Backlog extras din feedback
 
-Data actualizarii: 2026-03-13
+Data actualizarii: 2026-03-15
 
 ## Scop
 
@@ -512,3 +512,313 @@ Backlog-ul corect extras din el este:
   - compliance twin
   - full autonomy
   - claim-uri prea mari
+
+## Addendum 2026-03-15 - lectura riguroasa a feedback-ului nou
+
+Aceasta sectiune incorporeaza explicit lectura riguroasa a blocului nou din `feedback.md`, incepand cu:
+
+- `#feedback nou directie si sprint de release`
+
+Scopul nu este sa desconsideram ideile noi, ci sa le punem intr-o forma care poate fi folosita de produs si roadmap fara sa creeze deriva.
+
+### Ce contine noul bloc de feedback
+
+Blocul nou aduce 6 fire mari:
+
+1. o lectura buna a maturitatii actuale CompliScan
+2. un plan GTM agresiv pe 8 saptamani
+3. o lista de capabilitati „globale” considerate necesare
+4. o estimare dura de sansa comerciala
+5. o ramura mare de fine-tuning / LoRA / QLoRA / poisoning / GPAI compute
+6. o directie monetizabila bazata pe `CI/CD gate`, apoi `vendor risk`, `questionnaires`, `ServiceNow`
+
+### Concluzie de lucru
+
+Noul feedback are valoare, dar este foarte eterogen:
+
+- o parte este bine aliniata cu starea reala a produsului
+- o parte este directie buna pentru mai tarziu
+- o parte este ipoteza comerciala care trebuie revalidata
+- o parte este prea devreme si ar risca sa rupa focusul produsului
+
+### 1. Ce este valid si aliniat cu realitatea proiectului
+
+Aceste idei sunt utile si compatibile cu sursele noastre canonice:
+
+- CompliScan are deja o fundatie reala si nu trebuie tratat ca demo fragil
+- directia sanatoasa ramane:
+  - model unic de domeniu
+  - UX declutter
+  - stare + next action > framing excesiv
+  - fara rewrite major
+- valoarea reala a produsului ramane in lantul:
+  - `scanare -> control -> remediere -> dovada -> audit / export`
+- diferentierea sanatoasa ramane:
+  - `compliscan.yaml`
+  - repo sync
+  - drift lifecycle
+  - evidence quality
+  - audit pack defensibil
+- insight-ul corect de business este ca produsul valoreaza mai mult ca `operational compliance cockpit` decat ca simplu scanner
+
+Aceste idei trebuie pastrate ca semnal de directie:
+
+- produsul trebuie sa devina mai clar operational, nu mai „impresionant” declarativ
+- partea comerciala buna va veni din:
+  - executie controlata
+  - dovezi
+  - auditabilitate
+  - integrare in workflow
+
+### 2. Ce este util, dar pentru mai tarziu
+
+Aceste idei nu trebuie pierdute, dar nici trase acum in sprinturile de baza:
+
+- `Trust Center`
+- `multi-framework mapping`
+- `API-first posture`
+- `CI/CD gate` limitat ca wedge ulterior
+- `Slack / Jira / Teams` integrations
+- colaborare mai serioasa pe task-uri si approvals
+- `white-label export pack`
+- outward trust surface pentru prospecti sau clienti
+
+Cum le tratam:
+
+- le pastram ca backlog strategic
+- nu le lasam sa devina blocante pentru maturizarea cockpit-ului actual
+- le evaluam doar dupa ce runtime-ul principal este mult mai clar si coerent
+
+### 3. Ce este ipoteza comerciala de revalidat, nu adevar operational
+
+Noul feedback contine si multe afirmatii care pot fi utile ca energie sau directie, dar nu trebuie tratate ca realitate validata:
+
+- `€100k ARR pana in August 2026`
+- `15 customers in 8 weeks`
+- `28% sansa acum / 65-75% cu executie perfecta`
+- `Vanta = 0% AI Act`
+- `CompliScan > Vanta` ca adevar absolut
+- `Trust Center live in 48h sau muriti`
+- formule pseudo-exacte de succes comercial
+
+Cum le tratam:
+
+- nu le aruncam complet
+- le mutam in cosul `ipoteze comerciale`
+- orice folosim extern trebuie revalidat pe:
+  - clienti reali
+  - conversii
+  - piloți
+  - demo-uri
+  - win/loss notes
+
+### 4. Ce este prea devreme sau periculos ca directie imediata
+
+Aceste fire ar deschide prea multa complexitate prea devreme:
+
+- `EU Database integration` tratata ca must-have imediat
+- `CE marking auto-generation`
+- `fine-tune Llama 3.1`
+- `LoRA / QLoRA` ca sprint urgent
+- detectie de `poisoning`
+- pipeline GPAI FLOPs ca ramura majora
+- `vendor risk` ca produs separat acum
+- `questionnaire auto-fill` ca nou front enterprise
+- `LangChain + ServiceNow`
+- arhitectura `microservices` ca directie curenta
+
+Problema aici nu este ca ideile sunt „rele”.
+
+Problema este ordinea:
+
+- ele presupun ca produsul de baza este deja foarte stabil comercial si operational
+- ele ar consuma focusul exact cand produsul are nevoie de:
+  - claritate UX
+  - consistenta intre scanare, task-uri, drift si report
+  - guvernanta baseline / drift
+  - reducere false positives
+  - export si audit pack mult mai coerente
+
+### 5. Ce luam explicit din fiecare fir nou
+
+#### 5.1. Din lectura de maturitate
+
+Pastram:
+
+- confirmarea ca produsul are fundatie reala
+- focus pe `unified model`
+- focus pe `UX declutter`
+- focus pe `audit defensibility`
+- evitarea rewrite-urilor mari
+
+#### 5.2. Din planul GTM pe 8 saptamani
+
+Pastram:
+
+- nevoia de pozitionare clara
+- nevoia de demo mai convingator
+- nevoia de primii piloti plătitori
+- nevoia de o suprafata de trust / proof mai tarziu
+
+Nu luam ca adevar:
+
+- cifrele ARR
+- termenele foarte scurte
+- framing-ul de tip `market killer`
+
+#### 5.3. Din lista „ce iti trebuie global”
+
+Pastram:
+
+- `multi-framework mapping`
+- `API-first`
+- un `Trust Center` ulterior
+- colaborare / integrations ca nivel 2
+
+Parcam:
+
+- `EU database integration`
+- `CE marking`
+- pricing global complet
+- trust badges externe
+
+#### 5.4. Din „analistul cu sange rece”
+
+Pastram:
+
+- mesajul central:
+  - produsul tehnic e promitator
+  - business readiness si pilots sunt slabe
+- nevoia de validare externa reala
+- nevoia de primii clienti si de social proof
+
+Nu luam ca adevar:
+
+- procentele exacte
+- formulele de succes
+- predictiile dure fara date reale de pipeline
+
+#### 5.5. Din ramura `fine-tune / LoRA / QLoRA / poisoning`
+
+Pastram foarte limitat:
+
+- ideea de evaluare disciplinata a detectorului
+- ideea de benchmark-uri curate pe fixture-uri si seturi reale
+- ideea de a pastra output structurat si auditabil
+
+Nu tractam acum:
+
+- training model propriu
+- QLoRA pipeline
+- poisoning defense stack
+- GPAI compute documentation ca proiect separat
+- vLLM serving ca nou front de produs
+
+#### 5.6. Din directia `CI/CD gate -> vendor risk -> questionnaires`
+
+Pastram:
+
+- insight-ul strategic ca `enforcement` poate monetiza mai bine decat scanning pasiv
+- ideea ca integrarea in workflow-ul clientului poate creste stickiness
+
+Parcam:
+
+- `GitHub Action` ca wedge ulterior
+- `vendor risk` light
+- `questionnaire auto-fill`
+- `ServiceNow`
+
+Motiv:
+
+- produsul actual trebuie sa devina mai intai foarte coerent pe flow-ul existent
+
+### 6. Maparea operationala a feedback-ului nou
+
+Transformam tot ce e util din noul bloc in 4 cosuri clare.
+
+#### Acum
+
+Acestea sunt direct relevante pentru sprinturile active si urmatoarele valuri scurte:
+
+- UX declutter sever pe:
+  - `Dashboard`
+  - `Scanare`
+  - `Control`
+  - `Checklists`
+  - `Audit si export`
+- consistenta intre:
+  - findings
+  - remediation plan
+  - report
+  - audit pack
+- reducere false positives si clasificare mai buna pe:
+  - `Text manual`
+  - `compliscan.yaml`
+- baseline / drift governance mai stricta
+- evidence quality mai defensibila
+- pachet exportabil mai clar pentru client si audit
+- QA real pe flow-uri canonice si fixture-uri
+- primii piloti reali sau testari asistate cu utilizatori
+
+#### Curand, dupa stabilizare
+
+- `Trust Center` foarte limitat
+- `multi-framework mapping`
+- `API-first posture`
+- un `CI/CD gate` minimal, numai daca flow-ul curent devine foarte coerent
+
+#### Mai tarziu
+
+- colaborare avansata
+- Jira / Slack / Teams
+- vendor risk
+- questionnaire auto-fill
+- white-label packs
+
+#### Nu acum
+
+- fine-tuning Llama
+- LoRA / QLoRA ca directie de sprint
+- poisoning / spectral guards
+- GPAI FLOPs project
+- ServiceNow
+- microservices rewrite
+- claims absolute despre competitie
+
+### 7. Directia recomandata dupa aceasta lectura
+
+Directia corecta nu este „mai multa tehnologie noua”.
+
+Directia corecta este:
+
+1. sa facem cockpit-ul actual clar, sever si defensibil
+2. sa inchidem inconsistentele dintre `scan -> control -> remediere -> audit`
+3. sa demonstram valoare reala pe piloti si flow-uri complete
+4. abia apoi sa deschidem:
+   - trust surface
+   - API posture
+   - workflow enforcement
+
+### 8. Decizie pentru backlog
+
+Noul feedback nu trebuie ignorat.
+
+El trebuie insa citit in felul urmator:
+
+- `păstrăm` miezul bun de directie
+- `parcăm` optiunile bune, dar premature
+- `revalidăm` ipotezele comerciale
+- `blocăm` pentru moment firele care ar rupe focusul produsului
+
+### 9. Rezumat executiv al addendum-ului
+
+Noul bloc din `feedback.md` confirma ceva important:
+
+- CompliScan are produs real si directie buna
+- valoarea lui sta in cockpit operational + evidence + audit
+- urmatorul salt mare nu vine din model training sau enterprise sprawl
+- urmatorul salt mare vine din:
+  - claritate
+  - coerenta
+  - pilot validation
+  - trust castigat prin flow-uri reale

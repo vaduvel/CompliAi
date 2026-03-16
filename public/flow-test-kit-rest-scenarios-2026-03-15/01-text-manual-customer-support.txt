@@ -1,0 +1,9 @@
+Customer Support Assistant for an online retailer.
+
+The system uses OpenAI GPT-4o to classify incoming tickets, summarize customer requests and draft suggested replies for the support team.
+
+Inputs can include customer names, email addresses, order details and complaint descriptions. The assistant does not make final decisions by itself. A support lead reviews a sample of outputs every week and escalates any unsafe suggestion.
+
+Conversation logs are retained for 30 days in an EU region for troubleshooting and service quality review.
+
+The system is used for support triage, classification and response drafting, not for credit scoring, recruitment or biometric identification.

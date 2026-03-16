@@ -1,0 +1,26 @@
+version: "1.0"
+system_id: "recruitment-screening-ai"
+name: "Recruitment Screening Assistant"
+
+specs:
+  provider: "openai"
+  model: "gpt-4.1"
+  capability: ["scoring", "classification"]
+  temperature_limit: 0.2
+  filters_enabled: true
+
+governance:
+  risk_class: "high"
+  data_residency: "us-east-1"
+  personal_data_processed: true
+  retention_days: 365
+
+human_oversight:
+  required: false
+  review_method: "none"
+  reviewer_role: "none"
+  alert_on_failure: true
+
+mapping:
+  regulations: ["GDPR", "EU-AI-ACT"]
+  articles: ["Art. 14", "Art. 50", "Chapter V"]

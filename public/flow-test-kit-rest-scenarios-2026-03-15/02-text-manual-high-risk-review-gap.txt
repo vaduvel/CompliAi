@@ -1,0 +1,9 @@
+Recruitment Screening Assistant for a high-volume employer.
+
+The system scores CVs, ranks candidates automatically and recommends which applicants should be rejected before interview.
+
+Inputs include CV text, work history, education, skills, location and other personal data. The current operational process does not require human review before low-ranked candidates are filtered out.
+
+Candidate profiles and scoring outputs are stored for 365 days and are available to teams outside the EU through a US-hosted workspace.
+
+The workflow is described internally as automated candidate scoring and prioritization.
