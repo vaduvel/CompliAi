@@ -1565,3 +1565,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Audit si export` afiseaza sumarul registrului in zona de readiness
 - `Audit Pack` client-facing expune raportul de dovezi verificate din registru
 - `Audit Pack` JSON expune sumarul de calitate al registrului de dovezi
+- `Remediere` foloseste acum semnalul de calitate a dovezii in summary strip

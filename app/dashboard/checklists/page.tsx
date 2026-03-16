@@ -29,12 +29,21 @@ export default function RemediationPage() {
   const evidenceAttached = cockpit.tasks.filter((task) => Boolean(task.attachedEvidence))
   const openPriorityOneTasks = openTasks.filter((task) => task.priority === "P1")
   const tasksMissingEvidence = openTasks.filter((task) => !task.attachedEvidence)
+  const evidenceLedger = cockpit.data.evidenceLedger ?? []
+  const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
+  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = Math.max(
+    0,
+    evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
+  )
   const dominantExecutionSignal =
     tasksMissingEvidence.length > 0
       ? `${tasksMissingEvidence.length} task-uri fara dovada`
-      : openPriorityOneTasks.length > 0
-        ? `${openPriorityOneTasks.length} urgente P1`
-        : `${openTasks.length} task-uri active`
+      : ledgerWeakCount > 0
+        ? `${ledgerWeakCount} dovezi slabe`
+        : openPriorityOneTasks.length > 0
+          ? `${openPriorityOneTasks.length} urgente P1`
+          : `${openTasks.length} task-uri active`
   const items: SummaryStripItem[] = [
     {
       label: "Task-uri deschise",
@@ -59,6 +68,20 @@ export default function RemediationPage() {
     },
   ]
 
+  if (evidenceLedger.length > 0) {
+    items.push({
+      label: "Calitate dovada",
+      value: ledgerWeakCount > 0 ? `${ledgerWeakCount} slabe` : `${ledgerReadyCount} verificate`,
+      hint:
+        ledgerWeakCount > 0
+          ? "inlocuiesti dovezile slabe inainte de audit"
+          : ledgerUnratedCount > 0
+            ? `${ledgerUnratedCount} neevaluate inca`
+            : "registru curat",
+      tone: ledgerWeakCount > 0 ? "warning" : ledgerUnratedCount > 0 ? "accent" : "success",
+    })
+  }
+
   return (
     <div className="space-y-8">
       <PageIntro
@@ -81,9 +104,11 @@ export default function RemediationPage() {
             <p className="text-sm text-eos-text-muted">
               {tasksMissingEvidence.length > 0
                 ? "Atasezi dovada inainte sa inchizi task-ul."
-                : openPriorityOneTasks.length > 0
-                  ? "Intri in urgentele P1 inaintea restului."
-                  : "Poti lucra direct din board fara blocaje majore."}
+                : ledgerWeakCount > 0
+                  ? "Inlocuiesti dovezile slabe ca sa nu blocheze auditul."
+                  : openPriorityOneTasks.length > 0
+                    ? "Intri in urgentele P1 inaintea restului."
+                    : "Poti lucra direct din board fara blocaje majore."}
             </p>
           </div>
         }
