@@ -2695,6 +2695,45 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Hotfix build (Control overview props)
+
+- `app/dashboard/sisteme/page.tsx` a eliminat `reviewedCount` din `ControlOverview` (prop neacceptat)
+- build-ul nu mai cade pe mismatch de props
+
+Validare dupa pas:
+
+- `npm run build` -> verde
+
+Actualizare 2026-03-16 - Remediere progressive disclosure (handoff)
+
+- `Remediere` nu mai afiseaza by default pasii de verificare
+- `Auditor Vault` / `Audit si export` apar doar la cerere cand exista task-uri active
+- reduce concurenta cu board-ul de executie
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Audit si export progressive disclosure (support panels)
+
+- `Audit si export` ascunde by default panourile de ghidaj si suport
+- detaliile (handoff, status grid, artefacte, drift) apar doar la cerere
+- exportul si snapshot-ul raman in prim-plan ca livrabil
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Control overview si Audit export micro-pass
+
+- `Control` (overview) afiseaza sumar + actiuni scurte, iar ghidajul complet apare doar la cerere
+- `Audit si export` elimina duplicarea de navigare din snapshot card
+- reduce densitatea si mentine directia de confirmare vs executie
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
 
 - `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK
@@ -2735,3 +2774,13 @@ Validare dupa pas:
 - `npm test` -> verde (`71` fisiere, `258` teste)
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Actualizare 2026-03-16 - Dashboard progressive disclosure pentru detalii recente
+
+- `Dashboard` nu mai incarca vizual detaliile istorice la primul render
+- sectiunea `Detalii recente` este ascunsa by default si apare doar la cerere
+- reducere de densitate pe home + respect pentru regula summary -> detail -> action
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

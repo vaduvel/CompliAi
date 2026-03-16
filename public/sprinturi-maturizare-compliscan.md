@@ -1176,3 +1176,24 @@ Actualizare suplimentara 2026-03-16:
 - `Control` afiseaza semnalul de calitate a dovezii in overview
 - `Documente` incarca lazy sectiunile istorice pentru un load initial mai rapid
 - `Alerte/Drift` foloseste sumarul dovezii ca semnal operational
+
+Actualizare suplimentara 2026-03-16:
+
+- `Dashboard` foloseste acum progressive disclosure pentru detalii recente
+- `Detalii recente` este ascuns by default si apare doar cand este cerut explicit
+- home-ul ramane orientare, nu pagina de istoric
+
+Actualizare suplimentara 2026-03-16:
+
+- `Remediere` ascunde pasii de verificare cand exista executie activa
+- `Auditor Vault` / `Audit si export` apar doar la cerere, ca sa nu concureze cu board-ul
+
+Actualizare suplimentara 2026-03-16:
+
+- `Audit si export` ascunde panourile de suport by default
+- ghidajul complet si panourile secundare apar doar la cerere
+
+Actualizare suplimentara 2026-03-16:
+
+- `Control` (overview) foloseste progressive disclosure pentru ghidaj
+- `Audit si export` a scos duplicarile de navigare din snapshot card

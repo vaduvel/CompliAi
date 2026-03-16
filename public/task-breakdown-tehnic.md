@@ -1375,3 +1375,20 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `mvp-store` incearca upsert in `public.organizations` cand FK-ul lipseste
   - `mvp-store.test.ts` acopera cazul cu `code=23503`
   - validare: `npm test`, `npm run lint`, `npm run build`
+
+- [x] `Dashboard` progressive disclosure pentru detalii recente
+  - activitatea si scanarile recente sunt ascunse by default
+  - toggle explicit pentru afisarea istoricului
+  - home-ul ramane orientare, nu istoric
+
+- [x] `Remediere` progressive disclosure pentru pasii read-only
+  - Vault / Audit si export sunt ascunse cand exista executie activa
+  - apar la cerere, pentru a nu concura cu board-ul
+
+- [x] `Audit si export` progressive disclosure pentru panourile suport
+  - ghidaj + handoff + status grid sunt ascunse by default
+  - exportul si snapshot-ul raman dominante
+
+- [x] `Control` overview progressive disclosure
+  - sumar + actiuni scurte la intrare
+  - ghidajul complet apare doar la cerere

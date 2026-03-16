@@ -1570,3 +1570,24 @@ Asta este sanatos arhitectural pentru ca:
 - `Control` foloseste semnalul de calitate a dovezii in overview
 - `Documente` foloseste lazy load pentru sectiunile grele (latest + recent)
 - `Alerte/Drift` expune semnalul de calitate a dovezii pentru decizie rapida
+
+## Actualizare 2026-03-16 - Dashboard cu progressive disclosure pe detalii recente
+
+- `Dashboard` nu mai afiseaza activitatea recenta implicit
+- detaliile sunt disponibile doar la cerere, prin toggle explicit
+- reduce densitatea initiala si pastreaza home-ul ca orientare
+
+## Actualizare 2026-03-16 - Remediere: verificarea separata nu concureaza cu executia
+
+- `Remediere` afiseaza pasii de verificare doar la cerere cand exista task-uri active
+- `Auditor Vault` si `Audit si export` raman disponibile, dar nu concureaza cu board-ul
+
+## Actualizare 2026-03-16 - Audit si export: suportul nu concureaza cu livrabilul
+
+- `Audit si export` afiseaza ghidajul si panourile suport doar la cerere
+- exportul si snapshot-ul raman suprafata dominanta
+
+## Actualizare 2026-03-16 - Control overview: ghidajul nu concureaza cu actiunile
+
+- `Control` (overview) arata sumar + actiuni scurte ca default
+- ghidajul complet apare doar la cerere

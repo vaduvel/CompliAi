@@ -168,7 +168,6 @@ export default function SistemePage() {
           summary={data.summary}
           confirmedCount={confirmedCount}
           detectedActiveCount={detectedActiveCount}
-          reviewedCount={reviewedCount}
           recentDriftsCount={recentDrifts.length}
           validatedBaselineLabel={
             validatedBaseline
@@ -297,6 +296,9 @@ function ControlOverview({
   onOpenBaseline: () => void
   onOpenDrift: () => void
 }) {
+  const [showGuidance, setShowGuidance] = useState(false)
+  const shouldShowGuidance =
+    showGuidance || (confirmedCount === 0 && detectedActiveCount === 0 && recentDriftsCount === 0)
   const hasEvidenceLedger = evidenceLedgerTotal > 0
   const items: SummaryStripItem[] = [
     {
@@ -363,12 +365,14 @@ function ControlOverview({
         </CardContent>
       </Card>
 
-      <SectionBoundary
-        eyebrow="Control"
-        title="Confirmare umana, fara executie aici"
-        description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
-        badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
-        support={
+      <Card className="border-eos-border bg-eos-surface">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Continui confirmarea</p>
+            <p className="text-xs text-eos-text-muted">
+              Control ramane doar pentru confirmare. Executia ramane in Dovada.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={onOpenDiscovery}>
               Discovery
@@ -376,47 +380,72 @@ function ControlOverview({
             <Button variant="outline" onClick={onOpenBaseline}>
               Baseline
             </Button>
-            <Button asChild>
-              <Link href="/dashboard/setari">
-                Setari
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
+            <Button onClick={onOpenSystems}>Sisteme</Button>
+            <Button variant="outline" onClick={() => setShowGuidance((current) => !current)}>
+              {showGuidance ? "Ascunde ghidajul" : "Arata ghidajul"}
             </Button>
           </div>
-        }
-      />
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <HandoffCard
-          title="Continui in Sisteme"
-          description="Aici lucrezi pe candidate, inventar, compliance pack si baseline."
-          destinationLabel="workspace principal"
-          checklist={[
-            "incepi cu Discovery daca ai candidate noi",
-            "confirmi doar ce este real si asumat",
-            "salvezi baseline-ul dupa review uman",
-          ]}
-          actions={<Button onClick={onOpenSystems}>Deschide Sisteme</Button>}
-        />
-        <HandoffCard
-          title="Drift-ul sta separat"
-          description="Cand ai schimbari fata de baseline, le investighezi separat si trimiti doar ce merita in remediere."
-          destinationLabel="investigatie"
-          checklist={[
-            "vezi ce s-a schimbat fata de baseline",
-            "decizi daca merge spre remediere",
-            "nu inchizi auditul direct din Control",
-          ]}
-          actions={
-            <>
-              <Button variant="outline" onClick={onOpenBaseline}>
-                Baseline
-              </Button>
-              <Button onClick={onOpenDrift}>Drift</Button>
-            </>
-          }
-        />
-      </div>
+      {shouldShowGuidance ? (
+        <>
+          <SectionBoundary
+            eyebrow="Control"
+            title="Confirmare umana, fara executie aici"
+            description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
+            badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
+            support={
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" onClick={onOpenDiscovery}>
+                  Discovery
+                </Button>
+                <Button variant="outline" onClick={onOpenBaseline}>
+                  Baseline
+                </Button>
+                <Button asChild>
+                  <Link href="/dashboard/setari">
+                    Setari
+                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                  </Link>
+                </Button>
+              </div>
+            }
+          />
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <HandoffCard
+              title="Continui in Sisteme"
+              description="Aici lucrezi pe candidate, inventar, compliance pack si baseline."
+              destinationLabel="workspace principal"
+              checklist={[
+                "incepi cu Discovery daca ai candidate noi",
+                "confirmi doar ce este real si asumat",
+                "salvezi baseline-ul dupa review uman",
+              ]}
+              actions={<Button onClick={onOpenSystems}>Deschide Sisteme</Button>}
+            />
+            <HandoffCard
+              title="Drift-ul sta separat"
+              description="Cand ai schimbari fata de baseline, le investighezi separat si trimiti doar ce merita in remediere."
+              destinationLabel="investigatie"
+              checklist={[
+                "vezi ce s-a schimbat fata de baseline",
+                "decizi daca merge spre remediere",
+                "nu inchizi auditul direct din Control",
+              ]}
+              actions={
+                <>
+                  <Button variant="outline" onClick={onOpenBaseline}>
+                    Baseline
+                  </Button>
+                  <Button onClick={onOpenDrift}>Drift</Button>
+                </>
+              }
+            />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

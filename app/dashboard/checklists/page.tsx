@@ -22,6 +22,7 @@ export default function RemediationPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
+  const [showHandoff, setShowHandoff] = useState(false)
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -82,6 +83,8 @@ export default function RemediationPage() {
     })
   }
 
+  const shouldShowHandoff = showHandoff || openTasks.length === 0
+
   return (
     <div className="space-y-8">
       <PageIntro
@@ -136,32 +139,50 @@ export default function RemediationPage() {
       />
 
       <div className="grid gap-4">
-        <HandoffCard
-          title="Cand termini board-ul, mergi in paginile read-only"
-          description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
-          destinationLabel="vault / audit pack"
-          checklist={[
-            "inchizi task-ul si atasezi dovada aici",
-            "verifici ledger-ul separat in Auditor Vault",
-            "pregatesti livrabilul final in Audit si export",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/rapoarte/auditor-vault">
-                  Auditor Vault
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
-                </Link>
+        {openTasks.length > 0 ? (
+          <Card className="border-eos-border bg-eos-surface">
+            <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+              <div>
+                <p className="text-sm font-semibold text-eos-text">Verificare si livrabil</p>
+                <p className="text-xs text-eos-text-muted">
+                  Vault si Audit si export raman dupa executie, ca sa nu concureze cu board-ul.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => setShowHandoff((current) => !current)}>
+                {showHandoff ? "Ascunde pasii de verificare" : "Arata pasii de verificare"}
               </Button>
-              <Button asChild>
-                <Link href="/dashboard/rapoarte">
-                  Audit si export
-                  <ArrowRight className="size-4" strokeWidth={2.25} />
-                </Link>
-              </Button>
-            </>
-          }
-        />
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {shouldShowHandoff ? (
+          <HandoffCard
+            title="Cand termini board-ul, mergi in paginile read-only"
+            description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
+            destinationLabel="vault / audit pack"
+            checklist={[
+              "inchizi task-ul si atasezi dovada aici",
+              "verifici ledger-ul separat in Auditor Vault",
+              "pregatesti livrabilul final in Audit si export",
+            ]}
+            actions={
+              <>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/rapoarte/auditor-vault">
+                    Auditor Vault
+                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/dashboard/rapoarte">
+                    Audit si export
+                    <ArrowRight className="size-4" strokeWidth={2.25} />
+                  </Link>
+                </Button>
+              </>
+            }
+          />
+        ) : null}
       </div>
     </div>
   )

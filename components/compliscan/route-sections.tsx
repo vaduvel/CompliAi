@@ -162,6 +162,8 @@ export function OverviewPageSections({
     0,
     ledgerEntries.length - ledgerReadyCount - ledgerWeakCount
   )
+  const [showRecentDetails, setShowRecentDetails] = useState(false)
+  const hasRecentDetails = events.length > 0 || scans.length > 0
 
   return (
     <div className="space-y-8">
@@ -222,10 +224,31 @@ export function OverviewPageSections({
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
-        <RecentActivityCard events={events} />
-        <RecentScansCard scans={scans.slice(0, 4)} tasks={tasks} />
-      </section>
+      <Card className="border-eos-border bg-eos-surface">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Detalii recente</p>
+            <p className="text-xs text-eos-text-muted">
+              Istoric activitate si ultimele scanari, afisate doar la cerere.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="min-w-[180px]"
+            onClick={() => setShowRecentDetails((current) => !current)}
+            disabled={!hasRecentDetails}
+          >
+            {showRecentDetails ? "Ascunde detaliile" : "Arata detaliile"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {showRecentDetails && hasRecentDetails ? (
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+          <RecentActivityCard events={events} />
+          <RecentScansCard scans={scans.slice(0, 4)} tasks={tasks} />
+        </section>
+      ) : null}
     </div>
   )
 }

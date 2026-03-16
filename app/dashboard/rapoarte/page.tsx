@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import { useState } from "react"
 import {
   ArrowRight,
 } from "lucide-react"
@@ -65,6 +66,7 @@ const RecentDriftCard = dynamic(
 export default function AuditExportPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
+  const [showSupport, setShowSupport] = useState(false)
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -177,71 +179,91 @@ export default function AuditExportPage() {
         </CardContent>
       </Card>
 
-      <SectionBoundary
-        eyebrow="Flux canonic"
-        title="Livrabilul sta separat de executie si de ledger-ul complet"
-        description="Pagina asta nu mai este board de lucru. Verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat."
-        support={<ReportsGuideCard />}
-      />
+      <Card className="border-eos-border bg-eos-surface">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Detalii de livrabil</p>
+            <p className="text-xs text-eos-text-muted">
+              Ghidajul complet si panourile suport apar doar la cerere.
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => setShowSupport((current) => !current)}>
+            {showSupport ? "Ascunde detaliile" : "Arata detaliile"}
+          </Button>
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <RemediationHandoffCard
-          openTasks={openTasks.length}
-          doneTasks={doneTasks.length}
-          driftCount={activeDrifts.length}
-        />
-        <HandoffCard
-          title="Daca lipseste ceva, revii in pagina potrivita"
-          description="Audit si export ramane suprafata de finalizare. Remedierea ramane pentru actiune, iar Auditor Vault pentru trasabilitate si verificare audit-ready."
-          destinationLabel="remediere / vault"
-          checklist={[
-            "nu inchizi task-uri din aceasta pagina",
-            "nu tratezi ledger-ul complet aici",
-            "generezi artefactul abia dupa verificare umana",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/checklists">Deschide Remediere</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/dashboard/rapoarte/auditor-vault">Deschide Auditor Vault</Link>
-              </Button>
-            </>
-          }
-        />
-      </div>
+      {showSupport ? (
+        <>
+          <SectionBoundary
+            eyebrow="Flux canonic"
+            title="Livrabilul sta separat de executie si de ledger-ul complet"
+            description="Pagina asta nu mai este board de lucru. Verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat."
+            support={<ReportsGuideCard />}
+          />
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <RemediationHandoffCard
+              openTasks={openTasks.length}
+              doneTasks={doneTasks.length}
+              driftCount={activeDrifts.length}
+            />
+            <HandoffCard
+              title="Daca lipseste ceva, revii in pagina potrivita"
+              description="Audit si export ramane suprafata de finalizare. Remedierea ramane pentru actiune, iar Auditor Vault pentru trasabilitate si verificare audit-ready."
+              destinationLabel="remediere / vault"
+              checklist={[
+                "nu inchizi task-uri din aceasta pagina",
+                "nu tratezi ledger-ul complet aici",
+                "generezi artefactul abia dupa verificare umana",
+              ]}
+              actions={
+                <>
+                  <Button asChild variant="outline">
+                    <Link href="/dashboard/checklists">Deschide Remediere</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/dashboard/rapoarte/auditor-vault">Deschide Auditor Vault</Link>
+                  </Button>
+                </>
+              }
+            />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+            <div className="space-y-6">
+              <ReportsStatusGrid
+                openTasks={openTasks.length}
+                doneTasks={doneTasks.length}
+                activeDrifts={activeDrifts.length}
+                hasBaseline={Boolean(validatedBaseline)}
+              />
+              <ExportArtifactsCard />
+            </div>
+            <div className="space-y-6">
+              <RecentDriftCard drifts={activeDrifts} />
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <div className="space-y-6">
-          <ReportsStatusGrid
-            openTasks={openTasks.length}
-            doneTasks={doneTasks.length}
-            activeDrifts={activeDrifts.length}
-            hasBaseline={Boolean(validatedBaseline)}
-          />
-          <ExportArtifactsCard />
-        </div>
+        <SnapshotStatusCard
+          latestSnapshot={latestSnapshot}
+          validatedBaseline={validatedBaseline}
+          driftCount={activeDrifts.length}
+        />
 
-        <div className="space-y-6">
-          <SnapshotStatusCard
-            latestSnapshot={latestSnapshot}
-            validatedBaseline={validatedBaseline}
-            driftCount={activeDrifts.length}
-          />
-
-          <ExportCenter
-            onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
-            onGenerateAuditPack={() => void cockpitActions.handleGenerateAuditPack()}
-            onGenerateAuditBundle={() => void cockpitActions.handleGenerateAuditBundle()}
-            onGenerateAnnexLite={() => void cockpitActions.handleGenerateAnnexLite()}
-            onExportChecklist={() => void cockpitActions.handleChecklistExport()}
-            onExportCompliScanJson={() => void cockpitActions.handleExportCompliScanJson()}
-            onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
-            onShare={() => void cockpitActions.handleShareWithAccountant()}
-          />
-          <RecentDriftCard drifts={activeDrifts} />
-        </div>
+        <ExportCenter
+          onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
+          onGenerateAuditPack={() => void cockpitActions.handleGenerateAuditPack()}
+          onGenerateAuditBundle={() => void cockpitActions.handleGenerateAuditBundle()}
+          onGenerateAnnexLite={() => void cockpitActions.handleGenerateAnnexLite()}
+          onExportChecklist={() => void cockpitActions.handleChecklistExport()}
+          onExportCompliScanJson={() => void cockpitActions.handleExportCompliScanJson()}
+          onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
+          onShare={() => void cockpitActions.handleShareWithAccountant()}
+        />
       </div>
     </div>
   )
@@ -299,7 +321,7 @@ function RemediationHandoffCard({
           <div>
             <CardTitle className="text-xl">Unde continui munca reala</CardTitle>
             <p className="mt-1 text-sm text-eos-text-muted">
-              `Audit si export` ramane read-only pentru livrabil. Daca mai ai task-uri deschise sau gap-uri de dovada, revii in paginile de executie.
+              Daca mai ai task-uri deschise sau gap-uri de dovada, revii in paginile de executie.
             </p>
           </div>
           <Badge variant="outline">
@@ -424,27 +446,11 @@ function SnapshotStatusCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <CardTitle className="text-xl">Snapshot curent</CardTitle>
-            <p className="mt-1 text-sm text-eos-text-muted">
-              Exporturile `compliscan.json` și `compliscan.yaml` pornesc de aici.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild variant="outline" className="h-10 rounded-xl">
-              <Link href="/dashboard/rapoarte/auditor-vault">
-                Auditor Vault
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-10 rounded-xl">
-              <Link href="/dashboard/setari">
-                Baseline
-                <ArrowRight className="size-4" strokeWidth={2.25} />
-              </Link>
-            </Button>
-          </div>
+        <div>
+          <CardTitle className="text-xl">Snapshot curent</CardTitle>
+          <p className="mt-1 text-sm text-eos-text-muted">
+            Exporturile `compliscan.json` și `compliscan.yaml` pornesc de aici.
+          </p>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
