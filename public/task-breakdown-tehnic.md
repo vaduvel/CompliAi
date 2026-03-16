@@ -1445,3 +1445,4 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] `Summary + actions` recipe
   - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`
 - [~] `ActionCluster` in `DriftCommandCenter`
+- [~] `ActionCluster` in `Control / Sisteme`

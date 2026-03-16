@@ -14,6 +14,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
@@ -373,17 +374,30 @@ function ControlOverview({
               Control ramane doar pentru confirmare. Executia ramane in Dovada.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={onOpenDiscovery}>
-              Discovery
-            </Button>
-            <Button variant="outline" onClick={onOpenBaseline}>
-              Baseline
-            </Button>
-            <Button onClick={onOpenSystems}>Sisteme</Button>
-            <Button variant="outline" onClick={() => setShowGuidance((current) => !current)}>
+          <div className="min-w-[240px] space-y-2">
+            <ActionCluster
+              eyebrow="Actiuni"
+              title="Unde continui"
+              description="Alegi zona de confirmare reala."
+              actions={
+                <>
+                  <Button variant="outline" onClick={onOpenDiscovery}>
+                    Discovery
+                  </Button>
+                  <Button variant="outline" onClick={onOpenBaseline}>
+                    Baseline
+                  </Button>
+                  <Button onClick={onOpenSystems}>Sisteme</Button>
+                </>
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setShowGuidance((current) => !current)}
+              className="text-xs text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline"
+            >
               {showGuidance ? "Ascunde ghidajul" : "Arata ghidajul"}
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -396,20 +410,27 @@ function ControlOverview({
             description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
             badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
             support={
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={onOpenDiscovery}>
-                  Discovery
-                </Button>
-                <Button variant="outline" onClick={onOpenBaseline}>
-                  Baseline
-                </Button>
-                <Button asChild>
-                  <Link href="/dashboard/setari">
-                    Setari
-                    <ArrowRight className="size-4" strokeWidth={2} />
-                  </Link>
-                </Button>
-              </div>
+              <ActionCluster
+                eyebrow="Actiuni"
+                title="Handoff rapid"
+                description="Continui in zona potrivita."
+                actions={
+                  <>
+                    <Button variant="outline" onClick={onOpenDiscovery}>
+                      Discovery
+                    </Button>
+                    <Button variant="outline" onClick={onOpenBaseline}>
+                      Baseline
+                    </Button>
+                    <Button asChild>
+                      <Link href="/dashboard/setari">
+                        Setari
+                        <ArrowRight className="size-4" strokeWidth={2} />
+                      </Link>
+                    </Button>
+                  </>
+                }
+              />
             }
           />
 
@@ -839,20 +860,27 @@ function ControlDriftWorkspace({
           </>
         }
         support={
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/dashboard/alerte">
-                Vezi drift complet
-                <ArrowRight className="size-4" strokeWidth={2} />
-              </Link>
-            </Button>
-            <Button variant="outline" onClick={onOpenBaseline}>
-              Verifica Baseline
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/checklists">Deschide Remedierea</Link>
-            </Button>
-          </div>
+          <ActionCluster
+            eyebrow="Actiuni"
+            title="Handoff rapid"
+            description="Vezi driftul complet sau continua in Dovada."
+            actions={
+              <>
+                <Button asChild>
+                  <Link href="/dashboard/alerte">
+                    Vezi drift complet
+                    <ArrowRight className="size-4" strokeWidth={2} />
+                  </Link>
+                </Button>
+                <Button variant="outline" onClick={onOpenBaseline}>
+                  Verifica Baseline
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/checklists">Deschide Remedierea</Link>
+                </Button>
+              </>
+            }
+          />
         }
       />
 

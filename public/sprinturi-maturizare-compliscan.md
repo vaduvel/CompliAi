@@ -1297,3 +1297,7 @@ Actualizare suplimentara 2026-03-16:
 Actualizare suplimentara 2026-03-16:
 
 - `ActionCluster` aplicat si in `DriftCommandCenter`
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat in `Control / Sisteme`

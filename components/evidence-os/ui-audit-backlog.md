@@ -189,6 +189,7 @@ Rămas deschis intenționat:
   - `Alerte` (drift actions)
   - `Auditor Vault` (export)
   - `DriftCommandCenter` (quick actions)
+  - `Control / Sisteme` (handoff + confirmare)
 
 Rămas deschis:
 

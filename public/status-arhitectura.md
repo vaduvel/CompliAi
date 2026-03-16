@@ -1674,3 +1674,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - ActionCluster DriftCommandCenter
 
 - quick actions din `DriftCommandCenter` sunt canonizate cu `ActionCluster`
+
+## Actualizare 2026-03-16 - ActionCluster Control / Sisteme
+
+- `Control` (overview) foloseste `ActionCluster` pentru handoff

@@ -2934,3 +2934,11 @@ Actualizare 2026-03-16 - ActionCluster in DriftCommandCenter
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in Control / Sisteme
+
+- `Control` (overview) foloseste `ActionCluster` pentru handoff si confirmare
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
