@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { GuideCard } from "@/components/evidence-os/GuideCard"
@@ -280,53 +281,50 @@ export default function AuditorVaultPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-eos-text">
-            Audit Pack aduna sumarul executiv, controalele, dovezile si drift-ul.
-          </p>
-          <p className="text-sm text-eos-text-muted">
-            Client pack pentru stakeholderi. Exporturile tehnice sunt disponibile la cerere.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            asChild
-            size="default"
-            className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
-          >
-            <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
-              Audit Pack client
-              <Download className="size-4" strokeWidth={2} />
-            </a>
-          </Button>
-          <Button asChild variant="outline" size="default" className="gap-2">
-            <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
-              Annex IV lite
-              <Download className="size-4" strokeWidth={2} />
-            </a>
-          </Button>
-          <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
-            <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-              Export tehnic
-            </summary>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm" className="gap-2">
-                <a href="/api/exports/audit-pack">
-                  JSON Audit Pack
-                  <Download className="size-3.5" strokeWidth={2} />
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="gap-2">
-                <a href="/api/exports/audit-pack/bundle">
-                  Pachet ZIP
-                  <Download className="size-3.5" strokeWidth={2} />
-                </a>
-              </Button>
-            </div>
-          </details>
-        </div>
-      </div>
+      <ActionCluster
+        eyebrow="Export"
+        title="Audit Pack pentru stakeholderi"
+        description="Client pack pentru stakeholderi. Exporturile tehnice sunt la cerere."
+        actions={
+          <>
+            <Button
+              asChild
+              size="default"
+              className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+            >
+              <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
+                Audit Pack client
+                <Download className="size-4" strokeWidth={2} />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="default" className="gap-2">
+              <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
+                Annex IV lite
+                <Download className="size-4" strokeWidth={2} />
+              </a>
+            </Button>
+            <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
+              <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                Export tehnic
+              </summary>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm" className="gap-2">
+                  <a href="/api/exports/audit-pack">
+                    JSON Audit Pack
+                    <Download className="size-3.5" strokeWidth={2} />
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="gap-2">
+                  <a href="/api/exports/audit-pack/bundle">
+                    Pachet ZIP
+                    <Download className="size-3.5" strokeWidth={2} />
+                  </a>
+                </Button>
+              </div>
+            </details>
+          </>
+        }
+      />
 
       {cockpit.data.compliancePack ? (
         <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />

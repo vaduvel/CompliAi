@@ -1442,3 +1442,5 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - adoptate in `Auditor Vault`
 - [~] `DenseListItem` pentru liste operationale
   - adoptat in `DriftCommandCenter` si `Alerte`
+- [~] `Summary + actions` recipe
+  - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`

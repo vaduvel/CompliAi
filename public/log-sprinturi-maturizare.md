@@ -2917,3 +2917,12 @@ Actualizare 2026-03-16 - Canonizare recipes (dense list)
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Summary + Actions recipe
+
+- `ActionCluster` folosit ca reteta canonica pentru zone cu CTA multiple
+- aplicat in `Alerte` (drift actions) si `Auditor Vault` (export)
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

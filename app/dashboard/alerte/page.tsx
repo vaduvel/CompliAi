@@ -11,6 +11,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { AlertsList, LoadingScreen } from "@/components/compliscan/route-sections"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
@@ -324,59 +325,66 @@ export default function DriftPage() {
                           {[drift.systemLabel, drift.sourceDocument].filter(Boolean).join(" · ")}
                         </p>
                       )}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {(lifecycleStatus === "open") && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "acknowledge")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            size="sm"
-                          >
-                            Preia drift
-                          </Button>
-                        )}
-                        {(lifecycleStatus === "open" || lifecycleStatus === "acknowledged") && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "start")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            size="sm"
-                          >
-                            În lucru
-                          </Button>
-                        )}
-                        {drift.open && lifecycleStatus === "in_progress" && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "resolve")}
-                            disabled={cockpit.busy || isActing}
-                            size="sm"
-                            className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
-                          >
-                            Rezolvă
-                          </Button>
-                        )}
-                        {drift.open && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "waive")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            size="sm"
-                            className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
-                          >
-                            Waive
-                          </Button>
-                        )}
-                        {!drift.open && (
-                          <Button
-                            onClick={() => void handleDriftAction(drift.id, "reopen")}
-                            disabled={cockpit.busy || isActing}
-                            variant="outline"
-                            size="sm"
-                          >
-                            Redeschide
-                          </Button>
-                        )}
-                      </div>
+                      <ActionCluster
+                        eyebrow="Actiuni"
+                        title="Decizie pentru drift"
+                        description="Alege pasul urmator pentru acest drift."
+                        actions={
+                          <>
+                            {(lifecycleStatus === "open") && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "acknowledge")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Preia drift
+                              </Button>
+                            )}
+                            {(lifecycleStatus === "open" || lifecycleStatus === "acknowledged") && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "start")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                În lucru
+                              </Button>
+                            )}
+                            {drift.open && lifecycleStatus === "in_progress" && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "resolve")}
+                                disabled={cockpit.busy || isActing}
+                                size="sm"
+                                className="bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                              >
+                                Rezolvă
+                              </Button>
+                            )}
+                            {drift.open && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "waive")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                                className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
+                              >
+                                Waive
+                              </Button>
+                            )}
+                            {!drift.open && (
+                              <Button
+                                onClick={() => void handleDriftAction(drift.id, "reopen")}
+                                disabled={cockpit.busy || isActing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Redeschide
+                              </Button>
+                            )}
+                          </>
+                        }
+                      />
                     </>
                   ) : (
                     <p className="mt-3 text-xs text-eos-text-muted">

@@ -185,10 +185,13 @@ Rămas deschis intenționat:
 - adoptate deja în:
   - `Auditor Vault` (indicatori detaliați + quick actions)
   - `DriftCommandCenter` + `Alerte`
+- `summary + actions` prin `ActionCluster`:
+  - `Alerte` (drift actions)
+  - `Auditor Vault` (export)
 
 Rămas deschis:
 
-- rețeta `summary + actions` pentru zonele cu CTA multiple
+- rețeta `summary + actions` pentru alte zone cu CTA multiple
 
 ## Val 1 - Ierarhie și compactare
 

@@ -1665,3 +1665,8 @@ Asta este sanatos arhitectural pentru ca:
 
 - `DenseListItem` introdus pentru liste operationale
 - adoptat in `DriftCommandCenter` si `Alerte`
+
+## Actualizare 2026-03-16 - Summary + Actions recipe
+
+- `ActionCluster` folosit pentru zone cu CTA multiple
+- adoptat in `Alerte` si `Auditor Vault`
