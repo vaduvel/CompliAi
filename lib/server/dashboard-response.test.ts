@@ -96,10 +96,10 @@ describe("lib/server/dashboard-response", () => {
     }
 
     const summary = { score: 91, riskLabel: "low" }
-    const remediationPlan = []
+    const remediationPlan: unknown[] = []
     const snapshot = { snapshotId: "snap-1", generatedAt: "2026-03-13T12:00:00.000Z" }
     const compliancePack = { entries: [], summary: { openFindings: 0, sourceCoverage: [] } }
-    const traceabilityMatrix = []
+    const traceabilityMatrix: unknown[] = []
 
     mocks.getOrgContextMock.mockResolvedValue(workspace)
     mocks.hydrateEvidenceAttachmentsFromSupabaseMock.mockResolvedValue(hydratedState)
@@ -132,10 +132,10 @@ describe("lib/server/dashboard-response", () => {
         snapshot,
       })
     )
-    expect(payload.state.taskState["rem-task-1"].attachedEvidenceMeta.storageProvider).toBe(
+    expect(payload.state.taskState["rem-task-1"]?.attachedEvidenceMeta?.storageProvider).toBe(
       "supabase_private"
     )
-    expect(payload.state.taskState["rem-task-1"].attachedEvidenceMeta.accessPath).toBe(
+    expect(payload.state.taskState["rem-task-1"]?.attachedEvidenceMeta?.accessPath).toBe(
       "/api/tasks/rem-task-1/evidence/evidence-1"
     )
   })

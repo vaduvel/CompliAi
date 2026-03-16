@@ -3140,3 +3140,54 @@ Branch: `codex/ux-sprint-3-language`
 Validare dupa pas:
 
 - `tsc --noEmit` pe cele 3 fisiere modificate -> zero erori
+
+---
+
+## 2026-03-16 — Runtime Audit Complet + Sprint 8, 9, 10, 11
+
+### Audit runtime flows (2026-03-16)
+
+Rulat full test suite: **258 teste, 71 fisiere — toate trec.** Zero pici in runtime.
+
+#### Coverage per flow
+
+| Flow | Status | Note |
+|------|--------|------|
+| **Text manual scan** | ✅ acoperit | Testat end-to-end in `canonical-runtime-audit.test.ts` + `flow-test-kit-user-nou.test.ts`. Document → findings → tasks → dashboard actualizat. |
+| **YAML / manifest scan** | ✅ acoperit | `repo-sync-executor.test.ts` + `manifest-autodiscovery.test.ts`. `compliscan.yaml` parsat corect, AI system detectat, risk class pastrat. |
+| **PDF / OCR path** | ⚠️ partial | `ocr-fallback.test.ts` acopera fallback logic + validare fixture base64. Apelul cloud real (Google Vision) nu este testabil fara serviciu extern — gap asteptat. `/api/scan/extract` testat pe caile de eroare (422 daca nu se extrage continut). |
+| **Dovada (evidence)** | ✅ acoperit | Upload, stocare, sync Supabase, URL semnat, role-checks — toate testate. |
+| **Baseline** | ✅ acoperit | Set, clear, cerinta snapshot, rol gated — testat in `state/baseline/route.test.ts`. |
+| **Drift detection** | ✅ acoperit | Lifecycle, SLA breach, policy escalation, acknowledge, waive — testate. |
+| **Auth (register/login/logout/me)** | ✅ acoperit | Flux complet de sesiune testat in `canonical-runtime-audit.test.ts`. |
+
+#### Datorie tehnica TS identificata (toate in fisiere de test, nu productie)
+
+15 erori TypeScript in 6 fisiere de test — tipurile au evoluat in cod dar fixture-urile din teste nu au fost actualizate:
+
+- `audit-quality-gates.test.ts:47` — `"tracking_consent"` → `"tracking-consent"` (typo separator)
+- `audit-pack.test.ts`, `audit-pack-client.test.ts` — `ComplianceDriftRecord` fixture lipsit de `snapshotId` + `comparedToSnapshotId`
+- `audit-pack.test.ts:254` — `CompliScanSnapshot` fixture incomplet fata de tipul curent
+- `compliance-trace.test.ts` — `summary` absent din `RemediationAction`; `sourceKind` absent din `ComplianceDriftRecord`
+- `dashboard-response.test.ts` — `any[]` implicit, posibil `undefined` netratat
+- `app-health.test.ts` — `NODE_ENV` read-only, nu poate fi asignat direct
+
+#### Bugs UX functionale identificate (fara acoperire de test)
+
+Identificate prin analiza codului si audit vizual. Prioritate:
+
+**P0 — Blocheaza utilizatorul:**
+1. `next-best-action.tsx:70` — Empty state "Incepi din Scanari" fara link/buton navigare
+2. `task-card.tsx:260` — Buton "Valideaza + rescaneaza" fara `disabled` pe click — double-submit posibil
+3. `task-card.tsx:391` — Pasii task-ului trunchiati la 3 fara indicator
+
+**P1 — Creeaza confuzie:**
+4. `floating-assistant.tsx:88` — Eroare chat fara retry; utilizatorul crede asistentul e stricat
+5. `app/dashboard/page.tsx:18` — Niciun branch de eroare daca `useCockpitData()` esueaza
+6. `checklists/page.tsx:86` — Board gol = nu a terminat OR n-a inceput — mesaj `HandoffCard` contradictoriu
+7. `setari/page.tsx:550` — Eroare load members fara retry
+
+**P2 — Accesibilitate si copy:**
+8. `setari/page.tsx:517` — Input email + select fara `<label>` asociat
+9. `task-card.tsx` — Prioritate afisata ca "P1"/"P2" raw, netradus in romana
+
