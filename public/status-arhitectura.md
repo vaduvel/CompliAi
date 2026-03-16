@@ -1627,3 +1627,41 @@ Asta este sanatos arhitectural pentru ca:
 - `Alerte`: etichete mai scurte pe actiunile de drift
 - `NextBestAction`: CTA principal scurtat
 - `TaskCard`: CTA principal scurtat, starea `done` foloseste `Redeschide`
+
+## Actualizare 2026-03-16 - Overview + TaskCard density trim
+
+- `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+- hero-ul pastreaza un mesaj principal, scorul ramane in aside
+- `TaskCard` nu mai repeta blocajul de audit in mai multe zone
+
+## Actualizare 2026-03-16 - Drift density pass (Alerte)
+
+- listarea drift-urilor este compacta, cu `next action` vizibil
+- metrics duplicate au fost eliminate in favoarea SummaryStrip
+- CTA-urile sunt limitate la maxim 3 actiuni simultane
+
+## Actualizare 2026-03-16 - Export + Vault density pass
+
+- `Audit si export` are hero mai scurt si copy redus
+- `Auditor Vault` foloseste disclosure pentru indicatorii detaliati
+- exporturile tehnice sunt ascunse by default
+
+## Actualizare 2026-03-16 - Setari density trim
+
+- hero si summary mai scurte
+- handoff administrativ compact
+
+## Actualizare 2026-03-16 - Floating Assistant trim
+
+- header si empty state mai scurte
+- badge-uri reduse la esential
+
+## Actualizare 2026-03-16 - Canonizare recipes (partial)
+
+- `GuideCard` si `MetricTile` introduse in Evidence OS
+- adoptate in `Auditor Vault` pentru consistenta de recipe
+
+## Actualizare 2026-03-16 - Canonizare dense list
+
+- `DenseListItem` introdus pentru liste operationale
+- adoptat in `DriftCommandCenter` si `Alerte`

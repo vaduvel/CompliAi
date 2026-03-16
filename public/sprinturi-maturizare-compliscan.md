@@ -1244,3 +1244,47 @@ Actualizare suplimentara 2026-03-16:
   - `Alerte` (drift actions)
   - `NextBestAction`
   - `TaskCard`
+
+Actualizare suplimentara 2026-03-16:
+
+- `Overview` + `TaskCard` au primit un density trim scurt:
+  - `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+  - `TaskCard` afiseaza blocajul de audit o singura data
+
+Actualizare suplimentara 2026-03-16:
+
+- `Drift` (Alerte) a primit un density pass:
+  - listare compacta cu `next action` vizibil
+  - metrics duplicate eliminate (SummaryStrip ramane sursa unica)
+  - CTA-urile sunt limitate la maxim 3 actiuni vizibile
+
+Actualizare suplimentara 2026-03-16:
+
+- `Audit si export` + `Auditor Vault` au primit un density pass:
+  - hero mai scurt, badge unic
+  - indicatorii detaliati sunt sub disclosure
+  - exporturile tehnice sunt ascunse by default
+
+Actualizare suplimentara 2026-03-16:
+
+- `Setari` a primit un trim de copy:
+  - hero si summary mai scurte
+  - handoff administrativ compact
+
+Actualizare suplimentara 2026-03-16:
+
+- `Floating Assistant` a primit un trim de copy:
+  - header si empty state mai scurte
+  - badge-uri reduse la esential
+
+Actualizare suplimentara 2026-03-16:
+
+- `Evidence OS` recipes partial canonizate:
+  - `GuideCard`
+  - `MetricTile`
+  - adoptate in `Auditor Vault`
+
+Actualizare suplimentara 2026-03-16:
+
+- `DenseListItem` canonizat pentru liste operationale
+  - adoptat in `DriftCommandCenter` si `Alerte`

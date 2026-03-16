@@ -1419,3 +1419,26 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - input-uri la sizing `md` (36px) cu radius `md` si padding standard
   - `DashboardShell` aliniat la grid (max-width `1200px`, sidebar `240px`)
   - eliminare suprascrieri de radius legacy (`rounded-2xl`, `rounded-3xl`)
+- [x] `Overview` + `TaskCard` density trim
+  - `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+  - `TaskCard` afiseaza blocajul de audit o singura data
+- [x] `Drift` (Alerte) density pass
+  - listare compacta, `next action` vizibil
+  - metrics duplicate eliminate
+  - maxim 3 CTA-uri simultan
+- [x] `Audit si export` + `Auditor Vault` density pass
+  - hero mai scurt, badge unic
+  - indicatorii detaliati sunt sub disclosure
+  - exporturile tehnice sunt ascunse by default
+- [x] `Setari` density trim
+  - hero si summary mai scurte
+  - handoff administrativ compact
+- [x] `Floating Assistant` trim
+  - header si empty state mai scurte
+  - badge-uri reduse la esential
+- [~] `Evidence OS` page recipes (partial)
+  - `GuideCard`
+  - `MetricTile`
+  - adoptate in `Auditor Vault`
+- [~] `DenseListItem` pentru liste operationale
+  - adoptat in `DriftCommandCenter` si `Alerte`

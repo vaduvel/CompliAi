@@ -221,14 +221,6 @@ export function RiskHeader({
               {state.eyebrow}
             </Badge>
             <Badge className={state.badge}>{state.statusLabel}</Badge>
-            <Badge className="border-eos-border bg-transparent text-eos-text-muted">
-              scor {score}/100
-            </Badge>
-            {!state.isOnboarding ? (
-              <Badge className="border-eos-border bg-transparent text-eos-text-muted">
-                validare umana
-              </Badge>
-            ) : null}
           </>
         }
         title={state.actionTitle}
@@ -263,14 +255,6 @@ export function RiskHeader({
                 <div className="pb-1 text-sm text-eos-text-muted">/100</div>
               </div>
               <p className={`mt-2 text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
-            </div>
-
-            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
-                Pasul urmator
-              </p>
-              <p className="mt-2 text-sm leading-6 text-eos-text-muted">{state.actionDescription}</p>
-              <p className="mt-2 text-xs leading-5 text-eos-text-tertiary">{state.actionHint}</p>
             </div>
           </div>
         }

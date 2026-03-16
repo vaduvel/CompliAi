@@ -2846,3 +2846,74 @@ Actualizare 2026-03-16 - Dashboard progressive disclosure pentru detalii recente
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Overview + TaskCard density trim
+
+- `RiskHeader` nu mai dubleaza scorul si pasul urmator in hero
+- hero-ul pastreaza un mesaj principal, scorul ramane doar in aside
+- `TaskCard` nu mai repeta blocajul de audit in mai multe zone
+- `Primul pas` ramane actiunea, iar blocajul apare o singura data
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Drift density pass (Alerte)
+
+- `Drift` foloseste listare mai compacta cu `next action` vizibil
+- a fost eliminata dublarea de metrics (SummaryStrip ramane sursa unica)
+- `Flux canonic` si `Handoff` sunt mai scurte, fara suport redundant
+- CTA-urile din drift raman sub maxim 3 actiuni vizibile simultan
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Export + Vault density pass
+
+- `Audit si export` are copy mai scurt si un singur badge in hero
+- `Auditor Vault` elimina dublarea de metrics (indicatorii detaliati apar la cerere)
+- exporturile tehnice sunt ascunse sub disclosure, CTA-urile vizibile raman sub 3
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Setari density trim
+
+- `Setari` are copy mai scurt in hero si summary
+- handoff-ul administrativ este mai compact, checklist redus
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Floating Assistant trim
+
+- header si empty state sunt mai scurte
+- badge-uri reduse la esential
+- footer de avertizare compact
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Canonizare recipes (partial)
+
+- retele canonice adaugate in Evidence OS:
+  - `GuideCard`
+  - `MetricTile`
+- adoptate in `Auditor Vault` pentru quick actions si indicatori detaliati
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Canonizare recipes (dense list)
+
+- `DenseListItem` introdus ca reteta canonica pentru liste operationale
+- adoptat in `DriftCommandCenter` si `Alerte`
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

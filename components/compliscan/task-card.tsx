@@ -240,9 +240,6 @@ export function TaskCard({
                 <p className="mt-2 text-sm font-medium text-eos-text">
                   {nextAction}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-eos-text-muted">
-                  {auditBlocker}
-                </p>
               </div>
             </div>
 
@@ -257,13 +254,6 @@ export function TaskCard({
                 >
                   {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
                 </Badge>
-              </div>
-
-              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                  Blocaj acum
-                </p>
-                <p className="mt-1 text-sm text-eos-text">{auditBlocker}</p>
               </div>
 
               <div className="mt-4 space-y-2">

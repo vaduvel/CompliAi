@@ -14,6 +14,7 @@ import { TextExtractDrawer } from "@/components/compliscan/text-extract-drawer"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Separator } from "@/components/evidence-os/Separator"
 import type { CockpitTask } from "@/components/compliscan/types"
@@ -123,54 +124,53 @@ export function DriftCommandCenter({
                 const isSelected = drift.id === selectedDrift.id
 
                 return (
-                  <button
-                    key={drift.id}
-                    type="button"
-                    onClick={() => setSelectedDriftId(drift.id)}
-                    className={`w-full rounded-eos-md border p-4 text-left transition ${
-                      isSelected
-                        ? "border-eos-border-strong bg-eos-bg-inset"
-                        : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
-                    }`}
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold text-eos-text">
-                            {drift.summary}
+                  <DenseListItem key={drift.id} active={isSelected}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDriftId(drift.id)}
+                      className={`w-full p-4 text-left transition ${
+                        isSelected ? "" : "hover:bg-eos-secondary-hover"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-semibold text-eos-text">
+                              {drift.summary}
+                            </p>
+                            {isSelected ? (
+                              <Badge className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
+                                selectat
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <p className="mt-1 text-xs text-eos-text-muted">
+                            {[
+                              formatDriftTypeLabel(drift.type),
+                              drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
+                              formatRelativeRomanian(drift.detectedAtISO),
+                            ].join(" · ")}
                           </p>
-                          {isSelected ? (
-                            <Badge className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
-                              selectat
+                          <p className="mt-2 text-sm text-eos-text-muted line-clamp-2">
+                            {guidance.nextAction}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <Badge className={driftSeverityClasses(drift.severity)}>
+                            {driftSeverityLabel(drift.severity)}
+                          </Badge>
+                          <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
+                            {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
+                          </Badge>
+                          {breached ? (
+                            <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                              SLA depășit
                             </Badge>
                           ) : null}
                         </div>
-                        <p className="mt-1 text-xs text-eos-text-muted">
-                          {[
-                            formatDriftTypeLabel(drift.type),
-                            drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
-                            formatRelativeRomanian(drift.detectedAtISO),
-                          ].join(" · ")}
-                        </p>
-                        <p className="mt-2 text-sm text-eos-text-muted line-clamp-2">
-                          {guidance.nextAction}
-                        </p>
                       </div>
-                      <div className="flex flex-wrap justify-end gap-2">
-                        <Badge className={driftSeverityClasses(drift.severity)}>
-                          {driftSeverityLabel(drift.severity)}
-                        </Badge>
-                        <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
-                          {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
-                        </Badge>
-                        {breached ? (
-                          <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
-                            SLA depășit
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </div>
-                  </button>
+                    </button>
+                  </DenseListItem>
                 )
               })}
             </div>

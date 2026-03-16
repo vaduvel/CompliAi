@@ -127,15 +127,12 @@ export default function AuditExportPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Audit Pack"
-        title="Aici pregatesti livrabilul, nu executia"
-        description="Verifici snapshot-ul, readiness-ul si artefactele de livrare. Daca mai exista munca reala, revii in Remediere sau in Auditor Vault pentru executie."
+        title="Pregatesti livrabilul final"
+        description="Verifici snapshot-ul, readiness-ul si artefactele. Executia ramane in Remediere, iar ledger-ul complet in Auditor Vault."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               read-only pentru livrabil
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              validare umana obligatorie
             </Badge>
           </>
         }
@@ -172,8 +169,8 @@ export default function AuditExportPage() {
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Audit si export"
-            title="Readiness de livrabil"
-            description="Vezi rapid ce mai intra in snapshot inainte sa generezi artefactul extern potrivit."
+            title="Readiness livrabil"
+            description="Ce mai intra in snapshot inainte de export."
             items={summaryItems}
           />
         </CardContent>
@@ -184,7 +181,7 @@ export default function AuditExportPage() {
           <div>
             <p className="text-sm font-semibold text-eos-text">Detalii de livrabil</p>
             <p className="text-xs text-eos-text-muted">
-              Ghidajul complet si panourile suport apar doar la cerere, ca sa nu concureze cu livrabilul.
+              Ghidajul complet apare doar la cerere.
             </p>
           </div>
           <Button variant="outline" onClick={() => setShowSupport((current) => !current)}>
@@ -197,8 +194,8 @@ export default function AuditExportPage() {
         <>
           <SectionBoundary
             eyebrow="Flux canonic"
-            title="Livrabilul sta separat de executie si de ledger-ul complet"
-            description="Pagina asta nu mai este board de lucru. Verifici ce intra in snapshot, ce baseline compara livrabilul si ce artefact extern merita generat."
+            title="Livrabilul sta separat de executie"
+            description="Verifici ce intra in snapshot si ce merita exportat."
             support={<ReportsGuideCard />}
           />
 
@@ -210,11 +207,10 @@ export default function AuditExportPage() {
             />
             <HandoffCard
               title="Daca lipseste ceva, revii in pagina potrivita"
-              description="Audit si export ramane suprafata de finalizare. Remedierea ramane pentru actiune, iar Auditor Vault pentru trasabilitate si verificare audit-ready."
+              description="Audit si export ramane suprafata de finalizare. Remedierea ramane pentru actiune, Vault pentru trasabilitate."
               destinationLabel="remediere / vault"
               checklist={[
                 "nu inchizi task-uri din aceasta pagina",
-                "nu tratezi ledger-ul complet aici",
                 "generezi artefactul abia dupa verificare umana",
               ]}
               actions={

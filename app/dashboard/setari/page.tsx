@@ -292,8 +292,8 @@ export default function SetariPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Setari"
-        title="Aici administrezi contextul operational"
-        description="Fixezi workspace-ul, accesul si starea operationala. Executia ramane in Scanare, Control si Dovada."
+        title="Administrezi contextul operational"
+        description="Context, acces si operare. Executia ramane in Scanare, Control si Dovada."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -329,7 +329,7 @@ export default function SetariPage() {
           <SummaryStrip
             eyebrow="Setari"
             title="Vezi rapid starea administrativa"
-            description="Context, baseline, acces si readiness operational."
+            description="Context, baseline, acces si readiness."
             items={summaryItems}
           />
         </CardContent>
@@ -339,7 +339,7 @@ export default function SetariPage() {
         <SectionBoundary
           eyebrow="Handoff"
           title="Configurezi aici, lucrezi in produs"
-          description="Setari ramane zona administrativa. Dupa context, acces si operare, revii in Dashboard, Control sau Dovada."
+          description="Setari ramane zona administrativa. Dupa context si acces revii in Dashboard, Control sau Dovada."
         />
         <HandoffCard
           title="Setari nu inlocuieste fluxul principal"
@@ -347,7 +347,6 @@ export default function SetariPage() {
           destinationLabel="dashboard / control / dovada"
           checklist={[
             "nu tratezi Setari ca overview executiv",
-            "nu inchizi task-uri si nu exporti din aceasta pagina",
             "folosesti Setari pentru context, acces si operare",
           ]}
           actions={

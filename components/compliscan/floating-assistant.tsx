@@ -136,11 +136,10 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline">Asistent Evidence OS</Badge>
-                  <Badge variant="warning">Validare umana</Badge>
                 </div>
                 <p className="mt-2 text-sm font-medium text-eos-text">Asistent de context</p>
                 <p className="text-[11px] text-eos-text-muted">
-                  Contextul paginii te ajuta cu orientare rapida, nu cu verdict final.
+                  Orientare rapida, fara verdict final.
                 </p>
               </div>
             </div>
@@ -153,7 +152,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
                   <EmptyState
                     icon={Sparkles}
                     title="Intreaba direct din pagina"
-                    label="Porneste cu o intrebare scurta despre risc, pasul urmator sau sensul unui status."
+                    label="Porneste cu o intrebare scurta despre risc sau pasul urmator."
                     className="border-eos-border-subtle bg-eos-bg-panel px-4 py-8"
                   />
                   <div className="space-y-3">
@@ -228,7 +227,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
               </Button>
             </form>
             <p className="mt-2 text-[11px] text-eos-text-muted">
-              Raspuns orientativ. Verifica uman inainte de orice decizie oficiala.
+              Raspuns orientativ. Confirmi uman inainte de decizie.
             </p>
           </div>
         </div>

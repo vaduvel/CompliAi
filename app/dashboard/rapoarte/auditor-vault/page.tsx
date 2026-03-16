@@ -20,7 +20,9 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { GuideCard } from "@/components/evidence-os/GuideCard"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
+import { MetricTile } from "@/components/evidence-os/MetricTile"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
@@ -196,13 +198,10 @@ export default function AuditorVaultPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Vault"
-        title="Ledger-ul in care verifici daca auditul chiar se sustine"
-        description="Aici vezi daca dovada, trasabilitatea si schimbarea recentă tin impreuna. Daca apare un gap, revii in executie sau finalizezi in Audit si export."
+        title="Verifici daca auditul chiar se sustine"
+        description="Aici vezi daca dovada, trasabilitatea si drift-ul tin impreuna. Daca apare un gap, revii in executie sau finalizezi in Audit si export."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              audit ledger
-            </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
               trasabilitate
             </Badge>
@@ -246,7 +245,7 @@ export default function AuditorVaultPage() {
           <SummaryStrip
             eyebrow="Vault"
             title="Ce sustii acum in audit"
-            description="Vezi rapid daca pachetul e sustenabil sau daca trebuie sa revii in executie."
+            description="Daca pachetul e sustenabil sau daca trebuie sa revii in executie."
             items={summaryItems}
           />
         </CardContent>
@@ -254,8 +253,8 @@ export default function AuditorVaultPage() {
 
       <SectionBoundary
         eyebrow="Acum"
-        title="Vault-ul iti spune daca povestea de audit tine"
-        description="Verifici legatura dintre control, dovada, articole si drift. Daca lipseste ceva, iesi spre pagina potrivita."
+        title="Vault-ul iti arata daca auditul tine"
+        description="Verifici legatura dintre control, dovada, articole si drift."
       />
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -266,7 +265,6 @@ export default function AuditorVaultPage() {
           destinationLabel="remediere / livrabil"
           checklist={[
             "nu inchizi task-uri direct din vault",
-            "nu tratezi exportul final ca ledger intern",
             "validezi uman inainte de orice pachet extern",
           ]}
           actions={
@@ -285,10 +283,10 @@ export default function AuditorVaultPage() {
       <div className="flex flex-col gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-eos-text">
-            Audit Pack v2 aduna intr-un singur loc sumarul executiv, controalele, dovezile si drift-ul.
+            Audit Pack aduna sumarul executiv, controalele, dovezile si drift-ul.
           </p>
           <p className="text-sm text-eos-text-muted">
-            Client pack pentru stakeholderi. JSON sau ZIP cand ai nevoie de schimb tehnic sau dosar complet.
+            Client pack pentru stakeholderi. Exporturile tehnice sunt disponibile la cerere.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -308,18 +306,25 @@ export default function AuditorVaultPage() {
               <Download className="size-4" strokeWidth={2} />
             </a>
           </Button>
-          <Button asChild variant="outline" size="default" className="gap-2">
-            <a href="/api/exports/audit-pack">
-              JSON Audit Pack
-              <Download className="size-4" strokeWidth={2} />
-            </a>
-          </Button>
-          <Button asChild variant="outline" size="default" className="gap-2">
-            <a href="/api/exports/audit-pack/bundle">
-              Pachet ZIP
-              <Download className="size-4" strokeWidth={2} />
-            </a>
-          </Button>
+          <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
+            <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+              Export tehnic
+            </summary>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <a href="/api/exports/audit-pack">
+                  JSON Audit Pack
+                  <Download className="size-3.5" strokeWidth={2} />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <a href="/api/exports/audit-pack/bundle">
+                  Pachet ZIP
+                  <Download className="size-3.5" strokeWidth={2} />
+                </a>
+              </Button>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -332,32 +337,37 @@ export default function AuditorVaultPage() {
         />
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <VaultMetric
-          label="Dovezi atasate"
-          value={evidenceReadyTasks.length}
-          hint="Task-uri care au dovada atasata si au trecut verificarea prin rescan."
-          tone="text-eos-success"
-        />
-        <VaultMetric
-          label="Gap-uri de dovada"
-          value={evidenceMissingTasks.length}
-          hint="Task-uri deschise care inca cer dovada la audit."
-          tone={evidenceMissingTasks.length > 0 ? "text-eos-warning" : "text-eos-success"}
-        />
-        <VaultMetric
-          label="Mapari legale"
-          value={legalMappedTasks.length}
-          hint="Task-uri legate clar de articole si obligatii."
-          tone="text-eos-info"
-        />
-        <VaultMetric
-          label="Drift activ"
-          value={activeDrifts.length}
-          hint="Schimbari noi care trebuie explicate sau remediate."
-          tone={activeDrifts.length > 0 ? "text-eos-error" : "text-eos-success"}
-        />
-      </div>
+      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+          Indicatori detaliati
+        </summary>
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <MetricTile
+            label="Dovezi atasate"
+            value={evidenceReadyTasks.length}
+            detail="Task-uri care au dovada atasata si au trecut verificarea prin rescan."
+            tone="text-eos-success"
+          />
+          <MetricTile
+            label="Gap-uri de dovada"
+            value={evidenceMissingTasks.length}
+            detail="Task-uri deschise care inca cer dovada la audit."
+            tone={evidenceMissingTasks.length > 0 ? "text-eos-warning" : "text-eos-success"}
+          />
+          <MetricTile
+            label="Mapari legale"
+            value={legalMappedTasks.length}
+            detail="Task-uri legate clar de articole si obligatii."
+            tone="text-eos-info"
+          />
+          <MetricTile
+            label="Drift activ"
+            value={activeDrifts.length}
+            detail="Schimbari noi care trebuie explicate sau remediate."
+            tone={activeDrifts.length > 0 ? "text-eos-error" : "text-eos-success"}
+          />
+        </div>
+      </details>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
         <div className="space-y-6">
@@ -426,17 +436,9 @@ function VaultQuickActionsCard() {
     <Card className="border-eos-border bg-eos-surface">
       <CardContent className="space-y-4 p-5">
         <div className="grid gap-4 lg:grid-cols-3">
-        {items.map((item) => (
-          <div
-            key={item.title}
-            className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
-          >
-            <p className="text-sm font-medium text-eos-text">{item.title}</p>
-            <p className="mt-2 text-sm leading-6 text-eos-text-muted">
-              {item.detail}
-            </p>
-          </div>
-        ))}
+          {items.map((item) => (
+            <GuideCard key={item.title} title={item.title} detail={item.detail} />
+          ))}
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="outline" size="default" className="gap-2">
@@ -452,28 +454,6 @@ function VaultQuickActionsCard() {
             </Link>
           </Button>
         </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function VaultMetric({
-  label,
-  value,
-  hint,
-  tone,
-}: {
-  label: string
-  value: number
-  hint: string
-  tone: string
-}) {
-  return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardContent className="space-y-2 p-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
-        <p className={`text-2xl font-semibold ${tone}`}>{value}</p>
-        <p className="text-sm leading-6 text-eos-text-muted">{hint}</p>
       </CardContent>
     </Card>
   )
