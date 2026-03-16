@@ -22,6 +22,7 @@ import type {
   ComplianceState,
   DashboardSummary,
   DetectedAISystemRecord,
+  EvidenceRegistryEntry,
   EFacturaValidationRecord,
   RemediationAction,
   TaskEvidenceAttachment,
@@ -42,6 +43,7 @@ export type DashboardPayload = {
   workspace: WorkspaceContext
   compliancePack?: AICompliancePack
   traceabilityMatrix?: ComplianceTraceRecord[]
+  evidenceLedger?: EvidenceRegistryEntry[]
 }
 
 type TaskUpdateFeedback = {

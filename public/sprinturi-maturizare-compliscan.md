@@ -1161,3 +1161,10 @@ Actualizare suplimentara 2026-03-16:
 - `org_state` nu mai poate cadea pe FK lipsa in Supabase
 - runtime-ul asigura upsert pentru `organizations` cand lipseste org-ul
 - dashboard-ul porneste fara crash chiar daca org-ul nu exista in cloud
+
+Actualizare suplimentara 2026-03-16:
+
+- registrul de evidence din Supabase este vizibil in `Auditor Vault`
+- `Dashboard core payload` include `evidenceLedger` ca sursa pentru `Registru dovezi`
+- UI-ul afiseaza acum calitatea dovezii (`verificata / slaba / neevaluata`), nu doar task-urile
+- `SummaryStrip` expune starea registrului ca semnal operational

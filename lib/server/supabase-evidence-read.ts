@@ -1,5 +1,6 @@
 import type {
   ComplianceState,
+  EvidenceRegistryEntry,
   EvidenceQualityAssessment,
   TaskEvidenceAttachment,
   TaskEvidenceKind,
@@ -72,6 +73,24 @@ export async function loadTaskEvidenceObjectFromSupabase(input: {
   }
 
   return mapEvidenceObjectRow(row)
+}
+
+export async function loadEvidenceLedgerFromSupabase(input: {
+  orgId: string
+  limit?: number
+}): Promise<EvidenceRegistryEntry[]> {
+  if (!shouldReadEvidenceRegistryFromSupabase()) {
+    return []
+  }
+
+  const limit = clamp(input.limit ?? 12, 1, 50)
+  const rows = await supabaseSelect<EvidenceObjectRow>(
+    "evidence_objects",
+    `select=attachment_id,task_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.${input.orgId}&order=uploaded_at.desc&limit=${limit}`,
+    "public"
+  )
+
+  return rows.map(mapEvidenceRegistryEntry)
 }
 
 export async function hydrateEvidenceAttachmentsFromSupabase(
@@ -176,8 +195,19 @@ function mapEvidenceObjectRow(row: EvidenceObjectRow): TaskEvidenceAttachment {
   }
 }
 
+function mapEvidenceRegistryEntry(row: EvidenceObjectRow): EvidenceRegistryEntry {
+  return {
+    ...mapEvidenceObjectRow(row),
+    taskId: typeof row.task_id === "string" ? row.task_id : null,
+  }
+}
+
 function unique(values: string[]) {
   return [...new Set(values)]
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
 }
 
 function isTaskEvidenceKind(value: string): value is TaskEvidenceKind {

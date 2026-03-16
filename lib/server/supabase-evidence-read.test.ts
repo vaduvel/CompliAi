@@ -19,6 +19,7 @@ vi.mock("@/lib/server/supabase-rest", () => ({
 
 import {
   hydrateEvidenceAttachmentsFromSupabase,
+  loadEvidenceLedgerFromSupabase,
   loadEvidenceObjectFromSupabase,
   loadTaskEvidenceObjectFromSupabase,
   shouldReadEvidenceRegistryFromSupabase,
@@ -80,6 +81,7 @@ describe("lib/server/supabase-evidence-read", () => {
   it("ramane inactiv pe backend local", async () => {
     expect(shouldReadEvidenceRegistryFromSupabase()).toBe(false)
     await expect(loadEvidenceObjectFromSupabase({ orgId: "org-1", attachmentId: "evidence-1" })).resolves.toBeNull()
+    await expect(loadEvidenceLedgerFromSupabase({ orgId: "org-1" })).resolves.toEqual([])
     await expect(hydrateEvidenceAttachmentsFromSupabase(createState(), "org-1")).resolves.toEqual(createState())
     expect(mocks.supabaseSelectMock).not.toHaveBeenCalled()
   })
@@ -202,6 +204,43 @@ describe("lib/server/supabase-evidence-read", () => {
     expect(mocks.supabaseSelectMock).toHaveBeenCalledWith(
       "evidence_objects",
       "select=attachment_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.org-1&attachment_id=in.(evidence-1)",
+      "public"
+    )
+  })
+
+  it("listeaza registrul de evidence din Supabase", async () => {
+    mocks.getConfiguredDataBackendMock.mockReturnValue("supabase")
+    mocks.supabaseSelectMock.mockResolvedValueOnce([
+      {
+        attachment_id: "evidence-1",
+        task_id: "rem-task-1",
+        file_name: "proof.pdf",
+        mime_type: "application/pdf",
+        size_bytes: 111,
+        kind: "document_bundle",
+        storage_provider: "supabase_private",
+        storage_key: "org-1/task-1/proof.pdf",
+        uploaded_at: "2026-03-13T11:00:00.000Z",
+        metadata: {
+          accessPath: "/api/tasks/rem-task-1/evidence/evidence-1",
+        },
+      },
+    ])
+
+    const result = await loadEvidenceLedgerFromSupabase({ orgId: "org-1", limit: 2 })
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "evidence-1",
+          taskId: "rem-task-1",
+          storageProvider: "supabase_private",
+        }),
+      ])
+    )
+    expect(mocks.supabaseSelectMock).toHaveBeenCalledWith(
+      "evidence_objects",
+      "select=attachment_id,task_id,file_name,mime_type,size_bytes,kind,storage_provider,storage_key,uploaded_at,metadata&org_id=eq.org-1&order=uploaded_at.desc&limit=2",
       "public"
     )
   })

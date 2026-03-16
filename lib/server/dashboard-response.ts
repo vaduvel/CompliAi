@@ -2,12 +2,15 @@ import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
-import type { ComplianceState } from "@/lib/compliance/types"
+import type { ComplianceState, EvidenceRegistryEntry } from "@/lib/compliance/types"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildAICompliancePack } from "@/lib/server/ai-compliance-pack"
 import { buildComplianceTraceRecords } from "@/lib/server/compliance-trace"
 import { getOrgContext } from "@/lib/server/org-context"
-import { hydrateEvidenceAttachmentsFromSupabase } from "@/lib/server/supabase-evidence-read"
+import {
+  hydrateEvidenceAttachmentsFromSupabase,
+  loadEvidenceLedgerFromSupabase,
+} from "@/lib/server/supabase-evidence-read"
 
 export type DashboardPayload = {
   state: ComplianceState
@@ -16,6 +19,7 @@ export type DashboardPayload = {
   workspace: Awaited<ReturnType<typeof getOrgContext>>
   compliancePack: AICompliancePack
   traceabilityMatrix: ComplianceTraceRecord[]
+  evidenceLedger?: EvidenceRegistryEntry[]
 }
 
 export type DashboardCorePayload = {
@@ -24,11 +28,13 @@ export type DashboardCorePayload = {
   remediationPlan: ReturnType<typeof buildRemediationPlan>
   workspace: Awaited<ReturnType<typeof getOrgContext>>
   snapshot: ReturnType<typeof buildCompliScanSnapshot>
+  evidenceLedger?: EvidenceRegistryEntry[]
 }
 
 export async function buildDashboardCorePayload(state: ComplianceState): Promise<DashboardCorePayload> {
   const workspace = await getOrgContext()
   const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
+  const evidenceLedger = await loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId })
   const normalizedState = normalizeComplianceState(hydratedState)
   const summary = computeDashboardSummary(normalizedState)
   const remediationPlan = buildRemediationPlan(normalizedState)
@@ -47,6 +53,7 @@ export async function buildDashboardCorePayload(state: ComplianceState): Promise
     remediationPlan,
     workspace,
     snapshot,
+    evidenceLedger,
   }
 }
 
@@ -69,5 +76,6 @@ export async function buildDashboardPayload(state: ComplianceState) {
       remediationPlan: core.remediationPlan,
       snapshot: core.snapshot,
     }),
+    evidenceLedger: core.evidenceLedger,
   } satisfies DashboardPayload
 }

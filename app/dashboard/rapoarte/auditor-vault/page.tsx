@@ -11,7 +11,6 @@ import {
   Paperclip,
   RefreshCcw,
   ShieldAlert,
-  ShieldCheck,
 } from "lucide-react"
 
 import { EvidenceReadinessBadge } from "@/components/evidence-os/EvidenceReadinessBadge"
@@ -42,6 +41,7 @@ import { isDriftSlaBreached } from "@/lib/compliance/drift-lifecycle"
 import type {
   ComplianceDriftRecord,
   ComplianceEvent,
+  EvidenceRegistryEntry,
   PersistedTaskState,
 } from "@/lib/compliance/types"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
@@ -138,6 +138,17 @@ export default function AuditorVaultPage() {
     validatedBaseline && activeDrifts.length === 0 && evidenceMissingTasks.length === 0
       ? "audit_ready"
       : "review_required"
+  const evidenceLedger = cockpit.data.evidenceLedger ?? []
+  const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
+  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = Math.max(
+    0,
+    evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
+  )
+  const ledgerHint =
+    evidenceLedger.length > 0
+      ? `${ledgerReadyCount} verificate · ${ledgerWeakCount} slabe · ${ledgerUnratedCount} neevaluate`
+      : "registrul se populeaza cand ai evidence storage activ"
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Audit readiness",
@@ -157,6 +168,12 @@ export default function AuditorVaultPage() {
       value: validatedBaseline ? "validat" : "lipseste",
       hint: validatedBaseline ? "comparatia are reper stabil" : "confirma un snapshot ca baseline",
       tone: validatedBaseline ? "success" : "warning",
+    },
+    {
+      label: "Registru dovezi",
+      value: `${evidenceLedger.length}`,
+      hint: ledgerHint,
+      tone: ledgerWeakCount > 0 ? "warning" : "success",
     },
     {
       label: "Drift activ",
@@ -356,8 +373,10 @@ export default function AuditorVaultPage() {
             />
           )}
           <EvidenceLedgerCard
+            evidenceLedger={evidenceLedger}
             evidenceReadyTasks={evidenceReadyTasks}
             evidenceMissingTasks={evidenceMissingTasks}
+            allTasks={cockpit.tasks}
           />
           <LegalMatrixCard tasks={legalMappedTasks} />
           {cockpit.data.traceabilityMatrix ? (
@@ -460,12 +479,20 @@ function VaultMetric({
 }
 
 function EvidenceLedgerCard({
+  evidenceLedger,
   evidenceReadyTasks,
   evidenceMissingTasks,
+  allTasks,
 }: {
+  evidenceLedger: EvidenceRegistryEntry[]
   evidenceReadyTasks: CockpitTask[]
   evidenceMissingTasks: CockpitTask[]
+  allTasks: CockpitTask[]
 }) {
+  const taskById = new Map(allTasks.map((task) => [task.id, task] as const))
+  const hasLedger = evidenceLedger.length > 0
+  const ledgerEntries = hasLedger ? evidenceLedger.slice(0, 6) : []
+
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
@@ -474,67 +501,131 @@ function EvidenceLedgerCard({
       <CardContent className="space-y-5 pt-6">
         <div className="rounded-2xl border border-eos-border bg-eos-bg-inset p-4">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-eos-success" strokeWidth={2.25} />
-            <p className="text-sm font-medium text-eos-text">Dovezi deja atasate</p>
+            <Paperclip className="size-4 text-eos-info" strokeWidth={2.25} />
+            <p className="text-sm font-medium text-eos-text">Dovezi in registru</p>
           </div>
+          <p className="mt-2 text-xs text-eos-text-muted">
+            Registrul vine din storage cand este disponibil. Daca nu este conectat, vezi dovada validata din task-uri.
+          </p>
           <div className="mt-4 space-y-3">
-            {evidenceReadyTasks.length === 0 && (
-              <EmptyState
-                title="Nu exista inca dovezi validate"
-                label="Incepe din Remediere, ataseaza o dovada si ruleaza `Mark as fixed & rescan`, apoi revino aici."
-                className="rounded-2xl py-8"
-              />
-            )}
-            {evidenceReadyTasks.slice(0, 6).map((task) => (
-              <div
-                key={task.id}
-                className="rounded-2xl border border-eos-border bg-eos-surface p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-eos-text">{task.title}</p>
-                    <p className="mt-1 text-xs text-eos-text-muted">
-                      {task.source} · {task.lawReference}
-                    </p>
-                  </div>
-                  <Badge variant="success">
-                    pregatit
-                  </Badge>
-                </div>
-                <p className="mt-3 text-sm text-eos-text-muted">
-                  {(() => {
-                    const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
-                    if (evidenceHref && task.attachedEvidence) {
-                      return (
+            {hasLedger ? (
+              ledgerEntries.map((entry) => {
+                const task = entry.taskId ? taskById.get(entry.taskId) : null
+                const evidenceHref = resolveEvidenceHref(entry)
+                const qualityStatus = entry.quality?.status
+                const qualityLabel =
+                  qualityStatus === "sufficient"
+                    ? "verificata"
+                    : qualityStatus === "weak"
+                      ? "slaba"
+                      : "neevaluata"
+                const qualityVariant =
+                  qualityStatus === "sufficient"
+                    ? "success"
+                    : qualityStatus === "weak"
+                      ? "warning"
+                      : "secondary"
+
+                return (
+                  <div
+                    key={entry.id}
+                    className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-eos-text">
+                          {task?.title ?? entry.fileName}
+                        </p>
+                        <p className="mt-1 text-xs text-eos-text-muted">
+                          {task
+                            ? `${task.source} · ${task.lawReference || "fara referinta legala"}`
+                            : "Dovada fara task asociat"}
+                        </p>
+                      </div>
+                      <Badge variant={qualityVariant}>{qualityLabel}</Badge>
+                    </div>
+                    <p className="mt-3 text-sm text-eos-text-muted">
+                      {evidenceHref ? (
                         <a
                           href={evidenceHref}
                           target="_blank"
                           rel="noreferrer"
                           className="text-eos-info underline decoration-eos-border underline-offset-4"
                         >
-                          {task.attachedEvidence.fileName}
+                          {entry.fileName}
                         </a>
-                      )
-                    }
+                      ) : (
+                        entry.fileName
+                      )}
+                    </p>
+                    <p className="mt-2 text-xs text-eos-text-muted">
+                      Tip dovada: {formatEvidenceKind(entry.kind)}
+                    </p>
+                    {entry.quality?.summary && (
+                      <p className="mt-2 text-xs text-eos-text-muted">{entry.quality.summary}</p>
+                    )}
+                  </div>
+                )
+              })
+            ) : (
+              <>
+                {evidenceReadyTasks.length === 0 && (
+                  <EmptyState
+                    title="Nu exista inca dovezi validate"
+                    label="Incepe din Remediere, ataseaza o dovada si ruleaza `Mark as fixed & rescan`, apoi revino aici."
+                    className="rounded-2xl py-8"
+                  />
+                )}
+                {evidenceReadyTasks.slice(0, 6).map((task) => (
+                  <div
+                    key={task.id}
+                    className="rounded-2xl border border-eos-border bg-eos-surface p-4"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-eos-text">{task.title}</p>
+                        <p className="mt-1 text-xs text-eos-text-muted">
+                          {task.source} · {task.lawReference}
+                        </p>
+                      </div>
+                      <Badge variant="success">pregatit</Badge>
+                    </div>
+                    <p className="mt-3 text-sm text-eos-text-muted">
+                      {(() => {
+                        const evidenceHref = resolveEvidenceHref(task.attachedEvidence)
+                        if (evidenceHref && task.attachedEvidence) {
+                          return (
+                            <a
+                              href={evidenceHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-eos-info underline decoration-eos-border underline-offset-4"
+                            >
+                              {task.attachedEvidence.fileName}
+                            </a>
+                          )
+                        }
 
-                    return task.attachedEvidence?.fileName ?? null
-                  })()}
-                </p>
-                {task.attachedEvidence && (
-                  <p className="mt-2 text-xs text-eos-text-muted">
-                    Tip dovada: {formatEvidenceKind(task.attachedEvidence.kind)}
-                  </p>
-                )}
-                {task.validationMessage && (
-                  <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-                      Detaliu validare
-                    </summary>
-                    <p className="mt-2 text-xs text-eos-text-muted">{task.validationMessage}</p>
-                  </details>
-                )}
-              </div>
-            ))}
+                        return task.attachedEvidence?.fileName ?? null
+                      })()}
+                    </p>
+                    {task.attachedEvidence && (
+                      <p className="mt-2 text-xs text-eos-text-muted">
+                        Tip dovada: {formatEvidenceKind(task.attachedEvidence.kind)}
+                      </p>
+                    )}
+                    {task.validationMessage && (
+                      <details className="mt-3 rounded-2xl border border-eos-border bg-eos-bg-inset p-3">
+                        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                          Detaliu validare
+                        </summary>
+                        <p className="mt-2 text-xs text-eos-text-muted">{task.validationMessage}</p>
+                      </details>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
 

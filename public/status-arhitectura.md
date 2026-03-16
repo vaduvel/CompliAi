@@ -1555,3 +1555,10 @@ Asta este sanatos arhitectural pentru ca:
 
 - `mvp-store` creeaza automat org-ul lipsa in `public.organizations` atunci cand `org_state` esueaza pe FK
 - previne blocajul runtime pentru workspace-uri locale / nou create
+
+## Actualizare 2026-03-16 - Registru evidence vizibil in Auditor Vault
+
+- `buildDashboardCorePayload` transporta `evidenceLedger` din `public.evidence_objects`
+- `Auditor Vault` foloseste acum registrul real ca sursa vizibila, nu doar attach-urile din task-uri
+- indicatorii de calitate (`verificata / slaba / neevaluata`) sunt expusi in UI
+- `SummaryStrip` din Vault afiseaza starea registrului ca semnal operational

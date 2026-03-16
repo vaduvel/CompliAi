@@ -2706,3 +2706,22 @@ Validare dupa pas:
 - `npm test` -> verde
 - `npm run lint` -> verde
 - `npm run build` -> verde
+
+Actualizare 2026-03-16 - Registru evidence alimentat din Supabase (Auditor Vault)
+
+- `lib/server/supabase-evidence-read.ts` expune acum `loadEvidenceLedgerFromSupabase(...)`
+- `buildDashboardCorePayload` include `evidenceLedger` in payload, iar `/api/dashboard/core` il transporta in UI
+- `Auditor Vault / Registru dovezi` afiseaza lista reala din `public.evidence_objects`:
+  - badge de calitate (`verificata / slaba / neevaluata`)
+  - link catre dovada
+  - fallback automat la lista pe task-uri cand registry-ul lipseste
+- `SummaryStrip` afiseaza acum starea registrului:
+  - dovezi verificate
+  - dovezi slabe
+  - dovezi neevaluate
+- test dedicat pentru ledger in `supabase-evidence-read.test.ts`
+
+Validare dupa pas:
+
+- `npm test` -> verde (`71` fisiere, `258` teste)
+- `npm run lint` -> verde

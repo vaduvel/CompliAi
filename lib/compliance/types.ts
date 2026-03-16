@@ -160,6 +160,10 @@ export type TaskEvidenceAttachment = {
   quality?: EvidenceQualityAssessment
 }
 
+export type EvidenceRegistryEntry = TaskEvidenceAttachment & {
+  taskId?: string | null
+}
+
 export type AIComplianceFieldOverride = {
   value: string | null
   confirmedByUser: boolean

@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   buildComplianceTraceRecordsMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   hydrateEvidenceAttachmentsFromSupabaseMock: vi.fn(),
+  loadEvidenceLedgerFromSupabaseMock: vi.fn(),
 }))
 
 vi.mock("@/lib/compliance/engine", () => ({
@@ -38,6 +39,7 @@ vi.mock("@/lib/server/org-context", () => ({
 
 vi.mock("@/lib/server/supabase-evidence-read", () => ({
   hydrateEvidenceAttachmentsFromSupabase: mocks.hydrateEvidenceAttachmentsFromSupabaseMock,
+  loadEvidenceLedgerFromSupabase: mocks.loadEvidenceLedgerFromSupabaseMock,
 }))
 
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
@@ -101,6 +103,7 @@ describe("lib/server/dashboard-response", () => {
 
     mocks.getOrgContextMock.mockResolvedValue(workspace)
     mocks.hydrateEvidenceAttachmentsFromSupabaseMock.mockResolvedValue(hydratedState)
+    mocks.loadEvidenceLedgerFromSupabaseMock.mockResolvedValue([])
     mocks.normalizeComplianceStateMock.mockImplementation((state) => state)
     mocks.computeDashboardSummaryMock.mockReturnValue(summary)
     mocks.buildRemediationPlanMock.mockReturnValue(remediationPlan)
@@ -114,6 +117,7 @@ describe("lib/server/dashboard-response", () => {
       sourceState,
       "org-1"
     )
+    expect(mocks.loadEvidenceLedgerFromSupabaseMock).toHaveBeenCalledWith({ orgId: "org-1" })
     expect(mocks.buildAICompliancePackMock).toHaveBeenCalledWith(
       expect.objectContaining({
         state: hydratedState,
