@@ -1392,3 +1392,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] `Control` overview progressive disclosure
   - sumar + actiuni scurte la intrare
   - ghidajul complet apare doar la cerere
+
+- [x] `Scanare` progressive disclosure (flux)
+  - actiunea apare inaintea ghidajului complet
+  - contextul si handoff-ul sunt la cerere

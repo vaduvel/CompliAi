@@ -1591,3 +1591,8 @@ Asta este sanatos arhitectural pentru ca:
 
 - `Control` (overview) arata sumar + actiuni scurte ca default
 - ghidajul complet apare doar la cerere
+
+## Actualizare 2026-03-16 - Scanare: actiunea precede detaliul
+
+- `Scanare` afiseaza fluxul activ inaintea ghidajului complet
+- detaliile de handoff apar doar la cerere

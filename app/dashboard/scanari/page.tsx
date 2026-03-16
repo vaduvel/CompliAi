@@ -90,6 +90,7 @@ export default function ScanariPage() {
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
   const [viewMode, setViewMode] = useState<ScanViewMode>("flow")
+  const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
     if (agentFlow.agentModeActive) {
@@ -175,6 +176,7 @@ export default function ScanariPage() {
       yamlFilePattern.test(drift.sourceDocument || "") ||
       (drift.systemLabel ? yamlPanelSystemNames.has(drift.systemLabel) : false)
   )
+  const shouldShowDetails = showDetails || cockpit.data.state.scans.length === 0
 
   // Construim plicul pentru agenti pe baza starii curente din UI
   const currentEnvelope: SourceEnvelope = {
@@ -247,14 +249,6 @@ export default function ScanariPage() {
         locked={agentFlow.agentModeActive}
       />
 
-      {viewMode !== "flow" ? (
-        <ScanWorkflowGuideCard
-          sourceType={sourceType}
-          viewMode={viewMode}
-          agentModeActive={agentFlow.agentModeActive}
-        />
-      ) : null}
-
       {agentFlow.agentModeActive ? (
         <AgentWorkspace
           sourceEnvelope={currentEnvelope}
@@ -289,13 +283,6 @@ export default function ScanariPage() {
 
           {viewMode === "flow" && (
             <>
-              <ScanFlowOverviewCard
-                sourceType={sourceType}
-                latestDocumentScan={latestDocumentScan}
-                latestManifestScan={latestManifestScan}
-                latestYamlScan={latestYamlScan}
-              />
-
               {sourceType === "manifest" || sourceType === "yaml" ? (
                 <div className="space-y-6">
                   <SectionDividerCard
@@ -361,19 +348,6 @@ export default function ScanariPage() {
                   />
                 </div>
               )}
-
-              <ScanFlowOverviewCard
-                sourceType={sourceType}
-                latestDocumentScan={latestDocumentScan}
-                latestManifestScan={latestManifestScan}
-                latestYamlScan={latestYamlScan}
-              />
-
-              <ScanWorkflowGuideCard
-                sourceType={sourceType}
-                viewMode={viewMode}
-                agentModeActive={agentFlow.agentModeActive}
-              />
             </>
           )}
 
@@ -398,6 +372,39 @@ export default function ScanariPage() {
           {viewMode === "history" && (
             <ScanHistoryTabLazy scans={cockpit.data.state.scans} tasks={cockpit.tasks} />
           )}
+
+          <Card className="border-eos-border bg-eos-surface">
+            <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+              <div>
+                <p className="text-sm font-semibold text-eos-text">Detalii de context</p>
+                <p className="text-xs text-eos-text-muted">
+                  Handoff-ul si ghidajul complet apar doar la cerere.
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => setShowDetails((current) => !current)}>
+                {showDetails ? "Ascunde detaliile" : "Arata detaliile"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {shouldShowDetails ? (
+            <div className="space-y-6">
+              {viewMode === "flow" ? (
+                <ScanFlowOverviewCard
+                  sourceType={sourceType}
+                  latestDocumentScan={latestDocumentScan}
+                  latestManifestScan={latestManifestScan}
+                  latestYamlScan={latestYamlScan}
+                />
+              ) : null}
+
+              <ScanWorkflowGuideCard
+                sourceType={sourceType}
+                viewMode={viewMode}
+                agentModeActive={agentFlow.agentModeActive}
+              />
+            </div>
+          ) : null}
         </>
       )}
     </div>

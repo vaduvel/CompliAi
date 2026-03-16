@@ -1197,3 +1197,8 @@ Actualizare suplimentara 2026-03-16:
 
 - `Control` (overview) foloseste progressive disclosure pentru ghidaj
 - `Audit si export` a scos duplicarile de navigare din snapshot card
+
+Actualizare suplimentara 2026-03-16:
+
+- `Scanare` respecta separarea sumar / actiune / detaliu
+- ghidajul complet apare doar la cerere dupa actiune

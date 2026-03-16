@@ -2734,6 +2734,16 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Scanare progressive disclosure (flow details)
+
+- `Scanare` afiseaza actiunea inaintea ghidajului complet
+- detaliile de context (flow + handoff) apar doar la cerere
+- respecta separarea sumar / actiune / detaliu in fluxul de scanare
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
 
 - `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK
