@@ -439,7 +439,8 @@ Rezultat urmărit:
 
 Status curent:
 
-- `DenseListItem` adoptat in `RecentScansCard`, `AlertsList`, `LatestDocumentSection` (findings + tasks), `ScanVerdictsTab` (YAML findings + manifest systems)
+- `DenseListItem` adoptat in `RecentScansCard`, `AlertsList`, `LatestDocumentSection` (findings + tasks), `ScanVerdictsTab` (YAML findings + manifest systems), `ScanVerdictsTab` (drift list)
+- `ActionCluster` folosit pentru handoff-ul din `ScanHistoryTab`
 
 ### 10. Reguli de densitate și copy
 

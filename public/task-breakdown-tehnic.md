@@ -1445,6 +1445,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - adoptat in `RecentScansCard` si `AlertsList`
   - adoptat in `LatestDocumentSection` (findings + task-uri)
   - adoptat in `ScanVerdictsTab` (YAML findings + manifest systems)
+  - adoptat pentru drifturile din `ScanVerdictsTab`
 - [~] `Summary + actions` recipe
   - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`
 - [~] `ActionCluster` in `DriftCommandCenter`
@@ -1452,3 +1453,4 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] `DenseListItem` in `Scanare` si `Control / Sisteme`
 - [~] `ActionCluster` in `Setari` (baseline actions)
 - [~] `GuideCard` in `Scanare` si `Asistent`
+- [~] `ActionCluster` in `ScanHistoryTab` (handoff)

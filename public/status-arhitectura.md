@@ -1706,3 +1706,8 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - DenseListItem ScanVerdictsTab
 
 - `ScanVerdictsTab` foloseste `DenseListItem` pentru YAML findings si sistemele din manifest
+
+## Actualizare 2026-03-16 - Drift list + ActionCluster Scanare
+
+- `ScanVerdictsTab` foloseste `DenseListItem` pentru drifturile din verdicts
+- `ScanHistoryTab` foloseste `ActionCluster` pentru handoff spre Documente
