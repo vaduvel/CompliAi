@@ -1720,3 +1720,8 @@ Asta este sanatos arhitectural pentru ca:
 
 - wrapping extins pe `ScanDrawer`, `TextExtractDrawer`, `Reports support panels`, `e-Factura validator`
 - `Audit si export` foloseste `ActionCluster` pentru toggle-ul de detalii
+
+## Actualizare 2026-03-16 - Control lists + Scanare toggle
+
+- `Control / Sisteme` foloseste `DenseListItem` pentru inventarul confirmat recent
+- `ScanVerdictsTab` foloseste `ActionCluster` pentru toggle-ul de detalii

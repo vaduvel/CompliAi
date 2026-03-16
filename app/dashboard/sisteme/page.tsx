@@ -634,33 +634,34 @@ function ControlSystemsWorkspace({
                 />
               )}
               {recentInventory.map((system) => (
-                <div
-                  key={system.id}
-                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-eos-text">{system.name}</p>
-                      <p className="mt-1 text-sm text-eos-text-muted">
-                        {system.vendor} · {formatPurposeLabel(system.purpose)}
-                      </p>
+                <DenseListItem key={system.id} className="bg-eos-surface-variant">
+                  <div className="p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="break-words text-sm font-semibold text-eos-text">
+                          {system.name}
+                        </p>
+                        <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
+                          {system.vendor} · {formatPurposeLabel(system.purpose)}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          system.riskLevel === "high"
+                            ? "destructive"
+                            : system.riskLevel === "limited"
+                              ? "warning"
+                              : "success"
+                        }
+                      >
+                        {system.riskLevel}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={
-                        system.riskLevel === "high"
-                          ? "destructive"
-                          : system.riskLevel === "limited"
-                            ? "warning"
-                            : "success"
-                      }
-                    >
-                      {system.riskLevel}
-                    </Badge>
+                    <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+                      {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
+                    </p>
                   </div>
-                  <p className="mt-2 text-xs text-eos-text-muted">
-                    {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
-                  </p>
-                </div>
+                </DenseListItem>
               ))}
             </CardContent>
           </Card>
