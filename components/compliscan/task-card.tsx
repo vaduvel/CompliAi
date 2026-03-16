@@ -227,10 +227,10 @@ export function TaskCard({
               </div>
 
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
-                <span>Responsabil: {task.owner}</span>
-                <span>Termen: {task.dueDate}</span>
-                <span>Tip: {remediationModeLabel(task.remediationMode)}</span>
-                <span>{task.effortLabel}</span>
+                <span className="[overflow-wrap:anywhere]">Responsabil: {task.owner}</span>
+                <span className="[overflow-wrap:anywhere]">Termen: {task.dueDate}</span>
+                <span className="[overflow-wrap:anywhere]">Tip: {remediationModeLabel(task.remediationMode)}</span>
+                <span className="[overflow-wrap:anywhere]">{task.effortLabel}</span>
               </div>
 
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
@@ -341,7 +341,9 @@ export function TaskCard({
                             </>
                           ) : null}
                         </div>
-                        {evidenceQualitySummary ? <p>{evidenceQualitySummary}</p> : null}
+                        {evidenceQualitySummary ? (
+                          <p className="[overflow-wrap:anywhere]">{evidenceQualitySummary}</p>
+                        ) : null}
                       </div>
                     ) : (
                       <div className="space-y-1">
@@ -424,12 +426,14 @@ export function TaskCard({
                   {task.why}
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
-                  <span>Sursa: {task.source}</span>
-                  <span>Incredere: {confidenceLabel(task.confidence)}</span>
+                  <span className="[overflow-wrap:anywhere]">Sursa: {task.source}</span>
+                  <span className="[overflow-wrap:anywhere]">
+                    Incredere: {confidenceLabel(task.confidence)}
+                  </span>
                   <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-eos-text">
+                  <p className="break-words text-sm font-medium text-eos-text">
                     {task.triggerLabel}
                   </p>
                   <p className="mt-2 whitespace-pre-wrap break-words rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
@@ -437,7 +441,9 @@ export function TaskCard({
                   </p>
                 </div>
                 {task.legalSummary ? (
-                  <p className="text-xs text-eos-text-muted">{task.legalSummary}</p>
+                  <p className="text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+                    {task.legalSummary}
+                  </p>
                 ) : null}
                 {task.principles.length > 0 ? (
                   <div className="flex flex-wrap gap-2">

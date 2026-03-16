@@ -137,8 +137,10 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline">Asistent Evidence OS</Badge>
                 </div>
-                <p className="mt-2 text-sm font-medium text-eos-text">Asistent de context</p>
-                <p className="text-[11px] text-eos-text-muted">
+                <p className="mt-2 break-words text-sm font-medium text-eos-text">
+                  Asistent de context
+                </p>
+                <p className="text-[11px] text-eos-text-muted [overflow-wrap:anywhere]">
                   Orientare rapida, fara verdict final.
                 </p>
               </div>

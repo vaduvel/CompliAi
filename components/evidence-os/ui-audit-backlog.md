@@ -386,6 +386,10 @@ Rezultat urmărit:
 
 - mai puține rupturi vizuale pe mobil și pe conținut real
 
+Status curent:
+
+- wrapping aplicat in `floating-assistant`, `logo` si `task-card` pentru string-uri lungi
+
 ### 8. Curățare CTA labels
 
 Suprafață:
