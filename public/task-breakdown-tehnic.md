@@ -1457,3 +1457,5 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] overflow / wrapping pass pentru texte lungi
 - [~] overflow / wrapping pass extins pe drawers si rapoarte
 - [~] summary + actions sweep pentru `Audit si export` (toggle detalii)
+- [~] summary + actions sweep pentru `ScanVerdictsTab` (toggle detalii)
+- [~] dense list sweep pentru `Control / Sisteme` (inventar recent)

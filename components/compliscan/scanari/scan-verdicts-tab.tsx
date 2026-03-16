@@ -8,6 +8,7 @@ import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta
 import { LatestDocumentSection } from "@/components/compliscan/route-sections"
 import type { CockpitTask, ScanInsight } from "@/components/compliscan/types"
 import { Badge } from "@/components/evidence-os/Badge"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
@@ -551,19 +552,16 @@ export function ScanVerdictsTab({
         description="Zona aceasta este read-only: te ajuta sa explici verdictul, finding-urile si drift-ul fara sa amesteci fluxul activ."
       />
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
-          <div>
-            <p className="text-sm font-semibold text-eos-text">Detalii verdict</p>
-            <p className="text-xs text-eos-text-muted">
-              Contextul complet apare doar la cerere.
-            </p>
-          </div>
+      <ActionCluster
+        eyebrow="Detalii"
+        title="Detalii verdict"
+        description="Contextul complet apare doar la cerere."
+        actions={
           <Button variant="outline" onClick={() => setShowDetails((current) => !current)}>
             {showDetails ? "Ascunde detaliile" : "Arata detaliile"}
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
 
       {shouldShowDetails ? (
         <>

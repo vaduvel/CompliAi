@@ -393,6 +393,11 @@ Status curent:
 Status curent (summary + actions):
 
 - `ActionCluster` folosit pentru toggle-ul de detalii din `Audit si export`
+- `ActionCluster` folosit pentru toggle-ul de detalii din `ScanVerdictsTab`
+
+Status curent (dense lists):
+
+- `DenseListItem` folosit pentru `Inventar confirmat recent` in `Control / Sisteme`
 
 ### 8. Curățare CTA labels
 

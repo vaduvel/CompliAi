@@ -1349,4 +1349,9 @@ Actualizare suplimentara 2026-03-16:
 
 Actualizare suplimentara 2026-03-16:
 
+- `Control / Sisteme` foloseste `DenseListItem` pentru inventar confirmat recent
+- `ScanVerdictsTab` foloseste `ActionCluster` pentru toggle-ul de detalii
+
+Actualizare suplimentara 2026-03-16:
+
 - `references/source-of-truth.md` adaugat ca index pentru docurile canonice
