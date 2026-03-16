@@ -2942,3 +2942,12 @@ Actualizare 2026-03-16 - ActionCluster in Control / Sisteme
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem adoption
+
+- `Scanare` foloseste `DenseListItem` pentru tab-uri
+- `Control / Sisteme` foloseste `DenseListItem` pentru drift recent
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

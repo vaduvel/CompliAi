@@ -181,10 +181,12 @@ Rămas deschis intenționat:
 - rețete canonice introduse pentru:
   - `guide card` prin `components/evidence-os/GuideCard.tsx`
   - `metrics row` prin `components/evidence-os/MetricTile.tsx`
-  - `dense operational list` prin `components/evidence-os/DenseListItem.tsx`
+- `dense operational list` prin `components/evidence-os/DenseListItem.tsx`
 - adoptate deja în:
   - `Auditor Vault` (indicatori detaliați + quick actions)
   - `DriftCommandCenter` + `Alerte`
+  - `Scanare` (tab-uri)
+  - `Control / Sisteme` (drift recent)
 - `summary + actions` prin `ActionCluster`:
   - `Alerte` (drift actions)
   - `Auditor Vault` (export)

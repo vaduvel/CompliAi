@@ -15,6 +15,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
@@ -897,10 +898,7 @@ function ControlDriftWorkspace({
             />
           )}
           {recentDrifts.map((drift) => (
-            <div
-              key={drift.id}
-              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
-            >
+            <DenseListItem key={drift.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
@@ -920,7 +918,7 @@ function ControlDriftWorkspace({
                   {drift.severity}
                 </Badge>
               </div>
-            </div>
+            </DenseListItem>
           ))}
         </CardContent>
       </Card>

@@ -13,6 +13,7 @@ import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -454,31 +455,30 @@ function ScanViewTabs({
           const disabled = locked && tab.id !== "flow"
 
           return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onChange(tab.id)}
-              disabled={disabled}
-              className={`rounded-eos-md border p-4 text-left transition ${
-                isActive
-                  ? "border-eos-border-subtle bg-eos-surface-active"
-                  : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
-              } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-eos-text-muted">
-                    {tab.description}
-                  </p>
+            <DenseListItem key={tab.id} active={isActive} className={disabled ? "opacity-60" : ""}>
+              <button
+                type="button"
+                onClick={() => onChange(tab.id)}
+                disabled={disabled}
+                className={`w-full p-4 text-left transition ${
+                  isActive ? "" : "hover:bg-eos-secondary-hover"
+                } ${disabled ? "cursor-not-allowed" : ""}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-eos-text-muted">
+                      {tab.description}
+                    </p>
+                  </div>
+                  {tab.badge ? (
+                    <Badge variant="secondary" className="normal-case tracking-normal">
+                      {tab.badge}
+                    </Badge>
+                  ) : null}
                 </div>
-                {tab.badge ? (
-                  <Badge variant="secondary" className="normal-case tracking-normal">
-                    {tab.badge}
-                  </Badge>
-                ) : null}
-              </div>
-            </button>
+              </button>
+            </DenseListItem>
           )
         })}
       </div>

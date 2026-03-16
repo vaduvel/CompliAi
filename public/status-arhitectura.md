@@ -1678,3 +1678,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - ActionCluster Control / Sisteme
 
 - `Control` (overview) foloseste `ActionCluster` pentru handoff
+
+## Actualizare 2026-03-16 - DenseListItem Scanare + Control
+
+- `Scanare` (tab-uri) si `Control / Sisteme` (drift recent) folosesc `DenseListItem`

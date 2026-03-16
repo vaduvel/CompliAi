@@ -1446,3 +1446,4 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `ActionCluster` aplicat in `Alerte` si `Auditor Vault`
 - [~] `ActionCluster` in `DriftCommandCenter`
 - [~] `ActionCluster` in `Control / Sisteme`
+- [~] `DenseListItem` in `Scanare` si `Control / Sisteme`
