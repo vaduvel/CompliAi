@@ -2994,6 +2994,15 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Drift list + ActionCluster in Scanare
+
+- `ScanVerdictsTab` foloseste `DenseListItem` pentru drifturile din verdicts
+- `ScanHistoryTab` foloseste `ActionCluster` pentru handoff spre Documente
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Index canon docuri
 
 - a fost adaugat `references/source-of-truth.md` ca index operational pentru docurile canonice

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react"
 
 import { RecentScansCard } from "@/components/compliscan/route-sections"
 import type { CockpitTask } from "@/components/compliscan/types"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
@@ -35,24 +36,19 @@ export function ScanHistoryTab({
           </CardContent>
         </Card>
       )}
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-          <div>
-            <p className="text-sm font-medium text-eos-text">
-              Istoricul complet ramane in Documente
-            </p>
-            <p className="text-xs text-eos-text-muted">
-              Acolo gasesti toate scanarile, nu doar cele recente.
-            </p>
-          </div>
+      <ActionCluster
+        eyebrow="Handoff"
+        title="Istoricul complet ramane in Documente"
+        description="Acolo gasesti toate scanarile, nu doar cele recente."
+        actions={
           <Button asChild variant="outline" size="default" className="gap-2">
             <Link href="/dashboard/documente">
               Mergi la Documente
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     </div>
   )
 }

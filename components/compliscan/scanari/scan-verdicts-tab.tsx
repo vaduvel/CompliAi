@@ -75,7 +75,7 @@ function ScanDriftCard({
   const guidance = getDriftPolicyFromRecord(drift)
 
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+    <div className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
@@ -296,7 +296,9 @@ function LatestYamlSection({
                     />
                   )}
                   {drifts.map((drift) => (
-                    <ScanDriftCard key={drift.id} drift={drift} compact />
+                    <DenseListItem key={drift.id} className="bg-eos-bg-inset">
+                      <ScanDriftCard drift={drift} compact />
+                    </DenseListItem>
                   ))}
                 </div>
               </div>
@@ -491,7 +493,9 @@ function LatestManifestSection({
                   />
                 )}
                 {drifts.map((drift) => (
-                  <ScanDriftCard key={drift.id} drift={drift} />
+                  <DenseListItem key={drift.id} className="bg-eos-bg-inset">
+                    <ScanDriftCard drift={drift} />
+                  </DenseListItem>
                 ))}
               </div>
             </div>

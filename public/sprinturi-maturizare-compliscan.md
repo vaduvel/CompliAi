@@ -1328,4 +1328,9 @@ Actualizare suplimentara 2026-03-16:
 
 Actualizare suplimentara 2026-03-16:
 
+- `DenseListItem` adoptat pentru drifturile din `ScanVerdictsTab`
+- `ActionCluster` folosit pentru handoff-ul din `ScanHistoryTab`
+
+Actualizare suplimentara 2026-03-16:
+
 - `references/source-of-truth.md` adaugat ca index pentru docurile canonice
