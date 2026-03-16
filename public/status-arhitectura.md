@@ -1690,3 +1690,19 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - GuideCard Scanare + Asistent
 
 - `GuideCard` adoptat pentru contextul canonic in `Scanare` si `Asistent`
+
+## Actualizare 2026-03-16 - DenseListItem RecentScans + Alerts
+
+- `RecentScansCard` si `AlertsList` folosesc `DenseListItem` pentru liste operationale
+
+## Actualizare 2026-03-16 - DenseListItem LatestDocumentSection
+
+- `LatestDocumentSection` foloseste `DenseListItem` pentru findings si task-uri recente
+
+## Actualizare 2026-03-16 - Index sursa de adevar
+
+- `references/source-of-truth.md` defineste explicit docurile canonice
+
+## Actualizare 2026-03-16 - DenseListItem ScanVerdictsTab
+
+- `ScanVerdictsTab` foloseste `DenseListItem` pentru YAML findings si sistemele din manifest

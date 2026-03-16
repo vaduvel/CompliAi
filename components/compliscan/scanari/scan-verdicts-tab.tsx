@@ -10,6 +10,7 @@ import type { CockpitTask, ScanInsight } from "@/components/compliscan/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
@@ -262,25 +263,24 @@ function LatestYamlSection({
                     />
                   )}
                   {findings.map((finding) => (
-                    <div
-                      key={finding.id}
-                      className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-eos-text">
-                            {finding.title}
-                          </p>
-                          <p className="mt-1 text-sm text-eos-text-muted">
-                            {finding.detail}
-                          </p>
-                          <FindingVerdictMeta finding={finding} className="mt-3" />
+                    <DenseListItem key={finding.id} className="bg-eos-bg-inset">
+                      <div className="p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-eos-text">
+                              {finding.title}
+                            </p>
+                            <p className="mt-1 text-sm text-eos-text-muted">
+                              {finding.detail}
+                            </p>
+                            <FindingVerdictMeta finding={finding} className="mt-3" />
+                          </div>
+                          <Badge variant={findingSeverityClasses(finding.severity)}>
+                            {finding.severity}
+                          </Badge>
                         </div>
-                        <Badge variant={findingSeverityClasses(finding.severity)}>
-                          {finding.severity}
-                        </Badge>
                       </div>
-                    </div>
+                    </DenseListItem>
                   ))}
                 </div>
               </div>
@@ -449,32 +449,31 @@ function LatestManifestSection({
                   />
                 )}
                 {systems.map((system) => (
-                  <div
-                    key={system.id}
-                    className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-eos-text">
-                          {system.name}
-                        </p>
-                        <p className="mt-1 text-sm text-eos-text-muted">
-                          {system.vendor} · {formatPurposeLabel(system.purpose)}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
-                          {system.confidence}
-                        </Badge>
-                        <Badge variant={systemRiskVariant(system.riskLevel)}>
-                          {system.riskLevel}
-                        </Badge>
-                        <Badge variant="secondary" className="normal-case tracking-normal">
-                          {system.detectionStatus}
-                        </Badge>
+                  <DenseListItem key={system.id} className="bg-eos-bg-inset">
+                    <div className="p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-eos-text">
+                            {system.name}
+                          </p>
+                          <p className="mt-1 text-sm text-eos-text-muted">
+                            {system.vendor} · {formatPurposeLabel(system.purpose)}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                            {system.confidence}
+                          </Badge>
+                          <Badge variant={systemRiskVariant(system.riskLevel)}>
+                            {system.riskLevel}
+                          </Badge>
+                          <Badge variant="secondary" className="normal-case tracking-normal">
+                            {system.detectionStatus}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </DenseListItem>
                 ))}
               </div>
             </div>

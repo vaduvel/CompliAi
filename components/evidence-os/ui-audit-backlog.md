@@ -437,6 +437,10 @@ Rezultat urmărit:
 
 - DS-ul controlează nu doar look-ul, ci și claritatea structurală
 
+Status curent:
+
+- `DenseListItem` adoptat in `RecentScansCard`, `AlertsList`, `LatestDocumentSection` (findings + tasks), `ScanVerdictsTab` (YAML findings + manifest systems)
+
 ### 10. Reguli de densitate și copy
 
 Suprafață:

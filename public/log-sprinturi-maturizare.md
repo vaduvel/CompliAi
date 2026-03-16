@@ -2968,3 +2968,36 @@ Actualizare 2026-03-16 - GuideCard adoption
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem in listele de cockpit
+
+- `RecentScansCard` foloseste `DenseListItem` pentru sursele recente
+- `AlertsList` foloseste `DenseListItem` pentru actiunile generate din drift
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem in rezultate recente
+
+- `LatestDocumentSection` foloseste `DenseListItem` pentru findings si task-uri recente
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - DenseListItem in ScanVerdictsTab
+
+- `ScanVerdictsTab` foloseste `DenseListItem` pentru YAML findings si sistemele din manifest
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
+Actualizare 2026-03-16 - Index canon docuri
+
+- a fost adaugat `references/source-of-truth.md` ca index operational pentru docurile canonice
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

@@ -627,28 +627,27 @@ export function LatestDocumentSection({
                       />
                     )}
                     {latestScanFindings.slice(0, 3).map((finding) => (
-                      <div
-                        key={finding.id}
-                        className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
-                            {finding.provenance?.ruleId || "fara regula"}
-                          </Badge>
-                          {finding.provenance?.matchedKeyword && (
+                      <DenseListItem key={finding.id} className="bg-eos-bg">
+                        <div className="p-4">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
-                              keyword: {finding.provenance.matchedKeyword}
+                              {finding.provenance?.ruleId || "fara regula"}
                             </Badge>
-                          )}
+                            {finding.provenance?.matchedKeyword && (
+                              <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                                keyword: {finding.provenance.matchedKeyword}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="mt-3 text-sm font-semibold text-eos-text">
+                            {finding.title}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-eos-text-muted">
+                            {finding.provenance?.excerpt || finding.detail}
+                          </p>
+                          <FindingVerdictMeta finding={finding} className="mt-3" />
                         </div>
-                        <p className="mt-3 text-sm font-semibold text-eos-text">
-                          {finding.title}
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-eos-text-muted">
-                          {finding.provenance?.excerpt || finding.detail}
-                        </p>
-                        <FindingVerdictMeta finding={finding} className="mt-3" />
-                      </div>
+                      </DenseListItem>
                     ))}
                   </div>
                 </div>
@@ -667,22 +666,21 @@ export function LatestDocumentSection({
                     />
                   )}
                   {latestScanTasks.slice(0, 3).map((task) => (
-                      <div
-                        key={task.id}
-                        className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
-                      >
+                    <DenseListItem key={task.id} className="bg-eos-bg">
+                      <div className="p-4">
                         <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-eos-text">
-                          {task.title}
+                          <p className="text-sm font-semibold text-eos-text">
+                            {task.title}
                           </p>
                           <span className="text-xs text-eos-text-muted">{task.priority}</span>
                         </div>
-                      <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
-                      <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
-                      <p className="mt-2 text-xs text-eos-text-muted">
-                        {task.effortLabel} · {task.source}
-                      </p>
-                    </div>
+                        <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+                        <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+                        <p className="mt-2 text-xs text-eos-text-muted">
+                          {task.effortLabel} · {task.source}
+                        </p>
+                      </div>
+                    </DenseListItem>
                   ))}
                 </div>
               </div>
@@ -754,65 +752,66 @@ export function RecentScansCard({
           const targetHref = sourceHref(scan)
 
           return (
-            <Link
-              key={scan.id}
-              href={targetHref}
-              className="group flex flex-col gap-4 rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 transition hover:border-eos-border-strong hover:bg-eos-secondary-hover md:flex-row md:items-center md:justify-between"
-            >
-              <div className="flex min-w-0 items-center gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-eos-md bg-eos-bg text-eos-text-muted">
-                  <FileText className="size-5" strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <p className="break-words text-base font-semibold text-eos-text md:truncate">
-                    {scan.documentName}
-                  </p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <Badge className="border-eos-border bg-eos-bg text-eos-text-muted">
-                      {sourceLabel(scan)}
-                    </Badge>
+            <DenseListItem key={scan.id} className="group hover:border-eos-border-strong">
+              <Link
+                href={targetHref}
+                className="flex flex-col gap-4 rounded-eos-md p-5 transition hover:bg-eos-secondary-hover md:flex-row md:items-center md:justify-between"
+              >
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-eos-md bg-eos-bg text-eos-text-muted">
+                    <FileText className="size-5" strokeWidth={2} />
                   </div>
-                  <p className="mt-0.5 text-sm text-eos-text-muted">
-                    Scanat pe {new Date(scan.createdAtISO).toLocaleString("ro-RO")}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="break-words text-base font-semibold text-eos-text md:truncate">
+                      {scan.documentName}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <Badge className="border-eos-border bg-eos-bg text-eos-text-muted">
+                        {sourceLabel(scan)}
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-sm text-eos-text-muted">
+                      Scanat pe {new Date(scan.createdAtISO).toLocaleString("ro-RO")}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:shrink-0 md:justify-end">
-                <Badge
-                  className={
-                    needsReview
-                      ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+                <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:shrink-0 md:justify-end">
+                  <Badge
+                    className={
+                      needsReview
+                        ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+                        : isManifest
+                        ? "border-eos-border bg-eos-primary-soft text-eos-primary"
+                        : isYaml
+                        ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
+                        : hasIssues
+                        ? "border-eos-error-border bg-eos-error-soft text-eos-error"
+                        : "border-eos-border bg-eos-success-soft text-eos-success"
+                    }
+                  >
+                    {needsReview
+                      ? "Analiza in asteptare"
                       : isManifest
-                      ? "border-eos-border bg-eos-primary-soft text-eos-primary"
+                        ? "Manifest procesat"
                       : isYaml
-                      ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
-                      : hasIssues
-                      ? "border-eos-error-border bg-eos-error-soft text-eos-error"
-                      : "border-eos-border bg-eos-success-soft text-eos-success"
-                  }
-                >
-                  {needsReview
-                    ? "Analiza in asteptare"
-                    : isManifest
-                      ? "Manifest procesat"
-                    : isYaml
-                      ? "Config YAML procesat"
-                    : hasIssues
-                      ? `${openTasks.length} task${openTasks.length !== 1 ? "-uri" : ""} deschise`
-                      : "Fara probleme"}
-                </Badge>
-                {p1Count > 0 && (
-                  <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
-                    {p1Count} P1
+                        ? "Config YAML procesat"
+                        : hasIssues
+                          ? `${openTasks.length} task${openTasks.length !== 1 ? "-uri" : ""} deschise`
+                          : "Fara probleme"}
                   </Badge>
-                )}
-                <span className="text-sm text-eos-text-muted">
-                  {sourceActionLabel(scan)}
-                </span>
-                <ArrowRight className="size-4 text-eos-text-muted transition group-hover:text-eos-primary" strokeWidth={2} />
-              </div>
-            </Link>
+                  {p1Count > 0 && (
+                    <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                      {p1Count} P1
+                    </Badge>
+                  )}
+                  <span className="text-sm text-eos-text-muted">
+                    {sourceActionLabel(scan)}
+                  </span>
+                  <ArrowRight className="size-4 text-eos-text-muted transition group-hover:text-eos-primary" strokeWidth={2} />
+                </div>
+              </Link>
+            </DenseListItem>
           )
         })}
       </CardContent>
@@ -835,31 +834,30 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
         </Link>
       </div>
       {tasks.map((task) => (
-        <div
-          key={task.id}
-          className="rounded-eos-md border border-eos-border bg-eos-surface p-5"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-lg font-semibold text-eos-text">{task.title}</p>
-              <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
-              <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+        <DenseListItem key={task.id} className="bg-eos-surface">
+          <div className="p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-lg font-semibold text-eos-text">{task.title}</p>
+                <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
+                <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
+              </div>
+              <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                {task.priority}
+              </Badge>
             </div>
-            <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
-              {task.priority}
-            </Badge>
+            <p className="mt-3 text-xs text-eos-text-muted">
+              {task.source} · {task.lawReference}
+            </p>
+            <div className="mt-4">
+              <Button asChild variant="outline">
+                <Link href="/dashboard/rapoarte">
+                  Vezi task si dovezi →
+                </Link>
+              </Button>
+            </div>
           </div>
-          <p className="mt-3 text-xs text-eos-text-muted">
-            {task.source} · {task.lawReference}
-          </p>
-          <div className="mt-4">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/rapoarte">
-                Vezi task si dovezi →
-              </Link>
-            </Button>
-          </div>
-        </div>
+        </DenseListItem>
       ))}
     </div>
   )
