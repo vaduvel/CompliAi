@@ -1212,3 +1212,7 @@ Actualizare suplimentara 2026-03-16:
 
 - micro-pass de copy pentru clarificarea read-only vs executie
 - handoff explicit in `Scanare`, `Documente`, `Drift`, `Remediere`, `Audit si export`, `Setari`, `Asistent`
+
+Actualizare suplimentara 2026-03-16:
+
+- spacing aliniat pe componentele Evidence OS (badge icons, tabs, status rows)

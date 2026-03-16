@@ -17,8 +17,8 @@ export function ProposalConfidenceBadge({ confidence }: ProposalConfidenceBadgeP
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className="gap-1.5">
-      <Icon className="size-3" />
+    <Badge variant={config.variant} className="gap-1">
+      <Icon className="size-3.5" />
       {config.label}
     </Badge>
   )

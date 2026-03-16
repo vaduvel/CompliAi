@@ -27,7 +27,7 @@ export function ControlCoverageBadge({ state, count }: ControlCoverageBadgeProps
   }[state]
 
   return (
-    <Badge variant={config.variant} className="gap-1.5 normal-case tracking-normal">
+    <Badge variant={config.variant} className="gap-1 normal-case tracking-normal">
       <span>{config.label}</span>
       {typeof count === "number" && <span className="text-[11px] opacity-90">{count}</span>}
       <span className="inline-flex items-center gap-0.5" aria-hidden="true">

@@ -1606,3 +1606,9 @@ Asta este sanatos arhitectural pentru ca:
 
 - paginile cheie mentioneaza explicit unde se executa si unde doar se verifica
 - handoff-ul este scris clar in intro-uri si descrieri scurte
+
+## Actualizare 2026-03-16 - Spacing Evidence OS
+
+- iconurile din badge-uri sunt aliniate la 14px conform spec
+- tab-urile Evidence OS respecta paddingul standard
+- micro-list items folosesc padding pe scala

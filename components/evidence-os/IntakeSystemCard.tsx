@@ -64,19 +64,19 @@ export function IntakeSystemCard({
           <div className="space-y-2">
             <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Transparenta campuri</p>
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2">
                 <span className="text-xs text-eos-text-muted">Provider</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.provider} />
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2">
                 <span className="text-xs text-eos-text-muted">Model</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.model} />
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2">
                 <span className="text-xs text-eos-text-muted">Scop</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.purpose} />
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-2">
                 <span className="text-xs text-eos-text-muted">Risc</span>
                 <SourceFieldStatusBadge status={system.fieldStatus.risk_class} />
               </div>

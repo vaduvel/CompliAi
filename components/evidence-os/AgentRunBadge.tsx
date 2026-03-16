@@ -12,7 +12,7 @@ export function AgentRunBadge({ status }: AgentRunBadgeProps) {
   if (status === "running") {
     return (
       <Badge variant="warning" className="gap-1">
-        <Loader2 className="size-3 animate-spin" />
+        <Loader2 className="size-3.5 animate-spin" />
         In rulare
       </Badge>
     )
@@ -29,7 +29,7 @@ export function AgentRunBadge({ status }: AgentRunBadgeProps) {
 
   return (
     <Badge variant={config.variant} className="gap-1">
-      <Icon className="size-3" />
+      <Icon className="size-3.5" />
       {config.label}
     </Badge>
   )

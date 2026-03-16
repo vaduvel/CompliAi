@@ -2763,6 +2763,16 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Evidence OS spacing / icon grid
+
+- badge-urile folosesc icon 14px (size-3.5) si gap conform scalei
+- tabs in `ProposalBundlePanel` respecta paddingul standard (12/16) si gap-ul de 4px
+- randurile de status din `IntakeSystemCard` folosesc padding pe scala (py-2 / px-3)
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
 
 - `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK

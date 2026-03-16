@@ -1403,3 +1403,8 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 
 - [x] micro-pass de copy pentru read-only vs executie
   - intro-urile clarifica explicit handoff-ul corect
+
+- [x] Evidence OS spacing pass
+  - iconuri badge la 14px (size-3.5)
+  - tabs cu padding standard 12/16
+  - rows de status pe scala (py-2 / px-3)
