@@ -28,6 +28,8 @@ export function buildClientAuditPackDocument(
 }
 
 function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string) {
+  const evidenceLedgerSummary = summarizeEvidenceLedger(auditPack.evidenceLedger)
+  const hasEvidenceLedger = auditPack.evidenceLedger.length > 0
   const summaryCards = [
     {
       label: "Scor conformitate",
@@ -63,10 +65,17 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
       tone: "neutral",
     },
     {
-      label: "Dovezi validate",
-      value: String(auditPack.executiveSummary.validatedEvidenceItems),
-      tone:
-        auditPack.executiveSummary.missingEvidenceItems > 0 ? "warning" : "success",
+      label: hasEvidenceLedger ? "Dovezi verificate" : "Dovezi validate",
+      value: hasEvidenceLedger
+        ? `${evidenceLedgerSummary.sufficient}/${auditPack.evidenceLedger.length}`
+        : String(auditPack.executiveSummary.validatedEvidenceItems),
+      tone: hasEvidenceLedger
+        ? evidenceLedgerSummary.weak > 0
+          ? "warning"
+          : "success"
+        : auditPack.executiveSummary.missingEvidenceItems > 0
+          ? "warning"
+          : "success",
     },
     {
       label: "Bundle evidence",
@@ -856,6 +865,19 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
     </main>
   </body>
 </html>`
+}
+
+function summarizeEvidenceLedger(ledger: AuditPackV2["evidenceLedger"]) {
+  return ledger.reduce(
+    (acc, entry) => {
+      const status = entry.evidenceQuality?.status
+      if (status === "sufficient") acc.sufficient += 1
+      else if (status === "weak") acc.weak += 1
+      else acc.unrated += 1
+      return acc
+    },
+    { sufficient: 0, weak: 0, unrated: 0 }
+  )
 }
 
 function buildBulletList(items: string[]) {

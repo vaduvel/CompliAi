@@ -194,6 +194,7 @@ Fronturile active acum:
   - `Auditor Vault` expune acum registrul real prin `evidenceLedger` in payload
   - `SummaryStrip` in Vault afiseaza acum health-ul registrului (verificate / slabe / neevaluate)
   - `Audit si export` expune sumarul registrului in zona de readiness
+  - `Audit Pack` client-facing expune raportul de dovezi verificate din registru
 - [~] source of truth cloud pentru tenancy
   - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB

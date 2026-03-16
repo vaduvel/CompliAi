@@ -1169,3 +1169,4 @@ Actualizare suplimentara 2026-03-16:
 - UI-ul afiseaza acum calitatea dovezii (`verificata / slaba / neevaluata`), nu doar task-urile
 - `SummaryStrip` expune starea registrului ca semnal operational
 - `Audit si export` foloseste sumarul registrului in readiness
+- `Audit Pack` client-facing foloseste raportul de dovezi verificate din registru

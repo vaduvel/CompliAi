@@ -2720,6 +2720,7 @@ Actualizare 2026-03-16 - Registru evidence alimentat din Supabase (Auditor Vault
   - dovezi slabe
   - dovezi neevaluate
 - `Audit si export` expune sumarul registrului in zona de readiness
+- `Audit Pack` client-facing reflecta acum raportul de dovezi verificate din registru
 - test dedicat pentru ledger in `supabase-evidence-read.test.ts`
 
 Validare dupa pas:
