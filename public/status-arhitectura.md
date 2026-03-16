@@ -1569,3 +1569,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Dashboard` foloseste semnalul de calitate a dovezii in summary strip
 - `Control` foloseste semnalul de calitate a dovezii in overview
 - `Documente` foloseste lazy load pentru sectiunile grele (latest + recent)
+- `Alerte/Drift` expune semnalul de calitate a dovezii pentru decizie rapida

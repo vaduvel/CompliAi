@@ -1175,3 +1175,4 @@ Actualizare suplimentara 2026-03-16:
 - `Dashboard` afiseaza semnalul de calitate a dovezii in `Stare curenta`
 - `Control` afiseaza semnalul de calitate a dovezii in overview
 - `Documente` incarca lazy sectiunile istorice pentru un load initial mai rapid
+- `Alerte/Drift` foloseste sumarul dovezii ca semnal operational

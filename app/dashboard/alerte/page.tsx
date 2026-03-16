@@ -52,6 +52,17 @@ export default function DriftPage() {
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const breachedDrifts = openDrifts.filter((drift) => isDriftSlaBreached(drift)).length
   const driftTasks = openTasks.filter((task) => task.relatedDriftIds.length > 0)
+  const evidenceLedger = cockpit.data.evidenceLedger ?? []
+  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = evidenceLedger.filter((entry) => !entry.quality?.status).length
+  const ledgerHint =
+    evidenceLedger.length > 0
+      ? ledgerWeakCount > 0
+        ? `${ledgerWeakCount} dovezi slabe · ${ledgerUnratedCount} neevaluate`
+        : ledgerUnratedCount > 0
+          ? `${ledgerUnratedCount} neevaluate`
+          : "registru curat"
+      : "fara registru de dovada inca"
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Drift activ",
@@ -72,10 +83,10 @@ export default function DriftPage() {
       tone: driftTasks.length > 0 ? "accent" : "neutral",
     },
     {
-      label: "Validare",
-      value: "umana",
-      hint: "drift-ul cere decizie si explicatie umana, nu inchidere automata",
-      tone: "warning",
+      label: "Dovada",
+      value: evidenceLedger.length > 0 ? `${evidenceLedger.length}` : "lipsa",
+      hint: ledgerHint,
+      tone: ledgerWeakCount > 0 ? "warning" : evidenceLedger.length > 0 ? "success" : "neutral",
     },
   ]
 
