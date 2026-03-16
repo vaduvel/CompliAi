@@ -3115,3 +3115,28 @@ Branch: `codex/ux-sprint-2-control`
 Validare dupa pas:
 
 - `tsc --noEmit` pe `sisteme/page.tsx` -> zero erori
+
+---
+
+Actualizare 2026-03-16 - Sprint UX-4: Mixed language sweep
+
+Branch: `codex/ux-sprint-3-language`
+
+### UX-4: Romanian-first — 17 stringuri traduse
+
+**`app/dashboard/setari/page.tsx`**
+- `DRIFT_OVERRIDE_OPTIONS`: Default policy → Politica implicita, Low → Scazut, Medium → Mediu, High → Ridicat, Critical → Critic
+- Tab description "Health check si readiness." → "Health check si stare operationala."
+- SummaryStrip label "Operational" → "Stare operationala"
+
+**`components/compliscan/export-center.tsx`**
+- Export label "Annex IV" → "Anexa IV"
+
+**`app/dashboard/rapoarte/auditor-vault/page.tsx`**
+- MiniMeta labels: Sources → Surse, Systems → Sisteme, Findings → Constatari, Compared to → Comparat cu
+- `formatEvidenceKind`: Screenshot → Captura ecran, Policy text → Text de politica, Log export → Export loguri, Document bundle → Pachet documente, Other → Alta dovada
+- Button label "Annex IV lite" → "Anexa IV lite"
+
+Validare dupa pas:
+
+- `tsc --noEmit` pe cele 3 fisiere modificate -> zero erori

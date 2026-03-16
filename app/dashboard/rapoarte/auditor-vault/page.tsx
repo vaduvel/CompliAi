@@ -299,7 +299,7 @@ export default function AuditorVaultPage() {
             </Button>
             <Button asChild variant="outline" size="default" className="gap-2">
               <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
-                Annex IV lite
+                Anexa IV lite
                 <Download className="size-4" strokeWidth={2} />
               </a>
             </Button>
@@ -768,10 +768,10 @@ function SnapshotAuditCard({
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <MiniMeta label="Sources" value={latestSnapshot.sources.length} />
-              <MiniMeta label="Systems" value={latestSnapshot.systems.length} />
-              <MiniMeta label="Findings" value={latestSnapshot.findings.length} />
-              <MiniMeta label="Compared to" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
+              <MiniMeta label="Surse" value={latestSnapshot.sources.length} />
+              <MiniMeta label="Sisteme" value={latestSnapshot.systems.length} />
+              <MiniMeta label="Constatari" value={latestSnapshot.findings.length} />
+              <MiniMeta label="Comparat cu" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
             </div>
             <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
@@ -1229,10 +1229,10 @@ function EventIcon({ type }: { type: string }) {
 }
 
 function formatEvidenceKind(kind: string) {
-  if (kind === "screenshot") return "Screenshot"
-  if (kind === "policy_text") return "Policy text"
-  if (kind === "log_export") return "Log export"
-  if (kind === "yaml_evidence") return "dovada YAML"
-  if (kind === "document_bundle") return "Document bundle"
-  return "Other"
+  if (kind === "screenshot") return "Captura ecran"
+  if (kind === "policy_text") return "Text de politica"
+  if (kind === "log_export") return "Export loguri"
+  if (kind === "yaml_evidence") return "Dovada YAML"
+  if (kind === "document_bundle") return "Pachet documente"
+  return "Alta dovada"
 }
