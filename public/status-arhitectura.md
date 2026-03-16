@@ -1698,3 +1698,7 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - DenseListItem LatestDocumentSection
 
 - `LatestDocumentSection` foloseste `DenseListItem` pentru findings si task-uri recente
+
+## Actualizare 2026-03-16 - Index sursa de adevar
+
+- `references/source-of-truth.md` defineste explicit docurile canonice
