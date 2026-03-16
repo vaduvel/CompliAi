@@ -1396,3 +1396,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] `Scanare` progressive disclosure (flux)
   - actiunea apare inaintea ghidajului complet
   - contextul si handoff-ul sunt la cerere
+
+- [x] `Verdicts/Istoric` micro-claritate
+  - detaliile din Verdicts apar doar la cerere
+  - Istoric are empty state clar cand nu exista scanari

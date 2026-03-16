@@ -2744,6 +2744,16 @@ Validare dupa pas:
 
 - `npm run lint` -> verde
 
+Actualizare 2026-03-16 - Verdicts/Istoric micro-claritate
+
+- `Verdicts` afiseaza detaliile complete doar la cerere
+- `Istoric` arata empty state clar daca nu exista scanari
+- separarea read-only / executie ramane explicita
+
+Validare dupa pas:
+
+- `npm run lint` -> verde
+
 Actualizare 2026-03-16 - Fix org_state FK la org lipsa in Supabase
 
 - `lib/server/mvp-store.ts` asigura existenta organizatiei in `public.organizations` cand `org_state` esueaza pe FK

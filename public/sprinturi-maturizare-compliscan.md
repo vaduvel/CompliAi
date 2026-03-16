@@ -1202,3 +1202,8 @@ Actualizare suplimentara 2026-03-16:
 
 - `Scanare` respecta separarea sumar / actiune / detaliu
 - ghidajul complet apare doar la cerere dupa actiune
+
+Actualizare suplimentara 2026-03-16:
+
+- `Verdicts` expune detaliile doar la cerere
+- `Istoric` are empty state clar cand nu exista scanari

@@ -17,6 +17,8 @@ export function ScanHistoryTab({
   scans: ScanRecord[]
   tasks: CockpitTask[]
 }) {
+  const hasScans = scans.length > 0
+
   return (
     <div className="space-y-6">
       <SectionDividerCard
@@ -24,7 +26,15 @@ export function ScanHistoryTab({
         title="Istoric documente"
         description="Vezi toate scanarile recente intr-o singura lista si sari direct la rezultatul relevant."
       />
-      <RecentScansCard scans={scans} tasks={tasks} />
+      {hasScans ? (
+        <RecentScansCard scans={scans} tasks={tasks} />
+      ) : (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="py-6 text-sm text-eos-text-muted">
+            Nu exista inca scanari recente pentru istoric.
+          </CardContent>
+        </Card>
+      )}
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
           <div>

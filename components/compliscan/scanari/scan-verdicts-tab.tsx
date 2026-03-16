@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { ArrowRight, CheckCircle2, Clock3, ShieldAlert } from "lucide-react"
 
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
@@ -531,6 +532,14 @@ export function ScanVerdictsTab({
   latestDocumentInsights: ScanInsight[]
   latestDocumentTasks: CockpitTask[]
 }) {
+  const [showDetails, setShowDetails] = useState(false)
+
+  const hasData =
+    Boolean(latestManifestScan) ||
+    Boolean(latestYamlScan) ||
+    Boolean(latestDocumentScan)
+  const shouldShowDetails = showDetails || !hasData
+
   return (
     <div className="space-y-6">
       <SectionDividerCard
@@ -538,28 +547,47 @@ export function ScanVerdictsTab({
         title="Ultimul rezultat confirmat"
         description="Zona aceasta este read-only: te ajuta sa explici verdictul, finding-urile si drift-ul fara sa amesteci fluxul activ."
       />
-      {sourceType === "manifest" ? (
-        <LatestManifestSection
-          latestManifestScan={latestManifestScan}
-          systems={latestManifestSystems}
-          drifts={latestManifestDrifts}
-        />
-      ) : sourceType === "yaml" ? (
-        <LatestYamlSection
-          latestYamlScan={latestYamlScan}
-          systems={latestYamlSystems}
-          findings={latestYamlFindings}
-          drifts={latestYamlDrifts}
-        />
-      ) : (
-        <LatestDocumentSection
-          latestScan={latestDocumentScan}
-          latestScanText={latestDocumentText}
-          latestScanFindings={latestDocumentFindings}
-          latestScanInsights={latestDocumentInsights}
-          latestScanTasks={latestDocumentTasks}
-        />
-      )}
+
+      <Card className="border-eos-border bg-eos-surface">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Detalii verdict</p>
+            <p className="text-xs text-eos-text-muted">
+              Contextul complet apare doar la cerere.
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => setShowDetails((current) => !current)}>
+            {showDetails ? "Ascunde detaliile" : "Arata detaliile"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {shouldShowDetails ? (
+        <>
+          {sourceType === "manifest" ? (
+            <LatestManifestSection
+              latestManifestScan={latestManifestScan}
+              systems={latestManifestSystems}
+              drifts={latestManifestDrifts}
+            />
+          ) : sourceType === "yaml" ? (
+            <LatestYamlSection
+              latestYamlScan={latestYamlScan}
+              systems={latestYamlSystems}
+              findings={latestYamlFindings}
+              drifts={latestYamlDrifts}
+            />
+          ) : (
+            <LatestDocumentSection
+              latestScan={latestDocumentScan}
+              latestScanText={latestDocumentText}
+              latestScanFindings={latestDocumentFindings}
+              latestScanInsights={latestDocumentInsights}
+              latestScanTasks={latestDocumentTasks}
+            />
+          )}
+        </>
+      ) : null}
     </div>
   )
 }

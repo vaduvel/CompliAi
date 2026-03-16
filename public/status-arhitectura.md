@@ -1596,3 +1596,8 @@ Asta este sanatos arhitectural pentru ca:
 
 - `Scanare` afiseaza fluxul activ inaintea ghidajului complet
 - detaliile de handoff apar doar la cerere
+
+## Actualizare 2026-03-16 - Verdicts/Istoric: read-only mai curat
+
+- `Verdicts` afiseaza detaliile doar la cerere
+- `Istoric` are empty state clar pentru lipsa scanarilor
