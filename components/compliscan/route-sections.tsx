@@ -106,7 +106,7 @@ export function DriftCommandCenter({
           <div>
             <CardTitle className="text-xl">Control drift</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-eos-text-muted">
-              Vezi rapid schimbarea principala, impactul ei si urmatorul pas clar.
+              Schimbarile detectate, impactul operational si escalarea activa.
             </p>
           </div>
           <Badge className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-eos-border bg-eos-surface-variant text-eos-text-muted"}>
@@ -184,7 +184,7 @@ export function DriftCommandCenter({
               </div>
 
               <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Pasul urmator</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Actiune pentru drift</p>
                 <p className="mt-2 text-sm font-semibold text-eos-text">
                   {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                 </p>

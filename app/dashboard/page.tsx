@@ -42,7 +42,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Dashboard"
         title="Starea actuala a conformitatii tale"
-        description="Ce este blocat, ce cere atentie si ce faci acum."
+        description="Situatia globala: ce s-a schimbat, ce deviaza si ce cere interventie."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
