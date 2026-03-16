@@ -1670,3 +1670,7 @@ Asta este sanatos arhitectural pentru ca:
 
 - `ActionCluster` folosit pentru zone cu CTA multiple
 - adoptat in `Alerte` si `Auditor Vault`
+
+## Actualizare 2026-03-16 - ActionCluster DriftCommandCenter
+
+- quick actions din `DriftCommandCenter` sunt canonizate cu `ActionCluster`

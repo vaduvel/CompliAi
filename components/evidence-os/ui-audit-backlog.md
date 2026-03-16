@@ -188,6 +188,7 @@ Rămas deschis intenționat:
 - `summary + actions` prin `ActionCluster`:
   - `Alerte` (drift actions)
   - `Auditor Vault` (export)
+  - `DriftCommandCenter` (quick actions)
 
 Rămas deschis:
 

@@ -2926,3 +2926,11 @@ Actualizare 2026-03-16 - Summary + Actions recipe
 Validare dupa pas:
 
 - `npm run lint` -> verde
+
+Actualizare 2026-03-16 - ActionCluster in DriftCommandCenter
+
+- `DriftCommandCenter` foloseste `ActionCluster` pentru quick actions
+
+Validare dupa pas:
+
+- `npm run lint` -> verde

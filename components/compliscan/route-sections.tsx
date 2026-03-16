@@ -12,6 +12,7 @@ import {
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { TextExtractDrawer } from "@/components/compliscan/text-extract-drawer"
 import { Badge } from "@/components/evidence-os/Badge"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
@@ -232,35 +233,39 @@ export function DriftCommandCenter({
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild variant="outline">
-                <Link href="/dashboard/alerte">
-                  Vezi drifturile
-                </Link>
-              </Button>
-              
-              <Button asChild variant="default">
-                <Link href="/dashboard/checklists">
-                  Deschide remedierea
-                </Link>
-              </Button>
-              
-              <Button asChild variant="outline">
-                <Link href="/dashboard/sisteme">
-                  Vezi controlul
-                </Link>
-              </Button>
-              
-              {selectedBreached ? (
-                <Badge variant="destructive" className="normal-case tracking-normal">
-                  Driftul selectat a depasit SLA-ul
-                </Badge>
-              ) : null}
-              {breachedCount > 1 ? (
-                <Badge variant="warning" className="normal-case tracking-normal">
-                  {breachedCount} drift-uri depasesc SLA-ul
-                </Badge>
-              ) : null}
+            <div className="space-y-3">
+              <ActionCluster
+                eyebrow="Actiuni"
+                title="Decizie rapida pentru drift"
+                description="Deschizi drifturile, continui in Remediere sau revii in Control."
+                actions={
+                  <>
+                    <Button asChild variant="outline">
+                      <Link href="/dashboard/alerte">Vezi drifturile</Link>
+                    </Button>
+                    <Button asChild variant="default">
+                      <Link href="/dashboard/checklists">Deschide remedierea</Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <Link href="/dashboard/sisteme">Vezi controlul</Link>
+                    </Button>
+                  </>
+                }
+              />
+              {(selectedBreached || breachedCount > 1) && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedBreached ? (
+                    <Badge variant="destructive" className="normal-case tracking-normal">
+                      Driftul selectat a depasit SLA-ul
+                    </Badge>
+                  ) : null}
+                  {breachedCount > 1 ? (
+                    <Badge variant="warning" className="normal-case tracking-normal">
+                      {breachedCount} drift-uri depasesc SLA-ul
+                    </Badge>
+                  ) : null}
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -276,19 +281,23 @@ export function DriftCommandCenter({
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild variant="default">
-                <Link href="/dashboard/sisteme">
-                  {hasValidatedBaseline ? "Verifică controlul" : "Validează baseline-ul"}
-                </Link>
-              </Button>
-              
-              <Button asChild variant="outline">
-                <Link href="/dashboard/scanari">
-                  Rulează un scan nou
-                </Link>
-              </Button>
-            </div>
+            <ActionCluster
+              eyebrow="Actiuni"
+              title="Urmatorul pas"
+              description="Validezi controlul sau rulezi un scan nou."
+              actions={
+                <>
+                  <Button asChild variant="default">
+                    <Link href="/dashboard/sisteme">
+                      {hasValidatedBaseline ? "Verifică controlul" : "Validează baseline-ul"}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/dashboard/scanari">Rulează un scan nou</Link>
+                  </Button>
+                </>
+              }
+            />
           </>
         )}
       </CardContent>

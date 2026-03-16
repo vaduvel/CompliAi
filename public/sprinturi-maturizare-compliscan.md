@@ -1293,3 +1293,7 @@ Actualizare suplimentara 2026-03-16:
 
 - `ActionCluster` folosit ca reteta canonica pentru summary + actions
   - adoptat in `Alerte` si `Auditor Vault`
+
+Actualizare suplimentara 2026-03-16:
+
+- `ActionCluster` aplicat si in `DriftCommandCenter`
