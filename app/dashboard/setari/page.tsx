@@ -519,11 +519,13 @@ export default function SetariPage() {
                       value={newMemberEmail}
                       onChange={(event) => setNewMemberEmail(event.target.value)}
                       placeholder="coleg@companie.ro"
+                      aria-label="Email utilizator nou"
                       className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                     />
                     <select
                       className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                       value={newMemberRole}
+                      aria-label="Rol utilizator nou"
                       onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
                     >
                       {MEMBER_ROLE_OPTIONS.map((option) => (
@@ -589,6 +591,7 @@ export default function SetariPage() {
                             <select
                               className="h-9 min-w-[180px] rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
                               value={member.role}
+                              aria-label={`Rol pentru ${member.email}`}
                               disabled={isSelf || updatingMembershipId === member.membershipId}
                               onChange={(event) =>
                                 void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
