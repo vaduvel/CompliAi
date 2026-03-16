@@ -31,6 +31,7 @@ export default function DashboardPage() {
         scans={cockpit.data.state.scans}
         tasks={cockpit.tasks}
         events={cockpit.recentEvents}
+        evidenceLedger={cockpit.data.evidenceLedger}
       />
     </div>
   )

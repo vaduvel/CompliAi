@@ -197,6 +197,7 @@ Fronturile active acum:
   - `Audit Pack` client-facing expune raportul de dovezi verificate din registru
   - `Audit Pack` JSON expune sumarul `evidenceLedgerSummary` pentru dovada
   - `Remediere` foloseste semnalul de calitate a dovezii in summary strip
+  - `Dashboard` foloseste semnalul de calitate a dovezii in `Stare curenta`
 - [~] source of truth cloud pentru tenancy
   - backend-ul `supabase` poate seed-ui acum graful cloud din local daca proiectul cloud este gol
   - dupa seed, citirea revine pe `organizations / profiles / memberships` din DB

@@ -1172,3 +1172,4 @@ Actualizare suplimentara 2026-03-16:
 - `Audit Pack` client-facing foloseste raportul de dovezi verificate din registru
 - `Audit Pack` JSON include sumarul `evidenceLedgerSummary` pentru dovada
 - `Remediere` afiseaza semnalul de calitate a dovezii in summary strip
+- `Dashboard` afiseaza semnalul de calitate a dovezii in `Stare curenta`

@@ -1566,3 +1566,4 @@ Asta este sanatos arhitectural pentru ca:
 - `Audit Pack` client-facing expune raportul de dovezi verificate din registru
 - `Audit Pack` JSON expune sumarul de calitate al registrului de dovezi
 - `Remediere` foloseste acum semnalul de calitate a dovezii in summary strip
+- `Dashboard` foloseste semnalul de calitate a dovezii in summary strip

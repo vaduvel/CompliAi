@@ -41,6 +41,7 @@ import {
 import type {
   ComplianceDriftRecord,
   ComplianceEvent,
+  EvidenceRegistryEntry,
   ScanFinding,
   ScanRecord,
   WorkspaceContext,
@@ -120,6 +121,7 @@ export function OverviewPageSections({
   tasks,
   workspace,
   events,
+  evidenceLedger,
 }: {
   summary: { score: number; riskLabel: string }
   lastScanLabel: string
@@ -144,6 +146,7 @@ export function OverviewPageSections({
   tasks: CockpitTask[]
   workspace?: WorkspaceContext
   events: ComplianceEvent[]
+  evidenceLedger?: EvidenceRegistryEntry[]
 }) {
   const activeRiskCount = state.highRisk + state.lowRisk
   const hasEvidence = scans.length > 0
@@ -152,6 +155,13 @@ export function OverviewPageSections({
   const latestManifestScan = scans.find((scan) => scan.sourceKind === "manifest") ?? null
   const activeTaskCount = tasks.filter((task) => task.status !== "done").length
   const evidenceAttachedCount = tasks.filter((task) => Boolean(task.attachedEvidence)).length
+  const ledgerEntries = evidenceLedger ?? []
+  const ledgerReadyCount = ledgerEntries.filter((entry) => entry.quality?.status === "sufficient").length
+  const ledgerWeakCount = ledgerEntries.filter((entry) => entry.quality?.status === "weak").length
+  const ledgerUnratedCount = Math.max(
+    0,
+    ledgerEntries.length - ledgerReadyCount - ledgerWeakCount
+  )
 
   return (
     <div className="space-y-8">
@@ -174,6 +184,10 @@ export function OverviewPageSections({
         openDriftCount={openDriftCount}
         scanCount={scans.length}
         evidenceAttachedCount={evidenceAttachedCount}
+        evidenceLedgerTotal={ledgerEntries.length}
+        evidenceLedgerReady={ledgerReadyCount}
+        evidenceLedgerWeak={ledgerWeakCount}
+        evidenceLedgerUnrated={ledgerUnratedCount}
         hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
       />
 
@@ -224,6 +238,10 @@ function OverviewSummaryStrip({
   openDriftCount,
   scanCount,
   evidenceAttachedCount,
+  evidenceLedgerTotal,
+  evidenceLedgerReady,
+  evidenceLedgerWeak,
+  evidenceLedgerUnrated,
   hasValidatedBaseline,
 }: {
   score: number
@@ -233,8 +251,13 @@ function OverviewSummaryStrip({
   openDriftCount: number
   scanCount: number
   evidenceAttachedCount: number
+  evidenceLedgerTotal: number
+  evidenceLedgerReady: number
+  evidenceLedgerWeak: number
+  evidenceLedgerUnrated: number
   hasValidatedBaseline: boolean
 }) {
+  const hasEvidenceLedger = evidenceLedgerTotal > 0
   const items: SummaryStripItem[] = [
     {
       label: "Readiness",
@@ -254,6 +277,26 @@ function OverviewSummaryStrip({
       hint:
         openDriftCount > 0 ? "urmareste doar semnalele reale" : "control stabil in acest moment",
       tone: openDriftCount > 0 ? "danger" : "success",
+    },
+    {
+      label: "Calitate dovada",
+      value: hasEvidenceLedger
+        ? `${evidenceLedgerReady}/${evidenceLedgerTotal}`
+        : `${evidenceAttachedCount}`,
+      hint: hasEvidenceLedger
+        ? evidenceLedgerWeak > 0
+          ? `${evidenceLedgerWeak} slabe · ${evidenceLedgerUnrated} neevaluate`
+          : evidenceLedgerUnrated > 0
+            ? `${evidenceLedgerUnrated} neevaluate`
+            : "registru curat"
+        : "dovezi atasate pe task-uri",
+      tone: hasEvidenceLedger
+        ? evidenceLedgerWeak > 0
+          ? "warning"
+          : "success"
+        : evidenceAttachedCount > 0
+          ? "accent"
+          : "neutral",
     },
     {
       label: "Baseline",
