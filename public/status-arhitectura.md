@@ -1715,3 +1715,8 @@ Asta este sanatos arhitectural pentru ca:
 ## Actualizare 2026-03-16 - Overflow / wrapping pass
 
 - `Floating Assistant`, `Logo` si `TaskCard` trateaza corect string-uri lungi
+
+## Actualizare 2026-03-16 - Overflow + ActionCluster sweep
+
+- wrapping extins pe `ScanDrawer`, `TextExtractDrawer`, `Reports support panels`, `e-Factura validator`
+- `Audit si export` foloseste `ActionCluster` pentru toggle-ul de detalii

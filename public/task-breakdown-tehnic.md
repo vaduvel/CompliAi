@@ -1455,3 +1455,5 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] `GuideCard` in `Scanare` si `Asistent`
 - [~] `ActionCluster` in `ScanHistoryTab` (handoff)
 - [~] overflow / wrapping pass pentru texte lungi
+- [~] overflow / wrapping pass extins pe drawers si rapoarte
+- [~] summary + actions sweep pentru `Audit si export` (toggle detalii)

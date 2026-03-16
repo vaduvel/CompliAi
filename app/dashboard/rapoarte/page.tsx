@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
@@ -176,19 +177,16 @@ export default function AuditExportPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
-          <div>
-            <p className="text-sm font-semibold text-eos-text">Detalii de livrabil</p>
-            <p className="text-xs text-eos-text-muted">
-              Ghidajul complet apare doar la cerere.
-            </p>
-          </div>
+      <ActionCluster
+        eyebrow="Detalii"
+        title="Detalii de livrabil"
+        description="Ghidajul complet apare doar la cerere."
+        actions={
           <Button variant="outline" onClick={() => setShowSupport((current) => !current)}>
             {showSupport ? "Ascunde detaliile" : "Arata detaliile"}
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
 
       {showSupport ? (
         <>

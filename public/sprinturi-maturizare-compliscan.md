@@ -1340,4 +1340,13 @@ Actualizare suplimentara 2026-03-16:
 
 Actualizare suplimentara 2026-03-16:
 
+- overflow / wrapping pass extins pe:
+  - `ScanDrawer`
+  - `TextExtractDrawer`
+  - `Reports support panels`
+  - `e-Factura validator`
+- `ActionCluster` folosit pentru toggle-ul de detalii din `Audit si export`
+
+Actualizare suplimentara 2026-03-16:
+
 - `references/source-of-truth.md` adaugat ca index pentru docurile canonice

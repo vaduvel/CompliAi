@@ -34,7 +34,9 @@ export function TextExtractDrawer({
             <AlignLeft className="size-4 text-eos-text-muted" strokeWidth={2} />
             Text extras
           </SheetTitle>
-          <SheetDescription className="text-eos-text-muted">{title}</SheetDescription>
+          <SheetDescription className="text-eos-text-muted [overflow-wrap:anywhere]">
+            {title}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="p-6">

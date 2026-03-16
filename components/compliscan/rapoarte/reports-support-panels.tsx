@@ -89,7 +89,7 @@ export function ExportArtifactsCard() {
               <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
                 {group.label}
               </p>
-              <p className="mt-2 text-sm text-eos-text-muted">
+              <p className="mt-2 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                 {group.description}
               </p>
             </div>
@@ -100,10 +100,10 @@ export function ExportArtifactsCard() {
                     <artifact.icon className="size-4" strokeWidth={2} />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-eos-text">
+                    <p className="break-words text-sm font-medium text-eos-text">
                       {artifact.title}
                     </p>
-                    <p className="mt-1 text-sm text-eos-text-muted">
+                    <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
                       {artifact.detail}
                     </p>
                   </div>
@@ -137,8 +137,8 @@ function DriftDetailBlock({
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
-      <p className="mt-2 text-sm font-medium text-eos-text">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-eos-text-muted">{detail}</p>
+      <p className="mt-2 break-words text-sm font-medium text-eos-text">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-eos-text-muted [overflow-wrap:anywhere]">{detail}</p>
     </div>
   )
 }
@@ -172,10 +172,10 @@ export function RecentDriftCard({
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-eos-text">
+                  <p className="break-words text-sm font-medium text-eos-text">
                     {drift.summary}
                   </p>
-                  <p className="mt-2 text-xs text-eos-text-muted">
+                  <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
                     {formatDriftTypeLabel(drift.type)} · {formatRelativeRomanian(drift.detectedAtISO)}
                   </p>
                 </div>
@@ -224,7 +224,7 @@ export function RecentDriftCard({
                       <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                         Context operational
                       </p>
-                      <p className="mt-1 text-sm font-medium text-eos-text">
+                      <p className="mt-1 break-words text-sm font-medium text-eos-text">
                         Escalare, owner si update-uri de stare
                       </p>
                     </div>
