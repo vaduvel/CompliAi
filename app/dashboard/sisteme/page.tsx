@@ -46,14 +46,6 @@ const AIInventoryPanel = dynamic(
   { loading: () => <LoadingScreen variant="section" /> }
 )
 
-const AICompliancePackSummaryCard = dynamic(
-  () =>
-    import("@/components/compliscan/ai-compliance-pack-card").then(
-      (mod) => mod.AICompliancePackSummaryCard
-    ),
-  { loading: () => <LoadingScreen variant="section" /> }
-)
-
 const AICompliancePackEntriesCard = dynamic(
   () =>
     import("@/components/compliscan/ai-compliance-pack-card").then(
@@ -761,12 +753,11 @@ function ControlSystemsWorkspace({
           <SectionBoundary
             eyebrow="Compliance Pack"
             title="Review pe campuri si pachete de control"
-            description="Aici verifici ce a fost precompletat si ce trebuie confirmat uman inainte de a impinge mai departe spre dovada si audit."
+            description="Confirmi campurile si controalele per sistem. Starea de audit si exportul raman in Audit si export."
           />
 
           {compliancePack ? (
             <>
-              <AICompliancePackSummaryCard pack={compliancePack} compact />
               <ControlPackageHighlightsCard
                 highlights={buildControlPackageHighlights(compliancePack.entries)}
               />
@@ -1041,12 +1032,6 @@ function ControlReviewWorkspace({
         />
       </div>
 
-      {compliancePack ? (
-        <>
-          <AICompliancePackSummaryCard pack={compliancePack} compact />
-          <ControlPackageHighlightsCard highlights={buildControlPackageHighlights(compliancePack.entries)} />
-        </>
-      ) : null}
     </div>
   )
 }
