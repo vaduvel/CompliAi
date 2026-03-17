@@ -4,9 +4,9 @@
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { isTechVendorName } from "@/lib/server/efactura-mock-data"
-import { createLocalStorage } from "@/lib/server/storage-adapter"
+import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
-const nis2Storage = createLocalStorage<Nis2OrgState>("nis2")
+const nis2Storage = createAdaptiveStorage<Nis2OrgState>("nis2", "nis2_state")
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
