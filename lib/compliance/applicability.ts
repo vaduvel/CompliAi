@@ -26,7 +26,7 @@ export type OrgProfile = {
   completedAtISO: string
 }
 
-export type ApplicabilityTag = "gdpr" | "efactura" | "nis2" | "ai-act"
+export type ApplicabilityTag = "gdpr" | "efactura" | "nis2" | "ai-act" | "cer"
 
 export type ApplicabilityCertainty = "certain" | "probable" | "unlikely"
 
@@ -50,6 +50,15 @@ const NIS2_ESSENTIAL_SECTORS: OrgSector[] = [
 
 const NIS2_IMPORTANT_SECTORS: OrgSector[] = [
   "finance", "manufacturing", "professional-services",
+]
+
+// Sprint 3.5: CER — Directiva (EU) 2022/2557 Reziliență Entități Critice ✅
+// Sectoare cu obligații duble NIS2 + CER (reziliență fizică + cibernetică)
+const CER_PROBABLE_SECTORS: OrgSector[] = [
+  "energy", "transport", "health",
+]
+const CER_POSSIBLE_SECTORS: OrgSector[] = [
+  "banking", "digital-infrastructure", "public-admin", "manufacturing",
 ]
 
 // ── Engine ────────────────────────────────────────────────────────────────────
@@ -127,6 +136,21 @@ export function evaluateApplicability(profile: OrgProfile): ApplicabilityResult 
 
   entries.push({ tag: "ai-act", certainty: aiActCertainty, reason: aiActReason })
 
+  // ── Sprint 3.5: CER — Directiva (EU) 2022/2557 ✅ — semnal informativ
+  if (CER_PROBABLE_SECTORS.includes(profile.sector)) {
+    entries.push({
+      tag: "cer",
+      certainty: "probable",
+      reason: `Sectorul tău (${profile.sector}) intră potențial sub Directiva CER (EU) 2022/2557 pentru reziliență fizică a infrastructurii critice. Verifică cu un specialist dacă ai obligații suplimentare de continuitate operațională.`,
+    })
+  } else if (CER_POSSIBLE_SECTORS.includes(profile.sector)) {
+    entries.push({
+      tag: "cer",
+      certainty: "probable",
+      reason: `Sectorul tău poate intra sub incidența Directivei CER (EU) 2022/2557. Aceasta vizează reziliența fizică (nu doar cibernetică) a entităților critice. Consultați un specialist.`,
+    })
+  }
+
   // ── Compile active tags (certain + probable)
   const tags = entries
     .filter((e) => e.certainty !== "unlikely")
@@ -163,6 +187,7 @@ export const APPLICABILITY_TAG_LABELS: Record<ApplicabilityTag, string> = {
   efactura: "e-Factura",
   nis2: "NIS2",
   "ai-act": "AI Act",
+  cer: "Directiva CER",
 }
 
 export const APPLICABILITY_CERTAINTY_LABELS: Record<ApplicabilityCertainty, string> = {

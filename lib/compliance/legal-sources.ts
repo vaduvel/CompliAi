@@ -49,6 +49,12 @@ const LEGAL_SOURCES: Record<ApplicabilityTag, LegalSource> = {
     articleHint: "Art. 10-12",
     applicabilityNote: "Obligatoriu pentru tranzacții B2B plătitoare de TVA",
   },
+  cer: {
+    citation: "Directiva (EU) 2022/2557",
+    shortName: "CER",
+    articleHint: "Art. 13",
+    applicabilityNote: "Reziliența entităților critice — obligații fizice în paralel cu NIS2",
+  },
 }
 
 // Surse per FindingCategory (pentru findings NIS2/GDPR în scan results)

@@ -107,12 +107,13 @@ describe("evaluateApplicability", () => {
     expect(result.tags).toContain("efactura")
     expect(result.tags).toContain("nis2")
     expect(result.tags).toContain("ai-act")
-    expect(result.tags).toHaveLength(4)
+    // energy sector activates CER tag too (Sprint 3.5)
+    expect(result.tags).toContain("cer")
   })
 
-  it("entries au intotdeauna 4 intrări (unul per lege)", () => {
+  it("entries au cel puțin 4 intrări (una per lege; CER adaugă intrare opțională)", () => {
     const result = evaluateApplicability(makeProfile())
-    expect(result.entries).toHaveLength(4)
+    expect(result.entries.length).toBeGreaterThanOrEqual(4)
     const tags = result.entries.map((e) => e.tag)
     expect(tags).toContain("gdpr")
     expect(tags).toContain("efactura")
