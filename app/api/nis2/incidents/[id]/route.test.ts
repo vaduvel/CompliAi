@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DELETE, PATCH } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
+  requireRoleMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   updateIncidentMock: vi.fn(),
   deleteIncidentMock: vi.fn(),
@@ -20,7 +20,12 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireRole: mocks.requireRoleMock,
+}))
+
+vi.mock("@/lib/server/rbac", () => ({
+  WRITE_ROLES: ["owner", "compliance", "reviewer"],
+  DELETE_ROLES: ["owner", "compliance"],
 }))
 
 vi.mock("@/lib/server/org-context", () => ({
@@ -53,7 +58,7 @@ const MOCK_INCIDENT = {
 describe("PATCH /api/nis2/incidents/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
+    mocks.requireRoleMock.mockReturnValue(SESSION)
     mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
     mocks.updateIncidentMock.mockResolvedValue(MOCK_INCIDENT)
   })
@@ -92,7 +97,9 @@ describe("PATCH /api/nis2/incidents/[id]", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireRoleMock.mockImplementation(() => {
+      throw new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    })
     const res = await PATCH(
       new Request(`http://localhost/api/nis2/incidents/${INCIDENT_ID}`, {
         method: "PATCH",
@@ -122,7 +129,7 @@ describe("PATCH /api/nis2/incidents/[id]", () => {
 describe("DELETE /api/nis2/incidents/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
+    mocks.requireRoleMock.mockReturnValue(SESSION)
     mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
     mocks.deleteIncidentMock.mockResolvedValue(true)
   })
@@ -153,7 +160,9 @@ describe("DELETE /api/nis2/incidents/[id]", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireRoleMock.mockImplementation(() => {
+      throw new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    })
     const res = await DELETE(
       new Request(`http://localhost/api/nis2/incidents/${INCIDENT_ID}`, { method: "DELETE" }),
       { params: Promise.resolve({ id: INCIDENT_ID }) }

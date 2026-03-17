@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, ShieldCheck } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -12,7 +13,9 @@ import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/com
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
-import type { ApplicabilityCertainty } from "@/lib/compliance/applicability"
+import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
+import { getSuggestionExplanation } from "@/lib/compliance/legal-sources"
+import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -138,6 +141,11 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {/* ── DNSC Registration CTA (Sprint 4) ──────────────────────────────────── */}
+      {state.orgProfile && applicability?.tags.includes("nis2") && (
+        <DnscRegistrationBanner />
+      )}
+
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
@@ -245,6 +253,8 @@ export default function DashboardPage() {
             onViewDetails={() => router.push("/dashboard/sisteme")}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
+            legalTag="ai-act"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
           />
           <ReadinessFrameworkCard
             framework="GDPR"
@@ -255,6 +265,9 @@ export default function DashboardPage() {
             icon={CheckCircle2}
             onViewDetails={() => router.push("/dashboard/checklists")}
             ariaLabel={`GDPR: ${gdprScore}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
+            legalTag="gdpr"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
           />
           <ReadinessFrameworkCard
             framework="e-Factura"
@@ -266,6 +279,8 @@ export default function DashboardPage() {
             onViewDetails={() => router.push("/dashboard/setari")}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
+            legalTag="efactura"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "efactura")?.reason}
           />
           <ReadinessFrameworkCard
             framework="Scor Global"
@@ -347,6 +362,33 @@ export default function DashboardPage() {
   )
 }
 
+function DnscRegistrationBanner() {
+  return (
+    <section aria-label="Înregistrare DNSC NIS2">
+      <div className="flex flex-col gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-eos-warning" strokeWidth={2} />
+          <div>
+            <p className="text-sm font-semibold text-eos-text">
+              Înregistrare DNSC obligatorie — NIS2
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Termenul a expirat în septembrie 2025. Înregistrează-te acum pentru a evita sancțiunile.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/nis2/inregistrare-dnsc"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-warning-border bg-eos-warning px-3 py-2 text-sm font-medium text-eos-warning-text transition hover:opacity-90"
+        >
+          Începe acum
+          <ArrowRight className="size-4" strokeWidth={2} />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
 function SummaryMetric({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5 px-5 py-3.5">
@@ -370,6 +412,8 @@ function ReadinessFrameworkCard({
   onViewDetails,
   ariaLabel,
   applicabilityCertainty,
+  legalTag,
+  applicabilityReason,
 }: {
   framework: string
   percent: number
@@ -380,6 +424,8 @@ function ReadinessFrameworkCard({
   onViewDetails?: () => void
   ariaLabel?: string
   applicabilityCertainty?: ApplicabilityCertainty
+  legalTag?: ApplicabilityTag
+  applicabilityReason?: string
 }) {
   const statusConfig = {
     strong:  { label: "CONFIRMARE PUTERNICĂ",    color: "success"     as const },
@@ -405,6 +451,15 @@ function ReadinessFrameworkCard({
           <div className="flex items-center gap-2">
             {Icon && <Icon className="size-5 text-eos-text-muted" strokeWidth={2} />}
             <h3 className="font-semibold text-eos-text">{framework}</h3>
+            {legalTag && applicabilityCertainty && applicabilityCertainty !== "unlikely" && (
+              <LegalSourceBadge
+                explanation={getSuggestionExplanation(
+                  legalTag,
+                  applicabilityReason ?? "",
+                  applicabilityCertainty
+                )}
+              />
+            )}
           </div>
           {isUnlikely ? (
             <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">

@@ -1,0 +1,102 @@
+// GET /api/partner/clients/[orgId]
+// Sprint 12 — Partner Portal drill-down: date detaliate per client.
+// Verifică că utilizatorul are membership la acea org, returnează
+// compliance summary complet + NIS2 state + findings deschise.
+
+import { NextResponse } from "next/server"
+import { promises as fs } from "node:fs"
+import path from "node:path"
+
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
+import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
+import type { ComplianceState } from "@/lib/compliance/types"
+import { readNis2State } from "@/lib/server/nis2-store"
+
+const DATA_DIR = path.join(process.cwd(), ".data")
+
+async function readOrgState(orgId: string): Promise<ComplianceState | null> {
+  try {
+    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
+    return JSON.parse(raw) as ComplianceState
+  } catch {
+    return null
+  }
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ orgId: string }> }
+) {
+  try {
+    const session = readSessionFromRequest(request)
+    if (!session) {
+      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    }
+
+    const { orgId } = await params
+
+    // Verifică că userul are acces la acel orgId
+    const memberships = await listUserMemberships(session.userId)
+    const membership = memberships.find((m) => m.orgId === orgId && m.status === "active")
+    if (!membership) {
+      return jsonError("Acces interzis sau organizație inexistentă.", 403, "FORBIDDEN")
+    }
+
+    // Citește starea de conformitate
+    const rawState = await readOrgState(orgId)
+    let complianceSummary = null
+    let openFindings: { id: string; title: string; category: string; severity: string }[] = []
+
+    if (rawState) {
+      const state = normalizeComplianceState(rawState)
+      const summary = computeDashboardSummary(state)
+      complianceSummary = {
+        score: summary.score,
+        riskLabel: summary.riskLabel,
+        openAlerts: summary.openAlerts,
+        redAlerts: summary.redAlerts,
+        scannedDocuments: state.scannedDocuments,
+        gdprProgress: state.gdprProgress,
+        highRisk: state.highRisk,
+        efacturaConnected: state.efacturaConnected,
+        aiSystemsCount: state.aiSystems.length,
+      }
+      openFindings = state.findings
+        .filter((f) => {
+          const alert = state.alerts.find((a) => a.findingId === f.id && a.open)
+          return alert !== undefined
+        })
+        .slice(0, 10)
+        .map((f) => ({
+          id: f.id,
+          title: f.title,
+          category: f.category,
+          severity: f.severity,
+        }))
+    }
+
+    // Citește starea NIS2
+    // Simulăm org context prin patch-ul direct pe nis2-store
+    const nis2State = await readNis2State(orgId)
+
+    return NextResponse.json({
+      orgId,
+      orgName: membership.orgName,
+      role: membership.role,
+      compliance: complianceSummary,
+      openFindings,
+      nis2: {
+        dnscRegistrationStatus: nis2State.dnscRegistrationStatus ?? "not-started",
+        incidentsCount: nis2State.incidents.length,
+        openIncidentsCount: nis2State.incidents.filter((i) => i.status === "open").length,
+        vendorsCount: nis2State.vendors.length,
+        hasAssessment: nis2State.assessment !== null,
+        assessmentScore: nis2State.assessment?.score ?? null,
+      },
+    })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la incarcarea detaliilor clientului.", 500, "PARTNER_CLIENT_DETAIL_FAILED")
+  }
+}

@@ -1,12 +1,12 @@
 // NIS2 per-org store — .data/nis2-{orgId}.json
 // Holds: assessment answers, incident log, vendor risk register
-
-import { promises as fs } from "node:fs"
-import path from "node:path"
+// Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import { isTechVendorName } from "@/lib/server/efactura-mock-data"
+import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
-const DATA_DIR = path.join(process.cwd(), ".data")
+const nis2Storage = createAdaptiveStorage<Nis2OrgState>("nis2", "nis2_state")
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -74,11 +74,14 @@ export type Nis2AssessmentRecord = {
   maturityLabel: string
 }
 
+export type DnscRegistrationStatus = "not-started" | "in-progress" | "submitted" | "confirmed"
+
 export type Nis2OrgState = {
   assessment: Nis2AssessmentRecord | null
   incidents: Nis2Incident[]
   vendors: Nis2Vendor[]
   updatedAtISO: string
+  dnscRegistrationStatus?: DnscRegistrationStatus  // Sprint 4 — opțional, backward-safe
 }
 
 function emptyState(): Nis2OrgState {
@@ -90,25 +93,15 @@ function emptyState(): Nis2OrgState {
   }
 }
 
-// ── File helpers ──────────────────────────────────────────────────────────────
-
-function getFile(orgId: string): string {
-  return path.join(DATA_DIR, `nis2-${orgId}.json`)
-}
+// ── Storage helpers (Sprint 9: via adapter, nu direct fs) ─────────────────────
 
 export async function readNis2State(orgId: string): Promise<Nis2OrgState> {
-  try {
-    const raw = await fs.readFile(getFile(orgId), "utf8")
-    return JSON.parse(raw) as Nis2OrgState
-  } catch {
-    return emptyState()
-  }
+  return (await nis2Storage.read(orgId)) ?? emptyState()
 }
 
 async function writeNis2State(orgId: string, state: Nis2OrgState): Promise<Nis2OrgState> {
   const updated = { ...state, updatedAtISO: new Date().toISOString() }
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(getFile(orgId), JSON.stringify(updated, null, 2), "utf8")
+  await nis2Storage.write(orgId, updated)
   return updated
 }
 
@@ -266,13 +259,14 @@ export async function deleteVendor(orgId: string, vendorId: string): Promise<boo
 export async function upsertVendorsFromEfactura(
   orgId: string,
   supplierNames: string[]
-): Promise<{ added: number; skipped: number }> {
+): Promise<{ added: number; skipped: number; techVendorsWithoutDpa: string[] }> {
   const state = await readNis2State(orgId)
   const existingNames = new Set(state.vendors.map((v) => v.name.toLowerCase().trim()))
   const now = new Date().toISOString()
   let added = 0
   let skipped = 0
   const newVendors: Nis2Vendor[] = []
+  const techVendorsWithoutDpa: string[] = []
 
   for (const name of supplierNames) {
     const normalized = name.trim()
@@ -281,15 +275,19 @@ export async function upsertVendorsFromEfactura(
       continue
     }
     existingNames.add(normalized.toLowerCase())
+    const isTech = isTechVendorName(normalized)
+    if (isTech) techVendorsWithoutDpa.push(normalized)
     newVendors.push({
       id: uid(),
       name: normalized,
-      service: "Furnizor detectat din e-Factura",
-      riskLevel: "medium",
+      service: isTech ? "Furnizor tech/cloud/SaaS (risc ridicat NIS2)" : "Furnizor detectat din e-Factura",
+      riskLevel: isTech ? "high" : "medium",
       hasSecurityClause: false,
       hasIncidentNotification: false,
       hasAuditRight: false,
-      notes: "Importat automat din validările e-Factura. Completează detaliile de securitate.",
+      notes: isTech
+        ? "⚠️ Furnizor tech/cloud detectat automat. Verifică și atașează DPA (Data Processing Agreement) conform GDPR Art. 28 și NIS2."
+        : "Importat automat din validările e-Factura. Completează detaliile de securitate.",
       createdAtISO: now,
       updatedAtISO: now,
     })
@@ -303,7 +301,22 @@ export async function upsertVendorsFromEfactura(
     })
   }
 
-  return { added, skipped }
+  return { added, skipped, techVendorsWithoutDpa }
+}
+
+// ── Sprint 4: DNSC Registration Status ───────────────────────────────────────
+
+export async function saveDnscRegistrationStatus(
+  orgId: string,
+  status: DnscRegistrationStatus
+): Promise<Nis2OrgState> {
+  const state = await readNis2State(orgId)
+  return writeNis2State(orgId, { ...state, dnscRegistrationStatus: status })
+}
+
+export async function getDnscRegistrationStatus(orgId: string): Promise<DnscRegistrationStatus> {
+  const state = await readNis2State(orgId)
+  return state.dnscRegistrationStatus ?? "not-started"
 }
 
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────

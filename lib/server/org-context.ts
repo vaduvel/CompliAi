@@ -21,6 +21,7 @@ export async function getOrgContext(): Promise<WorkspaceContext> {
   let sessionOrgId: string | undefined
   let sessionOrgName: string | undefined
   let sessionEmail: string | undefined
+  let sessionRole: WorkspaceContext["userRole"] = undefined  // Sprint 6
 
   try {
     const h = await headers()
@@ -34,6 +35,7 @@ export async function getOrgContext(): Promise<WorkspaceContext> {
     sessionOrgId = session?.orgId
     sessionOrgName = session?.orgName
     sessionEmail = session?.email
+    sessionRole = session?.role ?? undefined
   } catch {
     // Outside request context (e.g. build time)
   }
@@ -64,5 +66,6 @@ export async function getOrgContext(): Promise<WorkspaceContext> {
     workspaceOwner,
     workspaceInitials:
       process.env.COMPLISCAN_WORKSPACE_INITIALS?.trim() || initialsFromName(workspaceOwner),
+    userRole: sessionRole,  // Sprint 6 — expune rolul în WorkspaceContext
   }
 }

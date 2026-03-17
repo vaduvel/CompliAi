@@ -6,6 +6,9 @@ import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
+import { DELETE_ROLES } from "@/lib/server/rbac"
 
 type AISystemPayload = {
   name?: string
@@ -102,6 +105,11 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  try {
+    requireRole(request, DELETE_ROLES, "ștergerea sistemului AI")
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+  }
   const { searchParams } = new URL(request.url)
   const id = searchParams.get("id")
   const actor = await resolveOptionalEventActor(request)

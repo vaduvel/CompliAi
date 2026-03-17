@@ -1,13 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   AlertTriangle,
   Building2,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Download,
   ExternalLink,
   RefreshCw,
+  Search,
+  Upload,
   Users,
 } from "lucide-react"
 
@@ -18,6 +23,14 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import type { PartnerClientSummary } from "@/app/api/partner/clients/route"
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ScoreFilter = "all" | "under50" | "50to75" | "over75"
+type AlertFilter = "all" | "withAlerts"
+type Nis2Filter = "all" | "hasNis2"  // simplu: filtrare nu e disponibilă fără endpoint dedicat
+type SortKey = "orgName" | "score" | "alerts"
+type SortDir = "asc" | "desc"
 
 // ── Client row ────────────────────────────────────────────────────────────────
 
@@ -31,12 +44,19 @@ function ScoreBar({ score }: { score: number }) {
   )
 }
 
-function ClientRow({ client }: { client: PartnerClientSummary }) {
+function ClientRow({ client, onDrillDown }: { client: PartnerClientSummary; onDrillDown: (id: string) => void }) {
   const c = client.compliance
   const hasData = c?.hasData ?? false
 
   return (
-    <div className="flex flex-wrap items-center gap-4 px-5 py-3.5">
+    <div
+      className="flex cursor-pointer flex-wrap items-center gap-4 px-5 py-3.5 transition-colors hover:bg-eos-surface-variant"
+      onClick={() => onDrillDown(client.orgId)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onDrillDown(client.orgId) }}
+      aria-label={`Detalii ${client.orgName}`}
+    >
       {/* Org */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -78,7 +98,7 @@ function ClientRow({ client }: { client: PartnerClientSummary }) {
               )}
               {c.openAlerts} alert{c.openAlerts !== 1 ? "e" : "ă"}
             </div>
-            <div>{c.scannedDocuments} doc scamate</div>
+            <div>{c.scannedDocuments} doc scanate</div>
           </div>
         ) : null}
       </div>
@@ -95,20 +115,21 @@ function ClientRow({ client }: { client: PartnerClientSummary }) {
             GDPR
           </Badge>
         )}
-        {c && c.highRisk === 0 ? null : c && c.highRisk > 0 ? (
+        {c && c.highRisk > 0 ? (
           <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
             {c.highRisk} high-risk AI
           </Badge>
         ) : null}
       </div>
 
-      {/* Link to trust profile */}
+      {/* External trust profile link */}
       <a
         href={`/trust/${client.orgId}`}
         target="_blank"
         rel="noopener noreferrer"
         className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted transition hover:bg-eos-surface-variant hover:text-eos-text"
         title="Trust Profile"
+        onClick={(e) => e.stopPropagation()}
       >
         <ExternalLink className="size-3.5" strokeWidth={2} />
       </a>
@@ -148,23 +169,158 @@ function PortalSummary({ clients }: { clients: PartnerClientSummary[] }) {
   )
 }
 
+// ── Sortable header cell ───────────────────────────────────────────────────────
+
+function SortHeader({
+  label,
+  sortKey,
+  currentKey,
+  dir,
+  onSort,
+  className = "",
+}: {
+  label: string
+  sortKey: SortKey
+  currentKey: SortKey
+  dir: SortDir
+  onSort: (key: SortKey) => void
+  className?: string
+}) {
+  const active = currentKey === sortKey
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(sortKey)}
+      className={`flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary hover:text-eos-text ${className}`}
+    >
+      {label}
+      {active ? (
+        dir === "asc" ? <ChevronUp className="size-3" strokeWidth={2} /> : <ChevronDown className="size-3" strokeWidth={2} />
+      ) : (
+        <ChevronDown className="size-3 opacity-30" strokeWidth={2} />
+      )}
+    </button>
+  )
+}
+
+// ── CSV Import Modal ──────────────────────────────────────────────────────────
+
+function CsvImportModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [importing, setImporting] = useState(false)
+  const [result, setResult] = useState<{ message: string; errors: string[] } | null>(null)
+
+  async function handleImport() {
+    const file = fileRef.current?.files?.[0]
+    if (!file) return
+    const csvContent = await file.text()
+    setImporting(true)
+    setResult(null)
+    try {
+      const res = await fetch("/api/partner/import-csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csvContent }),
+      })
+      const data = (await res.json()) as { message: string; errors: string[] }
+      setResult(data)
+      if ((data.errors?.length ?? 0) === 0) {
+        setTimeout(() => { onSuccess(); onClose() }, 1500)
+      }
+    } catch (err) {
+      setResult({ message: err instanceof Error ? err.message : "Eroare la import.", errors: [] })
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-xl">
+        <h2 className="text-base font-semibold text-eos-text">Import clienți CSV</h2>
+        <p className="mt-1 text-xs text-eos-text-muted">
+          Format: <code className="rounded bg-eos-bg-inset px-1">orgName,cui,sector,employeeCount,email</code>
+        </p>
+        <p className="mt-1 text-[10px] text-eos-text-tertiary">
+          Sectoare valide: energy, transport, banking, health, digital-infrastructure,
+          public-admin, finance, retail, manufacturing, professional-services, other
+        </p>
+        <p className="mt-0.5 text-[10px] text-eos-text-tertiary">
+          Angajați: 1-9 · 10-49 · 50-249 · 250+
+        </p>
+
+        <div className="mt-4">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-eos-primary file:px-2 file:py-1 file:text-[11px] file:text-white"
+          />
+        </div>
+
+        {result && (
+          <div className={`mt-3 rounded-eos-md p-3 text-xs ${result.errors.length > 0 ? "bg-eos-warning-soft text-eos-warning-fg" : "bg-eos-success-soft text-eos-success-fg"}`}>
+            <p className="font-medium">{result.message}</p>
+            {result.errors.length > 0 && (
+              <ul className="mt-1 list-disc pl-4 space-y-0.5">
+                {result.errors.map((e, i) => <li key={i}>{e}</li>)}
+              </ul>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4 flex justify-end gap-2">
+          <Button size="sm" variant="ghost" onClick={onClose}>Anulează</Button>
+          <Button size="sm" onClick={() => void handleImport()} disabled={importing} className="gap-1.5">
+            <Upload className="size-3.5" strokeWidth={2} />
+            {importing ? "Se importă..." : "Importă"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PartnerPage() {
+  const router = useRouter()
   const [clients, setClients] = useState<PartnerClientSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showImport, setShowImport] = useState(false)
+
+  // ── Filters + Sort + Search ───────────────────────────────────────────────
+  const [search, setSearch] = useState("")
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all")
+  const [alertFilter, setAlertFilter] = useState<AlertFilter>("all")
+  const [sortKey, setSortKey] = useState<SortKey>("alerts")
+  const [sortDir, setSortDir] = useState<SortDir>("desc")
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => d === "asc" ? "desc" : "asc")
+    } else {
+      setSortKey(key)
+      setSortDir("desc")
+    }
+  }
 
   function handleExportCSV() {
     const dateLabel = new Date().toISOString().split("T")[0]
-    const header = ["orgName", "orgId", "scor", "alerte_critice", "alerte_totale", "ultima_scanare", "status"].join(",")
+    const header = ["orgName", "orgId", "scor", "alerte_critice", "alerte_totale", "status"].join(",")
     const rows = clients.map((c) => [
       `"${c.orgName.replace(/"/g, '""')}"`,
       c.orgId,
       c.compliance?.score ?? 0,
       c.compliance?.redAlerts ?? 0,
       c.compliance?.openAlerts ?? 0,
-      "",
       c.status,
     ].join(","))
     const csv = [header, ...rows].join("\n")
@@ -194,14 +350,68 @@ export default function PartnerPage() {
 
   useEffect(() => { void fetchClients() }, [])
 
+  const activeClients = clients.filter((c) => c.status === "active")
+
+  const filteredClients = useMemo(() => {
+    let list = activeClients
+
+    // Search
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter((c) => c.orgName.toLowerCase().includes(q) || c.orgId.includes(q))
+    }
+
+    // Score filter
+    if (scoreFilter !== "all") {
+      list = list.filter((c) => {
+        const score = c.compliance?.score ?? -1
+        if (scoreFilter === "under50") return score < 50
+        if (scoreFilter === "50to75") return score >= 50 && score <= 75
+        if (scoreFilter === "over75") return score > 75
+        return true
+      })
+    }
+
+    // Alert filter
+    if (alertFilter === "withAlerts") {
+      list = list.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
+    }
+
+    // Sort
+    list = [...list].sort((a, b) => {
+      let va = 0, vb = 0
+      if (sortKey === "orgName") {
+        const cmp = a.orgName.localeCompare(b.orgName, "ro")
+        return sortDir === "asc" ? cmp : -cmp
+      }
+      if (sortKey === "score") {
+        va = a.compliance?.score ?? -1
+        vb = b.compliance?.score ?? -1
+      }
+      if (sortKey === "alerts") {
+        va = a.compliance?.redAlerts ?? 0
+        vb = b.compliance?.redAlerts ?? 0
+      }
+      return sortDir === "asc" ? va - vb : vb - va
+    })
+
+    return list
+  }, [activeClients, search, scoreFilter, alertFilter, sortKey, sortDir])
+
   if (loading) return <LoadingScreen variant="section" />
   if (error) return <ErrorScreen message={error} variant="section" />
 
-  const activeClients = clients.filter((c) => c.status === "active")
   const alertClients = activeClients.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
 
   return (
     <div className="space-y-6">
+      {showImport && (
+        <CsvImportModal
+          onClose={() => setShowImport(false)}
+          onSuccess={() => void fetchClients()}
+        />
+      )}
+
       <PageIntro
         eyebrow="Partner Portal"
         title="Dashboard multi-client"
@@ -220,6 +430,15 @@ export default function PartnerPage() {
         }
         actions={
           <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowImport(true)}
+              className="gap-2"
+            >
+              <Upload className="size-3.5" strokeWidth={2} />
+              Import CSV
+            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -244,6 +463,43 @@ export default function PartnerPage() {
 
       <PortalSummary clients={activeClients} />
 
+      {/* ── Search + Filters ─────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Search */}
+        <div className="relative flex-1 min-w-48">
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-eos-text-muted" strokeWidth={2} />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Caută după nume sau ID..."
+            className="w-full rounded-eos-md border border-eos-border bg-eos-surface pl-9 pr-3 py-2 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Score filter */}
+        <select
+          value={scoreFilter}
+          onChange={(e) => setScoreFilter(e.target.value as ScoreFilter)}
+          className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text focus:outline-none"
+        >
+          <option value="all">Toate scorurile</option>
+          <option value="under50">Sub 50%</option>
+          <option value="50to75">50–75%</option>
+          <option value="over75">Peste 75%</option>
+        </select>
+
+        {/* Alert filter */}
+        <select
+          value={alertFilter}
+          onChange={(e) => setAlertFilter(e.target.value as AlertFilter)}
+          className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text focus:outline-none"
+        >
+          <option value="all">Toate alertele</option>
+          <option value="withAlerts">Cu alerte critice</option>
+        </select>
+      </div>
+
       <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
         {activeClients.length === 0 ? (
           <EmptyState
@@ -252,31 +508,35 @@ export default function PartnerPage() {
             icon={Users}
             className="px-5 py-10"
           />
+        ) : filteredClients.length === 0 ? (
+          <div className="px-5 py-6 text-center text-sm text-eos-text-muted">
+            Niciun client nu corespunde filtrelor aplicate.
+          </div>
         ) : (
           <>
-            {/* Header row */}
+            {/* Sortable header row */}
             <div className="flex flex-wrap items-center gap-4 bg-eos-bg-inset px-5 py-2">
-              <p className="flex-1 text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
-                Organizație
-              </p>
-              <p className="w-28 shrink-0 text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
-                Scor
-              </p>
-              <p className="hidden w-32 shrink-0 text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary sm:block">
-                Status
-              </p>
+              <div className="flex-1">
+                <SortHeader label="Organizație" sortKey="orgName" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+              </div>
+              <div className="w-28 shrink-0">
+                <SortHeader label="Scor" sortKey="score" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+              </div>
+              <div className="hidden w-32 shrink-0 sm:block">
+                <SortHeader label="Alerte" sortKey="alerts" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+              </div>
               <p className="hidden w-20 shrink-0 text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary sm:block">
                 Module
               </p>
               <div className="size-7 shrink-0" />
             </div>
 
-            {/* Alert clients first */}
-            {[
-              ...alertClients,
-              ...activeClients.filter((c) => (c.compliance?.redAlerts ?? 0) === 0),
-            ].map((client) => (
-              <ClientRow key={client.orgId} client={client} />
+            {filteredClients.map((client) => (
+              <ClientRow
+                key={client.orgId}
+                client={client}
+                onDrillDown={(id) => router.push(`/dashboard/partner/${id}`)}
+              />
             ))}
           </>
         )}
@@ -287,7 +547,7 @@ export default function PartnerPage() {
         <p className="font-medium text-eos-text">Contabil sau DPO consultant?</p>
         <p className="mt-0.5">
           Adaugă clienți noi invitându-i direct din pagina Setări → Echipă a fiecărei organizații.
-          Ei primesc un email de invitație și acceptă accesul.
+          Sau folosește butonul <strong>Import CSV</strong> pentru import în masă.
         </p>
       </div>
     </div>

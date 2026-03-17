@@ -19,6 +19,7 @@
 | R-9 | e-Factura → NIS2 vendor schema hook | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-10 | NIS2 incidents + vendors în audit-pack bundle | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-11 | Applicability Engine — stratul zero | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-12 | PDF export real — pdfkit server-side | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -422,6 +423,46 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 | 2026-03-17 | Claude | Implementat complet: motor, API, wizard, integrare dashboard |
 | 2026-03-17 | Claude | Sprint închis — DoD complet verificat, PR #35 deschis |
 | 2026-03-17 | sesiune | Fix vizual în curs: carduri cu certainty=unlikely trebuie downgraded (opacitate + border muted). Criteriu GPT: userul trebuie să vadă imediat ce module nu se aplică. Urmează după fix: R-5 (clipboard) → R-10 (NIS2 în audit pack) → R-3 (IR plan din NIS2) |
+
+---
+
+---
+
+## R-12 — PDF Export Real — pdfkit Server-Side
+
+**Origine:** `docs/definitia-perfecta-de-urmat.md` Sprint 3 — "PDF export real"
+**Impact:** Înalt — documentele generate sunt descărcabile ca PDF profesional, gata de trimis
+**Efort estimat:** 0.5 zile
+
+### Descriere
+Adaugă export PDF real pentru documentele generate de AI. Server-side cu `pdfkit` (fără puppeteer, funcționează pe Vercel). Parsează Markdown line-by-line, adaugă header (org name + dată) și footer (disclaimer juridic + număr pagină) pe fiecare pagină.
+
+### Scope tehnic
+- `lib/server/pdf-generator.ts` — `buildPDFFromMarkdown(content, metadata)` → `Promise<Buffer>`
+- `app/api/documents/export-pdf/route.ts` — `POST /api/documents/export-pdf`
+- `app/dashboard/generator/page.tsx` — buton „PDF" (primar) + `handleDownloadPdf()`
+- `lib/server/pdf-generator.test.ts` — 3 teste unitare
+
+### Fișiere afectate
+- `lib/server/pdf-generator.ts` (nou)
+- `lib/server/pdf-generator.test.ts` (nou)
+- `app/api/documents/export-pdf/route.ts` (nou)
+- `app/dashboard/generator/page.tsx`
+
+### Definition of Done
+- [x] `buildPDFFromMarkdown()` returnează Buffer non-gol
+- [x] Suportă H1/H2/H3, liste, blockquote, hr, paragrafe
+- [x] Header per pagină: org name + dată
+- [x] Footer: disclaimer juridic + număr pagină
+- [x] `POST /api/documents/export-pdf` returnează PDF binary cu Content-Disposition
+- [x] Buton „PDF" în generator page (lângă „.md")
+- [x] 3 teste unitare — 422 pass total, 0 fail
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | Claude | Implementat: pdfkit, pdf-generator.ts, export-pdf route, buton PDF în generator page |
+| 2026-03-17 | Claude | Sprint închis — DoD complet verificat, commit d7b0a46 |
 
 ---
 

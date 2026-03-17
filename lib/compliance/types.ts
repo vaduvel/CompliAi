@@ -15,6 +15,7 @@ export type WorkspaceContext = {
   workspaceLabel: string
   workspaceOwner: string
   workspaceInitials: string
+  userRole?: "owner" | "compliance" | "reviewer" | "viewer"  // Sprint 6 RBAC
 }
 
 export type NavSection =

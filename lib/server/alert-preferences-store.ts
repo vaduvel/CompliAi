@@ -12,6 +12,7 @@ export type AlertPreferences = {
   webhookUrl: string
   events: Record<AlertEventType, boolean>
   updatedAtISO: string
+  weeklyDigestEnabled?: boolean  // Sprint 13 — opțional, backward-safe
 }
 
 export const DEFAULT_ALERT_PREFERENCES: Omit<AlertPreferences, "updatedAtISO"> = {
@@ -24,6 +25,7 @@ export const DEFAULT_ALERT_PREFERENCES: Omit<AlertPreferences, "updatedAtISO"> =
     "task.overdue": true,
     "alert.critical": true,
   },
+  weeklyDigestEnabled: true,  // Default activat
 }
 
 function getPrefsFile(orgId: string): string {

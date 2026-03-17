@@ -3,9 +3,10 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { updateVendor, deleteVendor } from "@/lib/server/nis2-store"
+import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
 
 export async function PATCH(
@@ -13,8 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    requireRole(request, WRITE_ROLES, "actualizarea furnizorului")
 
     const { id } = await params
     const body = (await request.json()) as Partial<Nis2Vendor>
@@ -35,8 +35,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    requireRole(request, DELETE_ROLES, "ștergerea furnizorului")
 
     const { id } = await params
     const { orgId } = await getOrgContext()
