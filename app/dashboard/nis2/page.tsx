@@ -936,6 +936,16 @@ function VendorRow({
           <Badge variant={SEVERITY_BADGE[vendor.riskLevel]} className="text-[10px] normal-case tracking-normal">
             risc {vendor.riskLevel}
           </Badge>
+          {vendor.techConfidence === "high" && (
+            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+              tech ✓ certitudine ridicată
+            </span>
+          )}
+          {vendor.techConfidence === "low" && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title={vendor.techDetectionReason}>
+              posibil tech — verifică manual
+            </span>
+          )}
         </div>
         {vendor.service && <p className="text-xs text-eos-text-muted">{vendor.service}</p>}
       </div>

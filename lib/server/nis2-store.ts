@@ -3,7 +3,7 @@
 // Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
-import { isTechVendorName } from "@/lib/server/efactura-mock-data"
+import { detectTechVendor } from "@/lib/server/efactura-mock-data"
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
 const nis2Storage = createAdaptiveStorage<Nis2OrgState>("nis2", "nis2_state")
@@ -64,6 +64,9 @@ export type Nis2Vendor = {
   notes: string
   createdAtISO: string
   updatedAtISO: string
+  // Sprint 5.1: 3-level tech detection
+  techConfidence?: "high" | "medium" | "low" | null
+  techDetectionReason?: string
 }
 
 export type Nis2AssessmentRecord = {
@@ -313,19 +316,31 @@ export async function upsertVendorsFromEfactura(
       continue
     }
     existingNames.add(normalized.toLowerCase())
-    const isTech = isTechVendorName(normalized)
+    // Sprint 5.1: 3-level detection
+    const detection = detectTechVendor(normalized, "")
+    const { isTech, confidence, reason } = detection
     if (isTech) techVendorsWithoutDpa.push(normalized)
+
+    let notes: string
+    if (isTech && confidence === "high") {
+      notes = "⚠️ Furnizor tech/cloud identificat cu certitudine (Nivel 1). Verifică și atașează DPA conform GDPR Art. 28 și NIS2."
+    } else if (isTech && confidence === "low") {
+      notes = "🔍 Posibil furnizor tech (Nivel 3 — keyword match). Verifică manual dacă se aplică DPA."
+    } else {
+      notes = "Importat automat din validările e-Factura. Completează detaliile de securitate."
+    }
+
     newVendors.push({
       id: uid(),
       name: normalized,
-      service: isTech ? "Furnizor tech/cloud/SaaS (risc ridicat NIS2)" : "Furnizor detectat din e-Factura",
-      riskLevel: isTech ? "high" : "medium",
+      service: isTech ? "Furnizor tech/cloud/SaaS (detectat automat)" : "Furnizor detectat din e-Factura",
+      riskLevel: isTech && confidence === "high" ? "high" : isTech ? "medium" : "medium",
       hasSecurityClause: false,
       hasIncidentNotification: false,
       hasAuditRight: false,
-      notes: isTech
-        ? "⚠️ Furnizor tech/cloud detectat automat. Verifică și atașează DPA (Data Processing Agreement) conform GDPR Art. 28 și NIS2."
-        : "Importat automat din validările e-Factura. Completează detaliile de securitate.",
+      notes,
+      techConfidence: confidence,
+      techDetectionReason: reason || undefined,
       createdAtISO: now,
       updatedAtISO: now,
     })
