@@ -76,12 +76,34 @@ export type Nis2AssessmentRecord = {
 
 export type DnscRegistrationStatus = "not-started" | "in-progress" | "submitted" | "confirmed"
 
+// ── Sprint 2.6: Maturity Assessment DNSC ─────────────────────────────────────
+
+export type MaturityDomainStatus = "compliant" | "partial" | "non_compliant"
+
+export type MaturityDomain = {
+  id: string
+  name: string
+  score: number
+  status: MaturityDomainStatus
+}
+
+export type MaturityAssessment = {
+  level: "basic" | "important" | "essential"
+  completedAt: string
+  domains: MaturityDomain[]
+  overallScore: number
+  answers: Record<string, string>
+  remediationPlanDue: string   // completedAt + 30 zile
+  remediationPlan?: string
+}
+
 export type Nis2OrgState = {
   assessment: Nis2AssessmentRecord | null
   incidents: Nis2Incident[]
   vendors: Nis2Vendor[]
   updatedAtISO: string
   dnscRegistrationStatus?: DnscRegistrationStatus  // Sprint 4 — opțional, backward-safe
+  maturityAssessment?: MaturityAssessment           // Sprint 2.6
 }
 
 function emptyState(): Nis2OrgState {
@@ -317,6 +339,21 @@ export async function saveDnscRegistrationStatus(
 export async function getDnscRegistrationStatus(orgId: string): Promise<DnscRegistrationStatus> {
   const state = await readNis2State(orgId)
   return state.dnscRegistrationStatus ?? "not-started"
+}
+
+// ── Sprint 2.6: Maturity Assessment DNSC ─────────────────────────────────────
+
+export async function saveMaturityAssessment(
+  orgId: string,
+  data: MaturityAssessment
+): Promise<Nis2OrgState> {
+  const state = await readNis2State(orgId)
+  return writeNis2State(orgId, { ...state, maturityAssessment: data })
+}
+
+export async function readMaturityAssessment(orgId: string): Promise<MaturityAssessment | null> {
+  const state = await readNis2State(orgId)
+  return state.maturityAssessment ?? null
 }
 
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────

@@ -1,11 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  ClipboardCheck,
   Download,
   FileText,
   Loader2,
@@ -46,6 +48,7 @@ import type {
   Nis2VendorRiskLevel,
 } from "@/lib/server/nis2-store"
 import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
+import type { MaturityAssessment } from "@/lib/server/nis2-store"
 
 // ── DNSC download helper ───────────────────────────────────────────────────────
 
@@ -1198,6 +1201,69 @@ function VendorsTab() {
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
+function MaturityCard() {
+  const [assessment, setAssessment] = useState<MaturityAssessment | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/nis2/maturity", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { assessment: MaturityAssessment | null }) => setAssessment(d.assessment ?? null))
+      .catch(() => null)
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return null
+
+  if (!assessment) {
+    return (
+      <Link href="/dashboard/nis2/maturitate" className="block">
+        <div className="flex items-center justify-between gap-4 rounded-eos-lg border border-dashed border-eos-primary/40 bg-eos-primary-soft px-4 py-3 transition-all hover:border-eos-primary/70">
+          <div className="flex items-center gap-3">
+            <ClipboardCheck className="size-5 shrink-0 text-eos-primary" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-semibold text-eos-text">Auto-evaluare maturitate DNSC</p>
+              <p className="text-xs text-eos-text-muted">Obligatorie — OUG 155/2024 Art.18(7) ✅ · ~15 min · 10 domenii</p>
+            </div>
+          </div>
+          <Badge variant="warning" className="shrink-0">Necompletată</Badge>
+        </div>
+      </Link>
+    )
+  }
+
+  const daysLeft = Math.ceil(
+    (new Date(assessment.remediationPlanDue).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  )
+
+  return (
+    <Link href="/dashboard/nis2/maturitate" className="block">
+      <div className="flex items-center justify-between gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 transition-all hover:border-eos-primary/40">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="size-5 shrink-0 text-eos-primary" strokeWidth={1.5} />
+          <div>
+            <p className="text-sm font-semibold text-eos-text">
+              Maturitate DNSC — {assessment.overallScore}%
+            </p>
+            <p className="text-xs text-eos-text-muted">
+              Nivel {assessment.level} ·{" "}
+              {daysLeft > 0
+                ? `Plan remediere în ${daysLeft} zile`
+                : "⚠ Deadline plan remediere depășit"}
+            </p>
+          </div>
+        </div>
+        <Badge
+          variant={assessment.level === "essential" ? "success" : assessment.level === "important" ? "warning" : "destructive"}
+          className="shrink-0 normal-case"
+        >
+          {assessment.level}
+        </Badge>
+      </div>
+    </Link>
+  )
+}
+
 export default function Nis2Page() {
   // orgName pentru rapoartele DNSC — citit din session header via fetch minimal
   const [orgName, setOrgName] = useState<string | undefined>()
@@ -1225,6 +1291,8 @@ export default function Nis2Page() {
           </>
         }
       />
+
+      <MaturityCard />
 
       <Tabs defaultValue="assessment" className="space-y-5">
         <TabsList className="border-b border-eos-border">
