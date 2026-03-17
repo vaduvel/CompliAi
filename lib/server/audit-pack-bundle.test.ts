@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 
 vi.mock("@/lib/server/nis2-store", () => ({
   readNis2State: vi.fn(),
+  readMaturityAssessment: vi.fn().mockResolvedValue(null),
 }))
 
 vi.mock("@/lib/server/audit-pack-client", () => ({

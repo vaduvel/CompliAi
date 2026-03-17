@@ -9,7 +9,7 @@ import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
 import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
-import { readNis2State } from "@/lib/server/nis2-store"
+import { readNis2State, readMaturityAssessment } from "@/lib/server/nis2-store"
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 
 const execFileAsync = promisify(execFile)
@@ -38,6 +38,8 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     incidents: [],
     vendors: [],
   }))
+  // Sprint 2.6: citim maturity assessment
+  const maturityAssessment = await readMaturityAssessment(auditPack.workspace.id).catch(() => null)
   const nis2Dir = path.join(bundleDir, "nis2")
 
   try {
@@ -103,11 +105,17 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
       JSON.stringify(nis2State.assessment ?? {}, null, 2),
       "utf8"
     )
+    // Sprint 2.6: maturity assessment
+    await fs.writeFile(
+      path.join(nis2Dir, "maturity-assessment.json"),
+      JSON.stringify(maturityAssessment ?? {}, null, 2),
+      "utf8"
+    )
 
     const includedEvidence = await copyEvidenceFiles(auditPack, evidenceDir)
 
     // MANIFEST.md — lizibil de orice inspector
-    const manifestMd = buildManifestMarkdown(auditPack, nis2State, includedEvidence)
+    const manifestMd = buildManifestMarkdown(auditPack, nis2State, includedEvidence, maturityAssessment)
     await fs.writeFile(path.join(bundleDir, "MANIFEST.md"), manifestMd, "utf8")
 
     // MANIFEST.pdf — generat din Markdown
@@ -211,6 +219,7 @@ function buildReadme(auditPack: AuditPackV2) {
     "- nis2/incidents.json",
     "- nis2/vendors.json",
     "- nis2/assessment.json",
+    "- nis2/maturity-assessment.json",
     "- evidence/*",
     "",
     "Acest bundle leaga snapshot-ul curent, baseline-ul validat, controalele, dovezile, drift-ul si traceability matrix.",
@@ -281,7 +290,8 @@ function sanitizeSegment(value: string) {
 function buildManifestMarkdown(
   auditPack: AuditPackV2,
   nis2State: Pick<Nis2OrgState, "incidents" | "vendors" | "assessment">,
-  includedEvidence: Array<{ taskId: string; fileName: string; storedAs: string; kind: string }>
+  includedEvidence: Array<{ taskId: string; fileName: string; storedAs: string; kind: string }>,
+  maturityAssessment: Pick<import("@/lib/server/nis2-store").MaturityAssessment, "overallScore" | "level" | "completedAt"> | null
 ): string {
   const orgName = auditPack.workspace.label
   const cui = auditPack.workspace.name ?? "—"
@@ -332,9 +342,14 @@ function buildManifestMarkdown(
   }
 
   lines.push("### NIS2", "")
-  lines.push(`- Evaluare maturitate — \`nis2/assessment.json\` (scor: ${nis2State.assessment?.score ?? "—"}%)`)
+  lines.push(`- Evaluare gap analysis — \`nis2/assessment.json\` (scor: ${nis2State.assessment?.score ?? "—"}%)`)
   lines.push(`- Incidente raportate: ${nis2State.incidents.length} — \`nis2/incidents.json\``)
   lines.push(`- Registru furnizori: ${nis2State.vendors.length} — \`nis2/vendors.json\``)
+  if (maturityAssessment) {
+    lines.push(`- Auto-evaluare maturitate DNSC — \`nis2/maturity-assessment.json\` (scor: ${maturityAssessment.overallScore}%, nivel: ${maturityAssessment.level})`)
+  } else {
+    lines.push("- Auto-evaluare maturitate DNSC — \`nis2/maturity-assessment.json\` (necompletată)")
+  }
   lines.push("")
   lines.push("### Date tehnice", "")
   lines.push("- `data/audit-pack-v2-1.json` — snapshot complet")
