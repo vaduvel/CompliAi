@@ -5,6 +5,7 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import { isTechVendorName } from "@/lib/server/efactura-mock-data"
 
 const DATA_DIR = path.join(process.cwd(), ".data")
 
@@ -269,13 +270,14 @@ export async function deleteVendor(orgId: string, vendorId: string): Promise<boo
 export async function upsertVendorsFromEfactura(
   orgId: string,
   supplierNames: string[]
-): Promise<{ added: number; skipped: number }> {
+): Promise<{ added: number; skipped: number; techVendorsWithoutDpa: string[] }> {
   const state = await readNis2State(orgId)
   const existingNames = new Set(state.vendors.map((v) => v.name.toLowerCase().trim()))
   const now = new Date().toISOString()
   let added = 0
   let skipped = 0
   const newVendors: Nis2Vendor[] = []
+  const techVendorsWithoutDpa: string[] = []
 
   for (const name of supplierNames) {
     const normalized = name.trim()
@@ -284,15 +286,19 @@ export async function upsertVendorsFromEfactura(
       continue
     }
     existingNames.add(normalized.toLowerCase())
+    const isTech = isTechVendorName(normalized)
+    if (isTech) techVendorsWithoutDpa.push(normalized)
     newVendors.push({
       id: uid(),
       name: normalized,
-      service: "Furnizor detectat din e-Factura",
-      riskLevel: "medium",
+      service: isTech ? "Furnizor tech/cloud/SaaS (risc ridicat NIS2)" : "Furnizor detectat din e-Factura",
+      riskLevel: isTech ? "high" : "medium",
       hasSecurityClause: false,
       hasIncidentNotification: false,
       hasAuditRight: false,
-      notes: "Importat automat din validările e-Factura. Completează detaliile de securitate.",
+      notes: isTech
+        ? "⚠️ Furnizor tech/cloud detectat automat. Verifică și atașează DPA (Data Processing Agreement) conform GDPR Art. 28 și NIS2."
+        : "Importat automat din validările e-Factura. Completează detaliile de securitate.",
       createdAtISO: now,
       updatedAtISO: now,
     })
@@ -306,7 +312,7 @@ export async function upsertVendorsFromEfactura(
     })
   }
 
-  return { added, skipped }
+  return { added, skipped, techVendorsWithoutDpa }
 }
 
 // ── Sprint 4: DNSC Registration Status ───────────────────────────────────────

@@ -923,13 +923,20 @@ function VendorsTab() {
     setImporting(true)
     try {
       const res = await fetch("/api/nis2/vendors/import-efactura", { method: "POST" })
-      const data = (await res.json()) as { added: number; skipped: number; message: string }
+      const data = (await res.json()) as { added: number; skipped: number; message: string; demoMode?: boolean }
       if (!res.ok) throw new Error(data.message ?? "Import eșuat.")
       if (data.added > 0) {
         // reload vendors
         const updated = await fetch("/api/nis2/vendors", { cache: "no-store" }).then((r) => r.json()) as { vendors: Nis2Vendor[] }
         setVendors(updated.vendors ?? [])
-        toast.success(data.message)
+        if (data.demoMode) {
+          toast.warning(data.message, {
+            description: "Conectează contul ANAF din Setări pentru date reale.",
+            duration: 6000,
+          })
+        } else {
+          toast.success(data.message)
+        }
       } else {
         toast.info(data.message)
       }

@@ -1,5 +1,6 @@
 // POST /api/nis2/vendors/import-efactura
 // Importă furnizorii unici din validările e-Factura în registrul NIS2 Vendors.
+// Dacă nu există date ANAF reale → folosește mock data (demo mode).
 // Dedup pe nume — nu creează duplicate.
 
 import { NextResponse } from "next/server"
@@ -7,8 +8,10 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { readState } from "@/lib/server/mvp-store"
+import { readState, mutateState } from "@/lib/server/mvp-store"
 import { upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
+import { EFACTURA_MOCK_VENDORS } from "@/lib/server/efactura-mock-data"
+import type { ComplianceState } from "@/lib/compliance/types"
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +22,7 @@ export async function POST(request: Request) {
     const state = await readState()
 
     // Extrage furnizorii unici din validările e-Factura
-    const supplierNames = [
+    const realSuppliers = [
       ...new Set(
         state.efacturaValidations
           .map((v) => v.supplierName)
@@ -27,22 +30,50 @@ export async function POST(request: Request) {
       ),
     ]
 
+    // Sprint 5: Mock mode — când nu există date ANAF reale
+    const isDemoMode = realSuppliers.length === 0
+    const supplierNames = isDemoMode
+      ? EFACTURA_MOCK_VENDORS.map((v) => v.name)
+      : realSuppliers
+
     if (supplierNames.length === 0) {
       return NextResponse.json({
         added: 0,
         skipped: 0,
+        demoMode: false,
         message: "Nu există date e-Factura validate. Sincronizează mai întâi modulul e-Factura.",
       })
     }
 
     const result = await upsertVendorsFromEfactura(orgId, supplierNames)
 
+    // Generează alerte în compliance state pentru tech vendors fără DPA
+    if (result.techVendorsWithoutDpa.length > 0) {
+      await mutateState((s: ComplianceState) => {
+        const now = new Date().toISOString()
+        const newAlerts = result.techVendorsWithoutDpa.map((name) => ({
+          id: `dpa-${Math.random().toString(36).slice(2, 10)}`,
+          message: `Furnizor tech detectat: "${name}" — verifică și atașează DPA (GDPR Art. 28 + NIS2)`,
+          severity: "high" as const,
+          open: true,
+          sourceDocument: "Import e-Factura",
+          createdAtISO: now,
+        }))
+        return { ...s, alerts: [...newAlerts, ...s.alerts] }
+      })
+    }
+
+    const addedLabel = result.added !== 1 ? "furnizori importați" : "furnizor importat"
+    const message = isDemoMode
+      ? `Demo mode — ${result.added} ${addedLabel} (15 furnizori simulați). Conectează contul ANAF pentru date reale.`
+      : result.added > 0
+        ? `${result.added} ${addedLabel} din e-Factura.`
+        : "Toți furnizorii din e-Factura există deja în registru."
+
     return NextResponse.json({
       ...result,
-      message:
-        result.added > 0
-          ? `${result.added} furnizor${result.added !== 1 ? "i" : ""} importat${result.added !== 1 ? "ți" : ""} din e-Factura.`
-          : "Toți furnizorii din e-Factura există deja în registru.",
+      demoMode: isDemoMode,
+      message,
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
