@@ -877,6 +877,7 @@ function VendorsTab() {
   const [vendors, setVendors] = useState<Nis2Vendor[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({
     name: "",
@@ -918,6 +919,27 @@ function VendorsTab() {
     }
   }
 
+  async function handleImportFromEfactura() {
+    setImporting(true)
+    try {
+      const res = await fetch("/api/nis2/vendors/import-efactura", { method: "POST" })
+      const data = (await res.json()) as { added: number; skipped: number; message: string }
+      if (!res.ok) throw new Error(data.message ?? "Import eșuat.")
+      if (data.added > 0) {
+        // reload vendors
+        const updated = await fetch("/api/nis2/vendors", { cache: "no-store" }).then((r) => r.json()) as { vendors: Nis2Vendor[] }
+        setVendors(updated.vendors ?? [])
+        toast.success(data.message)
+      } else {
+        toast.info(data.message)
+      }
+    } catch (err) {
+      toast.error("Eroare la import", { description: err instanceof Error ? err.message : "Încearcă din nou." })
+    } finally {
+      setImporting(false)
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!window.confirm("Ștergi acest furnizor din registru?")) return
     try {
@@ -948,10 +970,26 @@ function VendorsTab() {
             </Badge>
           )}
         </div>
-        <Button size="sm" className="gap-2" onClick={() => setShowForm((v) => !v)}>
-          <Plus className="size-3.5" strokeWidth={2} />
-          Adaugă furnizor
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            onClick={() => void handleImportFromEfactura()}
+            disabled={importing}
+          >
+            {importing ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <FileText className="size-3.5" strokeWidth={2} />
+            )}
+            Importă din e-Factura
+          </Button>
+          <Button size="sm" className="gap-2" onClick={() => setShowForm((v) => !v)}>
+            <Plus className="size-3.5" strokeWidth={2} />
+            Adaugă furnizor
+          </Button>
+        </div>
       </div>
 
       {showForm && (

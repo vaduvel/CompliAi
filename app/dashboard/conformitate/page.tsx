@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertTriangle, CheckCircle2, ChevronRight, Loader2, ShieldCheck, XCircle } from "lucide-react"
+import { AlertTriangle, CheckCircle2, ChevronRight, Download, FileText, Loader2, ShieldCheck, XCircle } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -12,6 +12,7 @@ import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sectio
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import {
   AI_CONFORMITY_QUESTIONS,
+  buildAnnexIVDocument,
   scoreAssessment,
   type AssessmentAnswer,
   type AssessmentAnswers,
@@ -182,6 +183,20 @@ export default function ConformitatePage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  function handleDownloadAnnexIV() {
+    const system = aiSystems.find((s) => s.id === selectedSystemId)
+    if (!system) return
+    const doc = buildAnnexIVDocument(system, answers, cockpit.data?.workspace.orgName)
+    const blob = new Blob([doc.content], { type: "text/markdown;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `annex-iv-${system.name.toLowerCase().replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.md`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Documentație Anexa IV descărcată")
   }
 
   function handleAnswer(questionId: string, answer: AssessmentAnswer) {
@@ -367,6 +382,19 @@ export default function ConformitatePage() {
                       </>
                     )}
                   </Button>
+
+                  {answeredCount >= 8 && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={handleDownloadAnnexIV}
+                      className="w-full gap-2"
+                    >
+                      <FileText className="size-4" strokeWidth={2} />
+                      Generează Documentație Tehnică (Anexa IV)
+                      <Download className="ml-auto size-3.5 text-eos-text-muted" strokeWidth={2} />
+                    </Button>
+                  )}
 
                   {savedResult && savedResult.gaps.length > 0 && (
                     <Card className="border-eos-border bg-eos-surface">

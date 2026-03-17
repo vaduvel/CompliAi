@@ -256,5 +256,55 @@ export async function deleteVendor(orgId: string, vendorId: string): Promise<boo
   return true
 }
 
+// ── R-9: Import furnizori din e-Factura ───────────────────────────────────────
+
+/**
+ * Upsert furnizori din validările e-Factura în registrul NIS2.
+ * Dedup pe name (case-insensitive) — nu creează duplicate.
+ * Returnează numărul de furnizori nou adăugați.
+ */
+export async function upsertVendorsFromEfactura(
+  orgId: string,
+  supplierNames: string[]
+): Promise<{ added: number; skipped: number }> {
+  const state = await readNis2State(orgId)
+  const existingNames = new Set(state.vendors.map((v) => v.name.toLowerCase().trim()))
+  const now = new Date().toISOString()
+  let added = 0
+  let skipped = 0
+  const newVendors: Nis2Vendor[] = []
+
+  for (const name of supplierNames) {
+    const normalized = name.trim()
+    if (!normalized || existingNames.has(normalized.toLowerCase())) {
+      skipped++
+      continue
+    }
+    existingNames.add(normalized.toLowerCase())
+    newVendors.push({
+      id: uid(),
+      name: normalized,
+      service: "Furnizor detectat din e-Factura",
+      riskLevel: "medium",
+      hasSecurityClause: false,
+      hasIncidentNotification: false,
+      hasAuditRight: false,
+      notes: "Importat automat din validările e-Factura. Completează detaliile de securitate.",
+      createdAtISO: now,
+      updatedAtISO: now,
+    })
+    added++
+  }
+
+  if (newVendors.length > 0) {
+    await writeNis2State(orgId, {
+      ...state,
+      vendors: [...newVendors, ...state.vendors],
+    })
+  }
+
+  return { added, skipped }
+}
+
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────
 export { buildDNSCReport } from "@/lib/compliance/dnsc-report"
