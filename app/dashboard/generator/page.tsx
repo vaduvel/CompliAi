@@ -168,9 +168,10 @@ export default function GeneratorPage() {
   useEffect(() => {
     if (!cockpit.data) return
     if (!orgName) setOrgName(cockpit.data.workspace.orgName)
-    if (!orgSector) {
-      const sector = cockpit.data.state.orgProfile?.sector
-      if (sector) setOrgSector(ORG_SECTOR_LABELS[sector])
+    const profile = cockpit.data.state.orgProfile
+    if (profile) {
+      if (!orgSector) setOrgSector(ORG_SECTOR_LABELS[profile.sector])
+      if (!orgCui && profile.cui) setOrgCui(profile.cui)
     }
   }, [cockpit.data]) // eslint-disable-line react-hooks/exhaustive-deps
 

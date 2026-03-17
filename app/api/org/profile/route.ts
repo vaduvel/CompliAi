@@ -56,11 +56,16 @@ export async function POST(request: Request) {
       return jsonError("Câmp obligatoriu: requiresEfactura (boolean).", 400, "MISSING_REQUIRES_EFACTURA")
     }
 
+    // CUI: opțional, validare permisivă
+    const cuiRaw = typeof body.cui === "string" ? body.cui.trim() : undefined
+    const cui = cuiRaw && /^(RO)?\d{2,10}$/i.test(cuiRaw) ? cuiRaw.toUpperCase() : undefined
+
     const orgProfile: OrgProfile = {
       sector: body.sector,
       employeeCount: body.employeeCount,
       usesAITools: body.usesAITools,
       requiresEfactura: body.requiresEfactura,
+      ...(cui ? { cui } : {}),
       completedAtISO: new Date().toISOString(),
     }
 

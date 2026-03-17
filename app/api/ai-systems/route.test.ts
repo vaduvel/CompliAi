@@ -21,10 +21,11 @@ vi.mock("@/lib/server/org-context", () => ({
 }))
 
 import { mutateState } from "@/lib/server/mvp-store"
+import type { ComplianceState } from "@/lib/compliance/types"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function makeBaseState() {
+function makeBaseState(): ComplianceState {
   return {
     aiSystems: [],
     alerts: [],
@@ -33,7 +34,7 @@ function makeBaseState() {
     tasks: [],
     drifts: [],
     workspace: { id: "org-1", orgId: "org-1", name: "Test Org", orgName: "Test Org", workspaceLabel: "Test", workspaceOwner: "owner" },
-  }
+  } as unknown as ComplianceState
 }
 
 function makeRequest(body: Record<string, unknown>) {
@@ -65,11 +66,10 @@ describe("POST /api/ai-systems", () => {
 
   describe("R-4 — DPA alert trigger", () => {
     it("creează alertă DPA când vendor-ul este extern (non-Necunoscut)", async () => {
-      let capturedState: ReturnType<typeof makeBaseState> | null = null
+      let capturedState: ComplianceState | null = null
 
       vi.mocked(mutateState).mockImplementation(async (fn) => {
-        const base = makeBaseState()
-        capturedState = fn(base) as ReturnType<typeof makeBaseState>
+        capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
 
@@ -88,11 +88,10 @@ describe("POST /api/ai-systems", () => {
     })
 
     it("NU creează alertă DPA când vendor-ul lipsește (Necunoscut implicit)", async () => {
-      let capturedState: ReturnType<typeof makeBaseState> | null = null
+      let capturedState: ComplianceState | null = null
 
       vi.mocked(mutateState).mockImplementation(async (fn) => {
-        const base = makeBaseState()
-        capturedState = fn(base) as ReturnType<typeof makeBaseState>
+        capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
 
@@ -103,11 +102,10 @@ describe("POST /api/ai-systems", () => {
     })
 
     it("NU creează alertă DPA când vendor-ul este 'Necunoscut' explicit", async () => {
-      let capturedState: ReturnType<typeof makeBaseState> | null = null
+      let capturedState: ComplianceState | null = null
 
       vi.mocked(mutateState).mockImplementation(async (fn) => {
-        const base = makeBaseState()
-        capturedState = fn(base) as ReturnType<typeof makeBaseState>
+        capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
 
@@ -118,11 +116,10 @@ describe("POST /api/ai-systems", () => {
     })
 
     it("NU creează alertă DPA când vendor-ul este string gol", async () => {
-      let capturedState: ReturnType<typeof makeBaseState> | null = null
+      let capturedState: ComplianceState | null = null
 
       vi.mocked(mutateState).mockImplementation(async (fn) => {
-        const base = makeBaseState()
-        capturedState = fn(base) as ReturnType<typeof makeBaseState>
+        capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
 

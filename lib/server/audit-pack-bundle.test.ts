@@ -128,7 +128,8 @@ describe("R-10 — NIS2 data în audit-pack bundle", () => {
       incidents: [],
       vendors: [],
       assessment: null,
-    })
+      updatedAtISO: new Date().toISOString(),
+    } as never)
 
     await buildAuditPackBundle(makeAuditPack("org-specific-r10"))
 
@@ -150,7 +151,8 @@ describe("R-10 — NIS2 data în audit-pack bundle", () => {
       incidents: [{ id: "inc-1", title: "Atac ransomware" }] as never,
       vendors: [{ id: "v-1", name: "AWS" }] as never,
       assessment: { score: 65, completedAtISO: "2026-03-17T00:00:00.000Z" } as never,
-    })
+      updatedAtISO: new Date().toISOString(),
+    } as never)
 
     await buildAuditPackBundle(makeAuditPack("org-r10"))
 

@@ -15,9 +15,10 @@ import {
   type ApplicabilityResult,
 } from "@/lib/compliance/applicability"
 
-type WizardStep = "sector" | "size" | "ai" | "efactura" | "done"
+type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "done"
 
 type WizardState = {
+  cui: string
   sector: OrgSector | null
   employeeCount: OrgEmployeeCount | null
   usesAITools: boolean | null
@@ -38,8 +39,9 @@ const CERTAINTY_BADGE: Record<string, string> = {
 }
 
 export function ApplicabilityWizard({ onComplete }: Props) {
-  const [step, setStep] = useState<WizardStep>("sector")
+  const [step, setStep] = useState<WizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
+    cui: "",
     sector: null,
     employeeCount: null,
     usesAITools: null,
@@ -78,10 +80,11 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   }
 
   const STEP_LABELS: Record<WizardStep, string> = {
-    sector: "1 / 4",
-    size: "2 / 4",
-    ai: "3 / 4",
-    efactura: "4 / 4",
+    cui: "1 / 5",
+    sector: "2 / 5",
+    size: "3 / 5",
+    ai: "4 / 5",
+    efactura: "5 / 5",
     done: "✓",
   }
 
@@ -106,7 +109,35 @@ export function ApplicabilityWizard({ onComplete }: Props) {
         </div>
 
         <div className="mt-5">
-          {/* Step 1: Sector */}
+          {/* Step 1: CUI */}
+          {step === "cui" && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-eos-text">
+                CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional)</span>
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                Folosit pentru prefill automat în documentele generate. Ex: RO12345678 sau 12345678
+              </p>
+              <input
+                type="text"
+                value={values.cui}
+                onChange={(e) => setValues((v) => ({ ...v, cui: e.target.value }))}
+                placeholder="Ex: RO12345678"
+                className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setStep("sector")
+                }}
+              />
+              <button
+                onClick={() => setStep("sector")}
+                className="w-full rounded-eos-md border border-eos-primary bg-eos-primary px-3 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+              >
+                Continuă
+              </button>
+            </div>
+          )}
+
+          {/* Step 2: Sector */}
           {step === "sector" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
@@ -200,6 +231,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                           employeeCount: values.employeeCount!,
                           usesAITools: values.usesAITools!,
                           requiresEfactura: true,
+                          ...(values.cui.trim() ? { cui: values.cui.trim() } : {}),
                         }
                         const res = await fetch("/api/org/profile", {
                           method: "POST",
@@ -232,6 +264,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                           employeeCount: values.employeeCount!,
                           usesAITools: values.usesAITools!,
                           requiresEfactura: false,
+                          ...(values.cui.trim() ? { cui: values.cui.trim() } : {}),
                         }
                         const res = await fetch("/api/org/profile", {
                           method: "POST",
