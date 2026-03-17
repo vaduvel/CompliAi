@@ -5,6 +5,7 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Download,
   FileText,
   RefreshCw,
   ShieldCheck,
@@ -58,6 +59,31 @@ function formatEventDate(iso: string) {
   } catch {
     return iso
   }
+}
+
+// ─── CSV export ───────────────────────────────────────────────────────────────
+
+function downloadCsv(events: ComplianceEvent[]) {
+  const header = "id,type,entityType,message,createdAtISO,actorLabel,actorRole"
+  const rows = events.map((e) =>
+    [
+      e.id,
+      e.type,
+      e.entityType,
+      `"${e.message.replace(/"/g, '""')}"`,
+      e.createdAtISO,
+      e.actorLabel ?? "",
+      e.actorRole ?? "",
+    ].join(",")
+  )
+  const csv = [header, ...rows].join("\n")
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `audit-log-${new Date().toISOString().split("T")[0]}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -145,10 +171,22 @@ export default function AuditLogPage() {
             </Button>
           ))}
         </div>
-        <Button size="sm" variant="ghost" onClick={() => void fetchLog()} className="gap-2">
-          <RefreshCw className="size-3.5" strokeWidth={2} />
-          Actualizează
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => downloadCsv(filtered)}
+            disabled={filtered.length === 0}
+            className="gap-2"
+          >
+            <Download className="size-3.5" strokeWidth={2} />
+            Export CSV
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => void fetchLog()} className="gap-2">
+            <RefreshCw className="size-3.5" strokeWidth={2} />
+            Actualizează
+          </Button>
+        </div>
       </div>
 
       {/* ── Lista evenimente ── */}
