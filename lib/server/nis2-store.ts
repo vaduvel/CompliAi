@@ -13,6 +13,20 @@ const DATA_DIR = path.join(process.cwd(), ".data")
 export type Nis2IncidentSeverity = "low" | "medium" | "high" | "critical"
 export type Nis2IncidentStatus = "open" | "reported-24h" | "reported-72h" | "closed"
 
+// Câmpuri aliniate cu formularul oficial de raportare DNSC (NIS2 Art. 23)
+export type Nis2AttackType =
+  | "ransomware"
+  | "ddos"
+  | "phishing"
+  | "supply-chain"
+  | "insider"
+  | "unauthorized-access"
+  | "data-breach"
+  | "unknown"
+  | "other"
+
+export type Nis2OperationalImpact = "none" | "partial" | "full"
+
 export type Nis2Incident = {
   id: string
   title: string
@@ -25,6 +39,13 @@ export type Nis2Incident = {
   reportedAtISO?: string
   resolvedAtISO?: string
   affectedSystems: string[]
+  // ── Câmpuri DNSC (opționale, backward-compatible) ──────────────────────────
+  attackType?: Nis2AttackType
+  attackVector?: string           // ex: "email phishing cu atașament .exe"
+  operationalImpact?: Nis2OperationalImpact
+  operationalImpactDetails?: string // ex: "sisteme de producție oprite 4h"
+  measuresTaken?: string          // măsuri de containment/remediere luate
+  reportedToDNSCAtISO?: string    // când s-a trimis raportul oficial la DNSC
   createdAtISO: string
   updatedAtISO: string
 }
@@ -119,6 +140,11 @@ export async function createIncident(
   orgId: string,
   input: Pick<Nis2Incident, "title" | "description" | "severity" | "affectedSystems"> & {
     detectedAtISO?: string
+    attackType?: Nis2AttackType
+    attackVector?: string
+    operationalImpact?: Nis2OperationalImpact
+    operationalImpactDetails?: string
+    measuresTaken?: string
   }
 ): Promise<Nis2Incident> {
   const state = await readNis2State(orgId)
@@ -134,6 +160,11 @@ export async function createIncident(
     detectedAtISO: detectedAt,
     ...deadlines,
     affectedSystems: input.affectedSystems,
+    ...(input.attackType !== undefined && { attackType: input.attackType }),
+    ...(input.attackVector !== undefined && { attackVector: input.attackVector }),
+    ...(input.operationalImpact !== undefined && { operationalImpact: input.operationalImpact }),
+    ...(input.operationalImpactDetails !== undefined && { operationalImpactDetails: input.operationalImpactDetails }),
+    ...(input.measuresTaken !== undefined && { measuresTaken: input.measuresTaken }),
     createdAtISO: now,
     updatedAtISO: now,
   }
@@ -147,7 +178,13 @@ export async function createIncident(
 export async function updateIncident(
   orgId: string,
   incidentId: string,
-  patch: Partial<Pick<Nis2Incident, "status" | "title" | "description" | "severity" | "affectedSystems" | "reportedAtISO" | "resolvedAtISO">>
+  patch: Partial<Pick<
+    Nis2Incident,
+    | "status" | "title" | "description" | "severity" | "affectedSystems"
+    | "reportedAtISO" | "resolvedAtISO"
+    | "attackType" | "attackVector" | "operationalImpact" | "operationalImpactDetails"
+    | "measuresTaken" | "reportedToDNSCAtISO"
+  >>
 ): Promise<Nis2Incident | null> {
   const state = await readNis2State(orgId)
   const idx = state.incidents.findIndex((i) => i.id === incidentId)
@@ -218,3 +255,6 @@ export async function deleteVendor(orgId: string, vendorId: string): Promise<boo
   await writeNis2State(orgId, { ...state, vendors: filtered })
   return true
 }
+
+// ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────
+export { buildDNSCReport } from "@/lib/compliance/dnsc-report"

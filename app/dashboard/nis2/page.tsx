@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Download,
   Loader2,
   Plus,
   Shield,
@@ -35,12 +36,28 @@ import {
 } from "@/lib/compliance/nis2-rules"
 import type {
   Nis2AssessmentRecord,
+  Nis2AttackType,
   Nis2Incident,
   Nis2IncidentSeverity,
   Nis2IncidentStatus,
+  Nis2OperationalImpact,
   Nis2Vendor,
   Nis2VendorRiskLevel,
 } from "@/lib/server/nis2-store"
+import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
+
+// ── DNSC download helper ───────────────────────────────────────────────────────
+
+function downloadDNSCReport(incident: Nis2Incident, orgName?: string) {
+  const content = buildDNSCReport(incident, orgName)
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `raport-dnsc-${incident.id}-${new Date().toISOString().split("T")[0]}.md`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -390,10 +407,12 @@ const INCIDENT_STATUS_LABELS: Record<Nis2IncidentStatus, string> = {
 
 function IncidentRow({
   incident,
+  orgName,
   onUpdate,
   onDelete,
 }: {
   incident: Nis2Incident
+  orgName?: string
   onUpdate: (id: string, patch: Partial<Nis2Incident>) => void
   onDelete: (id: string) => void
 }) {
@@ -440,6 +459,16 @@ function IncidentRow({
           )}
           <button
             type="button"
+            onClick={() => downloadDNSCReport(incident, orgName)}
+            title="Generează raport DNSC"
+            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs font-medium text-eos-text-muted hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+            aria-label="Export raport DNSC"
+          >
+            <Download className="size-3.5" strokeWidth={2} />
+            DNSC
+          </button>
+          <button
+            type="button"
             onClick={() => onDelete(incident.id)}
             className="rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
             aria-label="Șterge incident"
@@ -466,11 +495,29 @@ function IncidentRow({
           </div>
         </div>
       )}
+
+      {/* Câmpuri DNSC completate */}
+      {(incident.attackType || incident.operationalImpact) && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
+          {incident.attackType && (
+            <span>
+              <span className="font-medium text-eos-text">Tip atac:</span>{" "}
+              {ATTACK_TYPE_LABELS[incident.attackType]}
+            </span>
+          )}
+          {incident.operationalImpact && (
+            <span>
+              <span className="font-medium text-eos-text">Impact:</span>{" "}
+              {OPERATIONAL_IMPACT_LABELS[incident.operationalImpact]}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
-function IncidentsTab() {
+function IncidentsTab({ orgName }: { orgName?: string }) {
   const [incidents, setIncidents] = useState<Nis2Incident[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -480,6 +527,11 @@ function IncidentsTab() {
     description: "",
     severity: "high" as Nis2IncidentSeverity,
     affectedSystems: "",
+    attackType: "" as Nis2AttackType | "",
+    attackVector: "",
+    operationalImpact: "" as Nis2OperationalImpact | "",
+    operationalImpactDetails: "",
+    measuresTaken: "",
   })
 
   useEffect(() => {
@@ -502,12 +554,21 @@ function IncidentsTab() {
           description: form.description.trim(),
           severity: form.severity,
           affectedSystems: form.affectedSystems.split(",").map((s) => s.trim()).filter(Boolean),
+          ...(form.attackType && { attackType: form.attackType }),
+          ...(form.attackVector.trim() && { attackVector: form.attackVector.trim() }),
+          ...(form.operationalImpact && { operationalImpact: form.operationalImpact }),
+          ...(form.operationalImpactDetails.trim() && { operationalImpactDetails: form.operationalImpactDetails.trim() }),
+          ...(form.measuresTaken.trim() && { measuresTaken: form.measuresTaken.trim() }),
         }),
       })
       const data = (await res.json()) as { incident?: Nis2Incident; error?: string }
       if (!res.ok) throw new Error(data.error ?? "Eroare la creare.")
       setIncidents((prev) => [data.incident!, ...prev])
-      setForm({ title: "", description: "", severity: "high", affectedSystems: "" })
+      setForm({
+        title: "", description: "", severity: "high", affectedSystems: "",
+        attackType: "", attackVector: "", operationalImpact: "",
+        operationalImpactDetails: "", measuresTaken: "",
+      })
       setShowForm(false)
       toast.success("Incident înregistrat", { description: "Termenele SLA au fost calculate automat." })
     } catch (err) {
@@ -607,6 +668,50 @@ function IncidentsTab() {
                 />
               </div>
             </div>
+            {/* Câmpuri DNSC opționale */}
+            <p className="text-xs font-medium text-eos-text-muted pt-1">Câmpuri raportare DNSC (opționale)</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-eos-text-muted">Tip atac</label>
+                <select
+                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  value={form.attackType}
+                  onChange={(e) => setForm((f) => ({ ...f, attackType: e.target.value as Nis2AttackType | "" }))}
+                >
+                  <option value="">— Selectează —</option>
+                  {(Object.entries(ATTACK_TYPE_LABELS) as [Nis2AttackType, string][]).map(([val, lbl]) => (
+                    <option key={val} value={val}>{lbl}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-eos-text-muted">Impact operațional</label>
+                <select
+                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  value={form.operationalImpact}
+                  onChange={(e) => setForm((f) => ({ ...f, operationalImpact: e.target.value as Nis2OperationalImpact | "" }))}
+                >
+                  <option value="">— Selectează —</option>
+                  {(Object.entries(OPERATIONAL_IMPACT_LABELS) as [Nis2OperationalImpact, string][]).map(([val, lbl]) => (
+                    <option key={val} value={val}>{lbl}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <input
+              type="text"
+              placeholder="Vector de atac (ex: email phishing cu .exe atașat)"
+              value={form.attackVector}
+              onChange={(e) => setForm((f) => ({ ...f, attackVector: e.target.value }))}
+              className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+            />
+            <textarea
+              placeholder="Măsuri luate (containment, remediere)"
+              value={form.measuresTaken}
+              onChange={(e) => setForm((f) => ({ ...f, measuresTaken: e.target.value }))}
+              rows={2}
+              className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
+            />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
                 Anulează
@@ -640,6 +745,7 @@ function IncidentsTab() {
             <IncidentRow
               key={inc.id}
               incident={inc}
+              orgName={orgName}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
             />
@@ -893,6 +999,15 @@ function VendorsTab() {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function Nis2Page() {
+  // orgName pentru rapoartele DNSC — citit din session header via fetch minimal
+  const [orgName, setOrgName] = useState<string | undefined>()
+  useEffect(() => {
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { orgName?: string }) => { if (d.orgName) setOrgName(d.orgName) })
+      .catch(() => null)
+  }, [])
+
   return (
     <div className="space-y-6">
       <PageIntro
@@ -931,7 +1046,7 @@ export default function Nis2Page() {
           <AssessmentTab />
         </TabsContent>
         <TabsContent value="incidents">
-          <IncidentsTab />
+          <IncidentsTab orgName={orgName} />
         </TabsContent>
         <TabsContent value="vendors">
           <VendorsTab />

@@ -6,7 +6,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
-import type { Nis2Incident, Nis2IncidentSeverity } from "@/lib/server/nis2-store"
+import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
 
 export async function GET(request: Request) {
   try {
@@ -28,7 +28,11 @@ export async function POST(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
     const body = (await request.json()) as Partial<
-      Pick<Nis2Incident, "title" | "description" | "severity" | "affectedSystems" | "detectedAtISO">
+      Pick<Nis2Incident,
+        | "title" | "description" | "severity" | "affectedSystems" | "detectedAtISO"
+        | "attackType" | "attackVector" | "operationalImpact" | "operationalImpactDetails"
+        | "measuresTaken"
+      >
     >
 
     if (!body.title?.trim()) return jsonError("Titlul incidentului este obligatoriu.", 400, "MISSING_TITLE")
@@ -38,6 +42,19 @@ export async function POST(request: Request) {
       return jsonError("Severitate invalidă.", 400, "INVALID_SEVERITY")
     }
 
+    const VALID_ATTACK_TYPES: Nis2AttackType[] = [
+      "ransomware", "ddos", "phishing", "supply-chain", "insider",
+      "unauthorized-access", "data-breach", "unknown", "other",
+    ]
+    if (body.attackType && !VALID_ATTACK_TYPES.includes(body.attackType)) {
+      return jsonError("Tip de atac invalid.", 400, "INVALID_ATTACK_TYPE")
+    }
+
+    const VALID_IMPACTS: Nis2OperationalImpact[] = ["none", "partial", "full"]
+    if (body.operationalImpact && !VALID_IMPACTS.includes(body.operationalImpact)) {
+      return jsonError("Impact operațional invalid.", 400, "INVALID_OPERATIONAL_IMPACT")
+    }
+
     const { orgId } = await getOrgContext()
     const incident = await createIncident(orgId, {
       title: body.title.trim(),
@@ -45,6 +62,11 @@ export async function POST(request: Request) {
       severity: body.severity,
       affectedSystems: body.affectedSystems ?? [],
       detectedAtISO: body.detectedAtISO,
+      attackType: body.attackType,
+      attackVector: body.attackVector?.trim(),
+      operationalImpact: body.operationalImpact,
+      operationalImpactDetails: body.operationalImpactDetails?.trim(),
+      measuresTaken: body.measuresTaken?.trim(),
     })
 
     return NextResponse.json({ incident }, { status: 201 })
