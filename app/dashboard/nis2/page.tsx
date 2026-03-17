@@ -76,14 +76,22 @@ const ANSWER_OPTIONS: { value: Nis2Answer; label: string }[] = [
   { value: "na", label: "N/A" },
 ]
 
-function slaLabel(deadlineISO: string): { label: string; urgent: boolean } {
+function slaLabel(
+  deadlineISO: string,
+  totalMs: number
+): { label: string; urgent: boolean; expired: boolean; progressPct: number } {
   const diff = new Date(deadlineISO).getTime() - Date.now()
-  if (diff < 0) return { label: "Termen depășit", urgent: true }
-  const h = Math.floor(diff / 3_600_000)
-  if (h < 1) return { label: "< 1h", urgent: true }
-  if (h < 24) return { label: `${h}h`, urgent: h < 6 }
+  const progressPct = Math.min(100, Math.max(0, Math.round(((totalMs - diff) / totalMs) * 100)))
+  if (diff < 0) return { label: "DEPĂȘIT", urgent: true, expired: true, progressPct: 100 }
+  const totalSec = Math.floor(diff / 1000)
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const urgent = diff < 4 * 3_600_000
+  if (h < 1) return { label: `${m}min`, urgent: true, expired: false, progressPct }
+  if (h < 24) return { label: `${h}h ${m}min`, urgent, expired: false, progressPct }
   const d = Math.floor(h / 24)
-  return { label: `${d}z`, urgent: false }
+  const remH = h % 24
+  return { label: `${d}z ${remH}h`, urgent: false, expired: false, progressPct }
 }
 
 // ── Assessment tab ─────────────────────────────────────────────────────────────
@@ -488,8 +496,8 @@ function IncidentRow({
   onUpdate: (id: string, patch: Partial<Nis2Incident>) => void
   onDelete: (id: string) => void
 }) {
-  const sla24 = slaLabel(incident.deadline24hISO)
-  const sla72 = slaLabel(incident.deadline72hISO)
+  const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
+  const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
   const isOpen = incident.status !== "closed"
 
   return (
@@ -550,20 +558,42 @@ function IncidentRow({
         </div>
       </div>
 
-      {/* SLA timers */}
+      {/* SLA timers cu progress bar */}
       {isOpen && (
-        <div className="flex flex-wrap gap-3">
-          <div className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
-            sla24.urgent ? "border-red-300 bg-red-50 text-red-700" : "border-eos-border bg-eos-surface text-eos-text-muted"
-          }`}>
-            <span>Alertă 24h DNSC:</span>
-            <span className="font-bold">{sla24.label}</span>
+        <div className="space-y-2">
+          {/* 24h early warning */}
+          <div className={`rounded-eos-md border px-3 py-2 ${sla24.expired ? "border-red-300 bg-red-50" : sla24.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
+            <div className="flex items-center justify-between">
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-red-700" : "text-eos-text-muted"}`}>
+                Alertă inițială DNSC (24h)
+              </span>
+              <span className={`text-xs font-bold ${sla24.expired ? "text-red-700 animate-pulse" : sla24.urgent ? "text-orange-700" : "text-eos-text"}`}>
+                {sla24.expired ? "⚠ DEPĂȘIT" : `Rămase: ${sla24.label}`}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
+              <div
+                className={`h-full rounded-full transition-all ${sla24.expired ? "bg-red-500" : sla24.urgent ? "bg-orange-500" : "bg-eos-primary"}`}
+                style={{ width: `${sla24.progressPct}%` }}
+              />
+            </div>
           </div>
-          <div className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
-            sla72.urgent ? "border-orange-300 bg-orange-50 text-orange-700" : "border-eos-border bg-eos-surface text-eos-text-muted"
-          }`}>
-            <span>Raport complet 72h:</span>
-            <span className="font-bold">{sla72.label}</span>
+          {/* 72h full report */}
+          <div className={`rounded-eos-md border px-3 py-2 ${sla72.expired ? "border-red-300 bg-red-50" : sla72.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
+            <div className="flex items-center justify-between">
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-red-700" : "text-eos-text-muted"}`}>
+                Raport complet DNSC (72h)
+              </span>
+              <span className={`text-xs font-bold ${sla72.expired ? "text-red-700 animate-pulse" : sla72.urgent ? "text-orange-700" : "text-eos-text"}`}>
+                {sla72.expired ? "⚠ DEPĂȘIT" : `Rămase: ${sla72.label}`}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
+              <div
+                className={`h-full rounded-full transition-all ${sla72.expired ? "bg-red-500" : sla72.urgent ? "bg-orange-500" : "bg-eos-primary"}`}
+                style={{ width: `${sla72.progressPct}%` }}
+              />
+            </div>
           </div>
         </div>
       )}
