@@ -13,7 +13,9 @@ import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/com
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
-import type { ApplicabilityCertainty } from "@/lib/compliance/applicability"
+import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
+import { getSuggestionExplanation } from "@/lib/compliance/legal-sources"
+import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -251,6 +253,8 @@ export default function DashboardPage() {
             onViewDetails={() => router.push("/dashboard/sisteme")}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
+            legalTag="ai-act"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
           />
           <ReadinessFrameworkCard
             framework="GDPR"
@@ -261,6 +265,9 @@ export default function DashboardPage() {
             icon={CheckCircle2}
             onViewDetails={() => router.push("/dashboard/checklists")}
             ariaLabel={`GDPR: ${gdprScore}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
+            legalTag="gdpr"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
           />
           <ReadinessFrameworkCard
             framework="e-Factura"
@@ -272,6 +279,8 @@ export default function DashboardPage() {
             onViewDetails={() => router.push("/dashboard/setari")}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
+            legalTag="efactura"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "efactura")?.reason}
           />
           <ReadinessFrameworkCard
             framework="Scor Global"
@@ -403,6 +412,8 @@ function ReadinessFrameworkCard({
   onViewDetails,
   ariaLabel,
   applicabilityCertainty,
+  legalTag,
+  applicabilityReason,
 }: {
   framework: string
   percent: number
@@ -413,6 +424,8 @@ function ReadinessFrameworkCard({
   onViewDetails?: () => void
   ariaLabel?: string
   applicabilityCertainty?: ApplicabilityCertainty
+  legalTag?: ApplicabilityTag
+  applicabilityReason?: string
 }) {
   const statusConfig = {
     strong:  { label: "CONFIRMARE PUTERNICĂ",    color: "success"     as const },
@@ -438,6 +451,15 @@ function ReadinessFrameworkCard({
           <div className="flex items-center gap-2">
             {Icon && <Icon className="size-5 text-eos-text-muted" strokeWidth={2} />}
             <h3 className="font-semibold text-eos-text">{framework}</h3>
+            {legalTag && applicabilityCertainty && applicabilityCertainty !== "unlikely" && (
+              <LegalSourceBadge
+                explanation={getSuggestionExplanation(
+                  legalTag,
+                  applicabilityReason ?? "",
+                  applicabilityCertainty
+                )}
+              />
+            )}
           </div>
           {isUnlikely ? (
             <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
