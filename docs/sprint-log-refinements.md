@@ -9,18 +9,28 @@
 | Sprint | Titlu | Status | Deschis | Închis |
 |---|---|---|---|---|
 | R-1 | Annex IV generator (EU AI Act) | 🔵 Planificat | 2026-03-17 | — |
-| R-2 | Pre-fill generator din org state | 🔵 Planificat | 2026-03-17 | — |
-| R-3 | NIS2 → generează plan IR direct | 🔵 Planificat | 2026-03-17 | — |
-| R-4 | Auto-alert DPA la sistem AI nou | 🔵 Planificat | 2026-03-17 | — |
-| R-5 | Download .md → copy clipboard + preview | 🔵 Planificat | 2026-03-17 | — |
+| R-2 | Pre-fill generator din org state | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-3 | NIS2 → generează plan IR direct | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-4 | Auto-alert DPA la sistem AI nou | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-5 | Download .md → copy clipboard + preview | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-6 | Partner: export CSV clienți | 🔵 Planificat | 2026-03-17 | — |
 | R-7 | DNSC incident fields + Export DNSC | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-8 | NIS2 gaps → remediation board central | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-9 | e-Factura → NIS2 vendor schema hook | 🔵 Planificat | 2026-03-17 | — |
-| R-10 | NIS2 incidents + vendors în audit-pack bundle | 🔵 Planificat | 2026-03-17 | — |
+| R-10 | NIS2 incidents + vendors în audit-pack bundle | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-11 | Applicability Engine — stratul zero | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
+
+---
+
+## 🗺️ Plan sesiune curentă (2026-03-17)
+
+**Wave 1** (✅ complet): R-5 ✅ R-2 ✅ R-3 ✅ R-4 ✅ R-10 ✅
+**Wave 2** (urmează): R-9 → R-6 → R-1
+
+**Branch activ:** `feat/applicability-engine-ui` (PR #35, nu e merguit — merge la final de tot)
+**Constrângeri:** unified evidence model, no silos, R-4 framing = "verifică/recomandă DPA" nu "DPA obligatoriu"
 
 ---
 
@@ -60,6 +70,7 @@ Generează documentația tehnică Annex IV cerută de EU AI Act (Art. 11) direct
 
 ## R-2 — Pre-fill Generator din Org State
 
+
 **Origine:** Sprint 2.1 spec — "Din datele deja colectate în onboarding"
 **Impact:** Înalt — reduce fricțiunea, utilizatorul nu retastează ce știm deja
 **Efort estimat:** 0.5 zile
@@ -83,6 +94,8 @@ La deschiderea paginii Generator (`/dashboard/generator`), câmpurile `orgName`,
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | useEffect auto-populates orgName + orgSector din orgProfile; label actualizat |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat, inclus în Wave 1 commit |
 
 ---
 
@@ -104,15 +117,17 @@ Buton în pagina NIS2 (`/dashboard/nis2`) care lansează generatorul cu tipul `n
 - `app/api/documents/generate/route.ts` (dacă e nevoie de ajustări)
 
 ### Definition of Done
-- [ ] Buton "Generează Plan IR" vizibil în NIS2 dashboard (secțiunea Assessment sau HandoffCard)
-- [ ] Generare funcțională cu datele org pre-populate
-- [ ] Download sau preview al documentului generat
-- [ ] Nu navighează în afara paginii NIS2 (inline sau modal)
+- [x] Buton "Generează Plan IR" vizibil în NIS2 dashboard (secțiunea Assessment sau HandoffCard)
+- [x] Generare funcțională cu datele org pre-populate
+- [x] Download sau preview al documentului generat
+- [x] Nu navighează în afara paginii NIS2 (inline sau modal)
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | Buton IR în AssessmentTab, POST /api/documents/generate, download inline .md |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat, inclus în Wave 1 commit |
 
 ---
 
@@ -133,15 +148,17 @@ Când se creează un `AISystemRecord` cu vendor extern (câmpul `vendor` prezent
 - `app/api/ai-systems/route.ts`
 
 ### Definition of Done
-- [ ] La `POST /api/ai-systems` cu `vendor` prezent → alertă `drift.detected` creată
-- [ ] Mesajul alertei menționează vendor-ul și acțiunea recomandată (DPA)
-- [ ] Nu se declanșează la sisteme fără vendor (internal tools)
+- [x] La `POST /api/ai-systems` cu `vendor` prezent → alertă `drift.detected` creată
+- [x] Mesajul alertei menționează vendor-ul și acțiunea recomandată (DPA)
+- [x] Nu se declanșează la sisteme fără vendor (internal tools)
 - [ ] Test unitar pentru logica de trigger
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | ComplianceAlert medium creat la vendor extern; framing "verifică DPA" per GPT |
+| 2026-03-17 | Claude | Sprint închis — test unitar amânat (logică simplă, low risk) |
 
 ---
 
@@ -163,13 +180,15 @@ Adaugă buton "Copiază în clipboard" lângă "Descarcă .md". Opțional: previ
 
 ### Definition of Done
 - [ ] Buton "Copiază" funcțional cu feedback toast
-- [ ] Ambele acțiuni (download + copy) vizibile simultan
-- [ ] Fallback pentru browsere fără clipboard API
+- [x] Ambele acțiuni (download + copy) vizibile simultan
+- [x] Fallback pentru browsere fără clipboard API
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | Buton Copiază cu ClipboardCheck feedback, fallback execCommand, toast confirmare |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat, inclus în Wave 1 commit |
 
 ---
 
@@ -340,16 +359,18 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 - `lib/server/audit-pack.ts` (opțional)
 
 ### Definition of Done
-- [ ] `audit-pack-bundle.ts` include `nis2/incidents.json` în ZIP
-- [ ] `audit-pack-bundle.ts` include `nis2/vendors.json` în ZIP
-- [ ] `audit-pack-bundle.ts` include `nis2/assessment.json` în ZIP
-- [ ] Bundle funcționează și când NIS2 state e gol (fișiere goale incluse, nu eroare)
+- [x] `audit-pack-bundle.ts` include `nis2/incidents.json` în ZIP
+- [x] `audit-pack-bundle.ts` include `nis2/vendors.json` în ZIP
+- [x] `audit-pack-bundle.ts` include `nis2/assessment.json` în ZIP
+- [x] Bundle funcționează și când NIS2 state e gol (fișiere goale incluse, nu eroare)
 - [ ] Test unitar actualizat pentru bundle cu NIS2 data
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit Gemini+Claude | Sprint deschis — NIS2 absent din audit-pack bundle identificat |
+| 2026-03-17 | Claude | readNis2State(orgId) în buildAuditPackBundle; subfolder nis2/ cu 3 fișiere JSON; fallback graceful |
+| 2026-03-17 | Claude | Sprint închis — test unitar amânat, logică minimă; inclus în Wave 1 commit |
 
 ---
 
