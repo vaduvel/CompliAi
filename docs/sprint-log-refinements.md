@@ -394,6 +394,7 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 | 2026-03-17 | analiză strategică | Sprint identificat — lipsă "strat zero" applicability |
 | 2026-03-17 | Claude | Implementat complet: motor, API, wizard, integrare dashboard |
 | 2026-03-17 | Claude | Sprint închis — DoD complet verificat, PR #35 deschis |
+| 2026-03-17 | sesiune | Fix vizual în curs: carduri cu certainty=unlikely trebuie downgraded (opacitate + border muted). Criteriu GPT: userul trebuie să vadă imediat ce module nu se aplică. Urmează după fix: R-5 (clipboard) → R-10 (NIS2 în audit pack) → R-3 (IR plan din NIS2) |
 
 ---
 

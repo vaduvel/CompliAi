@@ -389,9 +389,15 @@ function ReadinessFrameworkCard({
   }
   const config = statusConfig[status]
 
+  const isUnlikely = applicabilityCertainty === "unlikely"
+
   return (
     <Card
-      className="flex flex-col justify-between border-eos-border bg-eos-surface p-5 transition-all hover:border-eos-border-strong"
+      className={`flex flex-col justify-between p-5 transition-all ${
+        isUnlikely
+          ? "border-eos-border bg-eos-surface opacity-50 hover:opacity-70"
+          : "border-eos-border bg-eos-surface hover:border-eos-border-strong"
+      }`}
       aria-label={ariaLabel}
     >
       <div>
@@ -400,22 +406,25 @@ function ReadinessFrameworkCard({
             {Icon && <Icon className="size-5 text-eos-text-muted" strokeWidth={2} />}
             <h3 className="font-semibold text-eos-text">{framework}</h3>
           </div>
-          <Badge variant={config.color} className="text-[10px]">
-            {config.label}
-          </Badge>
+          {isUnlikely ? (
+            <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
+              Nu se aplică
+            </Badge>
+          ) : (
+            <Badge variant={config.color} className="text-[10px]">
+              {config.label}
+            </Badge>
+          )}
         </div>
-        {applicabilityCertainty === "unlikely" && (
-          <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-muted">
-            Probabil neaplicabil
-          </p>
-        )}
         {applicabilityCertainty === "probable" && (
           <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-eos-warning">
             Probabil aplicabil
           </p>
         )}
         {description && (
-          <p className="mt-2 text-xs leading-tight text-eos-text-muted">{description}</p>
+          <p className={`mt-2 text-xs leading-tight ${isUnlikely ? "text-eos-text-muted" : "text-eos-text-muted"}`}>
+            {description}
+          </p>
         )}
         <div className="mt-5 flex items-end gap-2">
           <span className="text-3xl font-semibold text-eos-text">{percent}%</span>
@@ -424,7 +433,7 @@ function ReadinessFrameworkCard({
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-eos-surface-variant">
           <div className="h-full bg-eos-primary transition-all duration-500" style={{ width: `${percent}%` }} />
         </div>
-        {missing > 0 && (
+        {!isUnlikely && missing > 0 && (
           <div className="mt-3 flex items-center gap-1.5 text-xs text-eos-warning">
             <AlertTriangle className="size-3.5" strokeWidth={2} />
             <span>{missing} actiuni deschise</span>
