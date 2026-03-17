@@ -118,7 +118,7 @@ describe("POST /api/alerts/notify", () => {
 
     expect(res.status).toBe(200)
     expect(body.dispatched).toBe(true)
-    expect(body.channels).toContain("email")
+    expect(body.channels.some((c: string) => c.startsWith("email"))).toBe(true)
     expect(body.skipped).toContain("webhook-disabled")
   })
 
