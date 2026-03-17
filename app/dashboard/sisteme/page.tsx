@@ -1073,9 +1073,9 @@ function ControlPrimaryTabs({
   }> = [
     {
       id: "overview",
-      title: "Overview",
+      title: "Prezentare",
       description: "Snapshot control si handoff clar spre zona unde continui lucrul real.",
-      badge: `${counts.reviewQueueCount} review`,
+      badge: `${counts.reviewQueueCount} de validat`,
     },
     {
       id: "systems",
@@ -1091,7 +1091,7 @@ function ControlPrimaryTabs({
     },
     {
       id: "review",
-      title: "Review",
+      title: "Validare",
       description: "Tot ce cere validare umana inainte sa poata deveni sursa de adevar.",
       badge: `${counts.detectedActiveCount} detectii`,
     },
@@ -1112,14 +1112,14 @@ function ControlPrimaryTabs({
                 : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
             }`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
                 <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
-                <p className="mt-1 text-sm leading-6 text-eos-text-muted">{tab.description}</p>
+                <Badge variant="outline" className="shrink-0 normal-case tracking-normal">
+                  {tab.badge}
+                </Badge>
               </div>
-              <Badge variant="outline" className="rounded-full px-2.5 py-1 normal-case tracking-normal">
-                {tab.badge}
-              </Badge>
+              <p className="text-xs leading-5 text-eos-text-muted">{tab.description}</p>
             </div>
           </button>
         )

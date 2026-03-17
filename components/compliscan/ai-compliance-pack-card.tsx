@@ -56,8 +56,8 @@ function severityClasses(severity: AICompliancePackEntry["compliance"]["highestS
 }
 
 function readinessLabel(readiness: AICompliancePackEntry["readiness"]) {
-  if (readiness === "audit_ready") return "audit ready"
-  if (readiness === "review_required") return "review required"
+  if (readiness === "audit_ready") return "gata de audit"
+  if (readiness === "review_required") return "necesită validare"
   return "draft"
 }
 
@@ -72,9 +72,9 @@ function confidenceModelClasses(state: AICompliancePackEntry["confidenceModel"][
 }
 
 function confidenceModelLabel(state: AICompliancePackEntry["confidenceModel"]["state"]) {
-  if (state === "confirmed_by_user") return "confirmed by user"
-  if (state === "inferred") return "inferred"
-  return "detected"
+  if (state === "confirmed_by_user") return "confirmat"
+  if (state === "inferred") return "dedus"
+  return "detectat"
 }
 
 export function AICompliancePackSummaryCard({
@@ -99,80 +99,29 @@ export function AICompliancePackSummaryCard({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className={`grid gap-4 pt-6 ${compact ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-2 xl:grid-cols-5"}`}>
-        <PackMetric
-          label="Audit ready"
-          value={pack.summary.auditReadyEntries}
-          tone="text-eos-success"
-          hint="Intrări care au control confirmat și dovezi suficiente."
-        />
-        <PackMetric
-          label="Review required"
-          value={pack.summary.reviewRequiredEntries}
-          tone={pack.summary.reviewRequiredEntries > 0 ? "text-eos-warning" : "text-eos-success"}
-          hint="Sisteme sau configurații care cer încă validare umană."
-        />
-        <PackMetric
-          label="Open findings"
-          value={pack.summary.openFindings}
-          tone={pack.summary.openFindings > 0 ? "text-eos-error" : "text-eos-success"}
-          hint="Probleme încă deschise în pack."
-        />
-        <PackMetric
-          label="Open drift"
-          value={pack.summary.openDrifts}
-          tone={pack.summary.openDrifts > 0 ? "text-eos-error" : "text-eos-success"}
-          hint="Schimbări față de baseline care cer explicație sau remediere."
-        />
-        <PackMetric
-          label="Prefill avg"
-          value={pack.summary.averageCompletenessScore}
-          suffix="%"
-          tone={
-            pack.summary.averageCompletenessScore >= 75
-              ? "text-eos-success"
-              : "text-eos-warning"
-          }
-          hint="Cât de complet este draftul comun de control și documentație."
-        />
-        {!compact && (
+      <CardContent className="space-y-4 pt-6">
+        <div className="grid gap-4 md:grid-cols-3">
           <PackMetric
-            label="Confirmed by user"
-            value={pack.summary.confidenceCoverage.confirmedByUser}
-            tone={
-              pack.summary.confidenceCoverage.confirmedByUser > 0
-                ? "text-eos-success"
-                : "text-eos-text-muted"
-            }
-            hint="Intrări validate explicit, nu doar detectate sau inferate."
+            label="Gata de audit"
+            value={pack.summary.auditReadyEntries}
+            tone="text-eos-success"
+            hint="Intrări care au control confirmat și dovezi suficiente."
           />
-        )}
-        {!compact && (
           <PackMetric
-            label="Annex lite ready"
-            value={pack.summary.annexLiteReadyEntries}
-            tone={
-              pack.summary.annexLiteReadyEntries > 0
-                ? "text-eos-success"
-                : "text-eos-warning"
-            }
-            hint="Intrări suficient de complete pentru un draft serios de documentație."
+            label="De validat"
+            value={pack.summary.reviewRequiredEntries}
+            tone={pack.summary.reviewRequiredEntries > 0 ? "text-eos-warning" : "text-eos-success"}
+            hint="Sisteme sau configurații care cer încă validare umană."
           />
-        )}
-        {!compact && (
           <PackMetric
-            label="Bundle ready"
-            value={pack.summary.bundleReadyEntries}
-            tone={
-              pack.summary.bundleReadyEntries > 0
-                ? "text-eos-success"
-                : "text-eos-warning"
-            }
-            hint="Intrări care au bundle de dovezi suficient de bun pentru un dosar defensibil."
+            label="Drift deschis"
+            value={pack.summary.openDrifts}
+            tone={pack.summary.openDrifts > 0 ? "text-eos-error" : "text-eos-success"}
+            hint="Schimbări față de baseline care cer explicație sau remediere."
           />
-        )}
+        </div>
 
-        <div className={`rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 ${compact ? "md:col-span-2 xl:col-span-4" : "md:col-span-2 xl:col-span-5"}`}>
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
@@ -182,7 +131,7 @@ export function AICompliancePackSummaryCard({
                 Documente {pack.summary.sourceCoverage.document} · Manifests {pack.summary.sourceCoverage.manifest} · YAML {pack.summary.sourceCoverage.yaml}
               </p>
               <p className="mt-2 text-xs text-eos-text-muted">
-                Snapshot: {pack.snapshotId || "încă lipsă"} {pack.comparedToSnapshotId ? `· compare to ${pack.comparedToSnapshotId}` : ""}
+                Snapshot: {pack.snapshotId || "încă lipsă"} {pack.comparedToSnapshotId ? `· comparat cu ${pack.comparedToSnapshotId}` : ""}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -202,14 +151,20 @@ export function AICompliancePackSummaryCard({
           </div>
           <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-              Coverage details
+              Detalii acoperire
             </summary>
             <div className="mt-3 space-y-2 text-sm text-eos-text-muted">
               <p>
-                Confidence model: detected {pack.summary.confidenceCoverage.detected} · inferred {pack.summary.confidenceCoverage.inferred} · confirmed {pack.summary.confidenceCoverage.confirmedByUser}
+                Findings deschise: {pack.summary.openFindings} · Completare medie: {pack.summary.averageCompletenessScore}%
               </p>
               <p>
-                Field confidence: confirmed {pack.summary.fieldConfidenceCoverage.confirmed} · inferred {pack.summary.fieldConfidenceCoverage.inferred} · missing {pack.summary.fieldConfidenceCoverage.missing}
+                Confirmate: {pack.summary.confidenceCoverage.confirmedByUser} · Deduse: {pack.summary.confidenceCoverage.inferred} · Detectate: {pack.summary.confidenceCoverage.detected}
+              </p>
+              <p>
+                Câmpuri: confirmate {pack.summary.fieldConfidenceCoverage.confirmed} · deduse {pack.summary.fieldConfidenceCoverage.inferred} · lipsă {pack.summary.fieldConfidenceCoverage.missing}
+              </p>
+              <p>
+                Annex IV ready: {pack.summary.annexLiteReadyEntries} · Bundle gata: {pack.summary.bundleReadyEntries}
               </p>
             </div>
           </details>
@@ -306,6 +261,12 @@ export function AICompliancePackEntriesCard({
               ))}
             </div>
 
+            {entry.suggestedNextStep && (
+              <p className="mt-3 text-sm font-medium text-eos-text">
+                → {entry.suggestedNextStep}
+              </p>
+            )}
+
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <PackMiniMeta
                 icon={ShieldCheck}
@@ -324,59 +285,50 @@ export function AICompliancePackEntriesCard({
               />
             </div>
 
-            <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-                Confidence model
-              </p>
-              <p className="mt-3 text-sm font-medium text-eos-text">
-                {confidenceModelLabel(entry.confidenceModel.state)}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-eos-text-muted">
+            <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                Model de încredere · {confidenceModelLabel(entry.confidenceModel.state)} · {entry.confidence}
+              </summary>
+              <p className="mt-3 text-sm leading-6 text-eos-text-muted">
                 {entry.confidenceModel.reason}
               </p>
-              <p className="mt-2 text-xs text-eos-text-muted">
-                Încredere tehnică curentă: {entry.confidence}
-              </p>
-            </div>
+            </details>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-                  Prefill status
-                </p>
-                {editable && onUpdateField ? (
+              {editable && onUpdateField ? (
+                <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                  <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    Câmpuri de completat · {entry.prefill.completenessScore}% completat
+                    {entry.prefill.missingFields.length > 0 ? ` · ${entry.prefill.missingFields.length} câmpuri lipsesc` : ""}
+                  </summary>
                   <EditablePackFields
                     entry={entry}
                     busy={busy}
                     onUpdateField={onUpdateField}
                   />
-                ) : (
-                  <>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {entry.prefill.fieldStatus.map((field) => (
-                        <Badge
-                          key={`${entry.id}-${field.field}`}
-                          className={fieldStatusClasses(field.status)}
-                        >
-                          {field.label}: {field.status} · {field.confidenceModel.state}
-                        </Badge>
-                      ))}
-                    </div>
-                    {entry.prefill.missingFields.length > 0 && (
-                      <p className="mt-3 text-sm text-eos-text-muted">
-                        Lipsesc încă: {entry.prefill.missingFields.join(", ")}
-                      </p>
-                    )}
-                    <div className="mt-3 space-y-2 text-sm text-eos-text-muted">
-                      {entry.prefill.fieldStatus.slice(0, 2).map((field) => (
-                        <p key={`${entry.id}-${field.field}-reason`}>
-                          <span className="font-medium text-eos-text">{field.label}</span>: {field.confidenceModel.reason}
-                        </p>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+                </details>
+              ) : (
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    Câmpuri prefill · {entry.prefill.completenessScore}%
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {entry.prefill.fieldStatus.map((field) => (
+                      <Badge
+                        key={`${entry.id}-${field.field}`}
+                        className={fieldStatusClasses(field.status)}
+                      >
+                        {field.label}: {field.status}
+                      </Badge>
+                    ))}
+                  </div>
+                  {entry.prefill.missingFields.length > 0 && (
+                    <p className="mt-3 text-sm text-eos-text-muted">
+                      Lipsesc: {entry.prefill.missingFields.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
@@ -640,9 +592,6 @@ export function AICompliancePackEntriesCard({
               </div>
             </details>
 
-            <p className="mt-4 text-sm font-medium text-eos-text-muted">
-              {entry.suggestedNextStep}
-            </p>
           </div>
         ))}
       </CardContent>

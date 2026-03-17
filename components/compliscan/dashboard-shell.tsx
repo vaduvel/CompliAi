@@ -103,7 +103,7 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,var(--eos-accent-primary-subtle),transparent_28%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] text-eos-text">
-      <div className="mx-auto flex max-w-[1200px]">
+      <div className="mx-auto flex max-w-[1680px]">
         <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 border-r border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-base))] px-4 py-5 md:flex md:flex-col">
           <div className="border-b border-eos-border-subtle pb-5">
             <CompliScanLogoLockup
