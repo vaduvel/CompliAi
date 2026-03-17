@@ -3,6 +3,7 @@
 import {
   BarChart3,
   BookOpen,
+  Building2,
   CheckCircle2,
   ClipboardList,
   FileSearch,
@@ -10,7 +11,9 @@ import {
   FolderOpen,
   Scan,
   Settings,
+  ShieldAlert,
   ShieldPlus,
+  Sparkles,
   TriangleAlert,
 } from "lucide-react"
 
@@ -30,6 +33,10 @@ export type DashboardNavId =
   | "asistent"
   | "politici"
   | "auditLog"
+  | "generator"
+  | "conformitate"
+  | "partner"
+  | "nis2"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -65,7 +72,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     label: "Control",
     href: "/dashboard/sisteme",
     icon: ShieldPlus,
-    matchers: ["/dashboard/sisteme", "/dashboard/alerte"],
+    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2"],
   },
   {
     id: "dovada",
@@ -79,7 +86,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     label: "Politici",
     href: "/dashboard/politici",
     icon: BookOpen,
-    matchers: ["/dashboard/politici"],
+    matchers: ["/dashboard/politici", "/dashboard/generator"],
   },
   {
     id: "setari",
@@ -100,11 +107,28 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     ],
   },
   {
+    id: "politici",
+    label: "Politici & Documente",
+    items: [
+      { id: "politici", label: "Politici interne", href: "/dashboard/politici", icon: BookOpen },
+      { id: "generator", label: "Generator documente", href: "/dashboard/generator", icon: Sparkles },
+    ],
+  },
+  {
     id: "control",
     label: "Control",
     items: [
       { id: "sisteme", label: "Sisteme", href: "/dashboard/sisteme", icon: ShieldPlus },
+      { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
       { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
+      { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
+    ],
+  },
+  {
+    id: "partner",
+    label: "Partner",
+    items: [
+      { id: "partner", label: "Dashboard multi-client", href: "/dashboard/partner", icon: Building2 },
     ],
   },
   {

@@ -10,6 +10,7 @@ import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import type { OrgPolicyAcknowledgments } from "@/lib/server/policy-store"
 
 // ─── Policy templates ─────────────────────────────────────────────────────────
@@ -298,6 +299,8 @@ export default function PoliticiPage() {
           </>
         }
       />
+
+      <PillarTabs sectionId="politici" />
 
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Trash2 } from "lucide-react"
+import { Bell, Loader2, Trash2, Webhook } from "lucide-react"
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
@@ -31,6 +31,7 @@ import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/Su
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Politica implicita" },
@@ -103,6 +104,11 @@ const SETTINGS_VIEW_TABS = [
     description: "Health check si stare operationala.",
   },
   {
+    value: "notificari",
+    label: "Notificari",
+    description: "Email si webhook la evenimente.",
+  },
+  {
     value: "avansat",
     label: "Avansat",
     description: "Politici locale si reset.",
@@ -134,6 +140,11 @@ export default function SetariPage() {
   const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
   const canViewReleaseReadiness =
     currentUser?.role === "owner" || currentUser?.role === "compliance"
+
+  // ── Alert preferences state ────────────────────────────────────────────────
+  const [alertPrefs, setAlertPrefs] = useState<AlertPreferences | null>(null)
+  const [alertPrefsLoading, setAlertPrefsLoading] = useState(true)
+  const [alertPrefsSaving, setAlertPrefsSaving] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -231,6 +242,15 @@ export default function SetariPage() {
     ) as Record<string, (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"]>
     setDriftOverrides(nextOverrides)
   }, [cockpit.data])
+
+  useEffect(() => {
+    setAlertPrefsLoading(true)
+    fetch("/api/alerts/preferences", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { prefs: AlertPreferences }) => setAlertPrefs(data.prefs))
+      .catch(() => setAlertPrefs(null))
+      .finally(() => setAlertPrefsLoading(false))
+  }, [])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -637,6 +657,146 @@ export default function SetariPage() {
           />
         </TabsContent>
 
+        <TabsContent value="notificari" className="space-y-6">
+          <SettingsTabIntro
+            title="Notificari"
+            description="Configurezi canalele de alertare proactiva: email si webhook la evenimente de drift, task expirat sau alerta critica."
+          />
+
+          {alertPrefsLoading ? (
+            <OperationalLoadingCard>Incarcam preferintele de notificare...</OperationalLoadingCard>
+          ) : (
+            <div className="space-y-4">
+              {/* ── Email ─────────────────────────────────────────────────── */}
+              <Card className="border-eos-border bg-eos-surface">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-4 text-eos-text-muted" strokeWidth={1.8} />
+                    <CardTitle className="text-base">Email</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-eos-border accent-eos-primary"
+                      checked={alertPrefs?.emailEnabled ?? false}
+                      onChange={(e) =>
+                        setAlertPrefs((p) => p ? { ...p, emailEnabled: e.target.checked } : p)
+                      }
+                    />
+                    <span className="text-sm text-eos-text">Activează notificari email</span>
+                  </label>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-eos-text-muted">
+                      Adresa email destinatar
+                    </label>
+                    <input
+                      type="email"
+                      className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:opacity-50"
+                      placeholder="alerte@companie.ro"
+                      value={alertPrefs?.emailAddress ?? ""}
+                      disabled={!alertPrefs?.emailEnabled}
+                      onChange={(e) =>
+                        setAlertPrefs((p) => p ? { ...p, emailAddress: e.target.value } : p)
+                      }
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* ── Webhook ───────────────────────────────────────────────── */}
+              <Card className="border-eos-border bg-eos-surface">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Webhook className="size-4 text-eos-text-muted" strokeWidth={1.8} />
+                    <CardTitle className="text-base">Webhook</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-eos-border accent-eos-primary"
+                      checked={alertPrefs?.webhookEnabled ?? false}
+                      onChange={(e) =>
+                        setAlertPrefs((p) => p ? { ...p, webhookEnabled: e.target.checked } : p)
+                      }
+                    />
+                    <span className="text-sm text-eos-text">Activează webhook la evenimente</span>
+                  </label>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-eos-text-muted">
+                      URL webhook (POST JSON)
+                    </label>
+                    <input
+                      type="url"
+                      className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:opacity-50"
+                      placeholder="https://hooks.slack.com/..."
+                      value={alertPrefs?.webhookUrl ?? ""}
+                      disabled={!alertPrefs?.webhookEnabled}
+                      onChange={(e) =>
+                        setAlertPrefs((p) => p ? { ...p, webhookUrl: e.target.value } : p)
+                      }
+                    />
+                    <p className="mt-1 text-xs text-eos-text-tertiary">
+                      Compatibil cu Slack, Teams, Make, Zapier sau orice endpoint HTTP.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* ── Events ────────────────────────────────────────────────── */}
+              <Card className="border-eos-border bg-eos-surface">
+                <CardHeader>
+                  <CardTitle className="text-base">Evenimente monitorizate</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {(
+                    [
+                      { id: "drift.detected" as AlertEventType, label: "Drift detectat", hint: "Schimbare fata de baseline validat" },
+                      { id: "task.overdue" as AlertEventType, label: "Task expirat", hint: "Task de remediere cu termen depasit" },
+                      { id: "alert.critical" as AlertEventType, label: "Alerta critica", hint: "Finding de severitate ridicata sau critica" },
+                    ] as const
+                  ).map((ev) => (
+                    <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+                        checked={alertPrefs?.events[ev.id] ?? true}
+                        onChange={(e) =>
+                          setAlertPrefs((p) =>
+                            p ? { ...p, events: { ...p.events, [ev.id]: e.target.checked } } : p
+                          )
+                        }
+                      />
+                      <div>
+                        <p className="text-sm font-medium text-eos-text">{ev.label}</p>
+                        <p className="text-xs text-eos-text-muted">{ev.hint}</p>
+                      </div>
+                    </label>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Button
+                disabled={alertPrefsSaving || !alertPrefs}
+                onClick={() => void handleSaveAlertPrefs()}
+                className="gap-2"
+              >
+                {alertPrefsSaving ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Se salvează…
+                  </>
+                ) : (
+                  "Salvează preferintele de notificare"
+                )}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="avansat" className="space-y-6">
           <SettingsTabIntro
             title="Avansat"
@@ -740,6 +900,28 @@ export default function SetariPage() {
       </Tabs>
     </div>
   )
+
+  async function handleSaveAlertPrefs() {
+    if (!alertPrefs) return
+    setAlertPrefsSaving(true)
+    try {
+      const res = await fetch("/api/alerts/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(alertPrefs),
+      })
+      const data = (await res.json()) as { prefs?: AlertPreferences; error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Salvarea a eșuat.")
+      setAlertPrefs(data.prefs ?? alertPrefs)
+      toast.success("Preferinte salvate", { description: "Configuratia de notificari a fost actualizata." })
+    } catch (err) {
+      toast.error("Eroare la salvare", {
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
+      })
+    } finally {
+      setAlertPrefsSaving(false)
+    }
+  }
 
   async function handleRoleChange(
     membershipId: string,

@@ -79,7 +79,7 @@ function confidenceModelLabel(state: AICompliancePackEntry["confidenceModel"]["s
 
 export function AICompliancePackSummaryCard({
   pack,
-  compact = false,
+  compact: _compact = false,
 }: {
   pack: AICompliancePack
   compact?: boolean

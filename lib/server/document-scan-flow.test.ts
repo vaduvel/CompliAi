@@ -30,7 +30,7 @@ describe("document scan flow integration", () => {
     expect(extracted.result.scan.sourceKind).toBe("document")
     expect(extracted.result.extractedTextPreview).toContain("Politica de confidentialitate")
 
-    const analyzed = analyzeExtractedScan(
+    const analyzed = await analyzeExtractedScan(
       extracted.nextState,
       extracted.result.scan.id,
       extracted.result.scan.contentExtracted
