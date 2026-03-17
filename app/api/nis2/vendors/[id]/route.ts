@@ -5,9 +5,11 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { updateVendor, deleteVendor } from "@/lib/server/nis2-store"
+import { updateVendor, deleteVendor, readNis2State } from "@/lib/server/nis2-store"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
+import { buildVendorRiskFindings } from "@/lib/compliance/vendor-risk"
+import { mutateState } from "@/lib/server/mvp-store"
 
 export async function PATCH(
   request: Request,
@@ -19,9 +21,27 @@ export async function PATCH(
     const { id } = await params
     const body = (await request.json()) as Partial<Nis2Vendor>
 
+    // Compute nextReviewDue if lastReviewDate is being set
+    if (body.lastReviewDate) {
+      body.nextReviewDue = new Date(
+        new Date(body.lastReviewDate).getTime() + 365 * 24 * 60 * 60 * 1000
+      ).toISOString()
+    }
+
     const { orgId } = await getOrgContext()
     const vendor = await updateVendor(orgId, id, body)
     if (!vendor) return jsonError("Furnizorul nu a fost găsit.", 404, "NOT_FOUND")
+
+    // Regenerate vendor risk findings after any update
+    const nis2State = await readNis2State(orgId)
+    const riskFindings = buildVendorRiskFindings(nis2State.vendors, new Date().toISOString())
+    await mutateState((current) => ({
+      ...current,
+      findings: [
+        ...current.findings.filter((f) => !f.id.startsWith("nis2-vendor-risk-")),
+        ...riskFindings,
+      ],
+    }))
 
     return NextResponse.json({ vendor })
   } catch (error) {

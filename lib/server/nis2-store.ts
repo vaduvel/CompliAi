@@ -67,6 +67,12 @@ export type Nis2Vendor = {
   // Sprint 5.1: 3-level tech detection
   techConfidence?: "high" | "medium" | "low" | null
   techDetectionReason?: string
+  // Sprint 5.4: Supply Chain Risk Score
+  hasDPA?: boolean                                  // DPA (Art. 28 GDPR) marcat de user
+  hasSecuritySLA?: boolean                          // SLA securitate verificat de user
+  dataProcessingVolume?: "none" | "low" | "high"   // volum date procesate — estimare
+  lastReviewDate?: string                           // ultima revizuire contract (ISO)
+  nextReviewDue?: string                            // lastReviewDate + 12 luni (ISO)
 }
 
 export type Nis2AssessmentRecord = {

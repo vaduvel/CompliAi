@@ -50,6 +50,7 @@ import type {
 } from "@/lib/server/nis2-store"
 import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
 import type { MaturityAssessment, BoardMember } from "@/lib/server/nis2-store"
+import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 
 // ── DNSC download helper ───────────────────────────────────────────────────────
 
@@ -916,62 +917,180 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
 
 // ── Vendors tab ────────────────────────────────────────────────────────────────
 
+const RISK_SCORE_COLORS: Record<string, string> = {
+  high: "text-red-600 bg-red-50 border-red-200",
+  medium: "text-amber-600 bg-amber-50 border-amber-200",
+  low: "text-emerald-600 bg-emerald-50 border-emerald-200",
+}
+
 function VendorRow({
   vendor,
   onDelete,
+  onPatch,
 }: {
   vendor: Nis2Vendor
   onDelete: (id: string) => void
+  onPatch: (id: string, patch: Partial<Nis2Vendor>) => Promise<void>
 }) {
+  const [expanded, setExpanded] = useState(false)
+  const [patching, setPatching] = useState<string | null>(null)
+
+  const { riskScore, riskLevel, factors } = computeVendorRisk(vendor)
+
   const clauses = [
     { ok: vendor.hasSecurityClause, label: "Clauze securitate" },
     { ok: vendor.hasIncidentNotification, label: "Notificare incident" },
     { ok: vendor.hasAuditRight, label: "Drept audit" },
   ]
+
+  async function markField(field: "hasDPA" | "hasSecuritySLA" | "lastReviewDate", value: boolean | string) {
+    setPatching(field)
+    try {
+      await onPatch(vendor.id, { [field]: value })
+    } finally {
+      setPatching(null)
+    }
+  }
+
   return (
-    <div className="flex flex-wrap items-start gap-4 px-5 py-4">
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-eos-text">{vendor.name}</p>
-          <Badge variant={SEVERITY_BADGE[vendor.riskLevel]} className="text-[10px] normal-case tracking-normal">
-            risc {vendor.riskLevel}
-          </Badge>
-          {vendor.techConfidence === "high" && (
-            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
-              tech ✓ certitudine ridicată
+    <div>
+      <div className="flex flex-wrap items-start gap-4 px-5 py-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-eos-text">{vendor.name}</p>
+            {/* Computed risk score badge */}
+            <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${RISK_SCORE_COLORS[riskLevel]}`}>
+              risc {riskLevel} ({riskScore}/100)
             </span>
-          )}
-          {vendor.techConfidence === "low" && (
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title={vendor.techDetectionReason}>
-              posibil tech — verifică manual
+            {vendor.techConfidence === "high" && (
+              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                tech ✓ certitudine ridicată
+              </span>
+            )}
+            {vendor.techConfidence === "low" && (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title={vendor.techDetectionReason}>
+                posibil tech — verifică manual
+              </span>
+            )}
+          </div>
+          {vendor.service && <p className="text-xs text-eos-text-muted">{vendor.service}</p>}
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {clauses.map((c) => (
+            <span
+              key={c.label}
+              className={`flex items-center gap-1 text-xs ${c.ok ? "text-emerald-600" : "text-eos-text-muted line-through"}`}
+            >
+              {c.ok ? (
+                <CheckCircle2 className="size-3" strokeWidth={2} />
+              ) : (
+                <XCircle className="size-3" strokeWidth={2} />
+              )}
+              {c.label}
             </span>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-bg-inset"
+          aria-label="Detalii risc"
+        >
+          {expanded ? <ChevronUp className="size-3.5" strokeWidth={2} /> : <ChevronDown className="size-3.5" strokeWidth={2} />}
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(vendor.id)}
+          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
+          aria-label="Șterge vendor"
+        >
+          <Trash2 className="size-3.5" strokeWidth={2} />
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="border-t border-eos-border-subtle bg-eos-bg-inset px-5 py-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-eos-text-muted">
+            Factori de risc NIS2 Art. 21(2)(d)
+          </p>
+          <div className="mb-4 grid gap-2 sm:grid-cols-2">
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.isTechVendor ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.isTechVendor ? <ShieldAlert className="size-3.5 shrink-0" strokeWidth={2} /> : <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} />}
+              Furnizor tech/cloud {factors.isTechVendor ? "(+30 pct risc)" : "— nedetectat"}
+            </div>
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasDPA && factors.isTechVendor ? "border-red-200 bg-red-50 text-red-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.hasDPA ? <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
+              DPA (Acord procesare date) {!factors.hasDPA && factors.isTechVendor ? "(+25 pct risc)" : factors.hasDPA ? "— bifat" : ""}
+            </div>
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasSecuritySLA && factors.isTechVendor ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.hasSecuritySLA ? <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
+              SLA securitate {!factors.hasSecuritySLA && factors.isTechVendor ? "(+15 pct risc)" : factors.hasSecuritySLA ? "— bifat" : ""}
+            </div>
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.dataProcessingVolume === "high" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              <Shield className="size-3.5 shrink-0" strokeWidth={2} />
+              Date procesate: {factors.dataProcessingVolume === "high" ? "volum ridicat (+20 pct)" : factors.dataProcessingVolume === "low" ? "volum scăzut" : "necunoscut"}
+            </div>
+          </div>
+
+          {/* Scor bar */}
+          <div className="mb-4">
+            <div className="mb-1 flex items-center justify-between text-xs text-eos-text-muted">
+              <span>Scor risc</span>
+              <span className="font-semibold">{riskScore}/100</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-eos-border">
+              <div
+                className={`h-full rounded-full transition-all ${riskLevel === "high" ? "bg-red-500" : riskLevel === "medium" ? "bg-amber-500" : "bg-emerald-500"}`}
+                style={{ width: `${riskScore}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Acțiuni remediere */}
+          <div className="flex flex-wrap gap-2">
+            {!factors.hasDPA && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs"
+                disabled={patching === "hasDPA"}
+                onClick={() => void markField("hasDPA", true)}
+              >
+                {patching === "hasDPA" ? <Loader2 className="size-3 animate-spin" /> : <CheckCircle2 className="size-3" strokeWidth={2} />}
+                Marchează DPA existent
+              </Button>
+            )}
+            {!factors.hasSecuritySLA && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs"
+                disabled={patching === "hasSecuritySLA"}
+                onClick={() => void markField("hasSecuritySLA", true)}
+              >
+                {patching === "hasSecuritySLA" ? <Loader2 className="size-3 animate-spin" /> : <CheckCircle2 className="size-3" strokeWidth={2} />}
+                Marchează SLA verificat
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs"
+              disabled={patching === "lastReviewDate"}
+              onClick={() => void markField("lastReviewDate", new Date().toISOString())}
+            >
+              {patching === "lastReviewDate" ? <Loader2 className="size-3 animate-spin" /> : <ClipboardCheck className="size-3" strokeWidth={2} />}
+              Marchează revizuire azi
+            </Button>
+          </div>
+          {vendor.lastReviewDate && (
+            <p className="mt-2 text-xs text-eos-text-muted">
+              Ultima revizuire: {new Date(vendor.lastReviewDate).toLocaleDateString("ro-RO")}
+              {vendor.nextReviewDue && ` · Scadentă: ${new Date(vendor.nextReviewDue).toLocaleDateString("ro-RO")}`}
+            </p>
           )}
         </div>
-        {vendor.service && <p className="text-xs text-eos-text-muted">{vendor.service}</p>}
-      </div>
-      <div className="flex shrink-0 flex-wrap gap-2">
-        {clauses.map((c) => (
-          <span
-            key={c.label}
-            className={`flex items-center gap-1 text-xs ${c.ok ? "text-emerald-600" : "text-eos-text-muted line-through"}`}
-          >
-            {c.ok ? (
-              <CheckCircle2 className="size-3" strokeWidth={2} />
-            ) : (
-              <XCircle className="size-3" strokeWidth={2} />
-            )}
-            {c.label}
-          </span>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={() => onDelete(vendor.id)}
-        className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
-        aria-label="Șterge vendor"
-      >
-        <Trash2 className="size-3.5" strokeWidth={2} />
-      </button>
+      )}
     </div>
   )
 }
@@ -1062,7 +1181,23 @@ function VendorsTab() {
     }
   }
 
-  const highRiskCount = vendors.filter((v) => v.riskLevel === "high" || v.riskLevel === "critical").length
+  async function handlePatch(id: string, patch: Partial<Nis2Vendor>) {
+    try {
+      const res = await fetch(`/api/nis2/vendors/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      })
+      const data = (await res.json()) as { vendor?: Nis2Vendor; error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Eroare la actualizare.")
+      setVendors((prev) => prev.map((v) => (v.id === id ? data.vendor! : v)))
+      toast.success("Furnizor actualizat")
+    } catch (err) {
+      toast.error("Eroare", { description: err instanceof Error ? err.message : "Încearcă din nou." })
+    }
+  }
+
+  const highRiskCount = vendors.filter((v) => computeVendorRisk(v).riskLevel === "high").length
   const missingClausesCount = vendors.filter((v) => !v.hasSecurityClause || !v.hasIncidentNotification).length
 
   return (
@@ -1071,7 +1206,7 @@ function VendorsTab() {
         <div className="flex flex-wrap gap-2">
           {highRiskCount > 0 && (
             <Badge variant="destructive" className="normal-case tracking-normal">
-              {highRiskCount} risc înalt/critic
+              {highRiskCount} scor risc ridicat
             </Badge>
           )}
           {missingClausesCount > 0 && (
@@ -1194,7 +1329,7 @@ function VendorsTab() {
       ) : (
         <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {vendors.map((v) => (
-            <VendorRow key={v.id} vendor={v} onDelete={handleDelete} />
+            <VendorRow key={v.id} vendor={v} onDelete={handleDelete} onPatch={handlePatch} />
           ))}
         </Card>
       )}
