@@ -55,12 +55,23 @@ export default function DashboardPage() {
   const router = useRouter()
   const cockpit = useCockpitData()
   const [nis2Score, setNis2Score] = useState<number | null>(null)
+  const [nis2UrgentIncident, setNis2UrgentIncident] = useState(false)
 
   useEffect(() => {
     fetch("/api/nis2/assessment", { cache: "no-store" })
       .then((r) => r.ok ? r.json() : null)
       .then((data: { assessment?: { score?: number } } | null) => {
         if (data?.assessment?.score != null) setNis2Score(data.assessment.score)
+      })
+      .catch(() => {})
+
+    fetch("/api/nis2/incidents", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { incidents?: { deadline24hISO: string; status: string }[] } | null) => {
+        const urgent = (data?.incidents ?? []).some(
+          (i) => i.status !== "closed" && new Date(i.deadline24hISO).getTime() - Date.now() < 4 * 3_600_000
+        )
+        setNis2UrgentIncident(urgent)
       })
       .catch(() => {})
   }, [])
@@ -281,14 +292,15 @@ export default function DashboardPage() {
             framework="NIS2"
             percent={nis2Score ?? 0}
             missing={nis2Score === null ? 1 : nis2Score < 50 ? 1 : 0}
-            status={nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
-            description={nis2Score !== null ? `Maturitate cibernetică evaluată` : "Evaluare maturitate lipsă"}
+            status={nis2UrgentIncident ? "blocked" : nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
+            description={nis2UrgentIncident ? "⚠ Incident critic — deadline DNSC < 4h" : nis2Score !== null ? "Maturitate cibernetică evaluată" : "Evaluare maturitate lipsă"}
             icon={Shield}
             onViewDetails={() => router.push("/dashboard/nis2")}
             ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
             legalTag="nis2"
             applicabilityReason={applicability?.entries.find(e => e.tag === "nis2")?.reason}
+            urgentPulse={nis2UrgentIncident}
           />
           <ReadinessFrameworkCard
             framework="AI Act"
@@ -448,6 +460,7 @@ function ReadinessFrameworkCard({
   applicabilityCertainty,
   legalTag,
   applicabilityReason,
+  urgentPulse = false,
 }: {
   framework: string
   percent: number
@@ -460,6 +473,7 @@ function ReadinessFrameworkCard({
   applicabilityCertainty?: ApplicabilityCertainty
   legalTag?: ApplicabilityTag
   applicabilityReason?: string
+  urgentPulse?: boolean
 }) {
   const statusConfig = {
     strong:  { label: "CONFIRMARE PUTERNICĂ",    color: "success"     as const },
@@ -476,7 +490,9 @@ function ReadinessFrameworkCard({
       className={`flex flex-col justify-between p-5 transition-all ${
         isUnlikely
           ? "border-eos-border bg-eos-surface opacity-50 hover:opacity-70"
-          : "border-eos-border bg-eos-surface hover:border-eos-border-strong"
+          : urgentPulse
+            ? "border-red-400 bg-red-50 animate-pulse hover:animate-none"
+            : "border-eos-border bg-eos-surface hover:border-eos-border-strong"
       }`}
       aria-label={ariaLabel}
     >
