@@ -110,18 +110,13 @@ function driftSeverityLabel(severity: ComplianceDriftRecord["severity"]) {
 export function DriftCommandCenter({
   activeDrifts,
   hasValidatedBaseline,
-  latestDocumentScan,
-  latestManifestScan,
 }: {
   activeDrifts: ComplianceDriftRecord[]
   hasValidatedBaseline: boolean
-  latestDocumentScan: ScanRecord | null
-  latestManifestScan: ScanRecord | null
 }) {
   const [selectedDriftId, setSelectedDriftId] = useState<string | null>(activeDrifts[0]?.id ?? null)
   const primaryDrift = activeDrifts[0] ?? null
   const breachedCount = activeDrifts.filter((drift) => isDriftSlaBreached(drift)).length
-  const latestSource = latestManifestScan ?? latestDocumentScan
   const selectedDrift =
     activeDrifts.find((drift) => drift.id === selectedDriftId) ?? primaryDrift
   const selectedGuidance = selectedDrift ? getDriftPolicyFromRecord(selectedDrift) : null
@@ -211,62 +206,64 @@ export function DriftCommandCenter({
               })}
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Impact principal</p>
-                <p className="mt-2 text-sm font-semibold text-eos-text">
-                  {selectedGuidance?.lawReference || "revizie legala / operationala"}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                  {selectedDrift.severityReason}
-                </p>
-              </div>
+            <details className="group">
+              <summary className="flex cursor-pointer select-none items-center gap-2 py-1 text-xs font-medium text-eos-text-muted hover:text-eos-text">
+                <span className="transition-transform group-open:rotate-90">▶</span>
+                Detalii drift selectat
+              </summary>
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Impact principal</p>
+                  <p className="mt-1.5 text-sm font-semibold text-eos-text">
+                    {selectedGuidance?.lawReference || "revizie legala / operationala"}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                    {selectedDrift.severityReason}
+                  </p>
+                </div>
 
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Actiune pentru drift</p>
-                <p className="mt-2 text-sm font-semibold text-eos-text">
-                  {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                  {selectedGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
-                </p>
-              </div>
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Actiune pentru drift</p>
+                  <p className="mt-1.5 text-sm font-semibold text-eos-text">
+                    {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                    {selectedGuidance?.evidenceRequired || "Atasezi dovada si rulezi rescan"}
+                  </p>
+                </div>
 
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Escalare si baseline</p>
-                <p className="mt-2 text-sm font-semibold text-eos-text">
-                  {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
-                </p>
-                <p className="mt-2 text-xs text-eos-text-muted">
-                  <span className="font-medium text-eos-text">Owner:</span>{" "}
-                  {selectedDrift.escalationOwner || selectedGuidance?.ownerSuggestion || "in curs de confirmare"}
-                </p>
-                <p className="mt-2 text-xs text-eos-text-muted">
-                  <span className="font-medium text-eos-text">Escalare:</span>{" "}
-                  {formatDriftEscalationTier(
-                    selectedDrift.escalationTier || selectedGuidance?.escalationTier || "watch"
-                  )}{" "}
-                  ·{" "}
-                  {formatDriftEscalationDeadline(
-                    selectedDrift.escalationDueAtISO || selectedGuidance?.escalationDueAtISO
-                  )}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-eos-text-muted">
-                  <span className="font-medium text-eos-text">Impact operational:</span>{" "}
-                  {[
-                    selectedDrift.blocksAudit ? "blocheaza auditul" : null,
-                    selectedDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
-                    selectedDrift.requiresHumanApproval ? "cere aprobare umana" : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ") || "nu blocheaza auditul daca review-ul este documentat"}
-                </p>
-                <p className="mt-2 text-xs text-eos-text-muted">
-                  <span className="font-medium text-eos-text">Sursa reper:</span>{" "}
-                  {latestSource ? sourceLabel(latestSource) : "Porneste un scan nou din Scanare."}
-                </p>
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Escalare si baseline</p>
+                  <p className="mt-1.5 text-sm font-semibold text-eos-text">
+                    {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
+                  </p>
+                  <p className="mt-1.5 text-xs text-eos-text-muted">
+                    <span className="font-medium text-eos-text">Owner:</span>{" "}
+                    {selectedDrift.escalationOwner || selectedGuidance?.ownerSuggestion || "in curs de confirmare"}
+                  </p>
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    <span className="font-medium text-eos-text">Escalare:</span>{" "}
+                    {formatDriftEscalationTier(
+                      selectedDrift.escalationTier || selectedGuidance?.escalationTier || "watch"
+                    )}{" "}
+                    ·{" "}
+                    {formatDriftEscalationDeadline(
+                      selectedDrift.escalationDueAtISO || selectedGuidance?.escalationDueAtISO
+                    )}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                    <span className="font-medium text-eos-text">Impact:</span>{" "}
+                    {[
+                      selectedDrift.blocksAudit ? "blocheaza auditul" : null,
+                      selectedDrift.blocksBaseline ? "blocheaza baseline-ul" : null,
+                      selectedDrift.requiresHumanApproval ? "cere aprobare umana" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "nu blocheaza auditul"}
+                  </p>
+                </div>
               </div>
-            </div>
+            </details>
 
             <div className="space-y-3">
               <ActionCluster

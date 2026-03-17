@@ -2,7 +2,9 @@
 
 import {
   BarChart3,
+  BookOpen,
   CheckCircle2,
+  ClipboardList,
   FileSearch,
   FolderKanban,
   FolderOpen,
@@ -26,6 +28,8 @@ export type DashboardNavId =
   | "rapoarte"
   | "setari"
   | "asistent"
+  | "politici"
+  | "auditLog"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -71,6 +75,13 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     matchers: ["/dashboard/checklists", "/dashboard/rapoarte"],
   },
   {
+    id: "politici",
+    label: "Politici",
+    href: "/dashboard/politici",
+    icon: BookOpen,
+    matchers: ["/dashboard/politici"],
+  },
+  {
     id: "setari",
     label: "Setari",
     href: "/dashboard/setari",
@@ -108,6 +119,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
         icon: FolderKanban,
       },
       { id: "rapoarte", label: "Audit si export", href: "/dashboard/rapoarte", icon: FileSearch },
+      { id: "auditLog", label: "Log audit", href: "/dashboard/audit-log", icon: ClipboardList },
     ],
   },
 ] as const

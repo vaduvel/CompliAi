@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Layers, ShieldCheck } from "lucide-react"
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, ShieldCheck } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
@@ -21,6 +21,21 @@ const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
   stable:    "Control stabil",
   blocked:   "Blocat de audit",
 }
+const AUDIT_DECISION_LABEL: Record<AuditDecision, string> = {
+  ready:        "Pregătit",
+  blocked:      "Blocat",
+  weak:         "Dovezi slabe",
+  "in-progress": "În progres",
+  "not-started": "Neînceput",
+}
+
+const SCAN_SOURCE_LABEL: Record<string, string> = {
+  document: "Document scanat",
+  text:     "Text analizat",
+  manifest: "Manifest YAML",
+  yaml:     "Fișier YAML",
+}
+
 const CORE_HINT: Record<EvidenceCoreState, string> = {
   dormant:   "Rulează primul scan pentru a activa monitorizarea continuă.",
   scanning:  "Task-urile sunt active. Continuă să ataşezi dovezi şi să închidem itemii.",
@@ -112,6 +127,17 @@ export default function DashboardPage() {
         }
 
       />
+
+      {/* ── Summary strip ─────────────────────────────────────────────────────── */}
+      <section aria-label="Sumar rapid de conformitate">
+        <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
+          <SummaryMetric label="Readiness global"  value={`${data.summary.score}%`} />
+          <SummaryMetric label="Task-uri active"   value={String(openTasks.length)}     alert={openTasks.length > 0} />
+          <SummaryMetric label="Drift deschis"     value={String(activeDrifts.length)}  alert={activeDrifts.length > 0} />
+          <SummaryMetric label="Surse procesate"   value={String(state.scans.length)} />
+          <SummaryMetric label="Stare audit"       value={AUDIT_DECISION_LABEL[coreAuditDecision]} />
+        </div>
+      </section>
 
       {/* ── Stare + acțiune imediată (grupate ca o singură zonă de control) ── */}
       <div className="space-y-4">
@@ -246,10 +272,78 @@ export default function DashboardPage() {
         <DriftCommandCenter
           activeDrifts={activeDrifts}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
-          latestDocumentScan={state.scans.find((s) => s.sourceKind === "document") ?? null}
-          latestManifestScan={state.scans.find((s) => s.sourceKind === "manifest") ?? null}
         />
       </section>
+
+      {/* ── Snapshot / Activitate recentă ─────────────────────────────────────── */}
+      <section aria-label="Snapshot si activitate recenta" className="space-y-3">
+        <h2 className="text-sm font-medium uppercase tracking-[0.12em] text-eos-text-tertiary">
+          Snapshot &amp; Activitate recentă
+        </h2>
+        <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
+          {/* Baseline */}
+          <div className="flex items-center justify-between px-5 py-3">
+            <div className="flex items-center gap-2.5">
+              <Database className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+              <span className="text-sm text-eos-text">Baseline validat</span>
+            </div>
+            <Badge
+              variant={state.validatedBaselineSnapshotId ? "success" : "secondary"}
+              className="normal-case tracking-normal text-[11px]"
+            >
+              {state.validatedBaselineSnapshotId ? "Activ" : "Lipsă"}
+            </Badge>
+          </div>
+
+          {/* Surse recente */}
+          {state.scans.length === 0 ? (
+            <div className="flex items-center gap-2.5 px-5 py-4 text-sm text-eos-text-muted">
+              <History className="size-4 shrink-0" strokeWidth={2} />
+              <span>
+                Nicio sursă procesată.{" "}
+                <button
+                  onClick={() => router.push("/dashboard/scanari")}
+                  className="text-eos-primary underline-offset-2 hover:underline"
+                >
+                  Pornește primul scan
+                </button>
+              </span>
+            </div>
+          ) : (
+            state.scans.slice(0, 3).map((scan, i) => (
+              <div key={i} className="flex items-center justify-between px-5 py-3">
+                <div className="flex items-center gap-2.5">
+                  <Activity className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                  <span className="text-sm text-eos-text">
+                    {SCAN_SOURCE_LABEL[scan.sourceKind as string] ?? scan.sourceKind}
+                  </span>
+                </div>
+                {"scannedAt" in scan && scan.scannedAt ? (
+                  <span className="text-xs text-eos-text-muted">
+                    {new Date(String(scan.scannedAt)).toLocaleDateString("ro-RO", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                ) : null}
+              </div>
+            ))
+          )}
+        </Card>
+      </section>
+    </div>
+  )
+}
+
+function SummaryMetric({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5 px-5 py-3.5">
+      <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+        {label}
+      </span>
+      <span className={`text-lg font-semibold ${alert ? "text-eos-warning" : "text-eos-text"}`}>
+        {value}
+      </span>
     </div>
   )
 }

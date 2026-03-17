@@ -153,7 +153,9 @@ export function DashboardShell({
                               ? "discovery, baseline si drift"
                               : item.id === "dovada"
                                 ? "remediere, dovezi si livrabil"
-                                : "workspace, acces si operational"}
+                                : item.id === "politici"
+                                  ? "template-uri, confirmare si versiuni"
+                                  : "workspace, acces si operational"}
                         </span>
                       </div>
                       {active ? (
