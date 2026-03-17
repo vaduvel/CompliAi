@@ -15,6 +15,7 @@ import {
   Shield,
   ShieldAlert,
   Trash2,
+  Users,
   XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -48,7 +49,7 @@ import type {
   Nis2VendorRiskLevel,
 } from "@/lib/server/nis2-store"
 import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
-import type { MaturityAssessment } from "@/lib/server/nis2-store"
+import type { MaturityAssessment, BoardMember } from "@/lib/server/nis2-store"
 
 // ── DNSC download helper ───────────────────────────────────────────────────────
 
@@ -1264,6 +1265,55 @@ function MaturityCard() {
   )
 }
 
+function GovernanceCard() {
+  const [members, setMembers] = useState<BoardMember[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/nis2/governance", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { members: BoardMember[] }) => setMembers(d.members ?? []))
+      .catch(() => null)
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return null
+
+  const missingTraining = members.filter((m) => !m.nis2TrainingCompleted).length
+  const issues = missingTraining
+
+  return (
+    <Link href="/dashboard/nis2/governance" className="block">
+      <div className={`flex items-center justify-between gap-4 rounded-eos-lg border px-4 py-3 transition-all hover:border-eos-primary/40 ${
+        members.length === 0
+          ? "border-dashed border-eos-border bg-eos-surface"
+          : issues > 0
+            ? "border-amber-200 bg-amber-50"
+            : "border-eos-border bg-eos-surface"
+      }`}>
+        <div className="flex items-center gap-3">
+          <Users className={`size-5 shrink-0 ${issues > 0 ? "text-amber-600" : "text-eos-primary"}`} strokeWidth={1.5} />
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Training Board & CISO</p>
+            <p className="text-xs text-eos-text-muted">
+              {members.length === 0
+                ? "Adaugă membrii conducerii — OUG 155/2024 Art. 14 ✅"
+                : `${members.length} membri · ${missingTraining > 0 ? `${missingTraining} fără training` : "toți cu training documentat"}`}
+            </p>
+          </div>
+        </div>
+        {members.length === 0 ? (
+          <Badge variant="outline" className="shrink-0">Necompletat</Badge>
+        ) : issues > 0 ? (
+          <Badge variant="warning" className="shrink-0">{issues} problemă{issues > 1 ? "i" : ""}</Badge>
+        ) : (
+          <Badge variant="success" className="shrink-0">Conform</Badge>
+        )}
+      </div>
+    </Link>
+  )
+}
+
 export default function Nis2Page() {
   // orgName pentru rapoartele DNSC — citit din session header via fetch minimal
   const [orgName, setOrgName] = useState<string | undefined>()
@@ -1293,6 +1343,7 @@ export default function Nis2Page() {
       />
 
       <MaturityCard />
+      <GovernanceCard />
 
       <Tabs defaultValue="assessment" className="space-y-5">
         <TabsList className="border-b border-eos-border">

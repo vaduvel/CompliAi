@@ -9,7 +9,7 @@ import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
 import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
-import { readNis2State, readMaturityAssessment } from "@/lib/server/nis2-store"
+import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/server/nis2-store"
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 
 const execFileAsync = promisify(execFile)
@@ -40,6 +40,8 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
   }))
   // Sprint 2.6: citim maturity assessment
   const maturityAssessment = await readMaturityAssessment(auditPack.workspace.id).catch(() => null)
+  // Sprint 2.7: board members training
+  const boardMembers = await readBoardMembers(auditPack.workspace.id).catch(() => [])
   const nis2Dir = path.join(bundleDir, "nis2")
 
   try {
@@ -109,6 +111,12 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     await fs.writeFile(
       path.join(nis2Dir, "maturity-assessment.json"),
       JSON.stringify(maturityAssessment ?? {}, null, 2),
+      "utf8"
+    )
+    // Sprint 2.7: board members governance
+    await fs.writeFile(
+      path.join(nis2Dir, "governance-training.json"),
+      JSON.stringify(boardMembers, null, 2),
       "utf8"
     )
 
@@ -350,6 +358,7 @@ function buildManifestMarkdown(
   } else {
     lines.push("- Auto-evaluare maturitate DNSC — \`nis2/maturity-assessment.json\` (necompletată)")
   }
+  lines.push(`- Training conducere — \`nis2/governance-training.json\``)
   lines.push("")
   lines.push("### Date tehnice", "")
   lines.push("- `data/audit-pack-v2-1.json` — snapshot complet")
