@@ -1116,6 +1116,7 @@ export type CockpitDataSlice = Pick<
   | "validatedInvoicesToday"
   | "efacturaErrorsToday"
   | "gdprQuickFixes"
+  | "reloadDashboard"
 >
 
 export type CockpitActionSlice = Pick<
@@ -1185,6 +1186,7 @@ export function useCockpitData(): CockpitDataSlice {
     validatedInvoicesToday,
     efacturaErrorsToday,
     gdprQuickFixes,
+    reloadDashboard,
   } = store
 
   return {
@@ -1212,6 +1214,7 @@ export function useCockpitData(): CockpitDataSlice {
     validatedInvoicesToday,
     efacturaErrorsToday,
     gdprQuickFixes,
+    reloadDashboard,
   }
 }
 
