@@ -702,6 +702,24 @@ export default function SetariPage() {
                       }
                     />
                   </div>
+                  {/* ── Digest săptămânal (Sprint 13) ──────────────────── */}
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-eos-border accent-eos-primary"
+                      checked={alertPrefs?.weeklyDigestEnabled ?? true}
+                      disabled={!alertPrefs?.emailEnabled}
+                      onChange={(e) =>
+                        setAlertPrefs((p) => p ? { ...p, weeklyDigestEnabled: e.target.checked } : p)
+                      }
+                    />
+                    <div>
+                      <span className="text-sm text-eos-text">Primesc digest săptămânal</span>
+                      <p className="text-xs text-eos-text-muted">
+                        Email automat luni 08:00 — scor, alerte, deadline-uri iminente.
+                      </p>
+                    </div>
+                  </label>
                 </CardContent>
               </Card>
 
