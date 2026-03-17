@@ -18,6 +18,7 @@
 | R-8 | NIS2 gaps → remediation board central | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-9 | e-Factura → NIS2 vendor schema hook | 🔵 Planificat | 2026-03-17 | — |
 | R-10 | NIS2 incidents + vendors în audit-pack bundle | 🔵 Planificat | 2026-03-17 | — |
+| R-11 | Applicability Engine — stratul zero | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -352,6 +353,50 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 
 ---
 
+## R-11 — Applicability Engine — Stratul Zero
+
+**Origine:** Analiză strategică Gemini+Claude — "fără applicability, userul nou vede totul, churn garantat"
+**Impact:** Înalt — orice utilizator nou primește context imediat: ce legi îl privesc și de ce
+**Efort estimat:** 0.5 zile
+
+### Descriere
+Înainte de a deschide orice modul de compliance, sistemul determină ce legi se aplică organizației pe baza a 4 întrebări (sector, dimensiune, AI tools, e-Factura). Wizardul apare automat la primul login, durează <60 secunde și afișează un profil de aplicabilitate cu reasoning per lege. Dashboard-ul afișează badge-uri pe cardurile AI Act și e-Factura.
+
+### Scope tehnic
+- `lib/compliance/applicability.ts` — `evaluateApplicability(profile)` pur, determinist, fără I/O
+- `lib/compliance/applicability.test.ts` — 16 teste
+- `app/api/org/profile/route.ts` — GET/POST `/api/org/profile`
+- `components/compliscan/applicability-wizard.tsx` — wizard 4 pași
+- `app/dashboard/page.tsx` — wizard banner automat + badge-uri pe carduri
+- `components/compliscan/use-cockpit.tsx` — `reloadDashboard` expus în `CockpitDataSlice`
+- `lib/compliance/types.ts` — `ComplianceState.orgProfile?` + `ComplianceState.applicability?`
+
+### Fișiere afectate
+- `lib/compliance/applicability.ts` (nou)
+- `lib/compliance/applicability.test.ts` (nou)
+- `app/api/org/profile/route.ts` (nou)
+- `components/compliscan/applicability-wizard.tsx` (nou)
+- `app/dashboard/page.tsx`
+- `components/compliscan/use-cockpit.tsx`
+- `lib/compliance/types.ts`
+
+### Definition of Done
+- [x] `evaluateApplicability()` returnează certainty per lege (certain / probable / unlikely)
+- [x] Wizard apare automat pe dashboard când `!state.orgProfile`
+- [x] POST `/api/org/profile` salvează profilul și calculează applicability
+- [x] Badge-uri "Probabil aplicabil" / "Probabil neaplicabil" pe cardurile AI Act + e-Factura
+- [x] `reloadDashboard()` apelat după wizard → dashboard se actualizează fără reload complet
+- [x] 16/16 teste pass, TypeScript 0 erori
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | analiză strategică | Sprint identificat — lipsă "strat zero" applicability |
+| 2026-03-17 | Claude | Implementat complet: motor, API, wizard, integrare dashboard |
+| 2026-03-17 | Claude | Sprint închis — DoD complet verificat, PR #35 deschis |
+
+---
+
 ## Istoric sprint-uri principale (referință)
 
 | PR | Titlu | Merged |
@@ -362,3 +407,4 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 | direct | Test coverage NIS2 + alert preferences | 2026-03-17 |
 | direct | Resend email integration + Vision live tests | 2026-03-17 |
 | direct | PDF OCR fixture — 10/10 câmpuri detectate | 2026-03-17 |
+| #35 | R-11: Applicability Engine — stratul zero | 2026-03-17 |
