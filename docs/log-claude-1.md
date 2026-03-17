@@ -135,12 +135,12 @@ Acesta e **firul roșu** — 13 sprinturi definite. Sprint 1-3 = închise. Urmea
 | 5 | Mock demo mode e-Factura | 🟢 Închis |
 | 6 | RBAC minim | 🟢 Închis |
 | 7 | UX: empty states + copy + loading | 🟡 Parțial (empty states NIS2 ✅, copy labels ⚠️ parțial, generator recs ⏳) |
-| **8** | **ANAF live readiness** | **⚪ Pending — URMEAZĂ** |
-| 9 | Storage abstraction layer | ⚪ Pending |
-| 10 | Supabase sync end-to-end | ⚪ Pending |
-| 11 | Explainability layer | ⚪ Pending |
-| 12 | Partner Portal full | ⚪ Pending |
-| 13 | Weekly digest email | ⚪ Pending |
+| **8** | **ANAF live readiness** | **🟢 Închis** |
+| 9 | Storage abstraction layer | 🟢 Închis |
+| 10 | Supabase sync end-to-end | 🟢 Închis |
+| 11 | Explainability layer | 🟢 Închis |
+| 12 | Partner Portal full | 🟢 Închis |
+| 13 | Weekly digest email | 🟢 Închis |
 
 ---
 
@@ -307,6 +307,108 @@ git add <fișiere specifice>
 git commit -m "Sprint 4: DNSC Registration Wizard"
 # /sprint-log close R-13 (sau adaugă R-13 nou în sprint log)
 ```
+
+---
+
+## Sprint 8 — ANAF Live Readiness ✅ (commit `ef11bd3`)
+
+**Fișiere noi:**
+- `app/api/integrations/efactura/status/route.ts` — `GET` returnează `mode`, `connected`, `ready`, `missingConfig`, `message`
+- `app/api/integrations/efactura/status/route.test.ts` — 4 smoke tests
+
+---
+
+## Sprint 9 — Storage Abstraction Layer ✅ (commit commit anterior Sprint 10)
+
+**Fișiere noi:**
+- `lib/server/storage-adapter.ts` — `IStateStorage<T>`, `LocalFileStorage<T>`, `SupabaseStateStorage<T>`, factory helpers
+
+**Modificate:**
+- `lib/server/nis2-store.ts` — înlocuit `fs` direct cu `createLocalStorage("nis2")`
+
+---
+
+## Sprint 10 — Supabase Sync End-to-End ✅ (commit `9ec7e1e`)
+
+**Fișiere noi:**
+- `lib/server/storage-adapter.test.ts` — 7 teste pentru LocalFileStorage + createAdaptiveStorage
+
+**Modificate:**
+- `lib/server/storage-adapter.ts` — `SupabaseStateStorage<T>` + `createAdaptiveStorage<T>()` adăugate
+- `lib/server/nis2-store.ts` — `createLocalStorage` → `createAdaptiveStorage("nis2", "nis2_state")`
+
+**Pattern adaptive:**
+```typescript
+// Alege backend pe baza COMPLISCAN_DATA_BACKEND env var:
+const nis2Storage = createAdaptiveStorage<Nis2OrgState>("nis2", "nis2_state")
+// → Supabase când hasSupabaseConfig() && backend === "supabase"
+// → LocalFile altfel (dev, test)
+```
+
+---
+
+## Sprint 11 — Explainability Layer ✅ (commit `7405207`)
+
+**Fișiere noi:**
+- `lib/compliance/legal-sources.ts` — surse legale per tag (`getLegalSource`, `getSuggestionExplanation`, `getActiveLegalSources`)
+- `lib/compliance/legal-sources.test.ts` — 12 teste
+- `components/compliscan/legal-source-badge.tsx` — `LegalSourceBadge` (buton Info + tooltip) + `LegalSourceInline`
+
+**Modificate:**
+- `app/dashboard/page.tsx` — `ReadinessFrameworkCard` primește `legalTag` + `applicabilityReason`; badge afișat pentru AI Act, GDPR, e-Factura
+
+**Citații oficiale:**
+- GDPR: `Regulament UE 2016/679`
+- NIS2: `OUG 155/2024, Legea 124/2025`
+- AI Act: `Regulament UE 2024/1689` (aplicare completă august 2026)
+- e-Factura: `OUG 89/2025`
+
+---
+
+## Sprint 12 — Partner Portal Full ✅ (commit `d01225f`)
+
+**Fișiere noi:**
+- `app/api/partner/clients/[orgId]/route.ts` — detalii per client (NIS2 + findings + compliance summary)
+- `app/api/partner/import-csv/route.ts` — import bulk CSV cu `registerUser` + validare per rând
+- `app/dashboard/partner/[orgId]/page.tsx` — drill-down per client
+
+**Modificate:**
+- `app/dashboard/partner/page.tsx` — search instant, filtre scor/alerte, sortare header, modal Import CSV
+
+**⚠️ Notă:** Butonul "Descarcă dosar control" în drill-down apelează audit pack pentru org-ul curent al partenerului, nu org-ul clientului (necesită endpoint dedicat pentru cross-org audit pack). Notat ca limitare.
+
+---
+
+## Sprint 13 — Weekly Digest Email ✅ (commit `2f826d2`)
+
+**Fișiere noi:**
+- `lib/server/weekly-digest.ts` — `buildDigestEmail(WeeklyDigest): string` (HTML, funcție pură)
+- `lib/server/weekly-digest.test.ts` — 11 teste (scor, delta, NIS2, deadline-uri, HTML valid)
+- `app/api/cron/weekly-digest/route.ts` — cron endpoint, iterează org-uri, trimite via Resend
+- `vercel.json` — cron configurat `0 8 * * 1` (luni 08:00 UTC)
+
+**Modificate:**
+- `lib/server/alert-preferences-store.ts` — `weeklyDigestEnabled?: boolean` (default: true)
+- `app/dashboard/setari/page.tsx` — toggle "Primesc digest săptămânal"
+
+**Securitate cron:** `CRON_SECRET` env var validat în `Authorization: Bearer` header.
+
+---
+
+## Stare finală după Sesiunea 2
+
+| # | Sprint | Commit | Teste |
+|---|---|---|---|
+| 1-3 | Sesiunea 1 | `d7b0a46` | — |
+| 4-7 | Sesiunea 1 | `4728dba`–`ef11bd3` | — |
+| 8 | Sesiunea 2 | `ef11bd3` | 4 noi |
+| 9 | Sesiunea 2 | anterior 10 | — |
+| 10 | Sesiunea 2 | `9ec7e1e` | 7 noi |
+| 11 | Sesiunea 2 | `7405207` | 12 noi |
+| 12 | Sesiunea 2 | `d01225f` | — |
+| 13 | Sesiunea 2 | `2f826d2` | 11 noi |
+
+**Total final: 463 teste pass · 0 fail · TypeScript 0 erori**
 
 ---
 
