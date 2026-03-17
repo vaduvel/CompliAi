@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import dynamic from "next/dynamic"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
 } from "lucide-react"
@@ -20,6 +20,22 @@ import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
+
+const AICompliancePackSummaryCard = dynamic(
+  () =>
+    import("@/components/compliscan/ai-compliance-pack-card").then(
+      (mod) => mod.AICompliancePackSummaryCard
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="AI Compliance Pack"
+        detail="Se incarca starea de audit a pack-ului."
+      />
+    ),
+  }
+)
 
 const ExportCenter = dynamic(
   () => import("@/components/compliscan/export-center").then((mod) => mod.ExportCenter),
@@ -68,6 +84,14 @@ export default function AuditExportPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [showSupport, setShowSupport] = useState(false)
+  const heavyPayloadRequested = useRef(false)
+
+  useEffect(() => {
+    if (cockpit.data && !cockpit.data.compliancePack && !heavyPayloadRequested.current) {
+      heavyPayloadRequested.current = true
+      void cockpitActions.ensureHeavyPayload()
+    }
+  }, [cockpit.data, cockpitActions])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -240,6 +264,12 @@ export default function AuditExportPage() {
           </div>
         </>
       ) : null}
+
+      {cockpit.data.compliancePack && (
+        <section aria-label="AI Compliance Pack — stare audit">
+          <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
+        </section>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <SnapshotStatusCard
