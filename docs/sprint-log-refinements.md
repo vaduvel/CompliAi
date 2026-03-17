@@ -15,7 +15,7 @@
 | R-5 | Download .md → copy clipboard + preview | 🔵 Planificat | 2026-03-17 | — |
 | R-6 | Partner: export CSV clienți | 🔵 Planificat | 2026-03-17 | — |
 | R-7 | DNSC incident fields + Export DNSC | 🟢 Închis | 2026-03-17 | 2026-03-17 |
-| R-8 | NIS2 gaps → remediation board central | 🔵 Planificat | 2026-03-17 | — |
+| R-8 | NIS2 gaps → remediation board central | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-9 | e-Factura → NIS2 vendor schema hook | 🔵 Planificat | 2026-03-17 | — |
 | R-10 | NIS2 incidents + vendors în audit-pack bundle | 🔵 Planificat | 2026-03-17 | — |
 
@@ -271,16 +271,19 @@ Rezultatele gap analysis NIS2 (întrebările cu răspuns `no` sau `partial`) se 
 - `components/compliscan/remediation-board.tsx` (verificare, minimal)
 
 ### Definition of Done
-- [ ] `convertNIS2GapsToFindings()` exportă `ScanFinding[]` cu category `"NIS2"`
-- [ ] POST `/api/nis2/assessment` injectează findings în state după salvare
-- [ ] Board-ul de remediere afișează task-urile NIS2 cu badge distinct
-- [ ] Re-assessment suprascrie findings vechi NIS2 (nu duplică)
-- [ ] Test unitar pentru `convertNIS2GapsToFindings()`
+- [x] `convertNIS2GapsToFindings()` exportă `ScanFinding[]` cu category `"NIS2"`
+- [x] POST `/api/nis2/assessment` injectează findings în state după salvare
+- [x] Board-ul de remediere afișează task-urile NIS2 cu badge distinct
+- [x] Re-assessment suprascrie findings vechi NIS2 (nu duplică)
+- [x] Test unitar pentru `convertNIS2GapsToFindings()`
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit Gemini+Claude | Sprint deschis — NIS2 gaps siloed față de board central |
+| 2026-03-17 | sesiune | Marcat în progres |
+| 2026-03-17 | Claude | Implementat: `convertNIS2GapsToFindings()`, injectare în assessment POST, badge NIS2 în TaskCard, 21/21 teste |
+| 2026-03-17 | Claude | Sprint închis — DoD complet verificat |
 
 ---
 
