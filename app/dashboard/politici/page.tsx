@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -8,6 +9,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
+import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import type { OrgPolicyAcknowledgments } from "@/lib/server/policy-store"
+
+// ─── Policy templates ─────────────────────────────────────────────────────────
 
 interface PolicyTemplate {
   id: string
@@ -81,6 +86,8 @@ const POLICY_TEMPLATES: PolicyTemplate[] = [
   },
 ]
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function formatDate(isoDate: string): string {
   const [year, month, day] = isoDate.split("-")
   return `${day}.${month}.${year}`
@@ -111,14 +118,17 @@ function categoryBadgeVariant(
   }
 }
 
+// ─── PolicyCard ───────────────────────────────────────────────────────────────
+
 interface PolicyCardProps {
   policy: PolicyTemplate
-  acknowledged: boolean
-  acknowledgedAt: string | undefined
+  ack: OrgPolicyAcknowledgments[string] | undefined
+  saving: boolean
   onAcknowledge: (id: string) => void
 }
 
-function PolicyCard({ policy, acknowledged, acknowledgedAt, onAcknowledge }: PolicyCardProps) {
+function PolicyCard({ policy, ack, saving, onAcknowledge }: PolicyCardProps) {
+  const acknowledged = Boolean(ack)
   return (
     <Card className="flex flex-col">
       <CardHeader className="pb-3">
@@ -154,14 +164,17 @@ function PolicyCard({ policy, acknowledged, acknowledgedAt, onAcknowledge }: Pol
 
       <CardFooter className="flex flex-col items-stretch gap-3 border-t border-eos-border-subtle pt-4">
         <div className="flex items-center justify-between gap-2">
-          {acknowledged && acknowledgedAt ? (
+          {acknowledged && ack ? (
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="success" dot>
                 Confirmat
               </Badge>
               <span className="text-xs text-eos-text-muted">
-                pe {formatAcknowledgedAt(acknowledgedAt)}
+                pe {formatAcknowledgedAt(ack.acknowledgedAtISO)}
               </span>
+              {ack.userEmail && (
+                <span className="text-xs text-eos-text-muted">· {ack.userEmail}</span>
+              )}
             </div>
           ) : (
             <Badge variant="warning" dot>
@@ -170,47 +183,72 @@ function PolicyCard({ policy, acknowledged, acknowledgedAt, onAcknowledge }: Pol
           )}
         </div>
 
-        {acknowledged ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onAcknowledge(policy.id)}
-          >
-            Reconfirmă
-          </Button>
-        ) : (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => onAcknowledge(policy.id)}
-          >
-            Am citit și înțeles
-          </Button>
-        )}
+        <Button
+          variant={acknowledged ? "ghost" : "default"}
+          size="sm"
+          disabled={saving}
+          onClick={() => onAcknowledge(policy.id)}
+        >
+          {saving ? "Se salvează…" : acknowledged ? "Reconfirmă" : "Am citit și înțeles"}
+        </Button>
       </CardFooter>
     </Card>
   )
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function PoliticiPage() {
-  const [acknowledgments, setAcknowledgments] = useState<Record<string, string>>({})
+  const [acknowledgments, setAcknowledgments] = useState<OrgPolicyAcknowledgments>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [savingId, setSavingId] = useState<string | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem("policy-acknowledgments")
-    if (stored) {
-      try {
-        setAcknowledgments(JSON.parse(stored) as Record<string, string>)
-      } catch {
-        // localStorage corupt — ignoram
-      }
-    }
+    void fetchAcknowledgments()
   }, [])
 
-  function handleAcknowledge(policyId: string) {
-    const updated = { ...acknowledgments, [policyId]: new Date().toISOString() }
-    setAcknowledgments(updated)
-    localStorage.setItem("policy-acknowledgments", JSON.stringify(updated))
+  async function fetchAcknowledgments() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/policies", { cache: "no-store" })
+      if (!res.ok) throw new Error("Nu am putut incarca starea politicilor.")
+      const data = (await res.json()) as { acknowledgments: OrgPolicyAcknowledgments }
+      setAcknowledgments(data.acknowledgments)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Eroare necunoscuta.")
+    } finally {
+      setLoading(false)
+    }
   }
+
+  async function handleAcknowledge(policyId: string) {
+    setSavingId(policyId)
+    try {
+      const res = await fetch("/api/policies/acknowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ policyId }),
+      })
+      if (!res.ok) {
+        const payload = (await res.json()) as { error?: string }
+        throw new Error(payload.error ?? "Salvarea a esuat.")
+      }
+      const data = (await res.json()) as { acknowledgments: OrgPolicyAcknowledgments }
+      setAcknowledgments(data.acknowledgments)
+      toast.success("Politică confirmată", { description: policyId })
+    } catch (err) {
+      toast.error("Eroare la confirmare", {
+        description: err instanceof Error ? err.message : "Incearca din nou.",
+      })
+    } finally {
+      setSavingId(null)
+    }
+  }
+
+  if (error) return <ErrorScreen message={error} variant="section" />
+  if (loading) return <LoadingScreen variant="section" />
 
   const totalCount = POLICY_TEMPLATES.length
   const confirmedCount = POLICY_TEMPLATES.filter((p) => Boolean(acknowledgments[p.id])).length
@@ -276,8 +314,8 @@ export default function PoliticiPage() {
           <PolicyCard
             key={policy.id}
             policy={policy}
-            acknowledged={Boolean(acknowledgments[policy.id])}
-            acknowledgedAt={acknowledgments[policy.id]}
+            ack={acknowledgments[policy.id]}
+            saving={savingId === policy.id}
             onAcknowledge={handleAcknowledge}
           />
         ))}
