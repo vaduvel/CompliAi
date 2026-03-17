@@ -172,6 +172,65 @@ describe.skipIf(!HAS_KEY)("Google Vision OCR — live integration", () => {
     }
   }, 25_000)
 
+  it("extrage text complet din PDF real ocr_test_compliscan.pdf", async () => {
+    const pdfBase64 = readFixture("pdf", "ocr_test_compliscan.base64.txt")
+    const { status, body } = await callVisionPdfAnnotate(pdfBase64)
+
+    console.log(`  HTTP status: ${status}`)
+    expect(status).toBe(200)
+
+    const fileResponse = (body as {
+      responses?: Array<{
+        error?: { message?: string }
+        responses?: Array<{
+          fullTextAnnotation?: { text?: string }
+          textAnnotations?: Array<{ description?: string }>
+          error?: { message?: string }
+        }>
+      }>
+    }).responses?.[0]
+
+    if (fileResponse?.error?.message) {
+      throw new Error(`Vision file error: ${fileResponse.error.message}`)
+    }
+
+    const pages = fileResponse?.responses ?? []
+    expect(pages.length).toBeGreaterThan(0)
+
+    const fullText = pages
+      .map((p) => p.fullTextAnnotation?.text?.trim() || p.textAnnotations?.[0]?.description?.trim() || "")
+      .join("\n")
+
+    console.log(`  Pagini: ${pages.length}, Caractere extrase: ${fullText.length}`)
+    console.log(`  Preview: ${JSON.stringify(fullText.substring(0, 120))}`)
+
+    // Verificam toate campurile cheie din PDF
+    const checks: [string, RegExp][] = [
+      ["Titlu document",  /OCR TEST DOCUMENT/i],
+      ["Company SRL",     /SC Test Vision SRL/i],
+      ["CUI",             /12345678/],
+      ["Reg. Comertului", /J35\/123\/2024/],
+      ["Oras",            /Timisoara/i],
+      ["Nr. factura",     /INV-2026-001/i],
+      ["Suma",            /1250 RON/i],
+      ["compliance",      /compliance/i],
+      ["audit",           /audit/i],
+      ["regulation",      /regulation/i],
+    ]
+
+    console.log("")
+    let passed = 0
+    for (const [label, re] of checks) {
+      const ok = re.test(fullText)
+      console.log(`  ${ok ? "✓" : "✗"} ${label}`)
+      if (ok) passed++
+    }
+    console.log(`\n  Rezultat: ${passed}/${checks.length} campuri detectate`)
+
+    // Cel putin 8 din 10 campuri trebuie detectate
+    expect(passed).toBeGreaterThanOrEqual(8)
+  }, 30_000)
+
   it("returneaza 400 sau eroare clara pentru imagine invalida (nu 500 sau timeout)", async () => {
     const fakeBase64 = Buffer.from("not-an-image").toString("base64")
     const { status, body } = await callVisionImageAnnotate(fakeBase64)
