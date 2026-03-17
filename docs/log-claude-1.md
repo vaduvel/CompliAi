@@ -132,10 +132,10 @@ Acesta e **firul roșu** — 13 sprinturi definite. Sprint 1-3 = închise. Urmea
 | 2 | CUI în OrgProfile | 🟢 Închis |
 | 3 | PDF export real | 🟢 Închis |
 | **4** | **DNSC Registration Wizard** | **🟢 Închis** |
-| **5** | **Mock demo mode e-Factura** | **⚪ Pending — URMEAZĂ** |
-| 6 | RBAC minim | ⚪ Pending |
-| 7 | UX: empty states + copy + loading | ⚪ Pending |
-| 8 | ANAF live readiness | ⚪ Pending |
+| 5 | Mock demo mode e-Factura | 🟢 Închis |
+| 6 | RBAC minim | 🟢 Închis |
+| 7 | UX: empty states + copy + loading | 🟡 Parțial (empty states NIS2 ✅, copy labels ⚠️ parțial, generator recs ⏳) |
+| **8** | **ANAF live readiness** | **⚪ Pending — URMEAZĂ** |
 | 9 | Storage abstraction layer | ⚪ Pending |
 | 10 | Supabase sync end-to-end | ⚪ Pending |
 | 11 | Explainability layer | ⚪ Pending |
