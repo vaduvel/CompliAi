@@ -8,7 +8,9 @@ import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
 import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
+import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
 import { readNis2State } from "@/lib/server/nis2-store"
+import type { Nis2OrgState } from "@/lib/server/nis2-store"
 
 const execFileAsync = promisify(execFile)
 
@@ -103,6 +105,22 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     )
 
     const includedEvidence = await copyEvidenceFiles(auditPack, evidenceDir)
+
+    // MANIFEST.md — lizibil de orice inspector
+    const manifestMd = buildManifestMarkdown(auditPack, nis2State, includedEvidence)
+    await fs.writeFile(path.join(bundleDir, "MANIFEST.md"), manifestMd, "utf8")
+
+    // MANIFEST.pdf — generat din Markdown
+    try {
+      const manifestPdf = await buildPDFFromMarkdown(manifestMd, {
+        orgName: auditPack.workspace.label,
+        documentType: "Dosar de Control — Manifest",
+        generatedAt: auditPack.generatedAt,
+      })
+      await fs.writeFile(path.join(bundleDir, "MANIFEST.pdf"), manifestPdf)
+    } catch {
+      // PDF generation failure nu blochează bundle-ul
+    }
 
     await fs.writeFile(
       path.join(dataDir, "bundle-manifest.json"),
@@ -258,4 +276,80 @@ function sanitizeSegment(value: string) {
     .replace(/^-+|-+$/g, "")
 
   return sanitized || "artifact"
+}
+
+function buildManifestMarkdown(
+  auditPack: AuditPackV2,
+  nis2State: Pick<Nis2OrgState, "incidents" | "vendors" | "assessment">,
+  includedEvidence: Array<{ taskId: string; fileName: string; storedAs: string; kind: string }>
+): string {
+  const orgName = auditPack.workspace.label
+  const cui = auditPack.workspace.name ?? "—"
+  const date = new Date(auditPack.generatedAt).toLocaleDateString("ro-RO", {
+    day: "numeric", month: "long", year: "numeric",
+  })
+  const score = auditPack.executiveSummary.complianceScore ?? "—"
+  const openFindings = auditPack.executiveSummary.openFindings
+  const activeDrifts = auditPack.executiveSummary.activeDrifts
+
+  const lines: string[] = [
+    `# Dosar de Control — ${orgName}`,
+    "",
+    `**Organizație:** ${orgName}`,
+    `**Identificator:** ${cui}`,
+    `**Data generării:** ${date}`,
+    `**Generat de:** CompliAI v1.0`,
+    `**Scor conformitate:** ${score}%`,
+    "",
+    "---",
+    "",
+    "## Rezumat executiv",
+    "",
+    `- Probleme deschise: **${openFindings}**`,
+    `- Modificări active: **${activeDrifts}**`,
+    `- Dovezi validate: **${auditPack.executiveSummary.validatedEvidenceItems}**`,
+    `- Dovezi lipsă: **${auditPack.executiveSummary.missingEvidenceItems}**`,
+    `- Stare audit: **${auditPack.executiveSummary.auditReadiness}**`,
+    "",
+    "---",
+    "",
+    "## Conținut dosar",
+    "",
+    "### Rapoarte",
+    "",
+    "- Raport client HTML — `reports/audit-pack-client-*.html`",
+    "- Anexă IV Lite — `reports/annex-iv-lite-*.html`",
+    "- Sumar executiv — `reports/executive-summary.txt`",
+    "",
+  ]
+
+  if (includedEvidence.length > 0) {
+    lines.push(`### Dovezi (${includedEvidence.length} fișiere)`, "")
+    for (const ev of includedEvidence) {
+      lines.push(`- ${ev.fileName} — \`${ev.storedAs}\``)
+    }
+    lines.push("")
+  }
+
+  lines.push("### NIS2", "")
+  lines.push(`- Evaluare maturitate — \`nis2/assessment.json\` (scor: ${nis2State.assessment?.score ?? "—"}%)`)
+  lines.push(`- Incidente raportate: ${nis2State.incidents.length} — \`nis2/incidents.json\``)
+  lines.push(`- Registru furnizori: ${nis2State.vendors.length} — \`nis2/vendors.json\``)
+  lines.push("")
+  lines.push("### Date tehnice", "")
+  lines.push("- `data/audit-pack-v2-1.json` — snapshot complet")
+  lines.push("- `data/traceability-matrix.json` — matrice de trasabilitate")
+  lines.push("- `data/evidence-ledger.json` — registru dovezi")
+  lines.push("- `data/bundle-manifest.json` — manifest tehnic JSON")
+  lines.push("")
+  lines.push("---", "")
+  lines.push(
+    "> **Disclaimer:** Acest dosar a fost generat automat de CompliAI. " +
+    "Nu constituie opinie juridică și nu garantează conformitatea. " +
+    "CompliAI nu este certificat de DNSC, ANSPDCP sau altă autoritate. " +
+    "Dosarul servește ca instrument de organizare a dovezilor. " +
+    "Consultați un specialist juridic pentru validare finală."
+  )
+
+  return lines.join("\n")
 }
