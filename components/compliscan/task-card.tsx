@@ -212,6 +212,11 @@ export function TaskCard({
                   <Badge className={validationTone(task.validationStatus)}>
                     {validationLabel(task.validationStatus)}
                   </Badge>
+                  {task.category === "NIS2" ? (
+                    <Badge className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                      NIS2
+                    </Badge>
+                  ) : null}
                   {task.status === "done" ? (
                     <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.24em] text-[11px] text-eos-text-muted">
                       inchis

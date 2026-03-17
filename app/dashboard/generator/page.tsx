@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Download, FileText, Loader2, Sparkles } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Clipboard, ClipboardCheck, Download, FileText, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -12,6 +12,7 @@ import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
+import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 
 // ── Input field + textarea helpers ────────────────────────────────────────────
 
@@ -161,12 +162,43 @@ export default function GeneratorPage() {
   const [dataFlows, setDataFlows] = useState("")
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocument | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  // R-2: auto pre-fill din org state la prima încărcare
+  useEffect(() => {
+    if (!cockpit.data) return
+    if (!orgName) setOrgName(cockpit.data.workspace.orgName)
+    if (!orgSector) {
+      const sector = cockpit.data.state.orgProfile?.sector
+      if (sector) setOrgSector(ORG_SECTOR_LABELS[sector])
+    }
+  }, [cockpit.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  // Pre-fill org name from workspace
-  const prefillOrgName = () => {
-    if (!orgName) setOrgName(cockpit.data!.workspace.orgName)
+  // R-5: copiază în clipboard
+  async function handleCopy() {
+    if (!result) return
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(result.content)
+      } else {
+        // fallback pentru browsere fără Clipboard API
+        const ta = document.createElement("textarea")
+        ta.value = result.content
+        ta.style.position = "fixed"
+        ta.style.opacity = "0"
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand("copy")
+        document.body.removeChild(ta)
+      }
+      setCopied(true)
+      toast.success("Copiat în clipboard!")
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error("Nu am putut copia — încearcă manual.")
+    }
   }
 
   async function handleGenerate() {
@@ -269,13 +301,7 @@ export default function GeneratorPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm">Date organizație</CardTitle>
-                <button
-                  type="button"
-                  onClick={prefillOrgName}
-                  className="text-xs text-eos-primary hover:underline"
-                >
-                  Preia din profil
-                </button>
+                <span className="text-xs text-eos-text-muted">Pre-completat din profilul tău</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4 pt-0">
@@ -384,15 +410,30 @@ export default function GeneratorPage() {
                     {result.llmUsed ? " · AI" : " · schiță"}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  className="shrink-0 gap-1.5"
-                >
-                  <Download className="size-3.5" strokeWidth={2} />
-                  .md
-                </Button>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void handleCopy()}
+                    className="gap-1.5"
+                  >
+                    {copied ? (
+                      <ClipboardCheck className="size-3.5 text-eos-success" strokeWidth={2} />
+                    ) : (
+                      <Clipboard className="size-3.5" strokeWidth={2} />
+                    )}
+                    {copied ? "Copiat!" : "Copiază"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownload}
+                    className="gap-1.5"
+                  >
+                    <Download className="size-3.5" strokeWidth={2} />
+                    .md
+                  </Button>
+                </div>
               </div>
 
               <Card className="border-eos-border bg-eos-surface">

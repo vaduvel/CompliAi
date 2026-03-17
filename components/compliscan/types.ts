@@ -1,6 +1,7 @@
 "use client"
 
 import type {
+  FindingCategory,
   RemediationMode,
   TaskEvidenceAttachment,
   TaskEvidenceKind,
@@ -18,6 +19,7 @@ export type TaskValidationStatus = "idle" | "passed" | "failed" | "needs_review"
 export type CockpitTask = {
   id: string
   title: string
+  category?: FindingCategory
   priority: TaskPriority
   severity: ComplianceSeverity
   remediationMode: RemediationMode

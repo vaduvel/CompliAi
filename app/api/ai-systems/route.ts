@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import type { AISystemPurpose } from "@/lib/compliance/types"
+import type { AISystemPurpose, ComplianceAlert } from "@/lib/compliance/types"
 import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
@@ -58,9 +58,27 @@ export async function POST(request: Request) {
     nowISO
   )
 
+  // R-4: dacă vânzătorul e extern (nu "Necunoscut"), creăm o alertă de review DPA
+  const hasExternalVendor =
+    body.vendor?.trim() && body.vendor.trim().toLowerCase() !== "necunoscut"
+
+  const dpaAlert: ComplianceAlert | null = hasExternalVendor
+    ? {
+        id: `alert-dpa-${record.id}`,
+        message: `Sistem AI adăugat cu furnizor extern (${record.vendor}) — verifică dacă există un DPA (Data Processing Agreement) semnat cu acest furnizor.`,
+        severity: "medium",
+        open: true,
+        createdAtISO: nowISO,
+        findingId: record.id,
+      }
+    : null
+
   const nextState = await mutateState((current) => ({
     ...current,
     aiSystems: [record, ...current.aiSystems].slice(0, 50),
+    alerts: dpaAlert
+      ? [dpaAlert, ...current.alerts].slice(0, 200)
+      : current.alerts,
     events: appendComplianceEvents(current, [
       createComplianceEvent({
         type: "system.created",

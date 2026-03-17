@@ -1,4 +1,5 @@
 // NIS2 Directive (2022/2555) assessment — 20 questions mapped to DNSC guidance
+// convertNIS2GapsToFindings() bridges NIS2 gaps into the central ScanFinding board.
 // Covers the 10 minimum security measures from Art. 21 + DNSC implementation guide.
 //
 // Sectors covered: energy, transport, banking, health, digital-infrastructure, public-admin, general
@@ -351,6 +352,36 @@ export function scoreNis2Assessment(
     answeredCount,
     totalCount: applicable.length,
   }
+}
+
+// ── Central board bridge ───────────────────────────────────────────────────────
+
+import type { ScanFinding } from "@/lib/compliance/types"
+
+/**
+ * Converts NIS2 assessment gaps into ScanFindings suitable for the central
+ * remediation board. Each gap gets a stable ID derived from its questionId so
+ * re-running the assessment replaces findings in-place rather than duplicating.
+ * Pure function — no I/O, safe to call anywhere.
+ */
+export function convertNIS2GapsToFindings(
+  gaps: Nis2Gap[],
+  sector: Nis2Sector,
+  assessedAtISO: string
+): ScanFinding[] {
+  return gaps.map((gap) => ({
+    id: `nis2-finding-${gap.questionId}`,
+    title: gap.question,
+    detail: gap.remediationHint,
+    category: "NIS2" as const,
+    severity: gap.severity,
+    risk: (gap.severity === "critical" || gap.severity === "high" ? "high" : "low") as "high" | "low",
+    principles: ["robustness", "accountability", "oversight"] as ScanFinding["principles"],
+    createdAtISO: assessedAtISO,
+    sourceDocument: `Evaluare NIS2 — sector: ${sector}`,
+    legalReference: gap.article,
+    remediationHint: gap.remediationHint,
+  }))
 }
 
 export const NIS2_CATEGORY_LABELS: Record<Nis2Category, string> = {

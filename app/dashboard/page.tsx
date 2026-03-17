@@ -11,6 +11,8 @@ import { EvidenceCore, type EvidenceCoreState, type AuditDecision } from "@/comp
 import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
+import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
+import type { ApplicabilityCertainty } from "@/lib/compliance/applicability"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -52,8 +54,9 @@ export default function DashboardPage() {
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
+  const { data, activeDrifts, tasks, nextBestAction, openAlerts, reloadDashboard } = cockpit
   const state = data.state
+  const applicability = state.applicability ?? null
 
   // ── Framework readiness ───────────────────────────────────────────────────
   const aiHighRisk = state.highRisk
@@ -127,6 +130,13 @@ export default function DashboardPage() {
         }
 
       />
+
+      {/* ── Applicability Wizard (shown only before first profile) ─────────── */}
+      {!state.orgProfile && (
+        <section aria-label="Wizard aplicabilitate">
+          <ApplicabilityWizard onComplete={() => { reloadDashboard() }} />
+        </section>
+      )}
 
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
@@ -234,6 +244,7 @@ export default function DashboardPage() {
             icon={Layers}
             onViewDetails={() => router.push("/dashboard/sisteme")}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
           />
           <ReadinessFrameworkCard
             framework="GDPR"
@@ -254,6 +265,7 @@ export default function DashboardPage() {
             icon={FileText}
             onViewDetails={() => router.push("/dashboard/setari")}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
           />
           <ReadinessFrameworkCard
             framework="Scor Global"
@@ -357,6 +369,7 @@ function ReadinessFrameworkCard({
   icon: Icon,
   onViewDetails,
   ariaLabel,
+  applicabilityCertainty,
 }: {
   framework: string
   percent: number
@@ -366,6 +379,7 @@ function ReadinessFrameworkCard({
   icon?: React.ElementType
   onViewDetails?: () => void
   ariaLabel?: string
+  applicabilityCertainty?: ApplicabilityCertainty
 }) {
   const statusConfig = {
     strong:  { label: "CONFIRMARE PUTERNICĂ",    color: "success"     as const },
@@ -375,9 +389,15 @@ function ReadinessFrameworkCard({
   }
   const config = statusConfig[status]
 
+  const isUnlikely = applicabilityCertainty === "unlikely"
+
   return (
     <Card
-      className="flex flex-col justify-between border-eos-border bg-eos-surface p-5 transition-all hover:border-eos-border-strong"
+      className={`flex flex-col justify-between p-5 transition-all ${
+        isUnlikely
+          ? "border-eos-border bg-eos-surface opacity-50 hover:opacity-70"
+          : "border-eos-border bg-eos-surface hover:border-eos-border-strong"
+      }`}
       aria-label={ariaLabel}
     >
       <div>
@@ -386,12 +406,25 @@ function ReadinessFrameworkCard({
             {Icon && <Icon className="size-5 text-eos-text-muted" strokeWidth={2} />}
             <h3 className="font-semibold text-eos-text">{framework}</h3>
           </div>
-          <Badge variant={config.color} className="text-[10px]">
-            {config.label}
-          </Badge>
+          {isUnlikely ? (
+            <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
+              Nu se aplică
+            </Badge>
+          ) : (
+            <Badge variant={config.color} className="text-[10px]">
+              {config.label}
+            </Badge>
+          )}
         </div>
+        {applicabilityCertainty === "probable" && (
+          <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-eos-warning">
+            Probabil aplicabil
+          </p>
+        )}
         {description && (
-          <p className="mt-2 text-xs leading-tight text-eos-text-muted">{description}</p>
+          <p className={`mt-2 text-xs leading-tight ${isUnlikely ? "text-eos-text-muted" : "text-eos-text-muted"}`}>
+            {description}
+          </p>
         )}
         <div className="mt-5 flex items-end gap-2">
           <span className="text-3xl font-semibold text-eos-text">{percent}%</span>
@@ -400,7 +433,7 @@ function ReadinessFrameworkCard({
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-eos-surface-variant">
           <div className="h-full bg-eos-primary transition-all duration-500" style={{ width: `${percent}%` }} />
         </div>
-        {missing > 0 && (
+        {!isUnlikely && missing > 0 && (
           <div className="mt-3 flex items-center gap-1.5 text-xs text-eos-warning">
             <AlertTriangle className="size-3.5" strokeWidth={2} />
             <span>{missing} actiuni deschise</span>

@@ -133,6 +133,7 @@ function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): Cock
   return {
     id: buildFindingTaskId(finding.id),
     title: finding.title,
+    category: finding.category,
     priority,
     severity,
     remediationMode: inferRemediationModeFromFinding(finding),
@@ -406,6 +407,13 @@ function buildStepsForFinding(finding: ScanFinding) {
       "Verifica baza legala pentru tracking sau prelucrare.",
       "Revizuieste bannerul de consimtamant si textul legal.",
       "Pastreaza dovada preferintelor si a versiunii politicii.",
+    ]
+  }
+  if (finding.category === "NIS2") {
+    return [
+      finding.remediationHint || "Implementeaza masura de securitate NIS2 identificata.",
+      "Documenteaza implementarea si testeaza masura.",
+      "Pastreaza dovada pentru auditul DNSC (Art. 21).",
     ]
   }
   return [

@@ -1,8 +1,9 @@
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
+import type { OrgProfile, ApplicabilityResult } from "@/lib/compliance/applicability"
 
 export type AlertSeverity = ComplianceSeverity
-export type FindingCategory = "EU_AI_ACT" | "GDPR" | "E_FACTURA"
+export type FindingCategory = "EU_AI_ACT" | "GDPR" | "E_FACTURA" | "NIS2"
 export type ScanExtractionMethod = "manual" | "ocr-vision-image" | "ocr-vision-pdf"
 export type ScanAnalysisStatus = "pending" | "completed"
 export type ScanExtractionStatus = "completed" | "needs_review"
@@ -342,6 +343,9 @@ export type ComplianceState = {
   snapshotHistory: CompliScanSnapshot[]
   validatedBaselineSnapshotId?: string
   events: ComplianceEvent[]
+  // ── Applicability Engine ───────────────────────────────────────────────────
+  orgProfile?: OrgProfile
+  applicability?: ApplicabilityResult
 }
 
 export type DashboardSummary = {

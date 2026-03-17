@@ -66,6 +66,7 @@ export function severityToAlertBuckets(severity: ComplianceSeverity) {
 export function inferPrinciplesFromCategory(category: FindingCategory): CompliancePrinciple[] {
   if (category === "GDPR") return ["privacy_data_governance", "accountability"]
   if (category === "E_FACTURA") return ["accountability", "robustness"]
+  if (category === "NIS2") return ["robustness", "accountability", "oversight"]
   return ["oversight", "transparency", "accountability"]
 }
 

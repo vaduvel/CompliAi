@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle2,
+  Download,
   ExternalLink,
   RefreshCw,
   Users,
@@ -154,6 +155,28 @@ export default function PartnerPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  function handleExportCSV() {
+    const dateLabel = new Date().toISOString().split("T")[0]
+    const header = ["orgName", "orgId", "scor", "alerte_critice", "alerte_totale", "ultima_scanare", "status"].join(",")
+    const rows = clients.map((c) => [
+      `"${c.orgName.replace(/"/g, '""')}"`,
+      c.orgId,
+      c.compliance?.score ?? 0,
+      c.compliance?.redAlerts ?? 0,
+      c.compliance?.openAlerts ?? 0,
+      "",
+      c.status,
+    ].join(","))
+    const csv = [header, ...rows].join("\n")
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `partner-clients-${dateLabel}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   async function fetchClients() {
     setLoading(true)
     setError(null)
@@ -196,15 +219,26 @@ export default function PartnerPage() {
           </>
         }
         actions={
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => void fetchClients()}
-            className="gap-2"
-          >
-            <RefreshCw className="size-3.5" strokeWidth={2} />
-            Actualizează
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleExportCSV}
+              className="gap-2"
+            >
+              <Download className="size-3.5" strokeWidth={2} />
+              Exportă CSV
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => void fetchClients()}
+              className="gap-2"
+            >
+              <RefreshCw className="size-3.5" strokeWidth={2} />
+              Actualizează
+            </Button>
+          </div>
         }
       />
 
