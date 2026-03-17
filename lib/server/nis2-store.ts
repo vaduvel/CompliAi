@@ -74,11 +74,14 @@ export type Nis2AssessmentRecord = {
   maturityLabel: string
 }
 
+export type DnscRegistrationStatus = "not-started" | "in-progress" | "submitted" | "confirmed"
+
 export type Nis2OrgState = {
   assessment: Nis2AssessmentRecord | null
   incidents: Nis2Incident[]
   vendors: Nis2Vendor[]
   updatedAtISO: string
+  dnscRegistrationStatus?: DnscRegistrationStatus  // Sprint 4 — opțional, backward-safe
 }
 
 function emptyState(): Nis2OrgState {
@@ -304,6 +307,21 @@ export async function upsertVendorsFromEfactura(
   }
 
   return { added, skipped }
+}
+
+// ── Sprint 4: DNSC Registration Status ───────────────────────────────────────
+
+export async function saveDnscRegistrationStatus(
+  orgId: string,
+  status: DnscRegistrationStatus
+): Promise<Nis2OrgState> {
+  const state = await readNis2State(orgId)
+  return writeNis2State(orgId, { ...state, dnscRegistrationStatus: status })
+}
+
+export async function getDnscRegistrationStatus(orgId: string): Promise<DnscRegistrationStatus> {
+  const state = await readNis2State(orgId)
+  return state.dnscRegistrationStatus ?? "not-started"
 }
 
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────

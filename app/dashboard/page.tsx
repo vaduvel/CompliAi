@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, ShieldCheck } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -136,6 +137,11 @@ export default function DashboardPage() {
         <section aria-label="Wizard aplicabilitate">
           <ApplicabilityWizard onComplete={() => { reloadDashboard() }} />
         </section>
+      )}
+
+      {/* ── DNSC Registration CTA (Sprint 4) ──────────────────────────────────── */}
+      {state.orgProfile && applicability?.tags.includes("nis2") && (
+        <DnscRegistrationBanner />
       )}
 
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
@@ -344,6 +350,33 @@ export default function DashboardPage() {
         </Card>
       </section>
     </div>
+  )
+}
+
+function DnscRegistrationBanner() {
+  return (
+    <section aria-label="Înregistrare DNSC NIS2">
+      <div className="flex flex-col gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-eos-warning" strokeWidth={2} />
+          <div>
+            <p className="text-sm font-semibold text-eos-text">
+              Înregistrare DNSC obligatorie — NIS2
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Termenul a expirat în septembrie 2025. Înregistrează-te acum pentru a evita sancțiunile.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/nis2/inregistrare-dnsc"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-warning-border bg-eos-warning px-3 py-2 text-sm font-medium text-eos-warning-text transition hover:opacity-90"
+        >
+          Începe acum
+          <ArrowRight className="size-4" strokeWidth={2} />
+        </Link>
+      </div>
+    </section>
   )
 }
 
