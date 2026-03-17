@@ -8,6 +8,7 @@ import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
 import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
+import { readNis2State } from "@/lib/server/nis2-store"
 
 const execFileAsync = promisify(execFile)
 
@@ -29,10 +30,19 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
   const zipFileName = `audit-pack-dossier-${slug}-${dateLabel}.zip`
   const zipAbsolutePath = path.join(rootDir, zipFileName)
 
+  // R-10: citim NIS2 state pentru a-l include în bundle
+  const nis2State = await readNis2State(auditPack.workspace.id).catch(() => ({
+    assessment: null,
+    incidents: [],
+    vendors: [],
+  }))
+  const nis2Dir = path.join(bundleDir, "nis2")
+
   try {
     await fs.mkdir(evidenceDir, { recursive: true })
     await fs.mkdir(reportsDir, { recursive: true })
     await fs.mkdir(dataDir, { recursive: true })
+    await fs.mkdir(nis2Dir, { recursive: true })
 
     await fs.writeFile(
       path.join(bundleDir, "README.txt"),
@@ -72,6 +82,23 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     await fs.writeFile(
       path.join(reportsDir, annexLiteDocument.fileName),
       annexLiteDocument.html,
+      "utf8"
+    )
+
+    // R-10: NIS2 data în subfolder dedicat
+    await fs.writeFile(
+      path.join(nis2Dir, "incidents.json"),
+      JSON.stringify(nis2State.incidents, null, 2),
+      "utf8"
+    )
+    await fs.writeFile(
+      path.join(nis2Dir, "vendors.json"),
+      JSON.stringify(nis2State.vendors, null, 2),
+      "utf8"
+    )
+    await fs.writeFile(
+      path.join(nis2Dir, "assessment.json"),
+      JSON.stringify(nis2State.assessment ?? {}, null, 2),
       "utf8"
     )
 
@@ -163,6 +190,9 @@ function buildReadme(auditPack: AuditPackV2) {
     "- data/traceability-matrix.json",
     "- data/evidence-ledger.json",
     "- data/bundle-manifest.json",
+    "- nis2/incidents.json",
+    "- nis2/vendors.json",
+    "- nis2/assessment.json",
     "- evidence/*",
     "",
     "Acest bundle leaga snapshot-ul curent, baseline-ul validat, controalele, dovezile, drift-ul si traceability matrix.",

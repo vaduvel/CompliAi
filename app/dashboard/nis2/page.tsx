@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  FileText,
   Loader2,
   Plus,
   Shield,
@@ -98,10 +99,11 @@ function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
   return <Badge variant={variant}>{text}</Badge>
 }
 
-function AssessmentTab() {
+function AssessmentTab({ orgName }: { orgName?: string }) {
   const [sector, setSector] = useState<Nis2Sector>("general")
   const [answers, setAnswers] = useState<Nis2Answers>({})
   const [saving, setSaving] = useState(false)
+  const [generatingIR, setGeneratingIR] = useState(false)
   const [savedRecord, setSavedRecord] = useState<Nis2AssessmentRecord | null>(null)
   const [loading, setLoading] = useState(true)
   const [expandedCategories, setExpandedCategories] = useState<Set<Nis2Category>>(
@@ -139,6 +141,37 @@ function AssessmentTab() {
     },
     {} as Record<Nis2Category, typeof applicable>
   )
+
+  async function handleGenerateIR() {
+    setGeneratingIR(true)
+    try {
+      const res = await fetch("/api/documents/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentType: "nis2-incident-response",
+          orgName: orgName ?? "Organizația mea",
+          orgSector: sector !== "general" ? sector : undefined,
+        }),
+      })
+      if (!res.ok) throw new Error("Generarea a eșuat.")
+      const doc = (await res.json()) as { content: string; title: string }
+      const blob = new Blob([doc.content], { type: "text/markdown;charset=utf-8" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `plan-ir-nis2-${new Date().toISOString().split("T")[0]}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("Plan IR NIS2 generat și descărcat")
+    } catch (err) {
+      toast.error("Eroare la generare", {
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
+      })
+    } finally {
+      setGeneratingIR(false)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -390,6 +423,28 @@ function AssessmentTab() {
           <p className="text-center text-xs text-eos-text-muted">
             Ultima salvare: {new Date(savedRecord.savedAtISO).toLocaleString("ro-RO")} · Scor: {savedRecord.score}%
           </p>
+        )}
+
+        {/* R-3: Generează Plan IR */}
+        {answeredCount > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => void handleGenerateIR()}
+            disabled={generatingIR}
+            className="w-full gap-2"
+          >
+            {generatingIR ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Se generează planul IR…
+              </>
+            ) : (
+              <>
+                <FileText className="size-4" strokeWidth={2} />
+                Generează Plan de Răspuns la Incidente (NIS2)
+              </>
+            )}
+          </Button>
         )}
       </div>
     </div>
@@ -1043,7 +1098,7 @@ export default function Nis2Page() {
         </TabsList>
 
         <TabsContent value="assessment">
-          <AssessmentTab />
+          <AssessmentTab orgName={orgName} />
         </TabsContent>
         <TabsContent value="incidents">
           <IncidentsTab orgName={orgName} />
