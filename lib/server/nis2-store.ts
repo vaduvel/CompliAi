@@ -1,13 +1,12 @@
 // NIS2 per-org store — .data/nis2-{orgId}.json
 // Holds: assessment answers, incident log, vendor risk register
-
-import { promises as fs } from "node:fs"
-import path from "node:path"
+// Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { isTechVendorName } from "@/lib/server/efactura-mock-data"
+import { createLocalStorage } from "@/lib/server/storage-adapter"
 
-const DATA_DIR = path.join(process.cwd(), ".data")
+const nis2Storage = createLocalStorage<Nis2OrgState>("nis2")
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -94,25 +93,15 @@ function emptyState(): Nis2OrgState {
   }
 }
 
-// ── File helpers ──────────────────────────────────────────────────────────────
-
-function getFile(orgId: string): string {
-  return path.join(DATA_DIR, `nis2-${orgId}.json`)
-}
+// ── Storage helpers (Sprint 9: via adapter, nu direct fs) ─────────────────────
 
 export async function readNis2State(orgId: string): Promise<Nis2OrgState> {
-  try {
-    const raw = await fs.readFile(getFile(orgId), "utf8")
-    return JSON.parse(raw) as Nis2OrgState
-  } catch {
-    return emptyState()
-  }
+  return (await nis2Storage.read(orgId)) ?? emptyState()
 }
 
 async function writeNis2State(orgId: string, state: Nis2OrgState): Promise<Nis2OrgState> {
   const updated = { ...state, updatedAtISO: new Date().toISOString() }
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(getFile(orgId), JSON.stringify(updated, null, 2), "utf8")
+  await nis2Storage.write(orgId, updated)
   return updated
 }
 
