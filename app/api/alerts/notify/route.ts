@@ -12,6 +12,7 @@ import {
   readAlertPreferences,
   type AlertEventType,
 } from "@/lib/server/alert-preferences-store"
+import { sendEmailAlert } from "@/lib/server/email-alerts"
 
 type NotifyRequestBody = {
   event: AlertEventType
@@ -58,19 +59,6 @@ async function dispatchWebhook(
   }
 }
 
-function simulateEmail(
-  emailAddress: string,
-  event: AlertEventType,
-  orgId: string,
-  payload: Record<string, unknown>
-) {
-  // In production: integrate with SendGrid / Resend / SES.
-  // For MVP we log to stdout so the server console shows the notification.
-  console.log(
-    `[CompliAI Alert] EMAIL → ${emailAddress} | event=${event} | org=${orgId} | payload=${JSON.stringify(payload)}`
-  )
-}
-
 export async function POST(request: Request) {
   try {
     const session = readSessionFromRequest(request)
@@ -100,9 +88,13 @@ export async function POST(request: Request) {
 
     // ── Email ──────────────────────────────────────────────────────────────────
     if (prefs.emailEnabled && prefs.emailAddress) {
-      simulateEmail(prefs.emailAddress, body.event, body.orgId, payload)
-      result.channels.push("email")
-      result.dispatched = true
+      const emailResult = await sendEmailAlert(prefs.emailAddress, body.event, body.orgId, payload)
+      if (emailResult.ok) {
+        result.channels.push(emailResult.channel === "resend" ? "email:resend" : "email:console")
+        result.dispatched = true
+      } else {
+        result.skipped.push(`email-error:${emailResult.error ?? "unknown"}`)
+      }
     } else {
       result.skipped.push("email-disabled")
     }
