@@ -262,12 +262,29 @@ export function TaskCard({
                 </Badge>
               </div>
 
+              {/* Closure recipe — afișat când nu există dovadă */}
+              {!task.attachedEvidence && task.status !== "done" && task.closureRecipe && (
+                <div className="mt-3 rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2.5">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-warning">
+                    Cum închidem această problemă
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-eos-text">
+                    {task.closureRecipe}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-4 space-y-2">
                 <Button
-                  onClick={() => { setValidating(true); onMarkDone(task.id) }}
-                  disabled={validating}
+                  onClick={() => {
+                    if (!task.attachedEvidence && task.status !== "done") return
+                    setValidating(true)
+                    onMarkDone(task.id)
+                  }}
+                  disabled={validating || (!task.attachedEvidence && task.status !== "done")}
                   size="lg"
                   className="w-full gap-2"
+                  title={!task.attachedEvidence && task.status !== "done" ? "Adaugă o dovadă înainte de a marca ca rezolvat" : undefined}
                 >
                   {validating ? (
                     <RefreshCcw className="size-5 animate-spin" strokeWidth={2} />
@@ -278,6 +295,11 @@ export function TaskCard({
                   )}
                   {task.status === "done" ? "Redeschide" : "Validează + rescanează"}
                 </Button>
+                {!task.attachedEvidence && task.status !== "done" && (
+                  <p className="text-center text-[10px] text-eos-text-muted">
+                    Adaugă o dovadă pentru a putea valida această problemă
+                  </p>
+                )}
 
                 <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <select
