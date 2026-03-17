@@ -27,12 +27,15 @@ export interface BadgeProps
   extends React.ComponentProps<"span">,
     VariantProps<typeof badgeVariants> {
   asChild?: boolean
+  dot?: boolean
 }
 
 export function Badge({
   className,
   variant = "default",
   asChild = false,
+  dot = false,
+  children,
   ...props
 }: BadgeProps) {
   const Comp = asChild ? Slot : "span"
@@ -43,7 +46,15 @@ export function Badge({
       data-variant={variant}
       className={cn(badgeVariants({ variant }), className)}
       {...props}
-    />
+    >
+      {dot && (
+        <span
+          aria-hidden="true"
+          className="size-1.5 shrink-0 rounded-full bg-current opacity-80"
+        />
+      )}
+      {children}
+    </Comp>
   )
 }
 

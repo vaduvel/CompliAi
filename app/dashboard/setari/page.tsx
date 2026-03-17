@@ -374,7 +374,7 @@ export default function SetariPage() {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="min-h-14 min-w-[152px] items-start px-4 py-3 text-left data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+                  className="min-h-14 min-w-[152px] flex-col items-start whitespace-normal px-4 py-3 text-left data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
                   <span className="mt-1 whitespace-normal text-xs font-normal leading-5 text-eos-text-muted">
