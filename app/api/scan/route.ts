@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const nextState = await mutateState(async (current) => {
       const extracted = await createExtractedScan(current, body, actor)
       extractionResult = extracted.result
-      return analyzeExtractedScan(extracted.nextState, extracted.result.scan.id, body.content, actor)
+      return await analyzeExtractedScan(extracted.nextState, extracted.result.scan.id, body.content, actor)
     })
 
     if (!extractionResult) {

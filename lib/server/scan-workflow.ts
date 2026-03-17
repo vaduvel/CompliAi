@@ -4,6 +4,7 @@ import {
   type ComplianceEventActorInput,
 } from "@/lib/compliance/events"
 import { normalizeScanRecord, simulateFindings } from "@/lib/compliance/engine"
+import { llmAnalyzeScan } from "@/lib/compliance/llm-scan-analysis"
 import type {
   ComplianceState,
   ScanExtractionMethod,
@@ -216,7 +217,7 @@ export async function createExtractedScan(
   }
 }
 
-export function analyzeExtractedScan(
+export async function analyzeExtractedScan(
   current: ComplianceState,
   scanId: string,
   reviewText: string | undefined,
@@ -240,7 +241,24 @@ export function analyzeExtractedScan(
     throw new Error("SCAN_EMPTY_CONTENT")
   }
 
-  const result = simulateFindings(scan.documentName, finalContent, nowISO, scan.id)
+  const keywordResult = simulateFindings(scan.documentName, finalContent, nowISO, scan.id)
+  const existingRuleIds = new Set(
+    keywordResult.findings.map((f) => f.provenance?.ruleId ?? "").filter(Boolean)
+  )
+  const llmResult = await llmAnalyzeScan({
+    documentName: scan.documentName,
+    content: finalContent,
+    nowISO,
+    scanId: scan.id,
+    existingRuleIds,
+  })
+
+  const result = {
+    findings: [...keywordResult.findings, ...llmResult.findings],
+    alerts: keywordResult.alerts,
+    highRiskDelta: keywordResult.highRiskDelta,
+    lowRiskDelta: keywordResult.lowRiskDelta,
+  }
   const events = [
     createComplianceEvent({
       type: "scan.analyzed",

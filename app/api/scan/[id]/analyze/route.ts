@@ -17,7 +17,7 @@ export async function POST(
     const reviewedContent = asTrimmedString(body.reviewedContent, 50_000)
     const actor = await resolveOptionalEventActor(request)
 
-    const nextState = await mutateState((current) =>
+    const nextState = await mutateState(async (current) =>
       analyzeExtractedScan(current, id, reviewedContent, actor)
     )
 

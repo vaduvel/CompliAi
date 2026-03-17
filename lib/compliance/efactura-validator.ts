@@ -40,7 +40,7 @@ export function validateEFacturaXml({
 
   // --- Basic XML check ---
   if (!source.startsWith("<")) {
-    errors.push("Continutul nu pare XML valid.")
+    errors.push("T003 Continutul nu pare XML valid. Asigura-te ca fisierul este UTF-8.")
   }
 
   // --- Root element ---
@@ -48,15 +48,15 @@ export function validateEFacturaXml({
   const isCreditNote = /<(?:\w+:)?CreditNote[\s>]/i.test(source)
 
   if (!isInvoice && !isCreditNote) {
-    errors.push("Radacina UBL trebuie sa fie Invoice sau CreditNote.")
+    errors.push("V001 Radacina UBL trebuie sa fie Invoice sau CreditNote.")
   }
 
   // --- CustomizationID ---
   const customizationId = findTagValue(source, "CustomizationID")
   if (!customizationId) {
-    errors.push("Lipseste cbc:CustomizationID.")
+    errors.push("V002 Lipseste cbc:CustomizationID.")
   } else if (!/cius|ro/i.test(customizationId)) {
-    warnings.push("CustomizationID nu pare sa indice profil CIUS-RO.")
+    warnings.push("V002 CustomizationID nu pare sa indice profil CIUS-RO.")
   }
 
   // --- ProfileID (optional but good to have) ---
@@ -67,23 +67,23 @@ export function validateEFacturaXml({
   // --- InvoiceTypeCode ---
   const invoiceTypeCode = findTagValue(source, "InvoiceTypeCode")
   if (isInvoice && !invoiceTypeCode) {
-    errors.push("Lipseste cbc:InvoiceTypeCode. Valori uzuale: 380 (factura), 381 (stornare).")
+    errors.push("V003 Lipseste cbc:InvoiceTypeCode. Valori uzuale: 380 (factura), 381 (stornare).")
   } else if (invoiceTypeCode && !/^\d{3}$/.test(invoiceTypeCode)) {
-    warnings.push(`InvoiceTypeCode '${invoiceTypeCode}' nu pare un cod numeric standard (ex: 380).`)
+    warnings.push(`V003 InvoiceTypeCode '${invoiceTypeCode}' nu pare un cod numeric standard (ex: 380).`)
   }
 
   // --- ID ---
   const invoiceNumber = findTagValue(source, "ID")
   if (!invoiceNumber) {
-    errors.push("Lipseste cbc:ID pentru factura.")
+    errors.push("V004 Lipseste cbc:ID pentru factura.")
   }
 
   // --- IssueDate ---
   const issueDate = findTagValue(source, "IssueDate")
   if (!issueDate) {
-    errors.push("Lipseste cbc:IssueDate.")
+    errors.push("V005 Lipseste cbc:IssueDate.")
   } else if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-    warnings.push("IssueDate exista, dar formatul nu pare YYYY-MM-DD.")
+    warnings.push("V005 IssueDate exista, dar formatul nu pare YYYY-MM-DD.")
   }
 
   // --- DueDate ---
@@ -95,41 +95,41 @@ export function validateEFacturaXml({
   // --- DocumentCurrencyCode ---
   const currencyCode = findTagValue(source, "DocumentCurrencyCode")
   if (!currencyCode) {
-    errors.push("Lipseste cbc:DocumentCurrencyCode (ex: RON, EUR).")
+    errors.push("V006 Lipseste cbc:DocumentCurrencyCode (ex: RON, EUR).")
   } else if (currencyCode.length !== 3) {
-    warnings.push(`DocumentCurrencyCode '${currencyCode}' nu pare un cod ISO 4217 valid (3 litere).`)
+    warnings.push(`V006 DocumentCurrencyCode '${currencyCode}' nu pare un cod ISO 4217 valid (3 litere).`)
   }
 
   // --- Parties ---
   if (!hasTag(source, "AccountingSupplierParty")) {
-    errors.push("Lipseste blocul cac:AccountingSupplierParty.")
+    errors.push("V007 Lipseste blocul cac:AccountingSupplierParty.")
   }
   if (!hasTag(source, "AccountingCustomerParty")) {
-    errors.push("Lipseste blocul cac:AccountingCustomerParty.")
+    errors.push("V008 Lipseste blocul cac:AccountingCustomerParty.")
   }
 
   // --- TaxTotal ---
   if (!hasTag(source, "TaxTotal")) {
-    errors.push("Lipseste blocul cac:TaxTotal.")
+    errors.push("V009 Lipseste blocul cac:TaxTotal.")
   } else {
     const taxAmount = findTagValue(source, "TaxAmount")
     if (!taxAmount) {
-      warnings.push("cbc:TaxAmount lipseste sau nu a putut fi detectat in cac:TaxTotal.")
+      warnings.push("V009 cbc:TaxAmount lipseste sau nu a putut fi detectat in cac:TaxTotal.")
     }
   }
 
   // --- LegalMonetaryTotal ---
   if (!hasTag(source, "LegalMonetaryTotal")) {
-    errors.push("Lipseste blocul cac:LegalMonetaryTotal.")
+    errors.push("V010 Lipseste blocul cac:LegalMonetaryTotal.")
   } else {
     if (!hasTag(source, "PayableAmount")) {
-      errors.push("Lipseste cbc:PayableAmount in cac:LegalMonetaryTotal.")
+      errors.push("V010 Lipseste cbc:PayableAmount in cac:LegalMonetaryTotal.")
     }
     if (!hasTag(source, "TaxExclusiveAmount")) {
-      warnings.push("Lipseste cbc:TaxExclusiveAmount in cac:LegalMonetaryTotal.")
+      warnings.push("V010 Lipseste cbc:TaxExclusiveAmount in cac:LegalMonetaryTotal.")
     }
     if (!hasTag(source, "TaxInclusiveAmount")) {
-      warnings.push("Lipseste cbc:TaxInclusiveAmount in cac:LegalMonetaryTotal.")
+      warnings.push("V010 Lipseste cbc:TaxInclusiveAmount in cac:LegalMonetaryTotal.")
     }
   }
 
@@ -137,13 +137,13 @@ export function validateEFacturaXml({
   if (isInvoice) {
     const lineCount = countTags(source, "InvoiceLine")
     if (lineCount === 0) {
-      errors.push("Factura nu contine nicio linie InvoiceLine.")
+      errors.push("V011 Factura nu contine nicio linie InvoiceLine.")
     }
   }
   if (isCreditNote) {
     const lineCount = countTags(source, "CreditNoteLine")
     if (lineCount === 0) {
-      errors.push("Nota de credit nu contine nicio linie CreditNoteLine.")
+      errors.push("V011 Nota de credit nu contine nicio linie CreditNoteLine.")
     }
   }
 
@@ -156,7 +156,7 @@ export function validateEFacturaXml({
 
   // --- Seller VAT / TaxScheme ---
   if (!hasTag(source, "CompanyID")) {
-    warnings.push("Nu a fost detectat cbc:CompanyID pentru CIF/CUI furnizor sau client.")
+    warnings.push("C001 Nu a fost detectat cbc:CompanyID pentru CIF/CUI furnizor sau client.")
   }
 
   // --- Resolve supplier / customer names ---

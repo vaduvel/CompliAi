@@ -934,7 +934,7 @@ function ControlReviewWorkspace({
   reviewedCount,
   recentDriftsCount,
   validatedBaseline,
-  compliancePack,
+  compliancePack: _compliancePack,
   onOpenDiscovery,
   onOpenPack,
   onOpenBaseline,
