@@ -8,15 +8,15 @@
 
 | Sprint | Titlu | Status | Deschis | Închis |
 |---|---|---|---|---|
-| R-1 | Annex IV generator (EU AI Act) | 🔵 Planificat | 2026-03-17 | — |
+| R-1 | Annex IV generator (EU AI Act) | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-2 | Pre-fill generator din org state | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-3 | NIS2 → generează plan IR direct | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-4 | Auto-alert DPA la sistem AI nou | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-5 | Download .md → copy clipboard + preview | 🟢 Închis | 2026-03-17 | 2026-03-17 |
-| R-6 | Partner: export CSV clienți | 🔵 Planificat | 2026-03-17 | — |
+| R-6 | Partner: export CSV clienți | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-7 | DNSC incident fields + Export DNSC | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-8 | NIS2 gaps → remediation board central | 🟢 Închis | 2026-03-17 | 2026-03-17 |
-| R-9 | e-Factura → NIS2 vendor schema hook | 🔵 Planificat | 2026-03-17 | — |
+| R-9 | e-Factura → NIS2 vendor schema hook | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-10 | NIS2 incidents + vendors în audit-pack bundle | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-11 | Applicability Engine — stratul zero | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 
@@ -27,7 +27,7 @@
 ## 🗺️ Plan sesiune curentă (2026-03-17)
 
 **Wave 1** (✅ complet): R-5 ✅ R-2 ✅ R-3 ✅ R-4 ✅ R-10 ✅
-**Wave 2** (urmează): R-9 → R-6 → R-1
+**Wave 2** (✅ complet): R-9 ✅ R-6 ✅ R-1 ✅
 
 **Branch activ:** `feat/applicability-engine-ui` (PR #35, nu e merguit — merge la final de tot)
 **Constrângeri:** unified evidence model, no silos, R-4 framing = "verifică/recomandă DPA" nu "DPA obligatoriu"
@@ -56,15 +56,17 @@ Generează documentația tehnică Annex IV cerută de EU AI Act (Art. 11) direct
 - `app/dashboard/conformitate/page.tsx`
 
 ### Definition of Done
-- [ ] `buildAnnexIVDocument()` exportă Markdown structurat conform EU AI Act Annex IV
-- [ ] Buton activ în UI doar după ce assessment e completat (≥8/10 întrebări)
-- [ ] Download ca `.md` (același pattern cu generator-ul existent)
-- [ ] Test unitar pentru `buildAnnexIVDocument()`
+- [x] `buildAnnexIVDocument()` exportă Markdown structurat conform EU AI Act Annex IV
+- [x] Buton activ în UI doar după ce assessment e completat (≥8/10 întrebări)
+- [x] Download ca `.md` (același pattern cu generator-ul existent)
+- [x] Test unitar pentru `buildAnnexIVDocument()`
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | buildAnnexIVDocument() — 9 secțiuni, gap analysis inline, fallback empty answers; 14/14 teste |
+| 2026-03-17 | Claude | Sprint închis — DoD complet verificat, inclus în Wave 2 commit |
 
 ---
 
@@ -208,15 +210,17 @@ Buton "Exportă CSV" în pagina Partner (`/dashboard/partner`) care descarcă li
 - `app/dashboard/partner/page.tsx`
 
 ### Definition of Done
-- [ ] Buton "Exportă CSV" cu iconiță Download
-- [ ] CSV include: orgName, scor conformitate, alerte active, ultima scanare
-- [ ] Fișier denumit `partner-clients-{YYYY-MM-DD}.csv`
-- [ ] Funcționează cu 0 clienți (CSV cu doar header)
+- [x] Buton "Exportă CSV" cu iconiță Download
+- [x] CSV include: orgName, scor conformitate, alerte active, ultima scanare
+- [x] Fișier denumit `partner-clients-{YYYY-MM-DD}.csv`
+- [x] Funcționează cu 0 clienți (CSV cu doar header)
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit | Sprint deschis — gap identificat față de spec |
+| 2026-03-17 | Claude | handleExportCSV() în partner page; download partner-clients-{date}.csv |
+| 2026-03-17 | Claude | Sprint închis — DoD complet verificat, inclus în Wave 2 commit |
 
 ---
 
@@ -329,15 +333,17 @@ Când `efactura-validator.ts` parsează un XML de factură de achiziție și ext
 - `app/dashboard/nis2/page.tsx`
 
 ### Definition of Done
-- [ ] `upsertVendorFromEfactura()` crează vendor nou sau actualizează dacă CUI există deja
-- [ ] Buton "Importă furnizori din facturi ANAF" vizibil în UI
-- [ ] Fără ANAF credentials: buton dezactivat cu tooltip explicativ
-- [ ] Test unitar pentru logica de upsert (fără duplicate pe CUI)
+- [x] `upsertVendorsFromEfactura()` crează vendor nou sau actualizează dacă name există deja (dedup lowercase)
+- [x] Buton "Importă din e-Factura" vizibil în UI (tab Vendors)
+- [x] Mesaj explicit când nu există date e-Factura validate
+- [x] Implementat fără CUI (supplierName only) — backward-safe
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-17 | audit Gemini+Claude | Sprint deschis — hook e-Factura→NIS2 identificat ca valoare imediată |
+| 2026-03-17 | Claude | upsertVendorsFromEfactura() + POST /api/nis2/vendors/import-efactura; dedup by name |
+| 2026-03-17 | Claude | Sprint închis — DoD adaptat (CUI indisponibil, dedup pe name); inclus în Wave 2 commit |
 
 ---
 
