@@ -65,7 +65,7 @@ export default function DocumentePage() {
       tone: documentScans.length > 0 ? "accent" : "neutral",
     },
     {
-      label: "Finding-uri document",
+      label: "Probleme detectate",
       value: `${documentFindings.length}`,
       hint: "semnale extrase din documentele deja analizate",
       tone: documentFindings.length > 0 ? "warning" : "success",

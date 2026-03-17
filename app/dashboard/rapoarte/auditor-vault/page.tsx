@@ -770,7 +770,7 @@ function SnapshotAuditCard({
             <div className="grid gap-3 sm:grid-cols-2">
               <MiniMeta label="Surse" value={latestSnapshot.sources.length} />
               <MiniMeta label="Sisteme" value={latestSnapshot.systems.length} />
-              <MiniMeta label="Constatari" value={latestSnapshot.findings.length} />
+              <MiniMeta label="Probleme detectate" value={latestSnapshot.findings.length} />
               <MiniMeta label="Comparat cu" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
             </div>
             <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
