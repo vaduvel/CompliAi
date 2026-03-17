@@ -97,6 +97,21 @@ export type MaturityAssessment = {
   remediationPlan?: string
 }
 
+// ── Sprint 2.7: Board/CISO Training Tracker ──────────────────────────────────
+
+export type BoardMember = {
+  id: string
+  name: string
+  role: string                    // "Administrator", "Director IT", "CISO", "Responsabil Securitate"
+  nis2TrainingCompleted?: string  // ISO date
+  nis2TrainingExpiry?: string     // completed + 12 luni
+  cisoCertification?: string      // "CISA", "CISSP", "CompTIA Security+", etc.
+  cisoCertExpiry?: string         // ISO date
+  notes?: string
+  createdAtISO: string
+  updatedAtISO: string
+}
+
 export type Nis2OrgState = {
   assessment: Nis2AssessmentRecord | null
   incidents: Nis2Incident[]
@@ -104,6 +119,7 @@ export type Nis2OrgState = {
   updatedAtISO: string
   dnscRegistrationStatus?: DnscRegistrationStatus  // Sprint 4 — opțional, backward-safe
   maturityAssessment?: MaturityAssessment           // Sprint 2.6
+  boardMembers?: BoardMember[]                      // Sprint 2.7
 }
 
 function emptyState(): Nis2OrgState {
@@ -354,6 +370,79 @@ export async function saveMaturityAssessment(
 export async function readMaturityAssessment(orgId: string): Promise<MaturityAssessment | null> {
   const state = await readNis2State(orgId)
   return state.maturityAssessment ?? null
+}
+
+// ── Sprint 2.7: Board / CISO Training Tracker ────────────────────────────────
+
+export async function readBoardMembers(orgId: string): Promise<BoardMember[]> {
+  const state = await readNis2State(orgId)
+  return state.boardMembers ?? []
+}
+
+export async function createBoardMember(
+  orgId: string,
+  input: Pick<BoardMember, "name" | "role"> &
+    Partial<Pick<BoardMember, "nis2TrainingCompleted" | "cisoCertification" | "cisoCertExpiry" | "notes">>
+): Promise<BoardMember> {
+  const state = await readNis2State(orgId)
+  const now = new Date().toISOString()
+  const nis2TrainingExpiry = input.nis2TrainingCompleted
+    ? new Date(
+        new Date(input.nis2TrainingCompleted).getTime() + 365 * 24 * 60 * 60 * 1000
+      ).toISOString()
+    : undefined
+  const member: BoardMember = {
+    id: uid(),
+    name: input.name,
+    role: input.role,
+    ...(input.nis2TrainingCompleted !== undefined && { nis2TrainingCompleted: input.nis2TrainingCompleted, nis2TrainingExpiry }),
+    ...(input.cisoCertification !== undefined && { cisoCertification: input.cisoCertification }),
+    ...(input.cisoCertExpiry !== undefined && { cisoCertExpiry: input.cisoCertExpiry }),
+    ...(input.notes !== undefined && { notes: input.notes }),
+    createdAtISO: now,
+    updatedAtISO: now,
+  }
+  await writeNis2State(orgId, {
+    ...state,
+    boardMembers: [member, ...(state.boardMembers ?? [])],
+  })
+  return member
+}
+
+export async function updateBoardMember(
+  orgId: string,
+  memberId: string,
+  patch: Partial<Omit<BoardMember, "id" | "createdAtISO" | "updatedAtISO">>
+): Promise<BoardMember | null> {
+  const state = await readNis2State(orgId)
+  const members = state.boardMembers ?? []
+  const idx = members.findIndex((m) => m.id === memberId)
+  if (idx === -1) return null
+  const nis2TrainingExpiry =
+    patch.nis2TrainingCompleted !== undefined
+      ? new Date(
+          new Date(patch.nis2TrainingCompleted).getTime() + 365 * 24 * 60 * 60 * 1000
+        ).toISOString()
+      : members[idx].nis2TrainingExpiry
+  const updated: BoardMember = {
+    ...members[idx],
+    ...patch,
+    nis2TrainingExpiry,
+    updatedAtISO: new Date().toISOString(),
+  }
+  const newMembers = [...members]
+  newMembers[idx] = updated
+  await writeNis2State(orgId, { ...state, boardMembers: newMembers })
+  return updated
+}
+
+export async function deleteBoardMember(orgId: string, memberId: string): Promise<boolean> {
+  const state = await readNis2State(orgId)
+  const members = state.boardMembers ?? []
+  const filtered = members.filter((m) => m.id !== memberId)
+  if (filtered.length === members.length) return false
+  await writeNis2State(orgId, { ...state, boardMembers: filtered })
+  return true
 }
 
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────
