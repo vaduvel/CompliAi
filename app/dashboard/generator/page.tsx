@@ -163,6 +163,7 @@ export default function GeneratorPage() {
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocument | null>(null)
   const [copied, setCopied] = useState(false)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
 
   // R-2: auto pre-fill din org state la prima încărcare
   useEffect(() => {
@@ -253,6 +254,35 @@ export default function GeneratorPage() {
     a.download = `${result.documentType}-${new Date().toISOString().split("T")[0]}.md`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  async function handleDownloadPdf() {
+    if (!result || downloadingPdf) return
+    setDownloadingPdf(true)
+    try {
+      const res = await fetch("/api/documents/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: result.content,
+          orgName: orgName || cockpit.data?.workspace.orgName,
+          documentType: result.documentType,
+        }),
+      })
+      if (!res.ok) throw new Error("PDF generation failed")
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${result.documentType}-${new Date().toISOString().split("T")[0]}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("PDF descărcat!")
+    } catch {
+      toast.error("Eroare la generarea PDF-ului.")
+    } finally {
+      setDownloadingPdf(false)
+    }
   }
 
   const selectedDocMeta = DOCUMENT_TYPES.find((d) => d.id === selectedType)
@@ -433,6 +463,19 @@ export default function GeneratorPage() {
                   >
                     <Download className="size-3.5" strokeWidth={2} />
                     .md
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => void handleDownloadPdf()}
+                    disabled={downloadingPdf}
+                    className="gap-1.5"
+                  >
+                    {downloadingPdf ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Download className="size-3.5" strokeWidth={2} />
+                    )}
+                    PDF
                   </Button>
                 </div>
               </div>
