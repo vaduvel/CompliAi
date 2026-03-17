@@ -341,6 +341,25 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── Sprint 3.5: CER cross-signal — informativ, nu modul complet ──────── */}
+      {applicability?.tags.includes("cer") && (
+        <section aria-label="Directiva CER - semnal informativ">
+          <div className="flex items-start gap-3 rounded-eos-lg border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <span className="mt-0.5 shrink-0 text-base">🏛️</span>
+            <div className="flex-1">
+              <p className="font-semibold">Directiva CER — Reziliență Entități Critice ✅</p>
+              <p className="mt-0.5 text-xs text-blue-700">
+                {applicability.entries.find((e) => e.tag === "cer")?.reason}
+              </p>
+              <p className="mt-1 text-xs text-blue-600">
+                Directiva (EU) 2022/2557 vizează reziliența fizică (nu doar cibernetică) a infrastructurii critice — în paralel cu NIS2.
+                Verificați cu un specialist juridic dacă aveți obligații suplimentare de continuitate operațională.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section aria-label="Schimbari si drift activ" className="space-y-4" aria-live="polite">
         <DriftCommandCenter
           activeDrifts={activeDrifts}
