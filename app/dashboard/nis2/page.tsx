@@ -217,6 +217,23 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
 
   return (
     <div className="space-y-5">
+      {/* Sprint 7: Hero CTA când nu există evaluare salvată */}
+      {!savedRecord && answeredCount === 0 && (
+        <div className="rounded-eos-lg border border-eos-primary/30 bg-eos-primary-soft p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-eos-text">Evaluează maturitatea NIS2 în 10 minute</p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Alege sectorul tău și răspunde la 20 de întrebări. Primești scor + plan de remediere personalizat.
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full bg-eos-primary px-3 py-1.5 text-xs font-medium text-eos-primary-text">
+              ~10 min
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Sector selector */}
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-4">
@@ -576,6 +593,7 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
   const [incidents, setIncidents] = useState<Nis2Incident[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [generatingIR, setGeneratingIR] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({
     title: "",
@@ -596,6 +614,36 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
       .catch(() => null)
       .finally(() => setLoading(false))
   }, [])
+
+  async function handleGenerateIR() {
+    setGeneratingIR(true)
+    try {
+      const res = await fetch("/api/documents/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentType: "nis2-incident-response",
+          orgName: orgName ?? "Organizația mea",
+        }),
+      })
+      if (!res.ok) throw new Error("Generarea a eșuat.")
+      const doc = (await res.json()) as { content: string; title: string }
+      const blob = new Blob([doc.content], { type: "text/markdown;charset=utf-8" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `plan-ir-nis2-${new Date().toISOString().split("T")[0]}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("Plan IR NIS2 generat și descărcat")
+    } catch (err) {
+      toast.error("Eroare la generare", {
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
+      })
+    } finally {
+      setGeneratingIR(false)
+    }
+  }
 
   async function handleCreate() {
     if (!form.title.trim()) return
@@ -788,12 +836,23 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
       {loading ? (
         <LoadingScreen variant="section" />
       ) : incidents.length === 0 ? (
-        <EmptyState
-          title="Niciun incident înregistrat"
-          label="Înregistrează incidente de securitate pentru a monitoriza termenele SLA de raportare DNSC."
-          icon={ShieldAlert}
-          className="rounded-eos-md border border-eos-border"
-        />
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface p-8 text-center">
+          <ShieldAlert className="mx-auto mb-3 size-10 text-eos-text-muted" strokeWidth={1.5} />
+          <p className="font-semibold text-eos-text">Niciun incident înregistrat</p>
+          <p className="mt-1 text-sm text-eos-text-muted">
+            Înregistrează incidente de securitate pentru a monitoriza termenele SLA de raportare DNSC.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 gap-2"
+            onClick={() => void handleGenerateIR()}
+            disabled={generatingIR}
+          >
+            {generatingIR ? <Loader2 className="size-4 animate-spin" strokeWidth={2} /> : <FileText className="size-4" strokeWidth={2} />}
+            Generează Plan de Răspuns la Incidente
+          </Button>
+        </div>
       ) : (
         <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {incidents.map((inc) => (
@@ -1071,12 +1130,23 @@ function VendorsTab() {
       {loading ? (
         <LoadingScreen variant="section" />
       ) : vendors.length === 0 ? (
-        <EmptyState
-          title="Niciun furnizor ICT înregistrat"
-          label="Adaugă furnizorii IT și cloud care procesează date sau susțin sisteme critice ale organizației tale."
-          icon={Shield}
-          className="rounded-eos-md border border-eos-border"
-        />
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface p-8 text-center">
+          <Shield className="mx-auto mb-3 size-10 text-eos-text-muted" strokeWidth={1.5} />
+          <p className="font-semibold text-eos-text">Niciun furnizor ICT înregistrat</p>
+          <p className="mt-1 text-sm text-eos-text-muted">
+            Adaugă furnizorii IT și cloud care procesează date sau susțin sisteme critice ale organizației tale.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 gap-2"
+            onClick={() => void handleImportFromEfactura()}
+            disabled={importing}
+          >
+            {importing ? <Loader2 className="size-4 animate-spin" strokeWidth={2} /> : <Download className="size-4" strokeWidth={2} />}
+            Importă automat din e-Factura
+          </Button>
+        </div>
       ) : (
         <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {vendors.map((v) => (
