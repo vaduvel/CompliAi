@@ -162,11 +162,34 @@ function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): Cock
     relatedFindingIds: [finding.id],
     relatedDriftIds: [],
     rescanHint: finding.rescanHint,
+    closureRecipe: buildClosureRecipe(finding),
     status: "todo",
     sourceDocument: finding.sourceDocument,
     evidenceKinds: finding.evidenceTypes ?? inferEvidenceKindsFromCategory(finding.category),
     validationStatus: "idle",
   }
+}
+
+function buildClosureRecipe(finding: ScanFinding): string {
+  if (finding.category === "NIS2") {
+    if (finding.title.toLowerCase().includes("incident") || finding.title.toLowerCase().includes("raportare"))
+      return "Generează un Plan de Răspuns la Incidente din Generator și atașează-l ca dovadă."
+    if (finding.title.toLowerCase().includes("furnizor") || finding.title.toLowerCase().includes("dpa"))
+      return "Încarcă DPA-ul semnat cu furnizorul sau generează unul din Generator."
+    return "Documentează măsura implementată și atașează dovada (politică, procedură, screenshot sistem)."
+  }
+  if (finding.category === "GDPR") {
+    if (finding.title.toLowerCase().includes("dpa") || finding.title.toLowerCase().includes("prelucrare"))
+      return "Încarcă DPA-ul semnat cu procesatorul de date sau generează unul din Generator."
+    if (finding.title.toLowerCase().includes("politică") || finding.title.toLowerCase().includes("policy"))
+      return "Generează politica relevantă din Generator și publică-o. Atașează link-ul sau PDF-ul."
+    return "Generează documentul GDPR relevant din Generator și atașează-l ca dovadă."
+  }
+  if (finding.category === "EU_AI_ACT") {
+    return "Generează Politica de Guvernanță AI din Generator. Atașează documentul semnat de management."
+  }
+  if (finding.remediationHint) return finding.remediationHint
+  return "Adaugă o dovadă (document, screenshot, link extern) care demonstrează că problema a fost remediată."
 }
 
 function applyPersistedTaskState(

@@ -43,6 +43,7 @@ export type CockpitTask = {
   relatedFindingIds: string[]
   relatedDriftIds: string[]
   rescanHint?: string
+  closureRecipe?: string
   status: TaskStatus
   sourceDocument?: string
   attachedEvidence?: TaskEvidenceAttachment
