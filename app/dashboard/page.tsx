@@ -1,8 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, ShieldCheck } from "lucide-react"
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, Shield, ShieldCheck } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
@@ -53,6 +54,16 @@ const CORE_HINT: Record<EvidenceCoreState, string> = {
 export default function DashboardPage() {
   const router = useRouter()
   const cockpit = useCockpitData()
+  const [nis2Score, setNis2Score] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch("/api/nis2/assessment", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { assessment?: { score?: number } } | null) => {
+        if (data?.assessment?.score != null) setNis2Score(data.assessment.score)
+      })
+      .catch(() => {})
+  }, [])
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
@@ -149,11 +160,11 @@ export default function DashboardPage() {
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
-          <SummaryMetric label="Readiness global"  value={`${data.summary.score}%`} />
-          <SummaryMetric label="Task-uri active"   value={String(openTasks.length)}     alert={openTasks.length > 0} />
-          <SummaryMetric label="Drift deschis"     value={String(activeDrifts.length)}  alert={activeDrifts.length > 0} />
-          <SummaryMetric label="Surse procesate"   value={String(state.scans.length)} />
-          <SummaryMetric label="Stare audit"       value={AUDIT_DECISION_LABEL[coreAuditDecision]} />
+          <SummaryMetric label="Conformitate globală"  value={`${data.summary.score}%`} />
+          <SummaryMetric label="Acțiuni active"        value={String(openTasks.length)}     alert={openTasks.length > 0} />
+          <SummaryMetric label="Modificări detectate"  value={String(activeDrifts.length)}  alert={activeDrifts.length > 0} />
+          <SummaryMetric label="Documente procesate"   value={String(state.scans.length)} />
+          <SummaryMetric label="Stare audit"           value={AUDIT_DECISION_LABEL[coreAuditDecision]} />
         </div>
       </section>
 
@@ -241,21 +252,18 @@ export default function DashboardPage() {
       </div>
 
       <section aria-label="Conformitate pe cadru" className="space-y-4">
-        <h2 className="text-lg font-semibold text-eos-text">Conformitate pe cadru</h2>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <ReadinessFrameworkCard
-            framework="AI Act"
-            percent={aiActScore}
-            missing={aiHighRisk}
-            status={aiActStatus}
-            description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
-            icon={Layers}
-            onViewDetails={() => router.push("/dashboard/sisteme")}
-            ariaLabel={`AI Act: ${aiActScore}% pregatit`}
-            applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
-            legalTag="ai-act"
-            applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
-          />
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-eos-text">Conformitate pe cadru</h2>
+          <p className="text-xs text-eos-text-muted">
+            GDPR {gdprScore}%
+            {applicability?.tags.includes("nis2") && (
+              <> · NIS2 {nis2Score !== null ? `${nis2Score}%` : "—"}</>
+            )}
+            {" "}· AI Act {aiActScore}%
+            · e-Factura {state.efacturaConnected ? "activ" : "inactiv"}
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <ReadinessFrameworkCard
             framework="GDPR"
             percent={gdprScore}
@@ -268,6 +276,32 @@ export default function DashboardPage() {
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
             legalTag="gdpr"
             applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
+          />
+          <ReadinessFrameworkCard
+            framework="NIS2"
+            percent={nis2Score ?? 0}
+            missing={nis2Score === null ? 1 : nis2Score < 50 ? 1 : 0}
+            status={nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
+            description={nis2Score !== null ? `Maturitate cibernetică evaluată` : "Evaluare maturitate lipsă"}
+            icon={Shield}
+            onViewDetails={() => router.push("/dashboard/nis2")}
+            ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
+            legalTag="nis2"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "nis2")?.reason}
+          />
+          <ReadinessFrameworkCard
+            framework="AI Act"
+            percent={aiActScore}
+            missing={aiHighRisk}
+            status={aiActStatus}
+            description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
+            icon={Layers}
+            onViewDetails={() => router.push("/dashboard/sisteme")}
+            ariaLabel={`AI Act: ${aiActScore}% pregatit`}
+            applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
+            legalTag="ai-act"
+            applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
           />
           <ReadinessFrameworkCard
             framework="e-Factura"

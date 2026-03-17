@@ -120,10 +120,17 @@ export function RemediationBoard({
       </CardHeader>
 
       <CardContent className="space-y-4 pt-6">
-        {visibleTasks.length === 0 && (
+        {visibleTasks.length === 0 && activeFilter === "ALL" && (
           <EmptyState
-            title="Nu exista task-uri pentru filtrul curent"
-            label="Schimba filtrul sau ruleaza un scan nou pentru remedieri relevante."
+            title="Niciun finding activ"
+            label="Pornește o scanare sau completează evaluarea NIS2 pentru a genera probleme de remediat."
+            className="border-eos-border bg-eos-surface-variant"
+          />
+        )}
+        {visibleTasks.length === 0 && activeFilter !== "ALL" && (
+          <EmptyState
+            title="Niciun task pentru filtrul curent"
+            label="Schimbă filtrul sau pornește un scan nou pentru remedieri relevante."
             className="border-eos-border bg-eos-surface-variant"
           />
         )}

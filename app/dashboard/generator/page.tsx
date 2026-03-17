@@ -488,15 +488,40 @@ export default function GeneratorPage() {
             </>
           ) : (
             <Card className="border-eos-border bg-eos-surface">
-              <CardContent className="flex flex-col items-center justify-center gap-3 px-5 py-16 text-center">
-                <div className="grid size-10 place-items-center rounded-eos-md border border-eos-border bg-eos-surface-variant">
-                  <FileText className="size-5 text-eos-text-muted" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-eos-text">Document pregătit</p>
-                  <p className="mt-1 text-xs text-eos-text-muted">
-                    {`Completează datele și apasă „Generează" pentru a obține documentul.`}
+              <CardContent className="space-y-5 px-5 py-6">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="grid size-10 place-items-center rounded-eos-md border border-eos-border bg-eos-surface-variant">
+                    <FileText className="size-5 text-eos-text-muted" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-sm font-medium text-eos-text">Completează formularul și generează</p>
+                  <p className="text-xs text-eos-text-muted">
+                    Documentul va apărea aici imediat după generare.
                   </p>
+                </div>
+                {/* Documente recomandate pe baza applicability */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+                    Recomandate pentru tine
+                  </p>
+                  {((): { id: DocumentType; label: string; reason: string }[] => {
+                    const tags = cockpit.data.state.applicability?.tags ?? []
+                    const recs: { id: DocumentType; label: string; reason: string }[] = [
+                      { id: "privacy-policy", label: "Politică de Confidențialitate", reason: "GDPR — obligatoriu pentru orice firmă" },
+                    ]
+                    if (tags.includes("nis2")) recs.push({ id: "nis2-incident-response", label: "Plan de Răspuns la Incidente", reason: "NIS2 Art.21 — obligatoriu pentru entități NIS2" })
+                    if (tags.includes("ai-act")) recs.push({ id: "ai-governance", label: "Politică Guvernanță AI", reason: "AI Act Art.4 — literacy obligatorie din 2025" })
+                    recs.push({ id: "dpa", label: "Acord Prelucrare Date (DPA)", reason: "GDPR Art.28 — obligatoriu cu fiecare procesator" })
+                    return recs.slice(0, 3)
+                  })().map((rec) => (
+                    <button
+                      key={rec.id}
+                      onClick={() => setSelectedType(rec.id as DocumentType)}
+                      className={`w-full rounded-eos-md border px-3 py-2 text-left transition-colors hover:border-eos-primary ${selectedType === rec.id ? "border-eos-primary bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant"}`}
+                    >
+                      <p className="text-xs font-medium text-eos-text">{rec.label}</p>
+                      <p className="mt-0.5 text-[10px] text-eos-text-muted">{rec.reason}</p>
+                    </button>
+                  ))}
                 </div>
                 <p className="text-[10px] text-eos-text-tertiary">
                   Documentele generate de AI necesită verificare umană înainte de utilizare oficială.

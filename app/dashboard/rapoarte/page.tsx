@@ -502,8 +502,8 @@ function SnapshotStatusCard({
             <div className="grid gap-3 sm:grid-cols-2">
               <SnapshotMeta label="Surse" value={latestSnapshot.sources.length} />
               <SnapshotMeta label="Sisteme" value={latestSnapshot.systems.length} />
-              <SnapshotMeta label="Finding-uri" value={latestSnapshot.findings.length} />
-              <SnapshotMeta label="Drift inclus" value={driftCount} />
+              <SnapshotMeta label="Probleme detectate" value={latestSnapshot.findings.length} />
+              <SnapshotMeta label="Modificări incluse" value={driftCount} />
             </div>
 
             <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
