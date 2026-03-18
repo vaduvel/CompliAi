@@ -12,6 +12,7 @@ import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/s
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 import { sanitizeForMarkdown } from "@/lib/server/request-validation"
+import { listReviews } from "@/lib/server/vendor-review-store"
 
 type AuditPackBundleArtifact = {
   fileName: string
@@ -131,6 +132,36 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
       JSON.stringify(vendorRiskReport, null, 2),
       "utf8"
     )
+
+    // V5.6: vendor review workbench data
+    const vendorReviews = await listReviews(auditPack.workspace.id).catch(() => [])
+    if (vendorReviews.length > 0) {
+      await fs.writeFile(
+        path.join(nis2Dir, "vendor-reviews.json"),
+        JSON.stringify(vendorReviews, null, 2),
+        "utf8"
+      )
+      // Summary for quick inspection
+      const vrSummary = {
+        total: vendorReviews.length,
+        closed: vendorReviews.filter((r) => r.status === "closed").length,
+        open: vendorReviews.filter((r) => r.status !== "closed").length,
+        overdue: vendorReviews.filter((r) => r.status === "overdue-review").length,
+        critical: vendorReviews.filter((r) => r.urgency === "critical" && r.status !== "closed").length,
+        byCase: {
+          A: vendorReviews.filter((r) => r.reviewCase === "A").length,
+          B: vendorReviews.filter((r) => r.reviewCase === "B").length,
+          C: vendorReviews.filter((r) => r.reviewCase === "C").length,
+          D: vendorReviews.filter((r) => r.reviewCase === "D").length,
+        },
+        exportedAt: new Date().toISOString(),
+      }
+      await fs.writeFile(
+        path.join(nis2Dir, "vendor-reviews-summary.json"),
+        JSON.stringify(vrSummary, null, 2),
+        "utf8"
+      )
+    }
 
     const includedEvidence = await copyEvidenceFiles(auditPack, evidenceDir)
 
@@ -383,6 +414,7 @@ function buildManifestMarkdown(
   lines.push(`- Training conducere — \`nis2/governance-training.json\``)
   const highRiskVendors = nis2State.vendors.filter((v) => computeVendorRisk(v).riskLevel === "high").length
   lines.push(`- Raport risc furnizori — \`nis2/vendor-risk-report.json\` (${nis2State.vendors.length} furnizori, ${highRiskVendors} risc ridicat)`)
+  lines.push(`- Vendor reviews — \`nis2/vendor-reviews.json\` + \`nis2/vendor-reviews-summary.json\` (dacă există)`)
   lines.push("")
   lines.push("### Date tehnice", "")
   lines.push("- `data/audit-pack-v2-1.json` — snapshot complet")

@@ -50,6 +50,11 @@
 | V3-QA.2 | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V4-P2.1 | V4.2 Commercial Readiness — Pricing page, Plan logic, Stripe, Legal pages, Landing page | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V4-P4.4 | V4.4 Pilot Infrastructure — analytics, onboarding emails, micro-feedback | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V4-PARK | Parcate extern V4 — deploy Vercel, domeniu/email propriu, Sentry, smoke matrix, asset QA | 🔴 Blocat | 2026-03-18 | — |
+| V5-S1 | V5.1+V5.2 Vendor Review Workbench + Contextual Review Generator | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V5-S2 | V5.3+V5.4 Human Approval + Closure + Revalidation Cycle | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V5-S3 | V5.5+V5.6 Partner Launch Mode + Response Pack Integration | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V6-F1 | V6 Agentic Engine Phase 1 — Orchestrator + Compliance Monitor + Fiscal Sensor + Dashboard UI | ⏸️ Parcat | 2026-03-18 | — |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -58,6 +63,11 @@
 > **V3 STATUS: ✅ COMPLET**
 > **Sesiunea 4 (2026-03-18):** Audit complet cap-coadă V1→V3 — 6 bugs identificate, 4 fixate, +27 teste noi (PR #64).
 > **Sesiunea 4b (2026-03-18):** Audit extins V1+V2+V3+definitia-perfecta — BUG-007 ProposalBundlePanel "Drift"→"Modificări", BUG-008 traceability "finding"→"constatare", BUG-009 test R-10 NIS2 în audit-pack adăugat. 491 teste trecute. Score definitia-perfecta: 11/13 complet.
+> **Sesiunea 5 (2026-03-18):** V5 Sprint 1 — Vendor Review Workbench + Contextual Review Generator. Pagină separată /dashboard/vendor-review, engine branching 4 cazuri, assets generate, workflow complet detected→closed.
+> **Sesiunea 6 (2026-03-18):** V5 Sprint 2 — Human Approval + Closure (V5.3) + Revalidation Cycle (V5.4). Audit trail, dovezi structurate multi-evidence, progress stepper, confirmare înainte de închidere, cron overdue detection, overdue-review state + UI, past closures history, reviewCount tracking.
+> **Sesiunea 6b (2026-03-18):** V5 Sprint 3 — Partner Launch Mode (V5.5) + Response Pack Integration (V5.6). Partner vede vendor reviews per client cu metrici + status. Response pack include secțiune vendor reviews cu top reviews. Audit pack bundle exportă vendor-reviews.json + summary.
+> **Sesiunea 7 (2026-03-18):** V6 Agentic Engine Phase 1 — implementat complet dar **PARCAT pe branch separat `feat/v6-agentic-engine-wip`**. Nu intră în release V4/V5. Conține: core types, orchestrator, compliance monitor (6 checks), fiscal sensor (clasificare+escalare), agent run store, cron, API, dashboard UI.
+> **Sesiunea 7b (2026-03-18):** Worktree cleanup — separare V4/V5 release-safe de V6 WIP. V6 → `feat/v6-agentic-engine-wip`. Junk docs `(1)` șterse. `.claude/` adăugat la .gitignore. Navigation agents entry eliminat. Build clean, 491 teste, 0 erori TS.
 
 ---
 
@@ -815,3 +825,199 @@ Infrastructura de pilotare: analytics event tracking (fire-and-forget, Supabase 
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-18 | Claude | V4.4 Pilot Infrastructure — v44-pilot. Fișiere: lib/server/analytics.ts lib/server/onboarding-emails.ts components/compliscan/feedback-prompt.tsx app/api/feedback/route.ts app/api/auth/register/route.ts app/api/org/profile/route.ts app/api/documents/generate/route.ts app/api/tasks/[id]/route.ts |
+
+---
+
+## V4-PARK — Parcări externe V4
+
+**Origine:** decizie explicită de parcare pentru itemii V4 care cer cumpărături, domeniu, DNS sau credențiale externe
+**Impact:** Înalt, dar în afara execuției curente de cod
+**Status:** 🔴 Blocat / parcat până există domeniu și credențiale
+
+### Decizia de parcare
+Aceste item-uri nu intră în sprintul curent de implementare.
+
+Motiv:
+- cer domeniu propriu
+- cer configurare DNS
+- cer conturi / chei externe
+- cer verificare manuală finală pe mediu live
+
+Regula curentă:
+- V4 nu mai are cod de scris pe acest front
+- următorul pas începe doar când există domeniu și credențiale
+
+### Cele 5 item-uri parcate
+1. `Deploy Vercel + domeniu propriu`
+   - sursă: `V4.4.1 — Deploy Production`
+2. `Email domeniu propriu (DNS + Resend)`
+   - sursă: `V4.4.2 — Email Domeniu Propriu`
+3. `Monitoring Sentry`
+   - sursă: `V4.4.3 — Monitoring`
+4. `Smoke Test Matrix (testare manuală)`
+   - sursă: `V4.1.1 — Smoke Test Matrix`
+5. `Asset Quality Check (review manual PDF-uri)`
+   - sursă: `V4.3.4 — Asset Quality Check`
+
+### Confirmare din repo
+- `Stripe` este deja implementat și nu face parte din această parcare:
+  - `app/api/stripe/checkout/route.ts`
+  - `app/api/stripe/webhook/route.ts`
+  - `app/api/stripe/portal/route.ts`
+  - `lib/server/plan.ts`
+  - `.env.example` include deja `STRIPE_*`
+- `Vercel` este prezent doar minimal:
+  - `vercel.json` are cron pentru `weekly-digest`
+- `Sentry` nu este încă integrat:
+  - nu există fișiere sau wiring `sentry.*`
+  - nu există variabile `SENTRY_*` în `.env.example`
+
+### Deblocare
+Acest bloc se reia doar după ce există:
+- domeniu canonic
+- acces la Vercel project / production env
+- DNS configurabil
+- credențiale Resend
+- credențiale Sentry
+
+### Notă de coordonare
+Aceste 5 item-uri rămân parcate explicit. Nu le tratăm ca „următorul task de cod”, ci ca front extern dependent de achiziții și acces operațional.
+
+---
+
+## V5-S1 — V5.1+V5.2 Vendor Review Workbench + Contextual Review Generator
+
+**Origine:** `docs/CompliAI_V5_Semi_Automatic_Review_Bridge.md` — V5.1 + V5.2
+**Impact:** Înalt — capabilitatea centrală V5, puntea între detectare și review semi-automat
+**Efort estimat:** 3-4 ore
+
+### Descriere
+Pagină separată `/dashboard/vendor-review` cu coada de review pentru vendori externi. Engine de branching cu 4 cazuri (A-D) pe baza contextului capturat. 6 întrebări contextuale. Assets generate per caz (checklists privacy, DPA, transfer, AI use, notă internă). Workflow complet: detected → needs-context → review-generated → awaiting-evidence → closed cu dovadă + revalidare.
+
+### Scope tehnic
+- `lib/compliance/vendor-review-engine.ts` — tipuri, CONTEXT_QUESTIONS, determineReviewCase(), determineUrgency(), generateReviewAssets(), labels
+- `lib/server/vendor-review-store.ts` — createAdaptiveStorage, CRUD (list, get, create, update, delete)
+- `app/api/vendor-review/route.ts` — GET list, POST create (din NIS2 vendor registry, auto-detect category)
+- `app/api/vendor-review/[id]/route.ts` — PATCH (submit-context, approve, reject, close, reopen), DELETE cu RBAC
+- `app/dashboard/vendor-review/page.tsx` — queue cu stats, vendor picker, review panel expandabil, context form 6 întrebări, asset viewer, closure form
+- `components/compliscan/navigation.ts` — adăugat "Vendor Review" sub secțiunea Control
+
+### Fișiere afectate
+- `lib/compliance/vendor-review-engine.ts` (nou)
+- `lib/server/vendor-review-store.ts` (nou)
+- `app/api/vendor-review/route.ts` (nou)
+- `app/api/vendor-review/[id]/route.ts` (nou)
+- `app/dashboard/vendor-review/page.tsx` (nou)
+- `components/compliscan/navigation.ts` (modificat)
+- `app/dpa/page.tsx` (fix ESLint pre-existent)
+- `app/terms/page.tsx` (fix ESLint pre-existent)
+- `components/compliscan/task-card.tsx` (fix ESLint pre-existent)
+
+### Definition of Done
+- [x] Engine branching: 4 cazuri (A/B/C/D) pe baza contextului capturat
+- [x] 6 întrebări contextuale definite cu opțiuni
+- [x] Assets generate per caz: privacy checklist, DPA request, transfer review, AI use review, notă internă
+- [x] Store cu adaptive storage (local + Supabase)
+- [x] API CRUD complet cu RBAC
+- [x] Pagină `/dashboard/vendor-review` cu queue, stats, review panel, context form
+- [x] Workflow complet: needs-context → review-generated → approve → awaiting-evidence → close cu dovadă
+- [x] Reopen + reject disponibile
+- [x] Navigație adăugată în sidebar sub Control
+- [x] TypeScript: 0 erori
+- [x] Next.js build: 0 erori
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | V5 Sprint 1 complet — Vendor Review Workbench + Contextual Review Generator. 5 fișiere noi, 4 modificate. |
+
+---
+
+## V5-S2 — V5.3+V5.4 Human Approval + Closure + Revalidation Cycle
+
+**Origine:** `docs/CompliAI_V5_Semi_Automatic_Review_Bridge.md` — V5.3 + V5.4
+**Impact:** Înalt — fără approval workflow matur și revalidare, review-urile rămân fără dovadă și expiră fără avertizare
+**Efort estimat:** 2-3 ore
+
+### Descriere
+V5.3 — Audit trail pe fiecare acțiune (created, approved, rejected, closed etc.), dovezi structurate multi-evidence cu tip (DPA semnat, checklist completat, aprobare internă, link, notă, altele), progress stepper vizual 4 pași, confirmare dialog înainte de închidere review.
+V5.4 — Revalidation cycle: cron endpoint pentru detectare review-uri expirate, stare overdue-review cu UI dedicat, past closures history (arhivare automată la reopen/revalidate), reviewCount tracking, acțiune manuală "Pornește revalidarea".
+
+### Scope tehnic
+- `lib/compliance/vendor-review-engine.ts` — tipuri noi: AuditEntry, EvidenceItem, PastClosure, EvidenceType + helpers: appendAudit(), createEvidenceId(), isReviewOverdue(), buildPastClosure()
+- `app/api/vendor-review/[id]/route.ts` — acțiuni noi: add-evidence, revalidate + audit trail pe toate acțiunile existente
+- `app/api/vendor-review/route.ts` — audit trail la create
+- `app/api/cron/vendor-review-revalidation/route.ts` — cron endpoint: scanează org-uri, marchează overdue-review
+- `app/dashboard/vendor-review/page.tsx` — EvidenceManager (add/list evidence cu tip), ProgressStepper (4 pași), AuditTrailViewer, PastClosuresViewer, overdue-review UI cu banner + buton revalidare, confirmare dialog la închidere, stat card expirate
+
+### Fișiere afectate
+- `lib/compliance/vendor-review-engine.ts` (modificat)
+- `app/api/vendor-review/[id]/route.ts` (modificat)
+- `app/api/vendor-review/route.ts` (modificat)
+- `app/api/cron/vendor-review-revalidation/route.ts` (nou)
+- `app/dashboard/vendor-review/page.tsx` (modificat)
+
+### Definition of Done
+- [x] Audit trail pe fiecare acțiune (9 tipuri: created, context-submitted, approved, rejected, evidence-added, closed, reopened, revalidation-triggered, review-generated)
+- [x] Dovezi structurate multi-evidence cu 6 tipuri (dpa-signed, checklist-completed, internal-approval, link, note, other)
+- [x] EvidenceManager component: add evidence, list evidence, select tip
+- [x] Progress stepper vizual 4 pași (Context → Review generat → Dovezi → Închis)
+- [x] Confirmare dialog înainte de închidere review
+- [x] Cron endpoint `/api/cron/vendor-review-revalidation` — detectare overdue, marcare automată
+- [x] isReviewOverdue() + buildPastClosure() helpers în engine
+- [x] Stare overdue-review cu banner + buton "Pornește revalidarea"
+- [x] Past closures history (arhivare la reopen/revalidate)
+- [x] reviewCount tracking per review
+- [x] AuditTrailViewer + PastClosuresViewer componente
+- [x] Stat card "Expirate" în stats row (5 cards)
+- [x] TypeScript: 0 erori
+- [x] Next.js build: 0 erori
+- [x] Vitest: 491 passed (0 regresii)
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | V5 Sprint 2 complet — Human Approval + Closure (V5.3) + Revalidation Cycle (V5.4). Fișiere: lib/compliance/vendor-review-engine.ts, app/api/vendor-review/[id]/route.ts, app/api/vendor-review/route.ts, app/api/cron/vendor-review-revalidation/route.ts, app/dashboard/vendor-review/page.tsx |
+
+---
+
+## V5-S3 — V5.5+V5.6 Partner Launch Mode + Response Pack Integration
+
+**Origine:** `docs/CompliAI_V5_Semi_Automatic_Review_Bridge.md` — V5.5 + V5.6
+**Impact:** Înalt — partenerul vede review-urile vendor per client, response pack și audit pack includ datele vendor review
+**Efort estimat:** 1-2 ore
+
+### Descriere
+V5.5 — Partner Launch Mode: API-ul partner client detail returnează vendor review summary (total, open, closed, overdue, critical, needsContext + lista review-urilor). Pagina partner drill-down afișează secțiune dedicată cu metrici, badge-uri urgency/status, listă vendori cu detalii.
+V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțional `vendorReviewSummary`. Response pack HTML include secțiune nouă "Vendor Reviews — Evaluare furnizori externi" cu tabel metrici + detalii per vendor. Audit pack bundle exportă `nis2/vendor-reviews.json` și `nis2/vendor-reviews-summary.json`. MANIFEST menționează vendor reviews.
+
+### Scope tehnic
+- `app/api/partner/clients/[orgId]/route.ts` — returnează `vendorReviews` summary cu `listReviews(orgId)`
+- `app/dashboard/partner/[orgId]/page.tsx` — secțiune Vendor Reviews cu metrici, badge-uri, lista review-uri
+- `lib/compliance/response-pack.ts` — tipuri noi `ResponsePackVendorReview`, `ResponsePackVendorSummary`, secțiune HTML nouă
+- `app/api/reports/response-pack/route.ts` — citește `listReviews(orgId)`, construiește summary, pasează la builder
+- `lib/server/audit-pack-bundle.ts` — exportă `vendor-reviews.json` + `vendor-reviews-summary.json` în `nis2/`
+
+### Fișiere afectate
+- `app/api/partner/clients/[orgId]/route.ts` (modificat)
+- `app/dashboard/partner/[orgId]/page.tsx` (modificat)
+- `lib/compliance/response-pack.ts` (modificat)
+- `app/api/reports/response-pack/route.ts` (modificat)
+- `lib/server/audit-pack-bundle.ts` (modificat)
+
+### Definition of Done
+- [x] Partner API returnează vendor review summary per client
+- [x] Partner detail page afișează secțiune Vendor Reviews cu metrici + badge-uri + listă
+- [x] Response pack builder acceptă `vendorReviewSummary` opțional
+- [x] Response pack HTML include secțiune "Vendor Reviews" cu tabel + detalii per vendor
+- [x] Response pack API route citește vendor reviews și le pasează la builder
+- [x] Audit pack bundle exportă `vendor-reviews.json` + `vendor-reviews-summary.json`
+- [x] MANIFEST.md menționează vendor reviews
+- [x] TypeScript: 0 erori
+- [x] Next.js build: 0 erori
+- [x] Vitest: 491 passed (0 regresii)
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | V5 Sprint 3 complet — Partner Launch Mode (V5.5) + Response Pack Integration (V5.6). Fișiere: app/api/partner/clients/[orgId]/route.ts, app/dashboard/partner/[orgId]/page.tsx, lib/compliance/response-pack.ts, app/api/reports/response-pack/route.ts, lib/server/audit-pack-bundle.ts |

@@ -9,6 +9,7 @@ import {
   FileSearch,
   FolderKanban,
   FolderOpen,
+  GitPullRequestArrow,
   Scan,
   Settings,
   ShieldAlert,
@@ -37,6 +38,7 @@ export type DashboardNavId =
   | "conformitate"
   | "partner"
   | "nis2"
+  | "vendor-review"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -72,7 +74,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     label: "Control",
     href: "/dashboard/sisteme",
     icon: ShieldPlus,
-    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2"],
+    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2", "/dashboard/vendor-review"],
   },
   {
     id: "dovada",
@@ -122,6 +124,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
       { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
       { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
+      { id: "vendor-review", label: "Vendor Review", href: "/dashboard/vendor-review", icon: GitPullRequestArrow },
     ],
   },
   {

@@ -20,6 +20,23 @@ export type ResponsePackFinding = {
   targetDate: string
 }
 
+export type ResponsePackVendorReview = {
+  vendorName: string
+  status: string
+  urgency: string
+  reviewCase: string | null
+  hasEvidence: boolean
+  nextReviewDueISO: string | null
+}
+
+export type ResponsePackVendorSummary = {
+  totalVendors: number
+  reviewedVendors: number
+  overdueReviews: number
+  criticalCount: number
+  topReviews: ResponsePackVendorReview[]
+}
+
 export type ComplianceResponseData = {
   generatedAt: string
   generatedAtLabel: string
@@ -34,6 +51,7 @@ export type ComplianceResponseData = {
     aiSystemsInventoried: number
     highRiskAiSystems: number
   }
+  vendorReviews?: ResponsePackVendorSummary
   commitments: string[]
   disclaimer: string
 }
@@ -45,7 +63,8 @@ export function buildComplianceResponse(
   summary: DashboardSummary,
   remediationPlan: RemediationAction[],
   orgName: string,
-  nowISO: string
+  nowISO: string,
+  vendorReviewSummary?: ResponsePackVendorSummary,
 ): ComplianceResponseData {
   const now = new Date(nowISO)
   const generatedAtLabel = now.toLocaleString("ro-RO", {
@@ -194,6 +213,7 @@ export function buildComplianceResponse(
       aiSystemsInventoried: aiSystemsCount,
       highRiskAiSystems: state.highRisk ?? 0,
     },
+    vendorReviews: vendorReviewSummary,
     commitments,
     disclaimer:
       "Generat de CompliAI. Informațiile sunt orientative și nu constituie consultanță juridică. Verificați cu un specialist înainte de depunere oficială.",
@@ -323,6 +343,30 @@ export function buildComplianceResponseHtml(data: ComplianceResponseData): strin
     <h2>Finding-uri critice / high-risk deschise</h2>
     ${findingsHtml}
   </section>
+
+  <!-- Vendor Reviews (V5.6) -->
+  ${data.vendorReviews ? `
+  <section>
+    <h2>Vendor Reviews — Evaluare furnizori externi</h2>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Vendori totali evaluați</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right">${data.vendorReviews.totalVendors}</td></tr>
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Review-uri finalizate</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right">${data.vendorReviews.reviewedVendors}</td></tr>
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Review-uri expirate</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;${data.vendorReviews.overdueReviews > 0 ? "color:#dc2626" : ""}">${data.vendorReviews.overdueReviews}</td></tr>
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Vendori critici (deschise)</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;${data.vendorReviews.criticalCount > 0 ? "color:#dc2626" : ""}">${data.vendorReviews.criticalCount}</td></tr>
+    </table>
+    ${data.vendorReviews.topReviews.length > 0 ? `
+    <div style="margin-top:12px">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em">Detalii review-uri</p>
+      ${data.vendorReviews.topReviews.map((r) => `
+      <div style="border-left:3px solid ${r.urgency === "critical" ? "#dc2626" : r.urgency === "high" ? "#ea580c" : "#6b7280"};padding:6px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600;color:#111">${r.vendorName}</span>
+          <span style="background:${r.status === "closed" ? "#16a34a" : r.urgency === "critical" ? "#dc2626" : "#ca8a04"};color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">${r.status === "closed" ? "ÎNCHIS" : r.status === "overdue-review" ? "EXPIRAT" : r.status.toUpperCase()}</span>
+        </div>
+        <p style="margin:2px 0 0;font-size:11px;color:#6b7280">Caz: ${r.reviewCase ?? "—"} · Dovezi: ${r.hasEvidence ? "Da" : "Nu"}${r.nextReviewDueISO ? ` · Următorul review: ${new Date(r.nextReviewDueISO).toLocaleDateString("ro-RO")}` : ""}</p>
+      </div>`).join("")}
+    </div>` : ""}
+  </section>` : ""}
 
   <!-- Evidence summary -->
   <section>
