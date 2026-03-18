@@ -18,6 +18,7 @@ import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
+import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -383,6 +384,11 @@ export default function DashboardPage() {
           activeDrifts={activeDrifts}
           hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
         />
+      </section>
+
+      {/* ── Health Check Periodic (V3 P1.2) ──────────────────────────────────── */}
+      <section aria-label="Health check conformitate">
+        <HealthCheckCard />
       </section>
 
       {/* ── Snapshot / Activitate recentă ─────────────────────────────────────── */}
