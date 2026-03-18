@@ -20,8 +20,26 @@
 | R-10 | NIS2 incidents + vendors în audit-pack bundle | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-11 | Applicability Engine — stratul zero | 🟢 Închis | 2026-03-17 | 2026-03-17 |
 | R-12 | PDF export real — pdfkit server-side | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-13 | Audit Pack MANIFEST.md + MANIFEST.pdf | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-14 | NIS2 Maturitate DNSC — wizard 10 domenii | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-15 | Board/CISO Training Tracker | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| R-16 | CER cross-signal — entități critice | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| S-5.1 | Vendor detection 3 niveluri — HIGH/LOW confidence cu UI | 🟢 Închis | 2026-03-17 | 2026-03-17 |
+| S-5.4 | Supply Chain Risk Score NIS2 (VendorRiskProfile + findings) | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-3.2 | Notificări in-app — bell icon, badge, dropdown, polling | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-3.3 | Onboarding checklist — 8 pași auto-bifați din stare reală | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-6.1 | Disclaimer juridic consistent pe toate suprafețele | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-6.2 | Certitudine vizuală — statut juridic per framework (LegalBasis) | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-6.3 | Login page profesionistă — tagline + value props | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-6.4 | Error handling graceful — boundaries + 404 page | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-7.1 | Rate limiting API — in-memory, 60 req/min general, 10 generate | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-7.2 | Input validation — validateCUI + sanitizeForMarkdown | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| S-8 | AI Act Timeline Tracker — per sistem AI, per risk level | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
+
+> **Sesiunea 2 (2026-03-18) COMPLETĂ.** Toate sprint-urile v2 din `CompliScan_Sprint_Improvements_v2.md` sunt închise.
+> **Următor: V3** — prioritate conform `docs/Prompt_Claude_V3_Final.md`: P0.0 Resolution Layer → P0.1 One-Page Report → P0.2 NIS2 Rescue → P0.3 e-Factura Risk Dashboard → P0.4 Accountant Hub.
 
 ---
 
@@ -466,8 +484,87 @@ Adaugă export PDF real pentru documentele generate de AI. Server-side cu `pdfki
 
 ---
 
+## R-13 — Audit Pack MANIFEST.md + MANIFEST.pdf
+
+**Origine:** Sprint 2.5 v2 roadmap
+**Impact:** Mediu — dosar de control lizibil de orice inspector, fără tool-uri tehnice
+
+### Definition of Done
+- [x] `MANIFEST.md` în rădăcina bundle-ului ZIP
+- [x] `MANIFEST.pdf` generat cu pdfkit (eșec nu blochează bundle-ul)
+- [x] Conține: orgName, scor, rapoarte, dovezi, NIS2 state, disclaimer legal
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | Claude | MANIFEST.md + MANIFEST.pdf în buildAuditPackBundle; PR #40 merguit |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat |
+
+---
+
+## R-14 — NIS2 Maturitate DNSC — Wizard Auto-evaluare 10 Domenii
+
+**Origine:** Sprint 2.6 v2 roadmap — OUG 155/2024 Art. 18(7) ✅
+**Impact:** Înalt — obligație legală, diferențiator față de competitori
+
+### Definition of Done
+- [x] Pagină `/dashboard/nis2/maturitate` cu wizard 10 domenii NIS2 Art.21(2)
+- [x] Scoring per domeniu: Da/Parțial/Nu/Nu se aplică
+- [x] Findings automate pentru domenii cu scor < 50%
+- [x] Timeline plan remediere: completedAt + 30 zile
+- [x] Card status pe pagina NIS2 principală
+- [x] Inclus în audit pack: `nis2/maturity-assessment.json`
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | Claude | Wizard complet, API route, findings automate; PR #41 merguit |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat |
+
+---
+
+## R-15 — Board/CISO Training Tracker
+
+**Origine:** Sprint 2.7 v2 roadmap — OUG 155/2024 Art. 14 ✅
+**Impact:** Mediu — diferențiator, ușor de implementat
+
+### Definition of Done
+- [x] Pagină `/dashboard/nis2/governance` cu registru membri conducere
+- [x] Tracking training NIS2 + certificare CISO per membru
+- [x] Findings automate pentru training lipsă / expirat / cert expirată
+- [x] Card GovernanceCard pe pagina NIS2 principală
+- [x] Inclus în audit pack: `nis2/governance-training.json`
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | Claude | BoardMember model, API CRUD, pagină governance, findings; PR #42 merguit |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat |
+
+---
+
+## R-16 — CER Cross-Signal
+
+**Origine:** Sprint 3.5 v2 roadmap — Directiva (EU) 2022/2557 ✅
+**Impact:** Mic — diferențiator low-effort pentru entități critice
+
+### Definition of Done
+- [x] Tag `cer` în applicability engine pentru sectoare energy/transport/health/banking
+- [x] Card informativ pe dashboard (nu modul complet)
+- [x] `APPLICABILITY_TAG_LABELS` + `LEGAL_SOURCES` actualizate
+- [x] Teste actualizate (max profile + entries count)
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-17 | Claude | CER în applicability.ts + legal-sources.ts + card dashboard; PR #43 merguit |
+| 2026-03-17 | Claude | Sprint închis — DoD verificat |
+
+---
+
 ## Istoric sprint-uri principale (referință)
 
+### Sesiunea 1 (2026-03-17)
 | PR | Titlu | Merged |
 |---|---|---|
 | #31 | Compliance Pack Opțiunea B | 2026-03-17 |
@@ -476,4 +573,48 @@ Adaugă export PDF real pentru documentele generate de AI. Server-side cu `pdfki
 | direct | Test coverage NIS2 + alert preferences | 2026-03-17 |
 | direct | Resend email integration + Vision live tests | 2026-03-17 |
 | direct | PDF OCR fixture — 10/10 câmpuri detectate | 2026-03-17 |
-| #35 | R-11: Applicability Engine — stratul zero | 2026-03-17 |
+| #35 | R-1→R-11 Wave 1+2: Applicability Engine + 11 rafinări | 2026-03-17 |
+| #37 | Sprint 1 (v2): Credibilitate dashboard | 2026-03-17 |
+| #38 | Sprint 2.3: Finding → Evidence linking | 2026-03-17 |
+| #39 | Sprint 2.4: Countdown incidente NIS2 | 2026-03-17 |
+| #40 | Sprint 2.5 / R-13: Audit Pack MANIFEST.md + MANIFEST.pdf | 2026-03-17 |
+| #41 | Sprint 2.6 / R-14: NIS2 Maturitate DNSC — wizard 10 domenii | 2026-03-17 |
+| #42 | Sprint 2.7 / R-15: Board/CISO Training Tracker | 2026-03-17 |
+| #43 | Sprint 3.5 / R-16: CER cross-signal | 2026-03-17 |
+| #44 | Sprint 5.1: Vendor detection 3 niveluri HIGH/LOW confidence | 2026-03-17 |
+
+### Sesiunea 2 (2026-03-18) — v2 complet
+| PR | Titlu | Merged |
+|---|---|---|
+| #45 | Sprint 5.4: Supply Chain Risk Score NIS2 | 2026-03-18 |
+| #46 | Sprint 3.2: Notificări in-app (bell + badge + dropdown) | 2026-03-18 |
+| #47 | Sprint 3.3: Onboarding checklist 8 pași | 2026-03-18 |
+| #48 | Sprint 6.1: Disclaimer juridic | 2026-03-18 |
+| #49 | Sprint 6.2: Certitudine vizuală (LegalBasis, legalStatusNote) | 2026-03-18 |
+| #50 | Sprint 6.3: Login page profesionistă | 2026-03-18 |
+| #51 | Sprint 6.4: Error boundaries + 404 | 2026-03-18 |
+| #52 | Sprint 7.1: Rate limiting API | 2026-03-18 |
+| #53 | Sprint 7.2: validateCUI + sanitizeForMarkdown | 2026-03-18 |
+| #54 | Sprint 8: AI Act Timeline Tracker per sistem AI | 2026-03-18 |
+
+### Sesiunea 3 (2026-03-18+) — V3 URMĂTOR
+**Prioritate:** `docs/Prompt_Claude_V3_Final.md`
+| Prioritate | Sprint V3 | Status |
+|---|---|---|
+| P0.0 | Resolution Layer per Finding | 🔵 Următor |
+| P0.1 | One-Page Compliance Report | 🔵 Planificat |
+| P0.2 | Late NIS2 Rescue + Mesaj Urgență | 🔵 Planificat |
+| P0.3 | e-Factura Risk Dashboard + Findings | 🔵 Planificat |
+| P0.4 | Accountant Hub Multi-Client | 🔵 Planificat |
+| P1.1 | Compliance Response Pack | 🔵 Planificat |
+| P1.2 | Compliance Health Check Periodic | 🔵 Planificat |
+| P1.3 | Inspector Mode Enhanced / Simulare Control | 🔵 Planificat |
+| P2.1 | Shadow AI Questionnaire | 🔵 Planificat |
+| P2.2 | Board/CISO Training Tracker | 🟢 Închis (S-2.7) |
+| P2.3 | AI Act Timeline Tracker | 🟢 Închis (S-8) |
+
+**State aplicație la intrarea în V3 (2026-03-18):**
+- TypeScript: 0 erori
+- Vitest: 463 passed, 1 skipped
+- Branch activ: `main`
+- Toate v2 sprints merguite în main (#44–#54)
