@@ -94,6 +94,20 @@ const EFacturaRiskCard = dynamic(
   }
 )
 
+const InspectorModePanel = dynamic(
+  () =>
+    import("@/components/compliscan/inspector-mode-panel").then((mod) => mod.InspectorModePanel),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Inspector Mode"
+        detail="Se incarca simularea controlului extern."
+      />
+    ),
+  }
+)
+
 export default function AuditExportPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
@@ -286,6 +300,8 @@ export default function AuditExportPage() {
       )}
 
       <EFacturaRiskCard />
+
+      <InspectorModePanel />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <SnapshotStatusCard

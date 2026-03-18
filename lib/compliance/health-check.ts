@@ -62,7 +62,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
   // 2. Recent scan check (last scan within 30 days)
   const scans = state.scans ?? []
   const latestScan = scans[0]
-  const daysSinceLastScan = daysSince(latestScan?.scannedAtISO, nowMs)
+  const daysSinceLastScan = daysSince(latestScan?.createdAtISO, nowMs)
   if (daysSinceLastScan === null || daysSinceLastScan > 30) {
     items.push({
       id: "hc-scan",
