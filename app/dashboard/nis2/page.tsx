@@ -51,6 +51,7 @@ import type {
 import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
 import type { MaturityAssessment, BoardMember } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
+import { Nis2RescueBanner } from "@/components/compliscan/nis2-rescue-banner"
 
 // ── DNSC download helper ───────────────────────────────────────────────────────
 
@@ -1487,6 +1488,7 @@ export default function Nis2Page() {
         }
       />
 
+      <Nis2RescueBanner />
       <MaturityCard />
       <GovernanceCard />
 
