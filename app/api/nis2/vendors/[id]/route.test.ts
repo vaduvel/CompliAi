@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   updateVendorMock: vi.fn(),
   deleteVendorMock: vi.fn(),
+  readNis2StateMock: vi.fn().mockResolvedValue({ assessment: null, incidents: [], vendors: [] }),
+  mutateStateMock: vi.fn().mockResolvedValue(undefined),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -35,6 +37,15 @@ vi.mock("@/lib/server/org-context", () => ({
 vi.mock("@/lib/server/nis2-store", () => ({
   updateVendor: mocks.updateVendorMock,
   deleteVendor: mocks.deleteVendorMock,
+  readNis2State: mocks.readNis2StateMock,
+}))
+
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateState: mocks.mutateStateMock,
+}))
+
+vi.mock("@/lib/compliance/vendor-risk", () => ({
+  buildVendorRiskFindings: vi.fn().mockReturnValue([]),
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }

@@ -11,6 +11,7 @@ import { copyStoredEvidenceFile } from "@/lib/server/evidence-storage"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
 import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/server/nis2-store"
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
+import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 
 const execFileAsync = promisify(execFile)
 
@@ -117,6 +118,20 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     await fs.writeFile(
       path.join(nis2Dir, "governance-training.json"),
       JSON.stringify(boardMembers, null, 2),
+      "utf8"
+    )
+    // Sprint 5.3/5.4: vendor risk report
+    const vendorRiskReport = nis2State.vendors.map((v) => ({
+      id: v.id,
+      name: v.name,
+      service: v.service,
+      ...computeVendorRisk(v),
+      lastReviewDate: v.lastReviewDate ?? null,
+      nextReviewDue: v.nextReviewDue ?? null,
+    }))
+    await fs.writeFile(
+      path.join(nis2Dir, "vendor-risk-report.json"),
+      JSON.stringify(vendorRiskReport, null, 2),
       "utf8"
     )
 
@@ -359,6 +374,8 @@ function buildManifestMarkdown(
     lines.push("- Auto-evaluare maturitate DNSC — \`nis2/maturity-assessment.json\` (necompletată)")
   }
   lines.push(`- Training conducere — \`nis2/governance-training.json\``)
+  const highRiskVendors = nis2State.vendors.filter((v) => computeVendorRisk(v).riskLevel === "high").length
+  lines.push(`- Raport risc furnizori — \`nis2/vendor-risk-report.json\` (${nis2State.vendors.length} furnizori, ${highRiskVendors} risc ridicat)`)
   lines.push("")
   lines.push("### Date tehnice", "")
   lines.push("- `data/audit-pack-v2-1.json` — snapshot complet")
