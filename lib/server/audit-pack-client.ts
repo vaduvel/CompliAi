@@ -861,7 +861,7 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
       </section>
 
       <p class="footer">
-        Acest dosar este generat automat de CompliScan si trebuie revizuit uman inainte de utilizare oficiala. Varianta JSON ramane sursa structurata de adevar, iar acest format client-facing este optimizat pentru citire, discutie si export PDF din browser.
+        Acest document a fost generat automat de CompliAI pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. Consultați un specialist juridic pentru validare. Varianta JSON rămâne sursa structurată de adevăr, iar acest format este optimizat pentru citire, discuție și export PDF.
       </p>
     </main>
   </body>

@@ -10,6 +10,7 @@ import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
 import { NotificationBell } from "@/components/compliscan/notification-bell"
+import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 import {
   dashboardPrimaryNavItems,
   isNavItemActive,
@@ -238,6 +239,9 @@ export function DashboardShell({
 
         <main className="min-w-0 flex-1 px-4 pb-40 pt-5 md:px-6 md:pb-12 md:pt-8 lg:px-8">
           {children}
+          <footer className="mt-12 pb-4">
+            <LegalDisclaimer variant="short" />
+          </footer>
         </main>
       </div>
 
