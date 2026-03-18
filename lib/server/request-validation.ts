@@ -52,6 +52,34 @@ export function normalizeOptionalNote(value: unknown, maxLength: number) {
   return trimmed
 }
 
+// ── CUI validation ────────────────────────────────────────────────────────────
+
+/**
+ * Validează CUI-ul pe server.
+ * Format acceptat: opțional prefix RO, urmat de 2-10 cifre.
+ * Returnează CUI normalizat (uppercase) sau null dacă e invalid.
+ */
+export function validateCUI(value: unknown): string | null {
+  if (typeof value !== "string") return null
+  const trimmed = value.trim().toUpperCase()
+  if (!trimmed) return null
+  if (!/^(RO)?\d{2,10}$/.test(trimmed)) return null
+  return trimmed
+}
+
+// ── Sanitizare pentru Markdown generat ───────────────────────────────────────
+
+/**
+ * Sanitizează text introdus de utilizator înainte de a-l include în Markdown.
+ * Previne injectarea de headings, links și bold/italic prin date utilizator.
+ */
+export function sanitizeForMarkdown(value: string): string {
+  return value
+    .replace(/[\\`*_{}[\]()#+\-!|]/g, (char) => `\\${char}`)
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+}
+
 export function estimateBase64Size(base64: string) {
   const sanitized = base64.replace(/\s+/g, "")
   const padding = sanitized.endsWith("==") ? 2 : sanitized.endsWith("=") ? 1 : 0

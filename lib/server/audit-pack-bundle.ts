@@ -12,6 +12,7 @@ import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
 import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/server/nis2-store"
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
+import { sanitizeForMarkdown } from "@/lib/server/request-validation"
 
 const execFileAsync = promisify(execFile)
 
@@ -316,8 +317,8 @@ function buildManifestMarkdown(
   includedEvidence: Array<{ taskId: string; fileName: string; storedAs: string; kind: string }>,
   maturityAssessment: Pick<import("@/lib/server/nis2-store").MaturityAssessment, "overallScore" | "level" | "completedAt"> | null
 ): string {
-  const orgName = auditPack.workspace.label
-  const cui = auditPack.workspace.name ?? "—"
+  const orgName = sanitizeForMarkdown(auditPack.workspace.label)
+  const cui = sanitizeForMarkdown(auditPack.workspace.name ?? "—")
   const date = new Date(auditPack.generatedAt).toLocaleDateString("ro-RO", {
     day: "numeric", month: "long", year: "numeric",
   })
