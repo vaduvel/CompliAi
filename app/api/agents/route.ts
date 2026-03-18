@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         type: a,
         label: AGENT_LABELS[a],
         description: AGENT_DESCRIPTIONS[a],
-        implemented: a === "compliance_monitor" || a === "fiscal_sensor",
+        implemented: a === "compliance_monitor" || a === "fiscal_sensor" || a === "document",
         lastRun: recentRuns.find((r) => r.agentType === a) ?? null,
       })),
       recentRuns,
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (agentType !== "compliance_monitor" && agentType !== "fiscal_sensor") {
+    if (agentType !== "compliance_monitor" && agentType !== "fiscal_sensor" && agentType !== "document") {
       return jsonError(
         `Agentul "${AGENT_LABELS[agentType]}" nu este încă implementat.`,
         400,

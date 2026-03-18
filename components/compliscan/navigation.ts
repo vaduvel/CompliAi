@@ -3,6 +3,7 @@
 import {
   BarChart3,
   BookOpen,
+  Bot,
   Building2,
   CheckCircle2,
   ClipboardList,
@@ -37,6 +38,7 @@ export type DashboardNavId =
   | "conformitate"
   | "partner"
   | "nis2"
+  | "agents"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -72,7 +74,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     label: "Control",
     href: "/dashboard/sisteme",
     icon: ShieldPlus,
-    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2"],
+    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2", "/dashboard/agents"],
   },
   {
     id: "dovada",
@@ -122,6 +124,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
       { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
       { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
+      { id: "agents", label: "Agenți", href: "/dashboard/agents", icon: Bot },
     ],
   },
   {

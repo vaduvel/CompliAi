@@ -2,16 +2,26 @@
 // Executes agents, applies auto-actions (notifications, findings),
 // logs results, respects human-in-the-loop levels.
 
-import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
+import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { readStateForOrg } from "@/lib/server/mvp-store"
-import { readNis2State } from "@/lib/server/nis2-store"
-import { listReviews } from "@/lib/server/vendor-review-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { appendRun } from "@/lib/server/agent-run-store"
 import { trackEvent } from "@/lib/server/analytics"
 import { runComplianceMonitor } from "@/lib/compliance/agent-compliance-monitor"
 import { runFiscalSensor } from "@/lib/compliance/agent-fiscal-sensor"
+import { runDocumentAgent } from "@/lib/compliance/agent-document"
 import type { AgentType, AgentOutput } from "@/lib/compliance/agentic-engine"
+
+// Lazy-load vendor-review-store (only available when V5 is merged)
+async function safeListReviews(orgId: string): Promise<Array<{ id: string; vendorName: string; status: string; nextReviewDueISO?: string }>> {
+  try {
+    // @ts-expect-error — module only exists when V5 vendor-review is merged
+    const mod = await import("@/lib/server/vendor-review-store")
+    return (mod as { listReviews: (id: string) => Promise<unknown[]> }).listReviews(orgId) as Promise<Array<{ id: string; vendorName: string; status: string; nextReviewDueISO?: string }>>
+  } catch {
+    return []
+  }
+}
 
 export type OrchestratorResult = {
   orgId: string
@@ -39,7 +49,7 @@ export async function executeAgent(
       return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
     }
     const state = normalizeComplianceState(rawState)
-    const vendorReviews = await listReviews(orgId)
+    const vendorReviews = await safeListReviews(orgId)
 
     const output = runComplianceMonitor({
       orgId,
@@ -75,6 +85,29 @@ export async function executeAgent(
       orgId,
       state,
       signals: signals ?? [],
+      nowISO,
+    })
+
+    await applyAutoActions(orgId, output)
+    await appendRun(orgId, output)
+    void trackEvent(orgId, "agent_run" as never, {
+      agent: agentType,
+      issues: output.metrics?.issuesFound ?? 0,
+    })
+
+    return output
+  }
+
+  if (agentType === "document") {
+    const rawState = await readStateForOrg(orgId)
+    if (!rawState) {
+      return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
+    }
+    const state = normalizeComplianceState(rawState)
+
+    const output = runDocumentAgent({
+      orgId,
+      state,
       nowISO,
     })
 
