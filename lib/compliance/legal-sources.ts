@@ -15,6 +15,55 @@ export type LegalSource = {
   applicabilityNote?: string // ex: "Aplicabil complet din mai 2018"
 }
 
+// Sprint 6.2: Helper pentru statut juridic per cerință/obligație
+export type LegalStatus = "active_ro" | "active_eu" | "proposed_eu" | "draft_dnsc"
+
+export type LegalBasis = {
+  status: LegalStatus
+  reference: string        // ex: "OUG 155/2024 Art.23"
+  description: string      // ex: "Alertă inițială 24h la DNSC"
+  lastVerified: string     // ISO date — când a fost verificat textul legal
+  note?: string            // ex: "Propunere amânare — neconfirmat"
+}
+
+export const LEGAL_STATUS_LABELS: Record<LegalStatus, string> = {
+  active_ro:   "✅ Activ — legislație română",
+  active_eu:   "✅ Activ — regulament UE",
+  proposed_eu: "⚠️ Propunere UE — neconfirmat",
+  draft_dnsc:  "📝 Draft DNSC — consultare",
+}
+
+export const LEGAL_STATUS_SHORT: Record<LegalStatus, string> = {
+  active_ro:   "✅ Activ",
+  active_eu:   "✅ Activ",
+  proposed_eu: "⚠️ Propunere",
+  draft_dnsc:  "📝 Draft",
+}
+
+// Statut juridic per framework — pentru afișare în framework cards
+export const FRAMEWORK_LEGAL_STATUS: Record<string, { status: LegalStatus; note: string }> = {
+  gdpr: {
+    status: "active_eu",
+    note: "Regulament UE 2016/679 — activ din 25 mai 2018",
+  },
+  nis2: {
+    status: "active_ro",
+    note: "OUG 155/2024, aprobat prin Legea 124/2025 — activ",
+  },
+  "ai-act": {
+    status: "proposed_eu",
+    note: "Art.5 interdicții: ✅ activ aug 2025 · High-risk Annex III: ⚠️ propunere amânare dec 2027 (Digital Omnibus, neconfirmat)",
+  },
+  efactura: {
+    status: "active_ro",
+    note: "OUG 89/2025 — obligatoriu B2B de la 1 ian 2025",
+  },
+  cer: {
+    status: "active_eu",
+    note: "Directiva (EU) 2022/2557 — transpunere națională în curs",
+  },
+}
+
 export type SuggestionExplanation = {
   legalSource: LegalSource
   reasoning: string         // DE CE se aplică / DE CE a fost sugerat
