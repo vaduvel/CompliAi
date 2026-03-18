@@ -200,4 +200,49 @@ describe("lib/compliance/audit-quality-gates", () => {
       expect.arrayContaining(["stale_evidence", "unresolved_drift"])
     )
   })
+
+  // R-10: NIS2 findings (convertite din NIS2 gaps) apar în quality gates audit-pack
+  it("R-10: include finding NIS2 in quality gates (NIS2 data in audit-pack)", () => {
+    const state = createState()
+    state.findings = [
+      {
+        id: "nis2-risk-management-gap",
+        title: "Politică de management al riscului lipsă",
+        severity: "high",
+        category: "nis2_risk_management",
+        summary: "Organizatia nu are o politica documentata de management al riscului cibernetic.",
+        sourceDocument: "NIS2 Self-Assessment",
+        provenance: {
+          sourceType: "assessment",
+          sourceId: "nis2-assessment",
+          matchedKeywords: [],
+          matchedManifestKeys: [],
+          matchedSnippet: "",
+          confidence: "high",
+          confidenceReason: "NIS2 Art. 21 gap detectat",
+          verdictBasis: "explicit_signal",
+        },
+      } as unknown as ComplianceState["findings"][number],
+    ]
+    const nis2Task: RemediationAction = {
+      ...createTask(),
+      id: "nis2-task-1",
+      title: "Elaboreaza politica de management al riscului NIS2",
+      relatedFindingIds: ["nis2-risk-management-gap"],
+      relatedDriftIds: [],
+      lawReference: "OUG 155/2024 Art. 21",
+    }
+
+    const result = buildAuditQualityGates({
+      state,
+      remediationPlan: [nis2Task],
+      nowISO: "2026-03-18T10:00:00.000Z",
+    })
+
+    // Finding NIS2 e vizibil în quality gates — task fără dovadă = blocked
+    expect(result.decision).toBe("blocked")
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.code).toBe("missing_evidence")
+    expect(result.items[0]?.lawReference).toBe("OUG 155/2024 Art. 21")
+  })
 })
