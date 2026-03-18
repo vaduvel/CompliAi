@@ -2,6 +2,8 @@
 // Detectează evaluări expirate, dovezi stale, review-uri întârziate și gap-uri de monitorizare.
 
 import type { ComplianceState } from "@/lib/compliance/types"
+import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
+import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
 
 export type HealthCheckStatus = "ok" | "warning" | "critical"
 
@@ -209,6 +211,42 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       status: "ok",
       action: "Continuă atașarea de dovezi",
     })
+  }
+
+  // 7. Fiscal signals health (ANAF Phase A)
+  const efacturaSignals = (state as Record<string, unknown>).efacturaSignals as
+    | EFacturaInvoiceSignal[]
+    | undefined
+  if (efacturaSignals && efacturaSignals.length > 0) {
+    const fiscalSummary = buildFiscalSummary(efacturaSignals, nowISO)
+
+    if (fiscalSummary.fiscalHealthLabel === "critic") {
+      items.push({
+        id: "hc-fiscal",
+        title: `Semnale fiscale critice (${fiscalSummary.criticalUrgency} urgente)`,
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura, ${fiscalSummary.repeatedRejectionVendors} vendori cu respingeri repetate, ${fiscalSummary.pendingTooLong} facturi blocate.`,
+        status: "critical",
+        action: "Verifică semnalele fiscale și rezolvă respingerile",
+        actionHref: "/dashboard/scanari",
+      })
+    } else if (fiscalSummary.fiscalHealthLabel === "atenție") {
+      items.push({
+        id: "hc-fiscal",
+        title: `Semnale fiscale necesită atenție (scor urgență: ${fiscalSummary.averageUrgency})`,
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura active. ${fiscalSummary.highUrgency} cu urgență ridicată.`,
+        status: "warning",
+        action: "Revizuiește semnalele fiscale",
+        actionHref: "/dashboard/scanari",
+      })
+    } else {
+      items.push({
+        id: "hc-fiscal",
+        title: "Semnale fiscale sub control",
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura monitorizate, niciun semnal critic.`,
+        status: "ok",
+        action: "Monitorizează periodic",
+      })
+    }
   }
 
   // Calculate score
