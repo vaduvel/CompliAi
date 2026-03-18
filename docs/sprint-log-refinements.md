@@ -35,11 +35,27 @@
 | S-7.1 | Rate limiting API — in-memory, 60 req/min general, 10 generate | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | S-7.2 | Input validation — validateCUI + sanitizeForMarkdown | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | S-8 | AI Act Timeline Tracker — per sistem AI, per risk level | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P0.0 | Resolution Layer per Finding — drum complet detectare→inchidere | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P0.1 | One-Page Compliance Report — HTML preview + PDF descărcabil | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P0.2 | NIS2 Rescue — DNSC înregistrare tardivă, mesaj juridic prudent | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P0.3 | e-Factura Risk Dashboard — semnale risc fiscal + findings automate | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P0.4 | Accountant Hub Multi-Client — urgency signals NIS2 + e-Factura | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P1.1 | Compliance Response Pack — due diligence / chestionar conformitate | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P1.2 | Health Check Periodic — 6 verificări, scor 0-100, card dashboard | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P1.3 | Inspector Mode Enhanced — simulare perspectivă auditor extern | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P2.1 | Shadow AI Questionnaire — identificare utilizare AI nedeclarată | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-P2.2 | Board/CISO Training Tracker | ⚪ Anulat | — | — |
+| V3-P2.3 | AI Act Timeline Tracker | ⚪ Anulat | — | — |
+| V3-QA.1 | Audit Full + Bug Fixes RBAC + Teste V3 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V3-QA.2 | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
 > **Sesiunea 2 (2026-03-18) COMPLETĂ.** Toate sprint-urile v2 din `CompliScan_Sprint_Improvements_v2.md` sunt închise.
-> **Următor: V3** — prioritate conform `docs/Prompt_Claude_V3_Final.md`: P0.0 Resolution Layer → P0.1 One-Page Report → P0.2 NIS2 Rescue → P0.3 e-Factura Risk Dashboard → P0.4 Accountant Hub.
+> **Sesiunea 3 (2026-03-18) COMPLETĂ.** V3 complet — P0.0→P2.1 merguite în main (PR #56→#63). P2.2 și P2.3 erau deja implementate în v2 (R-15 și S-8).
+> **V3 STATUS: ✅ COMPLET**
+> **Sesiunea 4 (2026-03-18):** Audit complet cap-coadă V1→V3 — 6 bugs identificate, 4 fixate, +27 teste noi (PR #64).
+> **Sesiunea 4b (2026-03-18):** Audit extins V1+V2+V3+definitia-perfecta — BUG-007 ProposalBundlePanel "Drift"→"Modificări", BUG-008 traceability "finding"→"constatare", BUG-009 test R-10 NIS2 în audit-pack adăugat. 491 teste trecute. Score definitia-perfecta: 11/13 complet.
 
 ---
 
@@ -597,24 +613,66 @@ Adaugă export PDF real pentru documentele generate de AI. Server-side cu `pdfki
 | #53 | Sprint 7.2: validateCUI + sanitizeForMarkdown | 2026-03-18 |
 | #54 | Sprint 8: AI Act Timeline Tracker per sistem AI | 2026-03-18 |
 
-### Sesiunea 3 (2026-03-18+) — V3 URMĂTOR
-**Prioritate:** `docs/Prompt_Claude_V3_Final.md`
-| Prioritate | Sprint V3 | Status |
+### Sesiunea 3 (2026-03-18) — V3 COMPLET ✅
+| PR | Titlu | Merged |
 |---|---|---|
-| P0.0 | Resolution Layer per Finding | 🔵 Următor |
-| P0.1 | One-Page Compliance Report | 🔵 Planificat |
-| P0.2 | Late NIS2 Rescue + Mesaj Urgență | 🔵 Planificat |
-| P0.3 | e-Factura Risk Dashboard + Findings | 🔵 Planificat |
-| P0.4 | Accountant Hub Multi-Client | 🔵 Planificat |
-| P1.1 | Compliance Response Pack | 🔵 Planificat |
-| P1.2 | Compliance Health Check Periodic | 🔵 Planificat |
-| P1.3 | Inspector Mode Enhanced / Simulare Control | 🔵 Planificat |
-| P2.1 | Shadow AI Questionnaire | 🔵 Planificat |
-| P2.2 | Board/CISO Training Tracker | 🟢 Închis (S-2.7) |
-| P2.3 | AI Act Timeline Tracker | 🟢 Închis (S-8) |
+| #56 | V3 P0.1: Raport Executiv o-pagină — HTML preview + PDF descărcabil | 2026-03-18 |
+| #55 | V3 P0.0: Resolution Layer per Finding — drum complet detectare→inchidere | 2026-03-18 |
+| — | V3 P0.2: NIS2 Rescue — DNSC tardiv, mesaj juridic prudent | 2026-03-18 |
+| — | V3 P0.3: e-Factura Risk Dashboard — semnale risc + findings automate | 2026-03-18 |
+| — | V3 P0.4: Accountant Hub Multi-Client — NIS2 + e-Factura urgency signals | 2026-03-18 |
+| #58 | V3 P1.1: Compliance Response Pack — due diligence / chestionar conformitate | 2026-03-18 |
+| #61 | V3 P1.2: Health Check Periodic — 6 verificări, scor 0-100, card dashboard | 2026-03-18 |
+| #62 | V3 P1.3: Inspector Mode Enhanced — simulare perspectivă auditor extern | 2026-03-18 |
+| #63 | V3 P2.1: Shadow AI Questionnaire — identificare utilizare AI nedeclarată | 2026-03-18 |
 
-**State aplicație la intrarea în V3 (2026-03-18):**
+**Note V3:**
+- P2.2 (Board/CISO Training Tracker) era deja implementat în v2 → PR #42 / R-15
+- P2.3 (AI Act Timeline Tracker) era deja implementat în v2 → PR #54 / S-8
+
+**State aplicație la ieșirea din V3 (2026-03-18):**
 - TypeScript: 0 erori
 - Vitest: 463 passed, 1 skipped
 - Branch activ: `main`
-- Toate v2 sprints merguite în main (#44–#54)
+- Toate V3 sprints merguite în main (PR #55–#63)
+
+---
+
+## V3-QA.1 — Audit Full + Bug Fixes RBAC + Teste V3
+
+**Origine:** Audit automat complet cap-coadă după finalizarea V3 — 80 rute API, 32 componente, 14 pagini
+**Impact:** Mediu — RBAC gap pe AI systems, 3 rute V3 fără teste, +27 teste noi
+**Efort estimat:** 0.5 zile
+
+### Descriere
+Audit tehnic complet al codebase-ului CompliAI V1→V3: securitate, RBAC, input validation, test coverage, error handling. 6 bugs identificate, 4 fixate imediat. Raport complet în `docs/audit-bugs.md`.
+
+### Scope tehnic
+- Fix BUG-001: `POST /api/ai-systems` — adăugat `requireRole(WRITE_ROLES)` (viewer nu mai poate crea sisteme AI)
+- Fix BUG-002: `DELETE /api/ai-systems` — adăugat `throw error` pentru non-AuthzError în catch block
+- Fix BUG-003: 3 fișiere test noi pentru health-check, inspector, shadow-ai routes (26 teste)
+- Fix BUG-004: `ai-systems/route.test.ts` actualizat cu mock RBAC + test viewer→403
+- Raport audit: `docs/audit-bugs.md` cu 6 bugs + 5 gaps + security assessment
+
+### Fișiere afectate
+- `app/api/ai-systems/route.ts`
+- `app/api/ai-systems/route.test.ts`
+- `app/api/health-check/route.test.ts`
+- `app/api/inspector/route.test.ts`
+- `app/api/shadow-ai/route.test.ts`
+- `docs/audit-bugs.md`
+
+### Definition of Done
+- [x] Audit complet pe 80 rute API executat
+- [x] BUG-001 fixat: POST /api/ai-systems + RBAC
+- [x] BUG-002 fixat: DELETE /api/ai-systems catch pattern
+- [x] Teste V3 adăugate: health-check (6), inspector (7), shadow-ai (13)
+- [x] ai-systems test actualizat cu RBAC mock
+- [x] TypeScript: 0 erori
+- [x] Vitest: 490 passed (era 463, +27)
+- [x] PR #64 deschis
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | Audit Full + Bug Fixes RBAC + Teste V3 — PR #64 merguit. Fișiere: app/api/ai-systems/route.ts, app/api/ai-systems/route.test.ts, app/api/health-check/route.test.ts, app/api/inspector/route.test.ts, app/api/shadow-ai/route.test.ts, docs/audit-bugs.md |

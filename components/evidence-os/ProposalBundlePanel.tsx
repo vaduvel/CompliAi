@@ -17,7 +17,7 @@ export function ProposalBundlePanel({ bundle, children, value, onValueChange }: 
   const items = [
     { value: "intake", label: "Sisteme", count: bundle.intake?.proposedSystems?.length ?? 0 },
     { value: "findings", label: "Constatari", count: bundle.findings?.length ?? 0 },
-    { value: "drift", label: "Drift", count: bundle.drifts?.length ?? 0 },
+    { value: "drift", label: "Modificări", count: bundle.drifts?.length ?? 0 },
     { value: "evidence", label: "Dovezi", count: bundle.evidence ? 1 : 0 },
   ] as const
 

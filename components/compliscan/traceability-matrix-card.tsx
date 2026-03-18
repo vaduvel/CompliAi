@@ -292,7 +292,7 @@ export function TraceabilityMatrixCard({
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">
-                    {record.entryKind === "control_task" ? "control" : "finding"}
+                    {record.entryKind === "control_task" ? "control" : "constatare"}
                   </Badge>
                   {record.remediationMode && (
                     <Badge variant="outline">
