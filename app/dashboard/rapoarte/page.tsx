@@ -80,6 +80,20 @@ const RecentDriftCard = dynamic(
   }
 )
 
+const EFacturaRiskCard = dynamic(
+  () =>
+    import("@/components/compliscan/efactura-risk-card").then((mod) => mod.EFacturaRiskCard),
+  {
+    ssr: false,
+    loading: () => (
+      <SectionLoadingCard
+        title="Semnale e-Factura"
+        detail="Se incarca semnalele de risc e-Factura."
+      />
+    ),
+  }
+)
+
 export default function AuditExportPage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
@@ -270,6 +284,8 @@ export default function AuditExportPage() {
           <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
         </section>
       )}
+
+      <EFacturaRiskCard />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <SnapshotStatusCard
