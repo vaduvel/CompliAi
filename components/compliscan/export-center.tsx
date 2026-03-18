@@ -10,6 +10,7 @@ import {
   FileStack,
   FolderKanban,
   Mail,
+  ShieldCheck,
 } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -22,6 +23,7 @@ type ExportCenterProps = {
   onGenerateAuditPack?: () => void
   onGenerateAuditBundle?: () => void
   onGenerateAnnexLite?: () => void
+  onGenerateResponsePack?: () => void
   onExportChecklist: () => void
   onExportCompliScanJson?: () => void
   onExportCompliScanYaml?: () => void
@@ -44,6 +46,7 @@ export function ExportCenter({
   onGenerateAuditPack,
   onGenerateAuditBundle,
   onGenerateAnnexLite,
+  onGenerateResponsePack,
   onExportChecklist,
   onExportCompliScanJson,
   onExportCompliScanYaml,
@@ -76,6 +79,18 @@ export function ExportCenter({
   ]
 
   const secondaryActions: ExportAction[] = [
+    ...(onGenerateResponsePack
+      ? [
+          {
+            key: "response-pack",
+            label: "Compliance Response Pack",
+            hint: "Raspuns la due diligence sau chestionar de conformitate.",
+            icon: ShieldCheck,
+            onClick: onGenerateResponsePack,
+            variant: "outline" as const,
+          },
+        ]
+      : []),
     ...(onGenerateAuditPack
       ? [
           {
