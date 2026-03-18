@@ -18,9 +18,21 @@ vi.mock("@/lib/server/org-context", () => ({
   getOrgContext: vi.fn(async () => ({ orgId: "org-test", userEmail: "test@test.ro", orgName: "Test Org" })),
 }))
 
+vi.mock("@/lib/server/plan", () => ({
+  requirePlan: vi.fn(async () => "pro"),
+  PlanError: class PlanError extends Error {
+    code = "PLAN_REQUIRED"
+    status = 403
+  },
+}))
+
 import { readState } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { GET } from "./route"
+
+function makeRequest(): Request {
+  return new Request("http://localhost/api/inspector")
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -48,7 +60,7 @@ describe("GET /api/inspector", () => {
   })
 
   it("returnează structura InspectorSimulationResult validă", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     expect(res.status).toBe(200)
 
     const body = await res.json()
@@ -62,20 +74,20 @@ describe("GET /api/inspector", () => {
   })
 
   it("overallVerdict este ready | partial | not-ready", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
     expect(["ready", "partial", "not-ready"]).toContain(body.overallVerdict)
   })
 
   it("readinessScore este între 0 și 100", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
     expect(body.readinessScore).toBeGreaterThanOrEqual(0)
     expect(body.readinessScore).toBeLessThanOrEqual(100)
   })
 
   it("frameworks conțin GDPR, NIS2, EU AI Act, e-Factura", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     const names = body.frameworks.map((f: { framework: string }) => f.framework)
@@ -86,7 +98,7 @@ describe("GET /api/inspector", () => {
   })
 
   it("fiecare framework are verdict valid", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     for (const fw of body.frameworks) {
@@ -97,7 +109,7 @@ describe("GET /api/inspector", () => {
   })
 
   it("cu stare goală, verdictul este not-ready sau partial (fără baseline, fără scans)", async () => {
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
     expect(["not-ready", "partial"]).toContain(body.overallVerdict)
   })
@@ -105,14 +117,14 @@ describe("GET /api/inspector", () => {
   it("returnează 500 la eroare internă", async () => {
     vi.mocked(readState).mockRejectedValue(new Error("store failure"))
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     expect(res.status).toBe(500)
     const body = await res.json()
     expect(body.error).toBeTruthy()
   })
 
   it("apelează readNis2State cu orgId corect", async () => {
-    await GET()
+    await GET(makeRequest())
     expect(readNis2State).toHaveBeenCalledWith("org-test")
   })
 })

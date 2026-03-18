@@ -6,10 +6,12 @@ import { readState } from "@/lib/server/mvp-store"
 import { buildAuditPack } from "@/lib/server/audit-pack"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State } from "@/lib/server/nis2-store"
+import { requirePlan, PlanError } from "@/lib/server/plan"
 
 export async function GET(request: Request) {
   try {
     requireRole(request, ["owner", "compliance"], "exportul Audit Pack")
+    await requirePlan(request, "pro", "Audit Pack complet")
 
     const { orgId } = await getOrgContext()
     const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
@@ -38,6 +40,9 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+    if (error instanceof PlanError) {
       return jsonError(error.message, error.status, error.code)
     }
     return jsonError(

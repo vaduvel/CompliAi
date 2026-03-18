@@ -48,6 +48,7 @@
 | V3-P2.3 | AI Act Timeline Tracker | ⚪ Anulat | — | — |
 | V3-QA.1 | Audit Full + Bug Fixes RBAC + Teste V3 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V3-QA.2 | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V4-P2.1 | V4.2 Commercial Readiness — Pricing page, Plan logic, Stripe, Legal pages, Landing page | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -676,3 +677,93 @@ Audit tehnic complet al codebase-ului CompliAI V1→V3: securitate, RBAC, input 
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-18 | Claude | Audit Full + Bug Fixes RBAC + Teste V3 — PR #64 merguit. Fișiere: app/api/ai-systems/route.ts, app/api/ai-systems/route.test.ts, app/api/health-check/route.test.ts, app/api/inspector/route.test.ts, app/api/shadow-ai/route.test.ts, docs/audit-bugs.md |
+
+---
+
+## V3-QA.2 — Audit complet V1+V2+V3+definitia-perfecta
+
+**Origine:** Sesiunea 4b — audit extins pe tot V1→V3 + definitia-perfecta (13 features verificate)
+**Impact:** Mediu — 3 bugs UX copy + test R-10 NIS2 în audit-pack
+**Efort estimat:** 1 oră
+
+### Scope tehnic
+- BUG-007: ProposalBundlePanel — `"Drift"` → `"Modificări"` în tab label
+- BUG-008: traceability-matrix-card — `"finding"` → `"constatare"` în badge
+- BUG-009 / R-10: test nou `it("R-10: include finding NIS2 in quality gates")` verifică că nis2-* IDs apar în quality gates
+- V4.0 corecturi: AI Act timeline text fix în legal-sources.ts + applicability.ts
+
+### Fișiere afectate
+- `components/evidence-os/ProposalBundlePanel.tsx`
+- `components/compliscan/traceability-matrix-card.tsx`
+- `lib/compliance/audit-quality-gates.test.ts`
+- `lib/compliance/legal-sources.ts`
+- `lib/compliance/applicability.ts`
+
+### Definition of Done
+- [x] BUG-007 fix: tab label corect în română
+- [x] BUG-008 fix: badge "constatare" în loc de "finding" (engleză)
+- [x] BUG-009: test R-10 NIS2 findings în quality gates — pass
+- [x] AI Act text corectat (nu mai zice "aplicare completă august 2026")
+- [x] 491 teste trecute (era 490, +1 test R-10)
+- [x] TypeScript: 0 erori
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10. PR inclus în v4-p0-audit-fixes |
+
+---
+
+## V4-P2.1 — V4.2 Commercial Readiness
+
+**Origine:** `docs/CompliAI_V4_Final_Operabil.md` — V4.2.1→V4.2.4 + plan logic
+**Impact:** Înalt — fără pricing page și plan logic nu există revenue
+**Efort estimat:** 4-6 ore
+
+### Descriere
+Implementare completă commercial layer V4: sistem de planuri Free/Pro/Partner, pricing page publică, Stripe Checkout + Webhook + Portal, pagina de abonament în dashboard, pagini legale (ToS/Privacy/DPA), landing page reală, trial 14 zile automat la înregistrare, `requirePlan()` pe rutele Pro-only.
+
+### Scope tehnic
+- `lib/server/plan.ts` — OrgPlan type, PlanError, getOrgPlan(), setOrgPlan(), activateTrial(), requirePlan(), planHasFeature()
+- `app/pricing/page.tsx` — pagina publică Free/Pro/Partner cu tabel comparație
+- `components/compliscan/plan-gate.tsx` — overlay UI pentru features locked + PlanBadge
+- `app/dashboard/setari/abonament/page.tsx` — plan curent, upgrade, portal Stripe
+- `app/api/plan/route.ts` — GET plan curent
+- `app/api/stripe/checkout/route.ts` — creare sesiune checkout
+- `app/api/stripe/webhook/route.ts` — actualizare plan după plată
+- `app/api/stripe/portal/route.ts` — redirect portal Stripe
+- `app/api/auth/register/route.ts` — trial Pro 14 zile activat automat
+- `app/terms/page.tsx`, `app/privacy/page.tsx`, `app/dpa/page.tsx` — pagini legale
+- `app/page.tsx` — landing page real (Hero + Problem + Solution + Pricing preview)
+- `app/api/health-check/route.ts`, `app/api/inspector/route.ts`, `app/api/exports/audit-pack/*.ts` — requirePlan("pro") adăugat
+
+### Fișiere afectate
+- `lib/server/plan.ts` (nou)
+- `app/pricing/page.tsx` (nou)
+- `components/compliscan/plan-gate.tsx` (nou)
+- `app/dashboard/setari/abonament/page.tsx` (nou)
+- `app/api/plan/route.ts` (nou)
+- `app/api/stripe/checkout/route.ts` (nou)
+- `app/api/stripe/webhook/route.ts` (nou)
+- `app/api/stripe/portal/route.ts` (nou)
+- `app/terms/page.tsx`, `app/privacy/page.tsx`, `app/dpa/page.tsx` (noi)
+- `app/page.tsx` (modificat — landing page reală)
+- `.env.example` (adăugat STRIPE_* vars)
+
+### Definition of Done
+- [x] `lib/server/plan.ts` — Free/Pro/Partner, PlanError, requirePlan(), planHasFeature()
+- [x] `activateTrial()` apelat la register → 14 zile Pro gratuit
+- [x] `/pricing` publică cu 3 planuri + tabel comparație complet
+- [x] `PlanGate` + `PlanBadge` pentru UI locks
+- [x] `/dashboard/setari/abonament` — plan curent, upgrade, portal Stripe
+- [x] Stripe Checkout, Webhook (cu HMAC), Portal
+- [x] `/terms`, `/privacy`, `/dpa` — conținut legal real
+- [x] Landing page `/` cu hero, problemă, soluție, pricing CTA
+- [x] `requirePlan("pro")` pe health-check, inspector, audit-pack routes
+- [x] TypeScript: 0 erori
+- [x] Vitest: 491 passed (0 regresii)
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | V4.2 Commercial Readiness — v42-commercial. Fișiere: app/pricing/page.tsx components/compliscan/plan-gate.tsx app/dashboard/setari/abonament/page.tsx app/api/stripe app/api/plan/route.ts app/terms app/privacy app/dpa app/page.tsx lib/server/plan.ts |
