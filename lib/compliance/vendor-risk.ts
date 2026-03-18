@@ -3,6 +3,7 @@
 
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
 import type { ScanFinding } from "@/lib/compliance/types"
+import { buildVendorRiskResolution } from "@/lib/compliance/finding-resolution"
 
 export type VendorRiskLevel = "low" | "medium" | "high"
 
@@ -89,6 +90,7 @@ export function buildVendorRiskFindings(vendors: Nis2Vendor[], nowISO: string): 
         sourceDocument: "Registru Furnizori NIS2",
         legalReference: "NIS2 Art. 21(2)(d) / OUG 155/2024",
         remediationHint: `Revizuiește contractul cu ${vendor.name}: solicită DPA, SLA cu clauze de securitate și drept de audit. Marchează revizuirea în registru.`,
+        resolution: buildVendorRiskResolution(vendor.name, !factors.hasDPA, !factors.hasSecuritySLA),
       })
     }
   }

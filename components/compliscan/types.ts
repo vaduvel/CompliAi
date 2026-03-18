@@ -44,6 +44,7 @@ export type CockpitTask = {
   relatedDriftIds: string[]
   rescanHint?: string
   closureRecipe?: string
+  resolution?: import("@/lib/compliance/types").FindingResolution
   status: TaskStatus
   sourceDocument?: string
   attachedEvidence?: TaskEvidenceAttachment

@@ -163,6 +163,7 @@ function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): Cock
     relatedDriftIds: [],
     rescanHint: finding.rescanHint,
     closureRecipe: buildClosureRecipe(finding),
+    resolution: finding.resolution,
     status: "todo",
     sourceDocument: finding.sourceDocument,
     evidenceKinds: finding.evidenceTypes ?? inferEvidenceKindsFromCategory(finding.category),
