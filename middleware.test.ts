@@ -15,6 +15,13 @@ describe("middleware", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1")
   })
 
+  it("lasă liber webhook-ul Stripe fără sesiune", async () => {
+    const response = await middleware(makeRequest("http://localhost/api/stripe/webhook"))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("x-middleware-next")).toBe("1")
+  })
+
   it("continuă să protejeze alte rute API fără sesiune", async () => {
     const response = await middleware(makeRequest("http://localhost/api/health"))
 
@@ -24,6 +31,6 @@ describe("middleware", () => {
 
   it("menține matcher-ul corect pentru auth și demo", () => {
     expect(config.matcher).toContain("/dashboard/:path*")
-    expect(config.matcher).toContain("/api/((?!auth|demo).*)")
+    expect(config.matcher).toContain("/api/((?!auth|demo|stripe/webhook).*)")
   })
 })
