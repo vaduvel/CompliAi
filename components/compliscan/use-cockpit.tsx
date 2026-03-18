@@ -319,6 +319,27 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function handleDownloadExecutivePdf() {
+    await withBusyOperation(async () => {
+      const response = await fetch("/api/reports/pdf", { method: "POST" })
+      if (!response.ok) throw new Error("Nu am putut genera raportul executiv PDF.")
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `raport-executiv-${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success("Raport Executiv descărcat")
+    }).catch((err) => {
+      toast.error("Export esuat", {
+        description: err instanceof Error ? err.message : "Eroare la generarea raportului executiv.",
+      })
+    })
+  }
+
   async function handleGenerateAuditPack() {
     await withBusyOperation(async () => {
       const response = await fetch("/api/exports/audit-pack/client", { cache: "no-store" })
@@ -1038,6 +1059,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,
     handleGenerateAnnexLite,
@@ -1131,6 +1153,7 @@ export type CockpitActionSlice = Pick<
   | "handleAnalyzePendingScan"
   | "handleScan"
   | "handleGenerateReport"
+  | "handleDownloadExecutivePdf"
   | "handleGenerateAuditPack"
   | "handleGenerateAuditBundle"
   | "handleGenerateAnnexLite"
@@ -1231,6 +1254,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,
     handleGenerateAnnexLite,
@@ -1270,6 +1294,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,
     handleGenerateAnnexLite,

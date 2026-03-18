@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 
 type ExportCenterProps = {
   onGeneratePdf: () => void
+  onDownloadExecutivePdf?: () => void
   onGenerateAuditPack?: () => void
   onGenerateAuditBundle?: () => void
   onGenerateAnnexLite?: () => void
@@ -39,6 +40,7 @@ type ExportAction = {
 
 export function ExportCenter({
   onGeneratePdf,
+  onDownloadExecutivePdf,
   onGenerateAuditPack,
   onGenerateAuditBundle,
   onGenerateAnnexLite,
@@ -58,6 +60,19 @@ export function ExportCenter({
         "h-auto",
       variant: undefined,
     },
+    ...(onDownloadExecutivePdf
+      ? [
+          {
+            key: "executive-pdf",
+            label: "Raport Executiv PDF",
+            hint: "O pagina — descarca direct ca fisier PDF. Pentru management si auditori.",
+            icon: FileStack,
+            onClick: onDownloadExecutivePdf,
+            className: "h-auto",
+            variant: undefined,
+          },
+        ]
+      : []),
   ]
 
   const secondaryActions: ExportAction[] = [
