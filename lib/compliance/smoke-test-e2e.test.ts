@@ -35,13 +35,29 @@ function makeOrgProfile(overrides: Partial<OrgProfile> = {}): OrgProfile {
 
 function makeBaseState(applicability: ApplicabilityResult): ComplianceState {
   return normalizeComplianceState({
+    highRisk: 0,
+    lowRisk: 0,
+    gdprProgress: 0,
+    efacturaSyncedAtISO: "",
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 0,
+    alerts: [],
+    findings: [],
+    scans: [],
+    chat: [],
+    taskState: {},
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    events: [],
     orgProfile: makeOrgProfile(),
     applicability,
-    findings: [],
-    alerts: [],
-    driftRecords: [],
-    events: [],
-    taskState: {},
   })
 }
 
@@ -49,13 +65,13 @@ function makeFinding(overrides: Partial<ScanFinding> = {}): ScanFinding {
   return {
     id: "finding-smoke-1",
     title: "Politica GDPR lipsă",
-    description: "Nu a fost generată o politică de confidențialitate.",
     detail: "Organizația nu are o politică de confidențialitate generată sau încărcată.",
     severity: "high",
     category: "GDPR",
-    tags: ["gdpr"],
-    source: "health-check",
-    detectedAtISO: "2026-03-18T10:00:00.000Z",
+    risk: "high",
+    principles: [],
+    sourceDocument: "health-check",
+    createdAtISO: "2026-03-18T10:00:00.000Z",
     ...overrides,
   }
 }
@@ -151,7 +167,7 @@ describe("Smoke Test E2E: register → wizard → dashboard → finding → evid
       expect(finding.id).toBeTruthy()
       expect(finding.severity).toBe("high")
       expect(finding.category).toBe("GDPR")
-      expect(finding.detectedAtISO).toBeTruthy()
+      expect(finding.createdAtISO).toBeTruthy()
     })
 
     it("remediation plan se generează din findings", () => {
