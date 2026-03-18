@@ -3,6 +3,43 @@ import type { NextRequest } from "next/server"
 
 const SESSION_COOKIE = "compliscan_session"
 
+// ── Rate limiting (in-memory, per Edge Runtime instance) ──────────────────────
+// NOTE: Multi-instance deployments need Redis/Upstash for cross-instance limiting.
+// For single-instance MVP this is sufficient.
+
+type RateBucket = { count: number; windowStart: number }
+const rateBuckets = new Map<string, RateBucket>()
+
+const RATE_LIMITS: { pattern: RegExp; maxPerMin: number }[] = [
+  // Expensive generation routes — tight limit
+  { pattern: /^\/api\/documents\/generate/, maxPerMin: 10 },
+  { pattern: /^\/api\/scan\/extract/, maxPerMin: 10 },
+  // All other mutating routes
+  { pattern: /^\/api\//, maxPerMin: 60 },
+]
+
+function checkRateLimit(orgId: string, pathname: string, method: string): boolean {
+  // Only rate-limit mutating methods
+  if (!["POST", "PATCH", "PUT", "DELETE"].includes(method)) return true
+
+  const limit = RATE_LIMITS.find((r) => r.pattern.test(pathname))
+  if (!limit) return true
+
+  const key = `${orgId}:${pathname.replace(/\/[a-z0-9-]{8,}/gi, "/:id")}`
+  const now = Date.now()
+  const bucket = rateBuckets.get(key)
+
+  if (!bucket || now - bucket.windowStart > 60_000) {
+    rateBuckets.set(key, { count: 1, windowStart: now })
+    return true
+  }
+
+  if (bucket.count >= limit.maxPerMin) return false
+
+  bucket.count++
+  return true
+}
+
 function getSessionSecret() {
   const explicit = process.env.COMPLISCAN_SESSION_SECRET?.trim()
   if (explicit) return explicit
@@ -78,6 +115,17 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.redirect(new URL("/login", request.url))
     response.cookies.delete(SESSION_COOKIE)
     return response
+  }
+
+  // Rate limiting check
+  if (!checkRateLimit(session.orgId, pathname, request.method)) {
+    return NextResponse.json(
+      { error: "Prea multe cereri. Încearcă din nou în câteva secunde.", code: "RATE_LIMITED" },
+      {
+        status: 429,
+        headers: { "Retry-After": "60" },
+      }
+    )
   }
 
   const requestHeaders = new Headers(request.headers)
