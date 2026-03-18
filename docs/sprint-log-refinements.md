@@ -866,8 +866,15 @@ Regula curentă:
   - `app/api/stripe/portal/route.ts`
   - `lib/server/plan.ts`
   - `.env.example` include deja `STRIPE_*`
-- `Vercel` este prezent doar minimal:
-  - `vercel.json` are cron pentru `weekly-digest`
+- baseline-ul `Vercel` este acum live pe domeniu temporar:
+  - `https://compliscanag.vercel.app`
+  - env-urile de producție sunt configurate
+  - `vercel.json` acoperă `weekly-digest` și `vendor-review-revalidation`
+- `Stripe` test mode este validat end-to-end pe mediul live temporar:
+  - checkout plătit
+  - webhook procesat
+  - `/api/plan` mutat la `pro`
+  - billing portal activ
 - `Sentry` nu este încă integrat:
   - nu există fișiere sau wiring `sentry.*`
   - nu există variabile `SENTRY_*` în `.env.example`
@@ -875,7 +882,6 @@ Regula curentă:
 ### Deblocare
 Acest bloc se reia doar după ce există:
 - domeniu canonic
-- acces la Vercel project / production env
 - DNS configurabil
 - credențiale Resend
 - credențiale Sentry
