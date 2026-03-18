@@ -10,6 +10,9 @@ import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/s
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { UserMembershipSummary } from "@/lib/server/auth"
+import { readNis2State } from "@/lib/server/nis2-store"
+import { detectEntityType } from "@/lib/compliance/nis2-rules"
+import { buildMockEFacturaSignals, summarizeEFacturaSignals } from "@/lib/compliance/efactura-risk"
 
 const DATA_DIR = path.join(process.cwd(), ".data")
 
@@ -39,6 +42,9 @@ export type PartnerClientSummary = {
     highRisk: number
     efacturaConnected: boolean
     hasData: boolean
+    // V3 P0.4 — Accountant Hub signals
+    nis2RescueNeeded: boolean     // entity is NIS2-applicable but registration not confirmed
+    efacturaRiskCount: number     // rejected + xml-error signals
   } | null
 }
 
@@ -51,15 +57,29 @@ export async function GET(request: Request) {
 
     const memberships = await listUserMemberships(session.userId)
 
-    // Load compliance state for each org in parallel (max 20 orgs)
+    // Load compliance + NIS2 state for each org in parallel (max 20 orgs)
+    const efacturaSignals = buildMockEFacturaSignals()
+    const efacturaSummary = summarizeEFacturaSignals(efacturaSignals)
+
     const clients: PartnerClientSummary[] = await Promise.all(
       memberships.slice(0, 20).map(async (m) => {
-        const state = await readOrgState(m.orgId)
+        const [state, nis2State] = await Promise.all([
+          readOrgState(m.orgId),
+          readNis2State(m.orgId),
+        ])
         let compliance: PartnerClientSummary["compliance"] = null
 
         if (state) {
           const normalized = normalizeComplianceState(state)
           const summary = computeDashboardSummary(normalized)
+
+          // V3 P0.4: NIS2 rescue needed if entity is applicable but not confirmed
+          const sector = nis2State.assessment?.sector ?? "general"
+          const entityType = detectEntityType(sector)
+          const dnscStatus = nis2State.dnscRegistrationStatus ?? "not-started"
+          const nis2RescueNeeded =
+            entityType !== "not-applicable" && dnscStatus !== "confirmed"
+
           compliance = {
             score: summary.score,
             riskLabel: summary.riskLabel,
@@ -70,6 +90,8 @@ export async function GET(request: Request) {
             highRisk: normalized.highRisk,
             efacturaConnected: normalized.efacturaConnected,
             hasData: summary.score > 0 || normalized.scannedDocuments > 0,
+            nis2RescueNeeded,
+            efacturaRiskCount: efacturaSummary.rejected + efacturaSummary.xmlErrors,
           }
         }
 
