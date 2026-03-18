@@ -193,3 +193,6 @@ Cleanup operational aplicat:
   - Vercel baseline live
   - Stripe test mode functional
   - parcarea V4 ramane pentru domeniu, DNS/email, Sentry, smoke matrix, asset QA
+- `CRON_SECRET` creat in Vercel `production`, apoi rotit o data dupa un prim deploy esuat din cauza whitespace la final
+- redeploy productie reusit dupa rotirea secretului
+- `POST /api/cron/vendor-review-revalidation` fara auth → `401`, deci protectia cron este activa
