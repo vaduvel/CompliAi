@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { CheckCircle2, ChevronRight, Loader2, Shield } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -40,8 +40,12 @@ const CERTAINTY_BADGE: Record<string, string> = {
 }
 
 export function ApplicabilityWizard({ onComplete }: Props) {
-  const { trackOnce } = useTrackEvent()
+  const { track, trackOnce } = useTrackEvent()
+  const completedRef = useRef(false)
   useEffect(() => { trackOnce("started_applicability") }, [trackOnce])
+  useEffect(() => () => {
+    if (!completedRef.current) track("abandoned_applicability")
+  }, [track])
   const [step, setStep] = useState<WizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
     cui: "",
@@ -70,6 +74,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
       if (!res.ok) throw new Error("save failed")
       const data = (await res.json()) as { applicability: ApplicabilityResult }
       setResult(data.applicability)
+      completedRef.current = true
       setStep("done")
     } catch {
       // keep wizard open

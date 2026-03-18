@@ -17,6 +17,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 import { PLAN_LABELS, PLAN_PRICES } from "@/lib/server/plan"
 import type { OrgPlan } from "@/lib/server/plan"
 
@@ -74,6 +75,7 @@ function PlanStatusBadge({ plan, trialEndsAtISO }: { plan: OrgPlan; trialEndsAtI
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AbonamentPage() {
+  const { track } = useTrackEvent()
   const [planData, setPlanData] = useState<PlanResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<OrgPlan | null>(null)
@@ -103,6 +105,7 @@ export default function AbonamentPage() {
         toast.info("Stripe nu este configurat — mod demo")
         return
       }
+      track("started_checkout_not_completed", { targetPlan })
       window.location.href = data.url
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Checkout a eșuat.")

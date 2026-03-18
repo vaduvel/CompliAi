@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react"
 import {
   AlertTriangle,
   CheckCircle2,
@@ -23,6 +23,7 @@ import {
   formatEvidenceQualityStatus,
   getEvidenceQualitySummary,
 } from "@/lib/compliance/evidence-quality"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 
 type TaskCardProps = {
   task: CockpitTask
@@ -159,6 +160,29 @@ export function TaskCard({
   onAttachEvidence,
   onExport,
 }: TaskCardProps) {
+  const { track } = useTrackEvent()
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const trackedRef = useRef(false)
+
+  // Track "opened finding but not closed" when card becomes visible
+  useEffect(() => {
+    if (task.status !== "todo" || trackedRef.current) return
+    const el = cardRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !trackedRef.current) {
+          trackedRef.current = true
+          track("opened_finding_but_not_closed", { taskId: task.id })
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [task.id, task.status, track])
+
   const tone = priorityTone(task.priority)
   const evidenceInputRef = useRef<HTMLInputElement | null>(null)
   const [validating, setValidating] = useState(false)
@@ -196,6 +220,7 @@ export function TaskCard({
 
   return (
     <Card
+      ref={cardRef}
       id={`task-${task.id}`}
       className={`border-eos-border bg-eos-surface shadow-sm transition ${
         highlighted ? "ring-1 ring-eos-border-strong ring-offset-2 ring-offset-eos-bg" : ""
