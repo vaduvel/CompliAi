@@ -17,6 +17,7 @@ import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizar
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
+import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -178,6 +179,19 @@ export default function DashboardPage() {
           <SummaryMetric label="Stare audit"           value={AUDIT_DECISION_LABEL[coreAuditDecision]} />
         </div>
       </section>
+
+      {/* ── Onboarding checklist (Sprint 3.3) ───────────────────────────────── */}
+      {state.orgProfile && (
+        <section aria-label="Ghid de pornire">
+          <OnboardingProgress
+            hasProfile={true}
+            hasAiSystems={totalAiSystems > 0}
+            gdprProgress={state.gdprProgress}
+            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
+            hasResolvedTasks={tasks.some((t) => t.status === "done")}
+          />
+        </section>
+      )}
 
       {/* ── Stare + acțiune imediată (grupate ca o singură zonă de control) ── */}
       <div className="space-y-4">
