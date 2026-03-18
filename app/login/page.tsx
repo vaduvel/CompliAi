@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
@@ -52,17 +52,39 @@ export default function LoginPage() {
     }
   }
 
+  const VALUE_PROPS = [
+    "NIS2, GDPR, AI Act, e-Factura — totul într-un loc",
+    "Import automat din SPV / e-Factura ANAF",
+    "Dosar de control gata de descărcat pentru orice inspecție",
+  ]
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-4 py-12">
       <div className="w-full max-w-md">
         <CompliScanLogoLockup
-          className="mb-8"
+          className="mb-5"
           variant="gradient"
           size="md"
-          subtitle="control operational pentru documente si sisteme AI"
+          subtitle=""
           titleClassName="text-eos-text"
           subtitleClassName="text-eos-text-muted"
         />
+
+        {/* Tagline */}
+        <p className="mb-3 text-lg font-semibold leading-snug text-eos-text">
+          Află ce ți se aplică. Pregătește dovezile.{" "}
+          <span className="text-eos-primary">Fii gata de control.</span>
+        </p>
+
+        {/* Value props */}
+        <ul className="mb-8 space-y-2">
+          {VALUE_PROPS.map((prop) => (
+            <li key={prop} className="flex items-center gap-2 text-sm text-eos-text-muted">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-500" strokeWidth={2} />
+              {prop}
+            </li>
+          ))}
+        </ul>
 
         <Card className="border-eos-border bg-eos-surface">
           <CardHeader className="border-b border-eos-border pb-5">
@@ -192,9 +214,9 @@ export default function LoginPage() {
         </Card>
 
         <p className="mt-6 text-center text-xs text-eos-text-muted">
-          Scorul si recomandarile sunt sugestii operationale, nu sfat juridic.
+          Nu oferim consiliere juridică. Oferim instrumente de pregătire.
           <br />
-          Verifica uman inainte de orice raport oficial.
+          Verificați cu un specialist înainte de orice raport oficial.
         </p>
       </div>
     </div>
