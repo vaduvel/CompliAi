@@ -79,7 +79,7 @@ export default function HomePage() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/pricing">Vezi planurile</Link>
+              <Link href="/demo/imm">Vezi demo live</Link>
             </Button>
           </div>
           <p className="mt-3 text-xs text-eos-text-muted">
