@@ -104,7 +104,7 @@ function ClientRow({ client, onDrillDown }: { client: PartnerClientSummary; onDr
       </div>
 
       {/* Status pills */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-1.5">
         {c?.efacturaConnected && (
           <Badge variant="success" className="text-[10px] normal-case tracking-normal">
             e-Factura
@@ -118,6 +118,17 @@ function ClientRow({ client, onDrillDown }: { client: PartnerClientSummary; onDr
         {c && c.highRisk > 0 ? (
           <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
             {c.highRisk} high-risk AI
+          </Badge>
+        ) : null}
+        {/* V3 P0.4 — Accountant Hub urgency signals */}
+        {c?.nis2RescueNeeded && (
+          <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+            NIS2 neînregistrat
+          </Badge>
+        )}
+        {c && c.efacturaRiskCount > 0 ? (
+          <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+            {c.efacturaRiskCount} facturi risc
           </Badge>
         ) : null}
       </div>
