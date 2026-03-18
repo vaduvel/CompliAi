@@ -4,25 +4,12 @@
 // compliance summary complet + NIS2 state + findings deschise.
 
 import { NextResponse } from "next/server"
-import { promises as fs } from "node:fs"
-import path from "node:path"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
-import type { ComplianceState } from "@/lib/compliance/types"
 import { readNis2State } from "@/lib/server/nis2-store"
-
-const DATA_DIR = path.join(process.cwd(), ".data")
-
-async function readOrgState(orgId: string): Promise<ComplianceState | null> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
-    return JSON.parse(raw) as ComplianceState
-  } catch {
-    return null
-  }
-}
+import { readStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(
   request: Request,
@@ -44,7 +31,7 @@ export async function GET(
     }
 
     // Citește starea de conformitate
-    const rawState = await readOrgState(orgId)
+    const rawState = await readStateForOrg(orgId)
     let complianceSummary = null
     let openFindings: { id: string; title: string; category: string; severity: string }[] = []
 
@@ -77,7 +64,6 @@ export async function GET(
     }
 
     // Citește starea NIS2
-    // Simulăm org context prin patch-ul direct pe nis2-store
     const nis2State = await readNis2State(orgId)
 
     return NextResponse.json({

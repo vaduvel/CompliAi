@@ -1,31 +1,18 @@
-import { promises as fs } from "node:fs"
-import path from "node:path"
 import { CheckCircle2, Lock, ShieldCheck, XCircle } from "lucide-react"
 
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
-import type { ComplianceState } from "@/lib/compliance/types"
+import { readStateForOrg } from "@/lib/server/mvp-store"
+import { loadOrganizations } from "@/lib/server/auth"
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
-
-const DATA_DIR = path.join(process.cwd(), ".data")
 
 function isValidOrgId(id: string): boolean {
   return /^org-[a-z0-9]{8,}$/.test(id)
 }
 
-async function readPublicState(orgId: string): Promise<ComplianceState | null> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
-    return JSON.parse(raw) as ComplianceState
-  } catch {
-    return null
-  }
-}
-
 async function readOrgName(orgId: string): Promise<string> {
   try {
-    const raw = await fs.readFile(path.join(DATA_DIR, "orgs.json"), "utf8")
-    const orgs = JSON.parse(raw) as Array<{ id: string; name: string }>
+    const orgs = await loadOrganizations()
     return orgs.find((o) => o.id === orgId)?.name ?? orgId
   } catch {
     return orgId
@@ -106,7 +93,7 @@ export default async function TrustPage({
   }
 
   const [state, orgName] = await Promise.all([
-    readPublicState(orgId),
+    readStateForOrg(orgId),
     readOrgName(orgId),
   ])
 

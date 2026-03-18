@@ -2,28 +2,15 @@
 // Returns org summaries with compliance scores for multi-client dashboard.
 
 import { NextResponse } from "next/server"
-import { promises as fs } from "node:fs"
-import path from "node:path"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
-import type { ComplianceState } from "@/lib/compliance/types"
 import type { UserMembershipSummary } from "@/lib/server/auth"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { detectEntityType } from "@/lib/compliance/nis2-rules"
 import { buildMockEFacturaSignals, summarizeEFacturaSignals } from "@/lib/compliance/efactura-risk"
-
-const DATA_DIR = path.join(process.cwd(), ".data")
-
-async function readOrgState(orgId: string): Promise<ComplianceState | null> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
-    return JSON.parse(raw) as ComplianceState
-  } catch {
-    return null
-  }
-}
+import { readStateForOrg } from "@/lib/server/mvp-store"
 
 export type PartnerClientSummary = {
   orgId: string
@@ -64,7 +51,7 @@ export async function GET(request: Request) {
     const clients: PartnerClientSummary[] = await Promise.all(
       memberships.slice(0, 20).map(async (m) => {
         const [state, nis2State] = await Promise.all([
-          readOrgState(m.orgId),
+          readStateForOrg(m.orgId),
           readNis2State(m.orgId),
         ])
         let compliance: PartnerClientSummary["compliance"] = null

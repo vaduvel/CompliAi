@@ -68,6 +68,37 @@ export async function mutateState(
   return readState()
 }
 
+/**
+ * Read state for a specific orgId — bypasses getOrgContext().
+ * Used by partner portal, trust page, cron, demo routes that need
+ * cross-org access without relying on request headers.
+ */
+export async function readStateForOrg(orgId: string): Promise<ComplianceState | null> {
+  const cached = memoryStates.get(orgId)
+  if (cached) return structuredClone(cached)
+
+  try {
+    const loaded = await loadState(orgId)
+    const normalized = normalizeComplianceState(loaded)
+    memoryStates.set(orgId, normalized)
+    initializedOrgs.add(orgId)
+    return structuredClone(normalized)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Write state for a specific orgId — bypasses getOrgContext().
+ * Used by demo seed route to write state for demo orgs.
+ */
+export async function writeStateForOrg(orgId: string, state: ComplianceState, orgName?: string): Promise<void> {
+  const normalized = normalizeComplianceState(structuredClone(state))
+  memoryStates.set(orgId, normalized)
+  initializedOrgs.add(orgId)
+  await persistState(orgId, orgName, normalized)
+}
+
 export async function appendChat(
   userMessage: string,
   assistantMessage: string

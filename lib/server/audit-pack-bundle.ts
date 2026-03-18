@@ -1,8 +1,7 @@
-import { execFile } from "node:child_process"
 import os from "node:os"
 import path from "node:path"
 import { promises as fs } from "node:fs"
-import { promisify } from "node:util"
+import archiver from "archiver"
 
 import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
@@ -13,8 +12,6 @@ import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/s
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 import { sanitizeForMarkdown } from "@/lib/server/request-validation"
-
-const execFileAsync = promisify(execFile)
 
 type AuditPackBundleArtifact = {
   fileName: string
@@ -32,7 +29,6 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
   const clientDocument = buildClientAuditPackDocument(auditPack)
   const annexLiteDocument = buildClientAnnexLiteDocument(auditPack.appendix.compliancePack)
   const zipFileName = `audit-pack-dossier-${slug}-${dateLabel}.zip`
-  const zipAbsolutePath = path.join(rootDir, zipFileName)
 
   // R-10: citim NIS2 state pentru a-l include în bundle
   const nis2State = await readNis2State(auditPack.workspace.id).catch(() => ({
@@ -169,11 +165,7 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
       "utf8"
     )
 
-    await execFileAsync("/usr/bin/zip", ["-r", zipAbsolutePath, path.basename(bundleDir)], {
-      cwd: rootDir,
-    })
-
-    const buffer = await fs.readFile(zipAbsolutePath)
+    const buffer = await createZipBuffer(rootDir, path.basename(bundleDir))
     return {
       fileName: zipFileName,
       buffer,
@@ -181,6 +173,20 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
   } finally {
     await fs.rm(rootDir, { recursive: true, force: true })
   }
+}
+
+async function createZipBuffer(rootDir: string, folderName: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const archive = archiver("zip", { zlib: { level: 6 } })
+    const chunks: Buffer[] = []
+
+    archive.on("data", (chunk: Buffer) => chunks.push(chunk))
+    archive.on("end", () => resolve(Buffer.concat(chunks)))
+    archive.on("error", reject)
+
+    archive.directory(path.join(rootDir, folderName), folderName)
+    archive.finalize()
+  })
 }
 
 async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {

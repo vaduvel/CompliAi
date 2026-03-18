@@ -3,8 +3,7 @@
 import Link from "next/link"
 import { Lock } from "lucide-react"
 import { Button } from "@/components/evidence-os/Button"
-import { PLAN_LABELS, planHasFeature } from "@/lib/server/plan"
-import type { OrgPlan, PlanFeature } from "@/lib/server/plan"
+import { PLAN_LABELS, planHasFeature, type OrgPlan, type PlanFeature } from "@/lib/shared/plan-constants"
 
 // ── PlanGate ──────────────────────────────────────────────────────────────────
 //

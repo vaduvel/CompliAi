@@ -5,8 +5,6 @@
 // Sesiunea demo expiră în 2 ore. Datele demo sunt resetate la fiecare vizita.
 
 import { NextResponse } from "next/server"
-import { promises as fs } from "node:fs"
-import path from "node:path"
 import {
   createSessionToken,
   getSessionCookieOptions,
@@ -18,12 +16,7 @@ import {
   DEMO_SCENARIOS,
   type DemoScenario,
 } from "@/lib/server/demo-seed"
-
-const DATA_DIR = path.join(process.cwd(), ".data")
-
-async function ensureDataDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-}
+import { writeStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(
   _request: Request,
@@ -43,12 +36,7 @@ export async function GET(
 
   // Seed state (suprascrie la fiecare vizită — demo-ul pornește curat)
   const state = buildDemoState(demo)
-  await ensureDataDir()
-  await fs.writeFile(
-    path.join(DATA_DIR, `state-${orgConfig.orgId}.json`),
-    JSON.stringify(state, null, 2),
-    "utf8"
-  )
+  await writeStateForOrg(orgConfig.orgId, state, orgConfig.orgName)
 
   // Creare sesiune demo (2 ore)
   const token = createSessionToken({

@@ -18,8 +18,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { useTrackEvent } from "@/lib/client/use-track-event"
-import { PLAN_LABELS, PLAN_PRICES } from "@/lib/server/plan"
-import type { OrgPlan } from "@/lib/server/plan"
+import { PLAN_LABELS, PLAN_PRICES, type OrgPlan } from "@/lib/shared/plan-constants"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

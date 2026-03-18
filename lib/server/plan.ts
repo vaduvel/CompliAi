@@ -4,9 +4,19 @@
 
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// Re-export client-safe constants so existing imports from lib/server/plan still work
+export {
+  type OrgPlan,
+  type PlanFeature,
+  PLAN_LABELS,
+  PLAN_PRICES,
+  featureRequiresPlan,
+  planHasFeature,
+} from "@/lib/shared/plan-constants"
+import type { OrgPlan } from "@/lib/shared/plan-constants"
+import { PLAN_LABELS } from "@/lib/shared/plan-constants"
 
-export type OrgPlan = "free" | "pro" | "partner"
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 export type OrgPlanRecord = {
   orgId: string
@@ -23,18 +33,6 @@ const PLAN_PRIORITY: PlanHierarchy = {
   free: 0,
   pro: 1,
   partner: 2,
-}
-
-export const PLAN_LABELS: Record<OrgPlan, string> = {
-  free: "Gratuit",
-  pro: "Pro",
-  partner: "Partner",
-}
-
-export const PLAN_PRICES: Record<OrgPlan, string> = {
-  free: "€0 / lună",
-  pro: "€99 / lună",
-  partner: "€249 / lună",
 }
 
 // ── Plan Error ────────────────────────────────────────────────────────────────
@@ -135,43 +133,3 @@ export async function requirePlan(
   return currentPlan
 }
 
-// ── Plan feature gates (pentru UI) ───────────────────────────────────────────
-
-export type PlanFeature =
-  | "audit-pack-full"
-  | "findings-resolution"
-  | "efactura-signal"
-  | "partner-hub"
-  | "all-documents"
-  | "health-check"
-  | "inspector-mode"
-  | "weekly-digest"
-  | "nis2-full"
-  | "ai-act-full"
-  | "multi-client"
-  | "csv-import"
-  | "client-drilldown"
-
-const FEATURE_PLAN: Record<PlanFeature, OrgPlan> = {
-  "audit-pack-full": "pro",
-  "findings-resolution": "pro",
-  "efactura-signal": "pro",
-  "partner-hub": "partner",
-  "all-documents": "pro",
-  "health-check": "pro",
-  "inspector-mode": "pro",
-  "weekly-digest": "pro",
-  "nis2-full": "pro",
-  "ai-act-full": "pro",
-  "multi-client": "partner",
-  "csv-import": "partner",
-  "client-drilldown": "partner",
-}
-
-export function featureRequiresPlan(feature: PlanFeature): OrgPlan {
-  return FEATURE_PLAN[feature]
-}
-
-export function planHasFeature(currentPlan: OrgPlan, feature: PlanFeature): boolean {
-  return PLAN_PRIORITY[currentPlan] >= PLAN_PRIORITY[FEATURE_PLAN[feature]]
-}
