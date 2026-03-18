@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CheckCircle2, ChevronRight, Loader2, Shield } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -14,6 +14,7 @@ import {
   type OrgEmployeeCount,
   type ApplicabilityResult,
 } from "@/lib/compliance/applicability"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 
 type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "done"
 
@@ -39,6 +40,8 @@ const CERTAINTY_BADGE: Record<string, string> = {
 }
 
 export function ApplicabilityWizard({ onComplete }: Props) {
+  const { trackOnce } = useTrackEvent()
+  useEffect(() => { trackOnce("started_applicability") }, [trackOnce])
   const [step, setStep] = useState<WizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
     cui: "",

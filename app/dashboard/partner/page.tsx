@@ -22,6 +22,7 @@ import { Card } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 import type { PartnerClientSummary } from "@/app/api/partner/clients/route"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -302,6 +303,8 @@ function CsvImportModal({
 
 export default function PartnerPage() {
   const router = useRouter()
+  const { trackOnce } = useTrackEvent()
+  useEffect(() => { trackOnce("entered_accountant_hub") }, [trackOnce])
   const [clients, setClients] = useState<PartnerClientSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

@@ -49,6 +49,7 @@
 | V3-QA.1 | Audit Full + Bug Fixes RBAC + Teste V3 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V3-QA.2 | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V4-P2.1 | V4.2 Commercial Readiness — Pricing page, Plan logic, Stripe, Legal pages, Landing page | 🟢 Închis | 2026-03-18 | 2026-03-18 |
+| V4-P4.4 | V4.4 Pilot Infrastructure — analytics, onboarding emails, micro-feedback | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -767,3 +768,50 @@ Implementare completă commercial layer V4: sistem de planuri Free/Pro/Partner, 
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-18 | Claude | V4.2 Commercial Readiness — v42-commercial. Fișiere: app/pricing/page.tsx components/compliscan/plan-gate.tsx app/dashboard/setari/abonament/page.tsx app/api/stripe app/api/plan/route.ts app/terms app/privacy app/dpa app/page.tsx lib/server/plan.ts |
+
+---
+
+## V4-P4.4 — V4.4 Pilot Infrastructure
+
+**Origine:** `docs/CompliAI_V4_Final_Operabil.md` — V4.4 Pilot Infrastructure
+**Impact:** Înalt — fără analytics și onboarding emails nu putem învăța din comportamentul piloților
+**Efort estimat:** 2-3 ore
+
+### Descriere
+Infrastructura de pilotare: analytics event tracking (fire-and-forget, Supabase sau JSONL fallback), secvență de 4 emailuri de onboarding via Resend, component micro-feedback thumbs up/down după acțiuni cheie, endpoint `/api/feedback`, wiring în register/applicability/document-gen/task-closure.
+
+### Scope tehnic
+- `lib/server/analytics.ts` — trackEvent() fire-and-forget, 12 event types, Supabase sau .data/analytics.jsonl fallback
+- `lib/server/onboarding-emails.ts` — 4 emailuri HTML: welcome, day2-first-doc, day5-vendors, day10-upgrade, Resend API sau console.log fallback
+- `components/compliscan/feedback-prompt.tsx` — FeedbackPrompt thumbs up/down cu dismiss
+- `app/api/feedback/route.ts` — stochează feedback ca analytics event
+- `app/api/auth/register/route.ts` — void sendOnboardingEmail("welcome", ...) la register
+- `app/api/org/profile/route.ts` — void trackEvent(orgId, "completed_applicability") la POST
+- `app/api/documents/generate/route.ts` — void trackEvent(orgId, "generated_first_document") la generare
+- `app/api/tasks/[id]/route.ts` — void trackEvent(orgId, "closed_first_finding") când status→done cu alerte închise
+
+### Fișiere afectate
+- `lib/server/analytics.ts` (nou)
+- `lib/server/onboarding-emails.ts` (nou)
+- `components/compliscan/feedback-prompt.tsx` (nou)
+- `app/api/feedback/route.ts` (nou)
+- `app/api/auth/register/route.ts` (modificat)
+- `app/api/org/profile/route.ts` (modificat)
+- `app/api/documents/generate/route.ts` (modificat)
+- `app/api/tasks/[id]/route.ts` (modificat)
+
+### Definition of Done
+- [x] `trackEvent()` fire-and-forget, nu blochează niciodată fluxul
+- [x] `sendOnboardingEmail()` apelat la register cu "welcome"
+- [x] `trackEvent("completed_applicability")` wired la POST /api/org/profile
+- [x] `trackEvent("generated_first_document")` wired la POST /api/documents/generate
+- [x] `trackEvent("closed_first_finding")` wired la PATCH /api/tasks/[id]
+- [x] `FeedbackPrompt` component cu thumbs up/down + dismiss
+- [x] `/api/feedback` endpoint stochează ca analytics event
+- [x] TypeScript: 0 erori
+- [x] Vitest: 491 passed (0 regresii)
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-18 | Claude | V4.4 Pilot Infrastructure — v44-pilot. Fișiere: lib/server/analytics.ts lib/server/onboarding-emails.ts components/compliscan/feedback-prompt.tsx app/api/feedback/route.ts app/api/auth/register/route.ts app/api/org/profile/route.ts app/api/documents/generate/route.ts app/api/tasks/[id]/route.ts |
