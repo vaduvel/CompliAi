@@ -30,7 +30,7 @@ export default function DpaPage() {
 
         <div className="prose prose-sm mt-8 max-w-none text-eos-text [&_a]:text-eos-primary [&_h2]:text-eos-text [&_h3]:text-eos-text [&_strong]:text-eos-text">
           <p>
-            Prezentul Acord de Prelucrare a Datelor („DPA") se aplică automat tuturor
+            Prezentul Acord de Prelucrare a Datelor (&ldquo;DPA&rdquo;) se aplică automat tuturor
             utilizatorilor CompliAI care, prin utilizarea Serviciului, acționează în calitate
             de operatori de date conform GDPR și implică CompliAI în calitate de persoană
             împuternicită de operator (procesator).

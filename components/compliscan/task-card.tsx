@@ -769,7 +769,7 @@ function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
         <div className="border-t border-eos-border-subtle px-4 py-2.5">
           <p className="text-[10px] text-eos-text-muted">
             <span className="font-semibold text-eos-success">Inchidere:</span>{" "}
-            Butonul „Rezolvat" devine activ doar după ce atașezi dovada de mai sus.
+            Butonul &ldquo;Rezolvat&rdquo; devine activ doar după ce atașezi dovada de mai sus.
           </p>
         </div>
       )}

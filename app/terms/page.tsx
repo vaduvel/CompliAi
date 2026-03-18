@@ -27,7 +27,7 @@ export default function TermsPage() {
         <div className="prose prose-sm mt-8 max-w-none text-eos-text [&_a]:text-eos-primary [&_h2]:text-eos-text [&_h3]:text-eos-text [&_strong]:text-eos-text">
           <h2>1. Serviciul CompliAI</h2>
           <p>
-            CompliAI (denumit în continuare „Serviciul") este un instrument digital de asistență
+            CompliAI (denumit în continuare &ldquo;Serviciul&rdquo;) este un instrument digital de asistență
             în pregătirea conformității cu reglementările aplicabile în Uniunea Europeană,
             inclusiv GDPR, EU AI Act, NIS2 și cerințele e-Factura ANAF. Serviciul este operat
             de CompliAI SRL (în curs de constituire) cu sediul în România.
