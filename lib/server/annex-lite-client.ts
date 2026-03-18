@@ -228,7 +228,7 @@ function buildClientAnnexLiteHtml(compliancePack: AICompliancePack) {
       ${systemsMarkup}
 
       <p class="footer">
-        Annex IV lite este un draft operational generat automat de CompliScan. El trebuie revizuit uman inainte de utilizare formala, contractuala sau regulatorie. Varianta structurata a sursei de adevar ramane AI Compliance Pack din snapshot-ul curent.
+        Acest document a fost generat automat de CompliAI pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. CompliAI nu este certificat de DNSC, ANSPDCP sau altă autoritate. Consultați un specialist juridic pentru validare. Varianta structurată rămâne AI Compliance Pack din snapshot-ul curent.
       </p>
     </main>
   </body>
