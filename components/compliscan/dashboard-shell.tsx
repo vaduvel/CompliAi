@@ -238,6 +238,14 @@ export function DashboardShell({
         </aside>
 
         <main className="min-w-0 flex-1 px-4 pb-40 pt-5 md:px-6 md:pb-12 md:pt-8 lg:px-8">
+          {process.env.NODE_ENV !== "production" && (
+            <div className="mb-4 flex items-center gap-2 rounded-eos-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              <span className="shrink-0 rounded-sm bg-amber-200 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-amber-800">
+                {process.env.NEXT_PUBLIC_APP_ENV ?? "dev"}
+              </span>
+              <span>Mediu de dezvoltare — datele nu sunt reale, nu trimite documente la terți.</span>
+            </div>
+          )}
           {children}
           <footer className="mt-12 pb-4">
             <LegalDisclaimer variant="short" />
