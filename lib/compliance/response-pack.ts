@@ -37,6 +37,21 @@ export type ResponsePackVendorSummary = {
   topReviews: ResponsePackVendorReview[]
 }
 
+export type ResponsePackFiscalStatus = {
+  efacturaConnected: boolean
+  lastSyncDaysAgo: number | null
+  signalsTotal: number
+  signalsCritical: number
+  signalsHigh: number
+  fiscalHealthLabel: string
+  etvaPendingDiscrepancies: number
+  etvaOverdueDiscrepancies: number
+  filingDisciplineScore: number
+  filingDisciplineLabel: string
+  overdueFilings: number
+  upcomingReminders: number
+}
+
 export type ComplianceResponseData = {
   generatedAt: string
   generatedAtLabel: string
@@ -52,6 +67,7 @@ export type ComplianceResponseData = {
     highRiskAiSystems: number
   }
   vendorReviews?: ResponsePackVendorSummary
+  fiscalStatus?: ResponsePackFiscalStatus
   commitments: string[]
   disclaimer: string
 }
@@ -65,6 +81,7 @@ export function buildComplianceResponse(
   orgName: string,
   nowISO: string,
   vendorReviewSummary?: ResponsePackVendorSummary,
+  fiscalStatus?: ResponsePackFiscalStatus,
 ): ComplianceResponseData {
   const now = new Date(nowISO)
   const generatedAtLabel = now.toLocaleString("ro-RO", {
@@ -214,6 +231,7 @@ export function buildComplianceResponse(
       highRiskAiSystems: state.highRisk ?? 0,
     },
     vendorReviews: vendorReviewSummary,
+    fiscalStatus,
     commitments,
     disclaimer:
       "Generat de CompliAI. Informațiile sunt orientative și nu constituie consultanță juridică. Verificați cu un specialist înainte de depunere oficială.",
@@ -366,6 +384,33 @@ export function buildComplianceResponseHtml(data: ComplianceResponseData): strin
         <p style="margin:2px 0 0;font-size:11px;color:#6b7280">Caz: ${r.reviewCase ?? "—"} · Dovezi: ${r.hasEvidence ? "Da" : "Nu"}${r.nextReviewDueISO ? ` · Următorul review: ${new Date(r.nextReviewDueISO).toLocaleDateString("ro-RO")}` : ""}</p>
       </div>`).join("")}
     </div>` : ""}
+  </section>` : ""}
+
+  <!-- Fiscal Status (ANAF Phase B) -->
+  ${data.fiscalStatus ? `
+  <section>
+    <h2>Status fiscal — ANAF / e-Factura / RO e-TVA</h2>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Conexiune e-Factura SPV</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;color:${data.fiscalStatus.efacturaConnected ? "#16a34a" : "#dc2626"}">${data.fiscalStatus.efacturaConnected ? "Activă" : "Inactivă"}</td></tr>
+      ${data.fiscalStatus.lastSyncDaysAgo !== null ? `<tr><td style="padding:6px 0;font-size:13px;color:#374151">Ultima sincronizare</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right">${data.fiscalStatus.lastSyncDaysAgo === 0 ? "Astăzi" : data.fiscalStatus.lastSyncDaysAgo + " zile"}</td></tr>` : ""}
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Semnale e-Factura (total)</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right">${data.fiscalStatus.signalsTotal}</td></tr>
+      ${data.fiscalStatus.signalsCritical > 0 ? `<tr><td style="padding:6px 0;font-size:13px;color:#374151">Semnale critice</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;color:#dc2626">${data.fiscalStatus.signalsCritical}</td></tr>` : ""}
+      ${data.fiscalStatus.signalsHigh > 0 ? `<tr><td style="padding:6px 0;font-size:13px;color:#374151">Semnale ridicat</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;color:#ea580c">${data.fiscalStatus.signalsHigh}</td></tr>` : ""}
+      <tr><td style="padding:6px 0;font-size:13px;color:#374151">Sănătate fiscală</td><td style="padding:6px 0;font-size:13px;font-weight:600;text-align:right;color:${data.fiscalStatus.fiscalHealthLabel === "critic" ? "#dc2626" : data.fiscalStatus.fiscalHealthLabel === "atenție" ? "#ca8a04" : "#16a34a"}">${data.fiscalStatus.fiscalHealthLabel}</td></tr>
+    </table>
+
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px">
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em">RO e-TVA Discrepanțe</p>
+        <p style="margin:0;font-size:20px;font-weight:800;color:${data.fiscalStatus.etvaOverdueDiscrepancies > 0 ? "#dc2626" : "#111"}">${data.fiscalStatus.etvaPendingDiscrepancies} pendinte</p>
+        ${data.fiscalStatus.etvaOverdueDiscrepancies > 0 ? `<p style="margin:2px 0 0;font-size:12px;color:#dc2626;font-weight:600">${data.fiscalStatus.etvaOverdueDiscrepancies} cu termen depășit</p>` : `<p style="margin:2px 0 0;font-size:12px;color:#6b7280">Niciuna cu termen depășit</p>`}
+      </div>
+      <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px">
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em">Disciplină declarații</p>
+        <p style="margin:0;font-size:20px;font-weight:800;color:${data.fiscalStatus.filingDisciplineScore >= 75 ? "#16a34a" : data.fiscalStatus.filingDisciplineScore >= 50 ? "#ca8a04" : "#dc2626"}">${data.fiscalStatus.filingDisciplineScore}/100</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#6b7280">${data.fiscalStatus.filingDisciplineLabel}${data.fiscalStatus.overdueFilings > 0 ? ` · ${data.fiscalStatus.overdueFilings} depășite` : ""}${data.fiscalStatus.upcomingReminders > 0 ? ` · ${data.fiscalStatus.upcomingReminders} remindere` : ""}</p>
+      </div>
+    </div>
   </section>` : ""}
 
   <!-- Evidence summary -->
