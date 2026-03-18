@@ -8,7 +8,7 @@ import { randomBytes } from "node:crypto"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { listReviews, createReview } from "@/lib/server/vendor-review-store"
+import { safeListReviews, createReview } from "@/lib/server/vendor-review-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { appendAudit, type VendorReview, type VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
 
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
     const { orgId } = await getOrgContext()
-    const reviews = await listReviews(orgId)
+    const reviews = await safeListReviews(orgId)
     return NextResponse.json({ reviews })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

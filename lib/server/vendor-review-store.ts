@@ -33,6 +33,15 @@ export async function listReviews(orgId: string): Promise<VendorReview[]> {
   return state.reviews
 }
 
+export async function safeListReviews(orgId: string): Promise<VendorReview[]> {
+  try {
+    return await listReviews(orgId)
+  } catch {
+    // Vendor review data is additive and should not block read-only surfaces.
+    return []
+  }
+}
+
 export async function getReview(orgId: string, reviewId: string): Promise<VendorReview | null> {
   const state = await readState(orgId)
   return state.reviews.find((r) => r.id === reviewId) ?? null

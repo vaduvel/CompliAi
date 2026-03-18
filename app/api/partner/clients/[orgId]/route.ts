@@ -10,7 +10,7 @@ import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/s
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
-import { listReviews } from "@/lib/server/vendor-review-store"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 import type { VendorReviewStatus, VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
 
 export async function GET(
@@ -69,7 +69,7 @@ export async function GET(
     const nis2State = await readNis2State(orgId)
 
     // V5.5 — Vendor reviews per client
-    const vendorReviews = await listReviews(orgId)
+    const vendorReviews = await safeListReviews(orgId)
     const vendorReviewSummary = {
       total: vendorReviews.length,
       open: vendorReviews.filter((r) => r.status !== "closed").length,

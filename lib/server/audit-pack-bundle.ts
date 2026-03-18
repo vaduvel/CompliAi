@@ -12,7 +12,7 @@ import { readNis2State, readMaturityAssessment, readBoardMembers } from "@/lib/s
 import type { Nis2OrgState } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 import { sanitizeForMarkdown } from "@/lib/server/request-validation"
-import { listReviews } from "@/lib/server/vendor-review-store"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 type AuditPackBundleArtifact = {
   fileName: string
@@ -134,7 +134,7 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
     )
 
     // V5.6: vendor review workbench data
-    const vendorReviews = await listReviews(auditPack.workspace.id).catch(() => [])
+    const vendorReviews = await safeListReviews(auditPack.workspace.id)
     if (vendorReviews.length > 0) {
       await fs.writeFile(
         path.join(nis2Dir, "vendor-reviews.json"),

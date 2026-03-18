@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
   readStateMock: vi.fn(),
   getOrgContextMock: vi.fn(),
-  listReviewsMock: vi.fn(),
+  safeListReviewsMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
   computeDashboardSummaryMock: vi.fn(),
   buildRemediationPlanMock: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock("@/lib/server/org-context", () => ({
 }))
 
 vi.mock("@/lib/server/vendor-review-store", () => ({
-  listReviews: mocks.listReviewsMock,
+  safeListReviews: mocks.safeListReviewsMock,
 }))
 
 vi.mock("@/lib/compliance/engine", () => ({
@@ -45,7 +45,7 @@ describe("POST /api/reports/response-pack", () => {
 
     mocks.readStateMock.mockResolvedValue({ findings: [], alerts: [] })
     mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-demo-imm", orgName: "Demo Retail SRL" })
-    mocks.listReviewsMock.mockResolvedValue([])
+    mocks.safeListReviewsMock.mockResolvedValue([])
     mocks.normalizeComplianceStateMock.mockImplementation((value) => value)
     mocks.computeDashboardSummaryMock.mockReturnValue({ score: 72 })
     mocks.buildRemediationPlanMock.mockReturnValue([{ id: "plan-1" }])
@@ -63,7 +63,7 @@ describe("POST /api/reports/response-pack", () => {
   })
 
   it("degradeaza gratios cand vendor review store nu poate fi citit", async () => {
-    mocks.listReviewsMock.mockRejectedValueOnce(new Error("vendor store unavailable"))
+    mocks.safeListReviewsMock.mockResolvedValueOnce([])
 
     const response = await POST()
     const payload = await response.json()

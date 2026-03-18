@@ -12,7 +12,7 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { loadOrganizations } from "@/lib/server/auth"
 import {
-  listReviews,
+  safeListReviews,
   updateReview,
 } from "@/lib/server/vendor-review-store"
 import {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     for (const org of orgsToProcess) {
       try {
-        const reviews = await listReviews(org.id)
+        const reviews = await safeListReviews(org.id)
         let overdueCount = 0
 
         for (const review of reviews) {

@@ -12,7 +12,7 @@ import {
 } from "@/lib/compliance/response-pack"
 import { readState } from "@/lib/server/mvp-store"
 import { getOrgContext } from "@/lib/server/org-context"
-import { listReviews } from "@/lib/server/vendor-review-store"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 export async function POST() {
   const [state, { orgId, orgName }] = await Promise.all([readState(), getOrgContext()])
@@ -22,14 +22,7 @@ export async function POST() {
   const nowISO = new Date().toISOString()
 
   // V5.6 — Vendor review data for response pack
-  const reviews = await (async () => {
-    try {
-      return await listReviews(orgId)
-    } catch {
-      // Vendor reviews are additive in V5 and should not block response-pack generation.
-      return []
-    }
-  })()
+  const reviews = await safeListReviews(orgId)
   let vendorReviewSummary: ResponsePackVendorSummary | undefined
   if (reviews.length > 0) {
     vendorReviewSummary = {
