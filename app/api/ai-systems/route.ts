@@ -8,7 +8,7 @@ import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { DELETE_ROLES } from "@/lib/server/rbac"
+import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 type AISystemPayload = {
   name?: string
@@ -35,6 +35,13 @@ function isPurpose(value: unknown): value is AISystemPurpose {
 }
 
 export async function POST(request: Request) {
+  try {
+    requireRole(request, WRITE_ROLES, "adăugarea sistemului AI")
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    throw error
+  }
+
   const body = (await request.json()) as AISystemPayload
   const actor = await resolveOptionalEventActor(request)
 
@@ -109,6 +116,7 @@ export async function DELETE(request: Request) {
     requireRole(request, DELETE_ROLES, "ștergerea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    throw error
   }
   const { searchParams } = new URL(request.url)
   const id = searchParams.get("id")

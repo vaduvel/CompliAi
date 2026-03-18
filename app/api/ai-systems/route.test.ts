@@ -3,6 +3,29 @@ import { NextResponse } from "next/server"
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
+const { AuthzErrorMock } = vi.hoisted(() => ({
+  AuthzErrorMock: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: AuthzErrorMock,
+  requireRole: vi.fn(),
+}))
+
+vi.mock("@/lib/server/api-response", () => ({
+  jsonError: vi.fn((msg: string, status: number) =>
+    NextResponse.json({ error: msg }, { status })
+  ),
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
   mutateState: vi.fn(async (fn: (s: unknown) => unknown) => fn(makeBaseState())),
   readState: vi.fn(async () => makeBaseState()),
@@ -58,10 +81,24 @@ const validPayload = {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 import { POST } from "./route"
+import { requireRole, AuthzError } from "@/lib/server/auth"
 
 describe("POST /api/ai-systems", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Implicit: WRITE_ROLES — owner/compliance/reviewer trec prin RBAC
+    vi.mocked(requireRole).mockReturnValue(undefined as never)
+  })
+
+  describe("RBAC — rol insuficient", () => {
+    it("returnează 403 dacă rolul nu are drept de scriere", async () => {
+      vi.mocked(requireRole).mockImplementation(() => {
+        throw new AuthzError("Rolul viewer nu permite adăugarea sistemului AI.", 403)
+      })
+
+      const res = await POST(makeRequest(validPayload))
+      expect(res.status).toBe(403)
+    })
   })
 
   describe("R-4 — DPA alert trigger", () => {
