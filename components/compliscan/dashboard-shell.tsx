@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
+import { NotificationBell } from "@/components/compliscan/notification-bell"
 import {
   dashboardPrimaryNavItems,
   isNavItemActive,
@@ -174,7 +175,11 @@ export function DashboardShell({
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-4 mb-2 flex justify-end">
+            <NotificationBell />
+          </div>
+
+          <div className="mt-2">
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
