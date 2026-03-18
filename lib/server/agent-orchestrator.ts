@@ -13,18 +13,7 @@ import { runDocumentAgent } from "@/lib/compliance/agent-document"
 import { runVendorRiskAgent } from "@/lib/compliance/agent-vendor-risk"
 import { runRegulatoryRadar } from "@/lib/compliance/agent-regulatory-radar"
 import type { AgentType, AgentOutput } from "@/lib/compliance/agentic-engine"
-
-// Lazy-load vendor-review-store (only available when V5 is merged)
-// Returns unknown[] — each caller casts to their specific shape.
-async function safeListReviews(orgId: string): Promise<unknown[]> {
-  try {
-    // @ts-expect-error — module only exists when V5 vendor-review is merged
-    const mod = await import("@/lib/server/vendor-review-store")
-    return (mod as { listReviews: (id: string) => Promise<unknown[]> }).listReviews(orgId)
-  } catch {
-    return []
-  }
-}
+import { listReviews } from "@/lib/server/vendor-review-store"
 
 export type OrchestratorResult = {
   orgId: string
@@ -52,7 +41,7 @@ export async function executeAgent(
       return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
     }
     const state = normalizeComplianceState(rawState)
-    const vendorReviews = await safeListReviews(orgId) as Array<{ id: string; vendorName: string; status: string; nextReviewDueISO?: string }>
+    const vendorReviews = await listReviews(orgId)
 
     const output = runComplianceMonitor({
       orgId,
@@ -130,7 +119,7 @@ export async function executeAgent(
       return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
     }
     const state = normalizeComplianceState(rawState)
-    const vendorReviews = await safeListReviews(orgId) as import("@/lib/compliance/agent-vendor-risk").VendorRiskAgentInput["vendorReviews"]
+    const vendorReviews = await listReviews(orgId)
 
     const output = runVendorRiskAgent({
       orgId,

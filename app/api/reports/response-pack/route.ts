@@ -5,18 +5,92 @@ import { NextResponse } from "next/server"
 
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
-import { buildComplianceResponse, buildComplianceResponseHtml } from "@/lib/compliance/response-pack"
+import {
+  buildComplianceResponse,
+  buildComplianceResponseHtml,
+  type ResponsePackVendorSummary,
+  type ResponsePackFiscalStatus,
+} from "@/lib/compliance/response-pack"
+import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
+import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
+import { computeFilingDisciplineScore, generateFilingReminders, buildOverdueFilingFindings, type FilingRecord } from "@/lib/compliance/filing-discipline"
+import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import { readState } from "@/lib/server/mvp-store"
 import { getOrgContext } from "@/lib/server/org-context"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 export async function POST() {
-  const [state, { orgName }] = await Promise.all([readState(), getOrgContext()])
+  const [state, { orgId, orgName }] = await Promise.all([readState(), getOrgContext()])
   const normalized = normalizeComplianceState(state)
   const summary = computeDashboardSummary(normalized)
   const remediationPlan = buildRemediationPlan(normalized)
   const nowISO = new Date().toISOString()
 
-  const report = buildComplianceResponse(normalized, summary, remediationPlan, orgName, nowISO)
+  // V5.6 — Vendor review data for response pack
+  const reviews = await safeListReviews(orgId)
+  let vendorReviewSummary: ResponsePackVendorSummary | undefined
+  if (reviews.length > 0) {
+    vendorReviewSummary = {
+      totalVendors: reviews.length,
+      reviewedVendors: reviews.filter((r) => r.status === "closed").length,
+      overdueReviews: reviews.filter((r) => r.status === "overdue-review").length,
+      criticalCount: reviews.filter((r) => r.urgency === "critical" && r.status !== "closed").length,
+      topReviews: reviews.slice(0, 10).map((r) => ({
+        vendorName: r.vendorName,
+        status: r.status,
+        urgency: r.urgency,
+        reviewCase: r.reviewCase ?? null,
+        hasEvidence: (r.evidenceItems?.length ?? 0) > 0 || !!r.closureEvidence,
+        nextReviewDueISO: r.nextReviewDueISO ?? null,
+      })),
+    }
+  }
+
+  // ANAF Phase B — Fiscal status enrichment
+  let fiscalStatus: ResponsePackFiscalStatus | undefined
+  const stateAny = state as Record<string, unknown>
+  const efacturaSignals = (stateAny.efacturaSignals ?? []) as EFacturaInvoiceSignal[]
+  const etvaDiscrepancies = (stateAny.etvaDiscrepancies ?? []) as ETVADiscrepancy[]
+  const filingRecords = (stateAny.filingRecords ?? []) as FilingRecord[]
+
+  if (normalized.efacturaConnected || efacturaSignals.length > 0 || etvaDiscrepancies.length > 0 || filingRecords.length > 0) {
+    const fiscalSummary = efacturaSignals.length > 0
+      ? buildFiscalSummary(efacturaSignals, nowISO)
+      : { totalSignals: 0, criticalUrgency: 0, highUrgency: 0, fiscalHealthLabel: "sănătos" as const, repeatedRejectionVendors: 0, pendingTooLong: 0, averageUrgency: 0 }
+
+    const filingScore = computeFilingDisciplineScore(filingRecords)
+    const reminders = generateFilingReminders(filingRecords, nowISO)
+    const overdueFilings = buildOverdueFilingFindings(filingRecords, nowISO)
+
+    const pendingDiscrepancies = etvaDiscrepancies.filter(
+      (d) => d.status !== "resolved" && d.status !== "overdue",
+    ).length
+    const overdueDiscrepancies = etvaDiscrepancies.filter(
+      (d) => d.status === "overdue",
+    ).length
+
+    const syncMs = normalized.efacturaSyncedAtISO
+      ? new Date(nowISO).getTime() - new Date(normalized.efacturaSyncedAtISO).getTime()
+      : null
+    const lastSyncDaysAgo = syncMs !== null ? Math.floor(syncMs / 86_400_000) : null
+
+    fiscalStatus = {
+      efacturaConnected: normalized.efacturaConnected,
+      lastSyncDaysAgo,
+      signalsTotal: fiscalSummary.totalSignals,
+      signalsCritical: fiscalSummary.criticalUrgency,
+      signalsHigh: fiscalSummary.highUrgency,
+      fiscalHealthLabel: fiscalSummary.fiscalHealthLabel,
+      etvaPendingDiscrepancies: pendingDiscrepancies,
+      etvaOverdueDiscrepancies: overdueDiscrepancies,
+      filingDisciplineScore: filingScore.score,
+      filingDisciplineLabel: filingScore.label,
+      overdueFilings: overdueFilings.length,
+      upcomingReminders: reminders.length,
+    }
+  }
+
+  const report = buildComplianceResponse(normalized, summary, remediationPlan, orgName, nowISO, vendorReviewSummary, fiscalStatus)
   const html = buildComplianceResponseHtml(report)
 
   return NextResponse.json({ report, html })

@@ -173,3 +173,75 @@ Rezultat:
 
 - build complet verde
 - concluzie: `HEAD + cele 3 fixuri minime` este o felie valida pentru primul deploy pe Vercel, fara `V5/V6`
+
+## Smoke live extins dupa hotfix-uri
+
+Context verificat:
+
+- productie live pe `https://compliscanag.vercel.app`
+- baza live vine din branchul `feat/v4-p0-audit-fixes`
+- hotfix-uri impinse:
+  - `ccd0769` - demo boot route public
+  - `d6ca1d5` - demo session preservation + response-pack graceful degradation
+  - `1343930` - vendor review graceful degradation pe suprafetele V5 read-only
+
+Rezultate confirmate pe demo IMM:
+
+- `/api/demo/imm` deschide sesiune demo si intra in `/dashboard`
+- `/api/auth/me` raspunde cu user valid pentru `demo@demo-imm.compliscan.ro`
+- `/api/dashboard` raspunde `200` cu payload complet
+- `/dashboard/checklists` raspunde `200`
+- `/api/reports/response-pack` raspunde `200`
+- `/dashboard/vendor-review` raspunde `200`
+- `/api/vendor-review` raspunde acum `200` cu `{"reviews":[]}`
+
+Rezultate confirmate pe demo Partner:
+
+- `/api/demo/partner` deschide sesiune demo si intra in `/dashboard/partner`
+- `/api/auth/me` raspunde cu user valid pentru `demo@demo-partner.compliscan.ro`
+- `/api/partner/clients` raspunde `200` cu `clients: []`
+- `/dashboard/partner` raspunde `200`
+
+Validare hotfix `1343930` in clone izolat:
+
+- clone: `/tmp/compliai-release-hotfix.cLRkyw`
+- `npm test -- app/api/vendor-review/route.test.ts app/api/reports/response-pack/route.test.ts middleware.test.ts`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Decizie operativa dupa smoke:
+
+- `V5` ramane branchul de release activ si acum nu mai are findings runtime deschise in smoke-ul curent
+- `V6` ramane separat pe `feat/v6-agentic-engine-wip`
+- nu facem merge `V5 -> V6` pana nu inchidem explicit integrarea, ca sa pastram clar:
+  - release hardening pe `feat/v4-p0-audit-fixes`
+  - dezvoltare izolata pe `feat/v6-agentic-engine-wip`
+
+## Stripe activation status
+
+Executat pe firul `release/ops`, fara impact pe `V6` sau `CompliScan_ANAF_Signals_Roadmap`:
+
+- `.env.local` normalizat pentru Stripe test mode
+- obiecte Stripe create in contul test:
+  - `CompliScan Pro`
+  - `CompliScan Partner`
+  - `price_1TCQWMHdLNTkVjGQsnzo0VGi` pentru Pro
+  - `price_1TCQWNHdLNTkVjGQPxbVteOK` pentru Partner
+  - webhook `https://compliscanag.vercel.app/api/stripe/webhook`
+- env-uri Stripe urcate pe Vercel `production`
+- aplicata migrare manuala in Supabase pentru tabela `public.plans`
+- redeploy live executat dupa migrare
+
+Verificare live dupa migrare:
+
+- `GET /api/plan` → `200`
+- `POST /api/stripe/checkout` cu demo IMM si `targetPlan=pro` → `200`
+- response contine URL real `checkout.stripe.com`
+- `POST /api/stripe/portal` → `400`
+  - `NO_STRIPE_CUSTOMER`
+  - comportament asteptat pana cand un checkout real completeaza webhook-ul si salveaza `stripeCustomerId`
+
+Concluzie:
+
+- Stripe test checkout este activ
+- urmatorul pas pentru inchidere Stripe este un checkout test complet in browser, ca sa validam webhook + portal end-to-end

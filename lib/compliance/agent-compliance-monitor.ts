@@ -10,20 +10,7 @@ import {
   type AgentAction,
   type AgentOutput,
 } from "@/lib/compliance/agentic-engine"
-
-// Minimal vendor review shape — avoids hard dependency on V5 vendor-review-engine.
-// When V5 is merged, these can be replaced with the canonical imports.
-type VendorReview = {
-  id: string
-  vendorName: string
-  status: string
-  nextReviewDueISO?: string
-}
-
-function isReviewOverdue(review: VendorReview): boolean {
-  if (review.status !== "closed" || !review.nextReviewDueISO) return false
-  return new Date(review.nextReviewDueISO).getTime() < Date.now()
-}
+import { isReviewOverdue, type VendorReview } from "@/lib/compliance/vendor-review-engine"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
