@@ -44,6 +44,7 @@ export type Nis2Gap = {
   questionId: string
   question: string
   article: string
+  category: Nis2Category
   severity: "critical" | "high" | "medium"
   remediationHint: string
 }
@@ -320,6 +321,7 @@ export function scoreNis2Assessment(
         questionId: q.id,
         question: q.text,
         article: q.article,
+        category: q.category,
         severity: q.weight === 3 ? "high" : "medium",
         remediationHint: q.hint,
       })
@@ -329,6 +331,7 @@ export function scoreNis2Assessment(
         questionId: q.id,
         question: q.text,
         article: q.article,
+        category: q.category,
         severity: q.weight === 3 ? "critical" : "high",
         remediationHint: q.hint,
       })
@@ -357,12 +360,14 @@ export function scoreNis2Assessment(
 // ── Central board bridge ───────────────────────────────────────────────────────
 
 import type { ScanFinding } from "@/lib/compliance/types"
+import { getNis2GapResolution } from "@/lib/compliance/finding-resolution"
 
 /**
  * Converts NIS2 assessment gaps into ScanFindings suitable for the central
  * remediation board. Each gap gets a stable ID derived from its questionId so
  * re-running the assessment replaces findings in-place rather than duplicating.
  * Pure function — no I/O, safe to call anywhere.
+ * V3 P0.0: adds structured resolution per finding.
  */
 export function convertNIS2GapsToFindings(
   gaps: Nis2Gap[],
@@ -381,6 +386,7 @@ export function convertNIS2GapsToFindings(
     sourceDocument: `Evaluare NIS2 — sector: ${sector}`,
     legalReference: gap.article,
     remediationHint: gap.remediationHint,
+    resolution: getNis2GapResolution(gap.category),
   }))
 }
 

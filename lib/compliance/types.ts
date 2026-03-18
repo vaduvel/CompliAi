@@ -54,6 +54,21 @@ export type LegalMapping = {
   reason: string
 }
 
+/**
+ * V3 P0.0 — Resolution Layer
+ * Structura completă de la detectare la inchidere și revalidare.
+ * Orice finding nou trebuie să aibă cel puțin problem + impact + action.
+ */
+export type FindingResolution = {
+  problem: string          // Ce problemă concretă a detectat sistemul
+  impact: string           // Ce se întâmplă dacă nu e rezolvat
+  action: string           // Acțiunea concretă recomandată
+  generatedAsset?: string  // Asset generat de CompliAI (document, raport, template)
+  humanStep?: string       // Pasul uman obligatoriu (ce trebuie să facă persoana)
+  closureEvidence?: string // Dovada care confirmă că problema e rezolvată
+  revalidation?: string    // Când și cum se reverificată conformitatea
+}
+
 export type ScanFinding = {
   id: string
   title: string
@@ -78,6 +93,7 @@ export type ScanFinding = {
   readyTextLabel?: string
   readyText?: string
   provenance?: FindingProvenance
+  resolution?: FindingResolution
 }
 
 export type ScanRecord = {

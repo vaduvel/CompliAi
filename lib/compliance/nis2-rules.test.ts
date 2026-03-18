@@ -162,8 +162,8 @@ describe("nis2-rules", () => {
 
   it("convertNIS2GapsToFindings producecorrect ScanFindings pentru gap-uri", () => {
     const gaps: Nis2Gap[] = [
-      { questionId: "nis2-rm-01", question: "Test question", article: "Art. 21(2)(a)", severity: "critical", remediationHint: "Fix it" },
-      { questionId: "nis2-ir-01", question: "IR question", article: "Art. 21(2)(b)", severity: "medium", remediationHint: "Add IR plan" },
+      { questionId: "nis2-rm-01", question: "Test question", article: "Art. 21(2)(a)", category: "risk-management", severity: "critical", remediationHint: "Fix it" },
+      { questionId: "nis2-ir-01", question: "IR question", article: "Art. 21(2)(b)", category: "incident-response", severity: "medium", remediationHint: "Add IR plan" },
     ]
     const findings = convertNIS2GapsToFindings(gaps, "general", "2026-03-17T00:00:00.000Z")
 
@@ -180,7 +180,7 @@ describe("nis2-rules", () => {
 
   it("convertNIS2GapsToFindings seteaza risk low pentru medium severity", () => {
     const gaps: Nis2Gap[] = [
-      { questionId: "nis2-cr-01", question: "Crypto question", article: "Art. 21(2)(h)", severity: "medium", remediationHint: "Use TLS" },
+      { questionId: "nis2-cr-01", question: "Crypto question", article: "Art. 21(2)(h)", category: "cryptography", severity: "medium", remediationHint: "Use TLS" },
     ]
     const findings = convertNIS2GapsToFindings(gaps, "banking", "2026-03-17T00:00:00.000Z")
     expect(findings[0].risk).toBe("low")
@@ -193,7 +193,7 @@ describe("nis2-rules", () => {
 
   it("IDs-urile de finding sunt stabile (deterministice) bazate pe questionId", () => {
     const gaps: Nis2Gap[] = [
-      { questionId: "nis2-ac-01", question: "Access question", article: "Art. 21(2)(i)", severity: "high", remediationHint: "Apply least privilege" },
+      { questionId: "nis2-ac-01", question: "Access question", article: "Art. 21(2)(i)", category: "access-control", severity: "high", remediationHint: "Apply least privilege" },
     ]
     const run1 = convertNIS2GapsToFindings(gaps, "energy", "2026-03-17T00:00:00.000Z")
     const run2 = convertNIS2GapsToFindings(gaps, "energy", "2026-03-18T00:00:00.000Z")

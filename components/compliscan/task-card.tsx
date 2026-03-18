@@ -17,7 +17,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
-import type { EvidenceQualityAssessment, TaskEvidenceKind } from "@/lib/compliance/types"
+import type { EvidenceQualityAssessment, FindingResolution, TaskEvidenceKind } from "@/lib/compliance/types"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
 import {
   formatEvidenceQualityStatus,
@@ -247,6 +247,8 @@ export function TaskCard({
                   {nextAction}
                 </p>
               </div>
+
+              {task.resolution && <ResolutionPath resolution={task.resolution} />}
             </div>
 
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
@@ -643,4 +645,53 @@ function acceptForEvidenceKind(kind: TaskEvidenceKind) {
   if (kind === "yaml_evidence") return ".yaml,.yml,.json,.txt"
   if (kind === "document_bundle") return ".pdf,.zip,.json,.csv,.txt,.doc,.docx"
   return undefined
+}
+
+// ── V3 P0.0 Resolution Path ────────────────────────────────────────────────────
+
+const RESOLUTION_STEPS: Array<{
+  key: keyof FindingResolution
+  label: string
+  tone: string
+}> = [
+  { key: "problem", label: "Problemă", tone: "text-eos-error" },
+  { key: "impact", label: "Impact", tone: "text-eos-warning" },
+  { key: "action", label: "Acțiune", tone: "text-eos-primary" },
+  { key: "generatedAsset", label: "Generat de CompliAI", tone: "text-eos-success" },
+  { key: "humanStep", label: "Pas uman", tone: "text-eos-text" },
+  { key: "closureEvidence", label: "Dovadă de inchidere", tone: "text-eos-text" },
+  { key: "revalidation", label: "Revalidare", tone: "text-eos-text-muted" },
+]
+
+function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
+  const visibleSteps = RESOLUTION_STEPS.filter(({ key }) => resolution[key])
+
+  if (visibleSteps.length === 0) return null
+
+  return (
+    <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset">
+      <summary className="cursor-pointer px-4 py-3">
+        <span className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+          Drum complet la rezolvare
+        </span>
+      </summary>
+      <ol className="space-y-3 px-4 pb-4 pt-1">
+        {visibleSteps.map(({ key, label, tone }, idx) => (
+          <li key={key} className="flex gap-3">
+            <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-eos-border bg-eos-surface text-[10px] font-semibold text-eos-text-muted">
+              {idx + 1}
+            </span>
+            <div className="min-w-0">
+              <p className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${tone}`}>
+                {label}
+              </p>
+              <p className="mt-0.5 text-xs leading-5 text-eos-text [overflow-wrap:anywhere]">
+                {resolution[key]}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
 }
