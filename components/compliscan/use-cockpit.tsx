@@ -319,6 +319,22 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function handleGenerateResponsePack() {
+    await withBusyOperation(async () => {
+      const response = await fetch("/api/reports/response-pack", { method: "POST" })
+      if (!response.ok) throw new Error("Nu am putut genera Compliance Response Pack-ul.")
+      const payload = (await response.json()) as { html: string }
+      openHtmlPreview(payload.html)
+      toast.success("Compliance Response Pack generat", {
+        description: "Folosește print din browser pentru PDF și distribuire.",
+      })
+    }).catch((err) => {
+      toast.error("Export esuat", {
+        description: err instanceof Error ? err.message : "Eroare la generarea Response Pack-ului.",
+      })
+    })
+  }
+
   async function handleDownloadExecutivePdf() {
     await withBusyOperation(async () => {
       const response = await fetch("/api/reports/pdf", { method: "POST" })
@@ -1059,6 +1075,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleGenerateResponsePack,
     handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,
@@ -1153,6 +1170,7 @@ export type CockpitActionSlice = Pick<
   | "handleAnalyzePendingScan"
   | "handleScan"
   | "handleGenerateReport"
+  | "handleGenerateResponsePack"
   | "handleDownloadExecutivePdf"
   | "handleGenerateAuditPack"
   | "handleGenerateAuditBundle"
@@ -1254,6 +1272,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleGenerateResponsePack,
     handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,
@@ -1294,6 +1313,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleAnalyzePendingScan,
     handleScan,
     handleGenerateReport,
+    handleGenerateResponsePack,
     handleDownloadExecutivePdf,
     handleGenerateAuditPack,
     handleGenerateAuditBundle,

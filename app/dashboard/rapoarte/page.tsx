@@ -297,6 +297,7 @@ export default function AuditExportPage() {
         <ExportCenter
           onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
           onDownloadExecutivePdf={() => void cockpitActions.handleDownloadExecutivePdf()}
+          onGenerateResponsePack={() => void cockpitActions.handleGenerateResponsePack()}
           onGenerateAuditPack={() => void cockpitActions.handleGenerateAuditPack()}
           onGenerateAuditBundle={() => void cockpitActions.handleGenerateAuditBundle()}
           onGenerateAnnexLite={() => void cockpitActions.handleGenerateAnnexLite()}
