@@ -10,6 +10,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
+import { trackEvent } from "@/lib/server/analytics"
 import { validateTaskAgainstState } from "@/lib/compliance/task-validation"
 
 type TaskPatchPayload = {
@@ -291,6 +292,11 @@ export async function PATCH(
 
       return nextState
     })
+
+    // Track finding closure
+    if (feedback?.status === "done" && feedback.closedAlerts > 0) {
+      void trackEvent(session.orgId, "closed_first_finding", { taskId: id })
+    }
 
     return NextResponse.json({
       ...(await buildDashboardPayload(nextState)),

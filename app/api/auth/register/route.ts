@@ -10,6 +10,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 import { shouldUseSupabaseAuth, registerSupabaseIdentity } from "@/lib/server/supabase-auth"
 import { activateTrial } from "@/lib/server/plan"
+import { sendOnboardingEmail } from "@/lib/server/onboarding-emails"
 
 export async function POST(request: Request) {
   try {
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       : await registerUser(email, password, orgName)
     // Activare trial Pro 14 zile automat la înregistrare
     await activateTrial(user.orgId)
+    void sendOnboardingEmail("welcome", user.email, user.orgName || "utilizator nou")
 
     const token = createSessionToken({
       userId: user.id,
