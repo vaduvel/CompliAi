@@ -955,16 +955,22 @@ export function readSessionFromRequest(request: Request): SessionPayload | null 
   return verifySessionToken(token)
 }
 
+function isDemoSession(session: SessionPayload): boolean {
+  return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
+}
+
 export async function refreshSessionPayload(
   session: SessionPayload
 ): Promise<SessionPayload | null> {
+  const demoSession = isDemoSession(session)
+
   try {
     const resolvedUser = session.membershipId
       ? await resolveUserForMembership(session.userId, session.membershipId)
       : await findUserById(session.userId)
 
     if (!resolvedUser) {
-      return null
+      return demoSession ? session : null
     }
 
     return {
@@ -983,7 +989,7 @@ export async function refreshSessionPayload(
         error.message === "USER_NOT_FOUND" ||
         error.message === "ORGANIZATION_NOT_FOUND"
       ) {
-        return null
+        return demoSession ? session : null
       }
     }
 

@@ -22,7 +22,14 @@ export async function POST() {
   const nowISO = new Date().toISOString()
 
   // V5.6 — Vendor review data for response pack
-  const reviews = await listReviews(orgId)
+  const reviews = await (async () => {
+    try {
+      return await listReviews(orgId)
+    } catch {
+      // Vendor reviews are additive in V5 and should not block response-pack generation.
+      return []
+    }
+  })()
   let vendorReviewSummary: ResponsePackVendorSummary | undefined
   if (reviews.length > 0) {
     vendorReviewSummary = {

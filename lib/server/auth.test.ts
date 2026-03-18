@@ -662,6 +662,32 @@ describe("lib/server/auth", () => {
     )
   })
 
+  it("pastreaza sesiunea demo la refresh chiar daca userul nu exista in auth graph", async () => {
+    const token = createSessionToken({
+      userId: "demo-user-imm",
+      orgId: "org-demo-imm",
+      email: "demo@demo-imm.compliscan.ro",
+      orgName: "Demo Retail SRL",
+      role: "owner",
+    })
+
+    const request = new Request("http://localhost/api/auth/me", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    const session = await readFreshSessionFromRequest(request)
+
+    expect(session).toEqual(
+      expect.objectContaining({
+        userId: "demo-user-imm",
+        orgId: "org-demo-imm",
+        email: "demo@demo-imm.compliscan.ro",
+        orgName: "Demo Retail SRL",
+        role: "owner",
+      })
+    )
+  })
+
   it("cere sesiune fresh activa pentru actiuni protejate", async () => {
     const request = new Request("http://localhost/api/auth/memberships")
 
