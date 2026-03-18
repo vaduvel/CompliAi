@@ -15,7 +15,7 @@ import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
-import { getSuggestionExplanation } from "@/lib/compliance/legal-sources"
+import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 
@@ -301,6 +301,7 @@ export default function DashboardPage() {
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
             legalTag="gdpr"
             applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
+            legalStatusNote={FRAMEWORK_LEGAL_STATUS.gdpr.note}
           />
           <ReadinessFrameworkCard
             framework="NIS2"
@@ -315,6 +316,7 @@ export default function DashboardPage() {
             legalTag="nis2"
             applicabilityReason={applicability?.entries.find(e => e.tag === "nis2")?.reason}
             urgentPulse={nis2UrgentIncident}
+            legalStatusNote={FRAMEWORK_LEGAL_STATUS.nis2.note}
           />
           <ReadinessFrameworkCard
             framework="AI Act"
@@ -328,6 +330,7 @@ export default function DashboardPage() {
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
             legalTag="ai-act"
             applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
+            legalStatusNote={FRAMEWORK_LEGAL_STATUS["ai-act"].note}
           />
           <ReadinessFrameworkCard
             framework="e-Factura"
@@ -341,6 +344,7 @@ export default function DashboardPage() {
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
             legalTag="efactura"
             applicabilityReason={applicability?.entries.find(e => e.tag === "efactura")?.reason}
+            legalStatusNote={FRAMEWORK_LEGAL_STATUS.efactura.note}
           />
           <ReadinessFrameworkCard
             framework="Scor Global"
@@ -494,6 +498,7 @@ function ReadinessFrameworkCard({
   legalTag,
   applicabilityReason,
   urgentPulse = false,
+  legalStatusNote,
 }: {
   framework: string
   percent: number
@@ -507,6 +512,7 @@ function ReadinessFrameworkCard({
   legalTag?: ApplicabilityTag
   applicabilityReason?: string
   urgentPulse?: boolean
+  legalStatusNote?: string
 }) {
   const statusConfig = {
     strong:  { label: "CONFIRMARE PUTERNICĂ",    color: "success"     as const },
@@ -562,6 +568,11 @@ function ReadinessFrameworkCard({
         {description && (
           <p className={`mt-2 text-xs leading-tight ${isUnlikely ? "text-eos-text-muted" : "text-eos-text-muted"}`}>
             {description}
+          </p>
+        )}
+        {legalStatusNote && !isUnlikely && (
+          <p className="mt-2 text-[11px] leading-snug text-eos-text-muted italic">
+            {legalStatusNote}
           </p>
         )}
         <div className="mt-5 flex items-end gap-2">
