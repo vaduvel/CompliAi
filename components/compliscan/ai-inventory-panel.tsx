@@ -18,6 +18,7 @@ import type { AISystemPurpose, AISystemRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { AIActTimelineCard } from "@/components/compliscan/ai-act-timeline-card"
 
 type AIInventoryPanelProps = {
   systems: AISystemRecord[]
@@ -501,6 +502,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                       ))}
                     </ul>
                   </details>
+
+                  <div className="mt-3">
+                    <AIActTimelineCard system={system} />
+                  </div>
                 </div>
               )
             })}
