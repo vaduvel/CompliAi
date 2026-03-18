@@ -5,8 +5,9 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { readNis2State, saveNis2Assessment } from "@/lib/server/nis2-store"
+import { readNis2State, saveNis2Assessment, getDnscRegistrationStatus } from "@/lib/server/nis2-store"
 import { scoreNis2Assessment, convertNIS2GapsToFindings, type Nis2Answers, type Nis2Sector } from "@/lib/compliance/nis2-rules"
+import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
 import { mutateState } from "@/lib/server/mvp-store"
 
 export async function GET(request: Request) {
@@ -46,6 +47,10 @@ export async function POST(request: Request) {
       maturityLabel: result.maturityLabel,
     })
 
+    // Build rescue finding for incomplete DNSC registration (V3 P0.2)
+    const dnscStatus = await getDnscRegistrationStatus(orgId)
+    const rescueFinding = buildDnscRescueFinding(result.entityType, dnscStatus, now)
+
     // Sync NIS2 gaps into the central remediation board.
     // Replaces any existing NIS2 findings so re-runs don't accumulate duplicates.
     if (result.gaps.length > 0) {
@@ -53,15 +58,23 @@ export async function POST(request: Request) {
       await mutateState((current) => ({
         ...current,
         findings: [
-          ...current.findings.filter((f) => f.category !== "NIS2"),
+          ...current.findings.filter(
+            (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
+          ),
           ...nis2Findings,
+          ...(rescueFinding ? [rescueFinding] : []),
         ],
       }))
     } else {
-      // No gaps — clear any stale NIS2 findings from a previous assessment
+      // No gaps — clear gap findings but keep/update the rescue finding
       await mutateState((current) => ({
         ...current,
-        findings: current.findings.filter((f) => f.category !== "NIS2"),
+        findings: [
+          ...current.findings.filter(
+            (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
+          ),
+          ...(rescueFinding ? [rescueFinding] : []),
+        ],
       }))
     }
 

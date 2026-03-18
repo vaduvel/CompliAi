@@ -7,7 +7,11 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   saveNis2AssessmentMock: vi.fn(),
+  getDnscRegistrationStatusMock: vi.fn(),
   scoreNis2AssessmentMock: vi.fn(),
+  convertNIS2GapsToFindingsMock: vi.fn(),
+  mutateStateMock: vi.fn(),
+  buildDnscRescueFindingMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -31,10 +35,21 @@ vi.mock("@/lib/server/org-context", () => ({
 vi.mock("@/lib/server/nis2-store", () => ({
   readNis2State: mocks.readNis2StateMock,
   saveNis2Assessment: mocks.saveNis2AssessmentMock,
+  getDnscRegistrationStatus: mocks.getDnscRegistrationStatusMock,
 }))
 
 vi.mock("@/lib/compliance/nis2-rules", () => ({
   scoreNis2Assessment: mocks.scoreNis2AssessmentMock,
+  convertNIS2GapsToFindings: mocks.convertNIS2GapsToFindingsMock,
+}))
+
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateState: mocks.mutateStateMock,
+}))
+
+vi.mock("@/lib/compliance/nis2-rescue", () => ({
+  buildDnscRescueFinding: mocks.buildDnscRescueFindingMock,
+  DNSC_RESCUE_FINDING_ID: "nis2-rescue-dnsc-registration",
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
@@ -98,6 +113,10 @@ describe("POST /api/nis2/assessment", () => {
     mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
     mocks.scoreNis2AssessmentMock.mockReturnValue(MOCK_RESULT)
     mocks.saveNis2AssessmentMock.mockResolvedValue({})
+    mocks.getDnscRegistrationStatusMock.mockResolvedValue("not-started")
+    mocks.convertNIS2GapsToFindingsMock.mockReturnValue([])
+    mocks.mutateStateMock.mockImplementation(async (fn: (s: unknown) => unknown) => fn({ findings: [] }))
+    mocks.buildDnscRescueFindingMock.mockReturnValue(null)
   })
 
   it("scoreaza si salveaza evaluarea NIS2", async () => {
