@@ -127,7 +127,7 @@ export function evaluateApplicability(profile: OrgProfile): ApplicabilityResult 
   if (profile.usesAITools) {
     aiActCertainty = "probable"
     aiActReason =
-      "Folosești unelte AI (LLM, copilot, clasificare automată etc.). Obligațiile de transparență și AI literacy se aplică din 2 februarie 2025. Sistemele high-risk intră sub reglementare din august 2026."
+      "Folosești unelte AI (LLM, copilot, clasificare automată etc.). Interdicțiile Art.5 și alfabetizarea AI (Art.4) sunt active din 2 august 2025. Obligațiile pentru sisteme high-risk: 2 august 2026 (oficial) — ⚠️ propunere amânare dec 2027 (Digital Omnibus, neconfirmat)."
   } else {
     aiActCertainty = "unlikely"
     aiActReason =

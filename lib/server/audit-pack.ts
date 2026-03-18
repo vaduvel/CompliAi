@@ -12,6 +12,7 @@ import type {
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import { buildComplianceTraceRecords } from "@/lib/server/compliance-trace"
+import type { Nis2OrgState } from "@/lib/server/nis2-store"
 
 type BuildAuditPackInput = {
   state: ComplianceState
@@ -19,6 +20,7 @@ type BuildAuditPackInput = {
   workspace: WorkspaceContext
   compliancePack: AICompliancePack
   snapshot: CompliScanSnapshot | null
+  nis2State?: Nis2OrgState | null
 }
 
 export function buildAuditPack({
@@ -27,6 +29,7 @@ export function buildAuditPack({
   workspace,
   compliancePack,
   snapshot,
+  nis2State,
 }: BuildAuditPackInput): AuditPackV2 {
   const generatedAt = new Date().toISOString()
   const validatedBaseline =
@@ -207,6 +210,7 @@ export function buildAuditPack({
         metadata: event.metadata ?? null,
       })),
     traceabilityMatrix,
+    nis2Report: buildNis2Report(nis2State),
     appendix: {
       snapshot,
       validatedBaseline,
@@ -609,4 +613,77 @@ function buildNextActions({
   }
 
   return actions.slice(0, 4)
+}
+
+// ── NIS2 Report Section ────────────────────────────────────────────────────────
+
+function buildNis2Report(nis2State: Nis2OrgState | null | undefined): AuditPackV2["nis2Report"] {
+  if (!nis2State) {
+    return {
+      hasData: false,
+      assessment: null,
+      dnscRegistrationStatus: "not-started",
+      incidents: { total: 0, open: 0, critical: 0, withDnscReport: 0 },
+      vendors: { total: 0, highRisk: 0, withoutDPA: 0, techVendors: 0 },
+      maturityAssessment: null,
+      boardMembers: { total: 0, trainingExpired: 0, certExpired: 0 },
+    }
+  }
+
+  const nowISO = new Date().toISOString()
+
+  const openIncidents = nis2State.incidents.filter((i) => i.status !== "closed")
+  const criticalIncidents = nis2State.incidents.filter((i) => i.severity === "critical")
+  const withDnscReport = nis2State.incidents.filter((i) => !!i.reportedToDNSCAtISO)
+  const highRiskVendors = nis2State.vendors.filter((v) => v.riskLevel === "high" || v.riskLevel === "critical")
+  const withoutDpa = nis2State.vendors.filter((v) => v.hasDPA === false)
+  const techVendors = nis2State.vendors.filter((v) => v.techConfidence === "high" || v.techConfidence === "medium")
+
+  const trainingExpired = (nis2State.boardMembers ?? []).filter(
+    (m) => m.nis2TrainingExpiry && m.nis2TrainingExpiry < nowISO
+  )
+  const certExpired = (nis2State.boardMembers ?? []).filter(
+    (m) => m.cisoCertExpiry && m.cisoCertExpiry < nowISO
+  )
+
+  return {
+    hasData: true,
+    assessment: nis2State.assessment
+      ? {
+          score: nis2State.assessment.score,
+          maturityLabel: nis2State.assessment.maturityLabel,
+          sector: nis2State.assessment.sector,
+          savedAtISO: nis2State.assessment.savedAtISO,
+        }
+      : null,
+    dnscRegistrationStatus: nis2State.dnscRegistrationStatus ?? "not-started",
+    incidents: {
+      total: nis2State.incidents.length,
+      open: openIncidents.length,
+      critical: criticalIncidents.length,
+      withDnscReport: withDnscReport.length,
+    },
+    vendors: {
+      total: nis2State.vendors.length,
+      highRisk: highRiskVendors.length,
+      withoutDPA: withoutDpa.length,
+      techVendors: techVendors.length,
+    },
+    maturityAssessment: nis2State.maturityAssessment
+      ? {
+          overallScore: nis2State.maturityAssessment.overallScore,
+          level: nis2State.maturityAssessment.level,
+          domains: nis2State.maturityAssessment.domains.map((d) => ({
+            name: d.name,
+            score: d.score,
+            status: d.status,
+          })),
+        }
+      : null,
+    boardMembers: {
+      total: (nis2State.boardMembers ?? []).length,
+      trainingExpired: trainingExpired.length,
+      certExpired: certExpired.length,
+    },
+  }
 }

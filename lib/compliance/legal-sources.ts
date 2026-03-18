@@ -90,7 +90,7 @@ const LEGAL_SOURCES: Record<ApplicabilityTag, LegalSource> = {
     citation: "Regulament UE 2024/1689",
     shortName: "AI Act",
     articleHint: "Art. 6, Art. 13, Anexa III",
-    applicabilityNote: "Aplicare completă august 2026; interdicții din 2 august 2025",
+    applicabilityNote: "Interdicții AI (Art.5) ✅ activ 2 aug 2025 · Sisteme high-risk ⚠️ 2 aug 2026 (oficial) / propunere amânare dec 2027",
   },
   efactura: {
     citation: "OUG 89/2025, OUG 120/2021",

@@ -4,12 +4,16 @@ import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { readState } from "@/lib/server/mvp-store"
 import { buildAuditPack } from "@/lib/server/audit-pack"
+import { getOrgContext } from "@/lib/server/org-context"
+import { readNis2State } from "@/lib/server/nis2-store"
 
 export async function GET(request: Request) {
   try {
     requireRole(request, ["owner", "compliance"], "exportul Audit Pack")
 
-    const payload = await buildDashboardPayload(await readState())
+    const { orgId } = await getOrgContext()
+    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({
       state: payload.state,
@@ -17,6 +21,7 @@ export async function GET(request: Request) {
       workspace: payload.workspace,
       compliancePack: payload.compliancePack,
       snapshot,
+      nis2State,
     })
     const dateLabel = auditPack.generatedAt.slice(0, 10)
     const fileName = `audit-pack-v2-1-${payload.workspace.orgName
