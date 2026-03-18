@@ -54,6 +54,19 @@ const AICompliancePackEntriesCard = dynamic(
   { loading: () => <LoadingScreen variant="section" /> }
 )
 
+const ShadowAiQuestionnaire = dynamic(
+  () =>
+    import("@/components/compliscan/shadow-ai-questionnaire").then(
+      (mod) => mod.ShadowAiQuestionnaire
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-24 animate-pulse rounded-eos-md bg-eos-surface-variant" />
+    ),
+  }
+)
+
 export default function SistemePage() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
@@ -259,6 +272,11 @@ export default function SistemePage() {
           onOpenDrift={() => setPrimaryView("drift")}
         />
       )}
+
+      {/* ── V3 P2.1: Shadow AI Questionnaire ──────────────────────────────────── */}
+      <section aria-label="Shadow AI — utilizare nedeclarată">
+        <ShadowAiQuestionnaire />
+      </section>
     </div>
   )
 }

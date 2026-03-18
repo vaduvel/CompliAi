@@ -363,6 +363,9 @@ export type ComplianceState = {
   // ── Applicability Engine ───────────────────────────────────────────────────
   orgProfile?: OrgProfile
   applicability?: ApplicabilityResult
+  // ── V3 P2.1 Shadow AI ─────────────────────────────────────────────────────
+  shadowAiAnswers?: { questionId: string; value: string | string[] }[]
+  shadowAiCompletedAtISO?: string
 }
 
 export type DashboardSummary = {
