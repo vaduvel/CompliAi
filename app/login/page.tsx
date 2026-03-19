@@ -205,7 +205,18 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-eos-text-muted">
+            {mode === "login" && (
+              <div className="mt-4 text-center">
+                <Link
+                  href="/reset-password"
+                  className="text-sm text-eos-text-muted hover:text-eos-primary hover:underline"
+                >
+                  Am uitat parola
+                </Link>
+              </div>
+            )}
+
+            <div className="mt-4 text-center text-sm text-eos-text-muted">
               {mode === "login" ? (
                 <>
                   Nu ai cont?{" "}
