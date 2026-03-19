@@ -19,7 +19,7 @@ import {
 import { writeStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ scenario: string }> }
 ) {
   const { scenario } = await params
@@ -50,9 +50,10 @@ export async function GET(
 
   const redirectUrl =
     demo === "partner" ? "/dashboard/partner" : "/dashboard"
+  const requestOrigin = new URL(request.url).origin
 
   const response = NextResponse.redirect(
-    new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+    new URL(redirectUrl, requestOrigin)
   )
 
   response.cookies.set(SESSION_COOKIE, token, {
