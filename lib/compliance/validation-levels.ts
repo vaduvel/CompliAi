@@ -1,9 +1,9 @@
 // Validation Levels — "capture more legal prep work" strategy.
 // Derives the required validation level for a finding or task based on existing data.
 //
-// Level 1 = Auto-close: verificabil automat (document exista, camp completat, dovada atasata)
-// Level 2 = Business confirmation: necesita confirmare interna (admin/contabil)
-// Level 3 = Specialist validation: necesita review de specialitate (jurist/DPO/auditor)
+// Level 1 = Auto-validat: verificabil automat (document exista, camp completat, dovada atasata)
+// Level 2 = Confirmare interna: necesita confirmare interna (admin/contabil)
+// Level 3 = Validare specialist: necesita review de specialitate (jurist/DPO/auditor)
 
 import type { ScanFinding, ValidationLevel } from "@/lib/compliance/types"
 
@@ -13,10 +13,10 @@ export function inferValidationLevel(finding: ScanFinding): ValidationLevel {
   // Level 3: specialist required
   if (isSpecialistRequired(finding)) return 3
 
-  // Level 2: business confirmation
+  // Level 2: internal confirmation
   if (isBusinessConfirmationRequired(finding)) return 2
 
-  // Level 1: auto-closeable
+  // Level 1: automatically verifiable
   return 1
 }
 
@@ -140,21 +140,21 @@ export type ValidationLevelMeta = {
 const LEVEL_META: Record<ValidationLevel, Omit<ValidationLevelMeta, "level">> = {
   1: {
     label: "Închidere automată",
-    shortLabel: "Auto-close",
+    shortLabel: "Auto-validat",
     description: "Verificabil automat — document existent, câmp completat sau dovadă atașată.",
     escalationCopy:
       "Acest caz poate fi închis intern. Verifică că dovada este atașată și confirmă.",
   },
   2: {
     label: "Confirmare internă",
-    shortLabel: "Business",
+    shortLabel: "Confirmare internă",
     description: "Necesită confirmare de la administrator, contabil sau responsabil intern.",
     escalationCopy:
       "CompliAI a pregătit cazul. Un responsabil intern trebuie să confirme datele și să valideze acțiunea recomandată.",
   },
   3: {
     label: "Validare de specialitate",
-    shortLabel: "Specialist",
+    shortLabel: "Validare specialist",
     description: "Necesită review de specialitate — jurist, DPO sau auditor extern.",
     escalationCopy:
       "Cazul este pregătit pentru validare de specialitate. Documentele, red flags și recomandările sunt deja organizate. Specialistul intervine doar pentru validare finală.",

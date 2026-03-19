@@ -87,7 +87,9 @@ function statusVariant(s: VendorReviewStatus) {
 }
 
 function inferVendorValidationLabel(review: VendorReview) {
-  if (review.urgency === "critical" || review.urgency === "high") return "L3 · Specialist"
+  if (review.urgency === "critical" || review.urgency === "high") {
+    return "L3 · Validare specialist"
+  }
   if (review.urgency === "medium") return "L2 · Confirmare internă"
   return "L1 · Standard"
 }
