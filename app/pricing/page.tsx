@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Check, X, ArrowRight, Zap } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
+import { PricingVisitTracker } from "@/components/compliscan/pricing-visit-tracker"
 import { Button } from "@/components/evidence-os/Button"
 import { Badge } from "@/components/evidence-os/Badge"
 import { PLAN_LABELS, PLAN_PRICES } from "@/lib/server/plan"
@@ -78,6 +79,7 @@ const PLANS = [
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,var(--eos-accent-primary-subtle),transparent_28%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] text-eos-text">
+      <PricingVisitTracker />
       {/* Nav */}
       <header className="border-b border-eos-border-subtle bg-eos-surface-primary/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowRight, CheckCircle2, Clock3, ShieldAlert } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronRight, Clock3, ShieldAlert } from "lucide-react"
 
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { LatestDocumentSection } from "@/components/compliscan/route-sections"
@@ -275,6 +275,13 @@ function LatestYamlSection({
                               {finding.detail}
                             </p>
                             <FindingVerdictMeta finding={finding} className="mt-3" />
+                            <Link
+                              href={`/dashboard/findings/${finding.id}`}
+                              className="mt-3 inline-flex items-center gap-1 text-xs text-eos-primary hover:underline"
+                            >
+                              Detalii finding
+                              <ChevronRight className="size-3" strokeWidth={2} />
+                            </Link>
                           </div>
                           <Badge variant={findingSeverityClasses(finding.severity)}>
                             {finding.severity}
