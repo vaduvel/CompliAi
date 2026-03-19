@@ -25,6 +25,12 @@ create table if not exists public.notifications_state (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.nis2_state (
+  org_id text primary key references public.organizations(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.agent_runs (
   org_id text primary key references public.organizations(id) on delete cascade,
   state jsonb not null default '{}'::jsonb,
@@ -49,6 +55,12 @@ before update on public.notifications_state
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists nis2_state_set_updated_at on public.nis2_state;
+create trigger nis2_state_set_updated_at
+before update on public.nis2_state
+for each row
+execute function public.set_updated_at();
+
 drop trigger if exists agent_runs_set_updated_at on public.agent_runs;
 create trigger agent_runs_set_updated_at
 before update on public.agent_runs
@@ -63,6 +75,7 @@ execute function public.set_updated_at();
 
 alter table public.plans enable row level security;
 alter table public.notifications_state enable row level security;
+alter table public.nis2_state enable row level security;
 alter table public.agent_runs enable row level security;
 alter table public.vendor_reviews enable row level security;
 
@@ -78,6 +91,33 @@ using (
 drop policy if exists notifications_state_operator_write on public.notifications_state;
 create policy notifications_state_operator_write
 on public.notifications_state
+for all
+to authenticated
+using (
+  public.current_user_has_org_role(
+    org_id,
+    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+  )
+)
+with check (
+  public.current_user_has_org_role(
+    org_id,
+    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+  )
+);
+
+drop policy if exists nis2_state_member_select on public.nis2_state;
+create policy nis2_state_member_select
+on public.nis2_state
+for select
+to authenticated
+using (
+  org_id in (select org_id from public.current_user_org_ids())
+);
+
+drop policy if exists nis2_state_operator_write on public.nis2_state;
+create policy nis2_state_operator_write
+on public.nis2_state
 for all
 to authenticated
 using (
@@ -159,6 +199,15 @@ with check (true);
 drop policy if exists service_role_full_access_notifications_state on public.notifications_state;
 create policy service_role_full_access_notifications_state
 on public.notifications_state
+as permissive
+for all
+to service_role
+using (true)
+with check (true);
+
+drop policy if exists service_role_full_access_nis2_state on public.nis2_state;
+create policy service_role_full_access_nis2_state
+on public.nis2_state
 as permissive
 for all
 to service_role
