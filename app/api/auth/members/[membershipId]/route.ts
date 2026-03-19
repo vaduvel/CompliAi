@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server"
-
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import {
   AuthzError,
@@ -7,15 +5,19 @@ import {
   updateOrganizationMemberRole,
   type UserRole,
 } from "@/lib/server/auth"
-import { jsonError } from "@/lib/server/api-response"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ membershipId: string }> }
 ) {
+  const requestContext = createRequestContext(request, "/api/auth/members/[membershipId]")
+
   try {
     const session = await requireFreshRole(
       request,
@@ -51,40 +53,71 @@ export async function PATCH(
       ]),
     }))
 
-    return NextResponse.json({
+    return jsonWithRequestContext({
       ok: true,
       member,
       message: "Rolul membrului a fost actualizat.",
-    })
+    }, requestContext)
   } catch (error) {
     if (error instanceof AuthzError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, requestContext)
     }
     if (error instanceof RequestValidationError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, requestContext)
     }
 
     if (error instanceof Error) {
       if (error.message === "MEMBERSHIP_NOT_FOUND") {
-        return jsonError("Membrul selectat nu exista in organizatia curenta.", 404, "AUTH_MEMBER_NOT_FOUND")
+        return jsonError(
+          "Membrul selectat nu exista in organizatia curenta.",
+          404,
+          "AUTH_MEMBER_NOT_FOUND",
+          undefined,
+          requestContext
+        )
       }
       if (error.message === "ORGANIZATION_NOT_FOUND") {
-        return jsonError("Organizatia curenta nu exista.", 404, "AUTH_ORG_NOT_FOUND")
+        return jsonError("Organizatia curenta nu exista.", 404, "AUTH_ORG_NOT_FOUND", undefined, requestContext)
       }
       if (error.message === "MEMBERSHIP_USER_NOT_FOUND") {
-        return jsonError("Membrul selectat nu are un utilizator valid asociat.", 500, "AUTH_MEMBER_USER_MISSING")
+        await logRouteError(requestContext, error, {
+          code: "AUTH_MEMBER_USER_MISSING",
+          durationMs: getRequestDurationMs(requestContext),
+          status: 500,
+        })
+
+        return jsonError(
+          "Membrul selectat nu are un utilizator valid asociat.",
+          500,
+          "AUTH_MEMBER_USER_MISSING",
+          undefined,
+          requestContext
+        )
       }
       if (error.message === "LAST_OWNER_REQUIRED") {
         return jsonError(
           "Nu poti elimina ultimul owner activ din organizatia curenta.",
           409,
-          "AUTH_LAST_OWNER_REQUIRED"
+          "AUTH_LAST_OWNER_REQUIRED",
+          undefined,
+          requestContext
         )
       }
-      return jsonError(error.message, 500, "AUTH_MEMBER_ROLE_UPDATE_FAILED")
     }
 
-    return jsonError("Nu am putut actualiza rolul membrului.", 500, "AUTH_MEMBER_ROLE_UPDATE_FAILED")
+    await logRouteError(requestContext, error, {
+      code: "AUTH_MEMBER_ROLE_UPDATE_FAILED",
+      durationMs: getRequestDurationMs(requestContext),
+      status: 500,
+    })
+
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut actualiza rolul membrului.",
+      500,
+      "AUTH_MEMBER_ROLE_UPDATE_FAILED",
+      undefined,
+      requestContext
+    )
   }
 }
 

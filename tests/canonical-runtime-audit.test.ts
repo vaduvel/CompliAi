@@ -170,7 +170,7 @@ describe("canonical runtime audit", () => {
     expect(dashboardPayload.traceabilityMatrix.length).toBeGreaterThan(0)
     expect(dashboardPayload.remediationPlan.length).toBe(dashboardCorePayload.remediationPlan.length)
 
-    const reportsResponse = await buildReports()
+    const reportsResponse = await buildReports(new Request("http://localhost/api/reports", { method: "POST" }))
     const reportsPayload = await reportsResponse.json()
     expect(reportsResponse.status).toBe(200)
     expect(Array.isArray(reportsPayload.report.topActions)).toBe(true)

@@ -35,12 +35,13 @@ describe("GET /api/auth/summary", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(payload).toEqual({
+    expect(payload).toMatchObject({
       user: null,
       memberships: [],
       currentMembershipId: null,
       currentOrgId: null,
     })
+    expect(payload.requestId).toEqual(expect.any(String))
   })
 
   it("returneaza userul fresh si membership-urile curente", async () => {

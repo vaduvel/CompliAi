@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server"
-
 import {
   AuthzError,
   createSessionToken,
@@ -8,10 +6,14 @@ import {
   resolveUserForMembership,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
-import { jsonError } from "@/lib/server/api-response"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/auth/switch-org")
+
   try {
     const session = await requireFreshAuthenticatedSession(
       request,
@@ -37,23 +39,23 @@ export async function POST(request: Request) {
       membershipId: user.membershipId,
     })
 
-    const response = NextResponse.json({
+    const response = jsonWithRequestContext({
       ok: true,
       membershipId: user.membershipId,
       orgId: user.orgId,
       orgName: user.orgName,
       role: user.role,
       message: `Organizatia activa a fost schimbata la ${user.orgName}.`,
-    })
+    }, context)
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
     return response
   } catch (error) {
     if (error instanceof AuthzError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
 
     if (error instanceof RequestValidationError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
 
     if (error instanceof Error) {
@@ -61,21 +63,31 @@ export async function POST(request: Request) {
         return jsonError(
           "Organizatia selectata nu este disponibila pentru utilizatorul curent.",
           404,
-          "AUTH_MEMBERSHIP_NOT_FOUND"
+          "AUTH_MEMBERSHIP_NOT_FOUND",
+          undefined,
+          context
         )
       }
       if (error.message === "USER_NOT_FOUND") {
-        return jsonError("Utilizatorul curent nu exista.", 404, "AUTH_USER_NOT_FOUND")
+        return jsonError("Utilizatorul curent nu exista.", 404, "AUTH_USER_NOT_FOUND", undefined, context)
       }
       if (error.message === "ORGANIZATION_NOT_FOUND") {
-        return jsonError("Organizatia selectata nu exista.", 404, "AUTH_ORG_NOT_FOUND")
+        return jsonError("Organizatia selectata nu exista.", 404, "AUTH_ORG_NOT_FOUND", undefined, context)
       }
     }
+
+    await logRouteError(context, error, {
+      code: "AUTH_SWITCH_ORG_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
 
     return jsonError(
       error instanceof Error ? error.message : "Nu am putut schimba organizatia activa.",
       500,
-      "AUTH_SWITCH_ORG_FAILED"
+      "AUTH_SWITCH_ORG_FAILED",
+      undefined,
+      context
     )
   }
 }

@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server"
-
 import {
   createSessionToken,
   findUserById,
@@ -9,18 +7,22 @@ import {
   hashPassword,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
-import { jsonError } from "@/lib/server/api-response"
-import { asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
+import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 import { shouldUseSupabaseAuth, signInSupabaseIdentity } from "@/lib/server/supabase-auth"
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/auth/login")
+
   try {
     const body = requirePlainObject(await request.json())
     const email = asTrimmedString(body.email, 180)
     const password = asTrimmedString(body.password, 200)
 
     if (!email || !password) {
-      return jsonError("Email si parola sunt obligatorii.", 400, "AUTH_REQUIRED_FIELDS")
+      return jsonError("Email si parola sunt obligatorii.", 400, "AUTH_REQUIRED_FIELDS", undefined, context)
     }
 
     const localUser = await findUserByEmail(email)
@@ -37,12 +39,20 @@ export async function POST(request: Request) {
           return jsonError(
             "Identitatea exista, dar nu este mapata inca la o organizatie CompliScan.",
             403,
-            "AUTH_IDENTITY_NOT_MAPPED"
+            "AUTH_IDENTITY_NOT_MAPPED",
+            undefined,
+            context
           )
         }
         if (!localUser || localUser.authProvider === "supabase") {
           if (error instanceof Error && error.message === "AUTH_INVALID_CREDENTIALS") {
-            return jsonError("Email sau parola incorecta.", 401, "AUTH_INVALID_CREDENTIALS")
+            return jsonError(
+              "Email sau parola incorecta.",
+              401,
+              "AUTH_INVALID_CREDENTIALS",
+              undefined,
+              context
+            )
           }
           throw error
         }
@@ -50,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     if (!user || (user.authProvider !== "supabase" && hashPassword(password, user.salt) !== user.passwordHash)) {
-      return jsonError("Email sau parola incorecta.", 401, "AUTH_INVALID_CREDENTIALS")
+      return jsonError("Email sau parola incorecta.", 401, "AUTH_INVALID_CREDENTIALS", undefined, context)
     }
 
     const token = createSessionToken({
@@ -62,17 +72,28 @@ export async function POST(request: Request) {
       membershipId: user.membershipId,
     })
 
-    const response = NextResponse.json({
+    const response = jsonWithRequestContext({
       ok: true,
       orgId: user.orgId,
       orgName: user.orgName,
       role: user.role,
-    })
+    }, context)
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
     return response
   } catch (error) {
+    if (error instanceof RequestValidationError) {
+      return jsonError(error.message, error.status, error.code, undefined, context)
+    }
+
     const message =
       error instanceof Error ? error.message : "Autentificarea nu a putut fi pornita."
-    return jsonError(message, 500, "AUTH_LOGIN_FAILED")
+
+    await logRouteError(context, error, {
+      code: "AUTH_LOGIN_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+
+    return jsonError(message, 500, "AUTH_LOGIN_FAILED", undefined, context)
   }
 }

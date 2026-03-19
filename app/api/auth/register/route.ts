@@ -1,18 +1,20 @@
-import { NextResponse } from "next/server"
-
 import {
   createSessionToken,
   getSessionCookieOptions,
   registerUser,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
-import { jsonError } from "@/lib/server/api-response"
-import { asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
+import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 import { shouldUseSupabaseAuth, registerSupabaseIdentity } from "@/lib/server/supabase-auth"
 import { activateTrial } from "@/lib/server/plan"
 import { sendOnboardingEmail } from "@/lib/server/onboarding-emails"
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/auth/register")
+
   try {
     const body = requirePlainObject(await request.json())
     const email = asTrimmedString(body.email, 180)
@@ -20,14 +22,16 @@ export async function POST(request: Request) {
     const orgName = asTrimmedString(body.orgName, 180) || ""
 
     if (!email || !password) {
-      return jsonError("Email si parola sunt obligatorii.", 400, "AUTH_REQUIRED_FIELDS")
+      return jsonError("Email si parola sunt obligatorii.", 400, "AUTH_REQUIRED_FIELDS", undefined, context)
     }
 
     if (password.length < 8) {
       return jsonError(
         "Parola trebuie sa aiba cel putin 8 caractere.",
         400,
-        "AUTH_PASSWORD_TOO_SHORT"
+        "AUTH_PASSWORD_TOO_SHORT",
+        undefined,
+        context
       )
     }
 
@@ -53,19 +57,36 @@ export async function POST(request: Request) {
       membershipId: user.membershipId,
     })
 
-    const response = NextResponse.json({
+    const response = jsonWithRequestContext({
       ok: true,
       orgId: user.orgId,
       orgName: user.orgName,
       role: user.role,
-    })
+    }, context)
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
     return response
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Eroare la inregistrare."
-    if (message === "AUTH_EMAIL_ALREADY_REGISTERED") {
-      return jsonError("Adresa de email este deja inregistrata.", 400, "AUTH_REGISTER_FAILED")
+  } catch (error) {
+    if (error instanceof RequestValidationError) {
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
-    return jsonError(message, 400, "AUTH_REGISTER_FAILED")
+
+    const message = error instanceof Error ? error.message : "Eroare la inregistrare."
+    if (message === "AUTH_EMAIL_ALREADY_REGISTERED") {
+      return jsonError(
+        "Adresa de email este deja inregistrata.",
+        400,
+        "AUTH_REGISTER_FAILED",
+        undefined,
+        context
+      )
+    }
+
+    await logRouteError(context, error, {
+      code: "AUTH_REGISTER_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 400,
+    })
+
+    return jsonError(message, 400, "AUTH_REGISTER_FAILED", undefined, context)
   }
 }

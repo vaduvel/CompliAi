@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server"
-
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import {
   addOrganizationMemberByEmail,
@@ -8,12 +6,16 @@ import {
   requireFreshRole,
   type UserRole,
 } from "@/lib/server/auth"
-import { jsonError } from "@/lib/server/api-response"
+import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
 
 export async function GET(request: Request) {
+  const context = createRequestContext(request, "/api/auth/members")
+
   try {
     const session = await requireFreshRole(
       request,
@@ -22,26 +24,36 @@ export async function GET(request: Request) {
     )
     const members = await listOrganizationMembers(session.orgId)
 
-    return NextResponse.json({
+    return jsonWithRequestContext({
       members,
       orgId: session.orgId,
       orgName: session.orgName,
       actorRole: session.role,
-    })
+    }, context)
   } catch (error) {
     if (error instanceof AuthzError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
+
+    await logRouteError(context, error, {
+      code: "AUTH_MEMBERS_FETCH_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
 
     return jsonError(
       error instanceof Error ? error.message : "Nu am putut incarca membrii organizatiei.",
       500,
-      "AUTH_MEMBERS_FETCH_FAILED"
+      "AUTH_MEMBERS_FETCH_FAILED",
+      undefined,
+      context
     )
   }
 }
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/auth/members")
+
   try {
     const session = await requireFreshRole(request, ["owner"], "adaugarea membrilor in organizatie")
     const actor = eventActorFromSession(session)
@@ -73,51 +85,69 @@ export async function POST(request: Request) {
       ]),
     }))
 
-    return NextResponse.json(
+    return jsonWithRequestContext(
       {
         ok: true,
         member,
         message: "Membrul a fost adaugat in organizatia curenta.",
       },
+      context,
       { status: 201 }
     )
   } catch (error) {
     if (error instanceof AuthzError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
     if (error instanceof RequestValidationError) {
-      return jsonError(error.message, error.status, error.code)
+      return jsonError(error.message, error.status, error.code, undefined, context)
     }
 
     if (error instanceof Error) {
       if (error.message === "ORGANIZATION_NOT_FOUND") {
-        return jsonError("Organizatia curenta nu exista.", 404, "AUTH_ORG_NOT_FOUND")
+        return jsonError("Organizatia curenta nu exista.", 404, "AUTH_ORG_NOT_FOUND", undefined, context)
       }
       if (error.message === "USER_NOT_FOUND") {
         return jsonError(
           "Utilizatorul nu exista in workspace. Adauga doar utilizatori care au deja cont local.",
           404,
-          "AUTH_MEMBER_USER_NOT_FOUND"
+          "AUTH_MEMBER_USER_NOT_FOUND",
+          undefined,
+          context
         )
       }
       if (error.message === "MEMBER_ALREADY_EXISTS") {
         return jsonError(
           "Utilizatorul exista deja in organizatia curenta.",
           409,
-          "AUTH_MEMBER_ALREADY_EXISTS"
+          "AUTH_MEMBER_ALREADY_EXISTS",
+          undefined,
+          context
         )
       }
       if (error.message === "USER_NOT_SYNCABLE") {
         return jsonError(
           "Utilizatorul exista doar local si nu poate fi adaugat in acest mod cloud-first.",
           409,
-          "AUTH_MEMBER_NOT_SYNCABLE"
+          "AUTH_MEMBER_NOT_SYNCABLE",
+          undefined,
+          context
         )
       }
-      return jsonError(error.message, 500, "AUTH_MEMBER_ADD_FAILED")
     }
 
-    return jsonError("Nu am putut adauga membrul in organizatie.", 500, "AUTH_MEMBER_ADD_FAILED")
+    await logRouteError(context, error, {
+      code: "AUTH_MEMBER_ADD_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut adauga membrul in organizatie.",
+      500,
+      "AUTH_MEMBER_ADD_FAILED",
+      undefined,
+      context
+    )
   }
 }
 

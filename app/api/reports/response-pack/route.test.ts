@@ -68,7 +68,7 @@ describe("POST /api/reports/response-pack", () => {
   })
 
   it("genereaza response pack si fara vendor reviews", async () => {
-    const response = await POST()
+    const response = await POST(new Request("http://localhost/api/reports/response-pack", { method: "POST" }))
     const payload = await response.json()
 
     expect(response.status).toBe(200)
@@ -79,7 +79,7 @@ describe("POST /api/reports/response-pack", () => {
   it("degradeaza gratios cand vendor review store returneaza gol", async () => {
     mocks.listReviewsMock.mockResolvedValueOnce([])
 
-    const response = await POST()
+    const response = await POST(new Request("http://localhost/api/reports/response-pack", { method: "POST" }))
     const payload = await response.json()
 
     expect(response.status).toBe(200)
