@@ -13,7 +13,7 @@ import { runDocumentAgent } from "@/lib/compliance/agent-document"
 import { runVendorRiskAgent } from "@/lib/compliance/agent-vendor-risk"
 import { runRegulatoryRadar } from "@/lib/compliance/agent-regulatory-radar"
 import type { AgentType, AgentOutput } from "@/lib/compliance/agentic-engine"
-import { listReviews } from "@/lib/server/vendor-review-store"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 export type OrchestratorResult = {
   orgId: string
@@ -41,7 +41,7 @@ export async function executeAgent(
       return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
     }
     const state = normalizeComplianceState(rawState)
-    const vendorReviews = await listReviews(orgId)
+    const vendorReviews = await safeListReviews(orgId)
 
     const output = runComplianceMonitor({
       orgId,
@@ -119,7 +119,7 @@ export async function executeAgent(
       return makeEmptyOutput(agentType, "Nicio stare de conformitate pentru această organizație.")
     }
     const state = normalizeComplianceState(rawState)
-    const vendorReviews = await listReviews(orgId)
+    const vendorReviews = await safeListReviews(orgId)
 
     const output = runVendorRiskAgent({
       orgId,
