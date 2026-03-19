@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import * as Sentry from "@sentry/nextjs"
 import { AlertTriangle, RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -13,7 +14,8 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log to monitoring, nu în console
+    Sentry.captureException(error)
+
     if (process.env.NODE_ENV === "development") {
       console.error("[GlobalError]", error)
     }

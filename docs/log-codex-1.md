@@ -268,3 +268,35 @@ Cleanup operational aplicat:
 - `CRON_SECRET` creat in Vercel `production`, apoi rotit o data dupa un prim deploy esuat din cauza whitespace la final
 - redeploy productie reusit dupa rotirea secretului
 - `POST /api/cron/vendor-review-revalidation` fara auth -> `401`, deci protectia cron este activa
+
+## Sentry minimal integration
+
+Status pe branchul `codex/sentry-minimal`:
+
+- adaugat `@sentry/nextjs` si fisierele standard:
+  - `instrumentation-client.ts`
+  - `instrumentation.ts`
+  - `sentry.server.config.ts`
+  - `sentry.edge.config.ts`
+- `next.config.ts` este acum wrapped cu `withSentryConfig(...)`
+- `app/error.tsx`, `app/dashboard/error.tsx` si `app/global-error.tsx` captureaza exceptiile prin `Sentry.captureException(error)`
+- `lib/server/operational-logger.ts` trimite `route.error` in Sentry pentru rutele care deja folosesc `logRouteError(...)`
+- `.env.example` documenteaza:
+  - `NEXT_PUBLIC_SENTRY_DSN`
+  - `SENTRY_AUTH_TOKEN`
+  - `SENTRY_ORG`
+  - `SENTRY_PROJECT`
+  - `SENTRY_ENVIRONMENT`
+  - `SENTRY_RELEASE`
+
+Validare pe branch:
+
+- `npm test` -> `107 passed`, `583 tests passed`, `6 skipped`
+- `npx tsc --noEmit` -> verde
+- `npm run build` -> verde
+
+Activare ramasa dupa merge:
+
+- creare proiect Sentry si copiere `NEXT_PUBLIC_SENTRY_DSN`
+- setare env-uri `SENTRY_*` in Vercel
+- redeploy productie pentru activarea efectiva a capturii

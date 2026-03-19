@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import * as Sentry from "@sentry/nextjs"
 import { useRouter } from "next/navigation"
 import { AlertTriangle, Home, RefreshCw } from "lucide-react"
 
@@ -16,6 +17,8 @@ export default function DashboardError({
   const router = useRouter()
 
   useEffect(() => {
+    Sentry.captureException(error)
+
     if (process.env.NODE_ENV === "development") {
       console.error("[DashboardError]", error)
     }
