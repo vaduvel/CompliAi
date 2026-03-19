@@ -17,7 +17,8 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import type { CockpitTask } from "@/components/compliscan/types"
 import { resolveEvidenceHref } from "@/lib/compliance/evidence-links"
-import type { EvidenceQualityAssessment, FindingResolution, TaskEvidenceKind } from "@/lib/compliance/types"
+import type { EvidenceQualityAssessment, FindingResolution, TaskEvidenceKind, ValidationLevel } from "@/lib/compliance/types"
+import { getValidationLevelMeta } from "@/lib/compliance/validation-levels"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
 import {
   formatEvidenceQualityStatus,
@@ -77,6 +78,12 @@ function validationLabel(status: CockpitTask["validationStatus"]) {
   if (status === "failed") return "respins"
   if (status === "needs_review") return "revizuire"
   return "nepornit"
+}
+
+function validationLevelTone(level: ValidationLevel) {
+  if (level === 1) return "border-eos-border bg-eos-success-soft text-eos-success"
+  if (level === 2) return "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+  return "border-eos-error-border bg-eos-error-soft text-eos-error"
 }
 
 function validationConfidenceLabel(confidence?: CockpitTask["validationConfidence"]) {
@@ -150,6 +157,8 @@ function auditBlockerLabel(task: CockpitTask) {
   if (task.validationStatus === "failed") return "Ultima verificare a respins task-ul si cere revenire."
   if (task.validationStatus === "needs_review") return "Task-ul cere confirmare umana inainte de inchidere."
   if (task.status === "done") return "Task-ul este inchis si poate fi verificat separat in Vault."
+  if (task.validationLevel === 3) return "Cazul este pregatit pentru validare de specialitate. Dovezile si red flags sunt deja organizate."
+  if (task.validationLevel === 2) return "Cazul necesita confirmare interna inainte de inchidere."
   return "Nu exista blocaje majore vizibile pentru task-ul curent."
 }
 
@@ -237,6 +246,12 @@ export function TaskCard({
                   <Badge className={validationTone(task.validationStatus)}>
                     {validationLabel(task.validationStatus)}
                   </Badge>
+                  <Badge
+                    className={validationLevelTone(task.validationLevel)}
+                    title={getValidationLevelMeta(task.validationLevel).description}
+                  >
+                    L{task.validationLevel} · {getValidationLevelMeta(task.validationLevel).shortLabel}
+                  </Badge>
                   {task.category === "NIS2" ? (
                     <Badge className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
                       NIS2
@@ -274,6 +289,10 @@ export function TaskCard({
               </div>
 
               {task.resolution && <ResolutionPath resolution={task.resolution} />}
+
+              {task.validationLevel >= 2 && (
+                <ValidationLevelBlock level={task.validationLevel} />
+              )}
             </div>
 
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
@@ -670,6 +689,34 @@ function acceptForEvidenceKind(kind: TaskEvidenceKind) {
   if (kind === "yaml_evidence") return ".yaml,.yml,.json,.txt"
   if (kind === "document_bundle") return ".pdf,.zip,.json,.csv,.txt,.doc,.docx"
   return undefined
+}
+
+// ── Validation Level Block ────────────────────────────────────────────────────
+
+function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
+  const meta = getValidationLevelMeta(level)
+  const isSpecialist = level === 3
+
+  return (
+    <div
+      className={`mt-3 rounded-eos-md border px-4 py-3 ${
+        isSpecialist
+          ? "border-eos-error-border bg-eos-error-soft"
+          : "border-eos-warning-border bg-eos-warning-soft"
+      }`}
+    >
+      <p
+        className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+          isSpecialist ? "text-eos-error" : "text-eos-warning"
+        }`}
+      >
+        {meta.label}
+      </p>
+      <p className="mt-1.5 text-xs leading-5 text-eos-text">
+        {meta.escalationCopy}
+      </p>
+    </div>
+  )
 }
 
 // ── V3 P0.0 / V4.3.3 Resolution Path ─────────────────────────────────────────

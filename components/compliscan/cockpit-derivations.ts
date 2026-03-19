@@ -30,6 +30,10 @@ import {
   getTaskStateByTaskId,
   resolveFindingIdFromTaskId,
 } from "@/lib/compliance/task-ids"
+import {
+  inferValidationLevel,
+  inferTaskValidationLevel,
+} from "@/lib/compliance/validation-levels"
 
 type CockpitTaskSourcePayload = {
   state: ComplianceState
@@ -84,7 +88,7 @@ function getResolvedFindingIdsFromPayload(data: CockpitTaskSourcePayload) {
 }
 
 function convertRemediationTask(item: RemediationAction): CockpitTask {
-  return {
+  const task: CockpitTask = {
     id: `rem-${item.id}`,
     title: item.title,
     priority: item.priority,
@@ -119,7 +123,10 @@ function convertRemediationTask(item: RemediationAction): CockpitTask {
     sourceDocument: item.sourceDocument,
     evidenceKinds: item.evidenceTypes ?? ["policy_text", "other"],
     validationStatus: "idle",
+    validationLevel: 1, // placeholder, recalculated below
   }
+  task.validationLevel = inferTaskValidationLevel(task)
+  return task
 }
 
 function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): CockpitTask {
@@ -168,6 +175,7 @@ function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): Cock
     sourceDocument: finding.sourceDocument,
     evidenceKinds: finding.evidenceTypes ?? inferEvidenceKindsFromCategory(finding.category),
     validationStatus: "idle",
+    validationLevel: inferValidationLevel(finding),
   }
 }
 

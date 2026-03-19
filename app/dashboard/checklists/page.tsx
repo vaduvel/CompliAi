@@ -16,7 +16,7 @@ import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/Su
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 
-type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
+type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 
 export default function RemediationPage() {
   const cockpit = useCockpitData()
