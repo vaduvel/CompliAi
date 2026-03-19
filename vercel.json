@@ -5,6 +5,10 @@
       "schedule": "0 8 * * 1"
     },
     {
+      "path": "/api/cron/agent-orchestrator",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/cron/vendor-review-revalidation",
       "schedule": "0 7 * * *"
     }
