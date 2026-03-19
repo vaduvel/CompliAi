@@ -5,6 +5,7 @@
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
+import { hasSupabaseConfig, supabaseUpsert } from "@/lib/server/supabase-rest"
 
 const nis2Storage = createAdaptiveStorage<Nis2OrgState>("nis2", "nis2_state")
 
@@ -148,8 +149,54 @@ export async function readNis2State(orgId: string): Promise<Nis2OrgState> {
 
 async function writeNis2State(orgId: string, state: Nis2OrgState): Promise<Nis2OrgState> {
   const updated = { ...state, updatedAtISO: new Date().toISOString() }
-  await nis2Storage.write(orgId, updated)
+  try {
+    await nis2Storage.write(orgId, updated)
+  } catch (error) {
+    if (isMissingOrgForeignKey(error)) {
+      await ensureSupabaseOrganization(orgId)
+      await nis2Storage.write(orgId, updated)
+    } else {
+      throw error
+    }
+  }
   return updated
+}
+
+function isMissingOrgForeignKey(error: unknown) {
+  const text = error instanceof Error ? error.message : String(error)
+  return (
+    text.includes("23503") &&
+    (text.includes("nis2_state_org_id_fkey") || text.includes("org_id") || text.includes("organizations"))
+  )
+}
+
+async function ensureSupabaseOrganization(orgId: string, orgName?: string) {
+  if (!hasSupabaseConfig()) return
+
+  const name = orgName?.trim() || "Organizatie"
+  const now = new Date().toISOString()
+  await supabaseUpsert(
+    "organizations",
+    {
+      id: orgId,
+      name,
+      slug: slugify(name),
+      created_at: now,
+      updated_at: now,
+    },
+    "public"
+  )
+}
+
+function slugify(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 120) || null
+  )
 }
 
 // ── Assessment ────────────────────────────────────────────────────────────────
