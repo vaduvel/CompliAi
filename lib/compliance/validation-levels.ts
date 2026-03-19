@@ -6,7 +6,6 @@
 // Level 3 = Specialist validation: necesita review de specialitate (jurist/DPO/auditor)
 
 import type { ScanFinding, ValidationLevel } from "@/lib/compliance/types"
-import type { CockpitTask } from "@/components/compliscan/types"
 
 // ── Inference from ScanFinding ───────────────────────────────────────────────
 
@@ -95,9 +94,25 @@ function isBusinessConfirmationRequired(finding: ScanFinding): boolean {
   return false
 }
 
-// ── Inference from CockpitTask (fallback when finding not available) ─────────
+// ── Inference from remediation tasks (fallback when full finding not available) ─
 
-export function inferTaskValidationLevel(task: CockpitTask): ValidationLevel {
+type ValidationTaskInput = {
+  priority: "P1" | "P2" | "P3"
+  severity: ScanFinding["severity"]
+  remediationMode: "rapid" | "structural"
+}
+
+export function inferTaskValidationLevel(
+  task: ValidationTaskInput,
+  relatedFindings: ScanFinding[] = []
+): ValidationLevel {
+  // If the task is derived from findings, preserve the highest required level.
+  const relatedLevel = relatedFindings.reduce<ValidationLevel>(
+    (highest, finding) => Math.max(highest, inferValidationLevel(finding)) as ValidationLevel,
+    1
+  )
+  if (relatedLevel > 1) return relatedLevel
+
   // P1 critical → specialist
   if (task.priority === "P1" && task.severity === "critical") return 3
   if (task.priority === "P1" && task.severity === "high") return 3

@@ -43,7 +43,7 @@ type CockpitTaskSourcePayload = {
 export function buildCockpitTasks(data: CockpitTaskSourcePayload): CockpitTask[] {
   const remediationTasks = data.remediationPlan
     .filter((item) => item.id !== "baseline-maintenance")
-    .map(convertRemediationTask)
+    .map((item) => convertRemediationTask(item, data.state.findings))
   const resolvedFindingIds = getResolvedFindingIdsFromPayload(data)
 
   const evidenceTasks = data.state.findings
@@ -87,7 +87,10 @@ function getResolvedFindingIdsFromPayload(data: CockpitTaskSourcePayload) {
   return resolved
 }
 
-function convertRemediationTask(item: RemediationAction): CockpitTask {
+function convertRemediationTask(item: RemediationAction, findings: ScanFinding[]): CockpitTask {
+  const relatedFindings = findings.filter((finding) =>
+    (item.relatedFindingIds ?? []).includes(finding.id)
+  )
   const task: CockpitTask = {
     id: `rem-${item.id}`,
     title: item.title,
@@ -125,7 +128,7 @@ function convertRemediationTask(item: RemediationAction): CockpitTask {
     validationStatus: "idle",
     validationLevel: 1, // placeholder, recalculated below
   }
-  task.validationLevel = inferTaskValidationLevel(task)
+  task.validationLevel = inferTaskValidationLevel(task, relatedFindings)
   return task
 }
 
