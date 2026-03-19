@@ -169,3 +169,165 @@ export async function registerSupabaseIdentity(
     email: userEmail,
   }
 }
+
+export async function createSupabaseRecoveryLink(
+  email: string,
+  redirectTo: string
+): Promise<string> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("SUPABASE_AUTH_NOT_CONFIGURED")
+  }
+
+  const response = await fetchWithOperationalGuard(
+    `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/generate_link`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "recovery",
+        email,
+        redirect_to: redirectTo,
+      }),
+      cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: "supabase-auth-recovery-link",
+    }
+  )
+
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`SUPABASE_AUTH_RECOVERY_FAILED:${response.status}:${text}`)
+  }
+
+  const payload = (await response.json()) as {
+    action_link?: string
+    properties?: {
+      action_link?: string
+    }
+  }
+
+  const actionLink = payload.action_link || payload.properties?.action_link
+  if (!actionLink) {
+    throw new Error("SUPABASE_AUTH_RECOVERY_INVALID_RESPONSE")
+  }
+
+  return actionLink
+}
+
+async function getSupabaseIdentityFromAccessToken(
+  accessToken: string
+): Promise<SupabaseIdentity> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("SUPABASE_AUTH_NOT_CONFIGURED")
+  }
+
+  const response = await fetchWithOperationalGuard(
+    `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`,
+    {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: "supabase-auth-get-user",
+    }
+  )
+
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`SUPABASE_AUTH_GET_USER_FAILED:${response.status}:${text}`)
+  }
+
+  const payload = (await response.json()) as {
+    id?: string
+    email?: string | null
+    user?: { id?: string; email?: string | null }
+  }
+
+  const userId = payload.user?.id || payload.id
+  const userEmail = payload.user?.email || payload.email
+  if (!userId || !userEmail) {
+    throw new Error("SUPABASE_AUTH_GET_USER_INVALID_RESPONSE")
+  }
+
+  return {
+    id: userId,
+    email: userEmail,
+  }
+}
+
+export async function updateSupabasePasswordWithAccessToken(
+  accessToken: string,
+  password: string
+): Promise<SupabaseIdentity> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("SUPABASE_AUTH_NOT_CONFIGURED")
+  }
+
+  const response = await fetchWithOperationalGuard(
+    `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`,
+    {
+      method: "PUT",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+      cache: "no-store",
+      timeoutMs: 8_000,
+      retries: 1,
+      label: "supabase-auth-update-password",
+    }
+  )
+
+  if (!response.ok) {
+    const text = await response.text()
+    const normalized = text.toLowerCase()
+    if (
+      response.status === 400 ||
+      response.status === 401
+    ) {
+      if (
+        normalized.includes("expired") ||
+        normalized.includes("invalid") ||
+        normalized.includes("token") ||
+        normalized.includes("session") ||
+        normalized.includes("jwt")
+      ) {
+        throw new Error("AUTH_INVALID_RECOVERY_SESSION")
+      }
+    }
+
+    throw new Error(`SUPABASE_AUTH_UPDATE_PASSWORD_FAILED:${response.status}:${text}`)
+  }
+
+  try {
+    const payload = (await response.json()) as {
+      id?: string
+      email?: string | null
+      user?: { id?: string; email?: string | null }
+    }
+
+    const userId = payload.user?.id || payload.id
+    const userEmail = payload.user?.email || payload.email
+    if (userId && userEmail) {
+      return {
+        id: userId,
+        email: userEmail,
+      }
+    }
+  } catch {
+    // Some auth deployments may return an empty body here. Fall back to get-user.
+  }
+
+  return getSupabaseIdentityFromAccessToken(accessToken)
+}
