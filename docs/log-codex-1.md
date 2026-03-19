@@ -300,3 +300,61 @@ Activare ramasa dupa merge:
 - creare proiect Sentry si copiere `NEXT_PUBLIC_SENTRY_DSN`
 - setare env-uri `SENTRY_*` in Vercel
 - redeploy productie pentru activarea efectiva a capturii
+
+## Smart Intake Wizard — Questionnaire Automation (Blueprint → Cod)
+
+Data: 2026-03-19
+Branch: `codex/smart-intake-wizard`
+Sursa: `docs/CompliScan_Questionnaire_Automation_Blueprint.md`
+
+### Context
+
+Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asistata":
+- 3 straturi: prefill → 7 intrebari decisive → intrebari conditionale
+- suggested answers bazate pe ce stie deja sistemul
+- auto-generare findings + document requests + next best action
+
+### Ce implementam (slice executabil)
+
+1. `lib/compliance/intake-engine.ts` — engine-ul de intake:
+   - 7 intrebari decisive cu optiuni
+   - intrebari conditionale (branching pe raspunsuri)
+   - suppression rules (nu intreaba ce stie deja din profil)
+   - suggested answers din profil existent
+   - mapping raspuns → ScanFinding[] (sectiunea 10 din blueprint)
+   - mapping raspuns → document request list
+   - next best action derivat din findings
+
+2. Extend `applicability-wizard.tsx` — adaugare pas de intake dupa profil
+   - confirma/corecteaza stil, nu formular lung
+   - conditional questions apar doar daca e cazul
+   - summary cu findings + doc requests + next action
+
+3. Extend `POST /api/org/profile` — proceseaza intake answers
+   - genereaza findings initiale din raspunsuri
+   - salveaza intake answers in state
+
+### Ce NU implementam
+
+- CUI auto-lookup din ANAF (e pe `feat/anaf-signals-phase-a`)
+- site scanning / document NLP
+- vendor auto-detection
+- prefill din documente urcate
+
+### Inchidere sesiune Codex
+
+- `lib/compliance/intake-engine.ts` a fost adus pe branch si folosit ca motor pur pentru intake:
+  - suggested answers
+  - intrebari conditionale
+  - findings initiale
+  - document requests
+  - next best action
+- `POST /api/org/profile` proceseaza acum `intakeAnswers`, persista raspunsurile si inlocuieste findings-urile `intake-*` vechi cu setul nou generat.
+- `ApplicabilityWizard` a fost extins cu un pas de confirmare asistata:
+  - profil scurt
+  - confirmari adaptive
+  - rezumat final cu findings + documente + next best action
+- Validare pe branch:
+  - `./node_modules/.bin/tsc --noEmit`
+  - `npm test -- app/api/org/profile/route.test.ts`
+  - `npm run build`

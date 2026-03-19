@@ -1,6 +1,7 @@
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
 import type { OrgProfile, ApplicabilityResult } from "@/lib/compliance/applicability"
+import type { FullIntakeAnswers } from "@/lib/compliance/intake-engine"
 
 export type AlertSeverity = ComplianceSeverity
 export type FindingCategory = "EU_AI_ACT" | "GDPR" | "E_FACTURA" | "NIS2"
@@ -374,6 +375,9 @@ export type ComplianceState = {
   // ── V3 P2.1 Shadow AI ─────────────────────────────────────────────────────
   shadowAiAnswers?: { questionId: string; value: string | string[] }[]
   shadowAiCompletedAtISO?: string
+  // ── Smart Intake (Questionnaire Automation) ──────────────────────────────
+  intakeAnswers?: FullIntakeAnswers
+  intakeCompletedAtISO?: string
 }
 
 export type DashboardSummary = {

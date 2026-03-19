@@ -3,6 +3,13 @@
 
 import { NextResponse } from "next/server"
 
+import {
+  buildDocumentRequests,
+  buildInitialFindings,
+  buildNextBestAction,
+  type FullIntakeAnswers,
+  type IntakeAnswer,
+} from "@/lib/compliance/intake-engine"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { mutateState, readState } from "@/lib/server/mvp-store"
@@ -20,6 +27,19 @@ const VALID_SECTORS: OrgSector[] = [
 ]
 
 const VALID_EMPLOYEE_COUNTS: OrgEmployeeCount[] = ["1-9", "10-49", "50-249", "250+"]
+const VALID_INTAKE_ANSWERS: IntakeAnswer[] = [
+  "yes",
+  "no",
+  "probably",
+  "unknown",
+  "partial",
+  "collaborators",
+  "mixed",
+]
+
+type OrgProfileRequestBody = Partial<OrgProfile> & {
+  intakeAnswers?: Partial<FullIntakeAnswers>
+}
 
 export async function GET(request: Request) {
   try {
@@ -30,6 +50,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       orgProfile: state.orgProfile ?? null,
       applicability: state.applicability ?? null,
+      intakeAnswers: state.intakeAnswers ?? null,
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -42,7 +63,7 @@ export async function POST(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
-    const body = (await request.json()) as Partial<OrgProfile>
+    const body = (await request.json()) as OrgProfileRequestBody
 
     if (!body.sector || !VALID_SECTORS.includes(body.sector)) {
       return jsonError("Câmp invalid: sector.", 400, "INVALID_SECTOR")
@@ -71,16 +92,73 @@ export async function POST(request: Request) {
     }
 
     const applicability = evaluateApplicability(orgProfile)
+    const intakeAnswers = normalizeIntakeAnswers(body.intakeAnswers)
+    const initialFindings = intakeAnswers ? buildInitialFindings(intakeAnswers) : []
+    const documentRequests = intakeAnswers ? buildDocumentRequests(intakeAnswers) : []
+    const nextBestAction = intakeAnswers ? buildNextBestAction(initialFindings) : null
+    const intakeCompletedAtISO = intakeAnswers ? new Date().toISOString() : undefined
 
-    await mutateState((current) => ({ ...current, orgProfile, applicability }))
+    await mutateState((current) => {
+      const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
+      const nextFindings = intakeAnswers
+        ? [...previousFindings, ...initialFindings]
+        : current.findings
+
+      return {
+        ...current,
+        orgProfile,
+        applicability,
+        findings: nextFindings,
+        ...(intakeAnswers
+          ? {
+              intakeAnswers,
+              intakeCompletedAtISO,
+            }
+          : {}),
+      }
+    })
     void trackEvent(session.orgId, "completed_applicability", {
       sector: orgProfile.sector,
       employeeCount: orgProfile.employeeCount,
     })
+    if (intakeAnswers) {
+      void trackEvent(session.orgId, "completed_applicability", {
+        findingsCount: initialFindings.length,
+        requiredDocs: documentRequests.filter((item) => item.priority === "required").length,
+      })
+    }
 
-    return NextResponse.json({ orgProfile, applicability })
+    return NextResponse.json({
+      orgProfile,
+      applicability,
+      intakeAnswers,
+      initialFindings,
+      documentRequests,
+      nextBestAction,
+    })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Nu am putut salva profilul org.", 500, "ORG_PROFILE_SAVE_FAILED")
   }
+}
+
+function normalizeIntakeAnswers(raw: Partial<FullIntakeAnswers> | undefined): FullIntakeAnswers | undefined {
+  if (!raw || typeof raw !== "object") return undefined
+
+  const normalized: Partial<FullIntakeAnswers> = {}
+
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value !== "string") continue
+    const trimmed = value.trim()
+    if (!trimmed) continue
+
+    if (VALID_INTAKE_ANSWERS.includes(trimmed as IntakeAnswer)) {
+      ;(normalized as Record<string, string | undefined>)[key] = trimmed
+      continue
+    }
+
+    ;(normalized as Record<string, string | undefined>)[key] = trimmed
+  }
+
+  return Object.keys(normalized).length > 0 ? (normalized as FullIntakeAnswers) : undefined
 }

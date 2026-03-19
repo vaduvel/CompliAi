@@ -1,22 +1,44 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
-import { CheckCircle2, ChevronRight, Loader2, Shield } from "lucide-react"
+import {
+  CheckCircle2,
+  ChevronRight,
+  FileText,
+  ListChecks,
+  Loader2,
+  Shield,
+  Sparkles,
+  TriangleAlert,
+} from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import {
-  ORG_SECTOR_LABELS,
-  ORG_EMPLOYEE_COUNT_LABELS,
   APPLICABILITY_TAG_LABELS,
-  type OrgSector,
-  type OrgEmployeeCount,
+  ORG_EMPLOYEE_COUNT_LABELS,
+  ORG_SECTOR_LABELS,
   type ApplicabilityResult,
+  type OrgEmployeeCount,
+  type OrgProfile,
+  type OrgSector,
 } from "@/lib/compliance/applicability"
+import {
+  DECISIVE_QUESTIONS,
+  deriveSuggestedAnswers,
+  getVisibleConditionalQuestions,
+  type DocumentRequest,
+  type FullIntakeAnswers,
+  type IntakeQuestion,
+  type NextBestAction,
+  type SuggestedAnswer,
+} from "@/lib/compliance/intake-engine"
+import type { ScanFinding } from "@/lib/compliance/types"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 
-type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "done"
+type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "intake" | "done"
 
 type WizardState = {
   cui: string
@@ -26,12 +48,21 @@ type WizardState = {
   requiresEfactura: boolean | null
 }
 
+type ProfileSaveResponse = {
+  applicability: ApplicabilityResult
+  initialFindings?: ScanFinding[]
+  documentRequests?: DocumentRequest[]
+  nextBestAction?: NextBestAction | null
+  intakeAnswers?: FullIntakeAnswers | null
+}
+
 type Props = {
   onComplete: (result: ApplicabilityResult) => void
 }
 
 const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
 const SIZES = Object.entries(ORG_EMPLOYEE_COUNT_LABELS) as [OrgEmployeeCount, string][]
+const INTAKE_QUESTIONS = DECISIVE_QUESTIONS.filter((question) => question.id !== "usesAITools")
 
 const CERTAINTY_BADGE: Record<string, string> = {
   certain: "border-eos-border bg-eos-success-soft text-eos-success",
@@ -39,13 +70,24 @@ const CERTAINTY_BADGE: Record<string, string> = {
   unlikely: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
 }
 
+const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
+  high: "border-eos-border bg-eos-success-soft text-eos-success",
+  medium: "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
+  low: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
+}
+
 export function ApplicabilityWizard({ onComplete }: Props) {
   const { track, trackOnce } = useTrackEvent()
   const completedRef = useRef(false)
-  useEffect(() => { trackOnce("started_applicability") }, [trackOnce])
+
+  useEffect(() => {
+    trackOnce("started_applicability")
+  }, [trackOnce])
+
   useEffect(() => () => {
     if (!completedRef.current) track("abandoned_applicability")
   }, [track])
+
   const [step, setStep] = useState<WizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
     cui: "",
@@ -54,30 +96,60 @@ export function ApplicabilityWizard({ onComplete }: Props) {
     usesAITools: null,
     requiresEfactura: null,
   })
+  const [intakeAnswers, setIntakeAnswers] = useState<FullIntakeAnswers>({
+    usesAITools: "unknown",
+  })
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ApplicabilityResult | null>(null)
+  const [initialFindings, setInitialFindings] = useState<ScanFinding[]>([])
+  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
+  const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
+
+  const profileSnapshot = buildProfileSnapshot(values)
+  const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot) : []
+  const visibleConditionalQuestions = getVisibleConditionalQuestions(intakeAnswers)
+  const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
+
+  function hydrateIntakeStep(nextRequiresEfactura: boolean) {
+    if (!values.sector || !values.employeeCount || values.usesAITools === null) return
+
+    const snapshot = buildProfileSnapshot({ ...values, requiresEfactura: nextRequiresEfactura })
+    if (!snapshot) return
+    const nextAnswers = deriveInitialIntakeAnswers(snapshot)
+    setIntakeAnswers(nextAnswers)
+    setError(null)
+    setStep("intake")
+  }
 
   async function handleSubmit() {
-    if (!values.sector || !values.employeeCount || values.usesAITools === null || values.requiresEfactura === null) return
+    if (!profileSnapshot) return
+    if (unansweredQuestions.length > 0) {
+      setError("Mai confirmă răspunsurile care schimbă findings sau documentele recomandate.")
+      return
+    }
+
     setSaving(true)
+    setError(null)
     try {
       const res = await fetch("/api/org/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sector: values.sector,
-          employeeCount: values.employeeCount,
-          usesAITools: values.usesAITools,
-          requiresEfactura: values.requiresEfactura,
+          ...profileSnapshot,
+          intakeAnswers,
         }),
       })
       if (!res.ok) throw new Error("save failed")
-      const data = (await res.json()) as { applicability: ApplicabilityResult }
+      const data = (await res.json()) as ProfileSaveResponse
       setResult(data.applicability)
+      setInitialFindings(data.initialFindings ?? [])
+      setDocumentRequests(data.documentRequests ?? [])
+      setNextBestAction(data.nextBestAction ?? null)
       completedRef.current = true
       setStep("done")
     } catch {
-      // keep wizard open
+      setError("Nu am putut salva onboarding-ul asistat. Mai încearcă o dată.")
     } finally {
       setSaving(false)
     }
@@ -88,11 +160,12 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   }
 
   const STEP_LABELS: Record<WizardStep, string> = {
-    cui: "1 / 5",
-    sector: "2 / 5",
-    size: "3 / 5",
-    ai: "4 / 5",
-    efactura: "5 / 5",
+    cui: "1 / 6",
+    sector: "2 / 6",
+    size: "3 / 6",
+    ai: "4 / 6",
+    efactura: "5 / 6",
+    intake: "6 / 6",
     done: "✓",
   }
 
@@ -107,7 +180,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 Descoperă ce legi se aplică organizației tale
               </p>
               <p className="text-xs text-eos-text-muted">
-                4 întrebări · sub 60 de secunde · fără date personale
+                Prefill + confirmare asistată · primele findings apar imediat
               </p>
             </div>
           </div>
@@ -117,35 +190,30 @@ export function ApplicabilityWizard({ onComplete }: Props) {
         </div>
 
         <div className="mt-5">
-          {/* Step 1: CUI */}
           {step === "cui" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
                 CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional)</span>
               </p>
               <p className="text-xs text-eos-text-muted">
-                Folosit pentru prefill automat în documentele generate. Ex: RO12345678 sau 12345678
+                Îl folosim pentru prefill în documentele generate. Dacă nu-l ai acum, mergem mai departe.
               </p>
               <input
                 type="text"
                 value={values.cui}
-                onChange={(e) => setValues((v) => ({ ...v, cui: e.target.value }))}
+                onChange={(e) => setValues((current) => ({ ...current, cui: e.target.value }))}
                 placeholder="Ex: RO12345678"
                 className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") setStep("sector")
                 }}
               />
-              <button
-                onClick={() => setStep("sector")}
-                className="w-full rounded-eos-md border border-eos-primary bg-eos-primary px-3 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-              >
+              <Button onClick={() => setStep("sector")} className="w-full">
                 Continuă
-              </button>
+              </Button>
             </div>
           )}
 
-          {/* Step 2: Sector */}
           {step === "sector" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
@@ -156,7 +224,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                   <button
                     key={value}
                     onClick={() => {
-                      setValues((v) => ({ ...v, sector: value }))
+                      setValues((current) => ({ ...current, sector: value }))
                       setStep("size")
                     }}
                     className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2.5 text-left text-sm text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
@@ -168,18 +236,17 @@ export function ApplicabilityWizard({ onComplete }: Props) {
             </div>
           )}
 
-          {/* Step 2: Size */}
           {step === "size" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
-                Câți angajați are organizația?
+                Câți oameni sunt în firmă acum?
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SIZES.map(([value, label]) => (
                   <button
                     key={value}
                     onClick={() => {
-                      setValues((v) => ({ ...v, employeeCount: value }))
+                      setValues((current) => ({ ...current, employeeCount: value }))
                       setStep("ai")
                     }}
                     className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2.5 text-left text-sm text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
@@ -191,16 +258,18 @@ export function ApplicabilityWizard({ onComplete }: Props) {
             </div>
           )}
 
-          {/* Step 3: AI Tools */}
           {step === "ai" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
-                Folosești unelte bazate pe AI? (ChatGPT, Copilot, Gemini, orice LLM sau clasificator automat)
+                Folosiți unelte AI în firmă?
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                Exemplu: ChatGPT, Copilot, Gemini sau orice clasificator / asistent automat.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    setValues((v) => ({ ...v, usesAITools: true }))
+                    setValues((current) => ({ ...current, usesAITools: true }))
                     setStep("efactura")
                   }}
                   className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
@@ -209,53 +278,27 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 </button>
                 <button
                   onClick={() => {
-                    setValues((v) => ({ ...v, usesAITools: false }))
+                    setValues((current) => ({ ...current, usesAITools: false }))
                     setStep("efactura")
                   }}
                   className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
                 >
-                  Nu (deocamdată)
+                  Nu
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 4: e-Factura */}
           {step === "efactura" && (
             <div className="space-y-3">
               <p className="text-sm font-medium text-eos-text">
-                Ești plătitor de TVA cu tranzacții B2B? (obligat să transmiți facturile prin e-Factura / SPV ANAF)
+                Facturezi B2B cu obligație de e-Factura / SPV ANAF?
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    setValues((v) => ({ ...v, requiresEfactura: true }))
-                    void (async () => {
-                      setValues((prev) => ({ ...prev, requiresEfactura: true }))
-                      setSaving(true)
-                      try {
-                        const finalValues = {
-                          sector: values.sector!,
-                          employeeCount: values.employeeCount!,
-                          usesAITools: values.usesAITools!,
-                          requiresEfactura: true,
-                          ...(values.cui.trim() ? { cui: values.cui.trim() } : {}),
-                        }
-                        const res = await fetch("/api/org/profile", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(finalValues),
-                        })
-                        if (!res.ok) throw new Error("save failed")
-                        const data = (await res.json()) as { applicability: ApplicabilityResult }
-                        setResult(data.applicability)
-                        setStep("done")
-                      } catch {
-                        // keep wizard open
-                      } finally {
-                        setSaving(false)
-                      }
-                    })()
+                    setValues((current) => ({ ...current, requiresEfactura: true }))
+                    hydrateIntakeStep(true)
                   }}
                   className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
                 >
@@ -263,54 +306,109 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 </button>
                 <button
                   onClick={() => {
-                    void (async () => {
-                      setValues((prev) => ({ ...prev, requiresEfactura: false }))
-                      setSaving(true)
-                      try {
-                        const finalValues = {
-                          sector: values.sector!,
-                          employeeCount: values.employeeCount!,
-                          usesAITools: values.usesAITools!,
-                          requiresEfactura: false,
-                          ...(values.cui.trim() ? { cui: values.cui.trim() } : {}),
-                        }
-                        const res = await fetch("/api/org/profile", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(finalValues),
-                        })
-                        if (!res.ok) throw new Error("save failed")
-                        const data = (await res.json()) as { applicability: ApplicabilityResult }
-                        setResult(data.applicability)
-                        setStep("done")
-                      } catch {
-                        // keep wizard open
-                      } finally {
-                        setSaving(false)
-                      }
-                    })()
+                    setValues((current) => ({ ...current, requiresEfactura: false }))
+                    hydrateIntakeStep(false)
                   }}
                   className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
                 >
                   Nu / Nu știu
                 </button>
               </div>
-              {saving && (
-                <div className="flex items-center gap-2 text-xs text-eos-text-muted">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Se calculează aplicabilitatea...
-                </div>
-              )}
             </div>
           )}
 
-          {/* Done: show result */}
+          {step === "intake" && (
+            <div className="space-y-5">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-eos-text">
+                      Ce am înțeles deja despre firmă
+                    </p>
+                    <p className="mt-1 text-xs text-eos-text-muted">
+                      Confirmi doar răspunsurile care schimbă findings, documentele recomandate sau următorul pas.
+                    </p>
+                  </div>
+                </div>
+                {suggestedAnswers.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {suggestedAnswers.map((suggestion) => (
+                      <Badge
+                        key={suggestion.questionId}
+                        className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}
+                      >
+                        {questionLabelForSuggestion(suggestion.questionId)} · {answerLabel(suggestion.value)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {INTAKE_QUESTIONS.map((question) => (
+                  <QuestionCard
+                    key={question.id}
+                    question={question}
+                    value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
+                    suggestion={suggestedAnswers.find((item) => item.questionId === question.id)}
+                    onChange={(value) =>
+                      setIntakeAnswers((current) => ({
+                        ...current,
+                        [question.id]: value,
+                      }))
+                    }
+                  />
+                ))}
+              </div>
+
+              {visibleConditionalQuestions.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
+                    Confirmări suplimentare doar unde se schimbă obligațiile
+                  </p>
+                  {visibleConditionalQuestions.map((question) => (
+                    <QuestionCard
+                      key={question.id}
+                      question={question}
+                      value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
+                      onChange={(value) =>
+                        setIntakeAnswers((current) => ({
+                          ...current,
+                          [question.id]: value,
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+                <div className="text-xs text-eos-text-muted">
+                  {unansweredQuestions.length === 0
+                    ? "Toate răspunsurile care contează pentru prima rundă de findings sunt confirmate."
+                    : `${unansweredQuestions.length} răspunsuri mai schimbă findings sau documentele recomandate.`}
+                </div>
+                <Button onClick={() => void handleSubmit()} disabled={saving}>
+                  {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+                  Generează primul plan
+                </Button>
+              </div>
+            </div>
+          )}
+
           {step === "done" && result && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-eos-success" />
                 <p className="text-sm font-medium text-eos-text">
-                  Profilul tău de aplicabilitate
+                  Ai direcția inițială. Nu mai pornești din întuneric.
                 </p>
               </div>
 
@@ -337,10 +435,35 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 ))}
               </div>
 
-              <Button
-                onClick={handleDone}
-                className="w-full"
-              >
+              <div className="grid gap-3 lg:grid-cols-3">
+                <SummaryCard
+                  icon={<TriangleAlert className="h-4 w-4 text-eos-warning" />}
+                  title="Primele findings"
+                  subtitle="Constatări inițiale generate automat"
+                  items={initialFindings.slice(0, 4).map((finding) => finding.title)}
+                  emptyLabel="Nu au apărut findings inițiale."
+                />
+                <SummaryCard
+                  icon={<FileText className="h-4 w-4 text-eos-primary" />}
+                  title="Documente recomandate"
+                  subtitle="Ce merită pregătit imediat"
+                  items={documentRequests.slice(0, 4).map((document) => document.label)}
+                  emptyLabel="Nu există documente noi recomandate."
+                />
+                <SummaryCard
+                  icon={<ListChecks className="h-4 w-4 text-eos-success" />}
+                  title="Următorul pas"
+                  subtitle={
+                    nextBestAction
+                      ? `${nextBestAction.estimatedMinutes} min până la prima acțiune`
+                      : "Poți intra direct în dashboard"
+                  }
+                  items={nextBestAction ? [nextBestAction.label] : []}
+                  emptyLabel="Continuă în dashboard."
+                />
+              </div>
+
+              <Button onClick={handleDone} className="w-full">
                 Continuă la dashboard
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
@@ -350,4 +473,144 @@ export function ApplicabilityWizard({ onComplete }: Props) {
       </CardContent>
     </Card>
   )
+}
+
+function QuestionCard({
+  question,
+  value,
+  suggestion,
+  onChange,
+}: {
+  question: IntakeQuestion
+  value: FullIntakeAnswers[keyof FullIntakeAnswers] | undefined
+  suggestion?: SuggestedAnswer
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+      <div className="space-y-2">
+        <div>
+          <p className="text-sm font-medium text-eos-text">{question.text}</p>
+          {suggestion ? (
+            <p className="mt-1 text-xs text-eos-text-muted">
+              Sugestie: <span className="text-eos-text">{answerLabel(suggestion.value)}</span> · {suggestion.reason}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {question.options.map((option) => {
+            const active = value === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange(option.value)}
+                className={`rounded-eos-md border px-3 py-2 text-sm transition ${
+                  active
+                    ? "border-eos-primary bg-eos-primary/10 text-eos-primary"
+                    : "border-eos-border bg-eos-surface text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text"
+                }`}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SummaryCard({
+  icon,
+  title,
+  subtitle,
+  items,
+  emptyLabel,
+}: {
+  icon: ReactNode
+  title: string
+  subtitle: string
+  items: string[]
+  emptyLabel: string
+}) {
+  return (
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+      <div className="flex items-center gap-2">
+        {icon}
+        <p className="text-sm font-medium text-eos-text">{title}</p>
+      </div>
+      <p className="mt-1 text-xs text-eos-text-muted">{subtitle}</p>
+      {items.length > 0 ? (
+        <ul className="mt-3 space-y-2 text-sm text-eos-text">
+          {items.map((item) => (
+            <li key={item} className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2">
+              {item}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm text-eos-text-muted">{emptyLabel}</p>
+      )}
+    </div>
+  )
+}
+
+function buildProfileSnapshot(values: WizardState): OrgProfile | null {
+  if (!values.sector || !values.employeeCount || values.usesAITools === null || values.requiresEfactura === null) {
+    return null
+  }
+
+  const cui = values.cui.trim()
+  return {
+    sector: values.sector,
+    employeeCount: values.employeeCount,
+    usesAITools: values.usesAITools,
+    requiresEfactura: values.requiresEfactura,
+    ...(cui ? { cui } : {}),
+    completedAtISO: new Date().toISOString(),
+  }
+}
+
+function deriveInitialIntakeAnswers(profile: OrgProfile): FullIntakeAnswers {
+  const initial: FullIntakeAnswers = {
+    usesAITools: profile.usesAITools ? "yes" : "no",
+  }
+
+  for (const suggestion of deriveSuggestedAnswers(profile)) {
+    ;(initial as Record<string, string | undefined>)[suggestion.questionId] = suggestion.value
+  }
+
+  return initial
+}
+
+function getUnansweredQuestions(answers: FullIntakeAnswers, conditionalQuestions: IntakeQuestion[]) {
+  const visibleQuestions = [...INTAKE_QUESTIONS, ...conditionalQuestions]
+  return visibleQuestions.filter((question) => !answers[question.id as keyof FullIntakeAnswers])
+}
+
+function answerLabel(value: string) {
+  switch (value) {
+    case "yes":
+      return "Da"
+    case "no":
+      return "Nu"
+    case "probably":
+      return "Probabil"
+    case "unknown":
+      return "Nu știu"
+    case "partial":
+      return "Parțial"
+    case "collaborators":
+      return "Doar colaboratori"
+    case "mixed":
+      return "Mixt"
+    default:
+      return value
+  }
+}
+
+function questionLabelForSuggestion(questionId: string) {
+  const question = DECISIVE_QUESTIONS.find((item) => item.id === questionId)
+  return question?.text ?? questionId
 }
