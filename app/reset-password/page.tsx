@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react"
@@ -23,15 +23,42 @@ function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tokenFromUrl = searchParams.get("token")
+  const accessTokenFromQuery = searchParams.get("access_token")
 
-  const [mode, setMode] = useState<Mode>(tokenFromUrl ? "reset" : "forgot")
+  const [mode, setMode] = useState<Mode>(tokenFromUrl || accessTokenFromQuery ? "reset" : "forgot")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [recoveryAccessToken, setRecoveryAccessToken] = useState(accessTokenFromQuery ?? "")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
+
+  useEffect(() => {
+    if (tokenFromUrl || accessTokenFromQuery) {
+      setMode("reset")
+    }
+
+    if (accessTokenFromQuery) {
+      setRecoveryAccessToken(accessTokenFromQuery)
+      return
+    }
+
+    if (typeof window === "undefined") return
+
+    const hash = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : window.location.hash
+    if (!hash) return
+
+    const hashParams = new URLSearchParams(hash)
+    const accessTokenFromHash = hashParams.get("access_token")
+    if (!accessTokenFromHash) return
+
+    setRecoveryAccessToken(accessTokenFromHash)
+    setMode("reset")
+  }, [accessTokenFromQuery, tokenFromUrl])
 
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault()
@@ -75,7 +102,11 @@ function ResetPasswordContent() {
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: tokenFromUrl, password }),
+        body: JSON.stringify({
+          token: tokenFromUrl,
+          accessToken: recoveryAccessToken || undefined,
+          password,
+        }),
       })
 
       const data = (await response.json()) as { ok?: boolean; error?: string }
@@ -181,6 +212,12 @@ function ResetPasswordContent() {
             {/* ── Reset mode ──────────────────── */}
             {mode === "reset" && (
               <form onSubmit={(e) => void handleReset(e)} className="space-y-4">
+                {!tokenFromUrl && !recoveryAccessToken && (
+                  <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
+                    Link-ul de resetare este invalid sau incomplet. Solicită un link nou.
+                  </div>
+                )}
+
                 <div className="space-y-1.5">
                   <label className="text-sm text-eos-text-muted">
                     Parolă nouă
@@ -232,7 +269,7 @@ function ResetPasswordContent() {
 
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (!tokenFromUrl && !recoveryAccessToken)}
                   size="lg"
                   className="w-full gap-2"
                 >

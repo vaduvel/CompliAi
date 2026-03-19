@@ -4,6 +4,10 @@ import { findUserByEmail } from "@/lib/server/auth"
 import { createResetToken } from "@/lib/server/reset-tokens"
 import { jsonError } from "@/lib/server/api-response"
 import { asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
+import {
+  createSupabaseRecoveryLink,
+  shouldUseSupabaseAuth,
+} from "@/lib/server/supabase-auth"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_ADDRESS =
@@ -34,9 +38,7 @@ function buildResetEmailHtml(resetUrl: string): string {
 </body></html>`
 }
 
-async function sendResetEmail(to: string, token: string) {
-  const resetUrl = `${APP_URL}/reset-password?token=${token}`
-
+async function sendResetEmail(to: string, resetUrl: string) {
   if (!RESEND_API_KEY) {
     console.log(`[PASSWORD_RESET] Email to ${to}: ${resetUrl}`)
     return
@@ -73,8 +75,16 @@ export async function POST(request: Request) {
     // Always return success to prevent email enumeration
     const user = await findUserByEmail(email)
     if (user) {
-      const token = await createResetToken(user.email)
-      await sendResetEmail(user.email, token)
+      if (shouldUseSupabaseAuth(user.authProvider)) {
+        const actionLink = await createSupabaseRecoveryLink(
+          user.email,
+          `${APP_URL}/reset-password`
+        )
+        await sendResetEmail(user.email, actionLink)
+      } else {
+        const token = await createResetToken(user.email)
+        await sendResetEmail(user.email, `${APP_URL}/reset-password?token=${token}`)
+      }
     }
 
     return NextResponse.json({
