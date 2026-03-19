@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/nextjs"
 
 import type { RequestContext } from "@/lib/server/request-context"
-import { RequestValidationError } from "@/lib/server/request-validation"
 
 export type OperationalLogLevel = "info" | "warn" | "error"
 
@@ -46,6 +45,17 @@ export function logOperationalEvent(
   console.info(line)
 }
 
+function shouldCaptureSentryError(
+  error: Error,
+  details: Omit<OperationalLogDetails, "errorName" | "message">
+) {
+  if (details.status && details.status < 500) {
+    return false
+  }
+
+  return !new Set(["AuthzError", "PlanError", "RequestValidationError"]).has(error.name)
+}
+
 export async function logRouteError(
   context: RequestContext | undefined,
   error: unknown,
@@ -53,7 +63,7 @@ export async function logRouteError(
 ) {
   const normalizedError = error instanceof Error ? error : new Error("Unknown route error")
 
-  if (process.env.NEXT_PUBLIC_SENTRY_DSN && !(normalizedError instanceof RequestValidationError)) {
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN && shouldCaptureSentryError(normalizedError, details)) {
     Sentry.withScope((scope) => {
       scope.setLevel("error")
       scope.setTag("event", "route.error")

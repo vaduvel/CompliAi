@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server"
+
 import {
   createSessionToken,
   findUserById,
@@ -7,7 +9,7 @@ import {
   hashPassword,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
-import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
@@ -46,13 +48,7 @@ export async function POST(request: Request) {
         }
         if (!localUser || localUser.authProvider === "supabase") {
           if (error instanceof Error && error.message === "AUTH_INVALID_CREDENTIALS") {
-            return jsonError(
-              "Email sau parola incorecta.",
-              401,
-              "AUTH_INVALID_CREDENTIALS",
-              undefined,
-              context
-            )
+            return jsonError("Email sau parola incorecta.", 401, "AUTH_INVALID_CREDENTIALS", undefined, context)
           }
           throw error
         }
@@ -72,12 +68,15 @@ export async function POST(request: Request) {
       membershipId: user.membershipId,
     })
 
-    const response = jsonWithRequestContext({
-      ok: true,
-      orgId: user.orgId,
-      orgName: user.orgName,
-      role: user.role,
-    }, context)
+    const response = NextResponse.json(
+      {
+        ok: true,
+        orgId: user.orgId,
+        orgName: user.orgName,
+        role: user.role,
+      },
+      withRequestIdHeaders(undefined, context)
+    )
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
     return response
   } catch (error) {
@@ -87,13 +86,11 @@ export async function POST(request: Request) {
 
     const message =
       error instanceof Error ? error.message : "Autentificarea nu a putut fi pornita."
-
     await logRouteError(context, error, {
       code: "AUTH_LOGIN_FAILED",
       durationMs: getRequestDurationMs(context),
       status: 500,
     })
-
     return jsonError(message, 500, "AUTH_LOGIN_FAILED", undefined, context)
   }
 }

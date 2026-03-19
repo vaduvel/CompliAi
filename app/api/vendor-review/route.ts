@@ -5,31 +5,42 @@
 import { NextResponse } from "next/server"
 import { randomBytes } from "node:crypto"
 
-import { jsonError } from "@/lib/server/api-response"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { safeListReviews, createReview } from "@/lib/server/vendor-review-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { appendAudit, type VendorReview, type VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
+import { logRouteError } from "@/lib/server/operational-logger"
+import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
 export async function GET(request: Request) {
+  const context = createRequestContext(request, "/api/vendor-review")
+
   try {
     const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
 
     const { orgId } = await getOrgContext()
     const reviews = await safeListReviews(orgId)
-    return NextResponse.json({ reviews })
+    return NextResponse.json({ reviews }, withRequestIdHeaders(undefined, context))
   } catch (error) {
-    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
-    return jsonError("Nu am putut încărca review-urile.", 500, "VENDOR_REVIEW_LIST_FAILED")
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)
+    await logRouteError(context, error, {
+      code: "VENDOR_REVIEW_LIST_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+    return jsonError("Nu am putut încărca review-urile.", 500, "VENDOR_REVIEW_LIST_FAILED", undefined, context)
   }
 }
 
 export async function POST(request: Request) {
+  const context = createRequestContext(request, "/api/vendor-review")
+
   try {
     const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
 
     const body = (await request.json()) as {
       vendorId?: string
@@ -37,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     if (!body.vendorId?.trim()) {
-      return jsonError("vendorId este obligatoriu.", 400, "MISSING_VENDOR_ID")
+      return jsonError("vendorId este obligatoriu.", 400, "MISSING_VENDOR_ID", undefined, context)
     }
 
     const { orgId } = await getOrgContext()
@@ -46,7 +57,7 @@ export async function POST(request: Request) {
     const nis2 = await readNis2State(orgId)
     const vendor = nis2.vendors.find((v) => v.id === body.vendorId)
     if (!vendor) {
-      return jsonError("Vendorul nu a fost găsit.", 404, "VENDOR_NOT_FOUND")
+      return jsonError("Vendorul nu a fost găsit.", 404, "VENDOR_NOT_FOUND", undefined, context)
     }
 
     // Determine category from tech detection
@@ -85,9 +96,14 @@ export async function POST(request: Request) {
     }
 
     const created = await createReview(orgId, review)
-    return NextResponse.json({ review: created }, { status: 201 })
+    return NextResponse.json({ review: created }, withRequestIdHeaders({ status: 201 }, context))
   } catch (error) {
-    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
-    return jsonError("Nu am putut crea review-ul.", 500, "VENDOR_REVIEW_CREATE_FAILED")
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)
+    await logRouteError(context, error, {
+      code: "VENDOR_REVIEW_CREATE_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+    return jsonError("Nu am putut crea review-ul.", 500, "VENDOR_REVIEW_CREATE_FAILED", undefined, context)
   }
 }

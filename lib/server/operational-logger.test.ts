@@ -1,47 +1,68 @@
-import * as Sentry from "@sentry/nextjs"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { logRouteError } from "./operational-logger"
-import { RequestValidationError } from "./request-validation"
-
-vi.mock("@sentry/nextjs", () => ({
+const sentryMocks = vi.hoisted(() => ({
   captureException: vi.fn(),
-  flush: vi.fn().mockResolvedValue(true),
-  withScope: vi.fn((callback: (scope: Record<string, ReturnType<typeof vi.fn>>) => void) => {
-    callback({
-      setContext: vi.fn(),
-      setLevel: vi.fn(),
-      setTag: vi.fn(),
-    })
-  }),
+  flush: vi.fn().mockResolvedValue(undefined),
+  withScope: vi.fn(
+    (
+      callback: (scope: {
+        setLevel: (value: string) => void
+        setTag: (key: string, value: string) => void
+        setContext: (key: string, value: unknown) => void
+      }) => void
+    ) => {
+      callback({
+        setLevel: vi.fn(),
+        setTag: vi.fn(),
+        setContext: vi.fn(),
+      })
+    }
+  ),
 }))
+
+vi.mock("@sentry/nextjs", () => sentryMocks)
+
+import { logRouteError } from "./operational-logger"
 
 describe("logRouteError", () => {
   beforeEach(() => {
-    vi.mocked(Sentry.captureException).mockClear()
-    vi.mocked(Sentry.flush).mockClear()
-    vi.mocked(Sentry.withScope).mockClear()
+    vi.clearAllMocks()
     process.env.NEXT_PUBLIC_SENTRY_DSN = "https://examplePublicKey@o0.ingest.sentry.io/0"
-    vi.spyOn(console, "error").mockImplementation(() => undefined)
   })
 
-  it("captures unexpected route errors in Sentry", async () => {
-    await logRouteError(undefined, new Error("Boom"), {
-      route: "/api/example",
-      status: 500,
-    })
+  it("nu trimite in Sentry erorile de validare 4xx", async () => {
+    await logRouteError(
+      {
+        route: "/api/scan",
+        requestId: "req-validation",
+        startedAtMs: Date.now(),
+      },
+      Object.assign(new Error("Payload invalid"), { name: "RequestValidationError" }),
+      {
+        code: "INVALID_REQUEST",
+        status: 400,
+      }
+    )
 
-    expect(Sentry.captureException).toHaveBeenCalledTimes(1)
-    expect(Sentry.flush).toHaveBeenCalledTimes(1)
+    expect(sentryMocks.captureException).not.toHaveBeenCalled()
+    expect(sentryMocks.flush).not.toHaveBeenCalled()
   })
 
-  it("skips Sentry capture for request validation errors", async () => {
-    await logRouteError(undefined, new RequestValidationError("Payload invalid."), {
-      route: "/api/example",
-      status: 400,
-    })
+  it("trimite in Sentry erorile reale 5xx", async () => {
+    await logRouteError(
+      {
+        route: "/api/reports",
+        requestId: "req-500",
+        startedAtMs: Date.now(),
+      },
+      new Error("db down"),
+      {
+        code: "REPORTS_GENERATE_FAILED",
+        status: 500,
+      }
+    )
 
-    expect(Sentry.captureException).not.toHaveBeenCalled()
-    expect(Sentry.flush).not.toHaveBeenCalled()
+    expect(sentryMocks.captureException).toHaveBeenCalledTimes(1)
+    expect(sentryMocks.flush).toHaveBeenCalledTimes(1)
   })
 })

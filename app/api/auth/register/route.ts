@@ -1,10 +1,12 @@
+import { NextResponse } from "next/server"
+
 import {
   createSessionToken,
   getSessionCookieOptions,
   registerUser,
   SESSION_COOKIE,
 } from "@/lib/server/auth"
-import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
           })
         })()
       : await registerUser(email, password, orgName)
-    // Activare trial Pro 14 zile automat la înregistrare
+
     await activateTrial(user.orgId)
     void sendOnboardingEmail("welcome", user.email, user.orgName || "utilizator nou")
 
@@ -57,12 +59,15 @@ export async function POST(request: Request) {
       membershipId: user.membershipId,
     })
 
-    const response = jsonWithRequestContext({
-      ok: true,
-      orgId: user.orgId,
-      orgName: user.orgName,
-      role: user.role,
-    }, context)
+    const response = NextResponse.json(
+      {
+        ok: true,
+        orgId: user.orgId,
+        orgName: user.orgName,
+        role: user.role,
+      },
+      withRequestIdHeaders(undefined, context)
+    )
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
     return response
   } catch (error) {
@@ -72,21 +77,15 @@ export async function POST(request: Request) {
 
     const message = error instanceof Error ? error.message : "Eroare la inregistrare."
     if (message === "AUTH_EMAIL_ALREADY_REGISTERED") {
-      return jsonError(
-        "Adresa de email este deja inregistrata.",
-        400,
-        "AUTH_REGISTER_FAILED",
-        undefined,
-        context
-      )
+      return jsonError("Adresa de email este deja inregistrata.", 400, "AUTH_REGISTER_FAILED", undefined, context)
     }
 
     await logRouteError(context, error, {
       code: "AUTH_REGISTER_FAILED",
       durationMs: getRequestDurationMs(context),
-      status: 400,
+      status: 500,
     })
 
-    return jsonError(message, 400, "AUTH_REGISTER_FAILED", undefined, context)
+    return jsonError(message, 500, "AUTH_REGISTER_FAILED", undefined, context)
   }
 }

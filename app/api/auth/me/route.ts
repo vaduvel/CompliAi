@@ -1,5 +1,7 @@
+import { NextResponse } from "next/server"
+
 import { AuthzError, readFreshSessionFromRequest } from "@/lib/server/auth"
-import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -8,17 +10,20 @@ export async function GET(request: Request) {
 
   try {
     const session = await readFreshSessionFromRequest(request)
-    if (!session) return jsonWithRequestContext({ user: null }, context)
+    if (!session) return NextResponse.json({ user: null }, withRequestIdHeaders(undefined, context))
 
-    return jsonWithRequestContext({
-      user: {
-        email: session.email,
-        orgId: session.orgId,
-        orgName: session.orgName,
-        role: session.role,
-        membershipId: session.membershipId ?? null,
+    return NextResponse.json(
+      {
+        user: {
+          email: session.email,
+          orgId: session.orgId,
+          orgName: session.orgName,
+          role: session.role,
+          membershipId: session.membershipId ?? null,
+        },
       },
-    }, context)
+      withRequestIdHeaders(undefined, context)
+    )
   } catch (error) {
     if (error instanceof AuthzError) {
       return jsonError(error.message, error.status, error.code, { user: null }, context)

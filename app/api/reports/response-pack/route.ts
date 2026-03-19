@@ -1,24 +1,30 @@
 // V3 P1.1 — Compliance Response Pack endpoint
 // Generează documentul de răspuns la cereri de due diligence / chestionare conformitate.
 
+import { NextResponse } from "next/server"
+
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
+import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
+import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
+import {
+  buildOverdueFilingFindings,
+  computeFilingDisciplineScore,
+  generateFilingReminders,
+  type FilingRecord,
+} from "@/lib/compliance/filing-discipline"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import {
   buildComplianceResponse,
   buildComplianceResponseHtml,
-  type ResponsePackVendorSummary,
   type ResponsePackFiscalStatus,
+  type ResponsePackVendorSummary,
 } from "@/lib/compliance/response-pack"
-import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
-import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
-import { computeFilingDisciplineScore, generateFilingReminders, buildOverdueFilingFindings, type FilingRecord } from "@/lib/compliance/filing-discipline"
-import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
-import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { readState } from "@/lib/server/mvp-store"
 import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
-import { RequestValidationError } from "@/lib/server/request-validation"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 export async function POST(request: Request) {
@@ -31,7 +37,6 @@ export async function POST(request: Request) {
     const remediationPlan = buildRemediationPlan(normalized)
     const nowISO = new Date().toISOString()
 
-    // V5.6 — Vendor review data for response pack
     const reviews = await safeListReviews(orgId)
     let vendorReviewSummary: ResponsePackVendorSummary | undefined
     if (reviews.length > 0) {
@@ -51,28 +56,39 @@ export async function POST(request: Request) {
       }
     }
 
-    // ANAF Phase B — Fiscal status enrichment
     let fiscalStatus: ResponsePackFiscalStatus | undefined
     const stateAny = state as Record<string, unknown>
     const efacturaSignals = (stateAny.efacturaSignals ?? []) as EFacturaInvoiceSignal[]
     const etvaDiscrepancies = (stateAny.etvaDiscrepancies ?? []) as ETVADiscrepancy[]
     const filingRecords = (stateAny.filingRecords ?? []) as FilingRecord[]
 
-    if (normalized.efacturaConnected || efacturaSignals.length > 0 || etvaDiscrepancies.length > 0 || filingRecords.length > 0) {
-      const fiscalSummary = efacturaSignals.length > 0
-        ? buildFiscalSummary(efacturaSignals, nowISO)
-        : { totalSignals: 0, criticalUrgency: 0, highUrgency: 0, fiscalHealthLabel: "sănătos" as const, repeatedRejectionVendors: 0, pendingTooLong: 0, averageUrgency: 0 }
+    if (
+      normalized.efacturaConnected ||
+      efacturaSignals.length > 0 ||
+      etvaDiscrepancies.length > 0 ||
+      filingRecords.length > 0
+    ) {
+      const fiscalSummary =
+        efacturaSignals.length > 0
+          ? buildFiscalSummary(efacturaSignals, nowISO)
+          : {
+              totalSignals: 0,
+              criticalUrgency: 0,
+              highUrgency: 0,
+              fiscalHealthLabel: "sănătos" as const,
+              repeatedRejectionVendors: 0,
+              pendingTooLong: 0,
+              averageUrgency: 0,
+            }
 
       const filingScore = computeFilingDisciplineScore(filingRecords)
       const reminders = generateFilingReminders(filingRecords, nowISO)
       const overdueFilings = buildOverdueFilingFindings(filingRecords, nowISO)
 
       const pendingDiscrepancies = etvaDiscrepancies.filter(
-        (d) => d.status !== "resolved" && d.status !== "overdue",
+        (d) => d.status !== "resolved" && d.status !== "overdue"
       ).length
-      const overdueDiscrepancies = etvaDiscrepancies.filter(
-        (d) => d.status === "overdue",
-      ).length
+      const overdueDiscrepancies = etvaDiscrepancies.filter((d) => d.status === "overdue").length
 
       const syncMs = normalized.efacturaSyncedAtISO
         ? new Date(nowISO).getTime() - new Date(normalized.efacturaSyncedAtISO).getTime()
@@ -95,27 +111,26 @@ export async function POST(request: Request) {
       }
     }
 
-    const report = buildComplianceResponse(normalized, summary, remediationPlan, orgName, nowISO, vendorReviewSummary, fiscalStatus)
+    const report = buildComplianceResponse(
+      normalized,
+      summary,
+      remediationPlan,
+      orgName,
+      nowISO,
+      vendorReviewSummary,
+      fiscalStatus
+    )
     const html = buildComplianceResponseHtml(report)
 
-    return jsonWithRequestContext({ report, html }, context)
+    return NextResponse.json({ report, html }, withRequestIdHeaders(undefined, context))
   } catch (error) {
-    if (error instanceof RequestValidationError) {
-      return jsonError(error.message, error.status, error.code, undefined, context)
-    }
-
     await logRouteError(context, error, {
-      code: "RESPONSE_PACK_FAILED",
+      code: "RESPONSE_PACK_GENERATE_FAILED",
       durationMs: getRequestDurationMs(context),
       status: 500,
     })
 
-    return jsonError(
-      error instanceof Error ? error.message : "Response Pack nu a putut fi generat.",
-      500,
-      "RESPONSE_PACK_FAILED",
-      undefined,
-      context
-    )
+    const message = error instanceof Error ? error.message : "Response Pack nu a putut fi generat."
+    return jsonError(message, 500, "RESPONSE_PACK_GENERATE_FAILED", undefined, context)
   }
 }

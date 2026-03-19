@@ -1,12 +1,14 @@
-import { readState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
-import { readNis2State } from "@/lib/server/nis2-store"
+// V3 P1.3 — Inspector Mode API
+import { NextResponse } from "next/server"
+
 import { runInspectorSimulation } from "@/lib/compliance/inspector-mode"
-import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
-import { requirePlan, PlanError } from "@/lib/server/plan"
+import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
+import { readState } from "@/lib/server/mvp-store"
+import { readNis2State } from "@/lib/server/nis2-store"
+import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
+import { requirePlan, PlanError } from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
-import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/inspector")
@@ -19,13 +21,9 @@ export async function GET(request: Request) {
       readNis2State(orgId),
     ])
     const result = runInspectorSimulation(state, nis2State, new Date().toISOString())
-    return jsonWithRequestContext(result, context)
+    return NextResponse.json(result, withRequestIdHeaders(undefined, context))
   } catch (error) {
     if (error instanceof PlanError) {
-      return jsonError(error.message, error.status, error.code, undefined, context)
-    }
-
-    if (error instanceof RequestValidationError) {
       return jsonError(error.message, error.status, error.code, undefined, context)
     }
 
@@ -35,12 +33,7 @@ export async function GET(request: Request) {
       status: 500,
     })
 
-    return jsonError(
-      error instanceof Error ? error.message : "Internal server error",
-      500,
-      "INSPECTOR_FAILED",
-      undefined,
-      context
-    )
+    const message = error instanceof Error ? error.message : "Internal server error"
+    return jsonError(message, 500, "INSPECTOR_FAILED", undefined, context)
   }
 }
