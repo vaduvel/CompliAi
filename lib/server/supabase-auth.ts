@@ -68,6 +68,41 @@ export async function signInSupabaseIdentity(
   }
 }
 
+async function lookupSupabaseUserByEmail(email: string): Promise<SupabaseIdentity | null> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return null
+
+  try {
+    const response = await fetchWithOperationalGuard(
+      `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/users?page=1&per_page=50`,
+      {
+        method: "GET",
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        cache: "no-store",
+        timeoutMs: 8_000,
+        retries: 1,
+        label: "supabase-auth-lookup",
+      }
+    )
+
+    if (!response.ok) return null
+
+    const data = (await response.json()) as {
+      users?: Array<{ id?: string; email?: string }>
+    }
+    const match = data.users?.find(
+      (u) => u.email?.toLowerCase().trim() === email.toLowerCase().trim()
+    )
+    if (!match?.id || !match.email) return null
+
+    return { id: match.id, email: match.email }
+  } catch {
+    return null
+  }
+}
+
 export async function registerSupabaseIdentity(
   email: string,
   password: string
@@ -106,6 +141,11 @@ export async function registerSupabaseIdentity(
         normalized.includes("exists") ||
         normalized.includes("registered")
       ) {
+        // User exists in Supabase Auth (possibly from a previous failed registration).
+        // Look up the existing user and return their identity so the register flow
+        // can continue idempotently (create org/membership if missing).
+        const existing = await lookupSupabaseUserByEmail(email)
+        if (existing) return existing
         throw new Error("AUTH_EMAIL_ALREADY_REGISTERED")
       }
     }

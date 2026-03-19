@@ -128,17 +128,37 @@ export async function syncTenancyGraphToSupabase(input: {
 async function upsertOrganizations(organizations: OrganizationRecord[]) {
   if (organizations.length === 0) return
 
-  await supabaseUpsert(
-    "organizations",
-    organizations.map((organization) => ({
-      id: organization.id,
-      slug: slugify(organization.name),
-      name: organization.name,
-      created_at: organization.createdAtISO,
-      updated_at: organization.createdAtISO,
-    })),
-    "public"
-  )
+  try {
+    await supabaseUpsert(
+      "organizations",
+      organizations.map((organization) => ({
+        id: organization.id,
+        slug: slugify(organization.name),
+        name: organization.name,
+        created_at: organization.createdAtISO,
+        updated_at: organization.createdAtISO,
+      })),
+      "public"
+    )
+  } catch (err) {
+    // Slug conflict (23505 on organizations_slug_key) — retry with id-suffixed slug
+    const msg = err instanceof Error ? err.message : ""
+    if (msg.includes("23505") && msg.includes("slug")) {
+      await supabaseUpsert(
+        "organizations",
+        organizations.map((organization) => ({
+          id: organization.id,
+          slug: `${slugify(organization.name)}-${organization.id.slice(-8)}`,
+          name: organization.name,
+          created_at: organization.createdAtISO,
+          updated_at: organization.createdAtISO,
+        })),
+        "public"
+      )
+      return
+    }
+    throw err
+  }
 }
 
 async function upsertProfiles(users: PersistedUserRecord[]) {
