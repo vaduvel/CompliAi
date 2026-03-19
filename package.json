@@ -19,6 +19,7 @@
     "verify:supabase:rls": "node scripts/verify-supabase-rls.mjs"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.44.0",
     "@types/pdfkit": "^0.17.5",
     "archiver": "^7.0.1",
     "class-variance-authority": "^0.7.1",

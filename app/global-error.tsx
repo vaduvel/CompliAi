@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import * as Sentry from "@sentry/nextjs"
 import { AlertTriangle, RefreshCw } from "lucide-react"
 
 // Global error boundary — prinde erori din app/layout.tsx
@@ -13,6 +14,8 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
+    Sentry.captureException(error)
+
     if (process.env.NODE_ENV === "development") {
       console.error("[GlobalError]", error)
     }
