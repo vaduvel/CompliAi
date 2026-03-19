@@ -153,7 +153,7 @@ export async function POST(request: Request) {
 
     return new Response("ok", { status: 200 })
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "STRIPE_WEBHOOK_PROCESSING_FAILED",
       durationMs: 0,
       status: 500,
