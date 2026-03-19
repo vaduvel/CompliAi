@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs"
 
 import type { RequestContext } from "@/lib/server/request-context"
+import { RequestValidationError } from "@/lib/server/request-validation"
 
 export type OperationalLogLevel = "info" | "warn" | "error"
 
@@ -52,7 +53,7 @@ export async function logRouteError(
 ) {
   const normalizedError = error instanceof Error ? error : new Error("Unknown route error")
 
-  if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN && !(normalizedError instanceof RequestValidationError)) {
     Sentry.withScope((scope) => {
       scope.setLevel("error")
       scope.setTag("event", "route.error")

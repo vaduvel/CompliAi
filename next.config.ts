@@ -21,6 +21,9 @@ export default withSentryConfig(nextConfig, {
         name: sentryRelease,
       }
     : undefined,
+  _experimental: {
+    vercelCronsMonitoring: true,
+  },
   silent: !process.env.CI,
   webpack: {
     treeshake: {

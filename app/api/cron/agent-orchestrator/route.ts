@@ -11,6 +11,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { loadOrganizations } from "@/lib/server/auth"
 import { executeAgents } from "@/lib/server/agent-orchestrator"
 import type { AgentType } from "@/lib/compliance/agentic-engine"
+import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
 const DAILY_AGENTS: AgentType[] = ["compliance_monitor", "fiscal_sensor"]
 
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
   }
 
   const results: { orgId: string; totalActions: number; totalIssues: number; error?: string }[] = []
+  let capturedCronErrors = false
 
   try {
     const organizations = await loadOrganizations()
@@ -38,6 +40,14 @@ export async function POST(request: Request) {
           totalIssues: result.totalIssues,
         })
       } catch (err) {
+        capturedCronErrors =
+          captureCronError(err, {
+            cron: "/api/cron/agent-orchestrator",
+            metadata: { agents: DAILY_AGENTS },
+            orgId: org.id,
+            step: "org-run",
+          }) || capturedCronErrors
+
         results.push({
           orgId: org.id,
           totalActions: 0,
@@ -54,6 +64,10 @@ export async function POST(request: Request) {
       `[AgentOrchestrator] Daily run completat: ${results.length} org-uri, ${totalIssues} probleme, ${totalActions} acțiuni`,
     )
 
+    if (capturedCronErrors) {
+      await flushCronTelemetry()
+    }
+
     return NextResponse.json({
       ok: true,
       orgsProcessed: results.length,
@@ -64,6 +78,14 @@ export async function POST(request: Request) {
   } catch (error) {
     const msg = error instanceof Error ? error.message : "unknown"
     console.error(`[AgentOrchestrator] Eroare critică: ${msg}`)
+
+    captureCronError(error, {
+      cron: "/api/cron/agent-orchestrator",
+      metadata: { agents: DAILY_AGENTS },
+      step: "critical",
+    })
+    await flushCronTelemetry()
+
     return jsonError(`Eroare la execuția agenților: ${msg}`, 500, "AGENT_ORCHESTRATOR_FAILED")
   }
 }

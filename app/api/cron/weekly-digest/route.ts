@@ -17,6 +17,7 @@ import { normalizeComplianceState, computeDashboardSummary } from "@/lib/complia
 import { readNis2State } from "@/lib/server/nis2-store"
 import { buildDigestEmail, type WeeklyDigest, type DigestFinding } from "@/lib/server/weekly-digest"
 import { readStateForOrg } from "@/lib/server/mvp-store"
+import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
 
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
 
   const generatedAt = new Date().toISOString()
   const results: { orgId: string; sent: boolean; reason?: string }[] = []
+  let capturedCronErrors = false
 
   try {
     const organizations = await loadOrganizations()
@@ -127,6 +129,12 @@ export async function POST(request: Request) {
         results.push({ orgId: org.id, sent: ok })
       } catch (err) {
         const msg = err instanceof Error ? err.message : "unknown"
+        capturedCronErrors =
+          captureCronError(err, {
+            cron: "/api/cron/weekly-digest",
+            orgId: org.id,
+            step: "org-run",
+          }) || capturedCronErrors
         results.push({ orgId: org.id, sent: false, reason: msg })
       }
     }
@@ -135,6 +143,10 @@ export async function POST(request: Request) {
     const skipped = results.filter((r) => !r.sent).length
 
     console.log(`[WeeklyDigest] Run completat: ${sent} trimise, ${skipped} sărite`)
+
+    if (capturedCronErrors) {
+      await flushCronTelemetry()
+    }
 
     return NextResponse.json({
       ok: true,
@@ -146,6 +158,13 @@ export async function POST(request: Request) {
   } catch (error) {
     const msg = error instanceof Error ? error.message : "unknown"
     console.error(`[WeeklyDigest] Eroare critică: ${msg}`)
+
+    captureCronError(error, {
+      cron: "/api/cron/weekly-digest",
+      step: "critical",
+    })
+    await flushCronTelemetry()
+
     return jsonError(`Eroare la generarea digest-ului: ${msg}`, 500, "WEEKLY_DIGEST_FAILED")
   }
 }
