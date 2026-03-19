@@ -7,7 +7,7 @@ import { NextResponse } from "next/server"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { getRecentRuns } from "@/lib/server/agent-run-store"
+import { safeGetRecentRuns } from "@/lib/server/agent-run-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { AGENT_LABELS, AGENT_DESCRIPTIONS, type AgentType } from "@/lib/compliance/agentic-engine"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const session = requireRole(request, ["owner", "compliance", "reviewer"], "vizualizare agenți")
     const { orgId } = await getOrgContext()
 
-    const recentRuns = await getRecentRuns(orgId, 30)
+    const recentRuns = await safeGetRecentRuns(orgId, 30)
 
     void session
 

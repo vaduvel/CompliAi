@@ -31,6 +31,14 @@ export async function appendRun(orgId: string, run: AgentOutput): Promise<void> 
   await writeLog(orgId, log)
 }
 
+export async function safeAppendRun(orgId: string, run: AgentOutput): Promise<void> {
+  try {
+    await appendRun(orgId, run)
+  } catch {
+    // Agent logs are secondary; execution should still complete without persistent history.
+  }
+}
+
 export async function getAgentLog(orgId: string): Promise<AgentRunLog> {
   return readLog(orgId)
 }
@@ -44,4 +52,12 @@ export async function getLastRun(orgId: string, agentType: AgentType): Promise<A
 export async function getRecentRuns(orgId: string, limit = 20): Promise<AgentOutput[]> {
   const log = await readLog(orgId)
   return log.runs.slice(-limit).reverse()
+}
+
+export async function safeGetRecentRuns(orgId: string, limit = 20): Promise<AgentOutput[]> {
+  try {
+    return await getRecentRuns(orgId, limit)
+  } catch {
+    return []
+  }
 }

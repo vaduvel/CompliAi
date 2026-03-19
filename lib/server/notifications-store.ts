@@ -66,9 +66,26 @@ export async function listNotifications(orgId: string): Promise<AppNotification[
     .slice(0, 50)
 }
 
+export async function safeListNotifications(orgId: string): Promise<AppNotification[]> {
+  try {
+    return await listNotifications(orgId)
+  } catch {
+    // Notifications are additive; missing storage should not break dashboard reads.
+    return []
+  }
+}
+
 export async function countUnread(orgId: string): Promise<number> {
   const state = await readState(orgId)
   return state.notifications.filter((n) => !n.readAt).length
+}
+
+export async function safeCountUnread(orgId: string): Promise<number> {
+  try {
+    return await countUnread(orgId)
+  } catch {
+    return 0
+  }
 }
 
 export async function createNotification(
@@ -115,6 +132,14 @@ export async function markAllRead(orgId: string): Promise<void> {
     n.readAt ? n : { ...n, readAt: now }
   )
   await writeState(orgId, { notifications })
+}
+
+export async function safeMarkAllRead(orgId: string): Promise<void> {
+  try {
+    await markAllRead(orgId)
+  } catch {
+    // Best-effort UX action; storage gaps should not block the route.
+  }
 }
 
 // ── Phase A: ANAF notification lifecycle ──────────────────────────────────────

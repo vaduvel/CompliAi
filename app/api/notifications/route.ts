@@ -7,7 +7,7 @@ import { NextResponse } from "next/server"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { listNotifications, countUnread, markAllRead } from "@/lib/server/notifications-store"
+import { safeListNotifications, safeCountUnread, safeMarkAllRead } from "@/lib/server/notifications-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -20,8 +20,8 @@ export async function GET(request: Request) {
 
     const { orgId } = await getOrgContext()
     const [notifications, unread] = await Promise.all([
-      listNotifications(orgId),
-      countUnread(orgId),
+      safeListNotifications(orgId),
+      safeCountUnread(orgId),
     ])
 
     return NextResponse.json({ notifications, unread }, withRequestIdHeaders(undefined, context))
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const { orgId } = await getOrgContext()
-    await markAllRead(orgId)
+    await safeMarkAllRead(orgId)
     return NextResponse.json({ ok: true }, withRequestIdHeaders(undefined, context))
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)

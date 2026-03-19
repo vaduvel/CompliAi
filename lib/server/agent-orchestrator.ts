@@ -5,7 +5,7 @@
 import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
-import { appendRun } from "@/lib/server/agent-run-store"
+import { safeAppendRun } from "@/lib/server/agent-run-store"
 import { trackEvent } from "@/lib/server/analytics"
 import { runComplianceMonitor } from "@/lib/compliance/agent-compliance-monitor"
 import { runFiscalSensor } from "@/lib/compliance/agent-fiscal-sensor"
@@ -52,7 +52,7 @@ export async function executeAgent(
 
     // Apply level-1 auto-actions: notifications
     await applyAutoActions(orgId, output)
-    await appendRun(orgId, output)
+    await safeAppendRun(orgId, output)
     void trackEvent(orgId, "agent_run" as never, {
       agent: agentType,
       issues: output.metrics?.issuesFound ?? 0,
@@ -81,7 +81,7 @@ export async function executeAgent(
     })
 
     await applyAutoActions(orgId, output)
-    await appendRun(orgId, output)
+    await safeAppendRun(orgId, output)
     void trackEvent(orgId, "agent_run" as never, {
       agent: agentType,
       issues: output.metrics?.issuesFound ?? 0,
@@ -104,7 +104,7 @@ export async function executeAgent(
     })
 
     await applyAutoActions(orgId, output)
-    await appendRun(orgId, output)
+    await safeAppendRun(orgId, output)
     void trackEvent(orgId, "agent_run" as never, {
       agent: agentType,
       issues: output.metrics?.issuesFound ?? 0,
@@ -129,7 +129,7 @@ export async function executeAgent(
     })
 
     await applyAutoActions(orgId, output)
-    await appendRun(orgId, output)
+    await safeAppendRun(orgId, output)
     void trackEvent(orgId, "agent_run" as never, {
       agent: agentType,
       issues: output.metrics?.issuesFound ?? 0,
@@ -152,7 +152,7 @@ export async function executeAgent(
     })
 
     await applyAutoActions(orgId, output)
-    await appendRun(orgId, output)
+    await safeAppendRun(orgId, output)
     void trackEvent(orgId, "agent_run" as never, {
       agent: agentType,
       issues: output.metrics?.issuesFound ?? 0,

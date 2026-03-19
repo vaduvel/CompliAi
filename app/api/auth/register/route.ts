@@ -76,7 +76,10 @@ export async function POST(request: Request) {
     }
 
     const message = error instanceof Error ? error.message : "Eroare la inregistrare."
-    if (message === "AUTH_EMAIL_ALREADY_REGISTERED") {
+    if (
+      message === "AUTH_EMAIL_ALREADY_REGISTERED" ||
+      message === "Adresa de email este deja inregistrata."
+    ) {
       return jsonError("Adresa de email este deja inregistrata.", 400, "AUTH_REGISTER_FAILED", undefined, context)
     }
 
