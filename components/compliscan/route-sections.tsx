@@ -5,6 +5,7 @@ import Link from "next/link"
 import {
   AlertCircle,
   ArrowRight,
+  ChevronRight,
   FileText,
   Loader2,
   Upload,
@@ -678,6 +679,13 @@ export function LatestDocumentSection({
                             {finding.provenance?.excerpt || finding.detail}
                           </p>
                           <FindingVerdictMeta finding={finding} className="mt-3" />
+                          <Link
+                            href={`/dashboard/findings/${finding.id}`}
+                            className="mt-3 inline-flex items-center gap-1 text-xs text-eos-primary hover:underline"
+                          >
+                            Detalii finding
+                            <ChevronRight className="size-3" strokeWidth={2} />
+                          </Link>
                         </div>
                       </DenseListItem>
                     ))}

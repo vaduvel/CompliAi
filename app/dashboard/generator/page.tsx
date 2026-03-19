@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Clipboard, ClipboardCheck, Download, FileText, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
@@ -12,6 +12,7 @@ import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { FeedbackPrompt } from "@/components/compliscan/feedback-prompt"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 
@@ -165,6 +166,20 @@ export default function GeneratorPage() {
   const [result, setResult] = useState<GeneratedDocument | null>(null)
   const [copied, setCopied] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
+  const { track } = useTrackEvent()
+  const downloadedRef = useRef(false)
+
+  // Stuck event: doc generated but never downloaded
+  useEffect(() => {
+    if (result) downloadedRef.current = false
+  }, [result])
+  useEffect(() => {
+    return () => {
+      if (result && !downloadedRef.current) {
+        track("generated_doc_not_downloaded", { documentType: result.documentType })
+      }
+    }
+  }) // eslint-disable-line react-hooks/exhaustive-deps
 
   // R-2: auto pre-fill din org state la prima încărcare
   useEffect(() => {
@@ -255,6 +270,7 @@ export default function GeneratorPage() {
     a.download = `${result.documentType}-${new Date().toISOString().split("T")[0]}.md`
     a.click()
     URL.revokeObjectURL(url)
+    downloadedRef.current = true
   }
 
   async function handleDownloadPdf() {
@@ -279,6 +295,7 @@ export default function GeneratorPage() {
       a.click()
       URL.revokeObjectURL(url)
       toast.success("PDF descărcat!")
+      downloadedRef.current = true
     } catch {
       toast.error("Eroare la generarea PDF-ului.")
     } finally {
