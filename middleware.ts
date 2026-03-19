@@ -98,6 +98,12 @@ async function verifyToken(
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith("/api/")
+  const isDemoBootRoute = pathname.startsWith("/api/demo/")
+  const isStripeWebhookRoute = pathname === "/api/stripe/webhook"
+
+  if (isDemoBootRoute || isStripeWebhookRoute) {
+    return NextResponse.next()
+  }
 
   const sessionCookie = request.cookies.get(SESSION_COOKIE)
   if (!sessionCookie?.value) {
@@ -138,5 +144,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/((?!auth).*)"],
+  matcher: ["/dashboard/:path*", "/api/((?!auth|demo|stripe/webhook).*)"],
 }

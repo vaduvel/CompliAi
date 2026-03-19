@@ -5,12 +5,14 @@ import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { readState } from "@/lib/server/mvp-store"
+import { requirePlan, PlanError } from "@/lib/server/plan"
 
 export const runtime = "nodejs"
 
 export async function GET(request: Request) {
   try {
     requireRole(request, ["owner", "compliance"], "exportul Audit Pack bundle")
+    await requirePlan(request, "pro", "Audit Pack complet")
 
     const payload = await buildDashboardPayload(await readState())
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
@@ -32,6 +34,9 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+    if (error instanceof PlanError) {
       return jsonError(error.message, error.status, error.code)
     }
     return jsonError(

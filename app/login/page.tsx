@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [orgName, setOrgName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -156,6 +158,28 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {mode === "register" && (
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 rounded border-eos-border accent-eos-primary"
+                  />
+                  <span className="text-xs leading-relaxed text-eos-text-muted">
+                    Am citit și accept{" "}
+                    <Link href="/terms" target="_blank" className="text-eos-primary hover:underline">
+                      Termenii și Condițiile
+                    </Link>{" "}
+                    și{" "}
+                    <Link href="/privacy" target="_blank" className="text-eos-primary hover:underline">
+                      Politica de Confidențialitate
+                    </Link>
+                    .
+                  </span>
+                </label>
+              )}
+
               {error && (
                 <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
                   {error}
@@ -164,7 +188,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (mode === "register" && !acceptedTerms)}
                 size="lg"
                 className="w-full gap-2"
               >

@@ -1,7 +1,4 @@
-import { promises as fs } from "node:fs"
-import path from "node:path"
-
-const DATA_DIR = path.join(process.cwd(), ".data")
+import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
 export type PolicyAcknowledgment = {
   userEmail: string
@@ -10,17 +7,10 @@ export type PolicyAcknowledgment = {
 
 export type OrgPolicyAcknowledgments = Record<string, PolicyAcknowledgment>
 
-function getPolicyFile(orgId: string): string {
-  return path.join(DATA_DIR, `policies-${orgId}.json`)
-}
+const policyStorage = createAdaptiveStorage<OrgPolicyAcknowledgments>("policies", "policy_acknowledgments")
 
 export async function readPolicyAcknowledgments(orgId: string): Promise<OrgPolicyAcknowledgments> {
-  try {
-    const raw = await fs.readFile(getPolicyFile(orgId), "utf8")
-    return JSON.parse(raw) as OrgPolicyAcknowledgments
-  } catch {
-    return {}
-  }
+  return (await policyStorage.read(orgId)) ?? {}
 }
 
 export async function writePolicyAcknowledgment(
@@ -33,7 +23,6 @@ export async function writePolicyAcknowledgment(
     ...current,
     [policyId]: { userEmail, acknowledgedAtISO: new Date().toISOString() },
   }
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(getPolicyFile(orgId), JSON.stringify(updated, null, 2), "utf8")
+  await policyStorage.write(orgId, updated)
   return updated
 }

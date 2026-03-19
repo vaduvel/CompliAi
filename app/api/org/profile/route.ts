@@ -12,6 +12,7 @@ import {
   type OrgSector,
   type OrgEmployeeCount,
 } from "@/lib/compliance/applicability"
+import { trackEvent } from "@/lib/server/analytics"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
@@ -72,6 +73,10 @@ export async function POST(request: Request) {
     const applicability = evaluateApplicability(orgProfile)
 
     await mutateState((current) => ({ ...current, orgProfile, applicability }))
+    void trackEvent(session.orgId, "completed_applicability", {
+      sector: orgProfile.sector,
+      employeeCount: orgProfile.employeeCount,
+    })
 
     return NextResponse.json({ orgProfile, applicability })
   } catch (error) {

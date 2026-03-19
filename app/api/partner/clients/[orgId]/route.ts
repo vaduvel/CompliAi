@@ -4,25 +4,14 @@
 // compliance summary complet + NIS2 state + findings deschise.
 
 import { NextResponse } from "next/server"
-import { promises as fs } from "node:fs"
-import path from "node:path"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
-import type { ComplianceState } from "@/lib/compliance/types"
 import { readNis2State } from "@/lib/server/nis2-store"
-
-const DATA_DIR = path.join(process.cwd(), ".data")
-
-async function readOrgState(orgId: string): Promise<ComplianceState | null> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
-    return JSON.parse(raw) as ComplianceState
-  } catch {
-    return null
-  }
-}
+import { readStateForOrg } from "@/lib/server/mvp-store"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
+import type { VendorReviewStatus, VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
 
 export async function GET(
   request: Request,
@@ -44,7 +33,7 @@ export async function GET(
     }
 
     // Citește starea de conformitate
-    const rawState = await readOrgState(orgId)
+    const rawState = await readStateForOrg(orgId)
     let complianceSummary = null
     let openFindings: { id: string; title: string; category: string; severity: string }[] = []
 
@@ -77,8 +66,28 @@ export async function GET(
     }
 
     // Citește starea NIS2
-    // Simulăm org context prin patch-ul direct pe nis2-store
     const nis2State = await readNis2State(orgId)
+
+    // V5.5 — Vendor reviews per client
+    const vendorReviews = await safeListReviews(orgId)
+    const vendorReviewSummary = {
+      total: vendorReviews.length,
+      open: vendorReviews.filter((r) => r.status !== "closed").length,
+      closed: vendorReviews.filter((r) => r.status === "closed").length,
+      overdue: vendorReviews.filter((r) => r.status === "overdue-review").length,
+      critical: vendorReviews.filter((r) => r.urgency === "critical" && r.status !== "closed").length,
+      needsContext: vendorReviews.filter((r) => r.status === "needs-context").length,
+      reviews: vendorReviews.map((r) => ({
+        id: r.id,
+        vendorName: r.vendorName,
+        status: r.status as VendorReviewStatus,
+        urgency: r.urgency as VendorReviewUrgency,
+        category: r.category,
+        reviewCase: r.reviewCase ?? null,
+        nextReviewDueISO: r.nextReviewDueISO ?? null,
+        reviewCount: r.reviewCount ?? 0,
+      })),
+    }
 
     return NextResponse.json({
       orgId,
@@ -94,6 +103,7 @@ export async function GET(
         hasAssessment: nis2State.assessment !== null,
         assessmentScore: nis2State.assessment?.score ?? null,
       },
+      vendorReviews: vendorReviewSummary,
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

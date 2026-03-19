@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/evidence-os/Toaster";
+import { CookieConsent } from "@/components/compliscan/cookie-consent";
 
 export const metadata: Metadata = {
   title: "CompliScan – Dashboard",
@@ -26,6 +27,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster richColors />
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

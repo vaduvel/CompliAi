@@ -252,6 +252,42 @@ export type AuditPackV2 = {
     metadata: Record<string, string | number | boolean> | null
   }>
   traceabilityMatrix: ComplianceTraceRecord[]
+  nis2Report: {
+    hasData: boolean
+    assessment: {
+      score: number
+      maturityLabel: string
+      sector: string
+      savedAtISO: string
+    } | null
+    dnscRegistrationStatus: string
+    incidents: {
+      total: number
+      open: number
+      critical: number
+      withDnscReport: number
+    }
+    vendors: {
+      total: number
+      highRisk: number
+      withoutDPA: number
+      techVendors: number
+    }
+    maturityAssessment: {
+      overallScore: number
+      level: string
+      domains: Array<{
+        name: string
+        score: number
+        status: string
+      }>
+    } | null
+    boardMembers: {
+      total: number
+      trainingExpired: number
+      certExpired: number
+    }
+  }
   appendix: {
     snapshot: CompliScanSnapshot | null
     validatedBaseline: CompliScanSnapshot | null

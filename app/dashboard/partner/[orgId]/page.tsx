@@ -9,11 +9,14 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  Clock,
   Download,
   FileText,
+  GitPullRequestArrow,
   Shield,
   ShieldAlert,
   Users,
+  XCircle,
 } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
@@ -27,6 +30,27 @@ type FindingSummary = {
   title: string
   category: string
   severity: string
+}
+
+type VendorReviewItem = {
+  id: string
+  vendorName: string
+  status: string
+  urgency: string
+  category: string
+  reviewCase: string | null
+  nextReviewDueISO: string | null
+  reviewCount: number
+}
+
+type VendorReviewSummary = {
+  total: number
+  open: number
+  closed: number
+  overdue: number
+  critical: number
+  needsContext: number
+  reviews: VendorReviewItem[]
 }
 
 type ClientDetail = {
@@ -53,6 +77,7 @@ type ClientDetail = {
     hasAssessment: boolean
     assessmentScore: number | null
   }
+  vendorReviews?: VendorReviewSummary
 }
 
 const DNSC_STATUS_LABEL: Record<string, string> = {
@@ -239,6 +264,82 @@ export default function PartnerClientDetailPage() {
           <MetricBox label="Furnizori" value={nis2.vendorsCount} />
         </div>
       </Card>
+
+      {/* ── Vendor Reviews (V5.5) ────────────────────────────────────────── */}
+      {detail.vendorReviews && detail.vendorReviews.total > 0 && (
+        <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
+          <div className="flex items-center justify-between bg-eos-bg-inset px-5 py-3">
+            <div className="flex items-center gap-2">
+              <GitPullRequestArrow className="size-4 text-eos-text-muted" strokeWidth={2} />
+              <h3 className="text-sm font-semibold text-eos-text">
+                Vendor Reviews ({detail.vendorReviews.total})
+              </h3>
+            </div>
+            <div className="flex gap-2">
+              {detail.vendorReviews.critical > 0 && (
+                <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+                  {detail.vendorReviews.critical} critice
+                </Badge>
+              )}
+              {detail.vendorReviews.overdue > 0 && (
+                <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+                  {detail.vendorReviews.overdue} expirate
+                </Badge>
+              )}
+              {detail.vendorReviews.needsContext > 0 && (
+                <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+                  {detail.vendorReviews.needsContext} necesită context
+                </Badge>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 divide-x divide-eos-border-subtle">
+            <MetricBox label="Deschise" value={detail.vendorReviews.open} alert={detail.vendorReviews.critical > 0} />
+            <MetricBox label="Închise" value={detail.vendorReviews.closed} />
+            <MetricBox label="Expirate" value={detail.vendorReviews.overdue} alert={detail.vendorReviews.overdue > 0} />
+          </div>
+          {detail.vendorReviews.reviews.slice(0, 8).map((vr) => (
+            <div key={vr.id} className="flex items-center justify-between gap-4 px-5 py-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-eos-text">{vr.vendorName}</p>
+                <p className="text-xs text-eos-text-muted capitalize">
+                  {vr.category}
+                  {vr.reviewCase && ` · Caz ${vr.reviewCase}`}
+                  {vr.nextReviewDueISO && ` · Review: ${new Date(vr.nextReviewDueISO).toLocaleDateString("ro-RO")}`}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <Badge
+                  variant={
+                    vr.urgency === "critical" ? "destructive" :
+                    vr.urgency === "high" ? "warning" :
+                    "secondary"
+                  }
+                  className="text-[10px] normal-case tracking-normal"
+                >
+                  {vr.urgency}
+                </Badge>
+                <Badge
+                  variant={
+                    vr.status === "closed" ? "success" :
+                    vr.status === "overdue-review" ? "destructive" :
+                    vr.status === "needs-context" ? "warning" :
+                    "secondary"
+                  }
+                  className="text-[10px] normal-case tracking-normal"
+                >
+                  {vr.status === "closed" ? "Închis" :
+                   vr.status === "overdue-review" ? "Expirat" :
+                   vr.status === "needs-context" ? "Necesită context" :
+                   vr.status === "awaiting-evidence" ? "Așteaptă dovadă" :
+                   vr.status === "review-generated" ? "Review generat" :
+                   vr.status}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </Card>
+      )}
 
       {/* ── Findings deschise ─────────────────────────────────────────────── */}
       {detail.openFindings.length > 0 && (

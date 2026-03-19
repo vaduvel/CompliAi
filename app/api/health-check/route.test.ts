@@ -9,8 +9,20 @@ vi.mock("@/lib/server/mvp-store", () => ({
   readState: vi.fn(),
 }))
 
+vi.mock("@/lib/server/plan", () => ({
+  requirePlan: vi.fn(async () => "pro"),
+  PlanError: class PlanError extends Error {
+    code = "PLAN_REQUIRED"
+    status = 403
+  },
+}))
+
 import { readState } from "@/lib/server/mvp-store"
 import { GET } from "./route"
+
+function makeRequest(): Request {
+  return new Request("http://localhost/api/health-check")
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -28,7 +40,7 @@ describe("GET /api/health-check", () => {
   it("returnează structura HealthCheckResult validă", async () => {
     vi.mocked(readState).mockResolvedValue(makeState())
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     expect(res.status).toBe(200)
 
     const body = await res.json()
@@ -42,7 +54,7 @@ describe("GET /api/health-check", () => {
   it("returnează score între 0 și 100", async () => {
     vi.mocked(readState).mockResolvedValue(makeState())
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     expect(body.score).toBeGreaterThanOrEqual(0)
@@ -52,7 +64,7 @@ describe("GET /api/health-check", () => {
   it("fiecare item are status ok/warning/critical", async () => {
     vi.mocked(readState).mockResolvedValue(makeState())
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     for (const item of body.items) {
@@ -64,7 +76,7 @@ describe("GET /api/health-check", () => {
   it("returnează 500 la eroare internă", async () => {
     vi.mocked(readState).mockRejectedValue(new Error("store error"))
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     expect(res.status).toBe(500)
     const body = await res.json()
     expect(body.error).toBeTruthy()
@@ -75,7 +87,7 @@ describe("GET /api/health-check", () => {
       makeState({ validatedBaselineSnapshotId: "snap-123" })
     )
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     const baselineItem = body.items.find((i: { id: string }) => i.id === "hc-baseline")
@@ -87,7 +99,7 @@ describe("GET /api/health-check", () => {
       makeState({ validatedBaselineSnapshotId: undefined })
     )
 
-    const res = await GET()
+    const res = await GET(makeRequest())
     const body = await res.json()
 
     const baselineItem = body.items.find((i: { id: string }) => i.id === "hc-baseline")

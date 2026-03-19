@@ -2,6 +2,13 @@
 // Detectează evaluări expirate, dovezi stale, review-uri întârziate și gap-uri de monitorizare.
 
 import type { ComplianceState } from "@/lib/compliance/types"
+import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
+import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
+import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
+import { computeCountdown } from "@/lib/compliance/etva-discrepancy"
+import type { FilingRecord } from "@/lib/compliance/filing-discipline"
+import { computeFilingDisciplineScore } from "@/lib/compliance/filing-discipline"
+import { computeSAFTHygiene } from "@/lib/compliance/saft-hygiene"
 
 export type HealthCheckStatus = "ok" | "warning" | "critical"
 
@@ -209,6 +216,156 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       status: "ok",
       action: "Continuă atașarea de dovezi",
     })
+  }
+
+  // 7. Fiscal signals health (ANAF Phase A)
+  const efacturaSignals = (state as Record<string, unknown>).efacturaSignals as
+    | EFacturaInvoiceSignal[]
+    | undefined
+  if (efacturaSignals && efacturaSignals.length > 0) {
+    const fiscalSummary = buildFiscalSummary(efacturaSignals, nowISO)
+
+    if (fiscalSummary.fiscalHealthLabel === "critic") {
+      items.push({
+        id: "hc-fiscal",
+        title: `Semnale fiscale critice (${fiscalSummary.criticalUrgency} urgente)`,
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura, ${fiscalSummary.repeatedRejectionVendors} vendori cu respingeri repetate, ${fiscalSummary.pendingTooLong} facturi blocate.`,
+        status: "critical",
+        action: "Verifică semnalele fiscale și rezolvă respingerile",
+        actionHref: "/dashboard/scanari",
+      })
+    } else if (fiscalSummary.fiscalHealthLabel === "atenție") {
+      items.push({
+        id: "hc-fiscal",
+        title: `Semnale fiscale necesită atenție (scor urgență: ${fiscalSummary.averageUrgency})`,
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura active. ${fiscalSummary.highUrgency} cu urgență ridicată.`,
+        status: "warning",
+        action: "Revizuiește semnalele fiscale",
+        actionHref: "/dashboard/scanari",
+      })
+    } else {
+      items.push({
+        id: "hc-fiscal",
+        title: "Semnale fiscale sub control",
+        detail: `${fiscalSummary.totalSignals} semnale e-Factura monitorizate, niciun semnal critic.`,
+        status: "ok",
+        action: "Monitorizează periodic",
+      })
+    }
+  }
+
+  // 8. e-TVA Discrepancies (ANAF Phase C)
+  const etvaDiscrepancies = (state as Record<string, unknown>).etvaDiscrepancies as
+    | ETVADiscrepancy[]
+    | undefined
+  if (etvaDiscrepancies && etvaDiscrepancies.length > 0) {
+    const active = etvaDiscrepancies.filter(
+      (d) => d.status !== "resolved",
+    )
+    const overdue = active.filter((d) => {
+      const countdown = computeCountdown(d, nowISO)
+      return countdown.isOverdue
+    })
+    const urgent = active.filter((d) => {
+      const countdown = computeCountdown(d, nowISO)
+      return !countdown.isOverdue && countdown.daysRemaining !== null && countdown.daysRemaining <= 5
+    })
+
+    if (overdue.length > 0) {
+      items.push({
+        id: "hc-etva",
+        title: `e-TVA: ${overdue.length} discrepanță/discrepanțe cu termen depășit`,
+        detail: `${active.length} discrepanțe active, ${overdue.length} cu termen depășit. Risc de penalități ANAF.`,
+        status: "critical",
+        action: "Răspunde urgent la discrepanțele e-TVA",
+        actionHref: "/dashboard/scanari",
+      })
+    } else if (urgent.length > 0) {
+      items.push({
+        id: "hc-etva",
+        title: `e-TVA: ${urgent.length} discrepanță/discrepanțe urgente (≤5 zile)`,
+        detail: `${active.length} discrepanțe active, ${urgent.length} cu termen în mai puțin de 5 zile.`,
+        status: "warning",
+        action: "Pregătește răspunsurile la discrepanțe",
+        actionHref: "/dashboard/scanari",
+      })
+    } else if (active.length > 0) {
+      items.push({
+        id: "hc-etva",
+        title: `e-TVA: ${active.length} discrepanță/discrepanțe active`,
+        detail: `Discrepanțe e-TVA monitorizate, niciuna cu termen depășit.`,
+        status: "ok",
+        action: "Monitorizează termenele",
+      })
+    }
+  }
+
+  // 9. Filing Discipline (ANAF Phase C)
+  const filingRecords = (state as Record<string, unknown>).filingRecords as
+    | FilingRecord[]
+    | undefined
+  if (filingRecords && filingRecords.length > 0) {
+    const score = computeFilingDisciplineScore(filingRecords)
+
+    if (score.score < 40) {
+      items.push({
+        id: "hc-filing-discipline",
+        title: `Disciplina declarațiilor critică (${score.score}/100)`,
+        detail: `${score.missing} declarații lipsă, ${score.late} cu întârziere din ${score.total} total. ${score.details}`,
+        status: "critical",
+        action: "Depune declarațiile lipsă urgent",
+        actionHref: "/dashboard/scanari",
+      })
+    } else if (score.score < 75) {
+      items.push({
+        id: "hc-filing-discipline",
+        title: `Disciplina declarațiilor necesită atenție (${score.score}/100)`,
+        detail: `${score.details}`,
+        status: "warning",
+        action: "Îmbunătățește punctualitatea depunerii",
+        actionHref: "/dashboard/scanari",
+      })
+    } else {
+      items.push({
+        id: "hc-filing-discipline",
+        title: `Disciplina declarațiilor bună (${score.score}/100)`,
+        detail: `${score.details}`,
+        status: "ok",
+        action: "Menține ritmul de depunere",
+      })
+    }
+
+    // 10. SAF-T Hygiene (ANAF Phase C)
+    const saftHygiene = computeSAFTHygiene(filingRecords, nowISO)
+    if (saftHygiene.totalFilings > 0) {
+      if (saftHygiene.hygieneScore < 50) {
+        items.push({
+          id: "hc-saft",
+          title: `SAF-T: Igienă critică (${saftHygiene.hygieneScore}/100)`,
+          detail: `${saftHygiene.missing} lipsă, ${saftHygiene.late} cu întârziere, ${saftHygiene.multipleRectifications} cu rectificări multiple. ${saftHygiene.consistencyIssues.length} probleme de consistență.`,
+          status: "critical",
+          action: "Corectează raportarea SAF-T",
+          actionHref: "/dashboard/scanari",
+        })
+      } else if (saftHygiene.hygieneScore < 75) {
+        items.push({
+          id: "hc-saft",
+          title: `SAF-T: Igienă de monitorizat (${saftHygiene.hygieneScore}/100)`,
+          detail: `${saftHygiene.totalFilings} raportări SAF-T. ${saftHygiene.consistencyIssues.length > 0 ? saftHygiene.consistencyIssues.length + " probleme de consistență." : "Consistență OK."}`,
+          status: "warning",
+          action: "Verifică raportarea SAF-T lunar",
+          actionHref: "/dashboard/scanari",
+        })
+      } else {
+        items.push({
+          id: "hc-saft",
+          title: `SAF-T: Igienă bună (${saftHygiene.hygieneScore}/100)`,
+          detail: `${saftHygiene.totalFilings} raportări, toate la standarde.`,
+          status: "ok",
+          action: "Continuă monitorizarea",
+        })
+      }
+    }
   }
 
   // Calculate score

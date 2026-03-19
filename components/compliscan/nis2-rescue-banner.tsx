@@ -9,6 +9,7 @@ import Link from "next/link"
 import { AlertTriangle, ShieldAlert, X } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 import type { DnscRegistrationStatus } from "@/lib/server/nis2-store"
 
 const STATUS_CONTEXT: Record<
@@ -21,6 +22,7 @@ const STATUS_CONTEXT: Record<
 }
 
 export function Nis2RescueBanner() {
+  const { track } = useTrackEvent()
   const [status, setStatus] = useState<DnscRegistrationStatus | null>(null)
   const [dismissed, setDismissed] = useState(false)
 
@@ -81,7 +83,7 @@ export function Nis2RescueBanner() {
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Button asChild size="sm" variant={isCritical ? "destructive" : "default"}>
-              <Link href="/dashboard/nis2/inregistrare-dnsc">
+              <Link href="/dashboard/nis2/inregistrare-dnsc" onClick={() => track("clicked_late_nis2_rescue")}>
                 Deschide Expertul de Înregistrare
               </Link>
             </Button>

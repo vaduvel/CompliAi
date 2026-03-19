@@ -62,6 +62,10 @@ export const FRAMEWORK_LEGAL_STATUS: Record<string, { status: LegalStatus; note:
     status: "active_eu",
     note: "Directiva (EU) 2022/2557 — transpunere națională în curs",
   },
+  saft: {
+    status: "active_ro",
+    note: "D406 SAF-T — obligatoriu din 2025 inclusiv pentru contribuabili mici (comunicare ANAF 2024-2025)",
+  },
 }
 
 export type SuggestionExplanation = {
@@ -90,7 +94,7 @@ const LEGAL_SOURCES: Record<ApplicabilityTag, LegalSource> = {
     citation: "Regulament UE 2024/1689",
     shortName: "AI Act",
     articleHint: "Art. 6, Art. 13, Anexa III",
-    applicabilityNote: "Aplicare completă august 2026; interdicții din 2 august 2025",
+    applicabilityNote: "Interdicții AI (Art.5) ✅ activ 2 aug 2025 · Sisteme high-risk ⚠️ 2 aug 2026 (oficial) / propunere amânare dec 2027",
   },
   efactura: {
     citation: "OUG 89/2025, OUG 120/2021",
@@ -103,6 +107,12 @@ const LEGAL_SOURCES: Record<ApplicabilityTag, LegalSource> = {
     shortName: "CER",
     articleHint: "Art. 13",
     applicabilityNote: "Reziliența entităților critice — obligații fizice în paralel cu NIS2",
+  },
+  saft: {
+    citation: "Ordinul MFP 1783/2021, Comunicare ANAF 2024",
+    shortName: "SAF-T (D406)",
+    articleHint: "Art. 5-7",
+    applicabilityNote: "Declarația D406 SAF-T — obligatorie pentru contribuabili, inclusiv mici, din 2025",
   },
 }
 

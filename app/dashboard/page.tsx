@@ -170,6 +170,106 @@ export default function DashboardPage() {
         <DnscRegistrationBanner />
       )}
 
+      {/* ── V4.3 TOP URGENTA ──────────────────────────────────────────────────── */}
+      {state.orgProfile && (openAlerts.length > 0 || openTasks.length > 0 || activeDrifts.length > 0) && (
+        <section aria-label="Top urgente">
+          <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
+                <span className="text-sm font-semibold text-eos-text">Top urgențe</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-eos-text-muted">Conformitate: {data.summary.score}%</span>
+                <Badge
+                  variant={data.summary.score >= 70 ? "success" : data.summary.score >= 40 ? "warning" : "destructive"}
+                  className="normal-case tracking-normal"
+                >
+                  {data.summary.score >= 70 ? "OK" : data.summary.score >= 40 ? "Risc" : "Critic"}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Urgency list */}
+            <div className="divide-y divide-eos-border-subtle">
+              {[
+                ...openAlerts.slice(0, 2).map((a) => ({
+                  id: a.id,
+                  label: a.message,
+                  severity: a.severity === "high" || a.severity === "critical" ? "high" : "medium",
+                  href: "/dashboard/checklists",
+                })),
+                ...activeDrifts.slice(0, 1).map((d) => ({
+                  id: d.id,
+                  label: d.summary,
+                  severity: d.blocksAudit ? "high" : "medium",
+                  href: "/dashboard/control",
+                })),
+              ]
+                .slice(0, 3)
+                .map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className="flex items-center gap-3 px-5 py-3 hover:bg-eos-surface-variant"
+                  >
+                    <span
+                      className={`mt-0.5 size-2 shrink-0 rounded-full ${
+                        item.severity === "high" ? "bg-eos-error" : "bg-eos-warning"
+                      }`}
+                    />
+                    <span className="flex-1 text-sm text-eos-text">{item.label}</span>
+                    <ArrowRight className="size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                  </Link>
+                ))}
+            </div>
+
+            {/* ACTIUNEA TA ACUM */}
+            {nextBestAction && (
+              <div className="border-t border-eos-border-subtle bg-eos-surface-variant/50 px-5 py-3.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+                  Acțiunea ta acum
+                </p>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <p className="text-sm text-eos-text">{nextBestAction.title}</p>
+                  <Button
+                    asChild
+                    size="sm"
+                  >
+                    <Link href="/dashboard/checklists">
+                      Pornește <ArrowRight className="ml-1.5 size-3.5" strokeWidth={2} />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ACCES RAPID */}
+            <div className="flex flex-wrap gap-2 border-t border-eos-border-subtle px-5 py-3">
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard/rapoarte/one-page">
+                  <FileText className="mr-1.5 size-3.5" strokeWidth={2} />
+                  Raport 1 pagină
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard/rapoarte/audit-pack">
+                  <Shield className="mr-1.5 size-3.5" strokeWidth={2} />
+                  Dosar control
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard/inspector">
+                  <Activity className="mr-1.5 size-3.5" strokeWidth={2} />
+                  Dry Run
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">

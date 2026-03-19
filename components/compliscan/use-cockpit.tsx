@@ -328,6 +328,11 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       toast.success("Compliance Response Pack generat", {
         description: "Folosește print din browser pentru PDF și distribuire.",
       })
+      fetch("/api/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "generated_response_pack" }),
+      }).catch(() => {})
     }).catch((err) => {
       toast.error("Export esuat", {
         description: err instanceof Error ? err.message : "Eroare la generarea Response Pack-ului.",
@@ -349,6 +354,12 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.success("Raport Executiv descărcat")
+      // Track download event — fire-and-forget
+      fetch("/api/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "downloaded_one_page_report" }),
+      }).catch(() => {})
     }).catch((err) => {
       toast.error("Export esuat", {
         description: err instanceof Error ? err.message : "Eroare la generarea raportului executiv.",

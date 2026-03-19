@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
+import { FeedbackPrompt } from "@/components/compliscan/feedback-prompt"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
@@ -485,6 +486,7 @@ export default function GeneratorPage() {
                   <DocumentPreview content={result.content} />
                 </CardContent>
               </Card>
+              <FeedbackPrompt context="after_document" />
             </>
           ) : (
             <Card className="border-eos-border bg-eos-surface">

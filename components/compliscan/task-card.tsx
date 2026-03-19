@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react"
 import {
   AlertTriangle,
   CheckCircle2,
@@ -23,6 +23,7 @@ import {
   formatEvidenceQualityStatus,
   getEvidenceQualitySummary,
 } from "@/lib/compliance/evidence-quality"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 
 type TaskCardProps = {
   task: CockpitTask
@@ -159,6 +160,29 @@ export function TaskCard({
   onAttachEvidence,
   onExport,
 }: TaskCardProps) {
+  const { track } = useTrackEvent()
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const trackedRef = useRef(false)
+
+  // Track "opened finding but not closed" when card becomes visible
+  useEffect(() => {
+    if (task.status !== "todo" || trackedRef.current) return
+    const el = cardRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !trackedRef.current) {
+          trackedRef.current = true
+          track("opened_finding_but_not_closed", { taskId: task.id })
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [task.id, task.status, track])
+
   const tone = priorityTone(task.priority)
   const evidenceInputRef = useRef<HTMLInputElement | null>(null)
   const [validating, setValidating] = useState(false)
@@ -196,6 +220,7 @@ export function TaskCard({
 
   return (
     <Card
+      ref={cardRef}
       id={`task-${task.id}`}
       className={`border-eos-border bg-eos-surface shadow-sm transition ${
         highlighted ? "ring-1 ring-eos-border-strong ring-offset-2 ring-offset-eos-bg" : ""
@@ -647,51 +672,107 @@ function acceptForEvidenceKind(kind: TaskEvidenceKind) {
   return undefined
 }
 
-// ── V3 P0.0 Resolution Path ────────────────────────────────────────────────────
+// ── V3 P0.0 / V4.3.3 Resolution Path ─────────────────────────────────────────
+// V4.3: distincție vizuală CompliAI / Tu / Dovadă + progress indicator
+
+type StepKind = "auto" | "human" | "evidence" | "info"
 
 const RESOLUTION_STEPS: Array<{
   key: keyof FindingResolution
   label: string
-  tone: string
+  kind: StepKind
 }> = [
-  { key: "problem", label: "Problemă", tone: "text-eos-error" },
-  { key: "impact", label: "Impact", tone: "text-eos-warning" },
-  { key: "action", label: "Acțiune", tone: "text-eos-primary" },
-  { key: "generatedAsset", label: "Generat de CompliAI", tone: "text-eos-success" },
-  { key: "humanStep", label: "Pas uman", tone: "text-eos-text" },
-  { key: "closureEvidence", label: "Dovadă de inchidere", tone: "text-eos-text" },
-  { key: "revalidation", label: "Revalidare", tone: "text-eos-text-muted" },
+  { key: "problem",        label: "Problemă detectată", kind: "info" },
+  { key: "impact",         label: "Impact dacă nu acționezi", kind: "info" },
+  { key: "action",         label: "Acțiunea exactă", kind: "human" },
+  { key: "generatedAsset", label: "CompliAI face", kind: "auto" },
+  { key: "humanStep",      label: "Tu faci", kind: "human" },
+  { key: "closureEvidence",label: "Dovada de închidere", kind: "evidence" },
+  { key: "revalidation",   label: "Revalidare", kind: "info" },
 ]
+
+const STEP_KIND_CONFIG: Record<StepKind, { label: string; dot: string; text: string }> = {
+  auto:     { label: "CompliAI", dot: "bg-eos-primary",  text: "text-eos-primary" },
+  human:    { label: "Tu faci",  dot: "bg-eos-warning",   text: "text-eos-warning" },
+  evidence: { label: "Dovadă",   dot: "bg-eos-success",   text: "text-eos-success" },
+  info:     { label: "",         dot: "bg-eos-text-muted", text: "text-eos-text-muted" },
+}
 
 function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
   const visibleSteps = RESOLUTION_STEPS.filter(({ key }) => resolution[key])
-
   if (visibleSteps.length === 0) return null
 
+  const actionSteps = visibleSteps.filter((s) => s.kind === "human" || s.kind === "auto").length
+  const evidenceStep = visibleSteps.find((s) => s.kind === "evidence")
+
   return (
-    <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset">
-      <summary className="cursor-pointer px-4 py-3">
-        <span className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+    <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset">
+      {/* Header cu progress */}
+      <div className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-2.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
           Drum complet la rezolvare
         </span>
-      </summary>
-      <ol className="space-y-3 px-4 pb-4 pt-1">
-        {visibleSteps.map(({ key, label, tone }, idx) => (
-          <li key={key} className="flex gap-3">
-            <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-eos-border bg-eos-surface text-[10px] font-semibold text-eos-text-muted">
-              {idx + 1}
-            </span>
-            <div className="min-w-0">
-              <p className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${tone}`}>
-                {label}
-              </p>
-              <p className="mt-0.5 text-xs leading-5 text-eos-text [overflow-wrap:anywhere]">
-                {resolution[key]}
-              </p>
-            </div>
-          </li>
-        ))}
+        {actionSteps > 0 && (
+          <div className="flex items-center gap-2">
+            {["auto", "human", "evidence"].map((kind) => {
+              const cfg = STEP_KIND_CONFIG[kind as StepKind]
+              const count = visibleSteps.filter((s) => s.kind === kind).length
+              if (count === 0) return null
+              return (
+                <span key={kind} className="flex items-center gap-1 text-[10px] text-eos-text-muted">
+                  <span className={`size-1.5 rounded-full ${cfg.dot}`} />
+                  {cfg.label}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Steps */}
+      <ol className="space-y-3 px-4 pb-4 pt-3">
+        {visibleSteps.map(({ key, label, kind }, idx) => {
+          const cfg = STEP_KIND_CONFIG[kind]
+          return (
+            <li key={key} className="flex gap-3">
+              <div className="mt-0.5 flex shrink-0 flex-col items-center gap-1">
+                <span className={`flex size-5 items-center justify-center rounded-full border border-eos-border bg-eos-surface text-[10px] font-semibold text-eos-text-muted`}>
+                  {idx + 1}
+                </span>
+                {idx < visibleSteps.length - 1 && (
+                  <span className="h-3 w-px bg-eos-border-subtle" />
+                )}
+              </div>
+              <div className="min-w-0 pb-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+                    {label}
+                  </p>
+                  {cfg.label && (
+                    <span className={`flex items-center gap-1 text-[10px] font-semibold ${cfg.text}`}>
+                      <span className={`size-1.5 rounded-full ${cfg.dot}`} />
+                      {cfg.label}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs leading-5 text-eos-text [overflow-wrap:anywhere]">
+                  {resolution[key]}
+                </p>
+              </div>
+            </li>
+          )
+        })}
       </ol>
-    </details>
+
+      {/* Closure note */}
+      {evidenceStep && (
+        <div className="border-t border-eos-border-subtle px-4 py-2.5">
+          <p className="text-[10px] text-eos-text-muted">
+            <span className="font-semibold text-eos-success">Inchidere:</span>{" "}
+            Butonul &ldquo;Rezolvat&rdquo; devine activ doar după ce atașezi dovada de mai sus.
+          </p>
+        </div>
+      )}
+    </div>
   )
 }

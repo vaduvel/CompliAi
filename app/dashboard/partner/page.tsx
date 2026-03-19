@@ -22,6 +22,7 @@ import { Card } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import { useTrackEvent } from "@/lib/client/use-track-event"
 import type { PartnerClientSummary } from "@/app/api/partner/clients/route"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -302,6 +303,8 @@ function CsvImportModal({
 
 export default function PartnerPage() {
   const router = useRouter()
+  const { trackOnce } = useTrackEvent()
+  useEffect(() => { trackOnce("entered_accountant_hub") }, [trackOnce])
   const [clients, setClients] = useState<PartnerClientSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -471,6 +474,44 @@ export default function PartnerPage() {
           </div>
         }
       />
+
+      {/* ── V4.3 URGENTE ACUM ────────────────────────────────────────────── */}
+      {(() => {
+        const withRejected = activeClients.filter((c) => (c.compliance?.efacturaRiskCount ?? 0) > 0)
+        const withCritical = activeClients.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
+        const notDnsc = activeClients.filter((c) => c.compliance?.nis2RescueNeeded)
+        const lowScore = activeClients.filter((c) => (c.compliance?.score ?? 100) < 50 && c.compliance?.hasData)
+        const urgencies = [
+          withRejected.length > 0 && { label: `${withRejected.length} client${withRejected.length > 1 ? "ți" : ""} cu facturi respinse ANAF`, filter: () => setAlertFilter("withAlerts") },
+          withCritical.length > 0 && { label: `${withCritical.length} client${withCritical.length > 1 ? "ți" : ""} cu findings critice`, filter: () => setAlertFilter("withAlerts") },
+          notDnsc.length > 0 && { label: `${notDnsc.length} client${notDnsc.length > 1 ? "ți" : ""} DNSC neînregistrați`, filter: () => {} },
+          lowScore.length > 0 && { label: `${lowScore.length} client${lowScore.length > 1 ? "ți" : ""} cu scor sub 50%`, filter: () => setScoreFilter("under50") },
+        ].filter(Boolean) as { label: string; filter: () => void }[]
+
+        if (urgencies.length === 0) return null
+        return (
+          <div className="rounded-eos-xl border border-eos-error/20 bg-eos-error-soft px-5 py-4">
+            <div className="mb-3 flex items-center gap-2">
+              <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
+              <span className="text-sm font-semibold text-eos-error">Urgențe acum — {urgencies.length} categorii</span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {urgencies.map((u) => (
+                <button
+                  key={u.label}
+                  type="button"
+                  onClick={u.filter}
+                  className="flex items-center gap-2 rounded-eos-md border border-eos-error/20 bg-white/60 px-3 py-2 text-left text-sm text-eos-error hover:bg-white/80 dark:bg-black/10 dark:hover:bg-black/20"
+                >
+                  <span className="size-2 shrink-0 rounded-full bg-eos-error" />
+                  {u.label}
+                  <span className="ml-auto text-[10px] underline">Filtrează →</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       <PortalSummary clients={activeClients} />
 

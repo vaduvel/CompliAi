@@ -9,28 +9,16 @@
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
-import { promises as fs } from "node:fs"
-import path from "node:path"
 
 import { jsonError } from "@/lib/server/api-response"
-import { loadOrganizations, loadUsers, loadMemberships } from "@/lib/server/auth"
+import { loadOrganizations } from "@/lib/server/auth"
 import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
-import type { ComplianceState } from "@/lib/compliance/types"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { buildDigestEmail, type WeeklyDigest, type DigestFinding } from "@/lib/server/weekly-digest"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 
-const DATA_DIR = path.join(process.cwd(), ".data")
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
-
-async function readOrgState(orgId: string): Promise<ComplianceState | null> {
-  try {
-    const raw = await fs.readFile(path.join(DATA_DIR, `state-${orgId}.json`), "utf8")
-    return JSON.parse(raw) as ComplianceState
-  } catch {
-    return null
-  }
-}
 
 async function sendDigestEmail(
   to: string,
@@ -95,7 +83,7 @@ export async function POST(request: Request) {
         }
 
         // Construiește digest-ul
-        const rawState = await readOrgState(org.id)
+        const rawState = await readStateForOrg(org.id)
         if (!rawState) {
           results.push({ orgId: org.id, sent: false, reason: "no state" })
           continue
