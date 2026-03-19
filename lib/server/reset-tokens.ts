@@ -6,6 +6,8 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 import crypto from "node:crypto"
 
+import { writeFileSafe } from "@/lib/server/fs-safe"
+
 const TOKEN_TTL_MS = 60 * 60 * 1000 // 1 hour
 const MAX_TOKENS = 200 // FIFO cleanup
 
@@ -32,9 +34,7 @@ async function loadTokens(): Promise<ResetToken[]> {
 }
 
 async function saveTokens(tokens: ResetToken[]) {
-  const filePath = getTokensFile()
-  await fs.mkdir(path.dirname(filePath), { recursive: true })
-  await fs.writeFile(filePath, JSON.stringify(tokens, null, 2), "utf8")
+  await writeFileSafe(getTokensFile(), JSON.stringify(tokens, null, 2))
 }
 
 function pruneExpiredTokens(tokens: ResetToken[]): ResetToken[] {

@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 import crypto from "node:crypto"
 
+import { writeFileSafe } from "@/lib/server/fs-safe"
 import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallback-policy"
 import {
   shouldUseSupabaseTenancyAsPrimary,
@@ -194,8 +195,7 @@ async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
 }
 
 async function writeJsonFile(filePath: string, value: unknown) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true })
-  await fs.writeFile(filePath, JSON.stringify(value, null, 2), "utf8")
+  await writeFileSafe(filePath, JSON.stringify(value, null, 2))
 }
 
 function buildLegacyOrganization(user: PersistedUserRecord): OrganizationRecord {

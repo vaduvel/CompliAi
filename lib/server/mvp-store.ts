@@ -1,6 +1,8 @@
 import { promises as fs } from "node:fs"
 import path from "node:path"
 
+import { writeFileSafe } from "@/lib/server/fs-safe"
+
 import {
   computeDashboardSummary,
   initialComplianceState,
@@ -137,8 +139,7 @@ async function loadFromDisk(orgId: string): Promise<ComplianceState> {
 }
 
 async function persistToDisk(orgId: string, state: ComplianceState) {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(getDataFile(orgId), JSON.stringify(state, null, 2), "utf8")
+  await writeFileSafe(getDataFile(orgId), JSON.stringify(state, null, 2))
 }
 
 function uid(prefix: string) {

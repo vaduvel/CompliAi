@@ -7,6 +7,8 @@
 import { promises as fs } from "node:fs"
 import path from "node:path"
 
+import { writeFileSafe } from "@/lib/server/fs-safe"
+
 const DATA_DIR = path.join(process.cwd(), ".data")
 
 // ── Interfață ─────────────────────────────────────────────────────────────────
@@ -35,8 +37,7 @@ export class LocalFileStorage<T> implements IStateStorage<T> {
   }
 
   async write(orgId: string, state: T): Promise<void> {
-    await fs.mkdir(DATA_DIR, { recursive: true })
-    await fs.writeFile(this.filePath(orgId), JSON.stringify(state, null, 2), "utf8")
+    await writeFileSafe(this.filePath(orgId), JSON.stringify(state, null, 2))
   }
 }
 
