@@ -26,7 +26,7 @@ export type OrgProfile = {
   completedAtISO: string
 }
 
-export type ApplicabilityTag = "gdpr" | "efactura" | "nis2" | "ai-act" | "cer"
+export type ApplicabilityTag = "gdpr" | "efactura" | "nis2" | "ai-act" | "cer" | "saft"
 
 export type ApplicabilityCertainty = "certain" | "probable" | "unlikely"
 
@@ -151,6 +151,24 @@ export function evaluateApplicability(profile: OrgProfile): ApplicabilityResult 
     })
   }
 
+  // ── SAF-T (D406): obligatoriu din 2025 și pentru contribuabili mici
+  // Orice firmă plătitoare de TVA cu e-Factura activă e candidat SAF-T
+  if (profile.requiresEfactura) {
+    entries.push({
+      tag: "saft",
+      certainty: "probable",
+      reason:
+        "Firma ta este plătitoare de TVA. Din 2025, ANAF a extins obligația SAF-T (D406) și la contribuabili mici. Verifică cu contabilul dacă depui D406 și respectă termenele.",
+    })
+  } else {
+    entries.push({
+      tag: "saft",
+      certainty: "unlikely",
+      reason:
+        "Nu ai indicat obligativitate e-Factura/TVA. SAF-T (D406) se aplică contribuabililor care depun declarații fiscale standard. Verifică cu contabilul.",
+    })
+  }
+
   // ── Compile active tags (certain + probable)
   const tags = entries
     .filter((e) => e.certainty !== "unlikely")
@@ -188,6 +206,7 @@ export const APPLICABILITY_TAG_LABELS: Record<ApplicabilityTag, string> = {
   nis2: "NIS2",
   "ai-act": "AI Act",
   cer: "Directiva CER",
+  saft: "SAF-T (D406)",
 }
 
 export const APPLICABILITY_CERTAINTY_LABELS: Record<ApplicabilityCertainty, string> = {

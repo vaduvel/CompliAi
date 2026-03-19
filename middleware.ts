@@ -99,8 +99,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith("/api/")
   const isDemoBootRoute = pathname.startsWith("/api/demo/")
+  const isStripeWebhookRoute = pathname === "/api/stripe/webhook"
 
-  if (isDemoBootRoute) {
+  if (isDemoBootRoute || isStripeWebhookRoute) {
     return NextResponse.next()
   }
 
@@ -143,5 +144,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/((?!auth|demo).*)"],
+  matcher: ["/dashboard/:path*", "/api/((?!auth|demo|stripe/webhook).*)"],
 }

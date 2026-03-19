@@ -93,10 +93,10 @@ describe("evaluateApplicability", () => {
     }))
     // Only GDPR is certain/probable for a micro retail with no AI and no efactura
     expect(result.tags).toEqual(["gdpr"])
-    expect(result.entries).toHaveLength(4)
+    expect(result.entries).toHaveLength(5) // gdpr, efactura, nis2, ai-act, saft (no CER for "other")
   })
 
-  it("max profile activates all 4 tags", () => {
+  it("max profile activates all 6 tags", () => {
     const result = evaluateApplicability(makeProfile({
       sector: "energy",
       employeeCount: "250+",
@@ -109,16 +109,19 @@ describe("evaluateApplicability", () => {
     expect(result.tags).toContain("ai-act")
     // energy sector activates CER tag too (Sprint 3.5)
     expect(result.tags).toContain("cer")
+    // requiresEfactura activates SAF-T
+    expect(result.tags).toContain("saft")
   })
 
-  it("entries au cel puțin 4 intrări (una per lege; CER adaugă intrare opțională)", () => {
+  it("entries au cel puțin 5 intrări (una per lege; CER adaugă intrare opțională)", () => {
     const result = evaluateApplicability(makeProfile())
-    expect(result.entries.length).toBeGreaterThanOrEqual(4)
+    expect(result.entries.length).toBeGreaterThanOrEqual(5)
     const tags = result.entries.map((e) => e.tag)
     expect(tags).toContain("gdpr")
     expect(tags).toContain("efactura")
     expect(tags).toContain("nis2")
     expect(tags).toContain("ai-act")
+    expect(tags).toContain("saft")
   })
 
   it("fiecare entry are reason non-vid", () => {
@@ -126,6 +129,20 @@ describe("evaluateApplicability", () => {
     for (const entry of result.entries) {
       expect(entry.reason.length).toBeGreaterThan(10)
     }
+  })
+
+  it("SAF-T probable când requiresEfactura=true", () => {
+    const result = evaluateApplicability(makeProfile({ requiresEfactura: true }))
+    const saft = result.entries.find((e) => e.tag === "saft")
+    expect(saft?.certainty).toBe("probable")
+    expect(result.tags).toContain("saft")
+  })
+
+  it("SAF-T unlikely când requiresEfactura=false", () => {
+    const result = evaluateApplicability(makeProfile({ requiresEfactura: false }))
+    const saft = result.entries.find((e) => e.tag === "saft")
+    expect(saft?.certainty).toBe("unlikely")
+    expect(result.tags).not.toContain("saft")
   })
 
   it("digital-infrastructure este sector esential NIS2", () => {

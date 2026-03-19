@@ -245,3 +245,26 @@ Concluzie:
 
 - Stripe test checkout este activ
 - urmatorul pas pentru inchidere Stripe este un checkout test complet in browser, ca sa validam webhook + portal end-to-end
+
+## Stripe + ops cleanup
+
+Stare verificata dupa inchiderea Stripe test mode:
+
+- productie live pe `https://compliscanag.vercel.app`
+- checkout Stripe platit si webhook procesat
+- `GET /api/plan` pentru demo IMM -> `plan: "pro"`
+- `POST /api/stripe/portal` -> `200` cu URL valid de billing portal
+
+Cleanup operational aplicat:
+
+- adaugat `.env.example` in branchul de release
+- documentat `CRON_SECRET`
+- documentata dependenta pe tabela `public.plans` pentru persistenta planurilor Stripe in `supabase`
+- actualizat `vercel.json` cu cron pentru `vendor-review-revalidation`
+- actualizat `docs/sprint-log-refinements.md` ca sa reflecte:
+  - Vercel baseline live
+  - Stripe test mode functional
+  - parcarea V4 ramane pentru domeniu, DNS/email, Sentry, smoke matrix, asset QA
+- `CRON_SECRET` creat in Vercel `production`, apoi rotit o data dupa un prim deploy esuat din cauza whitespace la final
+- redeploy productie reusit dupa rotirea secretului
+- `POST /api/cron/vendor-review-revalidation` fara auth -> `401`, deci protectia cron este activa
