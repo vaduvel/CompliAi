@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       hasActiveSubscription: !!record.stripeSubscriptionId,
     })
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "PLAN_FETCH_FAILED",
       durationMs: getRequestDurationMs(context),
       status: 500,

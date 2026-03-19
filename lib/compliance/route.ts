@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     orgId = requireAuthenticatedSession(request, "rularea Agent OS").orgId
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unauthorized"
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "AUTH_UNAUTHORIZED",
       durationMs: getRequestDurationMs(context),
       status: 401,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     // Acum, îl returnăm direct.
     return jsonWithRequestContext(proposalBundle, context)
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "AGENT_RUN_FAILED",
       durationMs: getRequestDurationMs(context),
       status: 500,

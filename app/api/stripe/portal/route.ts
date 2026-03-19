@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     const portalSession = (await portalResponse.json()) as { url: string }
     return Response.json({ url: portalSession.url })
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "STRIPE_PORTAL_ERROR",
       durationMs: getRequestDurationMs(context),
       status: 500,

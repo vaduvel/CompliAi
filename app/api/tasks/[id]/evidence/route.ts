@@ -247,7 +247,7 @@ export async function POST(
     )
   } catch (error) {
     if (error instanceof AuthzError) {
-      logRouteError(requestContext, error, {
+      await logRouteError(requestContext, error, {
         code: error.code,
         durationMs: getRequestDurationMs(requestContext),
         status: error.status,
@@ -265,7 +265,7 @@ export async function POST(
       )
     }
 
-    logRouteError(requestContext, error, {
+    await logRouteError(requestContext, error, {
       code: "EVIDENCE_UPLOAD_FAILED",
       durationMs: getRequestDurationMs(requestContext),
       status: 500,

@@ -45,7 +45,7 @@ export function logOperationalEvent(
   console.info(line)
 }
 
-export function logRouteError(
+export async function logRouteError(
   context: RequestContext | undefined,
   error: unknown,
   details: Omit<OperationalLogDetails, "errorName" | "message"> = {}
@@ -83,6 +83,8 @@ export function logRouteError(
 
       Sentry.captureException(normalizedError)
     })
+
+    await Sentry.flush(1500)
   }
 
   logOperationalEvent("error", "route.error", context, {

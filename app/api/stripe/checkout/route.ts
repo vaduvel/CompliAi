@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     void currentPlan // used for potential upgrade validation — kept for future guards
     return Response.json({ url: checkoutSession.url })
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "STRIPE_CHECKOUT_ERROR",
       durationMs: getRequestDurationMs(context),
       status: 500,

@@ -27,7 +27,7 @@ async function resolveSection<T>(
     return { data: await handler(), error: null }
   } catch (error) {
     if (error instanceof AuthzError) {
-      logRouteError(context, error, {
+      await logRouteError(context, error, {
         code: error.code,
         durationMs: getRequestDurationMs(context),
         status: error.status,
@@ -35,7 +35,7 @@ async function resolveSection<T>(
       return { data: null, error: error.message }
     }
 
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: fallback.code,
       durationMs: getRequestDurationMs(context),
       status: 500,
@@ -156,7 +156,7 @@ export async function GET(request: Request) {
       context
     )
   } catch (error) {
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code: "SETTINGS_SUMMARY_FAILED",
       durationMs: getRequestDurationMs(context),
       status: 500,

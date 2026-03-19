@@ -51,7 +51,7 @@ export async function POST(request: Request) {
           : 400
     const code = error instanceof RequestValidationError ? error.code : "SCAN_FAILED"
 
-    logRouteError(context, error, {
+    await logRouteError(context, error, {
       code,
       durationMs: getRequestDurationMs(context),
       status,
