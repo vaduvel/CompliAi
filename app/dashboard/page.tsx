@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, Shield, ShieldCheck } from "lucide-react"
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
@@ -19,6 +19,7 @@ import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/complian
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
+import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 
 // ─── State labels shown beside the orb ────────────────────────────────────────
 const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
@@ -169,6 +170,31 @@ export default function DashboardPage() {
       {state.orgProfile && applicability?.tags.includes("nis2") && (
         <DnscRegistrationBanner />
       )}
+
+      {/* ── Vigilance Strip — sector risk ANAF (Phase A polish) ────────────── */}
+      {state.orgProfile && (() => {
+        const strip = getVigilanceStrip(state.orgProfile.sector)
+        if (!strip.visible) return null
+        const bgClass = strip.level === "high"
+          ? "border-red-200 bg-red-50 text-red-900"
+          : "border-amber-200 bg-amber-50 text-amber-900"
+        const iconColor = strip.level === "high" ? "text-red-500" : "text-amber-500"
+        return (
+          <section aria-label="Sector risk ANAF">
+            <div className={`flex items-center gap-3 rounded-eos-lg border px-4 py-2.5 text-sm ${bgClass}`}>
+              <ShieldAlert className={`size-4 shrink-0 ${iconColor}`} strokeWidth={2} />
+              <div className="flex-1">
+                <span className="font-semibold">Vigilență {strip.label.toLowerCase()}</span>
+                <span className="mx-1.5 text-xs opacity-60">·</span>
+                <span className="text-xs opacity-80">{strip.message}</span>
+              </div>
+              <Badge variant={strip.level === "high" ? "destructive" : "warning"} className="shrink-0 text-[10px] normal-case tracking-normal">
+                ANAF
+              </Badge>
+            </div>
+          </section>
+        )
+      })()}
 
       {/* ── V4.3 TOP URGENTA ──────────────────────────────────────────────────── */}
       {state.orgProfile && (openAlerts.length > 0 || openTasks.length > 0 || activeDrifts.length > 0) && (

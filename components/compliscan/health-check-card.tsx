@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AlertTriangle, CheckCircle2, XCircle, RefreshCw, ArrowRight } from "lucide-react"
+import { AlertTriangle, CheckCircle2, XCircle, RefreshCw, ArrowRight, ChevronDown } from "lucide-react"
 import Link from "next/link"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -63,10 +63,13 @@ function HealthItemRow({ item }: { item: HealthCheckItem }) {
   )
 }
 
+const FISCAL_ITEM_IDS = new Set(["hc-efactura", "hc-fiscal", "hc-etva", "hc-filing-discipline", "hc-saft"])
+
 export function HealthCheckCard() {
   const [result, setResult] = useState<HealthCheckResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [fiscalExpanded, setFiscalExpanded] = useState(false)
 
   async function load(showRefreshing = false) {
     if (showRefreshing) setRefreshing(true)
@@ -165,17 +168,65 @@ export function HealthCheckCard() {
           </div>
         )}
 
-        {/* Items list — show criticals + warnings first, then ok */}
-        <div className="divide-y divide-eos-border-subtle">
-          {[...criticalItems, ...warningItems].map((item) => (
-            <HealthItemRow key={item.id} item={item} />
-          ))}
-          {criticalItems.length === 0 && warningItems.length === 0 && (
-            result.items.slice(0, 3).map((item) => (
-              <HealthItemRow key={item.id} item={item} />
-            ))
-          )}
-        </div>
+        {/* Items list — split fiscal vs general */}
+        {(() => {
+          const fiscalItems = result.items.filter((i) => FISCAL_ITEM_IDS.has(i.id))
+          const generalItems = result.items.filter((i) => !FISCAL_ITEM_IDS.has(i.id))
+          const generalCritical = generalItems.filter((i) => i.status === "critical")
+          const generalWarning = generalItems.filter((i) => i.status === "warning")
+          const shownGeneral = generalCritical.length > 0 || generalWarning.length > 0
+            ? [...generalCritical, ...generalWarning]
+            : generalItems.slice(0, 3)
+          const fiscalCriticalCount = fiscalItems.filter((i) => i.status === "critical").length
+          const fiscalWarningCount = fiscalItems.filter((i) => i.status === "warning").length
+
+          return (
+            <>
+              {/* General items */}
+              <div className="divide-y divide-eos-border-subtle">
+                {shownGeneral.map((item) => (
+                  <HealthItemRow key={item.id} item={item} />
+                ))}
+              </div>
+
+              {/* Fiscal section — expandable */}
+              {fiscalItems.length > 0 && (
+                <div className="mt-3 rounded-eos-md border border-eos-border-subtle">
+                  <button
+                    type="button"
+                    onClick={() => setFiscalExpanded((v) => !v)}
+                    className="flex w-full items-center justify-between px-4 py-2.5 text-left hover:bg-eos-surface-variant/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-eos-text">Semnale fiscale</span>
+                      {fiscalCriticalCount > 0 && (
+                        <span className="rounded-full bg-eos-error px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          {fiscalCriticalCount}
+                        </span>
+                      )}
+                      {fiscalWarningCount > 0 && (
+                        <span className="rounded-full bg-eos-warning px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          {fiscalWarningCount}
+                        </span>
+                      )}
+                      {fiscalCriticalCount === 0 && fiscalWarningCount === 0 && (
+                        <span className="rounded-full bg-eos-success px-1.5 py-0.5 text-[10px] font-bold text-white">OK</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`size-4 text-eos-text-muted transition-transform ${fiscalExpanded ? "rotate-180" : ""}`} strokeWidth={2} />
+                  </button>
+                  {fiscalExpanded && (
+                    <div className="divide-y divide-eos-border-subtle border-t border-eos-border-subtle px-1">
+                      {fiscalItems.map((item) => (
+                        <HealthItemRow key={item.id} item={item} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )
+        })()}
 
         {/* Timestamp */}
         <p className="mt-3 text-right text-[10px] text-eos-text-muted">
