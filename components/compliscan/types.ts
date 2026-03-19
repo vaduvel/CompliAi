@@ -5,6 +5,7 @@ import type {
   RemediationMode,
   TaskEvidenceAttachment,
   TaskEvidenceKind,
+  ValidationLevel,
 } from "@/lib/compliance/types"
 import type {
   CompliancePrinciple,
@@ -54,6 +55,7 @@ export type CockpitTask = {
   validationConfidence?: "high" | "medium" | "low"
   validationBasis?: "direct_signal" | "inferred_signal" | "operational_state"
   validatedAtLabel?: string
+  validationLevel: ValidationLevel
 }
 
 export type ScanInsight = {

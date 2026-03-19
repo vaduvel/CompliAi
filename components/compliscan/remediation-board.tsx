@@ -8,7 +8,7 @@ import { TaskCard } from "@/components/compliscan/task-card"
 import type { CockpitTask, TaskPriority } from "@/components/compliscan/types"
 import type { TaskEvidenceKind } from "@/lib/compliance/types"
 
-type FilterValue = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL"
+type FilterValue = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 
 type RemediationBoardProps = {
   tasks: CockpitTask[]
@@ -27,6 +27,9 @@ const filters: Array<{ value: FilterValue; label: string }> = [
   { value: "P1", label: "P1 · Urgente" },
   { value: "P2", label: "P2 · Importante" },
   { value: "P3", label: "P3 · Optionale" },
+  { value: "L1", label: "L1 · Auto-close" },
+  { value: "L2", label: "L2 · Business" },
+  { value: "L3", label: "L3 · Specialist" },
   { value: "DONE", label: "Inchise" },
 ]
 
@@ -34,6 +37,7 @@ const filterGroups: Array<{ label: string; values: FilterValue[] }> = [
   { label: "Status", values: ["ALL", "DONE"] },
   { label: "Tip remediere", values: ["RAPID", "STRUCTURAL"] },
   { label: "Prioritate", values: ["P1", "P2", "P3"] },
+  { label: "Nivel validare", values: ["L1", "L2", "L3"] },
 ]
 
 export function RemediationBoard({
@@ -52,6 +56,9 @@ export function RemediationBoard({
       return task.remediationMode === "structural" && task.status !== "done"
     }
     if (activeFilter === "DONE") return task.status === "done"
+    if (activeFilter === "L1") return task.validationLevel === 1 && task.status !== "done"
+    if (activeFilter === "L2") return task.validationLevel === 2 && task.status !== "done"
+    if (activeFilter === "L3") return task.validationLevel === 3 && task.status !== "done"
     return task.priority === activeFilter && task.status !== "done"
   })
   const evidenceBlockedTasks = visibleTasks.filter(

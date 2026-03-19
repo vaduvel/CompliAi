@@ -4,6 +4,14 @@ import type { OrgProfile, ApplicabilityResult } from "@/lib/compliance/applicabi
 
 export type AlertSeverity = ComplianceSeverity
 export type FindingCategory = "EU_AI_ACT" | "GDPR" | "E_FACTURA" | "NIS2"
+
+/**
+ * Validation Levels — "capture more legal prep work" strategy.
+ * Level 1 = Auto-close: verificabil automat (document/camp/dovada exista).
+ * Level 2 = Business confirmation: necesita confirmare interna de la admin/contabil.
+ * Level 3 = Specialist validation: necesita review de specialitate (jurist/DPO/auditor).
+ */
+export type ValidationLevel = 1 | 2 | 3
 export type ScanExtractionMethod = "manual" | "ocr-vision-image" | "ocr-vision-pdf"
 export type ScanAnalysisStatus = "pending" | "completed"
 export type ScanExtractionStatus = "completed" | "needs_review"

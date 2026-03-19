@@ -86,6 +86,12 @@ function statusVariant(s: VendorReviewStatus) {
   return "secondary" as const
 }
 
+function inferVendorValidationLabel(review: VendorReview) {
+  if (review.urgency === "critical" || review.urgency === "high") return "L3 · Specialist"
+  if (review.urgency === "medium") return "L2 · Confirmare internă"
+  return "L1 · Auto-close"
+}
+
 // ── Context Form ──────────────────────────────────────────────────────────────
 
 function ContextForm({
@@ -486,7 +492,23 @@ function ReviewPanel({
             </p>
           </div>
         )}
+        <div>
+          <p className="text-xs text-eos-text-tertiary">Nivel validare</p>
+          <p className="text-sm font-medium text-eos-text">
+            {inferVendorValidationLabel(review)}
+          </p>
+        </div>
       </div>
+
+      {/* Specialist escalation for high-urgency vendors */}
+      {(review.urgency === "critical" || review.urgency === "high") && review.status !== "closed" && (
+        <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-2.5">
+          <ShieldAlert className="mt-0.5 size-3.5 shrink-0 text-eos-error" strokeWidth={2} />
+          <p className="text-xs text-eos-text">
+            Cazul este pregătit pentru validare de specialitate. Documentele și red flags sunt deja organizate. Specialistul intervine doar pentru validare finală.
+          </p>
+        </div>
+      )}
 
       {/* Status-based UI */}
       {review.status === "needs-context" && (
