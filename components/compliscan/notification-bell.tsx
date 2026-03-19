@@ -13,7 +13,12 @@ const TYPE_ICON: Record<string, string> = {
   drift_detected: "📊",
   vendor_risk: "🔗",
   info: "ℹ️",
+  anaf_signal: "📋",
+  anaf_deadline: "⚠️",
+  fiscal_alert: "🔔",
 }
+
+const ANAF_TYPES = new Set(["anaf_signal", "anaf_deadline", "fiscal_alert"])
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
@@ -93,6 +98,12 @@ export function NotificationBell() {
             {unread > 9 ? "9+" : unread}
           </span>
         )}
+        {notifications.some((n) => !n.readAt && ANAF_TYPES.has(n.type)) && (
+          <span
+            className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border border-white bg-amber-500"
+            title="Notificări ANAF nerezolvate"
+          />
+        )}
       </button>
 
       {open && (
@@ -121,6 +132,20 @@ export function NotificationBell() {
               </button>
             </div>
           </div>
+
+          {/* ANAF unresolved count strip */}
+          {(() => {
+            const anafUnread = notifications.filter((n) => !n.readAt && ANAF_TYPES.has(n.type)).length
+            if (anafUnread === 0) return null
+            return (
+              <div className="flex items-center gap-2 border-b border-eos-border-subtle bg-amber-50 px-4 py-2">
+                <span className="size-2 rounded-full bg-amber-500" />
+                <span className="text-[11px] font-medium text-amber-800">
+                  {anafUnread} semnal{anafUnread > 1 ? "e" : ""} ANAF nerezolvat{anafUnread > 1 ? "e" : ""}
+                </span>
+              </div>
+            )
+          })()}
 
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
