@@ -5,6 +5,8 @@
 
 import { promises as fs } from "node:fs"
 import path from "node:path"
+
+import { appendFileSafe } from "@/lib/server/fs-safe"
 import { hasSupabaseConfig, supabaseInsert } from "@/lib/server/supabase-rest"
 
 // ── Event types ───────────────────────────────────────────────────────────────
@@ -40,8 +42,7 @@ const DATA_DIR = path.join(process.cwd(), ".data")
 const ANALYTICS_FILE = path.join(DATA_DIR, "analytics.jsonl")
 
 async function appendToLocalFile(record: AnalyticsRecord): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.appendFile(ANALYTICS_FILE, JSON.stringify(record) + "\n", "utf8")
+  await appendFileSafe(ANALYTICS_FILE, JSON.stringify(record) + "\n")
 }
 
 // ── trackEvent ────────────────────────────────────────────────────────────────

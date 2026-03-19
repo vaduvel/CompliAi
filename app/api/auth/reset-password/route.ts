@@ -10,6 +10,7 @@ import {
 import { consumeResetToken } from "@/lib/server/reset-tokens"
 import { jsonError } from "@/lib/server/api-response"
 import { asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
+import { writeFileSafe } from "@/lib/server/fs-safe"
 import { promises as fs } from "node:fs"
 import path from "node:path"
 import crypto from "node:crypto"
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
     users[userIndex].salt = newSalt
     users[userIndex].passwordHash = hashPassword(password, newSalt)
 
-    await fs.writeFile(usersFile, JSON.stringify(users, null, 2), "utf8")
+    await writeFileSafe(usersFile, JSON.stringify(users, null, 2))
 
     // Auto-login after password reset
     const sessionToken = createSessionToken({
