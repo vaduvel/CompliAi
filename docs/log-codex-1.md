@@ -382,3 +382,13 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
   - `npm test -- app/api/state/reset/route.test.ts`
   - `./node_modules/.bin/tsc --noEmit`
   - `npm run build`
+
+### Dashboard UX cleanup — 20 martie 2026
+
+- `Dashboard` nu mai are doua blocuri separate pentru urmatorul pas; a ramas un singur CTA dominant in `Top urgente`.
+- blocul separat `Urmatorul pas recomandat` a fost eliminat pentru a reduce concurenta cu board-ul de urgenta.
+- rindul `Acces rapid` a fost scos din `Top urgente`; exporturile si utilitarele raman accesibile din navigatie, nu concureaza cu actiunea principala.
+- intro-ul a fost comprimat catre orientare operationala: `Vezi rapid ce cere interventie si porneste urmatorul pas corect.`
+- Validare:
+  - `./node_modules/.bin/tsc --noEmit`
+  - `npm run lint -- --file app/dashboard/page.tsx`

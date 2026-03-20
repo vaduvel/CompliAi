@@ -10,7 +10,6 @@ import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
-import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
@@ -78,8 +77,6 @@ export default function DashboardPage() {
 
   const openTasks = tasks.filter((t) => t.status !== "done")
   const missingEvidenceCount = openTasks.filter((t) => !t.attachedEvidence).length
-  const hasEvidence = state.scannedDocuments > 0 || state.scans.length > 0
-
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"
@@ -96,7 +93,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Dashboard"
         title="Starea actuala a conformitatii tale"
-        description="Situatia globala: ce s-a schimbat, ce deviaza si ce cere interventie."
+        description="Vezi rapid ce cere interventie si porneste urmatorul pas corect."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -226,27 +223,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* ACCES RAPID */}
-            <div className="flex flex-wrap gap-2 border-t border-eos-border-subtle px-5 py-3">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/rapoarte/one-page">
-                  <FileText className="mr-1.5 size-3.5" strokeWidth={2} />
-                  Raport 1 pagină
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/rapoarte/audit-pack">
-                  <Shield className="mr-1.5 size-3.5" strokeWidth={2} />
-                  Dosar control
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/inspector">
-                  <Activity className="mr-1.5 size-3.5" strokeWidth={2} />
-                  Dry Run
-                </Link>
-              </Button>
-            </div>
           </div>
         </section>
       )}
@@ -274,18 +250,6 @@ export default function DashboardPage() {
           />
         </section>
       )}
-
-      {/* ── Acțiune imediată ───────────────────────────────────────────────── */}
-      <div className="space-y-4">
-        <section aria-label="Urmatorul pas recomandat">
-          <NextBestAction
-            task={nextBestAction}
-            onResolve={() => router.push("/dashboard/checklists")}
-            hasEvidence={hasEvidence}
-            activeRiskCount={openAlerts.length}
-          />
-        </section>
-      </div>
 
       <section aria-label="Conformitate pe cadru" className="space-y-4">
         <div className="flex items-center justify-between">
