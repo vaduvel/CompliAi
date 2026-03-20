@@ -1,0 +1,212 @@
+/*
+ * CompliScan Design System v2.0 — Token Layer
+ * Sursă canonică: docs/final-guide-plan/compliscan-ui-prompt.md
+ * Wave 0 — branch: wave0/ux-foundation-ds-v2
+ *
+ * REGULI ABSOLUTE:
+ * - NICIODATĂ raw hex în componentele UI — doar aceste variabile
+ * - NICIODATĂ emerald decorativ — doar CTA primar și stări resolved
+ * - Violet DOAR pe review states
+ * - Roșu DOAR pe critical/fail
+ */
+
+:root {
+  /* ── PRIMITIVE: Warm Graphite ─────────────────────────────── */
+  --color-graphite-950: #111113;
+  --color-graphite-900: #18181B;
+  --color-graphite-850: #1F1F23;
+  --color-graphite-800: #27272B;
+  --color-graphite-750: #2E2E33;
+  --color-graphite-700: #3A3A40;
+  --color-graphite-600: #505057;
+  --color-graphite-500: #686872;
+  --color-graphite-400: #8C8C96;
+  --color-graphite-300: #B2B2BA;
+  --color-graphite-200: #D6D6DD;
+  --color-graphite-100: #F1F1F5;
+
+  /* ── PRIMITIVE: Brand Colors ──────────────────────────────── */
+  --color-emerald-700: #1E8E67;
+  --color-emerald-600: #279977;
+  --color-emerald-500: #34D399;
+  --color-emerald-400: #5BDEAC;
+  --color-emerald-300: #8BE8C4;
+
+  --color-red-700:    #7A1F24;
+  --color-red-600:    #A12B33;
+  --color-red-500:    #F87171;
+  --color-red-400:    #FF9A9A;
+
+  --color-amber-700:  #7A5A0B;
+  --color-amber-600:  #9A730F;
+  --color-amber-500:  #FBBF24;
+  --color-amber-400:  #FFD867;
+
+  --color-violet-700: #5B3D8A;
+  --color-violet-600: #7149A8;
+  --color-violet-500: #A78BFA;
+  --color-violet-400: #C0AEFF;
+
+  --color-blue-700:   #1D4E89;
+  --color-blue-600:   #245DA2;
+  --color-blue-500:   #60A5FA;
+  --color-blue-400:   #8DBEFF;
+
+  /* ── SEMANTIC: Surfaces ───────────────────────────────────── */
+  --bg-canvas:   var(--color-graphite-950);
+  --bg-panel:    var(--color-graphite-900);
+  --bg-card:     var(--color-graphite-900);
+  --bg-overlay:  var(--color-graphite-850);
+  --bg-hover:    var(--color-graphite-800);
+  --bg-active:   var(--color-graphite-750);
+  --bg-disabled: var(--color-graphite-800);
+  --bg-inverse:  var(--color-graphite-100);
+
+  /* ── SEMANTIC: Text ───────────────────────────────────────── */
+  --text-primary:   var(--color-graphite-100);
+  --text-secondary: var(--color-graphite-300);
+  --text-tertiary:  var(--color-graphite-400);
+  --text-muted:     var(--color-graphite-500);
+  --text-disabled:  var(--color-graphite-600);
+  --text-inverse:   var(--color-graphite-950);
+
+  /* ── SEMANTIC: Borders ────────────────────────────────────── */
+  --border-subtle:  var(--color-graphite-800);
+  --border-default: var(--color-graphite-750);
+  --border-strong:  var(--color-graphite-700);
+  --border-focus:   rgba(91, 222, 172, 0.42);
+
+  /* ── SEMANTIC: Actions ────────────────────────────────────── */
+  --action-primary-bg:       var(--color-emerald-500);
+  --action-primary-text:     var(--text-inverse);
+  --action-primary-hover:    var(--color-emerald-400);
+  --action-primary-active:   var(--color-emerald-600);
+
+  --action-secondary-bg:     var(--bg-card);
+  --action-secondary-text:   var(--text-primary);
+  --action-secondary-border: var(--border-default);
+  --action-secondary-hover:  var(--bg-hover);
+
+  --action-ghost-bg:         transparent;
+  --action-ghost-text:       var(--text-secondary);
+  --action-ghost-hover:      var(--bg-hover);
+
+  --action-destructive-bg:     rgba(248, 113, 113, 0.12);
+  --action-destructive-border: rgba(248, 113, 113, 0.42);
+  --action-destructive-text:   var(--color-red-500);
+
+  /* ── SEMANTIC: Status (operational meaning) ───────────────── */
+  --status-compliant-text:   var(--color-emerald-500);
+  --status-compliant-bg:     rgba(52, 211, 153, 0.08);
+  --status-compliant-border: rgba(52, 211, 153, 0.20);
+
+  --status-failing-text:     var(--color-red-500);
+  --status-failing-bg:       rgba(248, 113, 113, 0.10);
+  --status-failing-border:   rgba(248, 113, 113, 0.25);
+
+  --status-drift-text:       var(--color-amber-500);
+  --status-drift-bg:         rgba(251, 191, 36, 0.10);
+  --status-drift-border:     rgba(251, 191, 36, 0.25);
+
+  --status-review-text:      var(--color-violet-500);
+  --status-review-bg:        rgba(167, 139, 250, 0.10);
+  --status-review-border:    rgba(167, 139, 250, 0.25);
+
+  --status-info-text:        var(--color-blue-500);
+  --status-info-bg:          rgba(96, 165, 250, 0.10);
+  --status-info-border:      rgba(96, 165, 250, 0.25);
+
+  --status-neutral-text:     var(--text-tertiary);
+  --status-neutral-bg:       var(--bg-overlay);
+  --status-neutral-border:   var(--border-subtle);
+
+  /* ── SEMANTIC: Severity (gravity) ────────────────────────── */
+  --severity-critical-text:  var(--color-red-500);
+  --severity-critical-bg:    rgba(248, 113, 113, 0.10);
+  --severity-high-text:      var(--color-amber-500);
+  --severity-high-bg:        rgba(251, 191, 36, 0.10);
+  --severity-medium-text:    var(--text-tertiary);
+  --severity-medium-bg:      var(--bg-overlay);
+  --severity-low-text:       var(--text-muted);
+  --severity-low-bg:         var(--bg-overlay);
+
+  /* ── SEMANTIC: Review States ──────────────────────────────── */
+  --review-detected-text:    var(--color-amber-500);
+  --review-detected-bg:      rgba(251, 191, 36, 0.08);
+  --review-pending-text:     var(--color-violet-500);
+  --review-pending-bg:       rgba(167, 139, 250, 0.10);
+  --review-escalated-text:   var(--color-violet-400);
+  --review-escalated-bg:     rgba(167, 139, 250, 0.20);
+  --review-confirmed-text:   var(--color-amber-500);
+  --review-confirmed-bg:     rgba(251, 191, 36, 0.10);
+  --review-dismissed-text:   var(--text-muted);
+  --review-dismissed-bg:     var(--bg-overlay);
+  --review-remediation-text: var(--text-secondary);
+  --review-remediation-bg:   var(--bg-active);
+  --review-resolved-text:    var(--color-emerald-500);
+  --review-resolved-bg:      rgba(52, 211, 153, 0.08);
+
+  /* ── TYPOGRAPHY ───────────────────────────────────────────── */
+  --font-ui:   'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* ── SPACING ──────────────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── RADIUS ───────────────────────────────────────────────── */
+  --radius-xs:   6px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  24px;
+  --radius-pill: 9999px;
+
+  /* ── SHADOW ───────────────────────────────────────────────── */
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md:    0 8px 24px rgba(0,0,0,0.24);
+  --shadow-lg:    0 16px 40px rgba(0,0,0,0.28);
+  --shadow-focus: 0 0 0 3px rgba(91,222,172,0.22);
+
+  /* ── MOTION ───────────────────────────────────────────────── */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 260ms;
+  --easing:      cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ── SKELETON LOADING ─────────────────────────────────────────── */
+@keyframes cs-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.cs-skeleton {
+  background: var(--bg-hover);
+  border-radius: var(--radius-xs);
+  animation: cs-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── FOCUS RING — reusable utility ───────────────────────────── */
+.cs-focus-ring:focus-visible {
+  outline: 2px solid var(--border-focus);
+  box-shadow: var(--shadow-focus);
+  outline-offset: 2px;
+}
+
+/* ── REDUCED MOTION ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
