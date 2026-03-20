@@ -41,8 +41,12 @@ Status: plan activ, ancorat in log
   - document memory sugereaza acum si politici GDPR, DPA-uri, documentatie vendor si politica AI
   - AI inventory sugereaza direct si `aiUsesConfidentialData` cand sistemele confirmate sau detectate proceseaza date personale
   - wizardul arata sugestiile doar pentru intrebarile conditionale care sunt efectiv vizibile in pasul curent
+- `Wave 2.9` adauga semnale directe din website-ul public:
+  - onboarding-ul poate porni prefill si doar din `website`, nu doar din `CUI`
+  - website-ul public sugereaza acum `hasSiteWithForms`, `hasSitePrivacyPolicy`, `hasPrivacyPolicy`, `processesPersonalData` si `hasCookiesConsent`
+  - `website` devine camp persistat in `OrgProfile`, iar prefill-ul se pastreaza doar cand `CUI` / `website` raman aliniate
 - validare confirmata:
-  - `npm test -- lib/compliance/intake-engine.test.ts lib/server/ai-prefill-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts`
+  - `npm test -- lib/server/website-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
   - `npm run lint`
   - `npm run build`
 
@@ -79,14 +83,18 @@ Status: plan activ, ancorat in log
   - onboarding-ul poate sugera acum si raspunsuri conditionale, nu doar cele 7 intrebari decisive
   - semnalele din documente existente reduc intrebarile despre policy-uri, DPA-uri si documentatie vendor
   - semnalele AI existente reduc si confirmarea despre folosirea de date sensibile in tool-uri AI
+- `Wave 2.9`:
+  - `POST /api/org/profile/prefill` accepta acum si `website`, nu doar `CUI`
+  - semnalele din website-ul public apar in onboarding cu provenance dedicat `site public`
+  - website-ul poate sugera direct si `cookies consent`, nu doar existenta site-ului
+  - `POST /api/org/profile` normalizeaza si persista `website`, iar prefill-ul stale se curata si pe aceasta cheie
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6`, `Wave 2.7` si `Wave 2.8` sunt tinta pe `origin/main` dupa promovarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6`, `Wave 2.7`, `Wave 2.8` si `Wave 2.9` sunt tinta pe `origin/main` dupa promovarea acestui pass
 
 Ce nu face inca acest slice:
 
-- nu deduce inca raspunsuri din website
 - nu foloseste inca `AI Compliance Pack` ca sursa separata de onboarding
 - nu face inca ranking / arbitraj complet intre toate sursele posibile cand apar conflicte reale
 
@@ -160,6 +168,10 @@ Primul slice intrat:
   - modelul de prefill este extins si pe intrebarile conditionale cu impact real in findings
   - document memory si AI inventory contribuie acum si la politicile derivate, nu doar la raspunsurile decisive
   - rezumatul din wizard afiseaza doar sugestiile relevante pentru intrebarile vizibile, nu un lot generic
+- `Wave 2.9`:
+  - onboarding-ul primeste si `website signals` ca sursa reala, nu doar document memory despre site
+  - website-ul public poate deschide prefill chiar si fara `CUI`, daca detectam semnale suficiente
+  - website-ul contribuie conservator la intrebarile despre formulare, privacy policy, cookies consent si date personale
 
 ## Primul pas recomandat
 

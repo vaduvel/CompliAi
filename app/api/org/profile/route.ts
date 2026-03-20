@@ -14,6 +14,7 @@ import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { mutateState, readState } from "@/lib/server/mvp-store"
+import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import {
   evaluateApplicability,
   type OrgProfile,
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
     // CUI: opțional, validare permisivă
     const cuiRaw = typeof body.cui === "string" ? body.cui.trim() : undefined
     const cui = cuiRaw && /^(RO)?\d{2,10}$/i.test(cuiRaw) ? cuiRaw.toUpperCase() : undefined
+    const website = normalizeWebsiteUrl(body.website)
 
     const orgProfile: OrgProfile = {
       sector: body.sector,
@@ -90,6 +92,7 @@ export async function POST(request: Request) {
       usesAITools: body.usesAITools,
       requiresEfactura: body.requiresEfactura,
       ...(cui ? { cui } : {}),
+      ...(website ? { website } : {}),
       completedAtISO: new Date().toISOString(),
     }
 
@@ -103,7 +106,9 @@ export async function POST(request: Request) {
     await mutateState((current) => {
       const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
       const currentPrefill = current.orgProfilePrefill as OrgProfilePrefill | undefined
-      const matchingPrefill = currentPrefill?.normalizedCui === cui ? currentPrefill : undefined
+      const matchingPrefill = doesPrefillMatchProfile(currentPrefill, cui, website)
+        ? currentPrefill
+        : undefined
 
       return {
         ...current,
@@ -139,6 +144,17 @@ export async function POST(request: Request) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Nu am putut salva profilul org.", 500, "ORG_PROFILE_SAVE_FAILED")
   }
+}
+
+function doesPrefillMatchProfile(
+  prefill: OrgProfilePrefill | undefined,
+  cui: string | undefined,
+  website: string | null | undefined
+) {
+  if (!prefill) return false
+  if (prefill.normalizedCui && prefill.normalizedCui !== cui) return false
+  if (prefill.normalizedWebsite && prefill.normalizedWebsite !== website) return false
+  return Boolean(prefill.normalizedCui || prefill.normalizedWebsite)
 }
 
 function normalizeIntakeAnswers(raw: Partial<FullIntakeAnswers> | undefined): FullIntakeAnswers | undefined {

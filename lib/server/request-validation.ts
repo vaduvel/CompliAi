@@ -67,6 +67,33 @@ export function validateCUI(value: unknown): string | null {
   return trimmed
 }
 
+export function normalizeWebsiteUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const withProtocol = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`
+
+  try {
+    const url = new URL(withProtocol)
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null
+    if (!url.hostname) return null
+    if (!url.hostname.includes(".") && url.hostname !== "localhost") return null
+
+    url.username = ""
+    url.password = ""
+    url.hash = ""
+    url.search = ""
+    url.pathname = ""
+
+    return url.toString().replace(/\/$/, "")
+  } catch {
+    return null
+  }
+}
+
 // ── Sanitizare pentru Markdown generat ───────────────────────────────────────
 
 /**

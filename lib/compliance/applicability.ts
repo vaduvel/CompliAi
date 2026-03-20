@@ -23,6 +23,7 @@ export type OrgProfile = {
   usesAITools: boolean        // OpenAI, Copilot, Gemini, orice LLM / AI SaaS
   requiresEfactura: boolean   // firme plătitoare de TVA cu tranzacții B2B ≥ 5.000 RON
   cui?: string                // CUI fiscal (opțional) — ex: "RO12345678" sau "12345678"
+  website?: string            // website public (opțional) — ex: "https://exemplu.ro"
   completedAtISO: string
 }
 

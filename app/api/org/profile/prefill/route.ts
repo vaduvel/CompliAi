@@ -8,10 +8,12 @@ import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { enrichOrgProfilePrefillWithDocumentSignals } from "@/lib/server/document-prefill-signals"
 import { enrichOrgProfilePrefillWithVendorSignals } from "@/lib/server/efactura-vendor-signals"
 import { mutateState, readState } from "@/lib/server/mvp-store"
-import { validateCUI } from "@/lib/server/request-validation"
+import { normalizeWebsiteUrl, validateCUI } from "@/lib/server/request-validation"
+import { enrichOrgProfilePrefillWithWebsiteSignals } from "@/lib/server/website-prefill-signals"
 
 type PrefillRequestBody = {
   cui?: string
+  website?: string
 }
 
 export async function POST(request: Request) {
@@ -20,12 +22,19 @@ export async function POST(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
     const body = (await request.json()) as PrefillRequestBody
+    const hasCuiInput = typeof body?.cui === "string" && body.cui.trim().length > 0
     const cui = validateCUI(body?.cui)
-    if (!cui) return jsonError("CUI invalid.", 400, "INVALID_CUI")
+    const website = normalizeWebsiteUrl(body?.website)
+    if (!cui && !website) {
+      return hasCuiInput
+        ? jsonError("CUI invalid.", 400, "INVALID_CUI")
+        : jsonError("Introdu un CUI valid sau website-ul public al firmei.", 400, "INVALID_PREFILL_INPUT")
+    }
 
     const state = await readState()
-    const basePrefill = await lookupOrgProfilePrefillByCui(cui)
-    const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(basePrefill, state.efacturaValidations)
+    const basePrefill = cui ? await lookupOrgProfilePrefillByCui(cui) : null
+    const websitePrefill = await enrichOrgProfilePrefillWithWebsiteSignals(basePrefill, { website })
+    const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(websitePrefill, state.efacturaValidations)
     const aiPrefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
       aiSystems: state.aiSystems ?? [],
       detectedAISystems: state.detectedAISystems ?? [],

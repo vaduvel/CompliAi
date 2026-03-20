@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   readSessionMock: vi.fn(),
   readStateMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
+  enrichWebsitePrefillMock: vi.fn(async (prefill: unknown) => prefill),
   mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
     new Response(JSON.stringify({ error: message, code }), { status })
@@ -32,6 +33,10 @@ vi.mock("@/lib/server/anaf-company-lookup", () => ({
   lookupOrgProfilePrefillByCui: mocks.lookupOrgProfilePrefillByCuiMock,
 }))
 
+vi.mock("@/lib/server/website-prefill-signals", () => ({
+  enrichOrgProfilePrefillWithWebsiteSignals: mocks.enrichWebsitePrefillMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
   readState: mocks.readStateMock,
   mutateState: mocks.mutateStateMock,
@@ -52,6 +57,7 @@ describe("POST /api/org/profile/prefill", () => {
     vi.clearAllMocks()
     mocks.readSessionMock.mockReturnValue({ orgId: "org-1", userId: "user-1" })
     mocks.readStateMock.mockResolvedValue({ efacturaValidations: [] })
+    mocks.enrichWebsitePrefillMock.mockImplementation(async (prefill: unknown) => prefill)
   })
 
   it("respinge accesul fara sesiune", async () => {
@@ -68,6 +74,14 @@ describe("POST /api/org/profile/prefill", () => {
 
     expect(res.status).toBe(400)
     expect(body.code).toBe("INVALID_CUI")
+  })
+
+  it("respinge request-ul fără CUI sau website valid", async () => {
+    const res = await POST(makeRequest({ website: "nu-este-url" }))
+    const body = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(body.code).toBe("INVALID_PREFILL_INPUT")
   })
 
   it("intoarce prefill-ul cand lookup-ul reuseste", async () => {
@@ -233,6 +247,59 @@ describe("POST /api/org/profile/prefill", () => {
     expect((saved as { orgProfilePrefill?: { normalizedCui: string } }).orgProfilePrefill?.normalizedCui).toBe(
       "RO14399840"
     )
+  })
+
+  it("poate porni prefill-ul doar din website", async () => {
+    mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue(null)
+    mocks.enrichWebsitePrefillMock.mockResolvedValue({
+      source: "website_signals",
+      fetchedAtISO: "2026-03-20T10:00:00.000Z",
+      normalizedCui: null,
+      normalizedWebsite: "https://exemplu.ro",
+      companyName: "exemplu.ro",
+      address: null,
+      legalForm: null,
+      mainCaen: null,
+      fiscalStatus: null,
+      vatRegistered: false,
+      vatOnCashAccounting: false,
+      efacturaRegistered: false,
+      inactive: false,
+      websiteSignals: {
+        source: "website_signals",
+        normalizedWebsite: "https://exemplu.ro",
+        pagesChecked: 3,
+        matchedSignals: ["privacy policy publică", "cookies / consent banner"],
+        topPages: ["exemplu.ro", "/privacy-policy", "/cookies"],
+      },
+      suggestions: {
+        hasSiteWithForms: {
+          value: true,
+          confidence: "high",
+          reason: "Am detectat un banner de cookies și suprafață publică cu colectare.",
+          source: "website_signals",
+        },
+        hasSitePrivacyPolicy: {
+          value: true,
+          confidence: "high",
+          reason: "Am găsit o pagină publică de privacy policy.",
+          source: "website_signals",
+        },
+      },
+    })
+
+    const res = await POST(makeRequest({ website: "exemplu.ro" }))
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.prefill.normalizedWebsite).toBe("https://exemplu.ro")
+    expect(body.prefill.websiteSignals).toEqual({
+      source: "website_signals",
+      normalizedWebsite: "https://exemplu.ro",
+      pagesChecked: 3,
+      matchedSignals: ["privacy policy publică", "cookies / consent banner"],
+      topPages: ["exemplu.ro", "/privacy-policy", "/cookies"],
+    })
   })
 
   it("intoarce prefill null cand lookup-ul nu gaseste firma", async () => {

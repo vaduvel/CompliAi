@@ -649,3 +649,24 @@ Validare după pas:
 Validare după pas:
 
 - `npm test -- lib/compliance/intake-engine.test.ts lib/server/ai-prefill-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts` -> verde (`16/16`)
+
+## Actualizare 2026-03-20 - Wave 2.9 website prefill in onboarding
+
+- `app/api/org/profile/prefill` accepta acum si `website`, nu doar `CUI`, astfel incat onboarding-ul poate porni si din website-ul public al firmei
+- helperul nou `lib/server/website-prefill-signals.ts` verifica homepage-ul si cateva rute legale standard (`privacy`, `cookies`, `contact`) si produce semnale explicabile cu `source=website_signals`
+- website-ul public poate sugera acum direct:
+  - `hasSiteWithForms`
+  - `hasSitePrivacyPolicy`
+  - `hasPrivacyPolicy`
+  - `processesPersonalData`
+  - `hasCookiesConsent`
+- `components/compliscan/applicability-wizard.tsx` are acum camp optional pentru website si afiseaza semnalele publice alaturi de ANAF, e-Factura, AI inventory si document memory
+- `POST /api/org/profile` normalizeaza si persista `website`, iar prefill-ul stale se pastreaza/curata acum dupa ambele chei: `CUI` si `website`
+- `OrgProfilePrefill` are acum provenance dedicat pentru `website_signals`, inclusiv sumarul de pagini verificate si semnalele detectate
+- s-au adaugat teste pentru helperul de website signals si pentru persistenta `website` in profilul org
+
+Validare după pas:
+
+- `npm test -- lib/server/website-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`30/30`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde

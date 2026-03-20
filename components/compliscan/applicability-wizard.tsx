@@ -49,6 +49,7 @@ type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "intake" | "do
 
 type WizardState = {
   cui: string
+  website: string
   sector: OrgSector | null
   employeeCount: OrgEmployeeCount | null
   usesAITools: boolean | null
@@ -102,6 +103,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   const [step, setStep] = useState<WizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
     cui: "",
+    website: "",
     sector: null,
     employeeCount: null,
     usesAITools: null,
@@ -145,16 +147,26 @@ export function ApplicabilityWizard({ onComplete }: Props) {
 
   async function handleCuiContinue() {
     const trimmedCui = values.cui.trim()
-    if (!trimmedCui) {
+    const trimmedWebsite = values.website.trim()
+    const validCui = trimmedCui ? isValidCui(trimmedCui) : false
+    const validWebsite = trimmedWebsite ? isValidWebsiteInput(trimmedWebsite) : false
+
+    if (!trimmedCui && !trimmedWebsite) {
       setOrgPrefill(null)
       setPrefillError(null)
       setStep("sector")
       return
     }
 
-    if (!isValidCui(trimmedCui)) {
+    if (trimmedCui && !validCui && !validWebsite) {
       setOrgPrefill(null)
-      setPrefillError("CUI-ul pare invalid. Corectează-l sau lasă câmpul gol ca să continui fără prefill.")
+      setPrefillError("CUI-ul sau website-ul par invalide. Corectează unul dintre ele sau continuă fără prefill.")
+      return
+    }
+
+    if (trimmedWebsite && !validWebsite && !validCui) {
+      setOrgPrefill(null)
+      setPrefillError("Website-ul pare invalid. Adaugă domeniul public al firmei sau continuă fără prefill.")
       return
     }
 
@@ -164,7 +176,10 @@ export function ApplicabilityWizard({ onComplete }: Props) {
       const res = await fetch("/api/org/profile/prefill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cui: trimmedCui }),
+        body: JSON.stringify({
+          cui: validCui ? trimmedCui : undefined,
+          website: validWebsite ? trimmedWebsite : undefined,
+        }),
       })
 
       if (!res.ok) {
@@ -177,7 +192,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
       const data = (await res.json()) as ProfilePrefillResponse
       setOrgPrefill(data.prefill)
       if (!data.prefill) {
-        setPrefillError("Nu am găsit firma în registrul ANAF pentru CUI-ul introdus. Continuăm manual.")
+        setPrefillError("Nu am găsit suficiente semnale utile din CUI sau website. Continuăm manual.")
       }
       setStep("sector")
     } catch {
@@ -263,7 +278,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional)</span>
               </p>
               <p className="text-xs text-eos-text-muted">
-                Îl folosim pentru prefill în documentele generate. Dacă nu-l ai acum, mergem mai departe.
+                Îl folosim pentru prefill ANAF. Dacă îl combini cu website-ul public, onboarding-ul poate deduce și obligațiile de site.
               </p>
               <input
                 type="text"
@@ -280,6 +295,29 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                   if (e.key === "Enter") void handleCuiContinue()
                 }}
               />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-eos-text">
+                  Website-ul public <span className="font-normal text-eos-text-muted">(opțional)</span>
+                </p>
+                <input
+                  type="url"
+                  value={values.website}
+                  onChange={(e) => {
+                    const nextValue = e.target.value
+                    setValues((current) => ({ ...current, website: nextValue }))
+                    setOrgPrefill(null)
+                    setPrefillError(null)
+                  }}
+                  placeholder="Ex: https://exemplu.ro"
+                  className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleCuiContinue()
+                  }}
+                />
+                <p className="text-xs text-eos-text-muted">
+                  Detectăm doar semnalele publice vizibile: formulare, privacy policy, cookies sau newsletter.
+                </p>
+              </div>
               {prefillError ? (
                 <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
                   {prefillError}
@@ -303,7 +341,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 </div>
               ) : null}
               {orgPrefill ? (
-                <AnafPrefillCard
+                <PrefillContextCard
                   prefill={orgPrefill}
                   selectedSector={values.sector}
                   onApplySector={(sector) => {
@@ -609,7 +647,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   )
 }
 
-function AnafPrefillCard({
+function PrefillContextCard({
   prefill,
   selectedSector,
   onApplySector,
@@ -619,34 +657,43 @@ function AnafPrefillCard({
   onApplySector: (sector: OrgSector) => void
 }) {
   const sectorSuggestion = prefill.suggestions.sector
+  const subtitleParts = [prefill.companyName]
+  if (prefill.normalizedCui) subtitleParts.push(prefill.normalizedCui)
+  if (prefill.normalizedWebsite) subtitleParts.push(formatWebsiteLabel(prefill.normalizedWebsite))
+  const sourceLabel =
+    prefill.source === "anaf_vat_registry" ? "ANAF" : prefillSuggestionSourceLabel(prefill.source)
+  const title =
+    prefill.source === "anaf_vat_registry" ? "Am găsit firma în ANAF" : "Am găsit semnale din site-ul public"
 
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-eos-text">Am găsit firma în ANAF</p>
+          <p className="text-sm font-medium text-eos-text">{title}</p>
           <p className="mt-1 text-xs text-eos-text-muted">
-            {prefill.companyName} · {prefill.normalizedCui}
+            {subtitleParts.join(" · ")}
           </p>
         </div>
         <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-          Sursa: ANAF
+          Sursa: {sourceLabel}
         </Badge>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {prefill.mainCaen ? (
-          <Badge className="border-eos-border bg-eos-surface text-eos-text">CAEN {prefill.mainCaen}</Badge>
-        ) : null}
-        <Badge className="border-eos-border bg-eos-surface text-eos-text">
-          TVA {prefill.vatRegistered ? "activ" : "inactiv"}
-        </Badge>
-        <Badge className="border-eos-border bg-eos-surface text-eos-text">
-          RO e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
-        </Badge>
-      </div>
+      {prefill.source === "anaf_vat_registry" ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {prefill.mainCaen ? (
+            <Badge className="border-eos-border bg-eos-surface text-eos-text">CAEN {prefill.mainCaen}</Badge>
+          ) : null}
+          <Badge className="border-eos-border bg-eos-surface text-eos-text">
+            TVA {prefill.vatRegistered ? "activ" : "inactiv"}
+          </Badge>
+          <Badge className="border-eos-border bg-eos-surface text-eos-text">
+            RO e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
+          </Badge>
+        </div>
+      ) : null}
 
-      {prefill.fiscalStatus ? (
+      {prefill.source === "anaf_vat_registry" && prefill.fiscalStatus ? (
         <p className="mt-3 text-xs text-eos-text-muted">{prefill.fiscalStatus}</p>
       ) : null}
 
@@ -721,6 +768,30 @@ function AnafPrefillCard({
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
               Sursa: document memory
+            </Badge>
+          </div>
+        </div>
+      ) : null}
+
+      {prefill.websiteSignals ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Semnale din website-ul public
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                {prefill.websiteSignals.pagesChecked} pagini verificate
+                {prefill.websiteSignals.matchedSignals.length > 0
+                  ? ` · Semnale: ${prefill.websiteSignals.matchedSignals.join(", ")}.`
+                  : "."}
+                {prefill.websiteSignals.topPages.length > 0
+                  ? ` Pagini: ${prefill.websiteSignals.topPages.join(", ")}.`
+                  : ""}
+              </p>
+            </div>
+            <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+              Sursa: site public
             </Badge>
           </div>
         </div>
@@ -881,12 +952,14 @@ function buildProfileSnapshot(values: WizardState): OrgProfile | null {
   }
 
   const cui = values.cui.trim()
+  const website = values.website.trim()
   return {
     sector: values.sector,
     employeeCount: values.employeeCount,
     usesAITools: values.usesAITools,
     requiresEfactura: values.requiresEfactura,
     ...(cui ? { cui } : {}),
+    ...(website ? { website } : {}),
     completedAtISO: new Date().toISOString(),
   }
 }
@@ -932,7 +1005,17 @@ function isValidCui(value: string) {
   return /^(RO)?\d{2,10}$/i.test(value.trim())
 }
 
+function isValidWebsiteInput(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  return /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/.*)?$/i.test(trimmed)
+}
+
 function questionLabelForSuggestion(questionId: string) {
   const question = [...DECISIVE_QUESTIONS, ...CONDITIONAL_QUESTIONS].find((item) => item.id === questionId)
   return question?.text ?? questionId
+}
+
+function formatWebsiteLabel(value: string) {
+  return value.replace(/^https?:\/\//i, "")
 }

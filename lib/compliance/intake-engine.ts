@@ -484,6 +484,16 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
     })
   }
 
+  if (prefill?.suggestions.hasCookiesConsent) {
+    suggestions.push({
+      questionId: "hasCookiesConsent",
+      value: prefill.suggestions.hasCookiesConsent.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasCookiesConsent.confidence,
+      reason: prefill.suggestions.hasCookiesConsent.reason,
+      source: prefill.suggestions.hasCookiesConsent.source,
+    })
+  }
+
   // Q1 — B2C: inferred from sector
   if (profile.sector === "retail") {
     suggestions.push({

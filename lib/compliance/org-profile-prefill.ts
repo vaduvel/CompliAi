@@ -6,6 +6,7 @@ export type PrefillSuggestionSource =
   | "efactura_validations"
   | "ai_inventory"
   | "document_memory"
+  | "website_signals"
   | "profile_confirmed"
   | "profile_inference"
 
@@ -26,6 +27,8 @@ export function prefillSuggestionSourceLabel(source: PrefillSuggestionSource) {
       return "AI inventory"
     case "document_memory":
       return "document memory"
+    case "website_signals":
+      return "site public"
     case "profile_confirmed":
       return "profil confirmat"
     case "profile_inference":
@@ -36,9 +39,10 @@ export function prefillSuggestionSourceLabel(source: PrefillSuggestionSource) {
 }
 
 export type OrgProfilePrefill = {
-  source: "anaf_vat_registry"
+  source: "anaf_vat_registry" | "website_signals"
   fetchedAtISO: string
-  normalizedCui: string
+  normalizedCui: string | null
+  normalizedWebsite?: string | null
   companyName: string
   address: string | null
   legalForm: string | null
@@ -68,6 +72,13 @@ export type OrgProfilePrefill = {
     matchedSignals: string[]
     topDocuments: string[]
   }
+  websiteSignals?: {
+    source: "website_signals"
+    normalizedWebsite: string
+    pagesChecked: number
+    matchedSignals: string[]
+    topPages: string[]
+  }
   suggestions: {
     sector?: PrefillSuggestion<OrgSector>
     requiresEfactura?: PrefillSuggestion<boolean>
@@ -83,5 +94,6 @@ export type OrgProfilePrefill = {
     hasVendorDocumentation?: PrefillSuggestion<boolean>
     vendorsSendPersonalData?: PrefillSuggestion<boolean>
     hasSitePrivacyPolicy?: PrefillSuggestion<boolean>
+    hasCookiesConsent?: PrefillSuggestion<boolean>
   }
 }

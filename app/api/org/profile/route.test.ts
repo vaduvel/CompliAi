@@ -124,6 +124,20 @@ describe("POST /api/org/profile — CUI", () => {
     expect(orgProfile.cui).toBeUndefined()
   })
 
+  it("normalizează și salvează website-ul public când este valid", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({} as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, website: "exemplu.ro/contact" }))
+    expect(res.status).toBe(200)
+
+    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
+    expect(orgProfile.website).toBe("https://exemplu.ro")
+  })
+
   it("ignoră CUI cu format invalid (litere aleatorii)", async () => {
     let saved: unknown = null
     vi.mocked(mutateState).mockImplementation(async (fn) => {
@@ -274,6 +288,48 @@ describe("POST /api/org/profile — CUI", () => {
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "RO99999999" }))
+    expect(res.status).toBe(200)
+    expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
+  })
+
+  it("păstrează prefill-ul website-only când website-ul salvat se potrivește", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          source: "website_signals",
+          normalizedCui: null,
+          normalizedWebsite: "https://exemplu.ro",
+          companyName: "exemplu.ro",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, website: "https://exemplu.ro" }))
+    expect(res.status).toBe(200)
+    expect((saved as { orgProfilePrefill?: { normalizedWebsite: string } }).orgProfilePrefill?.normalizedWebsite).toBe(
+      "https://exemplu.ro"
+    )
+  })
+
+  it("curăță prefill-ul website-only dacă website-ul salvat nu se mai potrivește", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          source: "website_signals",
+          normalizedCui: null,
+          normalizedWebsite: "https://vechi.ro",
+          companyName: "vechi.ro",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, website: "https://nou.ro" }))
     expect(res.status).toBe(200)
     expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
   })
