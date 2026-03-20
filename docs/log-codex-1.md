@@ -359,6 +359,7 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
   - `npm test -- app/api/org/profile/route.test.ts`
   - `npm run build`
 
+<<<<<<< HEAD
 ### Integrare main — 20 martie 2026
 
 - `smart intake` a fost rebasat curat peste `main` si apoi integrat in production prin cherry-pick-ul commiturilor:
@@ -399,3 +400,72 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
 - fiecare `TaskCard` are acum un singur bloc principal `Acum faci asta`, care combina actiunea imediata si blocajul real.
 - au fost eliminate dublurile vizuale `Primul pas`, `Ce faci acum`, `Blocaj de audit` si panoul separat `Cum inchidem aceasta problema`.
 - `ValidationLevelBlock` ramane vizibil doar ca semnal de validare, in zona principala de actiune.
+
+## Clarificare 2026-03-20 - Intake prefill split + guardrail de log
+
+### Ce este live acum (`slice-ul mic`)
+
+- `components/compliscan/applicability-wizard.tsx` ramane un capture flow scurt pentru:
+  - `CUI` optional
+  - sector
+  - marime org
+  - folosire AI
+  - necesar e-Factura
+- `POST /api/org/profile` salveaza profilul si calculeaza applicability
+- `CUI` ajuta deja la prefill-ul documentelor generate, dar nu exista inca lookup real sau deducere multi-sursa
+
+### Ce ramane in afara (`partea mare`)
+
+- lookup CUI / ANAF
+- semnale din e-Factura / vendori
+- prefill din documente urcate / AI Compliance Pack
+- semnale din site
+- provenance + confidence vizibil pentru fiecare sugestie
+
+Motivul split-ului:
+
+- voiam un `slice executabil` sigur de mers in produs, nu un lot mare de conectoare si inferenta fara guardrails complete
+- in compliance, prefill-ul fara provenance si confidence clar poate crea incredere falsa
+- engine-ul de intake exista, dar runtime-ul live nu il foloseste inca end-to-end
+
+### Wave 1 - runtime wiring cu risc mic si impact mare
+
+- leaga `lib/compliance/intake-engine.ts` in wizardul live
+- afiseaza `Ce am inteles despre firma ta` doar din `orgProfile`
+- foloseste `deriveSuggestedAnswers(...)` si suppression doar pe semnale deja cunoscute
+- reda cele 7 intrebari decisive + conditionalele in flow-ul real
+- salveaza `intakeAnswers` in state prin `POST /api/org/profile`
+- genereaza in runtime:
+  - findings initiale
+  - document request list
+  - next best action
+
+### Wave 2 - prefill automat real
+
+- adauga surse reale de prefill:
+  - CUI / ANAF
+  - e-Factura / vendor hints
+  - documente urcate
+  - website signals
+- fiecare sugestie trebuie sa aiba:
+  - sursa
+  - confidence
+  - motiv scurt
+- doar raspunsurile cu `high confidence` pot fi auto-suppressed
+
+### Primul pas recomandat
+
+- `Wave 1.1`: wiring complet al engine-ului existent in wizard + API, fara conectori noi
+- este cel mai bun raport `impact / risc`
+- dupa el putem masura:
+  - cate intrebari dispar
+  - cat de repede ajunge userul la first findings
+  - unde merita investit prefill-ul greu
+
+### Regula de operare pe acest fir
+
+- nu mai lasam un pass de intake nepins si nelogat
+- daca un wave nu intra complet:
+  - notam imediat in `docs/log-codex-1.md`
+  - notam blocker-ul si pasul urmator in docurile canonice
+  - impingem macar commitul/documentatia care conserva starea firului
