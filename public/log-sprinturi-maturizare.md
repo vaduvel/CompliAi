@@ -3329,6 +3329,9 @@ Validare dupa pass:
   - `Scaneaza`
   - `De rezolvat`
   - `Rapoarte`
+- `Generatorul` nu mai este prezentat ca produs separat in copy-ul principal:
+  - pagina foloseste acum pozitionarea `Documente asistate`
+  - subnavigarea locala foloseste eticheta `Drafturi asistate`
 
 Validare dupa pass:
 

@@ -1549,5 +1549,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - `Snapshot & Activitate recenta`
 - [x] `Framework Readiness` este informativ-only pe `Acasa`
   - butoanele locale `Vezi detalii` au fost scoase
+- [~] de-emphasis pentru `Generator`
+  - copy-ul si subnav-ul il trateaza acum ca suprafata de draft asistat
 - [~] `Acasa` mai are de apropiat blueprint-ul pe compozitie fina
   - banner-ele legale raman temporar vizibile pana le mutam in suprafete dedicate

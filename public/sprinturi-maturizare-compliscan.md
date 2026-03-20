@@ -1420,3 +1420,4 @@ Actualizare suplimentara 2026-03-20:
 - `OnboardingProgress` a fost mutat din `Acasa` in `Setari`
 - `Acasa` nu mai expune `DriftCommandCenter` si `Snapshot & Activitate recenta`
 - cardurile de readiness au ramas informative pe `Acasa`, fara CTA-uri locale concurente
+- `Generatorul` este prezentat acum ca suprafata de `Documente asistate`, nu ca produs separat

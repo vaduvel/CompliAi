@@ -1818,3 +1818,6 @@ Asta este sanatos arhitectural pentru ca:
   - apoi `health/readiness`
   - fara feed operational concurent
 - in plus, `Framework Readiness` a ramas strict informativ pe `Acasa`; handoff-urile catre alte zone nu mai sunt atașate fiecarui card
+- pentru `Generator`, schimbarea curenta este de pozitionare UX, nu de arhitectura:
+  - ruta ramane aceeasi
+  - suprafața nu mai este branduita ca produs paralel in copy-ul principal

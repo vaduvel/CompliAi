@@ -125,10 +125,10 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
   },
   {
     id: "politici",
-    label: "Politici & Documente",
+    label: "Documente asistate",
     items: [
       { id: "politici", label: "Politici interne", href: dashboardRoutes.policies, icon: BookOpen },
-      { id: "generator", label: "Generator documente", href: "/dashboard/generator", icon: Sparkles },
+      { id: "generator", label: "Drafturi asistate", href: dashboardRoutes.generator, icon: Sparkles },
     ],
   },
   {
