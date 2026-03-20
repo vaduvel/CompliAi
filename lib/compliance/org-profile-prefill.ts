@@ -27,9 +27,18 @@ export type OrgProfilePrefill = {
     invoiceCount: number
     topVendors: string[]
   }
+  aiSignals?: {
+    source: "ai_inventory"
+    confirmedSystems: number
+    detectedSystems: number
+    personalDataSystems: number
+    topSystems: string[]
+  }
   suggestions: {
     sector?: PrefillSuggestion<OrgSector>
     requiresEfactura?: PrefillSuggestion<boolean>
+    usesAITools?: PrefillSuggestion<boolean>
+    processesPersonalData?: PrefillSuggestion<boolean>
     usesExternalVendors?: PrefillSuggestion<boolean>
   }
 }

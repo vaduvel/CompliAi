@@ -346,6 +346,39 @@ export function ApplicabilityWizard({ onComplete }: Props) {
               <p className="text-xs text-eos-text-muted">
                 Exemplu: ChatGPT, Copilot, Gemini sau orice clasificator / asistent automat.
               </p>
+              {orgPrefill?.aiSignals ? (
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-eos-text">Semnal AI din inventarul existent</p>
+                      <p className="mt-1 text-xs text-eos-text-muted">
+                        {orgPrefill.aiSignals.confirmedSystems > 0
+                          ? `${orgPrefill.aiSignals.confirmedSystems} sisteme AI confirmate`
+                          : "Niciun sistem confirmat încă"}
+                        {orgPrefill.aiSignals.detectedSystems > 0
+                          ? ` · ${orgPrefill.aiSignals.detectedSystems} detectate automat`
+                          : ""}
+                        {orgPrefill.aiSignals.personalDataSystems > 0
+                          ? ` · ${orgPrefill.aiSignals.personalDataSystems} cu semnal de date personale`
+                          : ""}
+                        {orgPrefill.aiSignals.topSystems.length > 0
+                          ? `. Exemple: ${orgPrefill.aiSignals.topSystems.join(", ")}.`
+                          : "."}
+                      </p>
+                    </div>
+                    <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+                      Sursa: AI inventory
+                    </Badge>
+                  </div>
+                </div>
+              ) : null}
+              {orgPrefill?.suggestions.usesAITools ? (
+                <PrefillSuggestionCard
+                  label="Sugestie din inventarul AI"
+                  valueLabel={orgPrefill.suggestions.usesAITools.value ? "Da" : "Nu"}
+                  suggestion={orgPrefill.suggestions.usesAITools}
+                />
+              ) : null}
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -619,6 +652,32 @@ function AnafPrefillCard({
             </div>
             <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE.high}`}>
               Încredere mare
+            </Badge>
+          </div>
+        </div>
+      ) : null}
+
+      {prefill.aiSignals ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Semnal AI din inventarul intern
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                {prefill.aiSignals.confirmedSystems > 0
+                  ? `${prefill.aiSignals.confirmedSystems} sisteme AI confirmate`
+                  : "Niciun sistem confirmat încă"}
+                {prefill.aiSignals.detectedSystems > 0
+                  ? ` · ${prefill.aiSignals.detectedSystems} detectate automat`
+                  : ""}
+                {prefill.aiSignals.topSystems.length > 0
+                  ? `. Exemple: ${prefill.aiSignals.topSystems.join(", ")}.`
+                  : "."}
+              </p>
+            </div>
+            <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+              Sursa: AI inventory
             </Badge>
           </div>
         </div>

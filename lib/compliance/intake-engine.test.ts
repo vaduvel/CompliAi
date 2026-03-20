@@ -93,6 +93,56 @@ describe("intake-engine", () => {
     )
   })
 
+  it("prefers direct personal-data signals from prefill over generic sector heuristics", () => {
+    const suggestions = deriveSuggestedAnswers(
+      {
+        sector: "other",
+        employeeCount: "1-9",
+        usesAITools: true,
+        requiresEfactura: false,
+        completedAtISO: "2026-03-20T00:00:00.000Z",
+      },
+      {
+        source: "anaf_vat_registry",
+        fetchedAtISO: "2026-03-20T10:00:00.000Z",
+        normalizedCui: "RO14399840",
+        companyName: "DANTE INTERNATIONAL SA",
+        address: "BUCURESTI",
+        legalForm: "SA",
+        mainCaen: "6201",
+        fiscalStatus: "INREGISTRAT",
+        vatRegistered: true,
+        vatOnCashAccounting: false,
+        efacturaRegistered: true,
+        inactive: false,
+        aiSignals: {
+          source: "ai_inventory",
+          confirmedSystems: 1,
+          detectedSystems: 0,
+          personalDataSystems: 1,
+          topSystems: ["ChatGPT Support Assistant"],
+        },
+        suggestions: {
+          processesPersonalData: {
+            value: true,
+            confidence: "high",
+            reason: "1 sistem AI confirmat procesează date personale.",
+          },
+        },
+      }
+    )
+
+    expect(suggestions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          questionId: "processesPersonalData",
+          value: "yes",
+          confidence: "high",
+        }),
+      ])
+    )
+  })
+
   it("shows only conditional questions unlocked by current answers", () => {
     const visibleQuestions = getVisibleConditionalQuestions({
       hasEmployees: "mixed",

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
+import { enrichOrgProfilePrefillWithAiSignals } from "@/lib/server/ai-prefill-signals"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { enrichOrgProfilePrefillWithVendorSignals } from "@/lib/server/efactura-vendor-signals"
@@ -23,7 +24,11 @@ export async function POST(request: Request) {
 
     const state = await readState()
     const basePrefill = await lookupOrgProfilePrefillByCui(cui)
-    const prefill = enrichOrgProfilePrefillWithVendorSignals(basePrefill, state.efacturaValidations)
+    const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(basePrefill, state.efacturaValidations)
+    const prefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
+      aiSystems: state.aiSystems ?? [],
+      detectedAISystems: state.detectedAISystems ?? [],
+    })
     await mutateState((current) => ({
       ...current,
       orgProfilePrefill: prefill ?? undefined,

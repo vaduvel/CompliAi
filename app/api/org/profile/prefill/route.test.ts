@@ -104,6 +104,23 @@ describe("POST /api/org/profile/prefill", () => {
           supplierCui: "RO12345678",
         },
       ],
+      aiSystems: [
+        {
+          id: "ai-1",
+          name: "ChatGPT Support Assistant",
+          purpose: "support-chatbot",
+          vendor: "OpenAI",
+          modelType: "gpt-4.1",
+          usesPersonalData: true,
+          makesAutomatedDecisions: false,
+          impactsRights: false,
+          hasHumanReview: true,
+          riskLevel: "limited",
+          recommendedActions: [],
+          createdAtISO: "2026-03-20T10:00:00.000Z",
+        },
+      ],
+      detectedAISystems: [],
     })
 
     const res = await POST(makeRequest({ cui: "RO14399840" }))
@@ -117,7 +134,26 @@ describe("POST /api/org/profile/prefill", () => {
         confidence: "high",
       })
     )
+    expect(body.prefill.suggestions.usesAITools).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+      })
+    )
+    expect(body.prefill.suggestions.processesPersonalData).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+      })
+    )
     expect(body.prefill.vendorSignals.topVendors).toEqual(["Amazon Web Services EMEA SARL"])
+    expect(body.prefill.aiSignals).toEqual({
+      source: "ai_inventory",
+      confirmedSystems: 1,
+      detectedSystems: 0,
+      personalDataSystems: 1,
+      topSystems: ["ChatGPT Support Assistant"],
+    })
     expect((saved as { orgProfilePrefill?: { normalizedCui: string } }).orgProfilePrefill?.normalizedCui).toBe(
       "RO14399840"
     )

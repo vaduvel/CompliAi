@@ -25,8 +25,12 @@ Status: plan activ, ancorat in log
   - `orgProfilePrefill` include sugestie `usesExternalVendors`
   - onboarding-ul vede top vendorii detectati din e-Factura
   - intake-ul foloseste semnalul direct, nu doar euristica din `requiresEfactura`
+- `Wave 2.5` foloseste inventarul AI deja existent:
+  - `orgProfilePrefill` include sugestii pentru `usesAITools` si `processesPersonalData`
+  - onboarding-ul vede contextul sistemelor AI confirmate / detectate
+  - intake-ul foloseste semnalul direct AI pentru date personale, nu doar euristica pe sector
 - validare confirmata:
-  - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
+  - `npm test -- lib/server/ai-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/efactura-vendor-signals.test.ts app/api/nis2/vendors/import-efactura/route.test.ts lib/server/nis2-store.test.ts lib/compliance/efactura-validator.test.ts`
   - `npm run lint`
   - `npm run build`
 
@@ -47,11 +51,15 @@ Status: plan activ, ancorat in log
 - `Wave 2.4`:
   - `POST /api/org/profile/prefill` intoarce acum si semnal direct pentru `usesExternalVendors`
   - wizardul afiseaza contextul vendor din e-Factura si precompleteaza intake-ul cu incredere mare cand exista dovezi directe
+- `Wave 2.5`:
+  - `POST /api/org/profile/prefill` intoarce si semnale AI din inventarul intern existent
+  - pasul `Folosiți unelte AI` nu mai porneste de la zero cand exista sisteme confirmate / detectate
+  - `processesPersonalData` poate veni direct din sistemele AI care proceseaza date, nu doar din euristici generale
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2` si `Wave 2.3` sunt pe `origin/main`
-- `Wave 2.4` este gata de promovare dupa validarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3` si `Wave 2.4` sunt pe `origin/main`
+- `Wave 2.5` este in lucru pe branch dupa validarea acestui pass
 
 Ce nu face inca acest slice:
 
@@ -113,6 +121,10 @@ Primul slice intrat:
   - `orgProfilePrefill` foloseste acelasi semnal vendor pentru runtime onboarding
   - `usesExternalVendors` poate fi sugerat cu `confidence=high` cand exista dovezi directe in e-Factura
   - heuristica generica din `requiresEfactura` ramane doar fallback, nu sursa principala
+- `Wave 2.5`:
+  - `orgProfilePrefill` foloseste si inventarul AI existent drept sursa reala de prefill
+  - `usesAITools` poate fi sugerat cu `confidence=high` pentru sisteme confirmate si `medium` pentru detectii inca neverificate
+  - `processesPersonalData` poate fi sugerat direct cand sistemele AI confirmate / detectate proceseaza date personale
 
 ## Primul pas recomandat
 

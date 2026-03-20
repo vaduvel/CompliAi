@@ -335,27 +335,36 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       : "Ai indicat că nu folosești unelte AI.",
   })
 
-  // Q3 — Personal data: inferred from sector/employees/B2C likelihood
-  const likelyProcessesData =
-    profile.sector === "health" ||
-    profile.sector === "banking" ||
-    profile.sector === "retail" ||
-    profile.employeeCount !== "1-9"
-  if (likelyProcessesData) {
+  // Q3 — Personal data: prefer direct signals from onboarding prefill
+  if (prefill?.suggestions.processesPersonalData) {
     suggestions.push({
       questionId: "processesPersonalData",
-      value: "probably",
-      confidence: "medium",
-      reason: `Cel mai probabil da — ${
-        profile.sector === "health"
-          ? "sectorul sănătății implică date sensibile"
-          : profile.sector === "banking"
-            ? "serviciile financiare procesează date clienți"
-            : profile.sector === "retail"
-              ? "retail-ul implică date clienți/comenzi"
-              : "ai angajați, deci procesezi date HR"
-      }.`,
+      value: prefill.suggestions.processesPersonalData.value ? "yes" : "no",
+      confidence: prefill.suggestions.processesPersonalData.confidence,
+      reason: prefill.suggestions.processesPersonalData.reason,
     })
+  } else {
+    const likelyProcessesData =
+      profile.sector === "health" ||
+      profile.sector === "banking" ||
+      profile.sector === "retail" ||
+      profile.employeeCount !== "1-9"
+    if (likelyProcessesData) {
+      suggestions.push({
+        questionId: "processesPersonalData",
+        value: "probably",
+        confidence: "medium",
+        reason: `Cel mai probabil da — ${
+          profile.sector === "health"
+            ? "sectorul sănătății implică date sensibile"
+            : profile.sector === "banking"
+              ? "serviciile financiare procesează date clienți"
+              : profile.sector === "retail"
+                ? "retail-ul implică date clienți/comenzi"
+                : "ai angajați, deci procesezi date HR"
+        }.`,
+      })
+    }
   }
 
   // Q5 — Vendors: prefer direct signals from e-Factura, fallback to e-Factura obligation heuristic

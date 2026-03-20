@@ -569,3 +569,19 @@ Validare după pas:
 - `npm test -- lib/server/efactura-vendor-signals.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts app/api/nis2/vendors/import-efactura/route.test.ts lib/server/nis2-store.test.ts lib/compliance/efactura-validator.test.ts` -> verde (`32/32`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - Wave 2.5 AI inventory prefill in onboarding
+
+- `app/api/org/profile/prefill` îmbogățește acum răspunsul ANAF și cu semnale din inventarul AI existent:
+  - `suggestions.usesAITools`
+  - `suggestions.processesPersonalData`
+  - `aiSignals` cu sisteme confirmate / detectate și exemple
+- helperul nou `lib/server/ai-prefill-signals.ts` ține într-un singur loc logica pentru sisteme AI confirmate și detectate
+- wizardul de applicability afișează acum sugestia directă la pasul `Folosiți unelte AI în firmă?`, nu doar la `e-Factura`
+- intake-ul preferă semnalul direct din inventarul AI pentru `processesPersonalData`, în locul euristicii generice pe sector / mărime
+
+Validare după pas:
+
+- `npm test -- lib/server/ai-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/efactura-vendor-signals.test.ts app/api/nis2/vendors/import-efactura/route.test.ts lib/server/nis2-store.test.ts lib/compliance/efactura-validator.test.ts` -> verde (`36/36`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde
