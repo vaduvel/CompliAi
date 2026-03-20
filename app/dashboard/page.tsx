@@ -9,7 +9,6 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { EvidenceCore, type EvidenceCoreState, type AuditDecision } from "@/components/evidence-os/EvidenceCore"
 import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
@@ -21,37 +20,11 @@ import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 
-// ─── State labels shown beside the orb ────────────────────────────────────────
-const CORE_HEADLINE: Record<EvidenceCoreState, string> = {
-  dormant:   "Sistem inactiv",
-  scanning:  "Remediere în curs",
-  reviewing: "Alerte deschise",
-  drifting:  "Drift detectat",
-  stable:    "Control stabil",
-  blocked:   "Blocat de audit",
-}
-const AUDIT_DECISION_LABEL: Record<AuditDecision, string> = {
-  ready:        "Pregătit",
-  blocked:      "Blocat",
-  weak:         "Dovezi slabe",
-  "in-progress": "În progres",
-  "not-started": "Neînceput",
-}
-
 const SCAN_SOURCE_LABEL: Record<string, string> = {
   document: "Document scanat",
   text:     "Text analizat",
   manifest: "Manifest YAML",
   yaml:     "Fișier YAML",
-}
-
-const CORE_HINT: Record<EvidenceCoreState, string> = {
-  dormant:   "Rulează primul scan pentru a activa monitorizarea continuă.",
-  scanning:  "Task-urile sunt active. Continuă să ataşezi dovezi şi să închidem itemii.",
-  reviewing: "Alerte deschise aşteaptă analiză. Intrați în ele înainte de orice altceva.",
-  drifting:  "Sistemul a deviat de la baseline validat. Intervino acum pentru a limita impactul.",
-  stable:    "Toate task-urile sunt închise şi dovezile sunt în ordine. Pregătit de audit.",
-  blocked:   "Drift-uri care blochează auditul activ. Prioritate maximă — rezolvă acum.",
 }
 
 export default function DashboardPage() {
@@ -107,34 +80,16 @@ export default function DashboardPage() {
   const missingEvidenceCount = openTasks.filter((t) => !t.attachedEvidence).length
   const hasEvidence = state.scannedDocuments > 0 || state.scans.length > 0
 
-  // ── EvidenceCore derivation ───────────────────────────────────────────────
-  const coreState: EvidenceCoreState = activeDrifts.some((d) => d.blocksAudit)
-    ? "blocked"
-    : activeDrifts.length > 0
-      ? "drifting"
-      : openAlerts.length > 0
-        ? "reviewing"
-        : tasks.length > 0 && openTasks.length === 0
-          ? "stable"
-          : tasks.length > 0
-            ? "scanning"
-            : "dormant"
-
-  const coreAuditDecision: AuditDecision =
+  const auditStatusLabel =
     data.summary.score >= 90
-      ? "ready"
+      ? "Pregătit"
       : activeDrifts.some((d) => d.blocksAudit)
-        ? "blocked"
+        ? "Blocat"
         : missingEvidenceCount > 0
-          ? "weak"
+          ? "Dovezi slabe"
           : data.summary.score >= 60
-            ? "in-progress"
-            : "not-started"
-
-  const coreReasons = [
-    ...activeDrifts.slice(0, 2).map((d) => d.summary),
-    ...openAlerts.slice(0, 1).map((a) => a.message),
-  ].filter(Boolean).slice(0, 3)
+            ? "În progres"
+            : "Neînceput"
 
   return (
     <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
@@ -303,7 +258,7 @@ export default function DashboardPage() {
           <SummaryMetric label="Acțiuni active"        value={String(openTasks.length)}     alert={openTasks.length > 0} />
           <SummaryMetric label="Modificări detectate"  value={String(activeDrifts.length)}  alert={activeDrifts.length > 0} />
           <SummaryMetric label="Documente procesate"   value={String(state.scans.length)} />
-          <SummaryMetric label="Stare audit"           value={AUDIT_DECISION_LABEL[coreAuditDecision]} />
+          <SummaryMetric label="Stare audit"           value={auditStatusLabel} />
         </div>
       </section>
 
@@ -320,79 +275,8 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Stare + acțiune imediată (grupate ca o singură zonă de control) ── */}
+      {/* ── Acțiune imediată ───────────────────────────────────────────────── */}
       <div className="space-y-4">
-        <section aria-label="Nucleu de control">
-          <Card className="border-eos-border bg-eos-surface">
-            <div className="flex flex-col items-center gap-8 p-6 sm:flex-row sm:items-center sm:gap-10">
-              {/* Orb full */}
-              <div className="shrink-0">
-                <EvidenceCore
-                  state={coreState}
-                  readinessScore={data.summary.score}
-                  auditDecision={coreAuditDecision}
-                  activeDrifts={activeDrifts.length}
-                  reviewRequiredCount={openAlerts.length}
-                  weakEvidenceCount={missingEvidenceCount}
-                  reasons={coreReasons}
-                  className="w-[200px]"
-                />
-              </div>
-
-              {/* Description + context links */}
-              <div className="flex flex-1 flex-col gap-4 text-center sm:text-left">
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-                    Nucleu de control
-                  </p>
-                  <h2 className="mt-2 text-xl font-semibold text-eos-text">
-                    {CORE_HEADLINE[coreState]}
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-eos-text-muted">
-                    {CORE_HINT[coreState]}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                  {openTasks.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push("/dashboard/checklists")}
-                      className="gap-2 text-eos-text-muted"
-                    >
-                      {openTasks.length} task-uri deschise
-                      <ArrowRight className="size-3.5" strokeWidth={2} />
-                    </Button>
-                  )}
-                  {activeDrifts.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push("/dashboard/control")}
-                      className="gap-2 text-eos-text-muted"
-                    >
-                      {activeDrifts.length} drift-uri active
-                      <ArrowRight className="size-3.5" strokeWidth={2} />
-                    </Button>
-                  )}
-                  {openTasks.length === 0 && activeDrifts.length === 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push("/dashboard/rapoarte/auditor-vault")}
-                      className="gap-2 text-eos-text-muted"
-                    >
-                      Auditor Vault
-                      <ArrowRight className="size-3.5" strokeWidth={2} />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
-        </section>
-
         <section aria-label="Urmatorul pas recomandat">
           <NextBestAction
             task={nextBestAction}
