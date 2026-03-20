@@ -176,7 +176,7 @@ export function buildDigestEmail(digest: WeeklyDigest): string {
     <!-- Footer -->
     <p style="text-align:center;color:#94a3b8;font-size:11px;margin:16px 0">
       Digest automat CompliAI &mdash;
-      <a href="https://compliai.ro/dashboard/setari" style="color:#6366f1">Dezactivează digest</a>
+      <a href="https://compliai.ro/dashboard/settings" style="color:#6366f1">Dezactivează digest</a>
     </p>
 
   </div>

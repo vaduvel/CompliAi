@@ -1500,3 +1500,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] reducerea handoff-urilor legacy ramase
   - subnav-ul local `Flux scanare` foloseste acum `/dashboard/scan`
   - share linkul principal pentru scan copiaza acum rezultatul canonic al ultimei scanari
+
+### Actualizare 2026-03-20 - BP-3 partial
+
+- [x] `settings` are owner canonic comun
+  - `components/compliscan/settings-page.tsx`
+  - `setari` ramane alias de compatibilitate
+- [x] exista si ruta canonica pentru billing
+  - `/dashboard/settings/abonament`
+  - `components/compliscan/settings-billing-page.tsx`
+- [~] reducerea handoff-urilor legacy administrative
+  - Stripe checkout/portal revin acum in familia canonica `settings`
+  - health-check si emailurile de notificare folosesc acum `settings`
+  - subnav-ul local `Dovada` foloseste acum `resolve` si `reports`

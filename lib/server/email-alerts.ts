@@ -45,7 +45,7 @@ function buildEmailHtml(event: AlertEventType, orgId: string, payload: Record<st
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0">
     <p style="color:#94a3b8;font-size:12px;margin:0">
       Notificare automata CompliAI &mdash;
-      <a href="https://compliai.ro/dashboard/setari" style="color:#6366f1">Gestioneaza notificarile</a>
+      <a href="https://compliai.ro/dashboard/settings" style="color:#6366f1">Gestioneaza notificarile</a>
     </p>
   </div>
 </body>

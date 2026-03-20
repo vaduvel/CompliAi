@@ -1766,3 +1766,16 @@ Asta este sanatos arhitectural pentru ca:
   - un singur owner de UI per suprafata
   - aliasul vechi nu mai cere mentenanta paralela
 - pentru scanare, inclusiv subnavigarea locala si share linkul principal folosesc acum traseul canonic
+
+## Actualizare 2026-03-20 - BP-3: familia canonica Settings
+
+- `/dashboard/settings` detine acum suprafata canonica prin `components/compliscan/settings-page.tsx`
+- `/dashboard/setari` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- a fost introdus si aliasul canonic pentru billing:
+  - `/dashboard/settings/abonament`
+  - `/dashboard/setari/abonament` ramane compatibilitate
+- pentru zona administrativa, linkurile cu impact mare folosesc acum namespace-ul canonic:
+  - Stripe return URLs
+  - health-check operational
+  - emailurile de notificare
+- asta inchide ultimul top-level owner important ramas pe pagina veche si reduce ruptura dintre shell-ul nou si handoff-urile administrative

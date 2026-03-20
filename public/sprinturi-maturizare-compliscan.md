@@ -1382,3 +1382,14 @@ Actualizare suplimentara 2026-03-20:
   - `Reports` are acum owner comun in `components/compliscan/reports-page.tsx`
   - `Scan` are acum owner comun in `components/compliscan/scan-page.tsx`
 - rutele vechi `checklists`, `rapoarte` si `scanari` raman active, dar doar ca aliasuri de compatibilitate peste aceleasi suprafete
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-3` a inceput cu familia `Settings`
+  - `Settings` are acum owner comun in `components/compliscan/settings-page.tsx`
+  - `Settings / Abonament` are acum ruta canonica `/dashboard/settings/abonament`
+- rutele vechi `setari` si `setari/abonament` raman active doar ca aliasuri de compatibilitate
+- handoff-urile administrative si subnavigarea locala folosesc acum namespace-ul canonic:
+  - `settings`
+  - `resolve`
+  - `reports`

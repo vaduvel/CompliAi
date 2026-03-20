@@ -21,7 +21,9 @@ export const dashboardRoutes = {
   policies: "/dashboard/politici",
   generator: "/dashboard/generator",
   settings: "/dashboard/settings",
+  settingsBilling: "/dashboard/settings/abonament",
   settingsLegacy: "/dashboard/setari",
+  settingsBillingLegacy: "/dashboard/setari/abonament",
 } as const
 
 export function dashboardScanResultsRoute(scanId: string) {

@@ -148,14 +148,14 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "dovada",
     label: "Dovada",
     items: [
-      { id: "checklists", label: "Remediere", href: "/dashboard/checklists", icon: CheckCircle2 },
+      { id: "checklists", label: "Remediere", href: dashboardRoutes.resolve, icon: CheckCircle2 },
       {
         id: "auditorVault",
         label: "Auditor Vault",
         href: "/dashboard/rapoarte/auditor-vault",
         icon: FolderKanban,
       },
-      { id: "rapoarte", label: "Audit si export", href: "/dashboard/rapoarte", icon: FileSearch },
+      { id: "rapoarte", label: "Audit si export", href: dashboardRoutes.reports, icon: FileSearch },
       { id: "auditLog", label: "Log audit", href: "/dashboard/audit-log", icon: ClipboardList },
     ],
   },

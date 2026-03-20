@@ -1,6 +1,7 @@
 // V3 P1.2 — Compliance Health Check Periodic
 // Detectează evaluări expirate, dovezi stale, review-uri întârziate și gap-uri de monitorizare.
 
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
 import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
@@ -54,7 +55,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Nu există un snapshot de referință validat. Fără baseline, drift-ul nu poate fi detectat corect.",
       status: "warning",
       action: "Validează un snapshot ca baseline",
-      actionHref: "/dashboard/rapoarte",
+      actionHref: dashboardRoutes.reports,
     })
   } else {
     items.push({
@@ -164,7 +165,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Integrarea cu SPV ANAF nu este activă. Semnalele de risc fiscal nu sunt monitorizate.",
       status: "warning",
       action: "Configurează integrarea e-Factura",
-      actionHref: "/dashboard/setari",
+      actionHref: dashboardRoutes.settings,
     })
   } else {
     // Check if sync is stale (>7 days)
@@ -176,7 +177,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: "Ultima sincronizare e-Factura a fost acum mai mult de 7 zile.",
         status: "warning",
         action: "Rulează sync e-Factura",
-        actionHref: "/dashboard/rapoarte",
+        actionHref: dashboardRoutes.reports,
         daysOverdue: Math.max(0, daysSinceSync - 7),
       })
     } else {
@@ -206,7 +207,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Finding-urile critice fără dovadă de remediere nu pot fi considerate închise.",
       status: "critical",
       action: "Atașează dovezi la finding-urile critice",
-      actionHref: "/dashboard/checklists",
+      actionHref: dashboardRoutes.resolve,
     })
   } else if (highFindings.length > 0) {
     items.push({

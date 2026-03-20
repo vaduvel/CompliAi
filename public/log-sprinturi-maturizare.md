@@ -3243,3 +3243,27 @@ Validare dupa BP-2 partial:
 
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
+
+### BP-3 - Canonizare settings si handoff-uri administrative
+
+- `Settings` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/settings-page.tsx`
+  - folosita de `/dashboard/settings`
+  - pastrata si in `/dashboard/setari` ca punte de compatibilitate
+- a fost introdusa si ruta canonica pentru billing:
+  - `/dashboard/settings/abonament`
+  - cu owner comun in `components/compliscan/settings-billing-page.tsx`
+  - `/dashboard/setari/abonament` ramane alias de compatibilitate
+- fluxurile administrative importante folosesc acum familia canonica `settings`:
+  - Stripe checkout success
+  - Stripe portal return
+  - health-check pentru integrarea e-Factura
+  - linkurile email/digest spre notificari
+- sub-navigarea locala `Dovada` foloseste acum rutele canonice:
+  - `De rezolvat`
+  - `Rapoarte`
+
+Validare dupa BP-3 partial:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde

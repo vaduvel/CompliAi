@@ -4,6 +4,7 @@
 // Model: prefill → 7 întrebări decisive → condiționare → findings + doc requests + next action
 // Funcție pură, fără I/O, safe în browser și pe server.
 
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { OrgProfile } from "@/lib/compliance/applicability"
 import type {
   OrgProfilePrefill,
@@ -948,7 +949,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (findings.length > 0) {
     return {
       label: "Rezolvă primul finding din board",
-      href: "/dashboard/checklists",
+      href: dashboardRoutes.resolve,
       estimatedMinutes: 3,
     }
   }
