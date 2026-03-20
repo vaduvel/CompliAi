@@ -58,8 +58,7 @@ Status: plan activ, ancorat in log
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3` si `Wave 2.4` sunt pe `origin/main`
-- `Wave 2.5` este in lucru pe branch dupa validarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4` si `Wave 2.5` sunt pe `origin/main`
 
 Ce nu face inca acest slice:
 
