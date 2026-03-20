@@ -1821,3 +1821,26 @@ Asta este sanatos arhitectural pentru ca:
 - pentru `Generator`, schimbarea curenta este de pozitionare UX, nu de arhitectura:
   - ruta ramane aceeasi
   - suprafața nu mai este branduita ca produs paralel in copy-ul principal
+
+## Actualizare 2026-03-21 - Scan Rezultate suprafata nativa
+
+- `/dashboard/scan/results/[scanId]` este acum suprafata nativa completa, nu bridge peste `ScanVerdictsTab`
+- success banner cand analiza este finalizata
+- finding-urile sunt grupate pe severitate: Critice / Ridicate / Medii / Informative
+- fiecare grup este colapsibil, critical+high deschise by default
+- fiecare finding row: `SeverityBadge` + titlu + framework badge + varsta + review state
+- `Resolution Layer` inline la expandare finding (7 pasi din `FindingResolution`)
+- CTA primar: `Adauga toate in queue` -> `/dashboard/resolve`
+- actiune: `Scaneaza din nou` (nu navigare inapoi)
+- `HandoffCard` explica separarea verdict vs executie
+
+## Actualizare 2026-03-21 - De rezolvat suprafata nativa cu finding queue
+
+- `/dashboard/resolve` are acum finding queue nativ deasupra `RemediationBoard`
+- filter tabs pe framework: `Toate | GDPR | NIS2 | AI Act | Furnizori` (per blueprint §3.4)
+- finding-urile sunt sortate critical-first in cadrul fiecarui filtru
+- fiecare finding row este expandabil cu `Resolution Layer` inline (7 pasi)
+- review state badges: `Detectat` / `In remediere`
+- `RemediationBoard` ramane mai jos pentru executia task-urilor existente
+- page header actualizat cu badge-uri de severitate per blueprint
+- `PillarTabs` ramane ca punte spre suprafetele de dovada existente
