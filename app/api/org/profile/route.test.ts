@@ -195,4 +195,31 @@ describe("POST /api/org/profile — CUI", () => {
     expect(findings.some((finding) => finding.id === "intake-old-a")).toBe(false)
     expect(findings.filter((finding) => finding.id.startsWith("intake-")).length).toBeGreaterThan(0)
   })
+
+  it("curăță findings-urile intake vechi când profilul se salvează fără intakeAnswers", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [
+          { id: "intake-old-a" },
+          { id: "manual-existing" },
+        ],
+        intakeAnswers: { sellsToConsumers: "yes" },
+        intakeCompletedAtISO: "2026-03-20T08:00:00.000Z",
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest(validBase))
+    expect(res.status).toBe(200)
+
+    const state = saved as {
+      findings: { id: string }[]
+      intakeAnswers?: Record<string, unknown>
+      intakeCompletedAtISO?: string
+    }
+    expect(state.findings).toEqual([{ id: "manual-existing" }])
+    expect(state.intakeAnswers).toBeUndefined()
+    expect(state.intakeCompletedAtISO).toBeUndefined()
+  })
 })

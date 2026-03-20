@@ -4,6 +4,16 @@ Data: 2026-03-20
 Branch de context: `codex/smart-intake-wizard`
 Status: plan activ, ancorat in log
 
+## Ultimul pass
+
+- `Wave 1.1` este din nou legat in runtime pe branchul `codex/smart-intake-wizard`
+- wizardul live foloseste confirmare asistata cap-coada
+- `POST /api/org/profile` proceseaza iar `intakeAnswers` si regenereaza iesirile initiale
+- validare confirmata:
+  - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
+  - `npm run lint`
+  - `npm run build`
+
 ## Ce este live acum
 
 - `slice-ul mic` live in onboarding inseamna:

@@ -469,3 +469,21 @@ Motivul split-ului:
   - notam imediat in `docs/log-codex-1.md`
   - notam blocker-ul si pasul urmator in docurile canonice
   - impingem macar commitul/documentatia care conserva starea firului
+
+## Actualizare 2026-03-20 - Wave 1.1 wired inapoi in runtime
+
+- `components/compliscan/applicability-wizard.tsx` foloseste din nou fluxul de confirmare asistata:
+  - profil scurt
+  - `Ce am inteles despre firma ta`
+  - 7 intrebari decisive
+  - conditionale doar unde se schimba obligatiile
+  - rezumat cu findings, documente si `next best action`
+- `POST /api/org/profile` accepta iar `intakeAnswers`, regenereaza findings-urile `intake-*`, returneaza `documentRequests` si `nextBestAction`, si curata starea intake veche cand payload-ul nu mai include intake
+- analytics-ul de applicability nu mai este trimis dublat; proprietatile pentru findings/documente merg acum in acelasi event
+- s-a adaugat test nou pentru motorul de intake: `lib/compliance/intake-engine.test.ts`
+
+Validare dupa pas:
+
+- `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`12/12`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde la rerulare solo; prima rulare paralela cu lint a lovit un artefact Next (`ENOENT` pe `.next/export/500.html`)

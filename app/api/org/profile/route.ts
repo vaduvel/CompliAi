@@ -100,33 +100,27 @@ export async function POST(request: Request) {
 
     await mutateState((current) => {
       const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
-      const nextFindings = intakeAnswers
-        ? [...previousFindings, ...initialFindings]
-        : current.findings
 
       return {
         ...current,
         orgProfile,
         applicability,
-        findings: nextFindings,
-        ...(intakeAnswers
-          ? {
-              intakeAnswers,
-              intakeCompletedAtISO,
-            }
-          : {}),
+        findings: intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings,
+        intakeAnswers,
+        intakeCompletedAtISO,
       }
     })
+
     void trackEvent(session.orgId, "completed_applicability", {
       sector: orgProfile.sector,
       employeeCount: orgProfile.employeeCount,
+      ...(intakeAnswers
+        ? {
+            findingsCount: initialFindings.length,
+            requiredDocs: documentRequests.filter((item) => item.priority === "required").length,
+          }
+        : {}),
     })
-    if (intakeAnswers) {
-      void trackEvent(session.orgId, "completed_applicability", {
-        findingsCount: initialFindings.length,
-        requiredDocs: documentRequests.filter((item) => item.priority === "required").length,
-      })
-    }
 
     return NextResponse.json({
       orgProfile,
