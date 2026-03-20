@@ -143,6 +143,66 @@ describe("intake-engine", () => {
     )
   })
 
+  it("surfaces direct document-memory signals for site and contracts", () => {
+    const suggestions = deriveSuggestedAnswers(
+      {
+        sector: "professional-services",
+        employeeCount: "1-9",
+        usesAITools: false,
+        requiresEfactura: false,
+        completedAtISO: "2026-03-20T00:00:00.000Z",
+      },
+      {
+        source: "anaf_vat_registry",
+        fetchedAtISO: "2026-03-20T10:00:00.000Z",
+        normalizedCui: "RO14399840",
+        companyName: "DANTE INTERNATIONAL SA",
+        address: "BUCURESTI",
+        legalForm: "SA",
+        mainCaen: "6201",
+        fiscalStatus: "INREGISTRAT",
+        vatRegistered: true,
+        vatOnCashAccounting: false,
+        efacturaRegistered: true,
+        inactive: false,
+        documentSignals: {
+          source: "document_memory",
+          generatedCount: 2,
+          uploadedCount: 1,
+          matchedSignals: ["site cu cookies sau formulare", "contracte standard"],
+          topDocuments: ["Politică de Cookies", "DPA template", "policy-tracking.txt"],
+        },
+        suggestions: {
+          hasSiteWithForms: {
+            value: true,
+            confidence: "high",
+            reason: "Ai deja o politică de cookies generată în workspace.",
+          },
+          hasStandardContracts: {
+            value: true,
+            confidence: "medium",
+            reason: "Există deja documente contractuale și DPA-uri în workspace.",
+          },
+        },
+      }
+    )
+
+    expect(suggestions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          questionId: "hasSiteWithForms",
+          value: "yes",
+          confidence: "high",
+        }),
+        expect.objectContaining({
+          questionId: "hasStandardContracts",
+          value: "yes",
+          confidence: "medium",
+        }),
+      ])
+    )
+  })
+
   it("shows only conditional questions unlocked by current answers", () => {
     const visibleQuestions = getVisibleConditionalQuestions({
       hasEmployees: "mixed",

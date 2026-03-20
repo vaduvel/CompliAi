@@ -585,3 +585,25 @@ Validare după pas:
 - `npm test -- lib/server/ai-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/efactura-vendor-signals.test.ts app/api/nis2/vendors/import-efactura/route.test.ts lib/server/nis2-store.test.ts lib/compliance/efactura-validator.test.ts` -> verde (`36/36`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - Wave 2.6 document memory pentru onboarding
+
+- `app/api/documents/generate` persistă acum metadata documentelor generate în `ComplianceState.generatedDocuments`, nu doar în state-ul local al paginii Generator
+- fiecare document generat lasă și audit trail în `events` cu tipul `document.generated`
+- helperul nou `lib/server/document-prefill-signals.ts` derivă semnale directe din:
+  - documentele generate în platformă
+  - documentele deja încărcate și scanate (`state.scans`)
+- `app/api/org/profile/prefill` îmbogățește acum răspunsul și cu:
+  - `documentSignals`
+  - sugestii directe pentru `hasSiteWithForms`
+  - sugestii directe pentru `hasStandardContracts`
+  - fallback documentar pentru `usesExternalVendors`, `processesPersonalData` și `usesAITools` doar când nu există semnale mai bune
+- onboarding-ul afișează acum și proveniența din `document memory`, nu doar ANAF, e-Factura și AI inventory
+- intake-ul folosește semnalele din documente pentru întrebările decisive despre site și contracte standard
+- `ComplianceState` include oficial `generatedDocuments`, iar constructorii de stare manuali au fost aliniați la noul model
+
+Validare după pas:
+
+- `npm test -- lib/server/document-prefill-signals.test.ts app/api/documents/generate/route.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/mvp-store.test.ts lib/server/document-scan-flow.test.ts app/api/org/profile/route.test.ts` -> verde (`33/33`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde

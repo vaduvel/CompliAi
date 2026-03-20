@@ -45,6 +45,7 @@ function makeBaseState(applicability: ApplicabilityResult): ComplianceState {
     alerts: [],
     findings: [],
     scans: [],
+    generatedDocuments: [],
     chat: [],
     taskState: {},
     aiComplianceFieldOverrides: {},

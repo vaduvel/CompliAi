@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole, AuthzError } from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
+import { mutateState } from "@/lib/server/mvp-store"
 import { RequestValidationError } from "@/lib/server/request-validation"
 import {
   generateDocument,
@@ -44,6 +46,43 @@ export async function POST(request: Request) {
     }
 
     const result = await generateDocument(input)
+    const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
+
+    await mutateState((current) => ({
+      ...current,
+      generatedDocuments: [
+        {
+          id: generatedDocumentId,
+          documentType: result.documentType,
+          title: result.title,
+          generatedAtISO: result.generatedAtISO,
+          llmUsed: result.llmUsed,
+        },
+        ...(current.generatedDocuments ?? []),
+      ].slice(0, 100),
+      events: appendComplianceEvents(current, [
+        createComplianceEvent(
+          {
+            type: "document.generated",
+            entityType: "system",
+            entityId: generatedDocumentId,
+            message: `Document generat: ${result.title}.`,
+            createdAtISO: result.generatedAtISO,
+            metadata: {
+              documentType: result.documentType,
+              llmUsed: result.llmUsed,
+            },
+          },
+          {
+            id: session.userId,
+            label: session.email,
+            role: session.role,
+            source: "session",
+          }
+        ),
+      ]),
+    }))
+
     void trackEvent(session.orgId, "generated_first_document", { docType: input.documentType })
 
     return NextResponse.json(result)

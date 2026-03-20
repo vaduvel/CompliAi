@@ -7,6 +7,7 @@ import type {
   DashboardSummary,
   DetectedAISystemRecord,
   EFacturaValidationRecord,
+  GeneratedDocumentRecord,
   PersistedTaskState,
   ScanExtractionStatus,
   ScanFinding,
@@ -42,6 +43,7 @@ export const initialComplianceState: ComplianceState = {
   alerts: [],
   findings: [],
   scans: [],
+  generatedDocuments: [],
   chat: [],
   taskState: {},
   aiComplianceFieldOverrides: {},
@@ -66,6 +68,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     (alert) => !(alert.id === "a1" || alert.id === "a2")
   ).map(normalizeAlert)
   const scans = (state.scans ?? []).map(normalizeScanRecord)
+  const generatedDocuments = normalizeGeneratedDocuments(state.generatedDocuments)
   const taskState = normalizeTaskState(state.taskState)
   const aiComplianceFieldOverrides = normalizeAIComplianceFieldOverrides(
     state.aiComplianceFieldOverrides
@@ -83,6 +86,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     alerts: rawAlerts,
     findings,
     scans,
+    generatedDocuments,
     taskState,
     aiComplianceFieldOverrides,
     traceabilityReviews,
@@ -99,6 +103,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     alerts: rawAlerts,
     findings,
     scans,
+    generatedDocuments,
     taskState,
     aiComplianceFieldOverrides,
     traceabilityReviews,
@@ -145,6 +150,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     efacturaConnected: Boolean(state.efacturaConnected),
     efacturaSignalsCount,
     efacturaSyncedAtISO,
+    generatedDocuments,
     taskState,
     aiComplianceFieldOverrides,
     traceabilityReviews,
@@ -160,6 +166,44 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
         : undefined,
     events,
   }
+}
+
+function normalizeGeneratedDocuments(
+  value: GeneratedDocumentRecord[] | undefined
+): GeneratedDocumentRecord[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .flatMap((item) => {
+      if (!item || typeof item !== "object") return []
+
+      const documentType =
+        item.documentType === "privacy-policy" ||
+        item.documentType === "cookie-policy" ||
+        item.documentType === "dpa" ||
+        item.documentType === "nis2-incident-response" ||
+        item.documentType === "ai-governance"
+          ? item.documentType
+          : null
+      const title = typeof item.title === "string" ? item.title.trim() : ""
+      const generatedAtISO = isValidIso(item.generatedAtISO) ? item.generatedAtISO : null
+
+      if (!documentType || !title || !generatedAtISO) return []
+
+      return [
+        {
+          id:
+            typeof item.id === "string" && item.id.trim()
+              ? item.id.trim()
+              : `generated-doc-${Math.random().toString(36).slice(2, 10)}`,
+          documentType,
+          title,
+          generatedAtISO,
+          llmUsed: Boolean(item.llmUsed),
+        },
+      ]
+    })
+    .slice(0, 100)
 }
 
 function normalizeDriftSettings(value: ComplianceState["driftSettings"] | undefined) {

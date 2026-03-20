@@ -5,6 +5,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { enrichOrgProfilePrefillWithAiSignals } from "@/lib/server/ai-prefill-signals"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
+import { enrichOrgProfilePrefillWithDocumentSignals } from "@/lib/server/document-prefill-signals"
 import { enrichOrgProfilePrefillWithVendorSignals } from "@/lib/server/efactura-vendor-signals"
 import { mutateState, readState } from "@/lib/server/mvp-store"
 import { validateCUI } from "@/lib/server/request-validation"
@@ -25,9 +26,13 @@ export async function POST(request: Request) {
     const state = await readState()
     const basePrefill = await lookupOrgProfilePrefillByCui(cui)
     const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(basePrefill, state.efacturaValidations)
-    const prefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
+    const aiPrefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
       aiSystems: state.aiSystems ?? [],
       detectedAISystems: state.detectedAISystems ?? [],
+    })
+    const prefill = enrichOrgProfilePrefillWithDocumentSignals(aiPrefill, {
+      generatedDocuments: state.generatedDocuments ?? [],
+      scans: state.scans ?? [],
     })
     await mutateState((current) => ({
       ...current,

@@ -384,6 +384,24 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
     })
   }
 
+  if (prefill?.suggestions.hasSiteWithForms) {
+    suggestions.push({
+      questionId: "hasSiteWithForms",
+      value: prefill.suggestions.hasSiteWithForms.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasSiteWithForms.confidence,
+      reason: prefill.suggestions.hasSiteWithForms.reason,
+    })
+  }
+
+  if (prefill?.suggestions.hasStandardContracts) {
+    suggestions.push({
+      questionId: "hasStandardContracts",
+      value: prefill.suggestions.hasStandardContracts.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasStandardContracts.confidence,
+      reason: prefill.suggestions.hasStandardContracts.reason,
+    })
+  }
+
   // Q1 — B2C: inferred from sector
   if (profile.sector === "retail") {
     suggestions.push({

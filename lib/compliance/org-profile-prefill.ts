@@ -34,11 +34,20 @@ export type OrgProfilePrefill = {
     personalDataSystems: number
     topSystems: string[]
   }
+  documentSignals?: {
+    source: "document_memory"
+    generatedCount: number
+    uploadedCount: number
+    matchedSignals: string[]
+    topDocuments: string[]
+  }
   suggestions: {
     sector?: PrefillSuggestion<OrgSector>
     requiresEfactura?: PrefillSuggestion<boolean>
     usesAITools?: PrefillSuggestion<boolean>
     processesPersonalData?: PrefillSuggestion<boolean>
     usesExternalVendors?: PrefillSuggestion<boolean>
+    hasSiteWithForms?: PrefillSuggestion<boolean>
+    hasStandardContracts?: PrefillSuggestion<boolean>
   }
 }

@@ -76,6 +76,7 @@ describe("lib/server/supabase-org-state", () => {
       alerts: [],
       findings: [],
       scans: [],
+      generatedDocuments: [],
       chat: [],
       taskState: {},
       aiComplianceFieldOverrides: {},

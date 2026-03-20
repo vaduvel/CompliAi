@@ -18,6 +18,12 @@ export type ScanExtractionMethod = "manual" | "ocr-vision-image" | "ocr-vision-p
 export type ScanAnalysisStatus = "pending" | "completed"
 export type ScanExtractionStatus = "completed" | "needs_review"
 export type ScanSourceKind = "document" | "manifest" | "yaml"
+export type GeneratedDocumentKind =
+  | "privacy-policy"
+  | "cookie-policy"
+  | "dpa"
+  | "nis2-incident-response"
+  | "ai-governance"
 
 export type WorkspaceContext = {
   orgId: string
@@ -120,6 +126,14 @@ export type ScanRecord = {
   extractionStatus?: ScanExtractionStatus
   analysisStatus?: ScanAnalysisStatus
   analyzedAtISO?: string
+}
+
+export type GeneratedDocumentRecord = {
+  id: string
+  documentType: GeneratedDocumentKind
+  title: string
+  generatedAtISO: string
+  llmUsed: boolean
 }
 
 export type AISystemPurpose =
@@ -360,6 +374,7 @@ export type ComplianceState = {
   alerts: ComplianceAlert[]
   findings: ScanFinding[]
   scans: ScanRecord[]
+  generatedDocuments: GeneratedDocumentRecord[]
   chat: ChatMessage[]
   taskState: Record<string, PersistedTaskState>
   aiComplianceFieldOverrides: Record<string, Record<string, AIComplianceFieldOverride>>

@@ -683,6 +683,35 @@ function AnafPrefillCard({
         </div>
       ) : null}
 
+      {prefill.documentSignals ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Semnale din documentele existente
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                {prefill.documentSignals.generatedCount > 0
+                  ? `${prefill.documentSignals.generatedCount} documente generate`
+                  : "Fără documente generate încă"}
+                {prefill.documentSignals.uploadedCount > 0
+                  ? ` · ${prefill.documentSignals.uploadedCount} documente încărcate`
+                  : ""}
+                {prefill.documentSignals.matchedSignals.length > 0
+                  ? `. Semnale: ${prefill.documentSignals.matchedSignals.join(", ")}.`
+                  : "."}
+                {prefill.documentSignals.topDocuments.length > 0
+                  ? ` Exemple: ${prefill.documentSignals.topDocuments.join(", ")}.`
+                  : ""}
+              </p>
+            </div>
+            <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+              Sursa: document memory
+            </Badge>
+          </div>
+        </div>
+      ) : null}
+
       {sectorSuggestion ? (
         <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
           <div className="flex items-start justify-between gap-3">
