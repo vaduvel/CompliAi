@@ -4,7 +4,14 @@ import { loadEnvFile, verifySupabaseSprint5Resources } from "./lib/supabase-live
 
 const ENV_PATH = path.join(process.cwd(), ".env.local")
 const DEFAULT_BUCKET = "compliscan-evidence-private"
-const TABLES = ["organizations", "memberships", "profiles", "org_state", "evidence_objects"]
+const TABLES = [
+  "organizations",
+  "memberships",
+  "profiles",
+  "org_state",
+  "evidence_objects",
+  "policy_acknowledgments",
+]
 
 async function main() {
   const env = await loadEnvFile(ENV_PATH)

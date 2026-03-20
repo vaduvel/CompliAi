@@ -1,7 +1,14 @@
 import { readFile } from "node:fs/promises"
 
 const DEFAULT_BUCKET = "compliscan-evidence-private"
-const TABLES = ["organizations", "memberships", "profiles", "org_state", "evidence_objects"]
+const TABLES = [
+  "organizations",
+  "memberships",
+  "profiles",
+  "org_state",
+  "evidence_objects",
+  "policy_acknowledgments",
+]
 
 export async function loadEnvFile(filePath) {
   const content = await readFile(filePath, "utf8")
