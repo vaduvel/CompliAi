@@ -151,6 +151,6 @@ describe("POST /api/auth/register", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(400)
-    expect(payload.code).toBe("AUTH_REGISTER_FAILED")
+    expect(payload.code).toBe("AUTH_EMAIL_ALREADY_REGISTERED")
   })
 })

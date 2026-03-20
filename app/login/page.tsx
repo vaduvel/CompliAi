@@ -17,15 +17,24 @@ export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [orgName, setOrgName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [registerDuplicateEmail, setRegisterDuplicateEmail] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setRegisterDuplicateEmail(false)
+
+    if (mode === "register" && password !== confirmPassword) {
+      setError("Parolele nu coincid. Verifica parola si confirmarea ei.")
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -38,9 +47,16 @@ export default function LoginPage() {
         body: JSON.stringify(body),
       })
 
-      const data = (await response.json()) as { ok?: boolean; error?: string }
+      const data = (await response.json()) as { ok?: boolean; error?: string; code?: string }
 
       if (!response.ok) {
+        if (mode === "register" && data.code === "AUTH_EMAIL_ALREADY_REGISTERED") {
+          setRegisterDuplicateEmail(true)
+          setError(
+            "Emailul are deja un cont creat. Dacă ai tastat greșit parola la prima încercare, autentifică-te sau resetează parola."
+          )
+          return
+        }
         setError(data.error || "A aparut o eroare.")
         return
       }
@@ -159,6 +175,21 @@ export default function LoginPage() {
               </div>
 
               {mode === "register" && (
+                <div className="space-y-1.5">
+                  <label className="text-sm text-eos-text-muted">Confirmă parola</label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Tastează parola încă o dată"
+                    required
+                    autoComplete="new-password"
+                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  />
+                </div>
+              )}
+
+              {mode === "register" && (
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -186,9 +217,33 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {mode === "register" && registerDuplicateEmail && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login")
+                      setPassword("")
+                      setConfirmPassword("")
+                      setError(null)
+                      setRegisterDuplicateEmail(false)
+                    }}
+                    className="text-sm text-eos-primary hover:underline"
+                  >
+                    Mergi la autentificare
+                  </button>
+                  <Link href="/reset-password" className="text-sm text-eos-primary hover:underline">
+                    Resetează parola
+                  </Link>
+                </div>
+              )}
+
               <Button
                 type="submit"
-                disabled={loading || (mode === "register" && !acceptedTerms)}
+                disabled={
+                  loading ||
+                  (mode === "register" && (!acceptedTerms || !confirmPassword || password !== confirmPassword))
+                }
                 size="lg"
                 className="w-full gap-2"
               >
@@ -224,6 +279,7 @@ export default function LoginPage() {
                     onClick={() => {
                       setMode("register")
                       setError(null)
+                      setRegisterDuplicateEmail(false)
                     }}
                     className="text-eos-primary hover:underline"
                   >
@@ -237,6 +293,8 @@ export default function LoginPage() {
                     onClick={() => {
                       setMode("login")
                       setError(null)
+                      setConfirmPassword("")
+                      setRegisterDuplicateEmail(false)
                     }}
                     className="text-eos-primary hover:underline"
                   >

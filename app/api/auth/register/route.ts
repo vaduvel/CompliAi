@@ -80,7 +80,13 @@ export async function POST(request: Request) {
       message === "AUTH_EMAIL_ALREADY_REGISTERED" ||
       message === "Adresa de email este deja inregistrata."
     ) {
-      return jsonError("Adresa de email este deja inregistrata.", 400, "AUTH_REGISTER_FAILED", undefined, context)
+      return jsonError(
+        "Adresa de email este deja inregistrata.",
+        400,
+        "AUTH_EMAIL_ALREADY_REGISTERED",
+        undefined,
+        context
+      )
     }
 
     await logRouteError(context, error, {
