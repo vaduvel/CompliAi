@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { POST } from "./route"
 
@@ -32,8 +32,12 @@ vi.mock("@/lib/server/mvp-store", () => ({
 }))
 
 describe("POST /api/state/reset", () => {
+  const originalResetKey = process.env.COMPLISCAN_RESET_KEY
+
   beforeEach(() => {
     vi.clearAllMocks()
+    if (originalResetKey === undefined) delete process.env.COMPLISCAN_RESET_KEY
+    else process.env.COMPLISCAN_RESET_KEY = originalResetKey
     mocks.requireRoleMock.mockReturnValue({
       userId: "user-1",
       orgId: "org-1",
@@ -46,11 +50,30 @@ describe("POST /api/state/reset", () => {
     mocks.writeStateMock.mockResolvedValue(undefined)
   })
 
+  afterEach(() => {
+    if (originalResetKey === undefined) delete process.env.COMPLISCAN_RESET_KEY
+    else process.env.COMPLISCAN_RESET_KEY = originalResetKey
+  })
+
   it("permite reset pentru owner local", async () => {
     const response = await POST(
       new Request("http://localhost/api/state/reset", {
         method: "POST",
         headers: { host: "localhost:3000" },
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.message).toContain("Starea a fost resetată")
+    expect(mocks.writeStateMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("permite reset pentru owner autenticat si in productie fara cheie", async () => {
+    const response = await POST(
+      new Request("https://example.com/api/state/reset", {
+        method: "POST",
+        headers: { host: "example.com" },
       })
     )
     const payload = await response.json()
@@ -77,11 +100,16 @@ describe("POST /api/state/reset", () => {
     expect(payload.code).toBe("AUTH_ROLE_FORBIDDEN")
   })
 
-  it("blocheaza resetul in afara localhost fara cheie", async () => {
+  it("blocheaza resetul cand cheia furnizata este invalida", async () => {
+    process.env.COMPLISCAN_RESET_KEY = "reset-secret"
+
     const response = await POST(
       new Request("https://example.com/api/state/reset", {
         method: "POST",
-        headers: { host: "example.com" },
+        headers: {
+          host: "example.com",
+          "x-compliscan-reset-key": "gresit",
+        },
       })
     )
     const payload = await response.json()

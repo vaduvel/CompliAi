@@ -370,3 +370,15 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
   - `npm run build`
   - `./node_modules/.bin/tsc --noEmit`
 - Preview-ul vechi care inca afisa un singur camp de parola a fost invalidat; buildul bun este cel care include `Confirmă parola`.
+
+### Reset workspace din UI — 20 martie 2026
+
+- `POST /api/state/reset` era blocat in productie de `COMPLISCAN_RESET_KEY`, desi endpointul era deja protejat prin sesiune autentificata + rol `owner`.
+- Fix aplicat:
+  - resetul din UI este acum permis pentru owner autentificat
+  - cheia `x-compliscan-reset-key` ramane optionala doar pentru fluxuri scriptate/admin
+  - daca headerul este trimis cu o valoare gresita, requestul este respins explicit
+- Validare:
+  - `npm test -- app/api/state/reset/route.test.ts`
+  - `./node_modules/.bin/tsc --noEmit`
+  - `npm run build`

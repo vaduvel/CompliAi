@@ -10,26 +10,12 @@ import { writeState } from "@/lib/server/mvp-store"
 
 const RESET_HEADER = "x-compliscan-reset-key"
 
-function isLocalRequest(request: Request) {
-  const url = new URL(request.url)
-  const hostHeader = request.headers.get("host")?.toLowerCase() ?? ""
-  const hostname = url.hostname.toLowerCase()
-
-  return (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostHeader.startsWith("localhost:") ||
-    hostHeader.startsWith("127.0.0.1:")
-  )
-}
-
-function canResetState(request: Request) {
+function hasValidResetKey(request: Request) {
   const configuredKey = process.env.COMPLISCAN_RESET_KEY?.trim()
   const providedKey = request.headers.get(RESET_HEADER)?.trim()
-
-  if (configuredKey) return configuredKey === providedKey
-  if (process.env.NODE_ENV === "development") return true
-  return isLocalRequest(request)
+  if (!providedKey) return false
+  if (!configuredKey) return false
+  return configuredKey === providedKey
 }
 
 export async function POST(request: Request) {
@@ -37,9 +23,11 @@ export async function POST(request: Request) {
     const session = requireRole(request, ["owner"], "resetarea starii workspace-ului")
     const actor = eventActorFromSession(session)
 
-    if (!canResetState(request)) {
+    // UI reset is allowed for authenticated owners. The optional reset key
+    // remains available only for scripted/admin flows outside the browser.
+    if (request.headers.get(RESET_HEADER)?.trim() && !hasValidResetKey(request)) {
       return jsonError(
-        "Resetarea este blocata pentru acest mediu. Local pe localhost este permisa fara cheie. In alte medii configureaza COMPLISCAN_RESET_KEY si trimite cheia in header-ul x-compliscan-reset-key.",
+        "Cheia de reset furnizata este invalida.",
         403,
         "RESET_BLOCKED"
       )
