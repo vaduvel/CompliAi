@@ -1537,3 +1537,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - tabul local foloseste acum `Istoric`
   - `Scan Rezultate` trimite catre `Istoric`, nu catre `Documente`
   - copy-ul de handoff din `Scanare` foloseste acum `De rezolvat / Rapoarte`, nu `Control / Dovada`
+
+### Actualizare 2026-03-20 - BP-4 home authority
+
+- [x] `Acasa` are din nou un CTA dominant clar
+  - `NextBestAction` este ownerul principal pentru pasul recomandat
+- [x] onboarding-ul a fost scos din `Acasa`
+  - `OnboardingProgress` traieste acum in `Setari`
+- [x] blocurile operationale concurente au fost scoase din `Acasa`
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- [~] `Acasa` mai are de apropiat blueprint-ul pe compozitie fina
+  - readiness-ul inca are CTA-uri locale pe carduri
+  - banner-ele legale raman temporar vizibile pana le mutam in suprafete dedicate

@@ -1804,3 +1804,16 @@ Asta este sanatos arhitectural pentru ca:
   - `Scaneaza` ca namespace canonic
   - vechiul handoff direct catre `/dashboard/documente`
 - pagina de rezultat si subnavigarea locala folosesc acum acelasi vocabular canonic: `Istoric`
+
+## Actualizare 2026-03-20 - BP-4: action authority pe Acasa
+
+- `/dashboard` foloseste acum un singur bloc dominant de actiune prin `NextBestAction`
+- vechiul panou `Top urgente` a fost absorbit; `Acasa` nu mai are doua centre vizuale concurente pentru actiune
+- onboarding-ul de progres operational nu mai sta pe `Acasa`; el a fost mutat in `Setari`, unde apartine contextului administrativ
+- `Acasa` nu mai tine si suprafete de lucru secundare:
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- arhitectural, asta muta pagina mai aproape de blueprint:
+  - `stare + urgenta curenta`
+  - apoi `health/readiness`
+  - fara feed operational concurent

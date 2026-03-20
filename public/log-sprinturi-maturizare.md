@@ -3315,3 +3315,21 @@ Validare dupa pass:
 
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
+
+### BP-4 - Acasa recapata un singur CTA dominant
+
+- `Acasa` foloseste acum `NextBestAction` ca bloc dominant imediat dupa header, in locul panoului separat `Top urgente`
+- onboarding-ul nu mai concureaza cu actiunea principala pe `Acasa`; `OnboardingProgress` a fost mutat in `Setari`
+- `Acasa` nu mai afiseaza workspace-urile concurente:
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- copy-ul de intrare si handoff-ul din `Setari` folosesc acum vocabularul nou:
+  - `Acasă`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde

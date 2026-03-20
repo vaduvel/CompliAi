@@ -3,29 +3,22 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
+import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
-import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
-
-const SCAN_SOURCE_LABEL: Record<string, string> = {
-  document: "Document scanat",
-  text:     "Text analizat",
-  manifest: "Manifest YAML",
-  yaml:     "Fișier YAML",
-}
+import { NextBestAction } from "@/components/compliscan/next-best-action"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -78,6 +71,10 @@ export default function DashboardPage() {
 
   const openTasks = tasks.filter((t) => t.status !== "done")
   const missingEvidenceCount = openTasks.filter((t) => !t.attachedEvidence).length
+  const hasBaselineEvidence = Boolean(
+    state.scans.length > 0 || state.scannedDocuments > 0 || state.validatedBaselineSnapshotId
+  )
+  const activeRiskCount = openAlerts.length + activeDrifts.length
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"
@@ -92,9 +89,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
       <PageIntro
-        eyebrow="Dashboard"
+        eyebrow="Acasă"
         title="Starea actuala a conformitatii tale"
-        description="Vezi rapid ce cere interventie si porneste urmatorul pas corect."
+        description="Vezi rapid starea curenta si porneste urmatorul pas corect."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -116,6 +113,17 @@ export default function DashboardPage() {
       {!state.orgProfile && (
         <section aria-label="Wizard aplicabilitate">
           <ApplicabilityWizard onComplete={() => { reloadDashboard() }} />
+        </section>
+      )}
+
+      {state.orgProfile && (
+        <section aria-label="Actiunea recomandata acum">
+          <NextBestAction
+            task={nextBestAction}
+            onResolve={() => router.push(dashboardRoutes.resolve)}
+            hasEvidence={hasBaselineEvidence}
+            activeRiskCount={activeRiskCount}
+          />
         </section>
       )}
 
@@ -149,85 +157,6 @@ export default function DashboardPage() {
         )
       })()}
 
-      {/* ── V4.3 TOP URGENTA ──────────────────────────────────────────────────── */}
-      {state.orgProfile && (openAlerts.length > 0 || openTasks.length > 0 || activeDrifts.length > 0) && (
-        <section aria-label="Top urgente">
-          <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
-                <span className="text-sm font-semibold text-eos-text">Top urgențe</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-eos-text-muted">Conformitate: {data.summary.score}%</span>
-                <Badge
-                  variant={data.summary.score >= 70 ? "success" : data.summary.score >= 40 ? "warning" : "destructive"}
-                  className="normal-case tracking-normal"
-                >
-                  {data.summary.score >= 70 ? "OK" : data.summary.score >= 40 ? "Risc" : "Critic"}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Urgency list */}
-            <div className="divide-y divide-eos-border-subtle">
-              {[
-                ...openAlerts.slice(0, 2).map((a) => ({
-                  id: a.id,
-                  label: a.message,
-                  severity: a.severity === "high" || a.severity === "critical" ? "high" : "medium",
-                  href: dashboardRoutes.resolve,
-                })),
-                ...activeDrifts.slice(0, 1).map((d) => ({
-                  id: d.id,
-                  label: d.summary,
-                  severity: d.blocksAudit ? "high" : "medium",
-                  href: dashboardRoutes.drifts,
-                })),
-              ]
-                .slice(0, 3)
-                .map((item) => (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className="flex items-center gap-3 px-5 py-3 hover:bg-eos-surface-variant"
-                  >
-                    <span
-                      className={`mt-0.5 size-2 shrink-0 rounded-full ${
-                        item.severity === "high" ? "bg-eos-error" : "bg-eos-warning"
-                      }`}
-                    />
-                    <span className="flex-1 text-sm text-eos-text">{item.label}</span>
-                    <ArrowRight className="size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                  </Link>
-                ))}
-            </div>
-
-            {/* ACTIUNEA TA ACUM */}
-            {nextBestAction && (
-              <div className="border-t border-eos-border-subtle bg-eos-surface-variant/50 px-5 py-3.5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
-                  Acțiunea ta acum
-                </p>
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <p className="text-sm text-eos-text">{nextBestAction.title}</p>
-                  <Button
-                    asChild
-                    size="sm"
-                  >
-                    <Link href={dashboardRoutes.resolve}>
-                      Pornește <ArrowRight className="ml-1.5 size-3.5" strokeWidth={2} />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </section>
-      )}
-
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
@@ -238,19 +167,6 @@ export default function DashboardPage() {
           <SummaryMetric label="Stare audit"           value={auditStatusLabel} />
         </div>
       </section>
-
-      {/* ── Onboarding checklist (Sprint 3.3) ───────────────────────────────── */}
-      {state.orgProfile && (
-        <section aria-label="Ghid de pornire">
-          <OnboardingProgress
-            hasProfile={true}
-            hasAiSystems={totalAiSystems > 0}
-            gdprProgress={state.gdprProgress}
-            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
-            hasResolvedTasks={tasks.some((t) => t.status === "done")}
-          />
-        </section>
-      )}
 
       <section aria-label="Conformitate pe cadru" className="space-y-4">
         <div className="flex items-center justify-between">
@@ -354,73 +270,9 @@ export default function DashboardPage() {
         </section>
       )}
 
-      <section aria-label="Schimbari si drift activ" className="space-y-4" aria-live="polite">
-        <DriftCommandCenter
-          activeDrifts={activeDrifts}
-          hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
-        />
-      </section>
-
       {/* ── Health Check Periodic (V3 P1.2) ──────────────────────────────────── */}
       <section aria-label="Health check conformitate">
         <HealthCheckCard />
-      </section>
-
-      {/* ── Snapshot / Activitate recentă ─────────────────────────────────────── */}
-      <section aria-label="Snapshot si activitate recenta" className="space-y-3">
-        <h2 className="text-sm font-medium uppercase tracking-[0.12em] text-eos-text-tertiary">
-          Snapshot &amp; Activitate recentă
-        </h2>
-        <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
-          {/* Baseline */}
-          <div className="flex items-center justify-between px-5 py-3">
-            <div className="flex items-center gap-2.5">
-              <Database className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-              <span className="text-sm text-eos-text">Baseline validat</span>
-            </div>
-            <Badge
-              variant={state.validatedBaselineSnapshotId ? "success" : "secondary"}
-              className="normal-case tracking-normal text-[11px]"
-            >
-              {state.validatedBaselineSnapshotId ? "Activ" : "Lipsă"}
-            </Badge>
-          </div>
-
-          {/* Surse recente */}
-          {state.scans.length === 0 ? (
-            <div className="flex items-center gap-2.5 px-5 py-4 text-sm text-eos-text-muted">
-              <History className="size-4 shrink-0" strokeWidth={2} />
-              <span>
-                Nicio sursă procesată.{" "}
-                <button
-                  onClick={() => router.push(dashboardRoutes.scan)}
-                  className="text-eos-primary underline-offset-2 hover:underline"
-                >
-                  Pornește primul scan
-                </button>
-              </span>
-            </div>
-          ) : (
-            state.scans.slice(0, 3).map((scan, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-3">
-                <div className="flex items-center gap-2.5">
-                  <Activity className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                  <span className="text-sm text-eos-text">
-                    {SCAN_SOURCE_LABEL[scan.sourceKind as string] ?? scan.sourceKind}
-                  </span>
-                </div>
-                {"scannedAt" in scan && scan.scannedAt ? (
-                  <span className="text-xs text-eos-text-muted">
-                    {new Date(String(scan.scannedAt)).toLocaleDateString("ro-RO", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </span>
-                ) : null}
-              </div>
-            ))
-          )}
-        </Card>
       </section>
     </div>
   )

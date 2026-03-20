@@ -31,6 +31,7 @@ import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/Su
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
@@ -255,6 +256,8 @@ export function SettingsPageSurface() {
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
+  const state = cockpit.data.state
+  const totalAiSystems = state.highRisk + state.lowRisk
   const activeSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
@@ -315,7 +318,7 @@ export function SettingsPageSurface() {
       <PageIntro
         eyebrow="Setari"
         title="Administrezi contextul operational"
-        description="Context, acces si operare. Executia ramane in Scanare, Control si Dovada."
+        description="Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -337,7 +340,7 @@ export function SettingsPageSurface() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href={dashboardRoutes.home}>Dashboard</Link>
+              <Link href={dashboardRoutes.home}>Acasă</Link>
             </Button>
             <Button asChild>
               <Link href={dashboardRoutes.resolve}>De rezolvat</Link>
@@ -366,7 +369,7 @@ export function SettingsPageSurface() {
         <HandoffCard
           title="Setari nu inlocuieste fluxul principal"
           description="Dupa configurare si verificare operationala, revii in zona potrivita de lucru."
-          destinationLabel="dashboard / de rezolvat"
+          destinationLabel="acasa / de rezolvat"
           checklist={[
             "nu tratezi Setari ca overview executiv",
             "folosesti Setari pentru context, acces si operare",
@@ -374,7 +377,7 @@ export function SettingsPageSurface() {
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href={dashboardRoutes.home}>Deschide Dashboard</Link>
+                <Link href={dashboardRoutes.home}>Deschide Acasă</Link>
               </Button>
               <Button asChild>
                 <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
@@ -383,6 +386,18 @@ export function SettingsPageSurface() {
           }
         />
       </div>
+
+      {state.orgProfile && (
+        <section aria-label="Ghid de pornire mutat din Acasa">
+          <OnboardingProgress
+            hasProfile={true}
+            hasAiSystems={totalAiSystems > 0}
+            gdprProgress={state.gdprProgress}
+            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
+            hasResolvedTasks={cockpit.tasks.some((task) => task.status === "done")}
+          />
+        </section>
+      )}
 
       <Tabs defaultValue="workspace" className="space-y-6">
         <div className="space-y-3">

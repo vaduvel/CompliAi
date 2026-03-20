@@ -1411,3 +1411,11 @@ Actualizare suplimentara 2026-03-20:
   - suprafata este detinuta de `components/compliscan/scan-history-page.tsx`
 - vechea ruta `/dashboard/documente` ramane doar alias de compatibilitate
 - handoff-urile vizibile din `Scanare` si `Scan Rezultate` spun acum `Istoric`, nu `Documente`
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-4` incepe curatarea reala a paginii `Acasa`
+  - cardul dominant este acum `NextBestAction`
+  - `Top urgente` nu mai concureaza separat cu CTA-ul principal
+- `OnboardingProgress` a fost mutat din `Acasa` in `Setari`
+- `Acasa` nu mai expune `DriftCommandCenter` si `Snapshot & Activitate recenta`
