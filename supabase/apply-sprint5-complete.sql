@@ -86,6 +86,12 @@ create table if not exists public.org_state (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.policy_acknowledgments (
+  org_id text primary key references public.organizations(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.evidence_objects (
   id uuid primary key default gen_random_uuid(),
   attachment_id text not null unique,

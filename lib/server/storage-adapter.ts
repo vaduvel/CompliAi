@@ -8,6 +8,8 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 
 import { writeFileSafe } from "@/lib/server/fs-safe"
+import { hasSupabaseConfig } from "@/lib/server/supabase-rest"
+import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
 
 const DATA_DIR = path.join(process.cwd(), ".data")
 
@@ -45,6 +47,20 @@ export class LocalFileStorage<T> implements IStateStorage<T> {
 
 type SupabaseRow<T> = { org_id: string; state: T }
 
+function isLocalFallbackAllowed() {
+  const explicit = process.env.COMPLISCAN_ALLOW_LOCAL_FALLBACK?.trim().toLowerCase()
+
+  if (explicit === "1" || explicit === "true" || explicit === "yes") {
+    return true
+  }
+
+  if (explicit === "0" || explicit === "false" || explicit === "no") {
+    return false
+  }
+
+  return process.env.NODE_ENV !== "production"
+}
+
 export class SupabaseStateStorage<T> implements IStateStorage<T> {
   constructor(private readonly table: string) {}
 
@@ -62,6 +78,43 @@ export class SupabaseStateStorage<T> implements IStateStorage<T> {
   async write(orgId: string, state: T): Promise<void> {
     const { supabaseUpsert } = await import("@/lib/server/supabase-rest")
     await supabaseUpsert(this.table, { org_id: orgId, state }, "public")
+  }
+}
+
+class CloudPrimaryStorage<T> implements IStateStorage<T> {
+  constructor(
+    private readonly primary: IStateStorage<T>,
+    private readonly fallback: IStateStorage<T>
+  ) {}
+
+  async read(orgId: string): Promise<T | null> {
+    try {
+      return await this.primary.read(orgId)
+    } catch (error) {
+      if (!isLocalFallbackAllowed()) {
+        throw new Error(
+          error instanceof Error
+            ? `SUPABASE_STATE_REQUIRED: ${error.message}`
+            : "SUPABASE_STATE_REQUIRED"
+        )
+      }
+      return this.fallback.read(orgId)
+    }
+  }
+
+  async write(orgId: string, state: T): Promise<void> {
+    try {
+      await this.primary.write(orgId, state)
+    } catch (error) {
+      if (!isLocalFallbackAllowed()) {
+        throw new Error(
+          error instanceof Error
+            ? `SUPABASE_STATE_REQUIRED: ${error.message}`
+            : "SUPABASE_STATE_REQUIRED"
+        )
+      }
+      await this.fallback.write(orgId, state)
+    }
   }
 }
 
@@ -88,21 +141,10 @@ export function createSupabaseStorage<T>(table: string): IStateStorage<T> {
  * Fallback local pentru development dacă Supabase nu e configurat.
  */
 export function createAdaptiveStorage<T>(localPrefix: string, supabaseTable: string): IStateStorage<T> {
-  try {
-    // Dynamic require pentru a evita import ciclic în build time
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getConfiguredDataBackend } = require("@/lib/server/supabase-tenancy") as {
-      getConfiguredDataBackend: () => string
-    }
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { hasSupabaseConfig } = require("@/lib/server/supabase-rest") as {
-      hasSupabaseConfig: () => boolean
-    }
-    if (hasSupabaseConfig() && getConfiguredDataBackend() === "supabase") {
-      return new SupabaseStateStorage<T>(supabaseTable)
-    }
-  } catch {
-    // Outside Node.js runtime or build time — use local
+  const localStorage = new LocalFileStorage<T>(localPrefix)
+
+  if (hasSupabaseConfig() && getConfiguredDataBackend() === "supabase") {
+    return new CloudPrimaryStorage<T>(new SupabaseStateStorage<T>(supabaseTable), localStorage)
   }
-  return new LocalFileStorage<T>(localPrefix)
+  return localStorage
 }
