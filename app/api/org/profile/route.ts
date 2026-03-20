@@ -152,6 +152,9 @@ function doesPrefillMatchProfile(
   website: string | null | undefined
 ) {
   if (!prefill) return false
+  if (prefill.source === "ai_compliance_pack" && !prefill.normalizedCui && !prefill.normalizedWebsite) {
+    return true
+  }
   if (prefill.normalizedCui && prefill.normalizedCui !== cui) return false
   if (prefill.normalizedWebsite && prefill.normalizedWebsite !== website) return false
   return Boolean(prefill.normalizedCui || prefill.normalizedWebsite)

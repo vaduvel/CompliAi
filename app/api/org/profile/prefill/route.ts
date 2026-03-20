@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
+import { enrichOrgProfilePrefillWithAICompliancePack } from "@/lib/server/ai-compliance-pack-prefill-signals"
 import { enrichOrgProfilePrefillWithAiSignals } from "@/lib/server/ai-prefill-signals"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
@@ -23,10 +24,11 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as PrefillRequestBody
     const hasCuiInput = typeof body?.cui === "string" && body.cui.trim().length > 0
+    const hasWebsiteInput = typeof body?.website === "string" && body.website.trim().length > 0
     const cui = validateCUI(body?.cui)
     const website = normalizeWebsiteUrl(body?.website)
-    if (!cui && !website) {
-      return hasCuiInput
+    if (!cui && !website && (hasCuiInput || hasWebsiteInput)) {
+      return hasCuiInput && !hasWebsiteInput
         ? jsonError("CUI invalid.", 400, "INVALID_CUI")
         : jsonError("Introdu un CUI valid sau website-ul public al firmei.", 400, "INVALID_PREFILL_INPUT")
     }
@@ -34,7 +36,8 @@ export async function POST(request: Request) {
     const state = await readState()
     const basePrefill = cui ? await lookupOrgProfilePrefillByCui(cui) : null
     const websitePrefill = await enrichOrgProfilePrefillWithWebsiteSignals(basePrefill, { website })
-    const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(websitePrefill, state.efacturaValidations)
+    const packPrefill = await enrichOrgProfilePrefillWithAICompliancePack(websitePrefill, state)
+    const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(packPrefill, state.efacturaValidations)
     const aiPrefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
       aiSystems: state.aiSystems ?? [],
       detectedAISystems: state.detectedAISystems ?? [],
@@ -53,6 +56,6 @@ export async function POST(request: Request) {
     } satisfies { prefill: OrgProfilePrefill | null })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
-    return jsonError("Nu am putut interoga ANAF acum.", 502, "ANAF_PREFILL_FAILED")
+    return jsonError("Nu am putut pregăti prefill-ul automat acum.", 502, "PREFILL_FAILED")
   }
 }

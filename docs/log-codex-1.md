@@ -671,6 +671,36 @@ Validare după pas:
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
 
+## Actualizare 2026-03-20 - Wave 2.10 AI Compliance Pack ca sursa separata de onboarding
+
+- onboarding-ul poate porni acum si din semnale interne mature, nu doar din `CUI` sau `website`, atunci cand workspace-ul are deja `AI Compliance Pack`
+- helperul nou `lib/server/ai-compliance-pack-prefill-signals.ts` transforma pack-ul intr-o sursa explicabila de prefill:
+  - `usesAITools`
+  - `processesPersonalData`
+  - `aiUsesConfidentialData`
+- `OrgProfilePrefill` are acum provenance dedicat pentru `ai_compliance_pack`, inclusiv sumar runtime cu:
+  - numar total de sisteme
+  - cate sunt `audit-ready`
+  - cate sunt confirmate
+  - cate au semnal de date personale
+- `app/api/org/profile/prefill` poate intoarce acum prefill chiar si fara input extern, daca workspace-ul are deja un `AI Compliance Pack` suficient de bogat
+- ordinea surselor a ramas defensabila:
+  - `AI Compliance Pack` poate crea seed prefill
+  - `AI inventory` ramane sursa mai directa si poate suprascrie sugestiile AI mai slabe din pack
+  - documentele si website-ul raman surse separate, afisate explicit
+- `POST /api/org/profile` pastreaza acum si prefill-ul intern din `AI Compliance Pack`, chiar daca nu exista chei externe precum `CUI` sau `website`
+- `components/compliscan/applicability-wizard.tsx` afiseaza separat cardul de context pentru `AI Compliance Pack`, fara sa confunde sursa cu `AI inventory`
+- am pastrat intentionat wave-ul conservator:
+  - nu sugereaza inca `hasAiPolicy` din pack
+  - nu face ranking global intre toate sursele
+  - nu foloseste semnale speculative doar pentru ca entry-ul exista
+
+Validare după pas:
+
+- `npm test -- lib/server/ai-compliance-pack-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`32/32`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde
+
 ## Actualizare 2026-03-20 - final guide plan canonic pentru forma finala a aplicatiei
 
 - am impachetat documentul mare `docs/documnet-final-log-sprint.md` intr-un loc canonic nou: `docs/final-guide-plan/`

@@ -45,8 +45,12 @@ Status: plan activ, ancorat in log
   - onboarding-ul poate porni prefill si doar din `website`, nu doar din `CUI`
   - website-ul public sugereaza acum `hasSiteWithForms`, `hasSitePrivacyPolicy`, `hasPrivacyPolicy`, `processesPersonalData` si `hasCookiesConsent`
   - `website` devine camp persistat in `OrgProfile`, iar prefill-ul se pastreaza doar cand `CUI` / `website` raman aliniate
+- `Wave 2.10` adauga `AI Compliance Pack` ca sursa separata de onboarding:
+  - prefill-ul poate porni acum si fara input extern, cand workspace-ul are deja pack-ul construit
+  - `OrgProfilePrefill` include provenance separat `ai_compliance_pack`
+  - wizardul afiseaza distinct contextul din pack fata de `AI inventory`
 - validare confirmata:
-  - `npm test -- lib/server/website-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
+  - `npm test -- lib/server/ai-compliance-pack-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
   - `npm run lint`
   - `npm run build`
 
@@ -88,15 +92,19 @@ Status: plan activ, ancorat in log
   - semnalele din website-ul public apar in onboarding cu provenance dedicat `site public`
   - website-ul poate sugera direct si `cookies consent`, nu doar existenta site-ului
   - `POST /api/org/profile` normalizeaza si persista `website`, iar prefill-ul stale se curata si pe aceasta cheie
+- `Wave 2.10`:
+  - `POST /api/org/profile/prefill` poate intoarce acum prefill si fara `CUI` / `website`, daca workspace-ul are deja `AI Compliance Pack`
+  - `AI Compliance Pack` sugereaza conservator `usesAITools`, `processesPersonalData` si `aiUsesConfidentialData`
+  - `POST /api/org/profile` pastreaza prefill-ul intern din pack chiar si fara chei externe de matching
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6`, `Wave 2.7`, `Wave 2.8` si `Wave 2.9` sunt tinta pe `origin/main` dupa promovarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6`, `Wave 2.7`, `Wave 2.8`, `Wave 2.9` si `Wave 2.10` sunt tinta pe `origin/main` dupa promovarea acestui pass
 
 Ce nu face inca acest slice:
 
-- nu foloseste inca `AI Compliance Pack` ca sursa separata de onboarding
 - nu face inca ranking / arbitraj complet intre toate sursele posibile cand apar conflicte reale
+- nu foloseste inca `AI Compliance Pack` pentru `hasAiPolicy`; pack-ul este folosit doar pentru semnale AI direct defensabile
 
 ## Wave 1
 
@@ -172,6 +180,10 @@ Primul slice intrat:
   - onboarding-ul primeste si `website signals` ca sursa reala, nu doar document memory despre site
   - website-ul public poate deschide prefill chiar si fara `CUI`, daca detectam semnale suficiente
   - website-ul contribuie conservator la intrebarile despre formulare, privacy policy, cookies consent si date personale
+- `Wave 2.10`:
+  - `AI Compliance Pack` devine sursa interna separata de onboarding, nu doar payload de dashboard
+  - pack-ul poate crea seed prefill chiar si fara surse externe, apoi celelalte surse il pot imbogati
+  - semnalele din pack raman limitate la raspunsuri AI pe care le putem explica usor si sustine in produs
 
 ## Primul pas recomandat
 

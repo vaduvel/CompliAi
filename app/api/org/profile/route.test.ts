@@ -333,4 +333,25 @@ describe("POST /api/org/profile — CUI", () => {
     expect(res.status).toBe(200)
     expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
   })
+
+  it("păstrează prefill-ul intern din AI Compliance Pack chiar fără CUI sau website", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          source: "ai_compliance_pack",
+          normalizedCui: null,
+          companyName: "Workspace Demo SRL",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest(validBase))
+    expect(res.status).toBe(200)
+    expect((saved as { orgProfilePrefill?: { source: string } }).orgProfilePrefill?.source).toBe(
+      "ai_compliance_pack"
+    )
+  })
 })

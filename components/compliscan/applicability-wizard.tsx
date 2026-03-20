@@ -151,13 +151,6 @@ export function ApplicabilityWizard({ onComplete }: Props) {
     const validCui = trimmedCui ? isValidCui(trimmedCui) : false
     const validWebsite = trimmedWebsite ? isValidWebsiteInput(trimmedWebsite) : false
 
-    if (!trimmedCui && !trimmedWebsite) {
-      setOrgPrefill(null)
-      setPrefillError(null)
-      setStep("sector")
-      return
-    }
-
     if (trimmedCui && !validCui && !validWebsite) {
       setOrgPrefill(null)
       setPrefillError("CUI-ul sau website-ul par invalide. Corectează unul dintre ele sau continuă fără prefill.")
@@ -184,20 +177,22 @@ export function ApplicabilityWizard({ onComplete }: Props) {
 
       if (!res.ok) {
         setOrgPrefill(null)
-        setPrefillError("Nu am putut interoga ANAF acum. Continuăm fără prefill automat.")
+        setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
         setStep("sector")
         return
       }
 
       const data = (await res.json()) as ProfilePrefillResponse
       setOrgPrefill(data.prefill)
-      if (!data.prefill) {
-        setPrefillError("Nu am găsit suficiente semnale utile din CUI sau website. Continuăm manual.")
+      if (!data.prefill && (trimmedCui || trimmedWebsite)) {
+        setPrefillError("Nu am găsit suficiente semnale utile din CUI, website sau datele deja existente. Continuăm manual.")
+      } else {
+        setPrefillError(null)
       }
       setStep("sector")
     } catch {
       setOrgPrefill(null)
-      setPrefillError("Nu am putut interoga ANAF acum. Continuăm fără prefill automat.")
+      setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
       setStep("sector")
     } finally {
       setPrefillLoading(false)
@@ -660,10 +655,13 @@ function PrefillContextCard({
   const subtitleParts = [prefill.companyName]
   if (prefill.normalizedCui) subtitleParts.push(prefill.normalizedCui)
   if (prefill.normalizedWebsite) subtitleParts.push(formatWebsiteLabel(prefill.normalizedWebsite))
-  const sourceLabel =
-    prefill.source === "anaf_vat_registry" ? "ANAF" : prefillSuggestionSourceLabel(prefill.source)
+  const sourceLabel = prefillSuggestionSourceLabel(prefill.source)
   const title =
-    prefill.source === "anaf_vat_registry" ? "Am găsit firma în ANAF" : "Am găsit semnale din site-ul public"
+    prefill.source === "anaf_vat_registry"
+      ? "Am găsit firma în ANAF"
+      : prefill.source === "website_signals"
+        ? "Am găsit semnale din site-ul public"
+        : "Am găsit semnale în AI Compliance Pack"
 
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
@@ -739,6 +737,36 @@ function PrefillContextCard({
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
               Sursa: AI inventory
+            </Badge>
+          </div>
+        </div>
+      ) : null}
+
+      {prefill.aiCompliancePackSignals ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Semnale din AI Compliance Pack
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                {prefill.aiCompliancePackSignals.totalEntries} sisteme în pack
+                {prefill.aiCompliancePackSignals.auditReadyEntries > 0
+                  ? ` · ${prefill.aiCompliancePackSignals.auditReadyEntries} audit-ready`
+                  : ""}
+                {prefill.aiCompliancePackSignals.confirmedEntries > 0
+                  ? ` · ${prefill.aiCompliancePackSignals.confirmedEntries} confirmate`
+                  : ""}
+                {prefill.aiCompliancePackSignals.personalDataEntries > 0
+                  ? ` · ${prefill.aiCompliancePackSignals.personalDataEntries} cu semnal de date personale`
+                  : ""}
+                {prefill.aiCompliancePackSignals.topSystems.length > 0
+                  ? `. Exemple: ${prefill.aiCompliancePackSignals.topSystems.join(", ")}.`
+                  : "."}
+              </p>
+            </div>
+            <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+              Sursa: AI Compliance Pack
             </Badge>
           </div>
         </div>

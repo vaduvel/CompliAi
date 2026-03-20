@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   readStateMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
   enrichWebsitePrefillMock: vi.fn(async (prefill: unknown) => prefill),
+  enrichAICompliancePackPrefillMock: vi.fn(async (prefill: unknown) => prefill),
   mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
     new Response(JSON.stringify({ error: message, code }), { status })
@@ -37,6 +38,10 @@ vi.mock("@/lib/server/website-prefill-signals", () => ({
   enrichOrgProfilePrefillWithWebsiteSignals: mocks.enrichWebsitePrefillMock,
 }))
 
+vi.mock("@/lib/server/ai-compliance-pack-prefill-signals", () => ({
+  enrichOrgProfilePrefillWithAICompliancePack: mocks.enrichAICompliancePackPrefillMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
   readState: mocks.readStateMock,
   mutateState: mocks.mutateStateMock,
@@ -58,6 +63,7 @@ describe("POST /api/org/profile/prefill", () => {
     mocks.readSessionMock.mockReturnValue({ orgId: "org-1", userId: "user-1" })
     mocks.readStateMock.mockResolvedValue({ efacturaValidations: [] })
     mocks.enrichWebsitePrefillMock.mockImplementation(async (prefill: unknown) => prefill)
+    mocks.enrichAICompliancePackPrefillMock.mockImplementation(async (prefill: unknown) => prefill)
   })
 
   it("respinge accesul fara sesiune", async () => {
@@ -82,6 +88,54 @@ describe("POST /api/org/profile/prefill", () => {
 
     expect(res.status).toBe(400)
     expect(body.code).toBe("INVALID_PREFILL_INPUT")
+  })
+
+  it("poate porni prefill-ul direct din AI Compliance Pack fără CUI sau website", async () => {
+    mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue(null)
+    mocks.enrichAICompliancePackPrefillMock.mockResolvedValue({
+      source: "ai_compliance_pack",
+      fetchedAtISO: "2026-03-20T10:00:00.000Z",
+      normalizedCui: null,
+      companyName: "Workspace Demo SRL",
+      address: null,
+      legalForm: null,
+      mainCaen: null,
+      fiscalStatus: null,
+      vatRegistered: false,
+      vatOnCashAccounting: false,
+      efacturaRegistered: false,
+      inactive: false,
+      aiCompliancePackSignals: {
+        source: "ai_compliance_pack",
+        totalEntries: 2,
+        auditReadyEntries: 1,
+        confirmedEntries: 1,
+        personalDataEntries: 1,
+        topSystems: ["ChatGPT Support Assistant", "Copilot drafting"],
+      },
+      suggestions: {
+        usesAITools: {
+          value: true,
+          confidence: "high",
+          reason: "Pack-ul confirmă utilizarea AI.",
+          source: "ai_compliance_pack",
+        },
+      },
+    })
+
+    const res = await POST(makeRequest({}))
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.prefill.source).toBe("ai_compliance_pack")
+    expect(body.prefill.aiCompliancePackSignals).toEqual({
+      source: "ai_compliance_pack",
+      totalEntries: 2,
+      auditReadyEntries: 1,
+      confirmedEntries: 1,
+      personalDataEntries: 1,
+      topSystems: ["ChatGPT Support Assistant", "Copilot drafting"],
+    })
   })
 
   it("intoarce prefill-ul cand lookup-ul reuseste", async () => {

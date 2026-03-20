@@ -4,6 +4,7 @@ export type PrefillConfidence = "high" | "medium" | "low"
 export type PrefillSuggestionSource =
   | "anaf_vat_registry"
   | "efactura_validations"
+  | "ai_compliance_pack"
   | "ai_inventory"
   | "document_memory"
   | "website_signals"
@@ -23,6 +24,8 @@ export function prefillSuggestionSourceLabel(source: PrefillSuggestionSource) {
       return "ANAF"
     case "efactura_validations":
       return "e-Factura"
+    case "ai_compliance_pack":
+      return "AI Compliance Pack"
     case "ai_inventory":
       return "AI inventory"
     case "document_memory":
@@ -39,7 +42,7 @@ export function prefillSuggestionSourceLabel(source: PrefillSuggestionSource) {
 }
 
 export type OrgProfilePrefill = {
-  source: "anaf_vat_registry" | "website_signals"
+  source: "anaf_vat_registry" | "website_signals" | "ai_compliance_pack"
   fetchedAtISO: string
   normalizedCui: string | null
   normalizedWebsite?: string | null
@@ -63,6 +66,14 @@ export type OrgProfilePrefill = {
     confirmedSystems: number
     detectedSystems: number
     personalDataSystems: number
+    topSystems: string[]
+  }
+  aiCompliancePackSignals?: {
+    source: "ai_compliance_pack"
+    totalEntries: number
+    auditReadyEntries: number
+    confirmedEntries: number
+    personalDataEntries: number
     topSystems: string[]
   }
   documentSignals?: {
