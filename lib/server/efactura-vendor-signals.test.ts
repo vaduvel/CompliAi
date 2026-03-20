@@ -38,6 +38,7 @@ describe("efactura-vendor-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "efactura_validations",
       })
     )
     expect(result.vendorSignals).toEqual({
@@ -72,6 +73,7 @@ describe("efactura-vendor-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "efactura_validations",
       })
     )
     expect(enriched?.vendorSignals?.topVendors).toEqual(["Amazon Web Services EMEA SARL"])

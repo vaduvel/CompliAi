@@ -20,6 +20,7 @@ type SignalEvidence = {
   kind: "generated" | "uploaded"
   confidence: "high" | "medium"
   reason: string
+  source: "document_memory"
 }
 
 const SIGNAL_LABELS: Record<QuestionId, string> = {
@@ -138,6 +139,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "high",
           reason:
             "Ai deja o politică de confidențialitate generată în CompliAI, ceea ce indică prelucrare de date personale.",
+          source: "document_memory",
         },
       ]
     case "cookie-policy":
@@ -150,6 +152,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "high",
           reason:
             "Ai deja o politică de cookies generată, ceea ce indică un site cu cookies, tracking sau formulare publice.",
+          source: "document_memory",
         },
       ]
     case "dpa":
@@ -162,6 +165,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "medium",
           reason:
             "Ai generat deja un DPA, deci există sau se pregătește o relație cu furnizori externi care procesează date.",
+          source: "document_memory",
         },
         {
           questionId: "hasStandardContracts",
@@ -171,6 +175,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "medium",
           reason:
             "Ai generat deja un DPA, deci lucrezi cu documente contractuale standard pentru furnizori sau procesatori.",
+          source: "document_memory",
         },
       ]
     case "ai-governance":
@@ -183,6 +188,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "high",
           reason:
             "Ai generat deja o politică de guvernanță AI, ceea ce indică utilizarea efectivă sau planificată a sistemelor AI în firmă.",
+          source: "document_memory",
         },
       ]
     default:
@@ -204,6 +210,7 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente încărcate despre cookies, tracking sau formulare de website, deci există probabil o suprafață publică cu colectare de date.",
+      source: "document_memory",
     })
   }
 
@@ -216,6 +223,7 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente contractuale încărcate, deci răspunsul este probabil „da” pentru contracte standard.",
+      source: "document_memory",
     })
   }
 
@@ -228,6 +236,7 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente care menționează DPA, furnizori sau procesatori externi, deci folosești probabil vendori externi.",
+      source: "document_memory",
     })
   }
 
@@ -240,6 +249,7 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente despre confidențialitate sau GDPR, ceea ce sugerează prelucrare de date personale.",
+      source: "document_memory",
     })
   }
 
@@ -259,6 +269,7 @@ function buildSuggestion(
     value: true,
     confidence,
     reason: `${baseReason}${suffix}`,
+    source: evidences[0]?.source ?? "document_memory",
   }
 }
 

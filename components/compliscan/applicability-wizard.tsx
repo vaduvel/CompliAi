@@ -25,8 +25,13 @@ import {
   type OrgProfile,
   type OrgSector,
 } from "@/lib/compliance/applicability"
-import type { OrgProfilePrefill, PrefillSuggestion } from "@/lib/compliance/org-profile-prefill"
 import {
+  prefillSuggestionSourceLabel,
+  type OrgProfilePrefill,
+  type PrefillSuggestion,
+} from "@/lib/compliance/org-profile-prefill"
+import {
+  buildInitialIntakeAnswers,
   DECISIVE_QUESTIONS,
   deriveSuggestedAnswers,
   getVisibleConditionalQuestions,
@@ -124,7 +129,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
 
     const snapshot = buildProfileSnapshot({ ...values, requiresEfactura: nextRequiresEfactura })
     if (!snapshot) return
-    const nextAnswers = deriveInitialIntakeAnswers(snapshot, orgPrefill)
+    const nextAnswers = buildInitialIntakeAnswers(snapshot, orgPrefill)
     setIntakeAnswers(nextAnswers)
     setError(null)
     setStep("intake")
@@ -447,7 +452,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                       Ce am înțeles deja despre firmă
                     </p>
                     <p className="mt-1 text-xs text-eos-text-muted">
-                      Confirmi doar răspunsurile care schimbă findings, documentele recomandate sau următorul pas.
+                      Semnalele cu încredere mare sunt precompletate. Restul rămân de confirmat doar unde schimbă findings, documentele recomandate sau următorul pas.
                     </p>
                   </div>
                 </div>
@@ -763,6 +768,9 @@ function PrefillSuggestionCard({
           {confidenceLabel(suggestion.confidence)}
         </Badge>
       </div>
+      <p className="mt-2 text-[11px] text-eos-text-muted">
+        Sursa: {prefillSuggestionSourceLabel(suggestion.source)}
+      </p>
     </div>
   )
 }
@@ -784,9 +792,19 @@ function QuestionCard({
         <div>
           <p className="text-sm font-medium text-eos-text">{question.text}</p>
           {suggestion ? (
-            <p className="mt-1 text-xs text-eos-text-muted">
-              Sugestie: <span className="text-eos-text">{answerLabel(suggestion.value)}</span> · {suggestion.reason}
-            </p>
+            <div className="mt-1 space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}>
+                  {confidenceLabel(suggestion.confidence)}
+                </Badge>
+                <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+                  Sursa: {prefillSuggestionSourceLabel(suggestion.source)}
+                </Badge>
+              </div>
+              <p className="text-xs text-eos-text-muted">
+                Sugestie: <span className="text-eos-text">{answerLabel(suggestion.value)}</span> · {suggestion.reason}
+              </p>
+            </div>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
@@ -862,18 +880,6 @@ function buildProfileSnapshot(values: WizardState): OrgProfile | null {
     ...(cui ? { cui } : {}),
     completedAtISO: new Date().toISOString(),
   }
-}
-
-function deriveInitialIntakeAnswers(profile: OrgProfile, prefill?: OrgProfilePrefill | null): FullIntakeAnswers {
-  const initial: FullIntakeAnswers = {
-    usesAITools: profile.usesAITools ? "yes" : "no",
-  }
-
-  for (const suggestion of deriveSuggestedAnswers(profile, prefill)) {
-    ;(initial as Record<string, string | undefined>)[suggestion.questionId] = suggestion.value
-  }
-
-  return initial
 }
 
 function getUnansweredQuestions(answers: FullIntakeAnswers, conditionalQuestions: IntakeQuestion[]) {

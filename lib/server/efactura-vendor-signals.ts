@@ -72,6 +72,7 @@ export function buildVendorPrefillSignal(validations: SupplierValidationLike[]):
       value: true,
       confidence: "high",
       reason,
+      source: "efactura_validations",
     },
     vendorSignals: {
       source: "efactura_validations",

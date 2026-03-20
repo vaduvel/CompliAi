@@ -5,7 +5,11 @@
 // Funcție pură, fără I/O, safe în browser și pe server.
 
 import type { OrgProfile } from "@/lib/compliance/applicability"
-import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
+import type {
+  OrgProfilePrefill,
+  PrefillConfidence,
+  PrefillSuggestionSource,
+} from "@/lib/compliance/org-profile-prefill"
 import type { ScanFinding, FindingCategory } from "@/lib/compliance/types"
 
 // ── Answer types ─────────────────────────────────────────────────────────────
@@ -69,8 +73,9 @@ export type IntakeQuestion = {
 export type SuggestedAnswer = {
   questionId: string
   value: IntakeAnswer
-  confidence: "high" | "medium" | "low"
+  confidence: PrefillConfidence
   reason: string
+  source: PrefillSuggestionSource
 }
 
 export type DocumentRequest = {
@@ -333,6 +338,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
     reason: profile.usesAITools
       ? "Ai confirmat deja că folosești unelte AI."
       : "Ai indicat că nu folosești unelte AI.",
+    source: "profile_confirmed",
   })
 
   // Q3 — Personal data: prefer direct signals from onboarding prefill
@@ -342,6 +348,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: prefill.suggestions.processesPersonalData.value ? "yes" : "no",
       confidence: prefill.suggestions.processesPersonalData.confidence,
       reason: prefill.suggestions.processesPersonalData.reason,
+      source: prefill.suggestions.processesPersonalData.source,
     })
   } else {
     const likelyProcessesData =
@@ -363,6 +370,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
                 ? "retail-ul implică date clienți/comenzi"
                 : "ai angajați, deci procesezi date HR"
         }.`,
+        source: "profile_inference",
       })
     }
   }
@@ -374,6 +382,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: prefill.suggestions.usesExternalVendors.value ? "yes" : "no",
       confidence: prefill.suggestions.usesExternalVendors.confidence,
       reason: prefill.suggestions.usesExternalVendors.reason,
+      source: prefill.suggestions.usesExternalVendors.source,
     })
   } else if (profile.requiresEfactura) {
     suggestions.push({
@@ -381,6 +390,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: "probably",
       confidence: "medium",
       reason: "Facturezi B2B prin e-Factura, deci cel mai probabil ai furnizori externi.",
+      source: "profile_inference",
     })
   }
 
@@ -390,6 +400,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: prefill.suggestions.hasSiteWithForms.value ? "yes" : "no",
       confidence: prefill.suggestions.hasSiteWithForms.confidence,
       reason: prefill.suggestions.hasSiteWithForms.reason,
+      source: prefill.suggestions.hasSiteWithForms.source,
     })
   }
 
@@ -399,6 +410,7 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: prefill.suggestions.hasStandardContracts.value ? "yes" : "no",
       confidence: prefill.suggestions.hasStandardContracts.confidence,
       reason: prefill.suggestions.hasStandardContracts.reason,
+      source: prefill.suggestions.hasStandardContracts.source,
     })
   }
 
@@ -409,10 +421,33 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
       value: "yes",
       confidence: "medium",
       reason: "Sectorul retail implică de regulă vânzări către persoane fizice.",
+      source: "profile_inference",
     })
   }
 
   return suggestions
+}
+
+export function shouldAutofillSuggestedAnswer(
+  suggestion: Pick<SuggestedAnswer, "confidence">
+) {
+  return suggestion.confidence === "high"
+}
+
+export function buildInitialIntakeAnswers(
+  profile: OrgProfile,
+  prefill?: OrgProfilePrefill | null
+): FullIntakeAnswers {
+  const initial: FullIntakeAnswers = {
+    usesAITools: profile.usesAITools ? "yes" : "no",
+  }
+
+  for (const suggestion of deriveSuggestedAnswers(profile, prefill)) {
+    if (!shouldAutofillSuggestedAnswer(suggestion)) continue
+    ;(initial as Record<string, string | undefined>)[suggestion.questionId] = suggestion.value
+  }
+
+  return initial
 }
 
 /**

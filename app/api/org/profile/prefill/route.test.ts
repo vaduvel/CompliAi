@@ -94,6 +94,7 @@ describe("POST /api/org/profile/prefill", () => {
           value: "retail",
           confidence: "high",
           reason: "Codul CAEN principal indică retail direct către clienți finali.",
+          source: "anaf_vat_registry",
         },
       },
     })

@@ -33,12 +33,14 @@ export function buildAiPrefillSignals({
       value: true,
       confidence: "high",
       reason: buildAiToolsReason(aiSystems.length, topSystems, "confirmate în inventarul AI"),
+      source: "ai_inventory",
     }
   } else if (activeDetected.length > 0) {
     usesAITools = {
       value: true,
       confidence: "medium",
       reason: buildAiToolsReason(activeDetected.length, topSystems, "detectate automat în manifeste sau documente"),
+      source: "ai_inventory",
     }
   }
 
@@ -52,6 +54,7 @@ export function buildAiPrefillSignals({
         confirmedPersonalDataSystems.map((system) => system.name.trim()).filter(Boolean).slice(0, 3),
         "confirmate"
       ),
+      source: "ai_inventory",
     }
   } else if (detectedPersonalDataSystems.length > 0) {
     processesPersonalData = {
@@ -62,6 +65,7 @@ export function buildAiPrefillSignals({
         detectedPersonalDataSystems.map((system) => system.name.trim()).filter(Boolean).slice(0, 3),
         "detectate"
       ),
+      source: "ai_inventory",
     }
   }
 

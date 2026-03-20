@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildDocumentRequests,
   buildInitialFindings,
+  buildInitialIntakeAnswers,
   buildNextBestAction,
   deriveSuggestedAnswers,
   getVisibleConditionalQuestions,
@@ -24,21 +25,25 @@ describe("intake-engine", () => {
           questionId: "usesAITools",
           value: "yes",
           confidence: "high",
+          source: "profile_confirmed",
         }),
         expect.objectContaining({
           questionId: "processesPersonalData",
           value: "probably",
           confidence: "medium",
+          source: "profile_inference",
         }),
         expect.objectContaining({
           questionId: "usesExternalVendors",
           value: "probably",
           confidence: "medium",
+          source: "profile_inference",
         }),
         expect.objectContaining({
           questionId: "sellsToConsumers",
           value: "yes",
           confidence: "medium",
+          source: "profile_inference",
         }),
       ])
     )
@@ -77,6 +82,7 @@ describe("intake-engine", () => {
             value: true,
             confidence: "high",
             reason: "Am detectat 2 furnizori în 3 validări e-Factura, deci folosești deja vendorii externi.",
+            source: "efactura_validations",
           },
         },
       }
@@ -127,6 +133,7 @@ describe("intake-engine", () => {
             value: true,
             confidence: "high",
             reason: "1 sistem AI confirmat procesează date personale.",
+            source: "ai_inventory",
           },
         },
       }
@@ -177,11 +184,13 @@ describe("intake-engine", () => {
             value: true,
             confidence: "high",
             reason: "Ai deja o politică de cookies generată în workspace.",
+            source: "document_memory",
           },
           hasStandardContracts: {
             value: true,
             confidence: "medium",
             reason: "Există deja documente contractuale și DPA-uri în workspace.",
+            source: "document_memory",
           },
         },
       }
@@ -201,6 +210,50 @@ describe("intake-engine", () => {
         }),
       ])
     )
+  })
+
+  it("auto-completeaza doar sugestiile cu încredere mare", () => {
+    const answers = buildInitialIntakeAnswers(
+      {
+        sector: "professional-services",
+        employeeCount: "1-9",
+        usesAITools: false,
+        requiresEfactura: false,
+        completedAtISO: "2026-03-20T00:00:00.000Z",
+      },
+      {
+        source: "anaf_vat_registry",
+        fetchedAtISO: "2026-03-20T10:00:00.000Z",
+        normalizedCui: "RO14399840",
+        companyName: "DANTE INTERNATIONAL SA",
+        address: "BUCURESTI",
+        legalForm: "SA",
+        mainCaen: "6201",
+        fiscalStatus: "INREGISTRAT",
+        vatRegistered: true,
+        vatOnCashAccounting: false,
+        efacturaRegistered: true,
+        inactive: false,
+        suggestions: {
+          hasSiteWithForms: {
+            value: true,
+            confidence: "high",
+            reason: "Ai deja o politică de cookies generată în workspace.",
+            source: "document_memory",
+          },
+          hasStandardContracts: {
+            value: true,
+            confidence: "medium",
+            reason: "Există deja documente contractuale și DPA-uri în workspace.",
+            source: "document_memory",
+          },
+        },
+      }
+    )
+
+    expect(answers.usesAITools).toBe("no")
+    expect(answers.hasSiteWithForms).toBe("yes")
+    expect(answers.hasStandardContracts).toBeUndefined()
   })
 
   it("shows only conditional questions unlocked by current answers", () => {

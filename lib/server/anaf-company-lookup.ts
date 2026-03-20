@@ -109,6 +109,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "energy",
       confidence: "high",
       reason: "Codul CAEN principal indică activitate în energie.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix >= 49 && prefix <= 53) {
@@ -116,6 +117,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "transport",
       confidence: "high",
       reason: "Codul CAEN principal indică transport sau logistică.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 64) {
@@ -123,6 +125,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "banking",
       confidence: "high",
       reason: "Codul CAEN principal indică intermediere financiară bancară.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 65 || prefix === 66) {
@@ -130,6 +133,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "finance",
       confidence: "high",
       reason: "Codul CAEN principal indică activitate financiară sau de asigurări.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 84) {
@@ -137,6 +141,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "public-admin",
       confidence: "high",
       reason: "Codul CAEN principal indică administrație publică.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 86) {
@@ -144,6 +149,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "health",
       confidence: "high",
       reason: "Codul CAEN principal indică servicii medicale.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix >= 61 && prefix <= 63) {
@@ -151,6 +157,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "digital-infrastructure",
       confidence: "medium",
       reason: "Codul CAEN principal indică telecom, IT sau servicii digitale.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix >= 10 && prefix <= 33) {
@@ -158,6 +165,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "manufacturing",
       confidence: "medium",
       reason: "Codul CAEN principal indică producție sau industrie.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 47) {
@@ -165,6 +173,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "retail",
       confidence: "high",
       reason: "Codul CAEN principal indică retail direct către clienți finali.",
+      source: "anaf_vat_registry",
     }
   }
   if (prefix === 46) {
@@ -172,6 +181,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "retail",
       confidence: "medium",
       reason: "Codul CAEN principal indică comerț; îl tratăm ca sector comercial până la confirmare.",
+      source: "anaf_vat_registry",
     }
   }
   if ((prefix >= 69 && prefix <= 74) || prefix === 78 || prefix === 82) {
@@ -179,6 +189,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       value: "professional-services",
       confidence: "medium",
       reason: "Codul CAEN principal indică servicii profesionale sau suport operațional.",
+      source: "anaf_vat_registry",
     }
   }
 
@@ -191,6 +202,7 @@ function inferEfacturaSuggestion(record: AnafCompanyEntry): PrefillSuggestion<bo
       value: true,
       confidence: "high",
       reason: "Firma apare înregistrată în Registrul RO e-Factura ANAF.",
+      source: "anaf_vat_registry",
     }
   }
 
@@ -199,6 +211,7 @@ function inferEfacturaSuggestion(record: AnafCompanyEntry): PrefillSuggestion<bo
       value: true,
       confidence: "medium",
       reason: "Firma apare înregistrată în scopuri de TVA; pentru multe fluxuri B2B obligația e-Factura este foarte probabilă.",
+      source: "anaf_vat_registry",
     }
   }
 

@@ -607,3 +607,27 @@ Validare după pas:
 - `npm test -- lib/server/document-prefill-signals.test.ts app/api/documents/generate/route.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/mvp-store.test.ts lib/server/document-scan-flow.test.ts app/api/org/profile/route.test.ts` -> verde (`33/33`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - Wave 2.7 provenance unitar + auto-fill doar pe high confidence
+
+- s-a închis un gap real din onboarding: sugestiile `medium confidence` nu mai sunt tratate ca răspunsuri deja confirmate
+- modelul comun `PrefillSuggestion` poartă acum explicit:
+  - `source`
+  - `confidence`
+  - `reason`
+- sursele reale de prefill au fost aliniate la același contract:
+  - `ANAF`
+  - `e-Factura`
+  - `AI inventory`
+  - `document memory`
+- `lib/compliance/intake-engine.ts` are acum prag clar de auto-completare:
+  - doar sugestiile `high confidence` intră direct în `buildInitialIntakeAnswers(...)`
+  - sugestiile `medium` / `low` rămân vizibile, dar cer confirmare explicită
+- `components/compliscan/applicability-wizard.tsx` arată acum explicit sursa fiecărei sugestii atât în cardurile de prefill, cât și în întrebările din intake
+- efectul practic este că nu mai putem ajunge la first findings cu un răspuns „probabil” bifat automat doar pentru că exista un semnal moderat în prefill
+
+Validare după pas:
+
+- `npm test -- lib/compliance/intake-engine.test.ts lib/server/anaf-company-lookup.test.ts lib/server/ai-prefill-signals.test.ts lib/server/efactura-vendor-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts` -> verde (`22/22`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde

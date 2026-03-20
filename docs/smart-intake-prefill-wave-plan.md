@@ -33,8 +33,12 @@ Status: plan activ, ancorat in log
   - `generatedDocuments` devine stare persistata pentru documentele generate in platforma
   - `orgProfilePrefill` include `documentSignals` si sugestii pentru `hasSiteWithForms` si `hasStandardContracts`
   - onboarding-ul vede provenienta din documente generate si documente scanate
+- `Wave 2.7` inchide guardrail-ul de confirmare:
+  - fiecare sugestie de prefill poarta explicit `source + confidence + reason`
+  - doar sugestiile `high confidence` se auto-completeaza in intake
+  - sugestiile `medium` raman vizibile, dar necesita confirmare explicita in wizard
 - validare confirmata:
-  - `npm test -- lib/server/document-prefill-signals.test.ts app/api/documents/generate/route.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts lib/server/mvp-store.test.ts lib/server/document-scan-flow.test.ts app/api/org/profile/route.test.ts`
+  - `npm test -- lib/compliance/intake-engine.test.ts lib/server/anaf-company-lookup.test.ts lib/server/ai-prefill-signals.test.ts lib/server/efactura-vendor-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts`
   - `npm run lint`
   - `npm run build`
 
@@ -63,17 +67,20 @@ Status: plan activ, ancorat in log
   - `app/api/documents/generate` persista documentele generate in `ComplianceState.generatedDocuments`
   - `POST /api/org/profile/prefill` intoarce si `documentSignals` din documente generate + documente scanate
   - intake-ul vede acum semnale directe pentru `hasSiteWithForms` si `hasStandardContracts`
+- `Wave 2.7`:
+  - toate sugestiile de onboarding folosesc acelasi contract `source + confidence + reason`
+  - intake-ul auto-completeaza doar semnalele `high confidence`
+  - wizardul arata explicit sursa pentru fiecare sugestie, inclusiv in intrebarile care raman de confirmat
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5` si `Wave 2.6` sunt tinta pe `origin/main` dupa promovarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6` si `Wave 2.7` sunt tinta pe `origin/main` dupa promovarea acestui pass
 
 Ce nu face inca acest slice:
 
-- nu unifica inca toate sursele de prefill sub acelasi model complet `source + confidence + reason`
 - nu deduce inca raspunsuri din website
 - nu foloseste inca `AI Compliance Pack` ca sursa separata de onboarding
-- nu face inca suppression automat pe baza unui model unitar multi-sursa
+- nu face inca ranking / arbitraj complet intre toate sursele posibile cand apar conflicte reale
 
 ## Wave 1
 
@@ -137,6 +144,10 @@ Primul slice intrat:
   - documentele generate in platforma devin stare persistata, nu doar rezultat de UI
   - documentele generate + scanate sunt folosite pentru semnale directe despre site/cookies si contracte standard
   - documentele raman fallback pentru `usesExternalVendors`, `processesPersonalData` si `usesAITools`, fara sa suprascrie sursele mai bune deja existente
+- `Wave 2.7`:
+  - fiecare sugestie din `orgProfilePrefill` poarta sursa explicita, nu doar confidence + motiv
+  - wizardul foloseste prag clar de auto-fill: doar `high confidence`
+  - `medium` si `low` raman sugestii asistate, nu raspunsuri deja confirmate
 
 ## Primul pas recomandat
 

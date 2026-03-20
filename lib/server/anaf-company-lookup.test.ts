@@ -47,10 +47,12 @@ describe("lookupOrgProfilePrefillByCui", () => {
           sector: expect.objectContaining({
             value: "retail",
             confidence: "high",
+            source: "anaf_vat_registry",
           }),
           requiresEfactura: expect.objectContaining({
             value: true,
             confidence: "high",
+            source: "anaf_vat_registry",
           }),
         }),
       })

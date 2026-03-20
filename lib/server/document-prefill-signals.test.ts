@@ -41,24 +41,28 @@ describe("document-prefill-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "document_memory",
       })
     )
     expect(result.suggestions.usesExternalVendors).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "document_memory",
       })
     )
     expect(result.suggestions.hasStandardContracts).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "document_memory",
       })
     )
     expect(result.suggestions.hasSiteWithForms).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "document_memory",
       })
     )
     expect(result.documentSignals).toEqual({
@@ -94,6 +98,7 @@ describe("document-prefill-signals", () => {
             value: true,
             confidence: "high",
             reason: "Semnalul vine deja din e-Factura.",
+            source: "efactura_validations",
           },
         },
       },
@@ -115,11 +120,13 @@ describe("document-prefill-signals", () => {
       value: true,
       confidence: "high",
       reason: "Semnalul vine deja din e-Factura.",
+      source: "efactura_validations",
     })
     expect(result?.suggestions.hasStandardContracts).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "document_memory",
       })
     )
     expect(result?.documentSignals?.generatedCount).toBe(1)

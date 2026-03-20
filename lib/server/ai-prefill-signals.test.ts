@@ -29,12 +29,14 @@ describe("ai-prefill-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "ai_inventory",
       })
     )
     expect(result.processesPersonalData).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "ai_inventory",
       })
     )
     expect(result.aiSignals).toEqual({
@@ -75,12 +77,14 @@ describe("ai-prefill-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "ai_inventory",
       })
     )
     expect(result.processesPersonalData).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
+        source: "ai_inventory",
       })
     )
     expect(result.aiSignals?.detectedSystems).toBe(1)
@@ -128,6 +132,7 @@ describe("ai-prefill-signals", () => {
       expect.objectContaining({
         value: true,
         confidence: "high",
+        source: "ai_inventory",
       })
     )
     expect(result?.aiSignals).toEqual({
