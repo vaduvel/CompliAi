@@ -59,7 +59,7 @@ export default function ScanResultsPage() {
               </Button>
               <Button asChild>
                 <Link href={dashboardRoutes.documents}>
-                  Deschide Documente
+                  Deschide Istoric
                   <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
               </Button>
@@ -71,7 +71,7 @@ export default function ScanResultsPage() {
           <CardContent className="px-5 py-6">
             <EmptyState
               title="Scanarea nu mai este in snapshot"
-              label="Daca rezultatul era mai vechi, il poti cauta in Documente. Pentru o analiza noua revii in Scaneaza."
+              label="Daca rezultatul era mai vechi, il poti cauta in Istoric. Pentru o analiza noua revii in Scaneaza."
               className="border-eos-border bg-eos-surface-variant py-8"
               actions={
                 <Button asChild variant="default">
@@ -213,17 +213,17 @@ export default function ScanResultsPage() {
         />
         <HandoffCard
           title="Continui fara sa pierzi contextul acestui scan"
-          description="Rezultatul tocmai analizat ramane ancorat aici, dar task-urile si drifturile lui merg in De rezolvat. Istoricul complet ramane separat in Documente."
-          destinationLabel="de rezolvat / documente"
+          description="Rezultatul tocmai analizat ramane ancorat aici, dar task-urile si drifturile lui merg in De rezolvat. Istoricul complet ramane separat in Istoric."
+          destinationLabel="de rezolvat / istoric"
           checklist={[
             "nu repornesti analiza din pagina de rezultat",
             "nu tratezi verdictul ca board de executie",
-            "folosesti Documente doar pentru arhiva completa",
+            "folosesti Istoric doar pentru arhiva completa",
           ]}
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href={dashboardRoutes.documents}>Documente</Link>
+                <Link href={dashboardRoutes.documents}>Istoric</Link>
               </Button>
               <Button asChild>
                 <Link href={dashboardRoutes.resolve}>De rezolvat</Link>

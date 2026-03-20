@@ -114,7 +114,13 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     label: "Scanare",
     items: [
       { id: "scanari", label: "Flux scanare", href: dashboardRoutes.scan, icon: Scan },
-      { id: "documente", label: "Documente", href: "/dashboard/documente", icon: FolderOpen },
+      {
+        id: "documente",
+        label: "Istoric",
+        href: dashboardRoutes.documents,
+        icon: FolderOpen,
+        matchers: [dashboardRoutes.documents, dashboardRoutes.documentsLegacy],
+      },
     ],
   },
   {

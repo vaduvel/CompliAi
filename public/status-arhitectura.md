@@ -1792,3 +1792,15 @@ Asta este sanatos arhitectural pentru ca:
 - asta reduce si mai mult ruptura dintre:
   - shell-ul nou `Rapoarte`
   - URL-urile vechi mostenite din `Dovada` si `Politici`
+
+## Actualizare 2026-03-20 - BP-3: scan archive canonic
+
+- `/dashboard/scan/history` este acum ruta canonica pentru arhiva document-first din `Scaneaza`
+- `/dashboard/documente` a ramas doar ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `lib/compliscan/dashboard-routes.ts` separa acum explicit:
+  - `documents` -> ruta canonica noua
+  - `documentsLegacy` -> aliasul vechi
+- asta reduce ruptura dintre:
+  - `Scaneaza` ca namespace canonic
+  - vechiul handoff direct catre `/dashboard/documente`
+- pagina de rezultat si subnavigarea locala folosesc acum acelasi vocabular canonic: `Istoric`

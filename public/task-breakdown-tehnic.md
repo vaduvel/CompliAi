@@ -1526,3 +1526,14 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [~] reducerea handoff-urilor legacy vizibile
   - navigatia locala `ReportsTabs` este activa pe subpaginile de output
   - linkurile principale catre `vault`, `policies` si `audit-log` folosesc acum familia canonica `reports`
+
+### Actualizare 2026-03-20 - BP-3 scan history
+
+- [x] exista ruta canonica pentru arhiva `Scaneaza -> Istoric`
+  - `/dashboard/scan/history`
+  - owner comun in `components/compliscan/scan-history-page.tsx`
+- [x] `/dashboard/documente` ramane alias de compatibilitate
+- [~] reducerea handoff-urilor legacy din `Scanare`
+  - tabul local foloseste acum `Istoric`
+  - `Scan Rezultate` trimite catre `Istoric`, nu catre `Documente`
+  - copy-ul de handoff din `Scanare` foloseste acum `De rezolvat / Rapoarte`, nu `Control / Dovada`

@@ -3296,3 +3296,22 @@ Validare dupa pass:
 
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
+
+### BP-3 - Canonizare `Scaneaza -> Istoric`
+
+- `Documente` nu mai este ruta canonica de scan archive; istoricul document-first este acum expus prin:
+  - `/dashboard/scan/history`
+  - owner comun in `components/compliscan/scan-history-page.tsx`
+- `/dashboard/documente` ramane activ doar ca alias de compatibilitate peste aceeasi suprafata
+- subnavigarea locala din `Scanare` foloseste acum eticheta si handoff-ul canonice:
+  - `Istoric`
+  - `/dashboard/scan/history`
+- pagina de rezultat a scanului si tabul de istoric folosesc acum vocabularul nou:
+  - `Istoric`
+  - `De rezolvat`
+  - `Rapoarte`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde

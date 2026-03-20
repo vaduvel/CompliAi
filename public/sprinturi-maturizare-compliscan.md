@@ -1403,3 +1403,11 @@ Actualizare suplimentara 2026-03-20:
   - `reports/trust-center`
 - vechile rute `rapoarte/auditor-vault`, `politici`, `audit-log` si `rapoarte/trust-profile` au ramas doar aliasuri de compatibilitate
 - `ReportsTabs` unifica navigatia locala pentru subpaginile de output
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-3` continua cu scan archive-ul canonic:
+  - `Scaneaza -> Istoric` foloseste acum `/dashboard/scan/history`
+  - suprafata este detinuta de `components/compliscan/scan-history-page.tsx`
+- vechea ruta `/dashboard/documente` ramane doar alias de compatibilitate
+- handoff-urile vizibile din `Scanare` si `Scan Rezultate` spun acum `Istoric`, nu `Documente`

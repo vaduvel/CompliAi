@@ -3,7 +3,8 @@ export const dashboardRoutes = {
   scan: "/dashboard/scan",
   scanLegacy: "/dashboard/scanari",
   scanResultsBase: "/dashboard/scan/results",
-  documents: "/dashboard/documente",
+  documents: "/dashboard/scan/history",
+  documentsLegacy: "/dashboard/documente",
   resolve: "/dashboard/resolve",
   resolveLegacy: "/dashboard/checklists",
   aiSystems: "/dashboard/sisteme",
@@ -37,7 +38,7 @@ export function dashboardScanResultsRoute(scanId: string) {
 
 export const dashboardRouteGroups = {
   home: [dashboardRoutes.home],
-  scan: [dashboardRoutes.scan, dashboardRoutes.scanLegacy, dashboardRoutes.documents],
+  scan: [dashboardRoutes.scan, dashboardRoutes.scanLegacy, dashboardRoutes.documents, dashboardRoutes.documentsLegacy],
   resolve: [
     dashboardRoutes.resolve,
     dashboardRoutes.resolveLegacy,

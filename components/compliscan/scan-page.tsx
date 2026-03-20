@@ -200,7 +200,7 @@ export function ScanPageSurface() {
       <PageIntro
         eyebrow="Scanare"
         title="Pornesti analiza din sursa potrivita"
-        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Documente. Dupa scanare continui in Control sau Dovada."
+        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -530,10 +530,10 @@ function ScanWorkflowGuideCard({
   const nextStep =
     viewMode === "history"
       ? {
-          title: "Continui in Documente",
-          description: "Acolo gasesti istoricul complet, nu doar cele mai recente surse.",
+          title: "Continui in Istoric",
+          description: "Acolo gasesti arhiva completa, nu doar cele mai recente surse.",
           href: dashboardRoutes.documents,
-          cta: "Deschide Documente",
+          cta: "Deschide Istoric",
         }
       : sourceType === "manifest" || sourceType === "yaml"
         ? {
@@ -578,7 +578,7 @@ function ScanWorkflowGuideCard({
               detail={
                 agentModeActive
                   ? "Workspace-ul agentului propune, dar omul valideaza."
-                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru control sau audit."
+                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru rezolvare sau dovezi."
               }
             />
             <GuideCard
@@ -596,14 +596,14 @@ function ScanWorkflowGuideCard({
           viewMode === "history"
             ? "istoric complet"
             : sourceType === "manifest" || sourceType === "yaml"
-              ? "control operational"
-              : "executie si dovada"
+              ? "de rezolvat"
+              : "de rezolvat si rapoarte"
         }
         checklist={
           viewMode === "history"
             ? [
                 "verifici sursa recenta potrivita",
-                "sari in Documente pentru lista completa",
+                "sari in Istoric pentru lista completa",
                 "revii in flux doar daca ai o sursa noua",
               ]
             : sourceType === "manifest" || sourceType === "yaml"
@@ -614,7 +614,7 @@ function ScanWorkflowGuideCard({
                 ]
               : [
                   "citesti verdictul pentru sursa curenta",
-                  "deschizi task-urile derivate in Dovada",
+                  "deschizi task-urile derivate in De rezolvat",
                   "atasezi dovezi si livrezi separat",
                 ]
         }
