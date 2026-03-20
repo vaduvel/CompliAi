@@ -1547,6 +1547,7 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 - [x] blocurile operationale concurente au fost scoase din `Acasa`
   - `DriftCommandCenter`
   - `Snapshot & Activitate recenta`
+- [x] `Framework Readiness` este informativ-only pe `Acasa`
+  - butoanele locale `Vezi detalii` au fost scoase
 - [~] `Acasa` mai are de apropiat blueprint-ul pe compozitie fina
-  - readiness-ul inca are CTA-uri locale pe carduri
   - banner-ele legale raman temporar vizibile pana le mutam in suprafete dedicate

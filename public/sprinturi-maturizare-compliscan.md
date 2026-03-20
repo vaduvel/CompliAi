@@ -1419,3 +1419,4 @@ Actualizare suplimentara 2026-03-20:
   - `Top urgente` nu mai concureaza separat cu CTA-ul principal
 - `OnboardingProgress` a fost mutat din `Acasa` in `Setari`
 - `Acasa` nu mai expune `DriftCommandCenter` si `Snapshot & Activitate recenta`
+- cardurile de readiness au ramas informative pe `Acasa`, fara CTA-uri locale concurente

@@ -8,7 +8,6 @@ import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Layers, Shield, Shie
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
@@ -188,7 +187,6 @@ export default function DashboardPage() {
             status={gdprStatus}
             description="Conformitatea prelucrarii datelor"
             icon={CheckCircle2}
-            onViewDetails={() => router.push(dashboardRoutes.resolve)}
             ariaLabel={`GDPR: ${gdprScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
             legalTag="gdpr"
@@ -202,7 +200,6 @@ export default function DashboardPage() {
             status={nis2UrgentIncident ? "blocked" : nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
             description={nis2UrgentIncident ? "⚠ Incident critic — deadline DNSC < 4h" : nis2Score !== null ? "Maturitate cibernetică evaluată" : "Evaluare maturitate lipsă"}
             icon={Shield}
-            onViewDetails={() => router.push("/dashboard/nis2")}
             ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
             legalTag="nis2"
@@ -217,7 +214,6 @@ export default function DashboardPage() {
             status={aiActStatus}
             description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
             icon={Layers}
-            onViewDetails={() => router.push(dashboardRoutes.resolve)}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
             legalTag="ai-act"
@@ -231,7 +227,6 @@ export default function DashboardPage() {
             status={efacturaStatus}
             description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
             icon={FileText}
-            onViewDetails={() => router.push(dashboardRoutes.settings)}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
             legalTag="efactura"
@@ -245,7 +240,6 @@ export default function DashboardPage() {
             status={data.summary.score >= 80 ? "strong" : "review"}
             description="Media controalelor validate"
             icon={ShieldCheck}
-            onViewDetails={() => router.push(dashboardRoutes.reports)}
             ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
           />
         </div>
@@ -325,7 +319,6 @@ function ReadinessFrameworkCard({
   status,
   description,
   icon: Icon,
-  onViewDetails,
   ariaLabel,
   applicabilityCertainty,
   legalTag,
@@ -339,7 +332,6 @@ function ReadinessFrameworkCard({
   status: "strong" | "good" | "review" | "blocked"
   description?: string
   icon?: React.ElementType
-  onViewDetails?: () => void
   ariaLabel?: string
   applicabilityCertainty?: ApplicabilityCertainty
   legalTag?: ApplicabilityTag
@@ -422,17 +414,6 @@ function ReadinessFrameworkCard({
           </div>
         )}
       </div>
-      {onViewDetails && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onViewDetails}
-          className="group mt-5 w-full justify-between"
-        >
-          Vezi detalii
-          <ArrowRight className="size-4 text-eos-text-muted transition-transform group-hover:translate-x-1" strokeWidth={2} />
-        </Button>
-      )}
     </Card>
   )
 }

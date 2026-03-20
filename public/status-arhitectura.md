@@ -1817,3 +1817,4 @@ Asta este sanatos arhitectural pentru ca:
   - `stare + urgenta curenta`
   - apoi `health/readiness`
   - fara feed operational concurent
+- in plus, `Framework Readiness` a ramas strict informativ pe `Acasa`; handoff-urile catre alte zone nu mai sunt atașate fiecarui card

@@ -3323,6 +3323,7 @@ Validare dupa pass:
 - `Acasa` nu mai afiseaza workspace-urile concurente:
   - `DriftCommandCenter`
   - `Snapshot & Activitate recenta`
+- `Framework Readiness` a ramas informativ pe `Acasa`; cardurile nu mai au butoane locale `Vezi detalii`
 - copy-ul de intrare si handoff-ul din `Setari` folosesc acum vocabularul nou:
   - `Acasă`
   - `Scaneaza`
