@@ -47,6 +47,7 @@ import type {
   EvidenceRegistryEntry,
   PersistedTaskState,
 } from "@/lib/compliance/types"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 
 const TraceabilityMatrixCard = dynamic(
@@ -224,14 +225,14 @@ export default function AuditorVaultPage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/dashboard/checklists">
-                Remediere
+              <Link href={dashboardRoutes.resolve}>
+                De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/rapoarte">
-                Audit si export
+              <Link href={dashboardRoutes.reports}>
+                Rapoarte
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -271,10 +272,10 @@ export default function AuditorVaultPage() {
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href="/dashboard/checklists">Deschide Remediere</Link>
+                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard/rapoarte">Deschide Audit si export</Link>
+                <Link href={dashboardRoutes.reports}>Deschide Rapoarte</Link>
               </Button>
             </>
           }
@@ -440,14 +441,14 @@ function VaultQuickActionsCard() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/checklists">
-              Remediere
+            <Link href={dashboardRoutes.resolve}>
+              De rezolvat
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/rapoarte">
-              Audit si export
+            <Link href={dashboardRoutes.reports}>
+              Rapoarte
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>
@@ -673,7 +674,7 @@ function LegalMatrixCard({
             </p>
           </div>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/rapoarte">
+            <Link href={dashboardRoutes.reports}>
               Inapoi la rapoarte
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>

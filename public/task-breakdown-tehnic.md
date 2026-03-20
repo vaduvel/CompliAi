@@ -1464,3 +1464,39 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 
 - `Dashboard` foloseste acum `NextBestAction` ca singur bloc dominant de actiune
 - CTA-urile duplicate si handoff-urile concurente au fost eliminate pentru a respecta regula `one dominant page intent`
+
+### Actualizare 2026-03-20 - IA bridge EOS v1
+
+- [~] shell canonic peste `EOS v1`
+  - `Acasa / Scaneaza / De rezolvat / Rapoarte / Setari`
+  - contract de rute in `lib/compliscan/dashboard-routes.ts`
+- [x] ruta canonica `Scan Rezultate`
+  - `/dashboard/scan/results/[scanId]`
+  - handoff post-analiza mutat din `Documente` in rezultatul scanului curent
+- [~] CTA-uri cross-page primare normalizate
+  - `Dashboard`
+  - `Documente`
+  - `Remediere`
+  - `Audit si export`
+- [ ] mutarea suprafetelor interne pe paginile canonice
+  - `scan` sa nu mai fie doar alias la `scanari`
+  - `resolve` sa nu mai fie doar alias la `checklists`
+  - `reports` sa nu mai fie doar alias la `rapoarte`
+- [ ] reducerea handoff-urilor legacy ramase
+  - permalinkuri user-facing spre `Documente`
+  - CTA-uri secundare spre `Sisteme`, `Vault`, `Rapoarte` vechi unde nu mai sunt necesare
+
+### Actualizare 2026-03-20 - BP-2 partial
+
+- [x] `resolve` are owner canonic comun
+  - `components/compliscan/resolve-page.tsx`
+  - `checklists` ramane alias de compatibilitate
+- [x] `reports` are owner canonic comun
+  - `components/compliscan/reports-page.tsx`
+  - `rapoarte` ramane alias de compatibilitate
+- [x] `scan` are owner canonic comun
+  - `components/compliscan/scan-page.tsx`
+  - `scanari` ramane alias de compatibilitate
+- [~] reducerea handoff-urilor legacy ramase
+  - subnav-ul local `Flux scanare` foloseste acum `/dashboard/scan`
+  - share linkul principal pentru scan copiaza acum rezultatul canonic al ultimei scanari

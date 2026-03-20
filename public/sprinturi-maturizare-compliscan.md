@@ -1360,3 +1360,25 @@ Actualizare 2026-03-16 - Dashboard action authority
 
 - `Dashboard` a fost simplificat la un singur bloc dominant pentru actiunea recomandata (`NextBestAction`)
 - CTA-urile duplicate si handoff-urile concurente au fost scoase pentru claritate
+
+Actualizare suplimentara 2026-03-20:
+
+- a pornit bridge-ul oficial `IA noua peste EOS v1`, fara rewrite vizual
+- shell-ul foloseste acum top-level IA canonica:
+  - `Acasa`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+  - `Setari`
+- exista acum si ruta canonica pentru rezultatul unei scanari:
+  - `/dashboard/scan/results/[scanId]`
+- handoff-ul principal dupa analiza intra in rezultatul scanului, nu direct in `Documente`
+- rutele legacy raman active ca punte temporara pana cand suprafetele canonice primesc implementarea completa
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-2` a inceput cu inversarea suprafetelor canonice:
+  - `Resolve` are acum owner comun in `components/compliscan/resolve-page.tsx`
+  - `Reports` are acum owner comun in `components/compliscan/reports-page.tsx`
+  - `Scan` are acum owner comun in `components/compliscan/scan-page.tsx`
+- rutele vechi `checklists`, `rapoarte` si `scanari` raman active, dar doar ca aliasuri de compatibilitate peste aceleasi suprafete

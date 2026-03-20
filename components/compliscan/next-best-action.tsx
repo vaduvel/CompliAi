@@ -8,6 +8,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import type { CockpitTask } from "@/components/compliscan/types"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type NextBestActionProps = {
   task: CockpitTask | null
@@ -74,9 +75,9 @@ export function NextBestAction({
         : "Mai exista semnale active. Revizuieste alertele si inchide urmatorul risc cu impact real."
 
     const ctaHref = !hasEvidence
-      ? "/dashboard/scanare"
+      ? dashboardRoutes.scan
       : activeRiskCount > 0
-        ? "/dashboard/alerte"
+        ? dashboardRoutes.drifts
         : null
 
     return (

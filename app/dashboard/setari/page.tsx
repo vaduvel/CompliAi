@@ -31,6 +31,7 @@ import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/Su
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const DRIFT_OVERRIDE_OPTIONS = [
@@ -336,10 +337,10 @@ export default function SetariPage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href={dashboardRoutes.home}>Dashboard</Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/sisteme">Control</Link>
+              <Link href={dashboardRoutes.resolve}>De rezolvat</Link>
             </Button>
           </>
         }
@@ -360,12 +361,12 @@ export default function SetariPage() {
         <SectionBoundary
           eyebrow="Handoff"
           title="Configurezi aici, lucrezi in produs"
-          description="Setari ramane zona administrativa. Dupa context si acces revii in Dashboard, Control sau Dovada."
+          description="Setari ramane zona administrativa. Dupa context si acces revii in Dashboard sau in De rezolvat."
         />
         <HandoffCard
           title="Setari nu inlocuieste fluxul principal"
           description="Dupa configurare si verificare operationala, revii in zona potrivita de lucru."
-          destinationLabel="dashboard / control / dovada"
+          destinationLabel="dashboard / de rezolvat"
           checklist={[
             "nu tratezi Setari ca overview executiv",
             "folosesti Setari pentru context, acces si operare",
@@ -373,10 +374,10 @@ export default function SetariPage() {
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href="/dashboard">Deschide Dashboard</Link>
+                <Link href={dashboardRoutes.home}>Deschide Dashboard</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
               </Button>
             </>
           }

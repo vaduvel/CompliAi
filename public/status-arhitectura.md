@@ -1731,3 +1731,38 @@ Asta este sanatos arhitectural pentru ca:
 - `Dashboard` foloseste acum un singur bloc dominant de actiune (`NextBestAction`)
 - duplicarile de CTA si handoff concurent au fost eliminate
 - pagina ramane orientare, iar actiunea dominanta este clara fara concurenta vizuala
+
+## Actualizare 2026-03-20 - Bridge IA noua peste EOS v1
+
+- directia canonica este acum implementata explicit ca `IA noua + UX nou + skin EOS v1`
+- contractul de rutare este centralizat in `lib/compliscan/dashboard-routes.ts`
+- shell-ul foloseste vocabularul nou:
+  - `Acasa`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+  - `Setari`
+- rutele canonice exista deja ca suprafete publice in dashboard:
+  - `/dashboard/scan`
+  - `/dashboard/resolve`
+  - `/dashboard/reports`
+  - `/dashboard/settings`
+  - `/dashboard/scan/results/[scanId]`
+- `scan/results/[scanId]` este acum punctul canonic de handoff dupa analiza, fara sa mai trimita utilizatorul direct in `Documente`
+- starea arhitecturala ramane intentionat hibrida:
+  - shell-ul si handoff-urile primare urmeaza IA noua
+  - suprafetele interne `scanari/checklists/rapoarte/setari` continua temporar ca aliasuri peste runtime-ul vechi
+- urmatorul pas de arhitectura nu este un rewrite vizual, ci mutarea treptata a CTA-urilor si a suprafetelor interne pe paginile canonice
+
+## Actualizare 2026-03-20 - BP-2: proprietate canonica pe Resolve + Reports + Scan
+
+- `/dashboard/resolve` detine acum suprafata canonica prin `components/compliscan/resolve-page.tsx`
+- `/dashboard/checklists` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `/dashboard/reports` detine acum suprafata canonica prin `components/compliscan/reports-page.tsx`
+- `/dashboard/rapoarte` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `/dashboard/scan` detine acum suprafata canonica prin `components/compliscan/scan-page.tsx`
+- `/dashboard/scanari` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- asta reduce riscul de drift intre ruta noua si ruta veche:
+  - un singur owner de UI per suprafata
+  - aliasul vechi nu mai cere mentenanta paralela
+- pentru scanare, inclusiv subnavigarea locala si share linkul principal folosesc acum traseul canonic

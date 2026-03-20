@@ -30,6 +30,7 @@ import {
   isDriftSlaBreached,
 } from "@/lib/compliance/drift-lifecycle"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 export default function DriftPage() {
   const cockpit = useCockpitData()
@@ -120,7 +121,7 @@ export default function DriftPage() {
       <PageIntro
         eyebrow="Control / Drift"
         title="Tratezi schimbarea fata de baseline"
-        description="Preiei, escaladezi sau inchizi drift-ul aici. Inventarul si baseline-ul raman in Control, iar executia si dovada raman in Dovada."
+        description="Preiei, escaladezi sau inchizi drift-ul aici. Daca vrei queue-ul canonic sau livrabilul, continui in De rezolvat si Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -140,14 +141,14 @@ export default function DriftPage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/dashboard/sisteme">
-                Control
+              <Link href={dashboardRoutes.resolve}>
+                De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/checklists">
-                Dovada
+              <Link href={dashboardRoutes.reports}>
+                Rapoarte
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -172,23 +173,23 @@ export default function DriftPage() {
         <SectionBoundary
           eyebrow="Flux canonic"
           title="Drift-ul ramane separat de inventar si dovada"
-          description="Aici tratezi schimbarea fata de baseline. Pentru executie si dovada continui in Dovada."
+          description="Aici tratezi schimbarea fata de baseline. Pentru queue-ul principal si livrabil continui in De rezolvat si Rapoarte."
         />
         <HandoffCard
-          title="Handoff corect intre Control si Dovada"
-          description="Pastrezi drift-ul clar pe schimbare si decizie, iar executia si dovada raman in Dovada."
-          destinationLabel="control / dovada"
+          title="Handoff corect intre drift, queue si rapoarte"
+          description="Pastrezi drift-ul clar pe schimbare si decizie, iar executia si livrabilul stau in suprafetele canonice."
+          destinationLabel="de rezolvat / rapoarte"
           checklist={[
             "nu amesteci inventarul cu drift-ul activ",
-            "folosesti Dovada pentru executie si dovada propriu-zisa",
+            "folosesti De rezolvat pentru executie si Rapoarte pentru output",
           ]}
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href="/dashboard/sisteme">Deschide Control</Link>
+                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+                <Link href={dashboardRoutes.reports}>Deschide Rapoarte</Link>
               </Button>
             </>
           }

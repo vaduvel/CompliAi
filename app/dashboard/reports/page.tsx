@@ -1,5 +1,5 @@
 import { ReportsPageSurface } from "@/components/compliscan/reports-page"
 
-export default function LegacyReportsPage() {
+export default function ReportsPage() {
   return <ReportsPageSurface />
 }

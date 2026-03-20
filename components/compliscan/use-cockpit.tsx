@@ -31,6 +31,7 @@ import type {
   WorkspaceContext,
 } from "@/lib/compliance/types"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
+import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 
@@ -266,9 +267,10 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       const message = "Extrage mai intai textul documentului."
       setError(message)
       toast.error("Analiza nu poate porni", { description: message })
-      return false
+      return null
     }
 
+    const analyzedScanId = pendingScanId
     setScanning(true)
     setError(null)
     try {
@@ -288,12 +290,12 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       toast.success("Analiza finalizata", {
         description: "Findings, drift si task-uri au fost regenerate pentru documentul curent.",
       })
-      return true
+      return payload.state.scans.find((scan) => scan.id === analyzedScanId)?.id ?? analyzedScanId
     } catch (err) {
       const message = err instanceof Error ? err.message : "Eroare la analiza."
       setError(message)
       toast.error("Analiza a esuat", { description: message })
-      return false
+      return null
     } finally {
       setScanning(false)
     }
@@ -471,8 +473,10 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
   async function handleShareWithAccountant() {
     const link =
       typeof window !== "undefined"
-        ? `${window.location.origin}/dashboard/documente?scan=${latestScan?.id ?? "latest"}`
-        : "https://compliscan.local/dashboard/documente"
+        ? `${window.location.origin}${
+            latestScan?.id ? dashboardScanResultsRoute(latestScan.id) : dashboardRoutes.scan
+          }`
+        : "https://compliscan.local/dashboard/scan"
 
     try {
       await copyTextToClipboard(link)

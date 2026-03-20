@@ -3191,3 +3191,55 @@ Identificate prin analiza codului si audit vizual. Prioritate:
 8. `setari/page.tsx:517` — Input email + select fara `<label>` asociat
 9. `task-card.tsx` — Prioritate afisata ca "P1"/"P2" raw, netradus in romana
 
+---
+
+## 2026-03-20 — IA bridge EOS v1 (phase 1)
+
+- shell-ul runtime foloseste acum IA canonica `Acasa / Scaneaza / De rezolvat / Rapoarte / Setari` peste skin-ul `Evidence OS v1`
+- a fost introdus contractul comun de rute in `lib/compliscan/dashboard-routes.ts`
+- au fost create rutele canonice-punte:
+  - `/dashboard/scan`
+  - `/dashboard/resolve`
+  - `/dashboard/reports`
+  - `/dashboard/settings`
+- a fost introdusa pagina canonica de rezultat:
+  - `/dashboard/scan/results/[scanId]`
+- dupa analiza din `Scanare`, handoff-ul principal merge acum in `scan/results/[scanId]`, nu in `Documente`
+- `RecentScansCard` deschide acum rezultatul canonic al scanului curent pentru sursele de tip document
+- CTA-urile cross-page cele mai vizibile au fost aliniate la IA noua:
+  - `Dashboard`
+  - `Documente`
+  - `Remediere`
+  - `Audit si export`
+- paginile legacy raman vii ca alias / punte; nu au fost eliminate inca
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-2 - Suprafete canonice peste aliasurile vechi
+
+- `Resolve` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/resolve-page.tsx`
+  - folosita de `/dashboard/resolve`
+  - pastrata si in `/dashboard/checklists` ca punte de compatibilitate
+- `Reports` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/reports-page.tsx`
+  - folosita de `/dashboard/reports`
+  - pastrata si in `/dashboard/rapoarte` ca punte de compatibilitate
+- `Scan` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/scan-page.tsx`
+  - folosita de `/dashboard/scan`
+  - pastrata si in `/dashboard/scanari` ca punte de compatibilitate
+- vocabularul user-facing din cele doua suprafete canonice a fost aliniat la:
+  - `De rezolvat`
+  - `Rapoarte`
+- sub-navigarea locala `Flux scanare` foloseste acum ruta canonica `/dashboard/scan`
+- linkul de share pentru contabil copiaza acum rezultatul canonic al ultimei scanari, nu o intrare legacy in `Documente`
+- rutele legacy raman active, dar nu mai detin proprietatea suprafetelor principale
+
+Validare dupa BP-2 partial:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde

@@ -18,6 +18,7 @@ import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/
 import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 const SCAN_SOURCE_LABEL: Record<string, string> = {
   document: "Document scanat",
@@ -176,13 +177,13 @@ export default function DashboardPage() {
                   id: a.id,
                   label: a.message,
                   severity: a.severity === "high" || a.severity === "critical" ? "high" : "medium",
-                  href: "/dashboard/checklists",
+                  href: dashboardRoutes.resolve,
                 })),
                 ...activeDrifts.slice(0, 1).map((d) => ({
                   id: d.id,
                   label: d.summary,
                   severity: d.blocksAudit ? "high" : "medium",
-                  href: "/dashboard/control",
+                  href: dashboardRoutes.drifts,
                 })),
               ]
                 .slice(0, 3)
@@ -215,7 +216,7 @@ export default function DashboardPage() {
                     asChild
                     size="sm"
                   >
-                    <Link href="/dashboard/checklists">
+                    <Link href={dashboardRoutes.resolve}>
                       Pornește <ArrowRight className="ml-1.5 size-3.5" strokeWidth={2} />
                     </Link>
                   </Button>
@@ -271,7 +272,7 @@ export default function DashboardPage() {
             status={gdprStatus}
             description="Conformitatea prelucrarii datelor"
             icon={CheckCircle2}
-            onViewDetails={() => router.push("/dashboard/checklists")}
+            onViewDetails={() => router.push(dashboardRoutes.resolve)}
             ariaLabel={`GDPR: ${gdprScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
             legalTag="gdpr"
@@ -300,7 +301,7 @@ export default function DashboardPage() {
             status={aiActStatus}
             description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
             icon={Layers}
-            onViewDetails={() => router.push("/dashboard/sisteme")}
+            onViewDetails={() => router.push(dashboardRoutes.resolve)}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
             legalTag="ai-act"
@@ -314,7 +315,7 @@ export default function DashboardPage() {
             status={efacturaStatus}
             description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
             icon={FileText}
-            onViewDetails={() => router.push("/dashboard/setari")}
+            onViewDetails={() => router.push(dashboardRoutes.settings)}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
             legalTag="efactura"
@@ -328,7 +329,7 @@ export default function DashboardPage() {
             status={data.summary.score >= 80 ? "strong" : "review"}
             description="Media controalelor validate"
             icon={ShieldCheck}
-            onViewDetails={() => router.push("/dashboard/rapoarte/auditor-vault")}
+            onViewDetails={() => router.push(dashboardRoutes.reports)}
             ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
           />
         </div>
@@ -392,7 +393,7 @@ export default function DashboardPage() {
               <span>
                 Nicio sursă procesată.{" "}
                 <button
-                  onClick={() => router.push("/dashboard/scanari")}
+                  onClick={() => router.push(dashboardRoutes.scan)}
                   className="text-eos-primary underline-offset-2 hover:underline"
                 >
                   Pornește primul scan

@@ -12,6 +12,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 export default function TrustProfilePage() {
   const cockpit = useCockpitData()
@@ -278,8 +279,8 @@ export default function TrustProfilePage() {
               Copiaza linkul
             </Button>
             <Button asChild variant="outline">
-              <Link href="/dashboard/rapoarte">
-                Mergi la Audit si export
+              <Link href={dashboardRoutes.reports}>
+                Mergi la Rapoarte
               </Link>
             </Button>
           </>

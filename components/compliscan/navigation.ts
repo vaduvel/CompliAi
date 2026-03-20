@@ -1,16 +1,17 @@
 "use client"
 
 import {
-  BarChart3,
   BookOpen,
   Bot,
   Building2,
   CheckCircle2,
   ClipboardList,
   FileSearch,
+  Flag,
   FolderKanban,
   FolderOpen,
   GitPullRequestArrow,
+  Home,
   Scan,
   Settings,
   ShieldAlert,
@@ -19,7 +20,14 @@ import {
   TriangleAlert,
 } from "lucide-react"
 
+import { dashboardRouteGroups, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+
 export type DashboardNavId =
+  | "home"
+  | "scan"
+  | "resolve"
+  | "reports"
+  | "settings"
   | "control"
   | "scanare"
   | "dovada"
@@ -47,6 +55,7 @@ export type DashboardNavItem = {
   label: string
   href: string
   icon: typeof Scan
+  description?: string
   matchers?: string[]
 }
 
@@ -58,46 +67,44 @@ export type DashboardNavSection = {
 
 export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   {
-    id: "dashboard",
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: BarChart3,
-    matchers: ["/dashboard"],
+    id: "home",
+    label: "Acasă",
+    href: dashboardRoutes.home,
+    icon: Home,
+    matchers: [...dashboardRouteGroups.home],
+    description: "stare, urgențe și pasul curent",
   },
   {
-    id: "scanare",
-    label: "Scanare",
-    href: "/dashboard/scanari",
+    id: "scan",
+    label: "Scanează",
+    href: dashboardRoutes.scan,
     icon: Scan,
-    matchers: ["/dashboard/scanari", "/dashboard/documente"],
+    matchers: [...dashboardRouteGroups.scan],
+    description: "surse, rezultate și istoric",
   },
   {
-    id: "control",
-    label: "Control",
-    href: "/dashboard/sisteme",
-    icon: ShieldPlus,
-    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2", "/dashboard/agents", "/dashboard/vendor-review"],
+    id: "resolve",
+    label: "De rezolvat",
+    href: dashboardRoutes.resolve,
+    icon: Flag,
+    matchers: [...dashboardRouteGroups.resolve],
+    description: "findings, drift și acțiuni",
   },
   {
-    id: "dovada",
-    label: "Dovada",
-    href: "/dashboard/checklists",
+    id: "reports",
+    label: "Rapoarte",
+    href: dashboardRoutes.reports,
     icon: FileSearch,
-    matchers: ["/dashboard/checklists", "/dashboard/rapoarte"],
+    matchers: [...dashboardRouteGroups.reports],
+    description: "dovezi, politici și export",
   },
   {
-    id: "politici",
-    label: "Politici",
-    href: "/dashboard/politici",
-    icon: BookOpen,
-    matchers: ["/dashboard/politici", "/dashboard/generator"],
-  },
-  {
-    id: "setari",
-    label: "Setari",
-    href: "/dashboard/setari",
+    id: "settings",
+    label: "Setări",
+    href: dashboardRoutes.settings,
     icon: Settings,
-    matchers: ["/dashboard/setari"],
+    matchers: [...dashboardRouteGroups.settings],
+    description: "workspace, acces și operațional",
   },
 ] as const
 
@@ -106,7 +113,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "scanare",
     label: "Scanare",
     items: [
-      { id: "scanari", label: "Flux scanare", href: "/dashboard/scanari", icon: Scan },
+      { id: "scanari", label: "Flux scanare", href: dashboardRoutes.scan, icon: Scan },
       { id: "documente", label: "Documente", href: "/dashboard/documente", icon: FolderOpen },
     ],
   },
@@ -157,7 +164,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
 export const mobileNavItems = [...dashboardPrimaryNavItems] as const
 
 export function isRouteActive(pathname: string, href: string) {
-  if (href === "/dashboard") return pathname === "/dashboard"
+  if (href === dashboardRoutes.home) return pathname === dashboardRoutes.home
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

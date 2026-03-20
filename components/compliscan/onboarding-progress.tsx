@@ -5,6 +5,7 @@ import Link from "next/link"
 import { CheckCircle2, Circle, ChevronDown, ChevronUp } from "lucide-react"
 
 import { Card } from "@/components/evidence-os/Card"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type OnboardingStep = {
   id: string
@@ -52,56 +53,56 @@ export function OnboardingProgress({
       id: "profile",
       label: "Completează profilul organizației",
       hint: "CUI, sector, număr angajați",
-      href: "/dashboard",
+      href: dashboardRoutes.home,
       done: hasProfile,
     },
     {
       id: "maturity",
       label: "Evaluează maturitatea NIS2",
       hint: "Auto-evaluare pe 10 domenii Art.21(2)",
-      href: "/dashboard/nis2/maturitate",
+      href: dashboardRoutes.nis2Maturity,
       done: hasMaturity,
     },
     {
       id: "ai",
       label: "Adaugă primul sistem AI în inventar",
       hint: "Completează fișa de sistem AI",
-      href: "/dashboard/sisteme",
+      href: dashboardRoutes.aiSystems,
       done: hasAiSystems,
     },
     {
       id: "gdpr",
       label: "Generează prima politică GDPR",
       hint: "Politică de confidențialitate sau DPA",
-      href: "/dashboard/politici",
+      href: dashboardRoutes.policies,
       done: gdprProgress > 0,
     },
     {
       id: "vendors",
       label: "Importă furnizorii din e-Factura",
       hint: "Registru furnizori NIS2 Art.21(2)(d)",
-      href: "/dashboard/nis2",
+      href: dashboardRoutes.nis2,
       done: hasVendors,
     },
     {
       id: "scan",
       label: "Scanează un document existent",
       hint: "Politică, contract sau procedură internă",
-      href: "/dashboard/scanare",
+      href: dashboardRoutes.scan,
       done: hasScans,
     },
     {
       id: "finding",
       label: "Rezolvă primul finding",
       hint: "Închide o problemă din lista de acțiuni",
-      href: "/dashboard/checklists",
+      href: dashboardRoutes.resolve,
       done: hasResolvedTasks,
     },
     {
       id: "dossier",
       label: "Descarcă dosarul de control",
       hint: "ZIP complet pregătit pentru audit DNSC",
-      href: "/dashboard/dovezi",
+      href: dashboardRoutes.reports,
       done: false,
     },
   ]

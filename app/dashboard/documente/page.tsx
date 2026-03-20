@@ -14,6 +14,7 @@ import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 const LatestDocumentSection = dynamic(
   () =>
@@ -114,13 +115,13 @@ export default function DocumentePage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/dashboard/scanari">
+              <Link href={dashboardRoutes.scan}>
                 Flux scanare
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/checklists">
+              <Link href={dashboardRoutes.resolve}>
                 Dovada
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
@@ -176,10 +177,10 @@ export default function DocumentePage() {
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href="/dashboard/scanari">Deschide Flux scanare</Link>
+                <Link href={dashboardRoutes.scan}>Deschide Flux scanare</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+                <Link href={dashboardRoutes.resolve}>Deschide Dovada</Link>
               </Button>
             </>
           }

@@ -31,6 +31,7 @@ import {
   formatDriftLifecycleStatus,
   isDriftSlaBreached,
 } from "@/lib/compliance/drift-lifecycle"
+import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type {
   ComplianceDriftRecord,
   ScanFinding,
@@ -274,13 +275,13 @@ export function DriftCommandCenter({
                 actions={
                   <>
                     <Button asChild variant="outline">
-                      <Link href="/dashboard/alerte">Vezi drifturile</Link>
+                      <Link href={dashboardRoutes.drifts}>Vezi drifturile</Link>
                     </Button>
                     <Button asChild variant="default">
-                      <Link href="/dashboard/checklists">Deschide remedierea</Link>
+                      <Link href={dashboardRoutes.resolve}>Deschide remedierea</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link href="/dashboard/sisteme">Vezi controlul</Link>
+                      <Link href={dashboardRoutes.aiSystems}>Vezi controlul</Link>
                     </Button>
                   </>
                 }
@@ -321,12 +322,12 @@ export function DriftCommandCenter({
               actions={
                 <>
                   <Button asChild variant="default">
-                    <Link href="/dashboard/sisteme">
+                    <Link href={dashboardRoutes.aiSystems}>
                       {hasValidatedBaseline ? "Verifică controlul" : "Validează baseline-ul"}
                     </Link>
                   </Button>
                   <Button asChild variant="outline">
-                    <Link href="/dashboard/scanari">Rulează un scan nou</Link>
+                    <Link href={dashboardRoutes.scan}>Rulează un scan nou</Link>
                   </Button>
                 </>
               }
@@ -346,8 +347,8 @@ function sourceLabel(scan: ScanRecord | null) {
 }
 
 function sourceHref(scan: ScanRecord) {
-  if (scan.sourceKind === "manifest" || scan.sourceKind === "yaml") return "/dashboard/sisteme"
-  return "/dashboard/documente"
+  if (scan.sourceKind === "manifest" || scan.sourceKind === "yaml") return dashboardRoutes.aiSystems
+  return dashboardScanResultsRoute(scan.id)
 }
 
 function sourceActionLabel(scan: ScanRecord) {
@@ -759,10 +760,10 @@ export function RecentScansCard({
             </p>
           </div>
           <Link
-            href="/dashboard/scanari"
+            href={dashboardRoutes.scan}
             className="text-sm font-medium text-eos-text transition hover:text-eos-primary"
           >
-            Mergi la Scanari
+            Mergi la Scanează
           </Link>
         </div>
       </CardHeader>
@@ -774,8 +775,8 @@ export function RecentScansCard({
             className="border-eos-border bg-eos-surface-variant py-8"
             actions={
               <Button asChild variant="default">
-                <Link href="/dashboard/scanari">
-                  Deschide Scanari
+                <Link href={dashboardRoutes.scan}>
+                  Deschide Scanează
                 </Link>
               </Button>
             }
@@ -867,7 +868,7 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
           {tasks.length} actiuni deschise generate din drift
         </p>
         <Link
-          href="/dashboard/rapoarte"
+          href={dashboardRoutes.resolve}
           className="text-sm text-eos-primary hover:underline"
         >
           Rezolva in Remediere →
@@ -891,7 +892,7 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
             </p>
             <div className="mt-4">
               <Button asChild variant="outline">
-                <Link href="/dashboard/rapoarte">
+                <Link href={dashboardRoutes.resolve}>
                   Vezi task si dovezi →
                 </Link>
               </Button>

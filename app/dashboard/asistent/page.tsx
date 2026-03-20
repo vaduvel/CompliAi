@@ -18,6 +18,7 @@ import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ScrollArea } from "@/components/evidence-os/ScrollArea"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ChatMessage } from "@/lib/compliance/types"
 
 const assistantSuggestions = [
@@ -154,14 +155,14 @@ export default function AsistentPage() {
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/dashboard">
+              <Link href={dashboardRoutes.home}>
                 Dashboard
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/checklists">
-                Dovada
+              <Link href={dashboardRoutes.resolve}>
+                De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -184,7 +185,7 @@ export default function AsistentPage() {
         <SectionBoundary
           eyebrow="Flux canonic"
           title="Asistentul explica si te redirectioneaza, nu executa in locul produsului"
-          description="Poti clarifica riscul, obligatia sau urmatorul pas, apoi revii in Dashboard, Scanare, Control sau Dovada pentru actiunea reala."
+          description="Poti clarifica riscul, obligatia sau urmatorul pas, apoi revii in Dashboard, Scaneaza sau De rezolvat pentru actiunea reala."
           support={
             <div className="grid gap-4 md:grid-cols-3">
               <GuideCard
@@ -205,7 +206,7 @@ export default function AsistentPage() {
         <HandoffCard
           title="Dupa clarificare revii in flow-ul real"
           description="Asistentul nu inchide task-uri, nu valideaza controlul si nu livreaza audit pack-ul in locul tau. Il folosesti pentru orientare, apoi continui in pagina potrivita."
-          destinationLabel="dashboard / scanare / dovada"
+          destinationLabel="dashboard / scaneaza / de rezolvat"
           checklist={[
             "nu tratezi raspunsul ca verdict definitiv",
             "nu sari peste validarea umana",
@@ -214,10 +215,10 @@ export default function AsistentPage() {
           actions={
             <>
               <Button asChild variant="outline">
-                <Link href="/dashboard/scanari">Deschide Scanare</Link>
+                <Link href={dashboardRoutes.scan}>Deschide Scaneaza</Link>
               </Button>
               <Button asChild>
-                <Link href="/dashboard/checklists">Deschide Dovada</Link>
+                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
               </Button>
             </>
           }

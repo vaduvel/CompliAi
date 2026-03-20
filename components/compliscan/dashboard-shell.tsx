@@ -111,7 +111,7 @@ export function DashboardShell({
             <CompliScanLogoLockup
               variant="flat"
               size="md"
-              subtitle="scanare, control si dovada cu validare umana"
+              subtitle="scanezi, rezolvi si dovedesti cu validare umana"
               titleClassName="text-eos-text"
               subtitleClassName="text-eos-text-muted"
             />
@@ -147,17 +147,7 @@ export function DashboardShell({
                       <div className="min-w-0 flex-1">
                         <span className="block font-medium">{item.label}</span>
                         <span className="mt-0.5 block truncate text-[11px] text-eos-text-muted">
-                          {item.id === "dashboard"
-                            ? "readiness, drift si pasul curent"
-                            : item.id === "scanare"
-                            ? "surse, verdict si istoric"
-                            : item.id === "control"
-                              ? "discovery, baseline si drift"
-                              : item.id === "dovada"
-                                ? "remediere, dovezi si livrabil"
-                                : item.id === "politici"
-                                  ? "template-uri, confirmare si versiuni"
-                                  : "workspace, acces si operational"}
+                          {item.description}
                         </span>
                       </div>
                       {active ? (
@@ -172,7 +162,7 @@ export function DashboardShell({
             </div>
 
             <div className="mt-6 rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4 text-xs leading-6 text-eos-text-muted">
-              Sub-sectiunile raman in tabs locale, ca sa nu concureze cu traseul principal.
+              Zonele detaliate raman in tabs locale si pagini suport, ca sa nu concureze cu traseul principal.
             </div>
           </div>
 

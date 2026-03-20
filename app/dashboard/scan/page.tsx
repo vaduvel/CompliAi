@@ -1,5 +1,5 @@
 import { ScanPageSurface } from "@/components/compliscan/scan-page"
 
-export default function LegacyScanariPage() {
+export default function ScanPage() {
   return <ScanPageSurface />
 }

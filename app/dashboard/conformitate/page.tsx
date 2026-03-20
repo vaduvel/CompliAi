@@ -18,6 +18,7 @@ import {
   type AssessmentAnswers,
   type AssessmentResult,
 } from "@/lib/compliance/ai-conformity-assessment"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 // ── Answer selector ───────────────────────────────────────────────────────────
 
@@ -245,7 +246,7 @@ export default function ConformitatePage() {
               </p>
             </div>
             <Button asChild size="sm" variant="outline">
-              <a href="/dashboard/sisteme">Mergi la Sisteme →</a>
+              <a href={dashboardRoutes.resolve}>Mergi la De rezolvat →</a>
             </Button>
           </CardContent>
         </Card>
