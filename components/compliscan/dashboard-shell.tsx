@@ -16,6 +16,7 @@ import {
   isNavItemActive,
   mobileNavItems,
 } from "@/components/compliscan/navigation"
+import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
 import { Button } from "@/components/evidence-os/Button"
 import {
@@ -59,6 +60,14 @@ export function DashboardShell({
   const [switchingMembershipId, setSwitchingMembershipId] = useState<string | null>(null)
   const currentUser = initialUser
   const memberships = initialMemberships
+
+  // Blueprint rule 8: badge on "De rezolvat" = critical + high findings count
+  const cockpit = useCockpitData()
+  const resolveBadgeCount = cockpit.data
+    ? cockpit.data.state.findings.filter(
+        (f) => f.severity === "critical" || f.severity === "high"
+      ).length
+    : 0
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" })
@@ -154,6 +163,10 @@ export function DashboardShell({
                         <span className="rounded-full bg-eos-primary px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-eos-primary-text">
                           acum
                         </span>
+                      ) : item.id === "resolve" && resolveBadgeCount > 0 ? (
+                        <span className="rounded-full bg-eos-error-soft px-2 py-0.5 text-[10px] font-bold text-eos-error">
+                          {resolveBadgeCount}
+                        </span>
                       ) : null}
                     </Link>
                   )
@@ -244,7 +257,7 @@ export function DashboardShell({
       </div>
 
       <FloatingAssistant pathname={pathname} />
-      <MobileBottomNav items={[...mobileNavItems]} activeHref={pathname} />
+      <MobileBottomNav items={[...mobileNavItems]} activeHref={pathname} resolveBadgeCount={resolveBadgeCount} />
     </div>
   )
 }
