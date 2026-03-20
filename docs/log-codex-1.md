@@ -532,3 +532,24 @@ Validare dupa pas:
 - `npm test -- app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/server/anaf-company-lookup.test.ts lib/compliance/intake-engine.test.ts` -> verde (`22/22`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - Wave 2.3 vendor hints din e-Factura / importuri
+
+- validatorul e-Factura extrage acum si `supplierCui` / `customerCui` din `AccountingSupplierParty` si `AccountingCustomerParty`
+- importul `NIS2` din e-Factura agrega furnizorii pe `CUI` cand exista, altfel pe nume, si retine `invoiceCount` pentru contextul sursei
+- `Nis2Vendor` poate pastra acum si `cui`, iar notele de import explica provenienta mai clar
+- s-au adaugat teste pentru:
+  - parserul e-Factura
+  - agregarea / deduplicarea vendorilor in `nis2-store`
+  - ruta `app/api/nis2/vendors/import-efactura`
+
+Validare dupa pas:
+
+- `npm test -- lib/compliance/efactura-validator.test.ts lib/server/nis2-store.test.ts app/api/nis2/vendors/import-efactura/route.test.ts` -> verde (`21/21`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+
+## Clarificare 2026-03-20 seara - stare git reala pentru smart intake
+
+- inspectia git arata ca `Wave 1.1` este conservat pe `origin/main`
+- `Wave 2.1`, `Wave 2.2` si `Wave 2.3` sunt conservate pe firul `codex/smart-intake-wizard` si asteapta promovarea curata spre `main`
+- intrarea mai veche care marca `Wave 2.1` ca fiind deja pe `main` trebuie tratata ca stare tinta, nu ca stare confirmata de git

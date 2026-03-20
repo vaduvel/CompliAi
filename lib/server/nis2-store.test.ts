@@ -24,6 +24,7 @@ import {
   updateVendor,
   deleteVendor,
   saveNis2Assessment,
+  upsertVendorsFromEfactura,
 } from "./nis2-store"
 
 const EMPTY_STATE = {
@@ -235,6 +236,62 @@ describe("nis2-store", () => {
     expect(vendor.hasSecurityClause).toBe(true)
     expect(vendor.id).toMatch(/^nis2-/)
     expect(vendor.createdAtISO).toBeDefined()
+  })
+
+  it("importa furnizori din e-Factura si pastreaza CUI-ul detectat", async () => {
+    fsMocks.readFileMock.mockRejectedValue(new Error("ENOENT"))
+
+    const written: string[] = []
+    fsMocks.writeFileMock.mockImplementation((_path: string, content: string) => {
+      written.push(content)
+      return Promise.resolve()
+    })
+
+    const result = await upsertVendorsFromEfactura("org-1", [
+      { name: "Amazon Web Services EMEA SARL", cui: "RO12345678", invoiceCount: 2 },
+    ])
+
+    expect(result.added).toBe(1)
+    expect(result.techVendorsWithoutDpa).toEqual(["Amazon Web Services EMEA SARL"])
+
+    const saved = JSON.parse(written[0])
+    expect(saved.vendors[0].name).toBe("Amazon Web Services EMEA SARL")
+    expect(saved.vendors[0].cui).toBe("RO12345678")
+    expect(saved.vendors[0].notes).toContain("RO12345678")
+    expect(saved.vendors[0].notes).toContain("2 validări e-Factura")
+  })
+
+  it("nu creeaza duplicate cand vendorul exista deja cu acelasi CUI", async () => {
+    fsMocks.readFileMock.mockResolvedValue(
+      JSON.stringify({
+        assessment: null,
+        incidents: [],
+        vendors: [
+          {
+            id: "nis2-aws",
+            name: "AWS EMEA",
+            cui: "RO12345678",
+            service: "Cloud hosting",
+            riskLevel: "high",
+            hasSecurityClause: false,
+            hasIncidentNotification: false,
+            hasAuditRight: false,
+            notes: "",
+            createdAtISO: "2026-01-01T00:00:00.000Z",
+            updatedAtISO: "2026-01-01T00:00:00.000Z",
+          },
+        ],
+        updatedAtISO: "2026-01-01T00:00:00.000Z",
+      })
+    )
+
+    const result = await upsertVendorsFromEfactura("org-1", [
+      { name: "Amazon Web Services EMEA SARL", cui: "RO12345678" },
+    ])
+
+    expect(result.added).toBe(0)
+    expect(result.skipped).toBe(1)
+    expect(fsMocks.writeFileMock).not.toHaveBeenCalled()
   })
 
   // ── updateVendor ────────────────────────────────────────────────────────────

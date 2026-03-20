@@ -4,6 +4,7 @@
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
+import { validateCUI } from "@/lib/server/request-validation"
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 import { hasSupabaseConfig, supabaseUpsert } from "@/lib/server/supabase-rest"
 
@@ -56,6 +57,7 @@ export type Nis2VendorRiskLevel = "low" | "medium" | "high" | "critical"
 export type Nis2Vendor = {
   id: string
   name: string
+  cui?: string
   service: string
   riskLevel: Nis2VendorRiskLevel
   hasSecurityClause: boolean
@@ -74,6 +76,12 @@ export type Nis2Vendor = {
   dataProcessingVolume?: "none" | "low" | "high"   // volum date procesate — estimare
   lastReviewDate?: string                           // ultima revizuire contract (ISO)
   nextReviewDue?: string                            // lastReviewDate + 12 luni (ISO)
+}
+
+export type EfacturaSupplierImportRecord = {
+  name: string
+  cui?: string
+  invoiceCount?: number
 }
 
 export type Nis2AssessmentRecord = {
@@ -347,32 +355,47 @@ export async function deleteVendor(orgId: string, vendorId: string): Promise<boo
 
 /**
  * Upsert furnizori din validările e-Factura în registrul NIS2.
- * Dedup pe name (case-insensitive) — nu creează duplicate.
+ * Dedup pe CUI când există, altfel pe nume (case-insensitive) — nu creează duplicate.
  * Returnează numărul de furnizori nou adăugați.
  */
 export async function upsertVendorsFromEfactura(
   orgId: string,
-  supplierNames: string[]
+  supplierRecords: EfacturaSupplierImportRecord[]
 ): Promise<{ added: number; skipped: number; techVendorsWithoutDpa: string[] }> {
   const state = await readNis2State(orgId)
-  const existingNames = new Set(state.vendors.map((v) => v.name.toLowerCase().trim()))
+  const existingKeys = new Set(
+    state.vendors.flatMap((vendor) => buildVendorIdentityKeys(vendor.name, vendor.cui))
+  )
   const now = new Date().toISOString()
   let added = 0
   let skipped = 0
   const newVendors: Nis2Vendor[] = []
   const techVendorsWithoutDpa: string[] = []
 
-  for (const name of supplierNames) {
-    const normalized = name.trim()
-    if (!normalized || existingNames.has(normalized.toLowerCase())) {
+  for (const record of supplierRecords) {
+    const normalizedName = record.name.trim()
+    const normalizedCui = record.cui ? validateCUI(record.cui) ?? undefined : undefined
+    if (!normalizedName) {
       skipped++
       continue
     }
-    existingNames.add(normalized.toLowerCase())
+
+    const identityKeys = buildVendorIdentityKeys(normalizedName, normalizedCui)
+    if (identityKeys.some((key) => existingKeys.has(key))) {
+      skipped++
+      continue
+    }
+    identityKeys.forEach((key) => existingKeys.add(key))
+
     // Sprint 5.1: 3-level detection
-    const detection = detectTechVendor(normalized, "")
+    const detection = detectTechVendor(normalizedName, normalizedCui ?? "")
     const { isTech, confidence, reason } = detection
-    if (isTech) techVendorsWithoutDpa.push(normalized)
+    if (isTech) techVendorsWithoutDpa.push(normalizedName)
+
+    const invoiceCount =
+      typeof record.invoiceCount === "number" && Number.isFinite(record.invoiceCount)
+        ? Math.max(1, Math.trunc(record.invoiceCount))
+        : 1
 
     let notes: string
     if (isTech && confidence === "high") {
@@ -383,9 +406,17 @@ export async function upsertVendorsFromEfactura(
       notes = "Importat automat din validările e-Factura. Completează detaliile de securitate."
     }
 
+    if (normalizedCui) {
+      notes = `${notes} CUI detectat: ${normalizedCui}.`
+    }
+    if (invoiceCount > 1) {
+      notes = `${notes} Detectat în ${invoiceCount} validări e-Factura.`
+    }
+
     newVendors.push({
       id: uid(),
-      name: normalized,
+      name: normalizedName,
+      ...(normalizedCui ? { cui: normalizedCui } : {}),
       service: isTech ? "Furnizor tech/cloud/SaaS (detectat automat)" : "Furnizor detectat din e-Factura",
       riskLevel: isTech && confidence === "high" ? "high" : isTech ? "medium" : "medium",
       hasSecurityClause: false,
@@ -408,6 +439,12 @@ export async function upsertVendorsFromEfactura(
   }
 
   return { added, skipped, techVendorsWithoutDpa }
+}
+
+function buildVendorIdentityKeys(name: string, cui?: string) {
+  const keys = [`name:${name.trim().toLowerCase()}`]
+  if (cui) keys.push(`cui:${cui}`)
+  return keys
 }
 
 // ── Sprint 4: DNSC Registration Status ───────────────────────────────────────

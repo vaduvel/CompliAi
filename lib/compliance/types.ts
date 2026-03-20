@@ -239,7 +239,9 @@ export type EFacturaValidationRecord = {
   invoiceNumber?: string
   issueDate?: string
   supplierName?: string
+  supplierCui?: string
   customerName?: string
+  customerCui?: string
   errors: string[]
   warnings: string[]
   createdAtISO: string

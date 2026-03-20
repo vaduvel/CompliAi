@@ -16,6 +16,14 @@ function findTagValue(xml: string, tag: string) {
   return match?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() || ""
 }
 
+function findTagBlock(xml: string, tag: string) {
+  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const pattern = new RegExp(
+    `<(?:(?:\\w|-)+:)?${escapedTag}(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/(?:(?:\\w|-)+:)?${escapedTag}>`,
+    "i"
+  )
+  return xml.match(pattern)?.[1] || ""
+}
 
 function hasTag(xml: string, tag: string) {
   const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -27,6 +35,12 @@ function countTags(xml: string, tag: string) {
   const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const pattern = new RegExp(`<(?:(?:\\w|-)+:)?${escapedTag}(?=[\\s>])`, "gi")
   return (xml.match(pattern) || []).length
+}
+
+function normalizePartyTaxId(value: string) {
+  const trimmed = value.replace(/\s+/g, "").toUpperCase()
+  if (!trimmed) return ""
+  return /^(RO)?\d{2,10}$/.test(trimmed) ? trimmed : ""
 }
 
 export function validateEFacturaXml({
@@ -166,8 +180,18 @@ export function validateEFacturaXml({
     .map((m) => m[1]?.trim() || "")
     .filter(Boolean)
 
-  const supplierName = registrationNames[0] || findTagValue(source, "RegistrationName")
-  const customerName = registrationNames[1] || ""
+  const supplierPartyBlock = findTagBlock(source, "AccountingSupplierParty")
+  const customerPartyBlock = findTagBlock(source, "AccountingCustomerParty")
+  const supplierName =
+    findTagValue(supplierPartyBlock, "RegistrationName") ||
+    registrationNames[0] ||
+    findTagValue(source, "RegistrationName")
+  const customerName =
+    findTagValue(customerPartyBlock, "RegistrationName") ||
+    registrationNames[1] ||
+    ""
+  const supplierCui = normalizePartyTaxId(findTagValue(supplierPartyBlock, "CompanyID"))
+  const customerCui = normalizePartyTaxId(findTagValue(customerPartyBlock, "CompanyID"))
 
   return {
     id: `efxml-${Math.random().toString(36).slice(2, 10)}`,
@@ -176,7 +200,9 @@ export function validateEFacturaXml({
     invoiceNumber: invoiceNumber || undefined,
     issueDate: issueDate || undefined,
     supplierName: supplierName || undefined,
+    supplierCui: supplierCui || undefined,
     customerName: customerName || undefined,
+    customerCui: customerCui || undefined,
     errors,
     warnings,
     createdAtISO: nowISO,
