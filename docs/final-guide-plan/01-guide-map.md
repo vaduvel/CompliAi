@@ -78,7 +78,8 @@ Ordinea recomandata de citire:
 2. `01-guide-map.md`
 3. `02-ux-ia-blueprint.md`
 4. `03-ux-wireframe-prototype.jsx`
-5. documentele de wave active si logurile curente
+5. `compliscan-ui-prompt.md` daca wave-ul atinge stratul vizual sau Design System
+6. documentele de wave active si logurile curente
 
 Cand facem implementari noi:
 - nu stergem din sursa master
@@ -90,9 +91,17 @@ Cand facem implementari noi:
 Pentru forma finala a aplicatiei, pachetul UX canonic este:
 - `02-ux-ia-blueprint.md` pentru arhitectura informationala si regulile de navigare
 - `03-ux-wireframe-prototype.jsx` pentru traducerea vizuala a blueprint-ului in ecrane si prioritati de interactiune
+- `compliscan-ui-prompt.md` pentru implementarea vizuala consistenta in wave-urile care ating Design System-ul
 
 Fisierele:
 - `compliscan-ia-revizuita.md`
 - `compliscan-ux-wireframe.jsx`
 
 raman in folder ca originale pastrate pentru provenance si comparatie, dar referinta de lucru merge pe variantele canonice numerotate.
+
+## 9. Cum legam wave-urile de ghidul final
+
+Cand deschidem un wave nou plecat din acest folder:
+- folosim blueprint-ul si wireframe-ul ca tinta de produs
+- folosim `compliscan-ui-prompt.md` doar daca wave-ul chiar atinge stratul vizual
+- tinem jurnalul wave-ului separat, astfel incat executia sa nu aglomereze ghidul canonic

@@ -726,3 +726,20 @@ Validare după pas:
 Validare după pas:
 
 - pass de documentatie; fara validare runtime necesara
+
+## Actualizare 2026-03-20 - Wave 0 UX foundation pornit din final guide plan
+
+- in worktree-ul curat a aparut un nou fir local de executie pentru `Wave 0`, pe branchul `wave0/ux-foundation-ds-v2`
+- `docs/final-guide-plan/compliscan-ui-prompt.md` introduce companionul de implementare UI pentru `Design System v2.0`, plecat din blueprint-ul UX canonic
+- `styles/tokens.css` adauga layer-ul de tokeni `Warm Graphite`, iar `app/globals.css` il importa in shell-ul runtime
+- `docs/wave0-log/WAVE0-LOG.md` pastreaza separat jurnalul wave-ului, astfel incat progresul de executie sa nu se piarda in afara ghidului final
+- pasul actual ramane intentionat de fundatie:
+  - token layer si wiring global
+  - document de implementare UI
+  - log de wave
+  - fara rescrierea inca a shell-ului sau a paginilor runtime
+
+Validare după pas:
+
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest pass
+- `npm run build` -> verde
