@@ -1,27 +1,240 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { useParams } from "next/navigation"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react"
 
 import { RecentScansCard } from "@/components/compliscan/route-sections"
-import { ScanVerdictsTab } from "@/components/compliscan/scanari/scan-verdicts-tab"
-import { buildScanInsights, useCockpitData } from "@/components/compliscan/use-cockpit"
+import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
+import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
+import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
-function sourceBadge(scan: { sourceKind?: "document" | "manifest" | "yaml" }) {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function frameworkFromLegal(ref?: string): string {
+  if (!ref) return "General"
+  const r = ref.toUpperCase()
+  if (r.includes("GDPR")) return "GDPR"
+  if (r.includes("AI ACT") || r.includes("EU AI")) return "AI Act"
+  if (r.includes("NIS2") || r.includes("NIS 2")) return "NIS2"
+  if (r.includes("FACTURA") || r.includes("ANAF") || r.includes("CIUS")) return "e-Factura"
+  return "General"
+}
+
+function ageLabel(iso: string): string {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
+  if (days === 0) return "azi"
+  if (days === 1) return "ieri"
+  if (days < 30) return `${days}z`
+  return `${Math.floor(days / 30)}l`
+}
+
+function sourceBadgeLabel(scan: { sourceKind?: string }) {
   if (scan.sourceKind === "manifest") return "repo / manifest"
   if (scan.sourceKind === "yaml") return "compliscan.yaml"
   return "document"
 }
+
+// ── Resolution Layer ──────────────────────────────────────────────────────────
+
+const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string }> = [
+  { key: "problem",         label: "Problemă detectată" },
+  { key: "impact",          label: "Impact" },
+  { key: "action",          label: "Acțiune recomandată" },
+  { key: "generatedAsset",  label: "Asset generat" },
+  { key: "humanStep",       label: "Pas uman obligatoriu" },
+  { key: "closureEvidence", label: "Dovadă de închidere" },
+  { key: "revalidation",    label: "Revalidare" },
+]
+
+function ResolutionLayer({ finding }: { finding: ScanFinding }) {
+  const res = finding.resolution
+  const activeIdx = res ? RESOLUTION_STEPS.findIndex((s) => !res[s.key]) : 0
+  const currentStep = activeIdx === -1 ? RESOLUTION_STEPS.length : activeIdx
+
+  return (
+    <div className="border-t border-eos-border-subtle px-5 py-5">
+      <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.06em] text-eos-text-tertiary">
+        Resolution Layer{finding.legalReference ? ` · ${finding.legalReference}` : ""}
+      </p>
+      <div className="space-y-4">
+        {RESOLUTION_STEPS.map((step, idx) => {
+          const isDone = idx < currentStep
+          const isActive = idx === currentStep
+          const text = (res?.[step.key] as string | undefined)
+            ?? (isActive ? (finding.remediationHint ?? finding.detail) : undefined)
+
+          return (
+            <div key={step.key} className="flex gap-3.5">
+              <div className="flex w-6 flex-col items-center">
+                <div
+                  className={[
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                    isDone
+                      ? "border border-eos-success/40 bg-eos-success-soft text-eos-success"
+                      : isActive
+                        ? "border border-eos-border-strong bg-eos-bg-inset text-eos-text shadow-[0_0_0_3px_hsl(145_60%_48%/0.15)]"
+                        : "border border-eos-border-subtle bg-eos-bg-inset text-eos-text-muted",
+                  ].join(" ")}
+                >
+                  {isDone ? "✓" : idx + 1}
+                </div>
+                {idx < RESOLUTION_STEPS.length - 1 && (
+                  <div className="mt-1 w-px flex-1 bg-eos-border-subtle" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <p
+                  className={[
+                    "mb-0.5 text-[11px] font-semibold",
+                    isDone ? "text-eos-success" : isActive ? "text-eos-text-tertiary" : "text-eos-text-muted",
+                  ].join(" ")}
+                >
+                  {step.label}
+                </p>
+                <p
+                  className={[
+                    "text-sm leading-relaxed",
+                    isDone ? "text-eos-text-muted" : isActive ? "text-eos-text" : "text-eos-text-muted",
+                  ].join(" ")}
+                >
+                  {text ?? "—"}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Finding Row ───────────────────────────────────────────────────────────────
+
+function FindingRow({ finding }: { finding: ScanFinding }) {
+  const [expanded, setExpanded] = useState(false)
+  const framework = frameworkFromLegal(finding.legalReference)
+  const age = ageLabel(finding.createdAtISO)
+  const inRemediation = Boolean(finding.resolution)
+
+  return (
+    <div
+      className={[
+        "overflow-hidden rounded-eos-md border transition-colors duration-150",
+        expanded ? "border-eos-border-default" : "border-eos-border-subtle",
+        "bg-eos-surface",
+      ].join(" ")}
+    >
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+        aria-expanded={expanded}
+      >
+        <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
+        <p className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
+          {finding.title}
+        </p>
+        <Badge variant="secondary" className="normal-case tracking-normal shrink-0">
+          {framework}
+        </Badge>
+        <span className="shrink-0 text-[11px] text-eos-text-muted">{age}</span>
+        <Badge
+          variant={inRemediation ? "default" : "warning"}
+          className="normal-case tracking-normal shrink-0"
+        >
+          {inRemediation ? "În remediere" : "Detectat"}
+        </Badge>
+        {expanded
+          ? <ChevronDown className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />
+          : <ChevronRight className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />
+        }
+      </button>
+      {expanded && <ResolutionLayer finding={finding} />}
+    </div>
+  )
+}
+
+// ── Finding Groups ────────────────────────────────────────────────────────────
+
+const SEVERITY_ORDER = ["critical", "high", "medium", "low"] as const
+const SEVERITY_LABEL: Record<string, string> = {
+  critical: "Critice",
+  high: "Ridicate",
+  medium: "Medii",
+  low: "Informative",
+}
+
+function FindingGroups({ findings }: { findings: ScanFinding[] }) {
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set(["critical", "high"]))
+
+  if (findings.length === 0) {
+    return (
+      <EmptyState
+        title="Nicio problemă detectată"
+        label="Documentul analizat nu a produs finding-uri. Poți continua în De rezolvat pentru task-urile existente."
+        className="border-eos-border bg-eos-surface-variant"
+      />
+    )
+  }
+
+  const groups = SEVERITY_ORDER
+    .map((sev) => ({ sev, items: findings.filter((f) => f.severity === sev) }))
+    .filter(({ items }) => items.length > 0)
+
+  function toggle(sev: string) {
+    setOpenGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(sev)) next.delete(sev)
+      else next.add(sev)
+      return next
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      {groups.map(({ sev, items }) => {
+        const open = openGroups.has(sev)
+        return (
+          <div key={sev}>
+            <button
+              type="button"
+              onClick={() => toggle(sev)}
+              className="mb-2 flex w-full items-center gap-2 text-left"
+            >
+              <SeverityBadge severity={sev as "critical" | "high" | "medium" | "low"} />
+              <span className="text-sm font-semibold text-eos-text">{SEVERITY_LABEL[sev]}</span>
+              <span className="rounded-full bg-eos-bg-inset px-2 py-0.5 text-[11px] text-eos-text-muted">
+                {items.length}
+              </span>
+              <div className="flex-1" />
+              {open
+                ? <ChevronDown className="size-3.5 text-eos-text-muted" strokeWidth={2} />
+                : <ChevronRight className="size-3.5 text-eos-text-muted" strokeWidth={2} />
+              }
+            </button>
+            {open && (
+              <div className="space-y-2">
+                {items.map((f) => <FindingRow key={f.id} finding={f} />)}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ScanResultsPage() {
   const params = useParams<{ scanId: string }>()
@@ -30,30 +243,26 @@ export default function ScanResultsPage() {
 
   if (cockpit.loading || !cockpit.data) return <div className="py-10" />
 
-  const targetScan = cockpit.data.state.scans.find((scan) => scan.id === scanId) ?? null
+  const targetScan = cockpit.data.state.scans.find((s) => s.id === scanId) ?? null
 
+  // ── Scan not found ───────────────────────────────────────────────────────
   if (!targetScan) {
     return (
       <div className="space-y-8">
         <PageIntro
           eyebrow="Scaneaza / Rezultat"
           title="Rezultatul cautat nu mai este disponibil"
-          description="Scanarea cautata nu mai apare in snapshotul curent. Poti porni o analiza noua sau poti cauta rezultatul in istoricul ramas separat."
+          description="Scanarea cautata nu mai apare in snapshotul curent. Poti porni o analiza noua sau poti cauta rezultatul in Istoric."
           badges={
-            <>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                rezultat indisponibil
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                punte temporara
-              </Badge>
-            </>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              rezultat indisponibil
+            </Badge>
           }
           actions={
             <>
               <Button asChild variant="outline">
                 <Link href={dashboardRoutes.scan}>
-                  Scaneaza din nou
+                  Scanează din nou
                   <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
               </Button>
@@ -66,97 +275,110 @@ export default function ScanResultsPage() {
             </>
           }
         />
-
         <Card className="border-eos-border bg-eos-surface">
           <CardContent className="px-5 py-6">
             <EmptyState
               title="Scanarea nu mai este in snapshot"
-              label="Daca rezultatul era mai vechi, il poti cauta in Istoric. Pentru o analiza noua revii in Scaneaza."
+              label="Daca rezultatul era mai vechi, il poti cauta in Istoric."
               className="border-eos-border bg-eos-surface-variant py-8"
               actions={
-                <Button asChild variant="default">
+                <Button asChild>
                   <Link href={dashboardRoutes.scan}>Mergi la Scaneaza</Link>
                 </Button>
               }
             />
           </CardContent>
         </Card>
-
         <RecentScansCard scans={cockpit.data.state.scans} tasks={cockpit.tasks} />
       </div>
     )
   }
 
+  // ── Data derivations ─────────────────────────────────────────────────────
   const targetFindings = cockpit.data.state.findings.filter(
-    (finding) => finding.scanId === targetScan.id || finding.sourceDocument === targetScan.documentName
+    (f) => f.scanId === targetScan.id || f.sourceDocument === targetScan.documentName
   )
-  const targetTasks = cockpit.tasks.filter((task) => task.sourceDocument === targetScan.documentName)
-  const targetText = targetScan.contentExtracted || targetScan.contentPreview || ""
-  const targetInsights = buildScanInsights(targetText)
-  const targetSystems = cockpit.data.state.detectedAISystems.filter(
-    (system) => system.sourceScanId === targetScan.id || system.sourceDocument === targetScan.documentName
-  )
-  const targetSystemNames = new Set(targetSystems.map((system) => system.name))
-  const targetDrifts = cockpit.activeDrifts.filter(
-    (drift) =>
-      drift.sourceDocument === targetScan.documentName ||
-      (drift.systemLabel ? targetSystemNames.has(drift.systemLabel) : false)
-  )
-  const sourceType = targetScan.sourceKind === "manifest" || targetScan.sourceKind === "yaml"
-    ? targetScan.sourceKind
-    : "document"
+  const criticalCount = targetFindings.filter((f) => f.severity === "critical").length
+  const highCount     = targetFindings.filter((f) => f.severity === "high").length
+  const mediumCount   = targetFindings.filter((f) => f.severity === "medium").length
+  const lowCount      = targetFindings.filter((f) => f.severity === "low").length
 
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Finding-uri",
       value: `${targetFindings.length}`,
-      hint: "rezultatul curent ramas explicabil pe scanarea aleasa",
+      hint: targetFindings.length > 0
+        ? `${criticalCount} critice · ${highCount} ridicate · ${mediumCount} medii`
+        : "document curat",
       tone: targetFindings.length > 0 ? "warning" : "success",
     },
     {
-      label: "Task-uri derivate",
-      value: `${targetTasks.length}`,
-      hint: targetTasks.length > 0 ? "actiuni deja pregatite pentru De rezolvat" : "nu exista actiuni noi pentru acest rezultat",
-      tone: targetTasks.length > 0 ? "accent" : "neutral",
-    },
-    {
-      label: "Drift legat",
-      value: `${targetDrifts.length}`,
-      hint: targetDrifts.length > 0 ? "semnale active care continua in De rezolvat" : "niciun drift activ pentru aceasta scanare",
-      tone: targetDrifts.length > 0 ? "warning" : "success",
+      label: "Critice",
+      value: `${criticalCount}`,
+      hint: criticalCount > 0 ? "necesită acțiune imediată" : "fără probleme critice",
+      tone: criticalCount > 0 ? "danger" : "success",
     },
     {
       label: "Scanat la",
-      value: new Date(targetScan.createdAtISO).toLocaleString("ro-RO"),
-      hint: targetScan.analysisStatus === "completed" ? "analiza finalizata" : "analiza in asteptare",
+      value: new Date(targetScan.createdAtISO).toLocaleString("ro-RO", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+      }),
+      hint: targetScan.analysisStatus === "completed" ? "analiză finalizată" : "analiză în așteptare",
       tone: targetScan.analysisStatus === "completed" ? "success" : "neutral",
+    },
+    {
+      label: "Sursă",
+      value: sourceBadgeLabel(targetScan),
+      hint: targetScan.documentName,
+      tone: "neutral",
     },
   ]
 
   return (
     <div className="space-y-8">
+
+      {/* ── Success Banner ─────────────────────────────────────────────────── */}
+      {targetScan.analysisStatus === "completed" && (
+        <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/30 bg-eos-success-soft px-4 py-3">
+          <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
+          <p className="text-sm font-medium text-eos-text">
+            Analiză finalizată
+            <span className="ml-1 font-normal text-eos-text-muted">
+              · {targetScan.documentName} · {targetFindings.length} finding-uri
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* ── Page Header ───────────────────────────────────────────────────── */}
       <PageIntro
         eyebrow="Scaneaza / Rezultat"
         title={`Rezultatul pentru ${targetScan.documentName}`}
-        description="Pagina aceasta pastreaza verdictul si explicatia lui pentru scanarea tocmai analizata. Executia continua in De rezolvat, iar istoricul complet ramane separat."
+        description="Verdictul și explicația scanării tocmai analizate. Execuția continuă în De rezolvat — această pagină rămâne ancorată la rezultatul curent."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              {sourceBadge(targetScan)}
+              {sourceBadgeLabel(targetScan)}
             </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {targetScan.analysisStatus === "completed" ? "analiza finalizata" : "in asteptare"}
-            </Badge>
+            {targetScan.analysisStatus === "completed" && (
+              <Badge variant="success" className="normal-case tracking-normal">
+                analiză finalizată
+              </Badge>
+            )}
           </>
         }
         aside={
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Scan curent
+              Finding-uri
             </p>
             <p className="text-2xl font-semibold text-eos-text">{targetFindings.length}</p>
             <p className="text-sm text-eos-text-muted">
-              finding-uri pe {sourceBadge(targetScan)}
+              {criticalCount > 0
+                ? `${criticalCount} critice`
+                : highCount > 0
+                  ? `${highCount} ridicate`
+                  : "fără probleme majore"}
             </p>
           </div>
         }
@@ -164,13 +386,13 @@ export default function ScanResultsPage() {
           <>
             <Button asChild variant="outline">
               <Link href={dashboardRoutes.scan}>
-                Scaneaza din nou
+                Scanează din nou
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild>
               <Link href={dashboardRoutes.resolve}>
-                Deschide De rezolvat
+                Adaugă toate în queue
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -178,87 +400,82 @@ export default function ScanResultsPage() {
         }
       />
 
+      {/* ── Summary Strip ─────────────────────────────────────────────────── */}
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Rezultat"
-            title="Verdictul ramane aici, executia merge mai departe"
-            description="Folosesti pagina asta ca sa intelegi ce a produs scanarea curenta, apoi continui cu task-urile si remedierea in locul dedicat."
+            title="Verdictul rămâne aici, execuția merge mai departe"
+            description="Citești verdictul și contextul scanării pe această pagină, apoi continui task-urile în De rezolvat."
             items={summaryItems}
           />
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
-        <SectionBoundary
-          eyebrow="Handoff canonic"
-          title="Rezultatul explica, De rezolvat executa"
-          description="Aici citesti verdictul, provenance-ul si contextul scanarii. Daca rezultatul deschide task-uri sau drift, continui in De rezolvat, nu pe aceasta pagina."
-          support={
-            <div className="grid gap-4 md:grid-cols-3">
-              <ResultFlowHint
-                title="1. Verifici verdictul"
-                detail="Vezi de ce a aparut problema si ce sursa a generat-o."
-              />
-              <ResultFlowHint
-                title="2. Separi explicatia de actiune"
-                detail="Pagina ramane explicabila si stabila, fara sa devina board de executie."
-              />
-              <ResultFlowHint
-                title="3. Continui in locul potrivit"
-                detail="Executia si inchiderea task-urilor se fac in De rezolvat."
-              />
+      {/* ── Finding Groups ────────────────────────────────────────────────── */}
+      <section aria-label="Finding-uri din această scanare">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+              Finding-uri din această scanare
+            </p>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Sortate după severitate · {targetFindings.length} total
+            </p>
+          </div>
+          {targetFindings.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {criticalCount > 0 && <Badge variant="destructive">{criticalCount} critice</Badge>}
+              {highCount > 0 && <Badge variant="destructive">{highCount} ridicate</Badge>}
+              {mediumCount > 0 && <Badge variant="warning">{mediumCount} medii</Badge>}
+              {lowCount > 0 && <Badge variant="secondary">{lowCount} informative</Badge>}
             </div>
-          }
-        />
-        <HandoffCard
-          title="Continui fara sa pierzi contextul acestui scan"
-          description="Rezultatul tocmai analizat ramane ancorat aici, dar task-urile si drifturile lui merg in De rezolvat. Istoricul complet ramane separat in Istoric."
-          destinationLabel="de rezolvat / istoric"
-          checklist={[
-            "nu repornesti analiza din pagina de rezultat",
-            "nu tratezi verdictul ca board de executie",
-            "folosesti Istoric doar pentru arhiva completa",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href={dashboardRoutes.documents}>Istoric</Link>
-              </Button>
-              <Button asChild>
-                <Link href={dashboardRoutes.resolve}>De rezolvat</Link>
-              </Button>
-            </>
-          }
-        />
-      </div>
+          )}
+        </div>
+        <FindingGroups findings={targetFindings} />
+      </section>
 
-      <ScanVerdictsTab
-        sourceType={sourceType}
-        latestManifestScan={sourceType === "manifest" ? targetScan : null}
-        latestManifestSystems={sourceType === "manifest" ? targetSystems : []}
-        latestManifestDrifts={sourceType === "manifest" ? targetDrifts : []}
-        latestYamlScan={sourceType === "yaml" ? targetScan : null}
-        latestYamlSystems={sourceType === "yaml" ? targetSystems : []}
-        latestYamlFindings={sourceType === "yaml" ? targetFindings : []}
-        latestYamlDrifts={sourceType === "yaml" ? targetDrifts : []}
-        latestDocumentScan={sourceType === "document" ? targetScan : null}
-        latestDocumentText={sourceType === "document" ? targetText : ""}
-        latestDocumentFindings={sourceType === "document" ? targetFindings : []}
-        latestDocumentInsights={sourceType === "document" ? targetInsights : []}
-        latestDocumentTasks={sourceType === "document" ? targetTasks : []}
+      {/* ── Primary CTA ───────────────────────────────────────────────────── */}
+      {targetFindings.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href={dashboardRoutes.resolve}>
+              Adaugă toate în queue
+              <ArrowRight className="size-4" strokeWidth={2} />
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={dashboardRoutes.scan}>Scanează din nou</Link>
+          </Button>
+        </div>
+      )}
+
+      {/* ── Handoff Card ──────────────────────────────────────────────────── */}
+      <HandoffCard
+        title="Rezultatul explică, De rezolvat execută"
+        description="Verdictul scanării rămâne ancorat pe această pagină. Task-urile și remedierea se fac exclusiv în De rezolvat."
+        destinationLabel="de rezolvat / istoric"
+        checklist={[
+          "nu repornești analiza din pagina de rezultat",
+          "execuția și dovezile se gestionează în De rezolvat",
+          "Istoricul complet rămâne în Scaneaza → Istoric",
+        ]}
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href={dashboardRoutes.documents}>Istoric</Link>
+            </Button>
+            <Button asChild>
+              <Link href={dashboardRoutes.resolve}>
+                De rezolvat
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </Button>
+          </>
+        }
       />
 
       <RecentScansCard scans={cockpit.data.state.scans} tasks={cockpit.tasks} />
-    </div>
-  )
-}
-
-function ResultFlowHint({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-sm font-medium text-eos-text">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-eos-text-muted">{detail}</p>
     </div>
   )
 }
