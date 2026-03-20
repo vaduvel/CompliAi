@@ -414,6 +414,76 @@ export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfile
     })
   }
 
+  if (prefill?.suggestions.hasPrivacyPolicy) {
+    suggestions.push({
+      questionId: "hasPrivacyPolicy",
+      value: prefill.suggestions.hasPrivacyPolicy.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasPrivacyPolicy.confidence,
+      reason: prefill.suggestions.hasPrivacyPolicy.reason,
+      source: prefill.suggestions.hasPrivacyPolicy.source,
+    })
+  }
+
+  if (prefill?.suggestions.hasVendorDpas) {
+    suggestions.push({
+      questionId: "hasVendorDpas",
+      value: prefill.suggestions.hasVendorDpas.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasVendorDpas.confidence,
+      reason: prefill.suggestions.hasVendorDpas.reason,
+      source: prefill.suggestions.hasVendorDpas.source,
+    })
+  }
+
+  if (prefill?.suggestions.aiUsesConfidentialData) {
+    suggestions.push({
+      questionId: "aiUsesConfidentialData",
+      value: prefill.suggestions.aiUsesConfidentialData.value ? "yes" : "no",
+      confidence: prefill.suggestions.aiUsesConfidentialData.confidence,
+      reason: prefill.suggestions.aiUsesConfidentialData.reason,
+      source: prefill.suggestions.aiUsesConfidentialData.source,
+    })
+  }
+
+  if (prefill?.suggestions.hasAiPolicy) {
+    suggestions.push({
+      questionId: "hasAiPolicy",
+      value: prefill.suggestions.hasAiPolicy.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasAiPolicy.confidence,
+      reason: prefill.suggestions.hasAiPolicy.reason,
+      source: prefill.suggestions.hasAiPolicy.source,
+    })
+  }
+
+  if (prefill?.suggestions.hasVendorDocumentation) {
+    suggestions.push({
+      questionId: "hasVendorDocumentation",
+      value: prefill.suggestions.hasVendorDocumentation.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasVendorDocumentation.confidence,
+      reason: prefill.suggestions.hasVendorDocumentation.reason,
+      source: prefill.suggestions.hasVendorDocumentation.source,
+    })
+  }
+
+  if (prefill?.suggestions.vendorsSendPersonalData) {
+    suggestions.push({
+      questionId: "vendorsSendPersonalData",
+      value: prefill.suggestions.vendorsSendPersonalData.value ? "yes" : "no",
+      confidence: prefill.suggestions.vendorsSendPersonalData.confidence,
+      reason: prefill.suggestions.vendorsSendPersonalData.reason,
+      source: prefill.suggestions.vendorsSendPersonalData.source,
+    })
+  }
+
+  if (prefill?.suggestions.hasSitePrivacyPolicy) {
+    suggestions.push({
+      questionId: "hasSitePrivacyPolicy",
+      value: prefill.suggestions.hasSitePrivacyPolicy.value ? "yes" : "no",
+      confidence: prefill.suggestions.hasSitePrivacyPolicy.confidence,
+      reason: prefill.suggestions.hasSitePrivacyPolicy.reason,
+      source: prefill.suggestions.hasSitePrivacyPolicy.source,
+    })
+  }
+
   // Q1 — B2C: inferred from sector
   if (profile.sector === "retail") {
     suggestions.push({

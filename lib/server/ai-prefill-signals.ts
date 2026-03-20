@@ -12,6 +12,7 @@ export function buildAiPrefillSignals({
 }: AiSignalInput): {
   usesAITools?: PrefillSuggestion<boolean>
   processesPersonalData?: PrefillSuggestion<boolean>
+  aiUsesConfidentialData?: PrefillSuggestion<boolean>
   aiSignals?: OrgProfilePrefill["aiSignals"]
 } {
   const activeDetected = getActiveDetectedSystems(detectedAISystems)
@@ -45,11 +46,22 @@ export function buildAiPrefillSignals({
   }
 
   let processesPersonalData: PrefillSuggestion<boolean> | undefined
+  let aiUsesConfidentialData: PrefillSuggestion<boolean> | undefined
   if (confirmedPersonalDataSystems.length > 0) {
     processesPersonalData = {
       value: true,
       confidence: "high",
       reason: buildPersonalDataReason(
+        confirmedPersonalDataSystems.length,
+        confirmedPersonalDataSystems.map((system) => system.name.trim()).filter(Boolean).slice(0, 3),
+        "confirmate"
+      ),
+      source: "ai_inventory",
+    }
+    aiUsesConfidentialData = {
+      value: true,
+      confidence: "high",
+      reason: buildAiSensitiveDataReason(
         confirmedPersonalDataSystems.length,
         confirmedPersonalDataSystems.map((system) => system.name.trim()).filter(Boolean).slice(0, 3),
         "confirmate"
@@ -67,11 +79,22 @@ export function buildAiPrefillSignals({
       ),
       source: "ai_inventory",
     }
+    aiUsesConfidentialData = {
+      value: true,
+      confidence: "medium",
+      reason: buildAiSensitiveDataReason(
+        detectedPersonalDataSystems.length,
+        detectedPersonalDataSystems.map((system) => system.name.trim()).filter(Boolean).slice(0, 3),
+        "detectate"
+      ),
+      source: "ai_inventory",
+    }
   }
 
   return {
     usesAITools,
     processesPersonalData,
+    aiUsesConfidentialData,
     aiSignals: {
       source: "ai_inventory",
       confirmedSystems: aiSystems.length,
@@ -88,7 +111,7 @@ export function enrichOrgProfilePrefillWithAiSignals(
 ): OrgProfilePrefill | null {
   if (!prefill) return null
 
-  const { usesAITools, processesPersonalData, aiSignals } = buildAiPrefillSignals(input)
+  const { usesAITools, processesPersonalData, aiUsesConfidentialData, aiSignals } = buildAiPrefillSignals(input)
   if (!aiSignals) return prefill
 
   return {
@@ -98,6 +121,7 @@ export function enrichOrgProfilePrefillWithAiSignals(
       ...prefill.suggestions,
       ...(usesAITools ? { usesAITools } : {}),
       ...(processesPersonalData ? { processesPersonalData } : {}),
+      ...(aiUsesConfidentialData ? { aiUsesConfidentialData } : {}),
     },
   }
 }
@@ -121,4 +145,10 @@ function buildPersonalDataReason(count: number, systems: string[], qualifier: st
   const noun = count === 1 ? "sistem AI" : "sisteme AI"
   const examples = systems.length > 0 ? ` (${systems.join(", ")})` : ""
   return `${count} ${noun} ${qualifier}${examples} procesează sau pot procesa date personale, deci răspunsul este foarte probabil „da”.`
+}
+
+function buildAiSensitiveDataReason(count: number, systems: string[], qualifier: string) {
+  const noun = count === 1 ? "sistem AI" : "sisteme AI"
+  const examples = systems.length > 0 ? ` (${systems.join(", ")})` : ""
+  return `${count} ${noun} ${qualifier}${examples} folosesc sau pot folosi date personale, deci trebuie confirmat că nu intră date confidențiale în fluxurile AI.`
 }

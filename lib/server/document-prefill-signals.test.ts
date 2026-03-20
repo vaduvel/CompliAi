@@ -65,11 +65,49 @@ describe("document-prefill-signals", () => {
         source: "document_memory",
       })
     )
+    expect(result.suggestions.hasPrivacyPolicy).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+        source: "document_memory",
+      })
+    )
+    expect(result.suggestions.hasVendorDpas).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "document_memory",
+      })
+    )
+    expect(result.suggestions.hasVendorDocumentation).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "document_memory",
+      })
+    )
+    expect(result.suggestions.vendorsSendPersonalData).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "document_memory",
+      })
+    )
     expect(result.documentSignals).toEqual({
       source: "document_memory",
       generatedCount: 2,
       uploadedCount: 1,
-      matchedSignals: ["date personale", "vendori externi", "contracte standard", "site cu cookies sau formulare"],
+      matchedSignals: [
+        "date personale",
+        "politica de confidențialitate",
+        "privacy policy publicată pe site",
+        "vendori externi",
+        "contracte standard",
+        "DPA-uri pentru vendori",
+        "documentație vendor",
+        "vendori care procesează date personale",
+        "site cu cookies sau formulare",
+      ],
       topDocuments: [
         "Politică de Confidențialitate",
         "Acord de Prelucrare a Datelor (DPA)",
@@ -123,6 +161,20 @@ describe("document-prefill-signals", () => {
       source: "efactura_validations",
     })
     expect(result?.suggestions.hasStandardContracts).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "document_memory",
+      })
+    )
+    expect(result?.suggestions.hasVendorDpas).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "document_memory",
+      })
+    )
+    expect(result?.suggestions.vendorsSendPersonalData).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",

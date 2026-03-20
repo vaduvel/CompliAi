@@ -631,3 +631,21 @@ Validare după pas:
 - `npm test -- lib/compliance/intake-engine.test.ts lib/server/anaf-company-lookup.test.ts lib/server/ai-prefill-signals.test.ts lib/server/efactura-vendor-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts` -> verde (`22/22`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - Wave 2.8 conditionale asistate din semnale reale
+
+- onboarding-ul nu se mai opreste la prefill pentru intrebarile decisive; foloseste acum semnale reale si pentru o parte din intrebarile conditionale care schimba findings
+- `lib/server/document-prefill-signals.ts` sugereaza acum si:
+  - `hasPrivacyPolicy`
+  - `hasVendorDpas`
+  - `hasVendorDocumentation`
+  - `vendorsSendPersonalData`
+  - `hasAiPolicy`
+  - `hasSitePrivacyPolicy`
+- `lib/server/ai-prefill-signals.ts` sugereaza acum si `aiUsesConfidentialData` cand sistemele AI confirmate sau detectate proceseaza date personale
+- `lib/compliance/intake-engine.ts` propagă aceste sugestii in acelasi model unitar de intake, iar auto-fill-ul ramane limitat la `high confidence`
+- `components/compliscan/applicability-wizard.tsx` arata sugestiile conditionale doar pentru intrebarile care sunt vizibile in pasul curent, ca sa nu incarce rezumatul cu semnale irelevante
+
+Validare după pas:
+
+- `npm test -- lib/compliance/intake-engine.test.ts lib/server/ai-prefill-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts` -> verde (`16/16`)

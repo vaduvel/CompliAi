@@ -32,6 +32,7 @@ import {
 } from "@/lib/compliance/org-profile-prefill"
 import {
   buildInitialIntakeAnswers,
+  CONDITIONAL_QUESTIONS,
   DECISIVE_QUESTIONS,
   deriveSuggestedAnswers,
   getVisibleConditionalQuestions,
@@ -122,6 +123,13 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   const profileSnapshot = buildProfileSnapshot(values)
   const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
   const visibleConditionalQuestions = getVisibleConditionalQuestions(intakeAnswers)
+  const visibleQuestionIds = new Set<string>([
+    ...INTAKE_QUESTIONS.map((question) => question.id),
+    ...visibleConditionalQuestions.map((question) => question.id),
+  ])
+  const visibleSuggestedAnswers = suggestedAnswers.filter((suggestion) =>
+    visibleQuestionIds.has(suggestion.questionId)
+  )
   const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
 
   function hydrateIntakeStep(nextRequiresEfactura: boolean) {
@@ -456,9 +464,9 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                     </p>
                   </div>
                 </div>
-                {suggestedAnswers.length > 0 && (
+                {visibleSuggestedAnswers.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {suggestedAnswers.map((suggestion) => (
+                    {visibleSuggestedAnswers.map((suggestion) => (
                       <Badge
                         key={suggestion.questionId}
                         className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}
@@ -476,7 +484,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                     key={question.id}
                     question={question}
                     value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
-                    suggestion={suggestedAnswers.find((item) => item.questionId === question.id)}
+                    suggestion={visibleSuggestedAnswers.find((item) => item.questionId === question.id)}
                     onChange={(value) =>
                       setIntakeAnswers((current) => ({
                         ...current,
@@ -497,6 +505,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                       key={question.id}
                       question={question}
                       value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
+                      suggestion={visibleSuggestedAnswers.find((item) => item.questionId === question.id)}
                       onChange={(value) =>
                         setIntakeAnswers((current) => ({
                           ...current,
@@ -924,6 +933,6 @@ function isValidCui(value: string) {
 }
 
 function questionLabelForSuggestion(questionId: string) {
-  const question = DECISIVE_QUESTIONS.find((item) => item.id === questionId)
+  const question = [...DECISIVE_QUESTIONS, ...CONDITIONAL_QUESTIONS].find((item) => item.id === questionId)
   return question?.text ?? questionId
 }

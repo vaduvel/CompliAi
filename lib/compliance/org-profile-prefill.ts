@@ -76,5 +76,12 @@ export type OrgProfilePrefill = {
     usesExternalVendors?: PrefillSuggestion<boolean>
     hasSiteWithForms?: PrefillSuggestion<boolean>
     hasStandardContracts?: PrefillSuggestion<boolean>
+    hasPrivacyPolicy?: PrefillSuggestion<boolean>
+    hasVendorDpas?: PrefillSuggestion<boolean>
+    aiUsesConfidentialData?: PrefillSuggestion<boolean>
+    hasAiPolicy?: PrefillSuggestion<boolean>
+    hasVendorDocumentation?: PrefillSuggestion<boolean>
+    vendorsSendPersonalData?: PrefillSuggestion<boolean>
+    hasSitePrivacyPolicy?: PrefillSuggestion<boolean>
   }
 }

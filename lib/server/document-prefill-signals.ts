@@ -12,6 +12,12 @@ type QuestionId =
   | "usesExternalVendors"
   | "hasSiteWithForms"
   | "hasStandardContracts"
+  | "hasPrivacyPolicy"
+  | "hasVendorDpas"
+  | "hasAiPolicy"
+  | "hasVendorDocumentation"
+  | "vendorsSendPersonalData"
+  | "hasSitePrivacyPolicy"
 
 type SignalEvidence = {
   questionId: QuestionId
@@ -29,6 +35,12 @@ const SIGNAL_LABELS: Record<QuestionId, string> = {
   usesExternalVendors: "vendori externi",
   hasSiteWithForms: "site cu cookies sau formulare",
   hasStandardContracts: "contracte standard",
+  hasPrivacyPolicy: "politica de confidențialitate",
+  hasVendorDpas: "DPA-uri pentru vendori",
+  hasAiPolicy: "politică AI",
+  hasVendorDocumentation: "documentație vendor",
+  vendorsSendPersonalData: "vendori care procesează date personale",
+  hasSitePrivacyPolicy: "privacy policy publicată pe site",
 }
 
 export function buildDocumentPrefillSignals({
@@ -38,7 +50,17 @@ export function buildDocumentPrefillSignals({
   suggestions: Partial<
     Pick<
       OrgProfilePrefill["suggestions"],
-      "usesAITools" | "processesPersonalData" | "usesExternalVendors" | "hasSiteWithForms" | "hasStandardContracts"
+      | "usesAITools"
+      | "processesPersonalData"
+      | "usesExternalVendors"
+      | "hasSiteWithForms"
+      | "hasStandardContracts"
+      | "hasPrivacyPolicy"
+      | "hasVendorDpas"
+      | "hasAiPolicy"
+      | "hasVendorDocumentation"
+      | "vendorsSendPersonalData"
+      | "hasSitePrivacyPolicy"
     >
   >
   documentSignals?: OrgProfilePrefill["documentSignals"]
@@ -57,7 +79,17 @@ export function buildDocumentPrefillSignals({
   const suggestions: Partial<
     Pick<
       OrgProfilePrefill["suggestions"],
-      "usesAITools" | "processesPersonalData" | "usesExternalVendors" | "hasSiteWithForms" | "hasStandardContracts"
+      | "usesAITools"
+      | "processesPersonalData"
+      | "usesExternalVendors"
+      | "hasSiteWithForms"
+      | "hasStandardContracts"
+      | "hasPrivacyPolicy"
+      | "hasVendorDpas"
+      | "hasAiPolicy"
+      | "hasVendorDocumentation"
+      | "vendorsSendPersonalData"
+      | "hasSitePrivacyPolicy"
     >
   > = {}
 
@@ -121,6 +153,15 @@ export function enrichOrgProfilePrefillWithDocumentSignals(
       processesPersonalData:
         prefill.suggestions.processesPersonalData ?? suggestions.processesPersonalData,
       usesAITools: prefill.suggestions.usesAITools ?? suggestions.usesAITools,
+      hasPrivacyPolicy: prefill.suggestions.hasPrivacyPolicy ?? suggestions.hasPrivacyPolicy,
+      hasVendorDpas: prefill.suggestions.hasVendorDpas ?? suggestions.hasVendorDpas,
+      hasAiPolicy: prefill.suggestions.hasAiPolicy ?? suggestions.hasAiPolicy,
+      hasVendorDocumentation:
+        prefill.suggestions.hasVendorDocumentation ?? suggestions.hasVendorDocumentation,
+      vendorsSendPersonalData:
+        prefill.suggestions.vendorsSendPersonalData ?? suggestions.vendorsSendPersonalData,
+      hasSitePrivacyPolicy:
+        prefill.suggestions.hasSitePrivacyPolicy ?? suggestions.hasSitePrivacyPolicy,
     },
   }
 }
@@ -139,6 +180,26 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "high",
           reason:
             "Ai deja o politică de confidențialitate generată în CompliAI, ceea ce indică prelucrare de date personale.",
+          source: "document_memory",
+        },
+        {
+          questionId: "hasPrivacyPolicy",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "high",
+          reason:
+            "Ai deja o politică de confidențialitate generată în CompliAI, deci există deja baza pentru politica GDPR cerută în onboarding.",
+          source: "document_memory",
+        },
+        {
+          questionId: "hasSitePrivacyPolicy",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "medium",
+          reason:
+            "Ai deja o politică de confidențialitate generată, deci există probabil și versiunea care trebuie publicată pe site dacă ai formulare sau cookies.",
           source: "document_memory",
         },
       ]
@@ -177,6 +238,36 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
             "Ai generat deja un DPA, deci lucrezi cu documente contractuale standard pentru furnizori sau procesatori.",
           source: "document_memory",
         },
+        {
+          questionId: "hasVendorDpas",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "medium",
+          reason:
+            "Ai generat deja un DPA în workspace, deci există deja documentație pentru vendorii care procesează date personale.",
+          source: "document_memory",
+        },
+        {
+          questionId: "hasVendorDocumentation",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "medium",
+          reason:
+            "Ai deja un DPA generat, deci există documentație contractuală pentru cel puțin o parte din vendorii externi.",
+          source: "document_memory",
+        },
+        {
+          questionId: "vendorsSendPersonalData",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "medium",
+          reason:
+            "Dacă ai generat deja un DPA, este foarte probabil că unii vendori procesează date personale în numele organizației.",
+          source: "document_memory",
+        },
       ]
     case "ai-governance":
       return [
@@ -188,6 +279,16 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           confidence: "high",
           reason:
             "Ai generat deja o politică de guvernanță AI, ceea ce indică utilizarea efectivă sau planificată a sistemelor AI în firmă.",
+          source: "document_memory",
+        },
+        {
+          questionId: "hasAiPolicy",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "high",
+          reason:
+            "Ai deja o politică AI generată în CompliAI, deci răspunsul pentru existența unei politici interne AI este „da”.",
           source: "document_memory",
         },
       ]
@@ -214,6 +315,19 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
     })
   }
 
+  if (matchesAny(text, ["privacy", "confidentialitate", "gdpr", "date personale", "persoanelor vizate", "operator de date"])) {
+    evidences.push({
+      questionId: "hasPrivacyPolicy",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Am găsit documente încărcate despre confidențialitate sau GDPR, deci există probabil deja o politică de confidențialitate pregătită.",
+      source: "document_memory",
+    })
+  }
+
   if (matchesAny(text, ["contract", "contracte", "agreement", "acord", "termeni", "terms", "msa", "addendum", "appendix"])) {
     evidences.push({
       questionId: "hasStandardContracts",
@@ -223,6 +337,16 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente contractuale încărcate, deci răspunsul este probabil „da” pentru contracte standard.",
+      source: "document_memory",
+    })
+    evidences.push({
+      questionId: "hasVendorDocumentation",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Am găsit documentație contractuală pentru vendorii existenți, deci nu pornești de la zero în vendor review.",
       source: "document_memory",
     })
   }
@@ -238,6 +362,26 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
         "Am găsit documente care menționează DPA, furnizori sau procesatori externi, deci folosești probabil vendori externi.",
       source: "document_memory",
     })
+    evidences.push({
+      questionId: "hasVendorDpas",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Am găsit documente DPA sau referințe la procesatori, deci există probabil deja DPA-uri sau drafturi pentru vendorii relevanți.",
+      source: "document_memory",
+    })
+    evidences.push({
+      questionId: "vendorsSendPersonalData",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Documentele menționează furnizori, DPA sau procesatori, ceea ce sugerează că anumite date personale ajung la vendori externi.",
+      source: "document_memory",
+    })
   }
 
   if (matchesAny(text, ["privacy", "confidentialitate", "gdpr", "date personale", "persoanelor vizate", "operator de date"])) {
@@ -249,6 +393,35 @@ function classifyUploadedDocument(scan: ScanRecord): SignalEvidence[] {
       confidence: "medium",
       reason:
         "Am găsit documente despre confidențialitate sau GDPR, ceea ce sugerează prelucrare de date personale.",
+      source: "document_memory",
+    })
+  }
+
+  if (
+    matchesAny(text, ["privacy", "confidentialitate", "gdpr"]) &&
+    matchesAny(text, ["site", "website", "cookies", "tracking", "formular", "newsletter", "contact"])
+  ) {
+    evidences.push({
+      questionId: "hasSitePrivacyPolicy",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Am găsit documente de privacy legate de site, cookies sau formulare, deci există probabil și versiunea publicată sau pregătită pentru site.",
+      source: "document_memory",
+    })
+  }
+
+  if (matchesAny(text, ["ai policy", "politica ai", "guvernanta ai", "governance ai", "chatgpt", "copilot", "llm"])) {
+    evidences.push({
+      questionId: "hasAiPolicy",
+      sourceKey: `uploaded:${scan.id}`,
+      label,
+      kind: "uploaded",
+      confidence: "medium",
+      reason:
+        "Am găsit documente sau mențiuni legate de guvernanță AI, deci există probabil o politică sau un draft intern pentru utilizarea AI.",
       source: "document_memory",
     })
   }

@@ -39,6 +39,13 @@ describe("ai-prefill-signals", () => {
         source: "ai_inventory",
       })
     )
+    expect(result.aiUsesConfidentialData).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+        source: "ai_inventory",
+      })
+    )
     expect(result.aiSignals).toEqual({
       source: "ai_inventory",
       confirmedSystems: 1,
@@ -81,6 +88,13 @@ describe("ai-prefill-signals", () => {
       })
     )
     expect(result.processesPersonalData).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+        source: "ai_inventory",
+      })
+    )
+    expect(result.aiUsesConfidentialData).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
@@ -135,6 +149,7 @@ describe("ai-prefill-signals", () => {
         source: "ai_inventory",
       })
     )
+    expect(result?.suggestions.aiUsesConfidentialData).toBeUndefined()
     expect(result?.aiSignals).toEqual({
       source: "ai_inventory",
       confirmedSystems: 1,

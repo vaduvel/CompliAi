@@ -135,6 +135,12 @@ describe("intake-engine", () => {
             reason: "1 sistem AI confirmat procesează date personale.",
             source: "ai_inventory",
           },
+          aiUsesConfidentialData: {
+            value: true,
+            confidence: "high",
+            reason: "1 sistem AI confirmat folosește date personale.",
+            source: "ai_inventory",
+          },
         },
       }
     )
@@ -146,11 +152,17 @@ describe("intake-engine", () => {
           value: "yes",
           confidence: "high",
         }),
+        expect.objectContaining({
+          questionId: "aiUsesConfidentialData",
+          value: "yes",
+          confidence: "high",
+          source: "ai_inventory",
+        }),
       ])
     )
   })
 
-  it("surfaces direct document-memory signals for site and contracts", () => {
+  it("surfaces direct document-memory signals for decisive and conditional questions", () => {
     const suggestions = deriveSuggestedAnswers(
       {
         sector: "professional-services",
@@ -192,6 +204,18 @@ describe("intake-engine", () => {
             reason: "Există deja documente contractuale și DPA-uri în workspace.",
             source: "document_memory",
           },
+          hasVendorDpas: {
+            value: true,
+            confidence: "medium",
+            reason: "Există deja DPA-uri și drafturi pentru vendorii activi.",
+            source: "document_memory",
+          },
+          hasVendorDocumentation: {
+            value: true,
+            confidence: "medium",
+            reason: "Există deja documentație contractuală pentru vendorii activi.",
+            source: "document_memory",
+          },
         },
       }
     )
@@ -207,6 +231,18 @@ describe("intake-engine", () => {
           questionId: "hasStandardContracts",
           value: "yes",
           confidence: "medium",
+        }),
+        expect.objectContaining({
+          questionId: "hasVendorDpas",
+          value: "yes",
+          confidence: "medium",
+          source: "document_memory",
+        }),
+        expect.objectContaining({
+          questionId: "hasVendorDocumentation",
+          value: "yes",
+          confidence: "medium",
+          source: "document_memory",
         }),
       ])
     )
@@ -247,6 +283,12 @@ describe("intake-engine", () => {
             reason: "Există deja documente contractuale și DPA-uri în workspace.",
             source: "document_memory",
           },
+          hasAiPolicy: {
+            value: true,
+            confidence: "high",
+            reason: "Ai deja o politică AI generată în workspace.",
+            source: "document_memory",
+          },
         },
       }
     )
@@ -254,6 +296,7 @@ describe("intake-engine", () => {
     expect(answers.usesAITools).toBe("no")
     expect(answers.hasSiteWithForms).toBe("yes")
     expect(answers.hasStandardContracts).toBeUndefined()
+    expect(answers.hasAiPolicy).toBe("yes")
   })
 
   it("shows only conditional questions unlocked by current answers", () => {

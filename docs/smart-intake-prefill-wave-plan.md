@@ -37,8 +37,12 @@ Status: plan activ, ancorat in log
   - fiecare sugestie de prefill poarta explicit `source + confidence + reason`
   - doar sugestiile `high confidence` se auto-completeaza in intake
   - sugestiile `medium` raman vizibile, dar necesita confirmare explicita in wizard
+- `Wave 2.8` extinde prefill-ul si pe intrebari conditionale:
+  - document memory sugereaza acum si politici GDPR, DPA-uri, documentatie vendor si politica AI
+  - AI inventory sugereaza direct si `aiUsesConfidentialData` cand sistemele confirmate sau detectate proceseaza date personale
+  - wizardul arata sugestiile doar pentru intrebarile conditionale care sunt efectiv vizibile in pasul curent
 - validare confirmata:
-  - `npm test -- lib/compliance/intake-engine.test.ts lib/server/anaf-company-lookup.test.ts lib/server/ai-prefill-signals.test.ts lib/server/efactura-vendor-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts`
+  - `npm test -- lib/compliance/intake-engine.test.ts lib/server/ai-prefill-signals.test.ts lib/server/document-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts`
   - `npm run lint`
   - `npm run build`
 
@@ -71,10 +75,14 @@ Status: plan activ, ancorat in log
   - toate sugestiile de onboarding folosesc acelasi contract `source + confidence + reason`
   - intake-ul auto-completeaza doar semnalele `high confidence`
   - wizardul arata explicit sursa pentru fiecare sugestie, inclusiv in intrebarile care raman de confirmat
+- `Wave 2.8`:
+  - onboarding-ul poate sugera acum si raspunsuri conditionale, nu doar cele 7 intrebari decisive
+  - semnalele din documente existente reduc intrebarile despre policy-uri, DPA-uri si documentatie vendor
+  - semnalele AI existente reduc si confirmarea despre folosirea de date sensibile in tool-uri AI
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6` si `Wave 2.7` sunt tinta pe `origin/main` dupa promovarea acestui pass
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2`, `Wave 2.3`, `Wave 2.4`, `Wave 2.5`, `Wave 2.6`, `Wave 2.7` si `Wave 2.8` sunt tinta pe `origin/main` dupa promovarea acestui pass
 
 Ce nu face inca acest slice:
 
@@ -148,6 +156,10 @@ Primul slice intrat:
   - fiecare sugestie din `orgProfilePrefill` poarta sursa explicita, nu doar confidence + motiv
   - wizardul foloseste prag clar de auto-fill: doar `high confidence`
   - `medium` si `low` raman sugestii asistate, nu raspunsuri deja confirmate
+- `Wave 2.8`:
+  - modelul de prefill este extins si pe intrebarile conditionale cu impact real in findings
+  - document memory si AI inventory contribuie acum si la politicile derivate, nu doar la raspunsurile decisive
+  - rezumatul din wizard afiseaza doar sugestiile relevante pentru intrebarile vizibile, nu un lot generic
 
 ## Primul pas recomandat
 

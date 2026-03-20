@@ -174,6 +174,12 @@ describe("POST /api/org/profile/prefill", () => {
         confidence: "high",
       })
     )
+    expect(body.prefill.suggestions.aiUsesConfidentialData).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+      })
+    )
     expect(body.prefill.suggestions.hasSiteWithForms).toEqual(
       expect.objectContaining({
         value: true,
@@ -181,6 +187,18 @@ describe("POST /api/org/profile/prefill", () => {
       })
     )
     expect(body.prefill.suggestions.hasStandardContracts).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+      })
+    )
+    expect(body.prefill.suggestions.hasVendorDpas).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "medium",
+      })
+    )
+    expect(body.prefill.suggestions.hasVendorDocumentation).toEqual(
       expect.objectContaining({
         value: true,
         confidence: "medium",
@@ -198,7 +216,14 @@ describe("POST /api/org/profile/prefill", () => {
       source: "document_memory",
       generatedCount: 2,
       uploadedCount: 1,
-      matchedSignals: ["site cu cookies sau formulare", "vendori externi", "contracte standard"],
+      matchedSignals: [
+        "site cu cookies sau formulare",
+        "vendori externi",
+        "contracte standard",
+        "DPA-uri pentru vendori",
+        "documentație vendor",
+        "vendori care procesează date personale",
+      ],
       topDocuments: [
         "Politică de Cookies",
         "Acord de Prelucrare a Datelor (DPA)",
