@@ -75,53 +75,52 @@ export function RemediationBoard({
     (task) => task.remediationMode === "structural" && !groupedTaskIds.has(task.id)
   )
   const openCount = tasks.filter((task) => task.status !== "done").length
-  const openPriorityOneCount = tasks.filter(
-    (task) => task.status !== "done" && task.priority === "P1"
-  ).length
-  const missingEvidenceCount = tasks.filter(
-    (task) => task.status !== "done" && !task.attachedEvidence
-  ).length
+  const activeFilterLabel = filters.find((filter) => filter.value === activeFilter)?.label ?? "Deschise"
 
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="gap-4 border-b border-eos-border pb-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-3">
               <CardTitle className="text-lg text-eos-text">Board de remediere</CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
                 {visibleTasks.length} vizibile
               </Badge>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
-                {openCount} deschise
-              </Badge>
-              {openPriorityOneCount > 0 ? (
-                <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
-                  {openPriorityOneCount} P1
-                </Badge>
-              ) : null}
-              {missingEvidenceCount > 0 ? (
-                <Badge className="border-eos-warning-border bg-eos-warning-soft text-eos-warning">
-                  {missingEvidenceCount} fara dovada
-                </Badge>
-              ) : null}
-            </div>
+            <p className="text-sm text-eos-text-muted">
+              Lucrezi task-ul, atașezi dovada și validezi. Filtrele rămân secundare.
+            </p>
           </div>
 
           {openCount > 0 && (
-            <div className="space-y-3 xl:min-w-[42rem]">
-              {filterGroups.map((group) => (
-                <FilterCluster
-                  key={group.label}
-                  label={group.label}
-                  activeFilter={activeFilter}
-                  values={group.values}
-                  onFilterChange={onFilterChange}
-                />
-              ))}
-            </div>
+            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3 xl:min-w-[42rem]">
+              <summary className="cursor-pointer list-none">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+                      Filtre și grupare
+                    </p>
+                    <p className="mt-1 text-sm text-eos-text">
+                      Filtru activ: {activeFilterLabel}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-xs text-eos-text-muted">Alege</span>
+                </div>
+              </summary>
+
+              <div className="mt-3 space-y-3">
+                {filterGroups.map((group) => (
+                  <FilterCluster
+                    key={group.label}
+                    label={group.label}
+                    activeFilter={activeFilter}
+                    values={group.values}
+                    onFilterChange={onFilterChange}
+                  />
+                ))}
+              </div>
+            </details>
           )}
         </div>
       </CardHeader>

@@ -392,3 +392,10 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
 - Validare:
   - `./node_modules/.bin/tsc --noEmit`
   - `npm run lint -- --file app/dashboard/page.tsx`
+
+### Dovada / Remediere cleanup — 20 martie 2026
+
+- `Board de remediere` nu mai dubleaza sumarul paginii cu badge-uri repetitive; filtrele au fost mutate intr-un bloc secundar, expandabil.
+- fiecare `TaskCard` are acum un singur bloc principal `Acum faci asta`, care combina actiunea imediata si blocajul real.
+- au fost eliminate dublurile vizuale `Primul pas`, `Ce faci acum`, `Blocaj de audit` si panoul separat `Cum inchidem aceasta problema`.
+- `ValidationLevelBlock` ramane vizibil doar ca semnal de validare, in zona principala de actiune.

@@ -8,7 +8,6 @@ import {
   FileDown,
   Paperclip,
   RefreshCcw,
-  ShieldCheck,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -162,6 +161,20 @@ function auditBlockerLabel(task: CockpitTask) {
   return "Nu exista blocaje majore vizibile pentru task-ul curent."
 }
 
+function primaryActionCopy(
+  task: CockpitTask,
+  nextAction: string,
+  hasDistinctFixPreview: boolean,
+) {
+  if (!task.attachedEvidence && task.status !== "done" && task.closureRecipe) {
+    return task.closureRecipe
+  }
+  if (hasDistinctFixPreview) {
+    return task.fixPreview
+  }
+  return nextAction
+}
+
 export function TaskCard({
   task,
   highlighted,
@@ -204,6 +217,7 @@ export function TaskCard({
     : null
   const hasDistinctFixPreview = hasDistinctTaskCopy(task.summary, task.fixPreview)
   const nextAction = nextActionLabel(task)
+  const primaryAction = primaryActionCopy(task, nextAction, hasDistinctFixPreview)
   const auditBlocker = auditBlockerLabel(task)
   const visiblePrinciples = task.principles.slice(0, 2)
   const hiddenPrinciples = task.principles.slice(visiblePrinciples.length)
@@ -279,23 +293,28 @@ export function TaskCard({
                 <span className="[overflow-wrap:anywhere]">{task.effortLabel}</span>
               </div>
 
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
-                  Primul pas
-                </p>
-                <p className="mt-2 text-sm font-medium text-eos-text">
-                  {nextAction}
-                </p>
-              </div>
-
               {task.resolution && <ResolutionPath resolution={task.resolution} />}
-
-              {task.validationLevel >= 2 && (
-                <ValidationLevelBlock level={task.validationLevel} />
-              )}
             </div>
 
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
+                    Acum faci asta
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-eos-text">
+                    {primaryAction}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+                    {auditBlocker}
+                  </p>
+                </div>
+
+                {task.validationLevel >= 2 && (
+                  <ValidationLevelBlock level={task.validationLevel} />
+                )}
+              </div>
+
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge
                   className={
@@ -307,18 +326,6 @@ export function TaskCard({
                   {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
                 </Badge>
               </div>
-
-              {/* Closure recipe — afișat când nu există dovadă */}
-              {!task.attachedEvidence && task.status !== "done" && task.closureRecipe && (
-                <div className="mt-3 rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2.5">
-                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-warning">
-                    Cum închidem această problemă
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-eos-text">
-                    {task.closureRecipe}
-                  </p>
-                </div>
-              )}
 
               <div className="mt-4 space-y-2">
                 <Button
@@ -453,49 +460,6 @@ export function TaskCard({
               </details>
             </section>
           </div>
-
-          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(280px,0.92fr)]">
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
-                Ce faci acum
-              </p>
-              {hasDistinctFixPreview ? (
-                <p className="mt-2 break-words rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text [overflow-wrap:anywhere]">
-                  {task.fixPreview}
-                </p>
-              ) : null}
-              <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
-                {task.steps.slice(0, 3).map((step, index) => (
-                  <li key={`${task.id}-${index}`} className="flex gap-2">
-                    <ShieldCheck
-                      className="mt-0.5 size-4 shrink-0 text-eos-text-muted"
-                      strokeWidth={2}
-                    />
-                    <span>{step}</span>
-                  </li>
-                ))}
-                {task.steps.length > 3 && (
-                  <li className="pl-6 text-xs text-eos-text-muted/70">
-                    +{task.steps.length - 3} pasi in detaliile task-ului
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
-                Blocaj de audit
-              </p>
-              <p className="mt-2 text-sm text-eos-text [overflow-wrap:anywhere]">
-                {auditBlocker}
-              </p>
-              {task.validationMessage ? (
-                <p className="mt-3 text-xs leading-5 text-eos-text-muted">
-                  {task.validationMessage}
-                </p>
-              ) : null}
-            </div>
-          </section>
 
           <div className="grid gap-3 xl:grid-cols-3">
             <TaskDisclosure
