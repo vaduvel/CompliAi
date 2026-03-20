@@ -670,3 +670,15 @@ Validare după pas:
 - `npm test -- lib/server/website-prefill-signals.test.ts app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`30/30`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-20 - final guide plan canonic pentru forma finala a aplicatiei
+
+- am impachetat documentul mare `docs/documnet-final-log-sprint.md` intr-un loc canonic nou: `docs/final-guide-plan/`
+- `docs/final-guide-plan/00-master-source.md` pastreaza integral continutul sursa, fara sa scoata nimic din el
+- `docs/final-guide-plan/README.md` defineste folderul ca punct canonic pentru forma finala dorita a produsului
+- `docs/final-guide-plan/01-guide-map.md` separa clar doctrina de produs, roadmap-ul pe faze, addon-urile si regulile finale care rezolva conflictele interne din document
+- fisierul original ramane prezent ca sursa bruta; folderul nou adauga doar structura si continuitate, ca sa nu se piarda firul intre viziune, loguri si implementare
+
+Validare după pas:
+
+- pass de documentatie; fara validare runtime necesara
