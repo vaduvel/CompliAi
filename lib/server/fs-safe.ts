@@ -8,15 +8,15 @@
 import { promises as fs } from "node:fs"
 import path from "node:path"
 
-function isNonWritableEnvironmentError(err: unknown): boolean {
+function isReadOnlyError(err: unknown): boolean {
   if (!(err instanceof Error)) return false
   const code = (err as NodeJS.ErrnoException).code
-  return code === "EROFS" || code === "EACCES" || code === "EPERM" || code === "ENOENT"
+  return code === "EROFS" || code === "EACCES"
 }
 
 /**
- * Write a file, silently skipping on non-writable serverless filesystems.
- * Returns `true` if the write succeeded, `false` if skipped due to EROFS/EACCES/EPERM/ENOENT.
+ * Write a file, silently skipping on read-only filesystems.
+ * Returns `true` if the write succeeded, `false` if skipped due to EROFS/EACCES.
  * Re-throws any other error.
  */
 export async function writeFileSafe(filePath: string, content: string): Promise<boolean> {
@@ -25,8 +25,8 @@ export async function writeFileSafe(filePath: string, content: string): Promise<
     await fs.writeFile(filePath, content, "utf8")
     return true
   } catch (err) {
-    if (isNonWritableEnvironmentError(err)) {
-      console.warn(`[fs-safe] Skipping write (non-writable FS): ${filePath}`)
+    if (isReadOnlyError(err)) {
+      console.warn(`[fs-safe] Skipping write (read-only FS): ${filePath}`)
       return false
     }
     throw err
@@ -34,7 +34,7 @@ export async function writeFileSafe(filePath: string, content: string): Promise<
 }
 
 /**
- * Append to a file, silently skipping on non-writable serverless filesystems.
+ * Append to a file, silently skipping on read-only filesystems.
  */
 export async function appendFileSafe(filePath: string, content: string): Promise<boolean> {
   try {
@@ -42,8 +42,8 @@ export async function appendFileSafe(filePath: string, content: string): Promise
     await fs.appendFile(filePath, content, "utf8")
     return true
   } catch (err) {
-    if (isNonWritableEnvironmentError(err)) {
-      console.warn(`[fs-safe] Skipping append (non-writable FS): ${filePath}`)
+    if (isReadOnlyError(err)) {
+      console.warn(`[fs-safe] Skipping append (read-only FS): ${filePath}`)
       return false
     }
     throw err

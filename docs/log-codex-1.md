@@ -487,3 +487,21 @@ Validare dupa pas:
 - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`12/12`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde la rerulare solo; prima rulare paralela cu lint a lovit un artefact Next (`ENOENT` pe `.next/export/500.html`)
+
+## Actualizare 2026-03-20 - Wave 2.1 CUI / ANAF prefill in onboarding
+
+- s-a adaugat lookup real `CUI -> ANAF` prin `app/api/org/profile/prefill` si `lib/server/anaf-company-lookup.ts`
+- endpointul ANAF verificat live pe 2026-03-20 este `https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva`
+- wizardul de applicability foloseste acum prefill-ul public imediat dupa pasul de CUI:
+  - afiseaza firma gasita in ANAF
+  - afiseaza semnale `TVA` / `RO e-Factura`
+  - propune sectorul pe baza `CAEN` cu `confidence + reason`
+  - propune raspunsul pentru `e-Factura` cand semnalul ANAF este suficient de puternic
+- s-a introdus modelul comun `OrgProfilePrefill` pentru a nu dubla contractul de date intre route si UI
+- s-au adaugat teste pentru parserul / clientul ANAF si pentru ruta noua de prefill
+
+Validare dupa pas:
+
+- `npm test -- app/api/org/profile/prefill/route.test.ts lib/server/anaf-company-lookup.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`19/19`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde; compilarea a durat mai mult decat de obicei, dar a inchis complet

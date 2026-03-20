@@ -9,6 +9,10 @@ Status: plan activ, ancorat in log
 - `Wave 1.1` este din nou legat in runtime pe branchul `codex/smart-intake-wizard`
 - wizardul live foloseste confirmare asistata cap-coada
 - `POST /api/org/profile` proceseaza iar `intakeAnswers` si regenereaza iesirile initiale
+- `Wave 2.1` a pornit cu primul source real de prefill:
+  - lookup `CUI -> ANAF`
+  - card runtime cu firma gasita, `CAEN`, `TVA`, `RO e-Factura`
+  - sugestii explicabile pentru `sector` si `requiresEfactura`
 - validare confirmata:
   - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
   - `npm run lint`
@@ -67,6 +71,15 @@ Include:
 - semnale din site
 - sursa + confidence + motiv scurt pentru fiecare sugestie
 - suppression doar pe `high confidence`
+
+Primul slice intrat:
+
+- `Wave 2.1`:
+  - route dedicata `POST /api/org/profile/prefill`
+  - client ANAF pentru registrul TVA / RO e-Factura
+  - sugestii runtime:
+    - `sector` din `CAEN`
+    - `requiresEfactura` din `RO e-Factura` / `TVA`
 
 ## Primul pas recomandat
 

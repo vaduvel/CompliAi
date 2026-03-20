@@ -25,6 +25,7 @@ import {
   type OrgProfile,
   type OrgSector,
 } from "@/lib/compliance/applicability"
+import type { OrgProfilePrefill, PrefillSuggestion } from "@/lib/compliance/org-profile-prefill"
 import {
   DECISIVE_QUESTIONS,
   deriveSuggestedAnswers,
@@ -54,6 +55,10 @@ type ProfileSaveResponse = {
   documentRequests?: DocumentRequest[]
   nextBestAction?: NextBestAction | null
   intakeAnswers?: FullIntakeAnswers | null
+}
+
+type ProfilePrefillResponse = {
+  prefill: OrgProfilePrefill | null
 }
 
 type Props = {
@@ -101,6 +106,9 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [prefillError, setPrefillError] = useState<string | null>(null)
+  const [prefillLoading, setPrefillLoading] = useState(false)
+  const [orgPrefill, setOrgPrefill] = useState<OrgProfilePrefill | null>(null)
   const [result, setResult] = useState<ApplicabilityResult | null>(null)
   const [initialFindings, setInitialFindings] = useState<ScanFinding[]>([])
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
@@ -120,6 +128,52 @@ export function ApplicabilityWizard({ onComplete }: Props) {
     setIntakeAnswers(nextAnswers)
     setError(null)
     setStep("intake")
+  }
+
+  async function handleCuiContinue() {
+    const trimmedCui = values.cui.trim()
+    if (!trimmedCui) {
+      setOrgPrefill(null)
+      setPrefillError(null)
+      setStep("sector")
+      return
+    }
+
+    if (!isValidCui(trimmedCui)) {
+      setOrgPrefill(null)
+      setPrefillError("CUI-ul pare invalid. Corectează-l sau lasă câmpul gol ca să continui fără prefill.")
+      return
+    }
+
+    setPrefillLoading(true)
+    setPrefillError(null)
+    try {
+      const res = await fetch("/api/org/profile/prefill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cui: trimmedCui }),
+      })
+
+      if (!res.ok) {
+        setOrgPrefill(null)
+        setPrefillError("Nu am putut interoga ANAF acum. Continuăm fără prefill automat.")
+        setStep("sector")
+        return
+      }
+
+      const data = (await res.json()) as ProfilePrefillResponse
+      setOrgPrefill(data.prefill)
+      if (!data.prefill) {
+        setPrefillError("Nu am găsit firma în registrul ANAF pentru CUI-ul introdus. Continuăm manual.")
+      }
+      setStep("sector")
+    } catch {
+      setOrgPrefill(null)
+      setPrefillError("Nu am putut interoga ANAF acum. Continuăm fără prefill automat.")
+      setStep("sector")
+    } finally {
+      setPrefillLoading(false)
+    }
   }
 
   async function handleSubmit() {
@@ -201,14 +255,25 @@ export function ApplicabilityWizard({ onComplete }: Props) {
               <input
                 type="text"
                 value={values.cui}
-                onChange={(e) => setValues((current) => ({ ...current, cui: e.target.value }))}
+                onChange={(e) => {
+                  const nextValue = e.target.value
+                  setValues((current) => ({ ...current, cui: nextValue }))
+                  setOrgPrefill(null)
+                  setPrefillError(null)
+                }}
                 placeholder="Ex: RO12345678"
                 className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") setStep("sector")
+                  if (e.key === "Enter") void handleCuiContinue()
                 }}
               />
-              <Button onClick={() => setStep("sector")} className="w-full">
+              {prefillError ? (
+                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                  {prefillError}
+                </div>
+              ) : null}
+              <Button onClick={() => void handleCuiContinue()} className="w-full" disabled={prefillLoading}>
+                {prefillLoading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
                 Continuă
               </Button>
             </div>
@@ -219,6 +284,21 @@ export function ApplicabilityWizard({ onComplete }: Props) {
               <p className="text-sm font-medium text-eos-text">
                 Care este sectorul principal de activitate?
               </p>
+              {prefillError ? (
+                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                  {prefillError}
+                </div>
+              ) : null}
+              {orgPrefill ? (
+                <AnafPrefillCard
+                  prefill={orgPrefill}
+                  selectedSector={values.sector}
+                  onApplySector={(sector) => {
+                    setValues((current) => ({ ...current, sector }))
+                    setStep("size")
+                  }}
+                />
+              ) : null}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SECTORS.map(([value, label]) => (
                   <button
@@ -294,6 +374,13 @@ export function ApplicabilityWizard({ onComplete }: Props) {
               <p className="text-sm font-medium text-eos-text">
                 Facturezi B2B cu obligație de e-Factura / SPV ANAF?
               </p>
+              {orgPrefill?.suggestions.requiresEfactura ? (
+                <PrefillSuggestionCard
+                  label="Sugestie ANAF"
+                  valueLabel={orgPrefill.suggestions.requiresEfactura.value ? "Da" : "Nu"}
+                  suggestion={orgPrefill.suggestions.requiresEfactura}
+                />
+              ) : null}
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -475,6 +562,102 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   )
 }
 
+function AnafPrefillCard({
+  prefill,
+  selectedSector,
+  onApplySector,
+}: {
+  prefill: OrgProfilePrefill
+  selectedSector: OrgSector | null
+  onApplySector: (sector: OrgSector) => void
+}) {
+  const sectorSuggestion = prefill.suggestions.sector
+
+  return (
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-eos-text">Am găsit firma în ANAF</p>
+          <p className="mt-1 text-xs text-eos-text-muted">
+            {prefill.companyName} · {prefill.normalizedCui}
+          </p>
+        </div>
+        <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
+          Sursa: ANAF
+        </Badge>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {prefill.mainCaen ? (
+          <Badge className="border-eos-border bg-eos-surface text-eos-text">CAEN {prefill.mainCaen}</Badge>
+        ) : null}
+        <Badge className="border-eos-border bg-eos-surface text-eos-text">
+          TVA {prefill.vatRegistered ? "activ" : "inactiv"}
+        </Badge>
+        <Badge className="border-eos-border bg-eos-surface text-eos-text">
+          RO e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
+        </Badge>
+      </div>
+
+      {prefill.fiscalStatus ? (
+        <p className="mt-3 text-xs text-eos-text-muted">{prefill.fiscalStatus}</p>
+      ) : null}
+
+      {sectorSuggestion ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Sector sugerat: {ORG_SECTOR_LABELS[sectorSuggestion.value]}
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">{sectorSuggestion.reason}</p>
+            </div>
+            <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[sectorSuggestion.confidence]}`}>
+              {confidenceLabel(sectorSuggestion.confidence)}
+            </Badge>
+          </div>
+          {selectedSector !== sectorSuggestion.value ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => onApplySector(sectorSuggestion.value)}
+            >
+              Folosește sugestia
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function PrefillSuggestionCard({
+  label,
+  valueLabel,
+  suggestion,
+}: {
+  label: string
+  valueLabel: string
+  suggestion: PrefillSuggestion<boolean>
+}) {
+  return (
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-eos-text">
+            {label}: <span className="text-eos-primary">{valueLabel}</span>
+          </p>
+          <p className="mt-1 text-xs text-eos-text-muted">{suggestion.reason}</p>
+        </div>
+        <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}>
+          {confidenceLabel(suggestion.confidence)}
+        </Badge>
+      </div>
+    </div>
+  )
+}
+
 function QuestionCard({
   question,
   value,
@@ -608,6 +791,21 @@ function answerLabel(value: string) {
     default:
       return value
   }
+}
+
+function confidenceLabel(value: SuggestedAnswer["confidence"]) {
+  switch (value) {
+    case "high":
+      return "Încredere mare"
+    case "medium":
+      return "Încredere medie"
+    default:
+      return "Semnal slab"
+  }
+}
+
+function isValidCui(value: string) {
+  return /^(RO)?\d{2,10}$/i.test(value.trim())
 }
 
 function questionLabelForSuggestion(questionId: string) {
