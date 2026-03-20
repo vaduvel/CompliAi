@@ -4,6 +4,7 @@
 
 import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
+import type { EfacturaSupplierImportRecord } from "@/lib/server/efactura-vendor-signals"
 import { validateCUI } from "@/lib/server/request-validation"
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 import { hasSupabaseConfig, supabaseUpsert } from "@/lib/server/supabase-rest"
@@ -76,12 +77,6 @@ export type Nis2Vendor = {
   dataProcessingVolume?: "none" | "low" | "high"   // volum date procesate — estimare
   lastReviewDate?: string                           // ultima revizuire contract (ISO)
   nextReviewDue?: string                            // lastReviewDate + 12 luni (ISO)
-}
-
-export type EfacturaSupplierImportRecord = {
-  name: string
-  cui?: string
-  invoiceCount?: number
 }
 
 export type Nis2AssessmentRecord = {

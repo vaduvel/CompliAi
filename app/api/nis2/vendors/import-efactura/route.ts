@@ -8,10 +8,9 @@ import { NextResponse } from "next/server"
 import type { ComplianceState } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import type { EfacturaSupplierImportRecord } from "@/lib/server/nis2-store"
+import { collectSupplierImports } from "@/lib/server/efactura-vendor-signals"
 import { readState, mutateState } from "@/lib/server/mvp-store"
 import { upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
-import { validateCUI } from "@/lib/server/request-validation"
 import { EFACTURA_MOCK_VENDORS } from "@/lib/server/efactura-mock-data"
 
 export async function POST(request: Request) {
@@ -23,7 +22,7 @@ export async function POST(request: Request) {
     const state = await readState()
 
     // Extrage furnizorii unici din validările e-Factura
-    const realSuppliers = collectSupplierImports(state)
+    const realSuppliers = collectSupplierImports(state.efacturaValidations)
 
     // Sprint 5: Mock mode — când nu există date ANAF reale
     const isDemoMode = realSuppliers.length === 0
@@ -74,40 +73,4 @@ export async function POST(request: Request) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Import eșuat.", 500, "EFACTURA_VENDOR_IMPORT_FAILED")
   }
-}
-
-function collectSupplierImports(state: Pick<ComplianceState, "efacturaValidations">): EfacturaSupplierImportRecord[] {
-  const index = new Map<string, EfacturaSupplierImportRecord>()
-
-  for (const validation of state.efacturaValidations) {
-    const supplierName = validation.supplierName?.trim()
-    if (!supplierName) continue
-
-    const supplierCui = validation.supplierCui ? validateCUI(validation.supplierCui) ?? undefined : undefined
-    const nameKey = `name:${supplierName.toLowerCase()}`
-    const cuiKey = supplierCui ? `cui:${supplierCui}` : null
-    const existing =
-      (cuiKey ? index.get(cuiKey) : undefined) ??
-      index.get(nameKey)
-
-    if (existing) {
-      existing.invoiceCount = (existing.invoiceCount ?? 1) + 1
-      if (!existing.cui && supplierCui) {
-        existing.cui = supplierCui
-      }
-      if (cuiKey) index.set(cuiKey, existing)
-      continue
-    }
-
-    const record: EfacturaSupplierImportRecord = {
-      name: supplierName,
-      ...(supplierCui ? { cui: supplierCui } : {}),
-      invoiceCount: 1,
-    }
-
-    index.set(nameKey, record)
-    if (cuiKey) index.set(cuiKey, record)
-  }
-
-  return [...new Set(index.values())]
 }

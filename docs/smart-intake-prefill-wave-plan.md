@@ -21,6 +21,10 @@ Status: plan activ, ancorat in log
   - extragere `supplierCui` / `customerCui`
   - agregare furnizori cu dedup pe `CUI`
   - context `invoiceCount` pentru importul in registrul `NIS2`
+- `Wave 2.4` duce semnalul vendor in runtime:
+  - `orgProfilePrefill` include sugestie `usesExternalVendors`
+  - onboarding-ul vede top vendorii detectati din e-Factura
+  - intake-ul foloseste semnalul direct, nu doar euristica din `requiresEfactura`
 - validare confirmata:
   - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
   - `npm run lint`
@@ -40,15 +44,17 @@ Status: plan activ, ancorat in log
 - `Wave 2.3`:
   - importul vendorilor din e-Factura retine `CUI` si `invoiceCount`
   - registrul `NIS2` poate deduplica vendorii pe semnale mai bune decat numele simplu
+- `Wave 2.4`:
+  - `POST /api/org/profile/prefill` intoarce acum si semnal direct pentru `usesExternalVendors`
+  - wizardul afiseaza contextul vendor din e-Factura si precompleteaza intake-ul cu incredere mare cand exista dovezi directe
 
 Stare git confirmata pe 2026-03-20:
 
-- `Wave 1.1` este pe `origin/main`
-- `Wave 2.1`, `Wave 2.2` si `Wave 2.3` sunt pe firul `codex/smart-intake-wizard` pana la promovarea pe `main`
+- `Wave 1.1`, `Wave 2.1`, `Wave 2.2` si `Wave 2.3` sunt pe `origin/main`
+- `Wave 2.4` este gata de promovare dupa validarea acestui pass
 
 Ce nu face inca acest slice:
 
-- nu propune inca raspunsuri runtime din semnalele vendor importate
 - nu unifica inca toate sursele de prefill sub acelasi model complet `source + confidence + reason`
 - nu deduce inca raspunsuri din documente urcate sau website
 - nu face inca suppression automat pe baza unui model unitar multi-sursa
@@ -103,6 +109,10 @@ Primul slice intrat:
   - semnalele vendor din e-Factura sunt extrase cu `CUI` si volum minim (`invoiceCount`)
   - importul in registrul `NIS2` foloseste dedup pe `CUI` cand sursa il ofera
   - pasul pregateste prefill-ul ulterior pentru `usesExternalVendors` si `vendorsUsed`, fara sa dubleze parsing-ul XML
+- `Wave 2.4`:
+  - `orgProfilePrefill` foloseste acelasi semnal vendor pentru runtime onboarding
+  - `usesExternalVendors` poate fi sugerat cu `confidence=high` cand exista dovezi directe in e-Factura
+  - heuristica generica din `requiresEfactura` ramane doar fallback, nu sursa principala
 
 ## Primul pas recomandat
 

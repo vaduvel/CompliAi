@@ -553,3 +553,19 @@ Validare dupa pas:
 - inspectia git arata ca `Wave 1.1` este conservat pe `origin/main`
 - `Wave 2.1`, `Wave 2.2` si `Wave 2.3` sunt conservate pe firul `codex/smart-intake-wizard` si asteapta promovarea curata spre `main`
 - intrarea mai veche care marca `Wave 2.1` ca fiind deja pe `main` trebuie tratata ca stare tinta, nu ca stare confirmata de git
+
+## Actualizare 2026-03-20 - Wave 2.4 runtime vendor prefill in onboarding
+
+- logica de vendor signals din e-Factura a fost extrasă în `lib/server/efactura-vendor-signals.ts` pentru a nu mai exista parsing dublat între import și onboarding
+- `app/api/org/profile/prefill` îmbogățește acum răspunsul ANAF cu:
+  - sugestie directă `usesExternalVendors`
+  - context `vendorSignals` cu număr de furnizori, număr de validări și top vendori detectați
+- wizardul de applicability folosește acum sugestia directă din prefill la pasul de intake, nu doar heuristica generică `requiresEfactura -> probably vendors`
+- cardul ANAF din onboarding arată și semnalul din e-Factura, astfel încât userul vede de ce întrebarea despre vendori vine deja precompletată
+- ruta `app/api/nis2/vendors/import-efactura` reutilizează aceeași logică de agregare, deci importul și onboarding-ul rămân aliniate
+
+Validare după pas:
+
+- `npm test -- lib/server/efactura-vendor-signals.test.ts app/api/org/profile/prefill/route.test.ts lib/compliance/intake-engine.test.ts app/api/nis2/vendors/import-efactura/route.test.ts lib/server/nis2-store.test.ts lib/compliance/efactura-validator.test.ts` -> verde (`32/32`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde

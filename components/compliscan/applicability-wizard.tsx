@@ -115,7 +115,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
 
   const profileSnapshot = buildProfileSnapshot(values)
-  const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot) : []
+  const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
   const visibleConditionalQuestions = getVisibleConditionalQuestions(intakeAnswers)
   const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
 
@@ -124,7 +124,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
 
     const snapshot = buildProfileSnapshot({ ...values, requiresEfactura: nextRequiresEfactura })
     if (!snapshot) return
-    const nextAnswers = deriveInitialIntakeAnswers(snapshot)
+    const nextAnswers = deriveInitialIntakeAnswers(snapshot, orgPrefill)
     setIntakeAnswers(nextAnswers)
     setError(null)
     setStep("intake")
@@ -603,6 +603,27 @@ function AnafPrefillCard({
         <p className="mt-3 text-xs text-eos-text-muted">{prefill.fiscalStatus}</p>
       ) : null}
 
+      {prefill.vendorSignals ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">
+                Semnal vendor din e-Factura
+              </p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                {prefill.vendorSignals.vendorCount} furnizori detectați în {prefill.vendorSignals.invoiceCount} validări e-Factura.
+                {prefill.vendorSignals.topVendors.length > 0
+                  ? ` Exemple: ${prefill.vendorSignals.topVendors.join(", ")}.`
+                  : ""}
+              </p>
+            </div>
+            <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE.high}`}>
+              Încredere mare
+            </Badge>
+          </div>
+        </div>
+      ) : null}
+
       {sectorSuggestion ? (
         <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
           <div className="flex items-start justify-between gap-3">
@@ -755,12 +776,12 @@ function buildProfileSnapshot(values: WizardState): OrgProfile | null {
   }
 }
 
-function deriveInitialIntakeAnswers(profile: OrgProfile): FullIntakeAnswers {
+function deriveInitialIntakeAnswers(profile: OrgProfile, prefill?: OrgProfilePrefill | null): FullIntakeAnswers {
   const initial: FullIntakeAnswers = {
     usesAITools: profile.usesAITools ? "yes" : "no",
   }
 
-  for (const suggestion of deriveSuggestedAnswers(profile)) {
+  for (const suggestion of deriveSuggestedAnswers(profile, prefill)) {
     ;(initial as Record<string, string | undefined>)[suggestion.questionId] = suggestion.value
   }
 

@@ -21,8 +21,15 @@ export type OrgProfilePrefill = {
   vatOnCashAccounting: boolean
   efacturaRegistered: boolean
   inactive: boolean
+  vendorSignals?: {
+    source: "efactura_validations"
+    vendorCount: number
+    invoiceCount: number
+    topVendors: string[]
+  }
   suggestions: {
     sector?: PrefillSuggestion<OrgSector>
     requiresEfactura?: PrefillSuggestion<boolean>
+    usesExternalVendors?: PrefillSuggestion<boolean>
   }
 }

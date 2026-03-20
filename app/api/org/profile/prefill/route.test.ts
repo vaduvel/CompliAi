@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   readSessionMock: vi.fn(),
+  readStateMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
   mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
@@ -32,6 +33,7 @@ vi.mock("@/lib/server/anaf-company-lookup", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
+  readState: mocks.readStateMock,
   mutateState: mocks.mutateStateMock,
 }))
 
@@ -49,6 +51,7 @@ describe("POST /api/org/profile/prefill", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.readSessionMock.mockReturnValue({ orgId: "org-1", userId: "user-1" })
+    mocks.readStateMock.mockResolvedValue({ efacturaValidations: [] })
   })
 
   it("respinge accesul fara sesiune", async () => {
@@ -94,12 +97,27 @@ describe("POST /api/org/profile/prefill", () => {
         },
       },
     })
+    mocks.readStateMock.mockResolvedValue({
+      efacturaValidations: [
+        {
+          supplierName: "Amazon Web Services EMEA SARL",
+          supplierCui: "RO12345678",
+        },
+      ],
+    })
 
     const res = await POST(makeRequest({ cui: "RO14399840" }))
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body.prefill.companyName).toBe("DANTE INTERNATIONAL SA")
+    expect(body.prefill.suggestions.usesExternalVendors).toEqual(
+      expect.objectContaining({
+        value: true,
+        confidence: "high",
+      })
+    )
+    expect(body.prefill.vendorSignals.topVendors).toEqual(["Amazon Web Services EMEA SARL"])
     expect((saved as { orgProfilePrefill?: { normalizedCui: string } }).orgProfilePrefill?.normalizedCui).toBe(
       "RO14399840"
     )

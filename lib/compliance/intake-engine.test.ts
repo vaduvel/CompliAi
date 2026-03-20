@@ -44,6 +44,55 @@ describe("intake-engine", () => {
     )
   })
 
+  it("prefers direct vendor signals from prefill over generic e-Factura heuristics", () => {
+    const suggestions = deriveSuggestedAnswers(
+      {
+        sector: "professional-services",
+        employeeCount: "1-9",
+        usesAITools: false,
+        requiresEfactura: false,
+        completedAtISO: "2026-03-20T00:00:00.000Z",
+      },
+      {
+        source: "anaf_vat_registry",
+        fetchedAtISO: "2026-03-20T10:00:00.000Z",
+        normalizedCui: "RO14399840",
+        companyName: "DANTE INTERNATIONAL SA",
+        address: "BUCURESTI",
+        legalForm: "SA",
+        mainCaen: "6201",
+        fiscalStatus: "INREGISTRAT",
+        vatRegistered: true,
+        vatOnCashAccounting: false,
+        efacturaRegistered: true,
+        inactive: false,
+        vendorSignals: {
+          source: "efactura_validations",
+          vendorCount: 2,
+          invoiceCount: 3,
+          topVendors: ["Amazon Web Services EMEA SARL", "Microsoft Ireland Operations Limited"],
+        },
+        suggestions: {
+          usesExternalVendors: {
+            value: true,
+            confidence: "high",
+            reason: "Am detectat 2 furnizori în 3 validări e-Factura, deci folosești deja vendorii externi.",
+          },
+        },
+      }
+    )
+
+    expect(suggestions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          questionId: "usesExternalVendors",
+          value: "yes",
+          confidence: "high",
+        }),
+      ])
+    )
+  })
+
   it("shows only conditional questions unlocked by current answers", () => {
     const visibleQuestions = getVisibleConditionalQuestions({
       hasEmployees: "mixed",

@@ -5,6 +5,7 @@
 // Funcție pură, fără I/O, safe în browser și pe server.
 
 import type { OrgProfile } from "@/lib/compliance/applicability"
+import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import type { ScanFinding, FindingCategory } from "@/lib/compliance/types"
 
 // ── Answer types ─────────────────────────────────────────────────────────────
@@ -321,7 +322,7 @@ export const CONDITIONAL_QUESTIONS: IntakeQuestion[] = [
  * Derive suggested answers from an existing OrgProfile.
  * If confidence is "high", the question can be suppressed (auto-filled).
  */
-export function deriveSuggestedAnswers(profile: OrgProfile): SuggestedAnswer[] {
+export function deriveSuggestedAnswers(profile: OrgProfile, prefill?: OrgProfilePrefill | null): SuggestedAnswer[] {
   const suggestions: SuggestedAnswer[] = []
 
   // Q4 — AI tools: already answered in profile
@@ -357,8 +358,15 @@ export function deriveSuggestedAnswers(profile: OrgProfile): SuggestedAnswer[] {
     })
   }
 
-  // Q5 — Vendors: inferred from e-Factura (B2B = likely vendors)
-  if (profile.requiresEfactura) {
+  // Q5 — Vendors: prefer direct signals from e-Factura, fallback to e-Factura obligation heuristic
+  if (prefill?.suggestions.usesExternalVendors) {
+    suggestions.push({
+      questionId: "usesExternalVendors",
+      value: prefill.suggestions.usesExternalVendors.value ? "yes" : "no",
+      confidence: prefill.suggestions.usesExternalVendors.confidence,
+      reason: prefill.suggestions.usesExternalVendors.reason,
+    })
+  } else if (profile.requiresEfactura) {
     suggestions.push({
       questionId: "usesExternalVendors",
       value: "probably",
