@@ -712,3 +712,17 @@ Validare după pas:
 Validare după pas:
 
 - pass de documentatie; fara validare runtime necesara
+
+## Actualizare 2026-03-20 - pachet UX canonic adaugat in final guide plan
+
+- am gasit in `docs/final-guide-plan/` doua fisiere UX valoroase, dar inca neversionate:
+  - `compliscan-ia-revizuita.md`
+  - `compliscan-ux-wireframe.jsx`
+- le-am pastrat ca originale pentru provenance si am creat copii canonice cu nume stabile:
+  - `02-ux-ia-blueprint.md`
+  - `03-ux-wireframe-prototype.jsx`
+- `README.md` si `01-guide-map.md` explica acum explicit ca aceste doua copii sunt referinta curenta pentru forma finala UX a aplicatiei, iar fisierele originale raman in folder pentru comparatie si istoric
+
+Validare după pas:
+
+- pass de documentatie; fara validare runtime necesara

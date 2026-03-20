@@ -10,12 +10,18 @@ Scopul lui este simplu:
 Ce gasesti aici:
 - `00-master-source.md` -> copie integrala, pastrata ca sursa master, a documentului `docs/documnet-final-log-sprint.md`
 - `01-guide-map.md` -> harta canonica de citire si folosire a sursei master
+- `02-ux-ia-blueprint.md` -> copie canonica a blueprint-ului de arhitectura UX si IA pentru forma finala a aplicatiei
+- `03-ux-wireframe-prototype.jsx` -> copie canonica a prototipului vizual care traduce blueprint-ul UX in ecrane
+- `compliscan-ia-revizuita.md` -> fisierul original, pastrat pentru provenance
+- `compliscan-ux-wireframe.jsx` -> fisierul original, pastrat pentru provenance
 
 Reguli pentru folder:
 - nu stergem continut din sursa master
 - nu rescriem agresiv `00-master-source.md`
+- nu stergem fisierele originale `compliscan-ia-revizuita.md` si `compliscan-ux-wireframe.jsx`
 - daca apar clarificari sau normalizari, le punem in fisiere companion din acest folder
 - daca exista conflict intre formularea stricta din corpul vechi si clarificarile finale adaugate la coada documentului, urmam clarificarile finale explicate in `01-guide-map.md`
+- pentru executie si referinta curenta, folosim numele canonice `02-*` si `03-*`, iar fisierele originale raman ca sursa de provenienta
 
 Intentia acestui folder:
 - aici tinem forma finala dorita a aplicatiei

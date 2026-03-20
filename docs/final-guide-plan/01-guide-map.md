@@ -76,9 +76,23 @@ Aceste clarificari fac documentul executabil in lumea reala si trebuie pastrate 
 Ordinea recomandata de citire:
 1. `00-master-source.md`
 2. `01-guide-map.md`
-3. documentele de wave active si logurile curente
+3. `02-ux-ia-blueprint.md`
+4. `03-ux-wireframe-prototype.jsx`
+5. documentele de wave active si logurile curente
 
 Cand facem implementari noi:
 - nu stergem din sursa master
 - documentam override-urile sau normalizarile in acest folder
 - actualizam logul de sprint astfel incat sa existe fir clar intre viziune, wave si codul livrat
+
+## 8. Pachetul UX canonic din folder
+
+Pentru forma finala a aplicatiei, pachetul UX canonic este:
+- `02-ux-ia-blueprint.md` pentru arhitectura informationala si regulile de navigare
+- `03-ux-wireframe-prototype.jsx` pentru traducerea vizuala a blueprint-ului in ecrane si prioritati de interactiune
+
+Fisierele:
+- `compliscan-ia-revizuita.md`
+- `compliscan-ux-wireframe.jsx`
+
+raman in folder ca originale pastrate pentru provenance si comparatie, dar referinta de lucru merge pe variantele canonice numerotate.
