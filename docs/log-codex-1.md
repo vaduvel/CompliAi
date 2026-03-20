@@ -505,3 +505,30 @@ Validare dupa pas:
 - `npm test -- app/api/org/profile/prefill/route.test.ts lib/server/anaf-company-lookup.test.ts app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts` -> verde (`19/19`)
 - `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
 - `npm run build` -> verde; compilarea a durat mai mult decat de obicei, dar a inchis complet
+
+Status runtime:
+
+- commitul `de3d15f` este pe `main`
+- deployul de productie este aliased pe `https://compliscanag.vercel.app`
+- smoke test live confirmat:
+  - `POST /api/org/profile/prefill` cu `RO14399840` -> `DANTE INTERNATIONAL SA` + sugestie `sector=retail`
+  - `POST /api/org/profile/prefill` cu `RO13348610` -> `REWE (ROMANIA) SRL` + sugestie `requiresEfactura=true` cu `confidence=high`
+  - `POST /api/org/profile/prefill` cu `abc` -> `400 INVALID_CUI`
+
+## Actualizare 2026-03-20 - Wave 2.2 persistam prefill-ul in state
+
+- `app/api/org/profile/prefill` salveaza acum `orgProfilePrefill` in `ComplianceState`
+- `GET /api/org/profile` expune si `orgProfilePrefill`, ca onboarding-ul si pasii urmatori sa poata rehidrata prefill-ul fara un nou lookup imediat
+- `POST /api/org/profile` pastreaza prefill-ul doar daca `CUI`-ul salvat se potriveste cu lookup-ul anterior; altfel il curata ca sa nu ramana stare stale
+- `ComplianceState` include oficial `orgProfilePrefill`
+- s-au adaugat teste pentru:
+  - persistarea prefill-ului la lookup reusit
+  - curatarea lui la lookup fara rezultat
+  - expunerea lui prin `GET /api/org/profile`
+  - pastrare/curatare corecta cand profilul se salveaza cu acelasi sau alt `CUI`
+
+Validare dupa pas:
+
+- `npm test -- app/api/org/profile/prefill/route.test.ts app/api/org/profile/route.test.ts lib/server/anaf-company-lookup.test.ts lib/compliance/intake-engine.test.ts` -> verde (`22/22`)
+- `npm run lint` -> verde cu warnings vechi, neatinse de acest slice
+- `npm run build` -> verde

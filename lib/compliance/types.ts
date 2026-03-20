@@ -2,6 +2,7 @@ import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
 import type { OrgProfile, ApplicabilityResult } from "@/lib/compliance/applicability"
 import type { FullIntakeAnswers } from "@/lib/compliance/intake-engine"
+import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 
 export type AlertSeverity = ComplianceSeverity
 export type FindingCategory = "EU_AI_ACT" | "GDPR" | "E_FACTURA" | "NIS2"
@@ -372,6 +373,7 @@ export type ComplianceState = {
   // ── Applicability Engine ───────────────────────────────────────────────────
   orgProfile?: OrgProfile
   applicability?: ApplicabilityResult
+  orgProfilePrefill?: OrgProfilePrefill
   // ── V3 P2.1 Shadow AI ─────────────────────────────────────────────────────
   shadowAiAnswers?: { questionId: string; value: string | string[] }[]
   shadowAiCompletedAtISO?: string

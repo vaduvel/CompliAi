@@ -26,8 +26,8 @@ vi.mock("@/lib/server/api-response", () => ({
   ),
 }))
 
-import { mutateState } from "@/lib/server/mvp-store"
-import { POST } from "./route"
+import { mutateState, readState } from "@/lib/server/mvp-store"
+import { GET, POST } from "./route"
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -50,6 +50,23 @@ const validBase = {
 
 describe("POST /api/org/profile — CUI", () => {
   beforeEach(() => vi.clearAllMocks())
+
+  it("returnează prefill-ul org salvat la GET", async () => {
+    vi.mocked(readState).mockResolvedValue({
+      orgProfile: null,
+      applicability: null,
+      orgProfilePrefill: {
+        normalizedCui: "RO14399840",
+        companyName: "DANTE INTERNATIONAL SA",
+      },
+    } as never)
+
+    const res = await GET(new Request("http://localhost/api/org/profile"))
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.orgProfilePrefill.normalizedCui).toBe("RO14399840")
+  })
 
   it("salvează CUI valid (format RO + cifre)", async () => {
     let saved: unknown = null
@@ -221,5 +238,43 @@ describe("POST /api/org/profile — CUI", () => {
     expect(state.findings).toEqual([{ id: "manual-existing" }])
     expect(state.intakeAnswers).toBeUndefined()
     expect(state.intakeCompletedAtISO).toBeUndefined()
+  })
+
+  it("păstrează prefill-ul doar când CUI-ul salvat se potrivește cu lookup-ul anterior", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          normalizedCui: "RO14399840",
+          companyName: "DANTE INTERNATIONAL SA",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, cui: "RO14399840" }))
+    expect(res.status).toBe(200)
+    expect((saved as { orgProfilePrefill?: { normalizedCui: string } }).orgProfilePrefill?.normalizedCui).toBe(
+      "RO14399840"
+    )
+  })
+
+  it("curăță prefill-ul vechi dacă profilul se salvează cu alt CUI", async () => {
+    let saved: unknown = null
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          normalizedCui: "RO14399840",
+          companyName: "DANTE INTERNATIONAL SA",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, cui: "RO99999999" }))
+    expect(res.status).toBe(200)
+    expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
   })
 })

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
   readSessionMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
+  mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
     new Response(JSON.stringify({ error: message, code }), { status })
   ),
@@ -28,6 +29,10 @@ vi.mock("@/lib/server/api-response", () => ({
 
 vi.mock("@/lib/server/anaf-company-lookup", () => ({
   lookupOrgProfilePrefillByCui: mocks.lookupOrgProfilePrefillByCuiMock,
+}))
+
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateState: mocks.mutateStateMock,
 }))
 
 import { POST } from "./route"
@@ -63,6 +68,11 @@ describe("POST /api/org/profile/prefill", () => {
   })
 
   it("intoarce prefill-ul cand lookup-ul reuseste", async () => {
+    let saved: unknown = null
+    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
+      saved = fn({ orgProfile: null }) as Record<string, unknown>
+      return saved
+    })
     mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue({
       source: "anaf_vat_registry",
       fetchedAtISO: "2026-03-20T10:00:00.000Z",
@@ -90,9 +100,21 @@ describe("POST /api/org/profile/prefill", () => {
 
     expect(res.status).toBe(200)
     expect(body.prefill.companyName).toBe("DANTE INTERNATIONAL SA")
+    expect((saved as { orgProfilePrefill?: { normalizedCui: string } }).orgProfilePrefill?.normalizedCui).toBe(
+      "RO14399840"
+    )
   })
 
   it("intoarce prefill null cand lookup-ul nu gaseste firma", async () => {
+    let saved: unknown = null
+    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
+      saved = fn({
+        orgProfilePrefill: {
+          normalizedCui: "RO99999999",
+        },
+      }) as Record<string, unknown>
+      return saved
+    })
     mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue(null)
 
     const res = await POST(makeRequest({ cui: "RO12345678" }))
@@ -100,5 +122,6 @@ describe("POST /api/org/profile/prefill", () => {
 
     expect(res.status).toBe(200)
     expect(body.prefill).toBeNull()
+    expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
   })
 })

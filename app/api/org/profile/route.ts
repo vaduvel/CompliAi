@@ -10,6 +10,7 @@ import {
   type FullIntakeAnswers,
   type IntakeAnswer,
 } from "@/lib/compliance/intake-engine"
+import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { mutateState, readState } from "@/lib/server/mvp-store"
@@ -51,6 +52,7 @@ export async function GET(request: Request) {
       orgProfile: state.orgProfile ?? null,
       applicability: state.applicability ?? null,
       intakeAnswers: state.intakeAnswers ?? null,
+      orgProfilePrefill: state.orgProfilePrefill ?? null,
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -100,11 +102,14 @@ export async function POST(request: Request) {
 
     await mutateState((current) => {
       const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
+      const currentPrefill = current.orgProfilePrefill as OrgProfilePrefill | undefined
+      const matchingPrefill = currentPrefill?.normalizedCui === cui ? currentPrefill : undefined
 
       return {
         ...current,
         orgProfile,
         applicability,
+        orgProfilePrefill: matchingPrefill,
         findings: intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings,
         intakeAnswers,
         intakeCompletedAtISO,

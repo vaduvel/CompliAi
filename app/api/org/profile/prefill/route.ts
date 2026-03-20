@@ -4,6 +4,7 @@ import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
+import { mutateState } from "@/lib/server/mvp-store"
 import { validateCUI } from "@/lib/server/request-validation"
 
 type PrefillRequestBody = {
@@ -20,6 +21,11 @@ export async function POST(request: Request) {
     if (!cui) return jsonError("CUI invalid.", 400, "INVALID_CUI")
 
     const prefill = await lookupOrgProfilePrefillByCui(cui)
+    await mutateState((current) => ({
+      ...current,
+      orgProfilePrefill: prefill ?? undefined,
+    }))
+
     return NextResponse.json({
       prefill: prefill ?? null,
     } satisfies { prefill: OrgProfilePrefill | null })

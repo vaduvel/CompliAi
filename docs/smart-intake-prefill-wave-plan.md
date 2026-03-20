@@ -13,6 +13,10 @@ Status: plan activ, ancorat in log
   - lookup `CUI -> ANAF`
   - card runtime cu firma gasita, `CAEN`, `TVA`, `RO e-Factura`
   - sugestii explicabile pentru `sector` si `requiresEfactura`
+- `Wave 2.2` continua firul fara sa piarda prefill-ul:
+  - persistenta `orgProfilePrefill` in state
+  - rehidratare prin `GET /api/org/profile`
+  - curatare automata cand `CUI`-ul din profil nu mai corespunde
 - validare confirmata:
   - `npm test -- app/api/org/profile/route.test.ts lib/compliance/intake-engine.test.ts`
   - `npm run lint`
@@ -80,6 +84,9 @@ Primul slice intrat:
   - sugestii runtime:
     - `sector` din `CAEN`
     - `requiresEfactura` din `RO e-Factura` / `TVA`
+- `Wave 2.2`:
+  - `orgProfilePrefill` devine stare persistata, nu doar raspuns efemer de route
+  - onboarding-ul si pasii urmatori pot consuma aceeasi baza de provenance fara relookup imediat
 
 ## Primul pas recomandat
 
