@@ -1513,3 +1513,16 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
   - Stripe checkout/portal revin acum in familia canonica `settings`
   - health-check si emailurile de notificare folosesc acum `settings`
   - subnav-ul local `Dovada` foloseste acum `resolve` si `reports`
+
+### Actualizare 2026-03-20 - BP-3 reports
+
+- [x] familia `reports` are subrutele canonice din blueprint
+  - `reports/vault`
+  - `reports/policies`
+  - `reports/audit-log`
+  - `reports/trust-center`
+- [x] suprafetele de output au owner comun in `components/compliscan/*`
+- [x] rutele vechi de output raman doar aliasuri de compatibilitate
+- [~] reducerea handoff-urilor legacy vizibile
+  - navigatia locala `ReportsTabs` este activa pe subpaginile de output
+  - linkurile principale catre `vault`, `policies` si `audit-log` folosesc acum familia canonica `reports`

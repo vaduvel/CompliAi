@@ -1,5 +1,5 @@
 import { ReportsAuditLogPageSurface } from "@/components/compliscan/reports-audit-log-page"
 
-export default function LegacyAuditLogPage() {
+export default function ReportsAuditLogPage() {
   return <ReportsAuditLogPageSurface />
 }

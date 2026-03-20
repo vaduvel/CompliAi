@@ -1,5 +1,5 @@
 import { ReportsPoliciesPageSurface } from "@/components/compliscan/reports-policies-page"
 
-export default function LegacyPoliciesPage() {
+export default function ReportsPoliciesPage() {
   return <ReportsPoliciesPageSurface />
 }

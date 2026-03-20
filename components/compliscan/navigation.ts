@@ -121,7 +121,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "politici",
     label: "Politici & Documente",
     items: [
-      { id: "politici", label: "Politici interne", href: "/dashboard/politici", icon: BookOpen },
+      { id: "politici", label: "Politici interne", href: dashboardRoutes.policies, icon: BookOpen },
       { id: "generator", label: "Generator documente", href: "/dashboard/generator", icon: Sparkles },
     ],
   },
@@ -152,11 +152,11 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       {
         id: "auditorVault",
         label: "Auditor Vault",
-        href: "/dashboard/rapoarte/auditor-vault",
+        href: dashboardRoutes.auditorVault,
         icon: FolderKanban,
       },
       { id: "rapoarte", label: "Audit si export", href: dashboardRoutes.reports, icon: FileSearch },
-      { id: "auditLog", label: "Log audit", href: "/dashboard/audit-log", icon: ClipboardList },
+      { id: "auditLog", label: "Log audit", href: dashboardRoutes.auditLog, icon: ClipboardList },
     ],
   },
 ] as const

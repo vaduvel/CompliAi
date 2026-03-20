@@ -1779,3 +1779,16 @@ Asta este sanatos arhitectural pentru ca:
   - health-check operational
   - emailurile de notificare
 - asta inchide ultimul top-level owner important ramas pe pagina veche si reduce ruptura dintre shell-ul nou si handoff-urile administrative
+
+## Actualizare 2026-03-20 - BP-3: subfamilia canonica Reports
+
+- `/dashboard/reports` nu mai este doar pagina principala; familia canonică include acum si:
+  - `/dashboard/reports/vault`
+  - `/dashboard/reports/policies`
+  - `/dashboard/reports/audit-log`
+  - `/dashboard/reports/trust-center`
+- fiecare subpagina foloseste acum owner comun in `components/compliscan/*`, iar rutele vechi raman doar aliasuri
+- `ReportsTabs` ofera subnavigatia locala ceruta de blueprint pentru output-uri
+- asta reduce si mai mult ruptura dintre:
+  - shell-ul nou `Rapoarte`
+  - URL-urile vechi mostenite din `Dovada` si `Politici`

@@ -1,5 +1,5 @@
 import { ReportsTrustCenterPageSurface } from "@/components/compliscan/reports-trust-center-page"
 
-export default function LegacyTrustCenterPage() {
+export default function ReportsTrustCenterPage() {
   return <ReportsTrustCenterPageSurface />
 }

@@ -154,7 +154,7 @@ function LatestYamlSection({
             </p>
           </div>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/rapoarte/auditor-vault">
+            <Link href={dashboardRoutes.auditorVault}>
               Mergi la Auditor Vault
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>

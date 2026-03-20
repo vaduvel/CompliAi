@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import { ArrowRight } from "lucide-react"
 
-import { PillarTabs } from "@/components/compliscan/pillar-tabs"
+import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
@@ -216,7 +216,7 @@ export function ReportsPageSurface() {
         }
       />
 
-      <PillarTabs sectionId="dovada" />
+      <ReportsTabs />
 
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">

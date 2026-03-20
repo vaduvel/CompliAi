@@ -1393,3 +1393,13 @@ Actualizare suplimentara 2026-03-20:
   - `settings`
   - `resolve`
   - `reports`
+
+Actualizare suplimentara 2026-03-20:
+
+- familia `Rapoarte` foloseste acum subrutele canonice din blueprint:
+  - `reports/vault`
+  - `reports/policies`
+  - `reports/audit-log`
+  - `reports/trust-center`
+- vechile rute `rapoarte/auditor-vault`, `politici`, `audit-log` si `rapoarte/trust-profile` au ramas doar aliasuri de compatibilitate
+- `ReportsTabs` unifica navigatia locala pentru subpaginile de output

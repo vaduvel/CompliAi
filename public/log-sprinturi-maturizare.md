@@ -3267,3 +3267,32 @@ Validare dupa BP-3 partial:
 
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
+
+### BP-3 - Canonizare familia Reports
+
+- familia `Reports` are acum si subrutele canonice din blueprint:
+  - `/dashboard/reports/vault`
+  - `/dashboard/reports/policies`
+  - `/dashboard/reports/audit-log`
+  - `/dashboard/reports/trust-center`
+- suprafetele sunt acum detinute prin owneri comuni in:
+  - `components/compliscan/reports-vault-page.tsx`
+  - `components/compliscan/reports-policies-page.tsx`
+  - `components/compliscan/reports-audit-log-page.tsx`
+  - `components/compliscan/reports-trust-center-page.tsx`
+- rutele legacy raman active doar ca aliasuri de compatibilitate:
+  - `/dashboard/rapoarte/auditor-vault`
+  - `/dashboard/politici`
+  - `/dashboard/audit-log`
+  - `/dashboard/rapoarte/trust-profile`
+- a fost introdus si subnav-ul local `ReportsTabs`, folosit pe:
+  - `Rapoarte`
+  - `Politici interne`
+  - `Log Audit`
+  - `Trust Center`
+- handoff-urile user-facing din navigatie si din verdicts folosesc acum familia canonica `reports`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
