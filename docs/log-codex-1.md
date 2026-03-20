@@ -358,3 +358,15 @@ Blueprint-ul propune inlocuirea intake-ului lung cu un model de "confirmare asis
   - `./node_modules/.bin/tsc --noEmit`
   - `npm test -- app/api/org/profile/route.test.ts`
   - `npm run build`
+
+### Integrare main — 20 martie 2026
+
+- `smart intake` a fost rebasat curat peste `main` si apoi integrat in production prin cherry-pick-ul commiturilor:
+  - `79f1db3` — wizard + intake engine + intake findings/doc requests
+  - `6b5da09` — fallback safe pentru lipsa `.data` pe preview/runtime serverless
+  - `cda904c` — register UX mai bun: confirmare parola + recovery pentru duplicate email
+- Validare pe `main` curat:
+  - `npm test -- app/api/auth/register/route.test.ts app/api/org/profile/route.test.ts lib/server/fs-safe.test.ts`
+  - `npm run build`
+  - `./node_modules/.bin/tsc --noEmit`
+- Preview-ul vechi care inca afisa un singur camp de parola a fost invalidat; buildul bun este cel care include `Confirmă parola`.
