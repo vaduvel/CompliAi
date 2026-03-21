@@ -410,6 +410,16 @@ export type ComplianceState = {
   // ── Smart Intake (Questionnaire Automation) ──────────────────────────────
   intakeAnswers?: FullIntakeAnswers
   intakeCompletedAtISO?: string
+  // ── Addon 1: Compliance Streak ─────────────────────────────────────────
+  complianceStreak?: ComplianceStreak
+}
+
+export type ComplianceStreak = {
+  currentDays: number        // consecutive days above threshold
+  longestStreak: number      // personal record
+  lastUpdated: string        // ISO date of last update
+  threshold: number          // default 70
+  brokenAt: string | null    // when the streak last broke
 }
 
 export type DashboardSummary = {
