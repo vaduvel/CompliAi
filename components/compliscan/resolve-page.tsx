@@ -152,7 +152,20 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
           : <ChevronRight className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />
         }
       </button>
-      {expanded && <ResolutionLayer finding={finding} />}
+      {expanded && (
+        <>
+          <ResolutionLayer finding={finding} />
+          <div className="border-t border-eos-border-subtle px-5 py-3">
+            <Link
+              href={`/dashboard/resolve/${finding.id}`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
+            >
+              Deschide detalii complete
+              <ArrowRight className="size-3" strokeWidth={2} />
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   )
 }
