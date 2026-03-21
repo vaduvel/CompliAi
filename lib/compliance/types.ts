@@ -110,6 +110,9 @@ export type ScanFinding = {
   readyText?: string
   provenance?: FindingProvenance
   resolution?: FindingResolution
+  // B2 — Finding status tracking
+  findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
+  findingStatusUpdatedAtISO?: string
   // B1 — Gemini semantic engine fields
   confidenceScore?: number           // 0-100, from Gemini analysis
   requiresHumanReview?: boolean      // true if confidence < 80 or severity critical
