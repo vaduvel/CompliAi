@@ -549,5 +549,15 @@ export async function deleteBoardMember(orgId: string, memberId: string): Promis
   return true
 }
 
+// ── Seed (demo) ──────────────────────────────────────────────────────────────
+
+/**
+ * Bulk-write NIS2 state for a given org — used by demo seeder.
+ * Overwrites the entire NIS2 state for that org.
+ */
+export async function seedNis2State(orgId: string, state: Nis2OrgState): Promise<void> {
+  await writeNis2State(orgId, state)
+}
+
 // ── DNSC Report generator — implementare în lib/compliance/dnsc-report.ts ─────
 export { buildDNSCReport } from "@/lib/compliance/dnsc-report"

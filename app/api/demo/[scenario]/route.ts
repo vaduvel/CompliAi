@@ -12,11 +12,13 @@ import {
 } from "@/lib/server/auth"
 import {
   buildDemoState,
+  buildDemoNis2State,
   DEMO_ORG,
   DEMO_SCENARIOS,
   type DemoScenario,
 } from "@/lib/server/demo-seed"
 import { writeStateForOrg } from "@/lib/server/mvp-store"
+import { seedNis2State } from "@/lib/server/nis2-store"
 
 export async function GET(
   request: Request,
@@ -37,6 +39,12 @@ export async function GET(
   // Seed state (suprascrie la fiecare vizită — demo-ul pornește curat)
   const state = buildDemoState(demo)
   await writeStateForOrg(orgConfig.orgId, state, orgConfig.orgName)
+
+  // Seed NIS2 separate store (vendors, incidents, maturity, board)
+  const nis2State = buildDemoNis2State(demo)
+  if (nis2State) {
+    await seedNis2State(orgConfig.orgId, nis2State)
+  }
 
   // Creare sesiune demo (2 ore)
   const token = createSessionToken({
