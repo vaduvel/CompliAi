@@ -143,6 +143,10 @@ export type GeneratedDocumentRecord = {
   title: string
   generatedAtISO: string
   llmUsed: boolean
+  // E1 — Expiry management
+  expiresAtISO?: string           // when this document expires
+  nextReviewDateISO?: string      // when to review this document
+  refreshStatus?: "current" | "refresh-candidate" | "expired"  // E2 drift-linked
 }
 
 export type AISystemPurpose =

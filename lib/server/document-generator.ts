@@ -30,9 +30,38 @@ export type GeneratedDocument = {
   content: string
   generatedAtISO: string
   llmUsed: boolean
+  // E1 — Expiry management
+  expiresAtISO: string
+  nextReviewDateISO: string
 }
 
 // ── Document metadata ─────────────────────────────────────────────────────────
+
+// E1 — Expiry rules per document type
+const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
+  "privacy-policy": 24,
+  "cookie-policy": 24,
+  "dpa": 12,
+  "nis2-incident-response": 12,
+  "ai-governance": 24,
+}
+
+// Review date = 30 days before expiry
+function calculateExpiryDates(documentType: DocumentType, generatedAtISO: string) {
+  const expiryMonths = DOC_EXPIRY_MONTHS[documentType]
+  const generatedAt = new Date(generatedAtISO)
+
+  const expiresAt = new Date(generatedAt)
+  expiresAt.setMonth(expiresAt.getMonth() + expiryMonths)
+
+  const nextReviewDate = new Date(expiresAt)
+  nextReviewDate.setDate(nextReviewDate.getDate() - 30)
+
+  return {
+    expiresAtISO: expiresAt.toISOString(),
+    nextReviewDateISO: nextReviewDate.toISOString(),
+  }
+}
 
 const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   "privacy-policy": {
@@ -197,12 +226,15 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
     `⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială.`,
   ].join("\n")
 
+  const expiry = calculateExpiryDates(input.documentType, now)
+
   return {
     documentType: input.documentType,
     title: meta.title,
     content,
     generatedAtISO: now,
     llmUsed: false,
+    ...expiry,
   }
 }
 
@@ -256,12 +288,15 @@ export async function generateDocument(
     throw new Error("Gemini a returnat un document gol.")
   }
 
+  const expiry = calculateExpiryDates(input.documentType, now)
+
   return {
     documentType: input.documentType,
     title: meta.title,
     content,
     generatedAtISO: now,
     llmUsed: true,
+    ...expiry,
   }
 }
 
