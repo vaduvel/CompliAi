@@ -110,6 +110,12 @@ export type ScanFinding = {
   readyText?: string
   provenance?: FindingProvenance
   resolution?: FindingResolution
+  // B1 — Gemini semantic engine fields
+  confidenceScore?: number           // 0-100, from Gemini analysis
+  requiresHumanReview?: boolean      // true if confidence < 80 or severity critical
+  reasoning?: string                 // Gemini's reasoning for the finding
+  sourceParagraph?: string           // exact text excerpt that triggered the finding
+  suggestedDocumentType?: string     // suggested document to generate (dpa, privacy-policy, etc.)
 }
 
 export type ScanRecord = {

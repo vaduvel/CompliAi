@@ -14,6 +14,8 @@ import { runVendorRiskAgent } from "@/lib/compliance/agent-vendor-risk"
 import { runRegulatoryRadar } from "@/lib/compliance/agent-regulatory-radar"
 import type { AgentType, AgentOutput } from "@/lib/compliance/agentic-engine"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
+import { readNis2State, updateIncident } from "@/lib/server/nis2-store"
+import type { Nis2Incident } from "@/lib/server/nis2-store"
 
 export type OrchestratorResult = {
   orgId: string
@@ -193,6 +195,13 @@ export async function executeAgents(
     }
   }
 
+  // A6 — Check incident SLA timers after running agents
+  try {
+    await checkIncidentTimers(orgId)
+  } catch {
+    // Timer check failure shouldn't block orchestrator result
+  }
+
   return {
     orgId,
     agentsRun: agentTypes,
@@ -201,6 +210,71 @@ export async function executeAgents(
     totalIssues: outputs.reduce((s, o) => s + (o.metrics?.issuesFound ?? 0), 0),
     executedAtISO: new Date().toISOString(),
   }
+}
+
+// ── A6 — Incident SLA Timer Alerts ──────────────────────────────────────────
+
+/**
+ * Check all open NIS2 incidents for SLA deadlines.
+ * Sends in-app notifications at 50% and 80% of SLA time elapsed.
+ * SLA: critical = 24h, high = 72h, medium/low = 72h.
+ */
+export async function checkIncidentTimers(orgId: string): Promise<number> {
+  const nis2State = await readNis2State(orgId)
+  const incidents = nis2State.incidents
+  let alertsSent = 0
+
+  for (const incident of incidents) {
+    if (incident.status === "closed") continue
+    if (incident.resolvedAtISO) continue
+
+    const slaHours = incident.severity === "critical" ? 24 : 72
+    const detectedAt = new Date(incident.detectedAtISO).getTime()
+    const elapsed = (Date.now() - detectedAt) / 3_600_000
+    const percent = (elapsed / slaHours) * 100
+    const hoursRemaining = Math.max(0, slaHours - elapsed)
+
+    // 50% alert
+    if (percent >= 50 && !incident.alert50SentAtISO) {
+      await sendIncidentSlaAlert(orgId, incident, 50, hoursRemaining)
+      await updateIncident(orgId, incident.id, {
+        alert50SentAtISO: new Date().toISOString(),
+      })
+      alertsSent++
+    }
+
+    // 80% alert
+    if (percent >= 80 && !incident.alert80SentAtISO) {
+      await sendIncidentSlaAlert(orgId, incident, 80, hoursRemaining)
+      await updateIncident(orgId, incident.id, {
+        alert80SentAtISO: new Date().toISOString(),
+      })
+      alertsSent++
+    }
+  }
+
+  return alertsSent
+}
+
+async function sendIncidentSlaAlert(
+  orgId: string,
+  incident: Nis2Incident,
+  percent: number,
+  hoursRemaining: number
+): Promise<void> {
+  const urgency = percent >= 80 ? "URGENT" : "ATENȚIE"
+  const hours = Math.round(hoursRemaining)
+
+  await createNotification(orgId, {
+    type: "finding_new",
+    title: `${urgency}: Incident "${incident.title}" — ${percent}% din SLA consumat`,
+    message:
+      `Incidentul NIS2 "${incident.title}" (${incident.severity}) a consumat ${percent}% ` +
+      `din termenul SLA. Mai ai ~${hours}h pentru rezolvare/raportare DNSC.`,
+    linkTo: "/dashboard/resolve",
+  }).catch(() => {
+    // Notification failure shouldn't block timer check
+  })
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -214,7 +288,7 @@ async function applyAutoActions(orgId: string, output: AgentOutput): Promise<voi
         type: action.type === "escalation_raised" ? "finding_new" : "info",
         title: `[${output.agentType}] ${action.description.slice(0, 80)}`,
         message: action.description,
-        linkTo: action.targetId ? `/dashboard/scanari` : undefined,
+        linkTo: action.targetId ? `/dashboard/scan` : undefined,
       }).catch(() => {
         // Notification failure shouldn't block agent execution
       })

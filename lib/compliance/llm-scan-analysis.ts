@@ -1,8 +1,10 @@
-// LLM-based compliance analysis using Gemini API.
-// Supplements keyword matching — returns findings for rules the keyword matcher missed.
-// Silently returns [] when GEMINI_API_KEY is absent or the call fails.
+// B1 — Gemini as Primary Scan Engine with framework-specific prompts.
+// Gemini is the primary engine. Keyword matching is the fallback/complement.
+// Each finding has a confidenceScore (0-100).
+// Findings with confidence < 80 or severity critical → requiresHumanReview = true.
 
-import type { ScanFinding } from "@/lib/compliance/types"
+import type { ScanFinding, FindingCategory } from "@/lib/compliance/types"
+import type { ComplianceSeverity } from "@/lib/compliance/constitution"
 import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
 import { buildFindingConfidenceReason, inferFindingConfidence } from "@/lib/compliance/finding-confidence"
 import { severityToLegacyRisk } from "@/lib/compliance/constitution"
@@ -10,12 +12,125 @@ import { severityToLegacyRisk } from "@/lib/compliance/constitution"
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite"
 
+// ── Framework-specific prompts (B1 spec) ────────────────────────────────────
+
+const FRAMEWORK_PROMPTS: Record<string, string> = {
+  GDPR: `
+Ești un expert GDPR cu 10 ani experiență în drept european.
+Analizează textul și identifică problemele de conformitate GDPR.
+
+Pentru fiecare problemă returnează JSON:
+{
+  "title": "titlul problemei în română",
+  "description": "descriere clară",
+  "article": "articolul GDPR (ex: Art. 28)",
+  "severity": "critical | high | medium | low",
+  "confidence": număr 0-100,
+  "reasoning": "de ce ai identificat această problemă",
+  "sourceParagraph": "fragmentul exact din text",
+  "recommendation": "ce trebuie făcut concret",
+  "suggestedDocumentType": "dpa | privacy-policy | cookie-policy | null",
+  "requiresHumanReview": true dacă confidence < 80 sau severity critical
+}
+
+Returnează DOAR array JSON valid, fără text suplimentar.
+Dacă nu există probleme returnează [].
+`,
+
+  NIS2: `
+Ești expert NIS2 (Directiva 2022/2555) și securitate cibernetică.
+Verifică în special: politici securitate, incident response, gestiunea riscurilor,
+criptografie, continuitate activitate, securitate furnizori.
+
+Pentru fiecare problemă returnează JSON:
+{
+  "title": "titlul problemei în română",
+  "description": "descriere clară",
+  "article": "articolul NIS2 (ex: Art. 21(2)(a))",
+  "severity": "critical | high | medium | low",
+  "confidence": număr 0-100,
+  "reasoning": "de ce ai identificat această problemă",
+  "sourceParagraph": "fragmentul exact din text",
+  "recommendation": "ce trebuie făcut concret",
+  "suggestedDocumentType": "incident-response-plan | risk-assessment | security-policy | null",
+  "requiresHumanReview": true dacă confidence < 80 sau severity critical
+}
+
+Returnează DOAR array JSON valid, fără text suplimentar.
+Dacă nu există probleme returnează [].
+`,
+
+  AI_ACT: `
+Ești expert EU AI Act (Regulamentul 2024/1689).
+Identifică: sisteme AI nedeclarate, potențial high-risk, lipsă transparență,
+lipsă human oversight documentat.
+
+Pentru fiecare problemă returnează JSON:
+{
+  "title": "titlul problemei în română",
+  "description": "descriere clară",
+  "article": "articolul AI Act relevant",
+  "severity": "critical | high | medium | low",
+  "confidence": număr 0-100,
+  "reasoning": "de ce ai identificat această problemă",
+  "sourceParagraph": "fragmentul exact din text",
+  "recommendation": "ce trebuie făcut concret",
+  "suggestedDocumentType": "ai-risk-assessment | ai-transparency-notice | null",
+  "requiresHumanReview": true dacă confidence < 80 sau severity critical
+}
+
+Returnează DOAR array JSON valid, fără text suplimentar.
+Dacă nu există probleme returnează [].
+`,
+
+  EFACTURA: `
+Ești expert e-Factura și fiscalitate română.
+Verifică: structura UBL CIUS-RO, câmpuri obligatorii, CUI/CIF, TVA, termene.
+
+Pentru fiecare problemă returnează JSON:
+{
+  "title": "titlul problemei în română",
+  "description": "descriere clară",
+  "article": "referința legală relevantă",
+  "severity": "critical | high | medium | low",
+  "confidence": număr 0-100,
+  "reasoning": "de ce ai identificat această problemă",
+  "sourceParagraph": "fragmentul exact din text",
+  "recommendation": "ce trebuie făcut concret",
+  "suggestedDocumentType": null,
+  "requiresHumanReview": true dacă confidence < 80 sau severity critical
+}
+
+Returnează DOAR array JSON valid, fără text suplimentar.
+Dacă nu există probleme returnează [].
+`,
+}
+
+// ── Legacy rule-based prompt (fallback complement) ──────────────────────────
+
 type LlmMatchedRule = {
   ruleId: string
   confidence: "high" | "medium" | "low"
   excerpt: string
   reason: string
 }
+
+// ── Types ───────────────────────────────────────────────────────────────────
+
+type GeminiSemanticFinding = {
+  title: string
+  description: string
+  article?: string
+  severity: string
+  confidence: number
+  reasoning: string
+  sourceParagraph: string
+  recommendation: string
+  suggestedDocumentType: string | null
+  requiresHumanReview?: boolean
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function uid(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
@@ -27,7 +142,7 @@ function buildRuleListForPrompt(): string {
   ).join("\n")
 }
 
-function buildPrompt(documentName: string, content: string): string {
+function buildLegacyPrompt(documentName: string, content: string): string {
   return [
     "You are a compliance analysis engine for Romanian SMEs.",
     "Analyze the document below for EU compliance issues: GDPR, EU AI Act, e-Factura.",
@@ -49,7 +164,9 @@ function buildPrompt(documentName: string, content: string): string {
   ].join("\n")
 }
 
-async function callGemini(prompt: string): Promise<LlmMatchedRule[]> {
+// ── Gemini API call ─────────────────────────────────────────────────────────
+
+async function callGeminiRaw(prompt: string, temperature = 0.1): Promise<string> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
     {
@@ -57,7 +174,7 @@ async function callGemini(prompt: string): Promise<LlmMatchedRule[]> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, topP: 0.9, maxOutputTokens: 1024 },
+        generationConfig: { temperature, topP: 0.9, maxOutputTokens: 2048 },
       }),
       cache: "no-store",
     }
@@ -71,16 +188,170 @@ async function callGemini(prompt: string): Promise<LlmMatchedRule[]> {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
   }
 
-  const raw =
+  return (
     json.candidates?.[0]?.content?.parts
       ?.map((p) => p.text ?? "")
       .join("")
       .trim() ?? ""
+  )
+}
 
+function cleanJsonResponse(raw: string): string {
+  return raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim()
+}
+
+// ── B1: Semantic framework analysis (PRIMARY) ───────────────────────────────
+
+function detectFrameworks(content: string): string[] {
+  const frameworks: string[] = []
+  const lower = content.toLowerCase()
+
+  // Always check GDPR — applies to all
+  frameworks.push("GDPR")
+
+  // NIS2 signals
+  if (
+    lower.includes("nis2") || lower.includes("securitate") ||
+    lower.includes("incident") || lower.includes("criptare") ||
+    lower.includes("risc cibernetic") || lower.includes("furnizori") ||
+    lower.includes("continuitate")
+  ) {
+    frameworks.push("NIS2")
+  }
+
+  // AI Act signals
+  if (
+    lower.includes("ai") || lower.includes("inteligență artificială") ||
+    lower.includes("machine learning") || lower.includes("sistem automat") ||
+    lower.includes("algoritm") || lower.includes("ai act")
+  ) {
+    frameworks.push("AI_ACT")
+  }
+
+  // e-Factura signals
+  if (
+    lower.includes("factur") || lower.includes("ubl") ||
+    lower.includes("cius-ro") || lower.includes("tva") ||
+    lower.includes("cui") || lower.includes("anaf")
+  ) {
+    frameworks.push("EFACTURA")
+  }
+
+  return frameworks
+}
+
+function normalizeSeverity(s: string): ComplianceSeverity {
+  const lower = s?.toLowerCase?.() ?? "medium"
+  if (lower === "critical") return "critical"
+  if (lower === "high") return "high"
+  if (lower === "low") return "low"
+  return "medium"
+}
+
+function mapFrameworkToCategory(framework: string): FindingCategory {
+  switch (framework) {
+    case "GDPR": return "GDPR"
+    case "NIS2": return "NIS2"
+    case "AI_ACT": return "EU_AI_ACT"
+    case "EFACTURA": return "E_FACTURA"
+    default: return "GDPR"
+  }
+}
+
+async function analyzeWithGeminiSemantic(
+  text: string,
+  frameworks: string[],
+  nowISO: string,
+  scanId?: string
+): Promise<ScanFinding[]> {
+  const allFindings: ScanFinding[] = []
+
+  for (const framework of frameworks) {
+    const promptTemplate = FRAMEWORK_PROMPTS[framework]
+    if (!promptTemplate) continue
+
+    try {
+      const prompt = promptTemplate + "\n\nText:\n" + text.slice(0, 6000)
+      const raw = await callGeminiRaw(prompt, 0.1)
+      if (!raw) continue
+
+      const cleaned = cleanJsonResponse(raw)
+      let parsed: unknown[]
+      try {
+        const result = JSON.parse(cleaned)
+        parsed = Array.isArray(result) ? result : []
+      } catch {
+        continue
+      }
+
+      for (const item of parsed) {
+        if (!item || typeof item !== "object") continue
+        const f = item as Record<string, unknown>
+        if (typeof f.title !== "string" || !f.title.trim()) continue
+
+        const confidence = typeof f.confidence === "number" ? Math.min(100, Math.max(0, f.confidence)) : 50
+        const severity = normalizeSeverity(String(f.severity ?? "medium"))
+        const needsReview = confidence < 80 || severity === "critical"
+
+        allFindings.push({
+          id: uid("finding"),
+          title: String(f.title).slice(0, 200),
+          detail: String(f.description ?? f.title).slice(0, 500),
+          category: mapFrameworkToCategory(framework),
+          severity,
+          verdictConfidence: confidence >= 80 ? "high" : confidence >= 50 ? "medium" : "low",
+          verdictConfidenceReason: String(f.reasoning ?? "").slice(0, 300),
+          risk: severityToLegacyRisk(severity),
+          principles: [],
+          createdAtISO: nowISO,
+          sourceDocument: "",
+          scanId,
+          legalReference: typeof f.article === "string" ? f.article : undefined,
+          remediationHint: typeof f.recommendation === "string" ? f.recommendation.slice(0, 300) : undefined,
+          // B1 fields
+          confidenceScore: confidence,
+          requiresHumanReview: needsReview,
+          reasoning: typeof f.reasoning === "string" ? f.reasoning.slice(0, 300) : undefined,
+          sourceParagraph: typeof f.sourceParagraph === "string" ? f.sourceParagraph.slice(0, 500) : undefined,
+          suggestedDocumentType:
+            typeof f.suggestedDocumentType === "string" && f.suggestedDocumentType !== "null"
+              ? f.suggestedDocumentType
+              : undefined,
+          provenance: {
+            ruleId: `gemini-${framework.toLowerCase()}-${uid("r")}`,
+            matchedKeyword: "gemini-semantic",
+            excerpt: typeof f.sourceParagraph === "string" ? f.sourceParagraph.slice(0, 300) : "",
+            signalSource: "keyword" as const,
+            verdictBasis: "inferred_signal" as const,
+            signalConfidence: confidence >= 80 ? "high" as const : "medium" as const,
+          },
+        })
+      }
+    } catch (err) {
+      console.error(`[B1] Gemini semantic analysis failed for ${framework}, will use keyword fallback`)
+    }
+  }
+
+  return deduplicateFindings(allFindings)
+}
+
+function deduplicateFindings(findings: ScanFinding[]): ScanFinding[] {
+  const seen = new Set<string>()
+  return findings.filter((f) => {
+    const key = `${f.title}::${f.category}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+// ── Legacy rule-based analysis (FALLBACK) ───────────────────────────────────
+
+async function callGeminiLegacy(prompt: string): Promise<LlmMatchedRule[]> {
+  const raw = await callGeminiRaw(prompt)
   if (!raw) return []
 
-  // Strip markdown code fences if present
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim()
+  const cleaned = cleanJsonResponse(raw)
 
   let parsed: { matchedRules?: unknown[] }
   try {
@@ -110,6 +381,46 @@ async function callGemini(prompt: string): Promise<LlmMatchedRule[]> {
   })
 }
 
+// ── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * B1: Primary semantic analysis with Gemini.
+ * Called BEFORE keyword matching. Returns framework-specific findings.
+ */
+export async function geminiSemanticAnalyze(params: {
+  documentName: string
+  content: string
+  nowISO: string
+  scanId?: string
+}): Promise<{ findings: ScanFinding[]; llmUsed: boolean }> {
+  if (!GEMINI_API_KEY) {
+    return { findings: [], llmUsed: false }
+  }
+
+  try {
+    const frameworks = detectFrameworks(params.content)
+    const findings = await analyzeWithGeminiSemantic(
+      params.content,
+      frameworks,
+      params.nowISO,
+      params.scanId
+    )
+
+    // Set sourceDocument on all findings
+    for (const f of findings) {
+      f.sourceDocument = params.documentName
+    }
+
+    return { findings, llmUsed: true }
+  } catch {
+    return { findings: [], llmUsed: false }
+  }
+}
+
+/**
+ * Legacy: Supplement keyword matching — returns findings for rules keyword missed.
+ * Now used as fallback/complement AFTER geminiSemanticAnalyze.
+ */
 export async function llmAnalyzeScan(params: {
   documentName: string
   content: string
@@ -123,7 +434,7 @@ export async function llmAnalyzeScan(params: {
 
   let matchedRules: LlmMatchedRule[]
   try {
-    matchedRules = await callGemini(buildPrompt(params.documentName, params.content))
+    matchedRules = await callGeminiLegacy(buildLegacyPrompt(params.documentName, params.content))
   } catch {
     return { findings: [], llmUsed: false }
   }
@@ -131,7 +442,7 @@ export async function llmAnalyzeScan(params: {
   const findings: ScanFinding[] = []
 
   for (const match of matchedRules) {
-    // Skip rules already detected by keyword matching — no duplication
+    // Skip rules already detected by keyword matching or Gemini semantic — no duplication
     if (params.existingRuleIds.has(match.ruleId)) continue
 
     const rule = COMPLIANCE_RULE_LIBRARY.find((r) => r.ruleId === match.ruleId)
@@ -145,6 +456,8 @@ export async function llmAnalyzeScan(params: {
       verdictBasis: "inferred_signal" as const,
       signalConfidence: (match.confidence === "high" ? "high" : "medium") as "high" | "medium",
     }
+
+    const confidenceScore = match.confidence === "high" ? 85 : match.confidence === "medium" ? 65 : 40
 
     findings.push({
       id: uid("finding"),
@@ -174,6 +487,9 @@ export async function llmAnalyzeScan(params: {
       readyTextLabel: rule.readyTextLabel,
       readyText: rule.readyText,
       provenance,
+      // B1 fields
+      confidenceScore,
+      requiresHumanReview: confidenceScore < 80 || rule.severity === "critical",
     })
   }
 
