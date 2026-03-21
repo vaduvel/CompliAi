@@ -1,5 +1,5 @@
-import { SettingsBillingPageSurface } from "@/components/compliscan/settings-billing-page"
+import { redirect } from "next/navigation"
 
 export default function LegacySettingsBillingPage() {
-  return <SettingsBillingPageSurface />
+  redirect("/dashboard/settings/abonament")
 }

@@ -925,7 +925,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (hasPrivacyFinding) {
     return {
       label: "Generează prima politică GDPR",
-      href: "/dashboard/scanari",
+      href: "/dashboard/scan",
       estimatedMinutes: 3,
     }
   }

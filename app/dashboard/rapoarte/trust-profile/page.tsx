@@ -1,5 +1,5 @@
-import { ReportsTrustCenterPageSurface } from "@/components/compliscan/reports-trust-center-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyTrustCenterPage() {
-  return <ReportsTrustCenterPageSurface />
+  redirect("/dashboard/reports/trust-center")
 }

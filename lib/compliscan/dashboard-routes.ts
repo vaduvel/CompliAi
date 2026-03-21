@@ -1,12 +1,9 @@
 export const dashboardRoutes = {
   home: "/dashboard",
   scan: "/dashboard/scan",
-  scanLegacy: "/dashboard/scanari",
   scanResultsBase: "/dashboard/scan/results",
   documents: "/dashboard/scan/history",
-  documentsLegacy: "/dashboard/documente",
   resolve: "/dashboard/resolve",
-  resolveLegacy: "/dashboard/checklists",
   aiSystems: "/dashboard/sisteme",
   aiConformity: "/dashboard/conformitate",
   drifts: "/dashboard/alerte",
@@ -16,20 +13,13 @@ export const dashboardRoutes = {
   agents: "/dashboard/agents",
   vendorReview: "/dashboard/vendor-review",
   reports: "/dashboard/reports",
-  reportsLegacy: "/dashboard/rapoarte",
   auditorVault: "/dashboard/reports/vault",
-  auditorVaultLegacy: "/dashboard/rapoarte/auditor-vault",
   auditLog: "/dashboard/reports/audit-log",
-  auditLogLegacy: "/dashboard/audit-log",
   policies: "/dashboard/reports/policies",
-  policiesLegacy: "/dashboard/politici",
   trustCenter: "/dashboard/reports/trust-center",
-  trustCenterLegacy: "/dashboard/rapoarte/trust-profile",
   generator: "/dashboard/generator",
   settings: "/dashboard/settings",
   settingsBilling: "/dashboard/settings/abonament",
-  settingsLegacy: "/dashboard/setari",
-  settingsBillingLegacy: "/dashboard/setari/abonament",
 } as const
 
 export function dashboardScanResultsRoute(scanId: string) {
@@ -38,10 +28,9 @@ export function dashboardScanResultsRoute(scanId: string) {
 
 export const dashboardRouteGroups = {
   home: [dashboardRoutes.home],
-  scan: [dashboardRoutes.scan, dashboardRoutes.scanLegacy, dashboardRoutes.documents, dashboardRoutes.documentsLegacy],
+  scan: [dashboardRoutes.scan, dashboardRoutes.documents],
   resolve: [
     dashboardRoutes.resolve,
-    dashboardRoutes.resolveLegacy,
     dashboardRoutes.aiSystems,
     dashboardRoutes.drifts,
     dashboardRoutes.aiConformity,
@@ -51,18 +40,13 @@ export const dashboardRouteGroups = {
   ],
   reports: [
     dashboardRoutes.reports,
-    dashboardRoutes.reportsLegacy,
     dashboardRoutes.auditorVault,
-    dashboardRoutes.auditorVaultLegacy,
     dashboardRoutes.auditLog,
-    dashboardRoutes.auditLogLegacy,
     dashboardRoutes.policies,
-    dashboardRoutes.policiesLegacy,
     dashboardRoutes.trustCenter,
-    dashboardRoutes.trustCenterLegacy,
     dashboardRoutes.generator,
   ],
-  settings: [dashboardRoutes.settings, dashboardRoutes.settingsLegacy],
+  settings: [dashboardRoutes.settings],
 } as const
 
 export function matchesDashboardRoute(pathname: string, matcher: string) {

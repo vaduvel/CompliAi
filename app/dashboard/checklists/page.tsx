@@ -1,5 +1,5 @@
-import { ResolvePageSurface } from "@/components/compliscan/resolve-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyResolvePage() {
-  return <ResolvePageSurface />
+  redirect("/dashboard/resolve")
 }

@@ -1,5 +1,5 @@
-import { ScanPageSurface } from "@/components/compliscan/scan-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyScanariPage() {
-  return <ScanPageSurface />
+  redirect("/dashboard/scan")
 }

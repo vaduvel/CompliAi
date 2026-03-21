@@ -1,5 +1,5 @@
-import { ScanHistoryPageSurface } from "@/components/compliscan/scan-history-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyDocumentsPage() {
-  return <ScanHistoryPageSurface />
+  redirect("/dashboard/scan/history")
 }

@@ -119,7 +119,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
         label: "Istoric",
         href: dashboardRoutes.documents,
         icon: FolderOpen,
-        matchers: [dashboardRoutes.documents, dashboardRoutes.documentsLegacy],
+        matchers: [dashboardRoutes.documents],
       },
     ],
   },

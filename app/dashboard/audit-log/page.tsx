@@ -1,5 +1,5 @@
-import { ReportsAuditLogPageSurface } from "@/components/compliscan/reports-audit-log-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyAuditLogPage() {
-  return <ReportsAuditLogPageSurface />
+  redirect("/dashboard/reports/audit-log")
 }

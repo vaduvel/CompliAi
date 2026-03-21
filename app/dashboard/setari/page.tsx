@@ -1,5 +1,5 @@
-import { SettingsPageSurface } from "@/components/compliscan/settings-page"
+import { redirect } from "next/navigation"
 
 export default function LegacySettingsPage() {
-  return <SettingsPageSurface />
+  redirect("/dashboard/settings")
 }

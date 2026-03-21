@@ -1,5 +1,5 @@
-import { ReportsVaultPageSurface } from "@/components/compliscan/reports-vault-page"
+import { redirect } from "next/navigation"
 
 export default function LegacyAuditorVaultPage() {
-  return <ReportsVaultPageSurface />
+  redirect("/dashboard/reports/vault")
 }

@@ -15,6 +15,7 @@ const EVENT_LABELS: Record<AlertEventType, string> = {
   "drift.detected": "Drift de conformitate detectat",
   "task.overdue": "Sarcina de remediere depășită",
   "alert.critical": "Alertă critică de conformitate",
+  "score.dropped": "Scorul de conformitate a scăzut",
 }
 
 function buildEmailHtml(event: AlertEventType, orgId: string, payload: Record<string, unknown>): string {
