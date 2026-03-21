@@ -11,6 +11,7 @@ export const dashboardRoutes = {
   nis2Maturity: "/dashboard/nis2/maturitate",
   nis2Dnsc: "/dashboard/nis2/inregistrare-dnsc",
   agents: "/dashboard/agents",
+  fiscal: "/dashboard/fiscal",
   vendorReview: "/dashboard/vendor-review",
   reports: "/dashboard/reports",
   auditorVault: "/dashboard/reports/vault",
@@ -36,6 +37,7 @@ export const dashboardRouteGroups = {
     dashboardRoutes.aiConformity,
     dashboardRoutes.nis2,
     dashboardRoutes.agents,
+    dashboardRoutes.fiscal,
     dashboardRoutes.vendorReview,
   ],
   reports: [

@@ -52,6 +52,7 @@ import { buildDNSCReport, ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "
 import type { MaturityAssessment, BoardMember } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
 import { Nis2RescueBanner } from "@/components/compliscan/nis2-rescue-banner"
+import type { IncidentChecklist, ChecklistStep } from "@/lib/compliance/incident-checklists"
 
 // ── DNSC download helper ───────────────────────────────────────────────────────
 
@@ -491,6 +492,110 @@ const INCIDENT_STATUS_LABELS: Record<Nis2IncidentStatus, string> = {
   "closed": "Închis",
 }
 
+function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
+  const [checklist, setChecklist] = useState<IncidentChecklist | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const type = attackType ?? "unknown"
+    setLoading(true)
+    fetch(`/api/nis2/incidents/checklist?type=${type}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { checklist?: IncidentChecklist }) => setChecklist(data.checklist ?? null))
+      .catch(() => setChecklist(null))
+      .finally(() => setLoading(false))
+  }, [attackType])
+
+  if (loading) return <div className="flex items-center gap-2 py-2 text-xs text-eos-text-muted"><Loader2 className="size-3.5 animate-spin" /> Se încarcă checklist-ul...</div>
+  if (!checklist) return null
+
+  const toggleStep = (stepId: string) => {
+    setCompletedSteps((prev) => {
+      const next = new Set(prev)
+      if (next.has(stepId)) next.delete(stepId)
+      else next.add(stepId)
+      return next
+    })
+  }
+
+  const CATEGORY_LABELS: Record<ChecklistStep["category"], string> = {
+    immediate: "Imediat",
+    investigation: "Investigare",
+    notification: "Notificare",
+    recovery: "Recuperare",
+    evidence: "Dovezi",
+  }
+
+  const CATEGORY_COLORS: Record<ChecklistStep["category"], string> = {
+    immediate: "text-red-700 bg-red-50 border-red-200",
+    investigation: "text-orange-700 bg-orange-50 border-orange-200",
+    notification: "text-blue-700 bg-blue-50 border-blue-200",
+    recovery: "text-green-700 bg-green-50 border-green-200",
+    evidence: "text-purple-700 bg-purple-50 border-purple-200",
+  }
+
+  const progress = checklist.steps.length > 0
+    ? Math.round((completedSteps.size / checklist.steps.length) * 100)
+    : 0
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-eos-text">{checklist.label}</p>
+          <p className="text-[10px] text-eos-text-muted">{checklist.description}</p>
+        </div>
+        <Badge variant={progress === 100 ? "default" : "outline"} className="text-[10px] normal-case tracking-normal">
+          {completedSteps.size}/{checklist.steps.length} pași
+        </Badge>
+      </div>
+
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
+        <div
+          className={`h-full rounded-full transition-all ${progress === 100 ? "bg-green-500" : "bg-eos-primary"}`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        {checklist.steps.map((step) => {
+          const done = completedSteps.has(step.id)
+          return (
+            <button
+              key={step.id}
+              type="button"
+              className={`flex w-full items-start gap-2.5 rounded-eos-md border px-3 py-2 text-left transition-colors ${done ? "border-green-200 bg-green-50/50" : "border-eos-border bg-eos-surface-variant hover:bg-eos-surface"}`}
+              onClick={() => toggleStep(step.id)}
+            >
+              <div className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border ${done ? "border-green-500 bg-green-500 text-white" : "border-eos-border"}`}>
+                {done && <CheckCircle2 className="size-3" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className={`text-xs ${done ? "text-eos-text-muted line-through" : "text-eos-text"}`}>
+                  {step.critical && <span className="mr-1 text-red-600">●</span>}
+                  {step.text}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <span className={`inline-block rounded-sm border px-1.5 py-0.5 text-[9px] font-medium ${CATEGORY_COLORS[step.category]}`}>
+                    {CATEGORY_LABELS[step.category]}
+                  </span>
+                  {step.deadlineHours && (
+                    <span className="text-[9px] text-eos-text-tertiary">⏱ {step.deadlineHours}h</span>
+                  )}
+                  {step.legalBasis && (
+                    <span className="text-[9px] text-eos-text-tertiary">{step.legalBasis}</span>
+                  )}
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function IncidentRow({
   incident,
   orgName,
@@ -505,6 +610,7 @@ function IncidentRow({
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
   const isOpen = incident.status !== "closed"
+  const [showChecklist, setShowChecklist] = useState(false)
 
   return (
     <div className="space-y-3 px-5 py-4">
@@ -621,6 +727,24 @@ function IncidentRow({
           )}
         </div>
       )}
+
+      {/* Checklist răspuns incident */}
+      <div>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
+          onClick={() => setShowChecklist((v) => !v)}
+        >
+          <ClipboardCheck className="size-3.5" />
+          {showChecklist ? "Ascunde checklist" : "Checklist răspuns incident"}
+          {showChecklist ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+        </button>
+        {showChecklist && (
+          <div className="mt-2 rounded-eos-md border border-eos-border bg-eos-surface p-3">
+            <IncidentChecklist_UI attackType={incident.attackType} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

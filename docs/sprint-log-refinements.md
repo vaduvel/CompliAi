@@ -55,6 +55,13 @@
 | V5-S2 | V5.3+V5.4 Human Approval + Closure + Revalidation Cycle | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V5-S3 | V5.5+V5.6 Partner Launch Mode + Response Pack Integration | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V6-F1 | V6 Agentic Engine Phase 1 — Orchestrator + Compliance Monitor + Fiscal Sensor + Dashboard UI | ⏸️ Parcat | 2026-03-18 | — |
+| EOS-S2 | EOS Sprint 2: A5 crons + A6 SLA timers + B1 Gemini primary engine | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S3 | EOS Sprint 3: B2 finding→task + B3 auto-doc + B4 auto-apply low-risk | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S4 | EOS Sprint 4: B5 vendor sync + B6 partner digest + C1-C2 vendor prefill/DPA | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S5 | EOS Sprint 5: C3 vendor revalidation + D1 evidence quality | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S6 | EOS Sprint 6: D2 task re-open + E1 document expiry + E2 drift-linked refresh | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S7 | EOS Sprint 7: F1-F4 legislation/ANAF + G1-G2 reports + Addons streak/benchmark/prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-S8 | EOS S8 UI Features — Streak, Benchmark, Counsel Brief, Share Token, Invoice Prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -68,6 +75,7 @@
 > **Sesiunea 6b (2026-03-18):** V5 Sprint 3 — Partner Launch Mode (V5.5) + Response Pack Integration (V5.6). Partner vede vendor reviews per client cu metrici + status. Response pack include secțiune vendor reviews cu top reviews. Audit pack bundle exportă vendor-reviews.json + summary.
 > **Sesiunea 7 (2026-03-18):** V6 Agentic Engine Phase 1 — implementat complet dar **PARCAT pe branch separat `feat/v6-agentic-engine-wip`**. Nu intră în release V4/V5. Conține: core types, orchestrator, compliance monitor (6 checks), fiscal sensor (clasificare+escalare), agent run store, cron, API, dashboard UI.
 > **Sesiunea 7b (2026-03-18):** Worktree cleanup — separare V4/V5 release-safe de V6 WIP. V6 → `feat/v6-agentic-engine-wip`. Junk docs `(1)` șterse. `.claude/` adăugat la .gitignore. Navigation agents entry eliminat. Build clean, 491 teste, 0 erori TS.
+> **Sesiunea EOS (2026-03-21):** Automation Layer complet — 8 sprint-uri (S2→S8) pe branch `codex/eos-v1-blueprint-main`. Implementat Faze A→G din `00-master-source.md`: Gemini primary scan engine, finding→task mapper, auto-doc generation, vendor sync/prefill/DPA, evidence quality, task re-open rules, document expiry, legislation radar (ANSPDCP/DNSC/ANAF), NIS2@RO tool importer, ANAF OAuth2+SPV, enhanced one-page report (audit readiness, content hash), partner/counsel pack, compliance streak, sector benchmark, invoice smart prefill. S8: conectare UI — streak strip, benchmark strip, counsel brief button, share token buttons, invoice prefill trigger în wizard. Definition of Done: 12/12 criterii. 0 erori TS non-test. Commits: b075724→93ff3c5.
 
 ---
 

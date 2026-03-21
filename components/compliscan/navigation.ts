@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   ShieldPlus,
   Sparkles,
+  Receipt,
   TriangleAlert,
 } from "lucide-react"
 
@@ -47,6 +48,7 @@ export type DashboardNavId =
   | "conformitate"
   | "partner"
   | "nis2"
+  | "fiscal"
   | "agents"
   | "vendor-review"
 
@@ -139,6 +141,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
       { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
       { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
+      { id: "fiscal", label: "Fiscal", href: dashboardRoutes.fiscal, icon: Receipt },
       { id: "agents", label: "Agenți", href: "/dashboard/agents", icon: Bot },
       { id: "vendor-review", label: "Vendor Review", href: "/dashboard/vendor-review", icon: GitPullRequestArrow },
     ],

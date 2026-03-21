@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Bell, Loader2, Trash2, Webhook } from "lucide-react"
+import { Bell, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "lucide-react"
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
@@ -142,6 +142,13 @@ export function SettingsPageSurface() {
   const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
   const canViewReleaseReadiness =
     currentUser?.role === "owner" || currentUser?.role === "compliance"
+
+  // ── GDPR rights state ──────────────────────────────────────────────────────
+  const [gdprExporting, setGdprExporting] = useState(false)
+  const [gdprDeleting, setGdprDeleting] = useState(false)
+  const [gdprRequestingDeletion, setGdprRequestingDeletion] = useState(false)
+  const [gdprDeletionReason, setGdprDeletionReason] = useState("")
+  const [gdprShowDeletionForm, setGdprShowDeletionForm] = useState(false)
 
   // ── Alert preferences state ────────────────────────────────────────────────
   const [alertPrefs, setAlertPrefs] = useState<AlertPreferences | null>(null)
@@ -930,10 +937,216 @@ export function SettingsPageSurface() {
               </div>
             </CardContent>
           </Card>
+
+          {/* ── GDPR Rights ──────────────────────────────────────────────── */}
+          <SectionBoundary
+            eyebrow="GDPR"
+            title="Drepturile tale conform GDPR"
+            description="Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile."
+          />
+
+          {/* Art. 20 — Export date */}
+          <Card className="border-eos-border bg-eos-surface">
+            <CardHeader>
+              <CardTitle className="text-xl">Exportă datele personale</CardTitle>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                GDPR Art. 20 — Dreptul la portabilitatea datelor. Descarcă toate datele tale într-un fișier JSON structurat.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <p className="text-sm text-eos-text-muted">
+                  Include: profil, findings, scanări, documente generate, furnizori, incidente, alerte și activitate.
+                </p>
+                <Button
+                  variant="outline"
+                  disabled={gdprExporting}
+                  className="gap-2"
+                  onClick={() => void handleGdprExport()}
+                >
+                  {gdprExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                  Descarcă datele mele
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Art. 17 — Ștergere date conformitate */}
+          <Card className="border-eos-error-border bg-eos-surface">
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-xl text-eos-error">Șterge datele de conformitate</CardTitle>
+                <Badge variant="destructive">GDPR Art. 17</Badge>
+              </div>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Dreptul la ștergere — resetează complet toate datele de conformitate din workspace. Contul rămâne activ.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
+                Această acțiune șterge permanent: scanări, findings, documente generate, alerte, sisteme AI înregistrate și toată activitatea. Nu poate fi anulată.
+              </div>
+              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <p className="text-sm font-medium text-eos-text">
+                  Sesiunea și contul rămân active după ștergere.
+                </p>
+                <Button
+                  variant="destructive"
+                  disabled={gdprDeleting || currentUser?.role !== "owner"}
+                  className="gap-2"
+                  onClick={() => void handleGdprDeleteData()}
+                >
+                  {gdprDeleting ? <Loader2 className="size-4 animate-spin" /> : <ShieldX className="size-4" />}
+                  Șterge toate datele
+                </Button>
+              </div>
+              {currentUser?.role !== "owner" && (
+                <p className="mt-2 text-xs text-eos-text-muted">Doar administratorul poate șterge datele.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Art. 17 — Solicită ștergere cont */}
+          <Card className="border-eos-error-border bg-eos-surface">
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-xl text-eos-error">Solicită ștergerea contului</CardTitle>
+                <Badge variant="destructive">GDPR Art. 17</Badge>
+              </div>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!gdprShowDeletionForm ? (
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm text-eos-text-muted">
+                    Vei primi un email de confirmare când cererea este procesată.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    disabled={currentUser?.role !== "owner"}
+                    className="gap-2"
+                    onClick={() => setGdprShowDeletionForm(true)}
+                  >
+                    <MailWarning className="size-4" />
+                    Solicită ștergerea contului
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-eos-text">
+                    Motivul ștergerii (opțional)
+                  </label>
+                  <textarea
+                    className="h-20 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    placeholder="Spune-ne de ce dorești ștergerea contului..."
+                    value={gdprDeletionReason}
+                    onChange={(e) => setGdprDeletionReason(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setGdprShowDeletionForm(false)
+                        setGdprDeletionReason("")
+                      }}
+                    >
+                      Anulează
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      disabled={gdprRequestingDeletion}
+                      className="gap-2"
+                      onClick={() => void handleGdprRequestDeletion()}
+                    >
+                      {gdprRequestingDeletion ? <Loader2 className="size-4 animate-spin" /> : <MailWarning className="size-4" />}
+                      Confirmă solicitarea
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {currentUser?.role !== "owner" && (
+                <p className="text-xs text-eos-text-muted">Doar administratorul poate solicita ștergerea contului.</p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   )
+
+  async function handleGdprExport() {
+    setGdprExporting(true)
+    try {
+      const res = await fetch("/api/account/export-data", { cache: "no-store" })
+      if (!res.ok) throw new Error("Exportul a eșuat.")
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ?? "compliai-export.json"
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Export descărcat", { description: "Fișierul JSON cu datele tale a fost descărcat." })
+    } catch (err) {
+      toast.error("Eroare la export", {
+        description: err instanceof Error ? err.message : "Nu am putut exporta datele.",
+      })
+    } finally {
+      setGdprExporting(false)
+    }
+  }
+
+  async function handleGdprDeleteData() {
+    if (
+      !window.confirm(
+        "Ești sigur că vrei să ștergi TOATE datele de conformitate? Această acțiune este ireversibilă."
+      )
+    ) {
+      return
+    }
+    setGdprDeleting(true)
+    try {
+      const res = await fetch("/api/account/delete-data", { method: "POST" })
+      const data = (await res.json()) as { ok?: boolean; error?: string; message?: string }
+      if (!res.ok) throw new Error(data.error ?? "Ștergerea a eșuat.")
+      toast.success("Date șterse", { description: data.message ?? "Toate datele de conformitate au fost șterse." })
+      window.location.reload()
+    } catch (err) {
+      toast.error("Eroare la ștergere", {
+        description: err instanceof Error ? err.message : "Nu am putut șterge datele.",
+      })
+    } finally {
+      setGdprDeleting(false)
+    }
+  }
+
+  async function handleGdprRequestDeletion() {
+    setGdprRequestingDeletion(true)
+    try {
+      const res = await fetch("/api/account/request-deletion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: gdprDeletionReason || undefined }),
+      })
+      const data = (await res.json()) as { ok?: boolean; error?: string; message?: string }
+      if (!res.ok) throw new Error(data.error ?? "Solicitarea a eșuat.")
+      toast.success("Solicitare trimisă", {
+        description: data.message ?? "Cererea de ștergere a contului a fost trimisă. Vei fi contactat în maxim 30 de zile.",
+      })
+      setGdprShowDeletionForm(false)
+      setGdprDeletionReason("")
+    } catch (err) {
+      toast.error("Eroare la solicitare", {
+        description: err instanceof Error ? err.message : "Nu am putut trimite solicitarea.",
+      })
+    } finally {
+      setGdprRequestingDeletion(false)
+    }
+  }
 
   async function handleSaveAlertPrefs() {
     if (!alertPrefs) return
