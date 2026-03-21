@@ -8,6 +8,7 @@ import type {
   AICompliancePack,
   AICompliancePackEntry,
 } from "@/lib/compliance/ai-compliance-pack"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { formatPrincipleLabel } from "@/lib/compliance/constitution"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -136,13 +137,13 @@ export function AICompliancePackSummaryCard({
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline" size="default" className="gap-2">
-                <Link href="/dashboard/scanari">
+                <Link href={dashboardRoutes.scan}>
                   Completează sursele
                   <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
               </Button>
               <Button asChild size="default" className="gap-2">
-                <Link href="/dashboard/rapoarte/auditor-vault">
+                <Link href={dashboardRoutes.auditorVault}>
                   Vezi Auditor Vault
                   <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>
@@ -205,8 +206,8 @@ export function AICompliancePackEntriesCard({
             </p>
           </div>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/sisteme">
-              Mergi la Control
+            <Link href={dashboardRoutes.resolve}>
+              Mergi la De rezolvat
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>

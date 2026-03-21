@@ -49,6 +49,9 @@ export type Nis2Incident = {
   operationalImpactDetails?: string // ex: "sisteme de producție oprite 4h"
   measuresTaken?: string          // măsuri de containment/remediere luate
   reportedToDNSCAtISO?: string    // când s-a trimis raportul oficial la DNSC
+  // ── SLA alert tracking (A6) ─────────────────────────────────────────────────
+  alert50SentAtISO?: string       // timestamp when 50% SLA alert was sent
+  alert80SentAtISO?: string       // timestamp when 80% SLA alert was sent
   createdAtISO: string
   updatedAtISO: string
 }
@@ -274,6 +277,7 @@ export async function updateIncident(
     | "reportedAtISO" | "resolvedAtISO"
     | "attackType" | "attackVector" | "operationalImpact" | "operationalImpactDetails"
     | "measuresTaken" | "reportedToDNSCAtISO"
+    | "alert50SentAtISO" | "alert80SentAtISO"
   >>
 ): Promise<Nis2Incident | null> {
   const state = await readNis2State(orgId)

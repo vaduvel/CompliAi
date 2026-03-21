@@ -2,6 +2,7 @@
 // Creare sesiune Stripe Checkout — Free→Pro sau Pro→Partner
 // Necesită: STRIPE_SECRET_KEY, STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PARTNER_MONTHLY
 
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { jsonError } from "@/lib/server/api-response"
 import { requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { getOrgPlan, getOrgPlanRecord } from "@/lib/server/plan"
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
       "line_items[0][price]": priceId,
       "line_items[0][quantity]": "1",
       mode: "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/dashboard/setari/abonament?success=1`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}${dashboardRoutes.settingsBilling}?success=1`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/pricing?canceled=1`,
       client_reference_id: session.orgId,
       "metadata[orgId]": session.orgId,

@@ -1,6 +1,6 @@
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 
-export type AlertEventType = "drift.detected" | "task.overdue" | "alert.critical"
+export type AlertEventType = "drift.detected" | "task.overdue" | "alert.critical" | "score.dropped"
 
 export type AlertPreferences = {
   emailEnabled: boolean
@@ -21,6 +21,7 @@ export const DEFAULT_ALERT_PREFERENCES: Omit<AlertPreferences, "updatedAtISO"> =
     "drift.detected": true,
     "task.overdue": true,
     "alert.critical": true,
+    "score.dropped": true,
   },
   weeklyDigestEnabled: true,  // Default activat
 }

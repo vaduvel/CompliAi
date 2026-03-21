@@ -435,3 +435,114 @@ function hoursSince(iso: string) {
   if (!iso) return Number.POSITIVE_INFINITY
   return Math.max(0, (Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60))
 }
+
+// ── D2 — Re-open Rules ─────────────────────────────────────────────────────
+
+export type ReopenReason = {
+  source: "evidence_expired" | "drift_detected" | "legislation_changed"
+  message: string
+  detectedAtISO: string
+}
+
+export type ReopenCheckResult = {
+  shouldReopen: boolean
+  reasons: ReopenReason[]
+}
+
+const MS_PER_DAY = 86_400_000
+const DPA_EXPIRY_DAYS = 365       // 12 months
+const POLICY_EXPIRY_DAYS = 730    // 24 months
+
+/**
+ * D2: Check if a resolved task should be re-opened.
+ * Triggers:
+ * - Evidence attached has expired (DPA: 12 months, policies: 24 months)
+ * - Drift detected on the same control
+ * - Legislative change affects the finding
+ */
+export function checkTaskReopenRules(params: {
+  state: ComplianceState
+  taskId: string
+  resolvedAtISO?: string
+  evidenceUploadedAtISO?: string
+  evidenceDocumentType?: string
+}): ReopenCheckResult {
+  const reasons: ReopenReason[] = []
+  const nowMs = Date.now()
+  const nowISO = new Date().toISOString()
+
+  // 1. Evidence expiry check
+  if (params.evidenceUploadedAtISO && params.resolvedAtISO) {
+    const uploadDate = new Date(params.evidenceUploadedAtISO).getTime()
+    const ageMs = nowMs - uploadDate
+
+    const isDpa = params.evidenceDocumentType === "dpa"
+    const expiryDays = isDpa ? DPA_EXPIRY_DAYS : POLICY_EXPIRY_DAYS
+    const expiryLabel = isDpa ? "12 luni (DPA)" : "24 luni (politică)"
+
+    if (ageMs > expiryDays * MS_PER_DAY) {
+      reasons.push({
+        source: "evidence_expired",
+        message: `Dovada atașată a depășit ${expiryLabel}. Revalidare necesară.`,
+        detectedAtISO: nowISO,
+      })
+    }
+  }
+
+  // 2. Drift on same control
+  const resolution = getTaskResolutionTargets(params.state, params.taskId)
+  const relatedFindingIds = new Set(resolution.findingIds)
+  const relatedDriftIds = new Set(resolution.driftIds)
+  const relatedFindings = params.state.findings.filter((f) => relatedFindingIds.has(f.id))
+
+  // Check open drifts that affect related findings
+  const openDrifts = params.state.driftRecords?.filter((d) => d.open) ?? []
+  for (const drift of openDrifts) {
+    // Check if drift was created after task was resolved
+    if (params.resolvedAtISO && drift.detectedAtISO > params.resolvedAtISO) {
+      // Check if drift affects the same control/finding
+      const driftAffectsTask =
+        relatedDriftIds.has(drift.id) ||
+        (drift.sourceDocument && relatedFindings.some((f) => f.sourceDocument === drift.sourceDocument))
+
+      if (driftAffectsTask) {
+        reasons.push({
+          source: "drift_detected",
+          message: `Drift detectat ("${drift.summary.slice(0, 60)}") după rezolvarea task-ului.`,
+          detectedAtISO: drift.detectedAtISO,
+        })
+      }
+    }
+  }
+
+  // 3. Legislative changes (check events for legislation.changed after resolution)
+  if (params.resolvedAtISO) {
+    const legislationEvents = (params.state.events ?? []).filter(
+      (e) =>
+        e.type === "legislation.changed" &&
+        e.createdAtISO > params.resolvedAtISO!
+    )
+
+    for (const event of legislationEvents.slice(0, 3)) {
+      // Check if the legislation change is relevant to the task's framework
+      const relatedFindings = params.state.findings.filter((f) =>
+        relatedFindingIds.has(f.id)
+      )
+      const taskFrameworks = new Set(relatedFindings.map((f) => f.category))
+
+      const eventFramework = (event.metadata as Record<string, unknown>)?.framework as string | undefined
+      if (eventFramework && taskFrameworks.has(eventFramework as never)) {
+        reasons.push({
+          source: "legislation_changed",
+          message: `Modificare legislativă detectată (${eventFramework}) — task-ul poate necesita re-evaluare.`,
+          detectedAtISO: event.createdAtISO,
+        })
+      }
+    }
+  }
+
+  return {
+    shouldReopen: reasons.length > 0,
+    reasons,
+  }
+}

@@ -1360,3 +1360,64 @@ Actualizare 2026-03-16 - Dashboard action authority
 
 - `Dashboard` a fost simplificat la un singur bloc dominant pentru actiunea recomandata (`NextBestAction`)
 - CTA-urile duplicate si handoff-urile concurente au fost scoase pentru claritate
+
+Actualizare suplimentara 2026-03-20:
+
+- a pornit bridge-ul oficial `IA noua peste EOS v1`, fara rewrite vizual
+- shell-ul foloseste acum top-level IA canonica:
+  - `Acasa`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+  - `Setari`
+- exista acum si ruta canonica pentru rezultatul unei scanari:
+  - `/dashboard/scan/results/[scanId]`
+- handoff-ul principal dupa analiza intra in rezultatul scanului, nu direct in `Documente`
+- rutele legacy raman active ca punte temporara pana cand suprafetele canonice primesc implementarea completa
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-2` a inceput cu inversarea suprafetelor canonice:
+  - `Resolve` are acum owner comun in `components/compliscan/resolve-page.tsx`
+  - `Reports` are acum owner comun in `components/compliscan/reports-page.tsx`
+  - `Scan` are acum owner comun in `components/compliscan/scan-page.tsx`
+- rutele vechi `checklists`, `rapoarte` si `scanari` raman active, dar doar ca aliasuri de compatibilitate peste aceleasi suprafete
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-3` a inceput cu familia `Settings`
+  - `Settings` are acum owner comun in `components/compliscan/settings-page.tsx`
+  - `Settings / Abonament` are acum ruta canonica `/dashboard/settings/abonament`
+- rutele vechi `setari` si `setari/abonament` raman active doar ca aliasuri de compatibilitate
+- handoff-urile administrative si subnavigarea locala folosesc acum namespace-ul canonic:
+  - `settings`
+  - `resolve`
+  - `reports`
+
+Actualizare suplimentara 2026-03-20:
+
+- familia `Rapoarte` foloseste acum subrutele canonice din blueprint:
+  - `reports/vault`
+  - `reports/policies`
+  - `reports/audit-log`
+  - `reports/trust-center`
+- vechile rute `rapoarte/auditor-vault`, `politici`, `audit-log` si `rapoarte/trust-profile` au ramas doar aliasuri de compatibilitate
+- `ReportsTabs` unifica navigatia locala pentru subpaginile de output
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-3` continua cu scan archive-ul canonic:
+  - `Scaneaza -> Istoric` foloseste acum `/dashboard/scan/history`
+  - suprafata este detinuta de `components/compliscan/scan-history-page.tsx`
+- vechea ruta `/dashboard/documente` ramane doar alias de compatibilitate
+- handoff-urile vizibile din `Scanare` si `Scan Rezultate` spun acum `Istoric`, nu `Documente`
+
+Actualizare suplimentara 2026-03-20:
+
+- `BP-4` incepe curatarea reala a paginii `Acasa`
+  - cardul dominant este acum `NextBestAction`
+  - `Top urgente` nu mai concureaza separat cu CTA-ul principal
+- `OnboardingProgress` a fost mutat din `Acasa` in `Setari`
+- `Acasa` nu mai expune `DriftCommandCenter` si `Snapshot & Activitate recenta`
+- cardurile de readiness au ramas informative pe `Acasa`, fara CTA-uri locale concurente
+- `Generatorul` este prezentat acum ca suprafata de `Documente asistate`, nu ca produs separat

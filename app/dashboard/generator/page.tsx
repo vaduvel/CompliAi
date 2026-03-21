@@ -308,13 +308,13 @@ export default function GeneratorPage() {
   return (
     <div className="space-y-6">
       <PageIntro
-        eyebrow="Generator"
-        title="Generator de documente de conformitate"
-        description="Generează politici și proceduri personalizate cu AI — Privacy Policy, Cookie Policy, DPA, Plan de Răspuns Incidente NIS2, Politică Guvernanță AI."
+        eyebrow="Documente asistate"
+        title="Creezi drafturi de politici și proceduri"
+        description="Aici generezi drafturi asistate pentru politici și proceduri. Validarea umană, publicarea și atașarea dovezilor rămân pași separați."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              Gemini AI
+              draft asistat
             </Badge>
             <Badge variant="success" dot className="normal-case tracking-normal">
               Privacy Policy gratuit

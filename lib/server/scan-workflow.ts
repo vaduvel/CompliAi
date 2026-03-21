@@ -4,7 +4,7 @@ import {
   type ComplianceEventActorInput,
 } from "@/lib/compliance/events"
 import { normalizeScanRecord, simulateFindings } from "@/lib/compliance/engine"
-import { llmAnalyzeScan } from "@/lib/compliance/llm-scan-analysis"
+import { geminiSemanticAnalyze, llmAnalyzeScan } from "@/lib/compliance/llm-scan-analysis"
 import type {
   ComplianceState,
   ScanExtractionMethod,
@@ -241,20 +241,35 @@ export async function analyzeExtractedScan(
     throw new Error("SCAN_EMPTY_CONTENT")
   }
 
+  // B1: Gemini semantic analysis is PRIMARY
+  const geminiResult = await geminiSemanticAnalyze({
+    documentName: scan.documentName,
+    content: finalContent,
+    nowISO,
+    scanId: scan.id,
+  })
+
+  // Keyword matching as FALLBACK/COMPLEMENT
   const keywordResult = simulateFindings(scan.documentName, finalContent, nowISO, scan.id)
-  const existingRuleIds = new Set(
-    keywordResult.findings.map((f) => f.provenance?.ruleId ?? "").filter(Boolean)
-  )
+
+  // Collect all rule IDs already found by Gemini + keyword
+  const allRuleIds = new Set([
+    ...geminiResult.findings.map((f) => f.provenance?.ruleId ?? "").filter(Boolean),
+    ...keywordResult.findings.map((f) => f.provenance?.ruleId ?? "").filter(Boolean),
+  ])
+
+  // Legacy LLM supplement — catches rule-library matches both engines missed
   const llmResult = await llmAnalyzeScan({
     documentName: scan.documentName,
     content: finalContent,
     nowISO,
     scanId: scan.id,
-    existingRuleIds,
+    existingRuleIds: allRuleIds,
   })
 
+  // Merge: Gemini (primary) → keyword (complement) → legacy LLM (supplement)
   const result = {
-    findings: [...keywordResult.findings, ...llmResult.findings],
+    findings: [...geminiResult.findings, ...keywordResult.findings, ...llmResult.findings],
     alerts: keywordResult.alerts,
     highRiskDelta: keywordResult.highRiskDelta,
     lowRiskDelta: keywordResult.lowRiskDelta,

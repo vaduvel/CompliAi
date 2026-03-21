@@ -1731,3 +1731,116 @@ Asta este sanatos arhitectural pentru ca:
 - `Dashboard` foloseste acum un singur bloc dominant de actiune (`NextBestAction`)
 - duplicarile de CTA si handoff concurent au fost eliminate
 - pagina ramane orientare, iar actiunea dominanta este clara fara concurenta vizuala
+
+## Actualizare 2026-03-20 - Bridge IA noua peste EOS v1
+
+- directia canonica este acum implementata explicit ca `IA noua + UX nou + skin EOS v1`
+- contractul de rutare este centralizat in `lib/compliscan/dashboard-routes.ts`
+- shell-ul foloseste vocabularul nou:
+  - `Acasa`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+  - `Setari`
+- rutele canonice exista deja ca suprafete publice in dashboard:
+  - `/dashboard/scan`
+  - `/dashboard/resolve`
+  - `/dashboard/reports`
+  - `/dashboard/settings`
+  - `/dashboard/scan/results/[scanId]`
+- `scan/results/[scanId]` este acum punctul canonic de handoff dupa analiza, fara sa mai trimita utilizatorul direct in `Documente`
+- starea arhitecturala ramane intentionat hibrida:
+  - shell-ul si handoff-urile primare urmeaza IA noua
+  - suprafetele interne `scanari/checklists/rapoarte/setari` continua temporar ca aliasuri peste runtime-ul vechi
+- urmatorul pas de arhitectura nu este un rewrite vizual, ci mutarea treptata a CTA-urilor si a suprafetelor interne pe paginile canonice
+
+## Actualizare 2026-03-20 - BP-2: proprietate canonica pe Resolve + Reports + Scan
+
+- `/dashboard/resolve` detine acum suprafata canonica prin `components/compliscan/resolve-page.tsx`
+- `/dashboard/checklists` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `/dashboard/reports` detine acum suprafata canonica prin `components/compliscan/reports-page.tsx`
+- `/dashboard/rapoarte` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `/dashboard/scan` detine acum suprafata canonica prin `components/compliscan/scan-page.tsx`
+- `/dashboard/scanari` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- asta reduce riscul de drift intre ruta noua si ruta veche:
+  - un singur owner de UI per suprafata
+  - aliasul vechi nu mai cere mentenanta paralela
+- pentru scanare, inclusiv subnavigarea locala si share linkul principal folosesc acum traseul canonic
+
+## Actualizare 2026-03-20 - BP-3: familia canonica Settings
+
+- `/dashboard/settings` detine acum suprafata canonica prin `components/compliscan/settings-page.tsx`
+- `/dashboard/setari` a ramas ruta de compatibilitate si consuma aceeasi suprafata partajata
+- a fost introdus si aliasul canonic pentru billing:
+  - `/dashboard/settings/abonament`
+  - `/dashboard/setari/abonament` ramane compatibilitate
+- pentru zona administrativa, linkurile cu impact mare folosesc acum namespace-ul canonic:
+  - Stripe return URLs
+  - health-check operational
+  - emailurile de notificare
+- asta inchide ultimul top-level owner important ramas pe pagina veche si reduce ruptura dintre shell-ul nou si handoff-urile administrative
+
+## Actualizare 2026-03-20 - BP-3: subfamilia canonica Reports
+
+- `/dashboard/reports` nu mai este doar pagina principala; familia canonică include acum si:
+  - `/dashboard/reports/vault`
+  - `/dashboard/reports/policies`
+  - `/dashboard/reports/audit-log`
+  - `/dashboard/reports/trust-center`
+- fiecare subpagina foloseste acum owner comun in `components/compliscan/*`, iar rutele vechi raman doar aliasuri
+- `ReportsTabs` ofera subnavigatia locala ceruta de blueprint pentru output-uri
+- asta reduce si mai mult ruptura dintre:
+  - shell-ul nou `Rapoarte`
+  - URL-urile vechi mostenite din `Dovada` si `Politici`
+
+## Actualizare 2026-03-20 - BP-3: scan archive canonic
+
+- `/dashboard/scan/history` este acum ruta canonica pentru arhiva document-first din `Scaneaza`
+- `/dashboard/documente` a ramas doar ruta de compatibilitate si consuma aceeasi suprafata partajata
+- `lib/compliscan/dashboard-routes.ts` separa acum explicit:
+  - `documents` -> ruta canonica noua
+  - `documentsLegacy` -> aliasul vechi
+- asta reduce ruptura dintre:
+  - `Scaneaza` ca namespace canonic
+  - vechiul handoff direct catre `/dashboard/documente`
+- pagina de rezultat si subnavigarea locala folosesc acum acelasi vocabular canonic: `Istoric`
+
+## Actualizare 2026-03-20 - BP-4: action authority pe Acasa
+
+- `/dashboard` foloseste acum un singur bloc dominant de actiune prin `NextBestAction`
+- vechiul panou `Top urgente` a fost absorbit; `Acasa` nu mai are doua centre vizuale concurente pentru actiune
+- onboarding-ul de progres operational nu mai sta pe `Acasa`; el a fost mutat in `Setari`, unde apartine contextului administrativ
+- `Acasa` nu mai tine si suprafete de lucru secundare:
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- arhitectural, asta muta pagina mai aproape de blueprint:
+  - `stare + urgenta curenta`
+  - apoi `health/readiness`
+  - fara feed operational concurent
+- in plus, `Framework Readiness` a ramas strict informativ pe `Acasa`; handoff-urile catre alte zone nu mai sunt atașate fiecarui card
+- pentru `Generator`, schimbarea curenta este de pozitionare UX, nu de arhitectura:
+  - ruta ramane aceeasi
+  - suprafața nu mai este branduita ca produs paralel in copy-ul principal
+
+## Actualizare 2026-03-21 - Scan Rezultate suprafata nativa
+
+- `/dashboard/scan/results/[scanId]` este acum suprafata nativa completa, nu bridge peste `ScanVerdictsTab`
+- success banner cand analiza este finalizata
+- finding-urile sunt grupate pe severitate: Critice / Ridicate / Medii / Informative
+- fiecare grup este colapsibil, critical+high deschise by default
+- fiecare finding row: `SeverityBadge` + titlu + framework badge + varsta + review state
+- `Resolution Layer` inline la expandare finding (7 pasi din `FindingResolution`)
+- CTA primar: `Adauga toate in queue` -> `/dashboard/resolve`
+- actiune: `Scaneaza din nou` (nu navigare inapoi)
+- `HandoffCard` explica separarea verdict vs executie
+
+## Actualizare 2026-03-21 - De rezolvat suprafata nativa cu finding queue
+
+- `/dashboard/resolve` are acum finding queue nativ deasupra `RemediationBoard`
+- filter tabs pe framework: `Toate | GDPR | NIS2 | AI Act | Furnizori` (per blueprint §3.4)
+- finding-urile sunt sortate critical-first in cadrul fiecarui filtru
+- fiecare finding row este expandabil cu `Resolution Layer` inline (7 pasi)
+- review state badges: `Detectat` / `In remediere`
+- `RemediationBoard` ramane mai jos pentru executia task-urilor existente
+- page header actualizat cu badge-uri de severitate per blueprint
+- `PillarTabs` ramane ca punte spre suprafetele de dovada existente

@@ -1,6 +1,7 @@
 // app/api/stripe/portal/route.ts
 // Redirect la Stripe Customer Portal pentru gestionare abonament
 
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { jsonError } from "@/lib/server/api-response"
 import { requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { getOrgPlanRecord } from "@/lib/server/plan"
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const returnUrl =
-      (process.env.NEXT_PUBLIC_APP_URL ?? "") + "/dashboard/setari/abonament"
+      (process.env.NEXT_PUBLIC_APP_URL ?? "") + dashboardRoutes.settingsBilling
 
     const portalBody = new URLSearchParams({
       customer: planRecord.stripeCustomerId,

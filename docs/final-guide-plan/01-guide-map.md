@@ -77,9 +77,10 @@ Ordinea recomandata de citire:
 1. `00-master-source.md`
 2. `01-guide-map.md`
 3. `02-ux-ia-blueprint.md`
-4. `03-ux-wireframe-prototype.jsx`
-5. `compliscan-ui-prompt.md` daca wave-ul atinge stratul vizual sau Design System
-6. documentele de wave active si logurile curente
+4. `04-implementation-reference-eos-v1.md`
+5. `03-ux-wireframe-prototype.jsx`
+6. `compliscan-ui-prompt.md` daca wave-ul atinge stratul vizual sau Design System
+7. documentele de wave active si logurile curente
 
 Cand facem implementari noi:
 - nu stergem din sursa master
@@ -92,6 +93,7 @@ Pentru forma finala a aplicatiei, pachetul UX canonic este:
 - `02-ux-ia-blueprint.md` pentru arhitectura informationala si regulile de navigare
 - `03-ux-wireframe-prototype.jsx` pentru traducerea vizuala a blueprint-ului in ecrane si prioritati de interactiune
 - `compliscan-ui-prompt.md` pentru implementarea vizuala consistenta in wave-urile care ating Design System-ul
+- `04-implementation-reference-eos-v1.md` pentru decizia executabila curenta: implementam blueprint-ul peste UI-ul existent `Evidence OS v1`
 
 Fisierele:
 - `compliscan-ia-revizuita.md`
@@ -103,5 +105,6 @@ raman in folder ca originale pastrate pentru provenance si comparatie, dar refer
 
 Cand deschidem un wave nou plecat din acest folder:
 - folosim blueprint-ul si wireframe-ul ca tinta de produs
-- folosim `compliscan-ui-prompt.md` doar daca wave-ul chiar atinge stratul vizual
+- folosim `04-implementation-reference-eos-v1.md` ca regula executabila pentru alegerea skin-ului vizual
+- folosim `compliscan-ui-prompt.md` doar daca wave-ul chiar atinge stratul vizual si decizia de skin o cere
 - tinem jurnalul wave-ului separat, astfel incat executia sa nu aglomereze ghidul canonic

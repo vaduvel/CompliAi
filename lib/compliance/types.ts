@@ -110,6 +110,15 @@ export type ScanFinding = {
   readyText?: string
   provenance?: FindingProvenance
   resolution?: FindingResolution
+  // B2 — Finding status tracking
+  findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
+  findingStatusUpdatedAtISO?: string
+  // B1 — Gemini semantic engine fields
+  confidenceScore?: number           // 0-100, from Gemini analysis
+  requiresHumanReview?: boolean      // true if confidence < 80 or severity critical
+  reasoning?: string                 // Gemini's reasoning for the finding
+  sourceParagraph?: string           // exact text excerpt that triggered the finding
+  suggestedDocumentType?: string     // suggested document to generate (dpa, privacy-policy, etc.)
 }
 
 export type ScanRecord = {
@@ -134,6 +143,10 @@ export type GeneratedDocumentRecord = {
   title: string
   generatedAtISO: string
   llmUsed: boolean
+  // E1 — Expiry management
+  expiresAtISO?: string           // when this document expires
+  nextReviewDateISO?: string      // when to review this document
+  refreshStatus?: "current" | "refresh-candidate" | "expired"  // E2 drift-linked
 }
 
 export type AISystemPurpose =
@@ -397,6 +410,16 @@ export type ComplianceState = {
   // ── Smart Intake (Questionnaire Automation) ──────────────────────────────
   intakeAnswers?: FullIntakeAnswers
   intakeCompletedAtISO?: string
+  // ── Addon 1: Compliance Streak ─────────────────────────────────────────
+  complianceStreak?: ComplianceStreak
+}
+
+export type ComplianceStreak = {
+  currentDays: number        // consecutive days above threshold
+  longestStreak: number      // personal record
+  lastUpdated: string        // ISO date of last update
+  threshold: number          // default 70
+  brokenAt: string | null    // when the streak last broke
 }
 
 export type DashboardSummary = {

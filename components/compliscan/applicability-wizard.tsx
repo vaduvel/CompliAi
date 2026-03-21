@@ -121,6 +121,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   const [initialFindings, setInitialFindings] = useState<ScanFinding[]>([])
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
   const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
+  const [prefillInvoiceStatus, setPrefillInvoiceStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
 
   const profileSnapshot = buildProfileSnapshot(values)
   const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
@@ -146,6 +147,10 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   }
 
   async function handleCuiContinue() {
+    if (orgPrefill) {
+      setStep("sector")
+      return
+    }
     const trimmedCui = values.cui.trim()
     const trimmedWebsite = values.website.trim()
     const validCui = trimmedCui ? isValidCui(trimmedCui) : false
@@ -194,6 +199,34 @@ export function ApplicabilityWizard({ onComplete }: Props) {
       setOrgPrefill(null)
       setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
       setStep("sector")
+    } finally {
+      setPrefillLoading(false)
+    }
+  }
+
+  async function handleCuiBlur() {
+    const trimmedCui = values.cui.trim()
+    if (!trimmedCui || !isValidCui(trimmedCui)) return
+    if (orgPrefill || prefillLoading) return
+
+    setPrefillLoading(true)
+    setPrefillError(null)
+    try {
+      const trimmedWebsite = values.website.trim()
+      const validWebsite = trimmedWebsite ? isValidWebsiteInput(trimmedWebsite) : false
+      const res = await fetch("/api/org/profile/prefill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cui: trimmedCui,
+          website: validWebsite ? trimmedWebsite : undefined,
+        }),
+      })
+      if (!res.ok) return
+      const data = (await res.json()) as ProfilePrefillResponse
+      setOrgPrefill(data.prefill)
+    } catch {
+      // Silent failure on blur — don't block flow
     } finally {
       setPrefillLoading(false)
     }
@@ -286,6 +319,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 }}
                 placeholder="Ex: RO12345678"
                 className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
+                onBlur={() => void handleCuiBlur()}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") void handleCuiContinue()
                 }}
@@ -316,6 +350,37 @@ export function ApplicabilityWizard({ onComplete }: Props) {
               {prefillError ? (
                 <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
                   {prefillError}
+                </div>
+              ) : null}
+              {orgPrefill ? (
+                <div className="rounded-eos-md border border-eos-success/30 bg-eos-success-soft px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-eos-text">
+                        {orgPrefill.companyName}
+                      </p>
+                      <p className="mt-1 text-xs text-eos-text-muted">
+                        {[
+                          orgPrefill.normalizedCui,
+                          orgPrefill.mainCaen ? `CAEN ${orgPrefill.mainCaen}` : null,
+                          orgPrefill.address,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
+                    <Badge className="shrink-0 border-eos-border bg-eos-success-soft text-eos-success">
+                      ✓ Sugerat din ANAF
+                    </Badge>
+                  </div>
+                  {(() => {
+                    const nis2 = classifyNis2FromSector(orgPrefill.suggestions.sector?.value)
+                    return nis2 ? (
+                      <div className="mt-2">
+                        <Badge className={nis2.badge}>{nis2.label}</Badge>
+                      </div>
+                    ) : null
+                  })()}
                 </div>
               ) : null}
               <Button onClick={() => void handleCuiContinue()} className="w-full" disabled={prefillLoading}>
@@ -630,6 +695,64 @@ export function ApplicabilityWizard({ onComplete }: Props) {
                 />
               </div>
 
+              {/* ── Addon 3: Invoice Smart Prefill trigger ─────────────────── */}
+              {values.requiresEfactura && prefillInvoiceStatus === "idle" && (
+                <div className="flex items-start gap-3 rounded-eos-md border border-dashed border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
+                  <Sparkles className="mt-0.5 size-4 shrink-0 text-eos-primary" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-eos-text">
+                      Smart Prefill din facturi
+                    </p>
+                    <p className="mt-0.5 text-xs text-eos-text-muted">
+                      Dacă ai facturile e-Factura conectate, putem deduce automat ce tool-uri și servicii cloud folosești. Toate valorile rămân sugestii — tu confirmi.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="mt-3 gap-2"
+                      onClick={async () => {
+                        setPrefillInvoiceStatus("loading")
+                        try {
+                          const res = await fetch("/api/prefill/invoice", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ invoiceItems: [] }),
+                          })
+                          if (res.ok) {
+                            setPrefillInvoiceStatus("done")
+                          } else {
+                            setPrefillInvoiceStatus("error")
+                          }
+                        } catch {
+                          setPrefillInvoiceStatus("error")
+                        }
+                      }}
+                    >
+                      <Sparkles className="size-4" />
+                      Analizează facturile
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {prefillInvoiceStatus === "loading" && (
+                <div className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
+                  <Loader2 className="size-4 animate-spin" />
+                  Se analizează facturile cu AI...
+                </div>
+              )}
+              {prefillInvoiceStatus === "done" && (
+                <div className="flex items-center gap-2 rounded-eos-md border border-eos-success-border bg-eos-success-soft px-4 py-3 text-sm text-eos-success">
+                  <CheckCircle2 className="size-4" />
+                  Prefill salvat — vei vedea sugestiile în dashboard.
+                </div>
+              )}
+              {prefillInvoiceStatus === "error" && (
+                <div className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
+                  <TriangleAlert className="size-4" />
+                  Nu am putut analiza facturile. Poți încerca mai târziu din setări.
+                </div>
+              )}
+
               <Button onClick={handleDone} className="w-full">
                 Continuă la dashboard
                 <ChevronRight className="ml-1 h-4 w-4" />
@@ -672,10 +795,14 @@ function PrefillContextCard({
             {subtitleParts.join(" · ")}
           </p>
         </div>
-        <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-          Sursa: {sourceLabel}
+        <Badge className="shrink-0 border-eos-border bg-eos-success-soft text-eos-success">
+          ✓ Sugerat din {sourceLabel} — confirmă
         </Badge>
       </div>
+
+      {prefill.address ? (
+        <p className="mt-2 text-xs text-eos-text-muted">{prefill.address}</p>
+      ) : null}
 
       {prefill.source === "anaf_vat_registry" ? (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -688,6 +815,10 @@ function PrefillContextCard({
           <Badge className="border-eos-border bg-eos-surface text-eos-text">
             RO e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
           </Badge>
+          {(() => {
+            const nis2 = classifyNis2FromSector(prefill.suggestions.sector?.value)
+            return nis2 ? <Badge className={nis2.badge}>{nis2.label}</Badge> : null
+          })()}
         </div>
       ) : null}
 
@@ -1042,6 +1173,32 @@ function isValidWebsiteInput(value: string) {
 function questionLabelForSuggestion(questionId: string) {
   const question = [...DECISIVE_QUESTIONS, ...CONDITIONAL_QUESTIONS].find((item) => item.id === questionId)
   return question?.text ?? questionId
+}
+
+function classifyNis2FromSector(
+  sector: OrgSector | null | undefined
+): { label: string; badge: string } | null {
+  if (!sector) return null
+  const essential: OrgSector[] = [
+    "energy",
+    "transport",
+    "banking",
+    "health",
+    "digital-infrastructure",
+    "public-admin",
+  ]
+  const important: OrgSector[] = ["finance", "manufacturing"]
+  if (essential.includes(sector))
+    return {
+      label: "Entitate esențială NIS2",
+      badge: "border-eos-border bg-eos-warning-soft text-eos-warning",
+    }
+  if (important.includes(sector))
+    return {
+      label: "Entitate importantă NIS2",
+      badge: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
+    }
+  return null
 }
 
 function formatWebsiteLabel(value: string) {

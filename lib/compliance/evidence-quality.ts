@@ -116,3 +116,113 @@ function extractExtension(fileName: string) {
 
   return normalized.slice(lastDot)
 }
+
+// ── D1 — Extended Evidence Quality Rules ────────────────────────────────────
+
+export type EvidenceValidationVerdict = "passed" | "needs_review" | "failed"
+
+export type EvidenceValidationResult = {
+  verdict: EvidenceValidationVerdict
+  reasons: string[]
+  checkedAtISO: string
+}
+
+type ValidateEvidenceInput = {
+  fileName: string
+  mimeType: string
+  sizeBytes: number
+  kind: TaskEvidenceKind
+  uploadedAtISO: string
+  /** Expected document type (e.g., "dpa", "privacy-policy") */
+  expectedDocumentType?: string
+  /** Finding creation date */
+  findingCreatedAtISO?: string
+  /** Is the finding linked to this evidence? */
+  findingLinked?: boolean
+}
+
+// Expected MIME types per document type
+const EXPECTED_MIMES: Record<string, string[]> = {
+  "dpa": ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  "privacy-policy": ["application/pdf", "text/html", "text/plain"],
+  "cookie-policy": ["application/pdf", "text/html", "text/plain"],
+  "nis2-incident-response": ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  "ai-governance": ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+}
+
+const MS_PER_DAY = 86_400_000
+const MAX_EVIDENCE_AGE_DAYS = 365 // evidence older than 1 year relative to finding → needs review
+
+/**
+ * D1: Comprehensive evidence validation.
+ * Validates: file type match, real size, recency, finding linkage.
+ * Returns: passed | needs_review | failed + reasons.
+ */
+export function validateEvidence(input: ValidateEvidenceInput): EvidenceValidationResult {
+  const reasons: string[] = []
+  const normalizedMime = input.mimeType.trim().toLowerCase()
+  const nowISO = new Date().toISOString()
+
+  // 1. File type matches expected document type
+  if (input.expectedDocumentType) {
+    const expectedMimes = EXPECTED_MIMES[input.expectedDocumentType]
+    if (expectedMimes && !expectedMimes.includes(normalizedMime)) {
+      // Images are never acceptable for legal documents
+      if (normalizedMime.startsWith("image/")) {
+        reasons.push(
+          `Tip fișier neacceptat: imagine (${normalizedMime}) pentru ${input.expectedDocumentType}. Se cere PDF sau document.`
+        )
+      } else {
+        reasons.push(
+          `Tip fișier neașteptat: ${normalizedMime} pentru ${input.expectedDocumentType}.`
+        )
+      }
+    }
+  }
+
+  // 2. Real file size (not empty or suspiciously small)
+  if (input.sizeBytes === 0) {
+    reasons.push("Fișier gol (0 bytes).")
+  } else if (input.sizeBytes < 100) {
+    reasons.push(`Fișier suspect de mic (${input.sizeBytes} bytes).`)
+  }
+
+  // 3. Document date is recent relative to finding
+  if (input.findingCreatedAtISO) {
+    const findingDate = new Date(input.findingCreatedAtISO).getTime()
+    const uploadDate = new Date(input.uploadedAtISO).getTime()
+
+    if (!isNaN(findingDate) && !isNaN(uploadDate)) {
+      // Evidence uploaded before finding was created → suspicious
+      if (uploadDate < findingDate - MS_PER_DAY) {
+        const daysBefore = Math.floor((findingDate - uploadDate) / MS_PER_DAY)
+        reasons.push(
+          `Dovada încărcată cu ${daysBefore} zile înainte de identificarea problemei. Verifică relevanța.`
+        )
+      }
+
+      // Evidence too old (> 1 year from finding)
+      if (uploadDate < findingDate - MAX_EVIDENCE_AGE_DAYS * MS_PER_DAY) {
+        reasons.push(
+          `Dovada are peste ${MAX_EVIDENCE_AGE_DAYS} zile de la crearea finding-ului. Posibil expirată.`
+        )
+      }
+    }
+  }
+
+  // 4. Link to finding documented
+  if (input.findingLinked === false) {
+    reasons.push("Dovada nu este legată de un finding specific. Adaugă referința.")
+  }
+
+  // Determine verdict
+  let verdict: EvidenceValidationVerdict = "passed"
+  if (reasons.length > 0) {
+    const hasCritical = reasons.some(
+      (r) => r.includes("Fișier gol") || r.includes("neacceptat") || r.includes("expirată")
+    )
+    verdict = hasCritical ? "failed" : "needs_review"
+  }
+
+  return { verdict, reasons, checkedAtISO: nowISO }
+}

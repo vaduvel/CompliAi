@@ -67,6 +67,8 @@ const MS_PER_DAY = 86_400_000
 const OVERDUE_THRESHOLD_DAYS = 0 // past nextReviewDueISO
 const STALE_OPEN_DAYS = 30 // open review without progress
 const DPA_MISSING_URGENCY_BUMP = true
+const REVALIDATION_WARNING_DAYS = 30 // C3: alert 30 days before review expiry
+const DPA_EXPIRY_MONTHS = 12 // C3: DPA considered expired after 12 months
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -95,6 +97,7 @@ export function runVendorRiskAgent(input: VendorRiskAgentInput): AgentOutput {
   let issuesFound = 0
 
   const reviews = input.vendorReviews
+  const overdueReviews: VendorReview[] = [] // C3: queue of overdue vendor reviews
 
   // 0. No reviews at all — check if org has vendors in state
   if (reviews.length === 0) {
@@ -121,6 +124,7 @@ export function runVendorRiskAgent(input: VendorRiskAgentInput): AgentOutput {
       if (daysLeft !== null && daysLeft <= OVERDUE_THRESHOLD_DAYS) {
         issuesFound++
         const daysOverdue = Math.abs(daysLeft)
+        overdueReviews.push(review)
         actions.push({
           type: "review_triggered",
           description: `Revalidare depășită: ${review.vendorName} — ${daysOverdue} zile peste termen. Re-evaluare necesară.`,
@@ -128,11 +132,11 @@ export function runVendorRiskAgent(input: VendorRiskAgentInput): AgentOutput {
           approvalLevel: 1,
           autoApplied: true,
         })
-      } else if (daysLeft !== null && daysLeft <= 14) {
-        // Approaching deadline — warn
+      } else if (daysLeft !== null && daysLeft <= REVALIDATION_WARNING_DAYS) {
+        // C3: Alert at 30 days before expiry
         actions.push({
           type: "alert_created",
-          description: `Revalidare apropiată: ${review.vendorName} — ${daysLeft} zile rămase.`,
+          description: `Revalidare apropiată: ${review.vendorName} — ${daysLeft} zile rămase până la re-evaluare.`,
           targetId: review.id,
           approvalLevel: 1,
           autoApplied: true,
@@ -176,6 +180,30 @@ export function runVendorRiskAgent(input: VendorRiskAgentInput): AgentOutput {
         approvalLevel: 2,
         autoApplied: false,
       })
+    }
+  }
+
+  // 3b. C3: DPA expiry check — alert immediately if DPA review is overdue
+  for (const review of reviews) {
+    if (review.status !== "closed") continue
+    if (!review.closedAtISO) continue
+
+    const closedAge = daysSince(review.closedAtISO, nowMs)
+    if (closedAge !== null && closedAge > DPA_EXPIRY_MONTHS * 30) {
+      const isProcessor = review.context?.vendorProcessesData === "processor"
+      const hasDpa = review.context?.hasDpaOrTerms === "yes"
+
+      if (isProcessor && hasDpa) {
+        issuesFound++
+        overdueReviews.push(review)
+        actions.push({
+          type: "escalation_raised",
+          description: `DPA posibil expirat: ${review.vendorName} — ultima validare acum ${closedAge} zile (>${DPA_EXPIRY_MONTHS} luni). Revalidare DPA necesară.`,
+          targetId: review.id,
+          approvalLevel: 2,
+          autoApplied: false,
+        })
+      }
     }
   }
 
@@ -257,6 +285,16 @@ export function runVendorRiskAgent(input: VendorRiskAgentInput): AgentOutput {
       targetId: "ai-vendor-gap",
       approvalLevel: 2,
       autoApplied: false,
+    })
+  }
+
+  // C3: Overdue vendor reviews queue notification
+  if (overdueReviews.length > 0) {
+    actions.push({
+      type: "notification_sent",
+      description: `${overdueReviews.length} vendor review(s) depășit(e): ${overdueReviews.map((r) => r.vendorName).join(", ")}. Accesează dashboard-ul pentru re-evaluare.`,
+      approvalLevel: 1,
+      autoApplied: true,
     })
   }
 

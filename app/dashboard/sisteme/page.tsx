@@ -22,6 +22,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { AICompliancePack, AICompliancePackEntry } from "@/lib/compliance/ai-compliance-pack"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import { cn } from "@/lib/utils"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
@@ -436,7 +437,7 @@ function ControlOverview({
                       Baseline
                     </Button>
                     <Button asChild>
-                      <Link href="/dashboard/setari">
+                      <Link href={dashboardRoutes.settings}>
                         Setari
                         <ArrowRight className="size-4" strokeWidth={2} />
                       </Link>
@@ -755,7 +756,7 @@ function ControlSystemsWorkspace({
                   </Button>
                 ) : null}
                 <Button asChild>
-                  <Link href="/dashboard/setari">
+                  <Link href={dashboardRoutes.settings}>
                     Gestioneaza Baseline
                     <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
@@ -797,8 +798,8 @@ function ControlSystemsWorkspace({
                 ]}
                 actions={
                   <Button asChild>
-                    <Link href="/dashboard/rapoarte">
-                      Mergi la Audit si export
+                    <Link href={dashboardRoutes.reports}>
+                      Mergi la Rapoarte
                       <ArrowRight className="size-4" strokeWidth={2} />
                     </Link>
                   </Button>
@@ -898,7 +899,7 @@ function ControlDriftWorkspace({
                   Verifica Baseline
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href="/dashboard/checklists">Deschide Remedierea</Link>
+                  <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
                 </Button>
               </>
             }

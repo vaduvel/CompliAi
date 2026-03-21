@@ -1,6 +1,7 @@
 // V3 P1.2 — Compliance Health Check Periodic
 // Detectează evaluări expirate, dovezi stale, review-uri întârziate și gap-uri de monitorizare.
 
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
 import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
@@ -54,7 +55,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Nu există un snapshot de referință validat. Fără baseline, drift-ul nu poate fi detectat corect.",
       status: "warning",
       action: "Validează un snapshot ca baseline",
-      actionHref: "/dashboard/rapoarte",
+      actionHref: dashboardRoutes.reports,
     })
   } else {
     items.push({
@@ -77,7 +78,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: `Ultimul scan a fost acum ${daysSinceLastScan ?? "N/A"} zile. Scanează periodic pentru a detecta noi finding-uri.`,
       status: "warning",
       action: "Rulează un scan nou",
-      actionHref: "/dashboard/scanari",
+      actionHref: dashboardRoutes.scan,
       daysOverdue: daysSinceLastScan ? Math.max(0, daysSinceLastScan - 30) : undefined,
     })
   } else {
@@ -164,7 +165,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Integrarea cu SPV ANAF nu este activă. Semnalele de risc fiscal nu sunt monitorizate.",
       status: "warning",
       action: "Configurează integrarea e-Factura",
-      actionHref: "/dashboard/setari",
+      actionHref: dashboardRoutes.settings,
     })
   } else {
     // Check if sync is stale (>7 days)
@@ -176,7 +177,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: "Ultima sincronizare e-Factura a fost acum mai mult de 7 zile.",
         status: "warning",
         action: "Rulează sync e-Factura",
-        actionHref: "/dashboard/rapoarte",
+        actionHref: dashboardRoutes.reports,
         daysOverdue: Math.max(0, daysSinceSync - 7),
       })
     } else {
@@ -206,7 +207,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Finding-urile critice fără dovadă de remediere nu pot fi considerate închise.",
       status: "critical",
       action: "Atașează dovezi la finding-urile critice",
-      actionHref: "/dashboard/checklists",
+      actionHref: dashboardRoutes.resolve,
     })
   } else if (highFindings.length > 0) {
     items.push({
@@ -232,7 +233,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${fiscalSummary.totalSignals} semnale e-Factura, ${fiscalSummary.repeatedRejectionVendors} vendori cu respingeri repetate, ${fiscalSummary.pendingTooLong} facturi blocate.`,
         status: "critical",
         action: "Verifică semnalele fiscale și rezolvă respingerile",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else if (fiscalSummary.fiscalHealthLabel === "atenție") {
       items.push({
@@ -241,7 +242,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${fiscalSummary.totalSignals} semnale e-Factura active. ${fiscalSummary.highUrgency} cu urgență ridicată.`,
         status: "warning",
         action: "Revizuiește semnalele fiscale",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else {
       items.push({
@@ -278,7 +279,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${active.length} discrepanțe active, ${overdue.length} cu termen depășit. Risc de penalități ANAF.`,
         status: "critical",
         action: "Răspunde urgent la discrepanțele e-TVA",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else if (urgent.length > 0) {
       items.push({
@@ -287,7 +288,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${active.length} discrepanțe active, ${urgent.length} cu termen în mai puțin de 5 zile.`,
         status: "warning",
         action: "Pregătește răspunsurile la discrepanțe",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else if (active.length > 0) {
       items.push({
@@ -314,7 +315,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${score.missing} declarații lipsă, ${score.late} cu întârziere din ${score.total} total. ${score.details}`,
         status: "critical",
         action: "Depune declarațiile lipsă urgent",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else if (score.score < 75) {
       items.push({
@@ -323,7 +324,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         detail: `${score.details}`,
         status: "warning",
         action: "Îmbunătățește punctualitatea depunerii",
-        actionHref: "/dashboard/scanari",
+        actionHref: dashboardRoutes.scan,
       })
     } else {
       items.push({
@@ -345,7 +346,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
           detail: `${saftHygiene.missing} lipsă, ${saftHygiene.late} cu întârziere, ${saftHygiene.multipleRectifications} cu rectificări multiple. ${saftHygiene.consistencyIssues.length} probleme de consistență.`,
           status: "critical",
           action: "Corectează raportarea SAF-T",
-          actionHref: "/dashboard/scanari",
+          actionHref: dashboardRoutes.scan,
         })
       } else if (saftHygiene.hygieneScore < 75) {
         items.push({
@@ -354,7 +355,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
           detail: `${saftHygiene.totalFilings} raportări SAF-T. ${saftHygiene.consistencyIssues.length > 0 ? saftHygiene.consistencyIssues.length + " probleme de consistență." : "Consistență OK."}`,
           status: "warning",
           action: "Verifică raportarea SAF-T lunar",
-          actionHref: "/dashboard/scanari",
+          actionHref: dashboardRoutes.scan,
         })
       } else {
         items.push({

@@ -3,34 +3,28 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Database, FileText, History, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, FileText, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { LoadingScreen, ErrorScreen, DriftCommandCenter } from "@/components/compliscan/route-sections"
+import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
-import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
-
-const SCAN_SOURCE_LABEL: Record<string, string> = {
-  document: "Document scanat",
-  text:     "Text analizat",
-  manifest: "Manifest YAML",
-  yaml:     "Fișier YAML",
-}
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { NextBestAction } from "@/components/compliscan/next-best-action"
 
 export default function DashboardPage() {
   const router = useRouter()
   const cockpit = useCockpitData()
   const [nis2Score, setNis2Score] = useState<number | null>(null)
   const [nis2UrgentIncident, setNis2UrgentIncident] = useState(false)
+  const [benchmark, setBenchmark] = useState<{ medie: number; percentil: number; nrFirme: number; sector: string } | null>(null)
 
   useEffect(() => {
     fetch("/api/nis2/assessment", { cache: "no-store" })
@@ -47,6 +41,13 @@ export default function DashboardPage() {
           (i) => i.status !== "closed" && new Date(i.deadline24hISO).getTime() - Date.now() < 4 * 3_600_000
         )
         setNis2UrgentIncident(urgent)
+      })
+      .catch(() => {})
+
+    fetch("/api/benchmark", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { benchmark?: { medie: number; percentil: number; nrFirme: number; sector: string } | null } | null) => {
+        if (data?.benchmark) setBenchmark(data.benchmark)
       })
       .catch(() => {})
   }, [])
@@ -77,6 +78,10 @@ export default function DashboardPage() {
 
   const openTasks = tasks.filter((t) => t.status !== "done")
   const missingEvidenceCount = openTasks.filter((t) => !t.attachedEvidence).length
+  const hasBaselineEvidence = Boolean(
+    state.scans.length > 0 || state.scannedDocuments > 0 || state.validatedBaselineSnapshotId
+  )
+  const activeRiskCount = openAlerts.length + activeDrifts.length
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"
@@ -91,9 +96,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
       <PageIntro
-        eyebrow="Dashboard"
+        eyebrow="Acasă"
         title="Starea actuala a conformitatii tale"
-        description="Vezi rapid ce cere interventie si porneste urmatorul pas corect."
+        description="Vezi rapid starea curenta si porneste urmatorul pas corect."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -115,6 +120,17 @@ export default function DashboardPage() {
       {!state.orgProfile && (
         <section aria-label="Wizard aplicabilitate">
           <ApplicabilityWizard onComplete={() => { reloadDashboard() }} />
+        </section>
+      )}
+
+      {state.orgProfile && (
+        <section aria-label="Actiunea recomandata acum">
+          <NextBestAction
+            task={nextBestAction}
+            onResolve={() => router.push(dashboardRoutes.resolve)}
+            hasEvidence={hasBaselineEvidence}
+            activeRiskCount={activeRiskCount}
+          />
         </section>
       )}
 
@@ -148,85 +164,6 @@ export default function DashboardPage() {
         )
       })()}
 
-      {/* ── V4.3 TOP URGENTA ──────────────────────────────────────────────────── */}
-      {state.orgProfile && (openAlerts.length > 0 || openTasks.length > 0 || activeDrifts.length > 0) && (
-        <section aria-label="Top urgente">
-          <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
-                <span className="text-sm font-semibold text-eos-text">Top urgențe</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-eos-text-muted">Conformitate: {data.summary.score}%</span>
-                <Badge
-                  variant={data.summary.score >= 70 ? "success" : data.summary.score >= 40 ? "warning" : "destructive"}
-                  className="normal-case tracking-normal"
-                >
-                  {data.summary.score >= 70 ? "OK" : data.summary.score >= 40 ? "Risc" : "Critic"}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Urgency list */}
-            <div className="divide-y divide-eos-border-subtle">
-              {[
-                ...openAlerts.slice(0, 2).map((a) => ({
-                  id: a.id,
-                  label: a.message,
-                  severity: a.severity === "high" || a.severity === "critical" ? "high" : "medium",
-                  href: "/dashboard/checklists",
-                })),
-                ...activeDrifts.slice(0, 1).map((d) => ({
-                  id: d.id,
-                  label: d.summary,
-                  severity: d.blocksAudit ? "high" : "medium",
-                  href: "/dashboard/control",
-                })),
-              ]
-                .slice(0, 3)
-                .map((item) => (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className="flex items-center gap-3 px-5 py-3 hover:bg-eos-surface-variant"
-                  >
-                    <span
-                      className={`mt-0.5 size-2 shrink-0 rounded-full ${
-                        item.severity === "high" ? "bg-eos-error" : "bg-eos-warning"
-                      }`}
-                    />
-                    <span className="flex-1 text-sm text-eos-text">{item.label}</span>
-                    <ArrowRight className="size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                  </Link>
-                ))}
-            </div>
-
-            {/* ACTIUNEA TA ACUM */}
-            {nextBestAction && (
-              <div className="border-t border-eos-border-subtle bg-eos-surface-variant/50 px-5 py-3.5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
-                  Acțiunea ta acum
-                </p>
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <p className="text-sm text-eos-text">{nextBestAction.title}</p>
-                  <Button
-                    asChild
-                    size="sm"
-                  >
-                    <Link href="/dashboard/checklists">
-                      Pornește <ArrowRight className="ml-1.5 size-3.5" strokeWidth={2} />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </section>
-      )}
-
       {/* ── Summary strip ─────────────────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
@@ -238,16 +175,39 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Onboarding checklist (Sprint 3.3) ───────────────────────────────── */}
-      {state.orgProfile && (
-        <section aria-label="Ghid de pornire">
-          <OnboardingProgress
-            hasProfile={true}
-            hasAiSystems={totalAiSystems > 0}
-            gdprProgress={state.gdprProgress}
-            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
-            hasResolvedTasks={tasks.some((t) => t.status === "done")}
-          />
+      {/* ── Compliance Streak (Addon 1) ──────────────────────────────────────── */}
+      {state.complianceStreak && state.complianceStreak.currentDays > 0 && (
+        <section aria-label="Serie de conformitate">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+            <Flame className="size-4 shrink-0 text-amber-500" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-semibold">
+                {state.complianceStreak.currentDays} zile consecutive peste {state.complianceStreak.threshold}%
+              </span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-80">
+                Record: {state.complianceStreak.longestStreak} zile
+              </span>
+            </div>
+            <Badge variant="warning" className="shrink-0 text-[10px] normal-case tracking-normal">
+              Streak
+            </Badge>
+          </div>
+        </section>
+      )}
+
+      {state.complianceStreak && state.complianceStreak.currentDays === 0 && state.complianceStreak.brokenAt && (
+        <section aria-label="Serie de conformitate întreruptă">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text-muted">
+            <Flame className="size-4 shrink-0 opacity-40" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-medium">Seria ta s-a întrerupt</span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-70">
+                Record: {state.complianceStreak.longestStreak} zile · Crește scorul peste {state.complianceStreak.threshold}% pentru a reporni
+              </span>
+            </div>
+          </div>
         </section>
       )}
 
@@ -271,7 +231,6 @@ export default function DashboardPage() {
             status={gdprStatus}
             description="Conformitatea prelucrarii datelor"
             icon={CheckCircle2}
-            onViewDetails={() => router.push("/dashboard/checklists")}
             ariaLabel={`GDPR: ${gdprScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
             legalTag="gdpr"
@@ -285,7 +244,6 @@ export default function DashboardPage() {
             status={nis2UrgentIncident ? "blocked" : nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
             description={nis2UrgentIncident ? "⚠ Incident critic — deadline DNSC < 4h" : nis2Score !== null ? "Maturitate cibernetică evaluată" : "Evaluare maturitate lipsă"}
             icon={Shield}
-            onViewDetails={() => router.push("/dashboard/nis2")}
             ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
             legalTag="nis2"
@@ -300,7 +258,6 @@ export default function DashboardPage() {
             status={aiActStatus}
             description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
             icon={Layers}
-            onViewDetails={() => router.push("/dashboard/sisteme")}
             ariaLabel={`AI Act: ${aiActScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
             legalTag="ai-act"
@@ -314,7 +271,6 @@ export default function DashboardPage() {
             status={efacturaStatus}
             description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
             icon={FileText}
-            onViewDetails={() => router.push("/dashboard/setari")}
             ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
             applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
             legalTag="efactura"
@@ -328,11 +284,31 @@ export default function DashboardPage() {
             status={data.summary.score >= 80 ? "strong" : "review"}
             description="Media controalelor validate"
             icon={ShieldCheck}
-            onViewDetails={() => router.push("/dashboard/rapoarte/auditor-vault")}
             ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
           />
         </div>
       </section>
+
+      {/* ── Sector Benchmark (Addon 2) ─────────────────────────────────────── */}
+      {benchmark && (
+        <section aria-label="Benchmark sector">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-900">
+            <BarChart3 className="size-4 shrink-0 text-blue-500" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-semibold">
+                Ești mai bun decât {benchmark.percentil}% din firme în {benchmark.sector}
+              </span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-80">
+                Media sector: {benchmark.medie}% · {benchmark.nrFirme} firme comparate
+              </span>
+            </div>
+            <Badge variant="default" className="shrink-0 text-[10px] normal-case tracking-normal">
+              Benchmark
+            </Badge>
+          </div>
+        </section>
+      )}
 
       {/* ── Sprint 3.5: CER cross-signal — informativ, nu modul complet ──────── */}
       {applicability?.tags.includes("cer") && (
@@ -353,73 +329,9 @@ export default function DashboardPage() {
         </section>
       )}
 
-      <section aria-label="Schimbari si drift activ" className="space-y-4" aria-live="polite">
-        <DriftCommandCenter
-          activeDrifts={activeDrifts}
-          hasValidatedBaseline={Boolean(state.validatedBaselineSnapshotId)}
-        />
-      </section>
-
       {/* ── Health Check Periodic (V3 P1.2) ──────────────────────────────────── */}
       <section aria-label="Health check conformitate">
         <HealthCheckCard />
-      </section>
-
-      {/* ── Snapshot / Activitate recentă ─────────────────────────────────────── */}
-      <section aria-label="Snapshot si activitate recenta" className="space-y-3">
-        <h2 className="text-sm font-medium uppercase tracking-[0.12em] text-eos-text-tertiary">
-          Snapshot &amp; Activitate recentă
-        </h2>
-        <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
-          {/* Baseline */}
-          <div className="flex items-center justify-between px-5 py-3">
-            <div className="flex items-center gap-2.5">
-              <Database className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-              <span className="text-sm text-eos-text">Baseline validat</span>
-            </div>
-            <Badge
-              variant={state.validatedBaselineSnapshotId ? "success" : "secondary"}
-              className="normal-case tracking-normal text-[11px]"
-            >
-              {state.validatedBaselineSnapshotId ? "Activ" : "Lipsă"}
-            </Badge>
-          </div>
-
-          {/* Surse recente */}
-          {state.scans.length === 0 ? (
-            <div className="flex items-center gap-2.5 px-5 py-4 text-sm text-eos-text-muted">
-              <History className="size-4 shrink-0" strokeWidth={2} />
-              <span>
-                Nicio sursă procesată.{" "}
-                <button
-                  onClick={() => router.push("/dashboard/scanari")}
-                  className="text-eos-primary underline-offset-2 hover:underline"
-                >
-                  Pornește primul scan
-                </button>
-              </span>
-            </div>
-          ) : (
-            state.scans.slice(0, 3).map((scan, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-3">
-                <div className="flex items-center gap-2.5">
-                  <Activity className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                  <span className="text-sm text-eos-text">
-                    {SCAN_SOURCE_LABEL[scan.sourceKind as string] ?? scan.sourceKind}
-                  </span>
-                </div>
-                {"scannedAt" in scan && scan.scannedAt ? (
-                  <span className="text-xs text-eos-text-muted">
-                    {new Date(String(scan.scannedAt)).toLocaleDateString("ro-RO", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </span>
-                ) : null}
-              </div>
-            ))
-          )}
-        </Card>
       </section>
     </div>
   )
@@ -472,7 +384,6 @@ function ReadinessFrameworkCard({
   status,
   description,
   icon: Icon,
-  onViewDetails,
   ariaLabel,
   applicabilityCertainty,
   legalTag,
@@ -486,7 +397,6 @@ function ReadinessFrameworkCard({
   status: "strong" | "good" | "review" | "blocked"
   description?: string
   icon?: React.ElementType
-  onViewDetails?: () => void
   ariaLabel?: string
   applicabilityCertainty?: ApplicabilityCertainty
   legalTag?: ApplicabilityTag
@@ -569,17 +479,6 @@ function ReadinessFrameworkCard({
           </div>
         )}
       </div>
-      {onViewDetails && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onViewDetails}
-          className="group mt-5 w-full justify-between"
-        >
-          Vezi detalii
-          <ArrowRight className="size-4 text-eos-text-muted transition-transform group-hover:translate-x-1" strokeWidth={2} />
-        </Button>
-      )}
     </Card>
   )
 }

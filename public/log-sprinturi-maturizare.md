@@ -3191,3 +3191,149 @@ Identificate prin analiza codului si audit vizual. Prioritate:
 8. `setari/page.tsx:517` — Input email + select fara `<label>` asociat
 9. `task-card.tsx` — Prioritate afisata ca "P1"/"P2" raw, netradus in romana
 
+---
+
+## 2026-03-20 — IA bridge EOS v1 (phase 1)
+
+- shell-ul runtime foloseste acum IA canonica `Acasa / Scaneaza / De rezolvat / Rapoarte / Setari` peste skin-ul `Evidence OS v1`
+- a fost introdus contractul comun de rute in `lib/compliscan/dashboard-routes.ts`
+- au fost create rutele canonice-punte:
+  - `/dashboard/scan`
+  - `/dashboard/resolve`
+  - `/dashboard/reports`
+  - `/dashboard/settings`
+- a fost introdusa pagina canonica de rezultat:
+  - `/dashboard/scan/results/[scanId]`
+- dupa analiza din `Scanare`, handoff-ul principal merge acum in `scan/results/[scanId]`, nu in `Documente`
+- `RecentScansCard` deschide acum rezultatul canonic al scanului curent pentru sursele de tip document
+- CTA-urile cross-page cele mai vizibile au fost aliniate la IA noua:
+  - `Dashboard`
+  - `Documente`
+  - `Remediere`
+  - `Audit si export`
+- paginile legacy raman vii ca alias / punte; nu au fost eliminate inca
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-2 - Suprafete canonice peste aliasurile vechi
+
+- `Resolve` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/resolve-page.tsx`
+  - folosita de `/dashboard/resolve`
+  - pastrata si in `/dashboard/checklists` ca punte de compatibilitate
+- `Reports` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/reports-page.tsx`
+  - folosita de `/dashboard/reports`
+  - pastrata si in `/dashboard/rapoarte` ca punte de compatibilitate
+- `Scan` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/scan-page.tsx`
+  - folosita de `/dashboard/scan`
+  - pastrata si in `/dashboard/scanari` ca punte de compatibilitate
+- vocabularul user-facing din cele doua suprafete canonice a fost aliniat la:
+  - `De rezolvat`
+  - `Rapoarte`
+- sub-navigarea locala `Flux scanare` foloseste acum ruta canonica `/dashboard/scan`
+- linkul de share pentru contabil copiaza acum rezultatul canonic al ultimei scanari, nu o intrare legacy in `Documente`
+- rutele legacy raman active, dar nu mai detin proprietatea suprafetelor principale
+
+Validare dupa BP-2 partial:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-3 - Canonizare settings si handoff-uri administrative
+
+- `Settings` nu mai este doar alias de ruta; suprafata este acum extrasa in:
+  - `components/compliscan/settings-page.tsx`
+  - folosita de `/dashboard/settings`
+  - pastrata si in `/dashboard/setari` ca punte de compatibilitate
+- a fost introdusa si ruta canonica pentru billing:
+  - `/dashboard/settings/abonament`
+  - cu owner comun in `components/compliscan/settings-billing-page.tsx`
+  - `/dashboard/setari/abonament` ramane alias de compatibilitate
+- fluxurile administrative importante folosesc acum familia canonica `settings`:
+  - Stripe checkout success
+  - Stripe portal return
+  - health-check pentru integrarea e-Factura
+  - linkurile email/digest spre notificari
+- sub-navigarea locala `Dovada` foloseste acum rutele canonice:
+  - `De rezolvat`
+  - `Rapoarte`
+
+Validare dupa BP-3 partial:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-3 - Canonizare familia Reports
+
+- familia `Reports` are acum si subrutele canonice din blueprint:
+  - `/dashboard/reports/vault`
+  - `/dashboard/reports/policies`
+  - `/dashboard/reports/audit-log`
+  - `/dashboard/reports/trust-center`
+- suprafetele sunt acum detinute prin owneri comuni in:
+  - `components/compliscan/reports-vault-page.tsx`
+  - `components/compliscan/reports-policies-page.tsx`
+  - `components/compliscan/reports-audit-log-page.tsx`
+  - `components/compliscan/reports-trust-center-page.tsx`
+- rutele legacy raman active doar ca aliasuri de compatibilitate:
+  - `/dashboard/rapoarte/auditor-vault`
+  - `/dashboard/politici`
+  - `/dashboard/audit-log`
+  - `/dashboard/rapoarte/trust-profile`
+- a fost introdus si subnav-ul local `ReportsTabs`, folosit pe:
+  - `Rapoarte`
+  - `Politici interne`
+  - `Log Audit`
+  - `Trust Center`
+- handoff-urile user-facing din navigatie si din verdicts folosesc acum familia canonica `reports`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-3 - Canonizare `Scaneaza -> Istoric`
+
+- `Documente` nu mai este ruta canonica de scan archive; istoricul document-first este acum expus prin:
+  - `/dashboard/scan/history`
+  - owner comun in `components/compliscan/scan-history-page.tsx`
+- `/dashboard/documente` ramane activ doar ca alias de compatibilitate peste aceeasi suprafata
+- subnavigarea locala din `Scanare` foloseste acum eticheta si handoff-ul canonice:
+  - `Istoric`
+  - `/dashboard/scan/history`
+- pagina de rezultat a scanului si tabul de istoric folosesc acum vocabularul nou:
+  - `Istoric`
+  - `De rezolvat`
+  - `Rapoarte`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde
+
+### BP-4 - Acasa recapata un singur CTA dominant
+
+- `Acasa` foloseste acum `NextBestAction` ca bloc dominant imediat dupa header, in locul panoului separat `Top urgente`
+- onboarding-ul nu mai concureaza cu actiunea principala pe `Acasa`; `OnboardingProgress` a fost mutat in `Setari`
+- `Acasa` nu mai afiseaza workspace-urile concurente:
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- `Framework Readiness` a ramas informativ pe `Acasa`; cardurile nu mai au butoane locale `Vezi detalii`
+- copy-ul de intrare si handoff-ul din `Setari` folosesc acum vocabularul nou:
+  - `Acasă`
+  - `Scaneaza`
+  - `De rezolvat`
+  - `Rapoarte`
+- `Generatorul` nu mai este prezentat ca produs separat in copy-ul principal:
+  - pagina foloseste acum pozitionarea `Documente asistate`
+  - subnavigarea locala foloseste eticheta `Drafturi asistate`
+
+Validare dupa pass:
+
+- `npm run lint` -> verde, doar warnings vechi
+- `npm run build` -> verde

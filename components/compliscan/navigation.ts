@@ -1,25 +1,34 @@
 "use client"
 
 import {
-  BarChart3,
   BookOpen,
   Bot,
   Building2,
   CheckCircle2,
   ClipboardList,
   FileSearch,
+  Flag,
   FolderKanban,
   FolderOpen,
   GitPullRequestArrow,
+  Home,
   Scan,
   Settings,
   ShieldAlert,
   ShieldPlus,
   Sparkles,
+  Receipt,
   TriangleAlert,
 } from "lucide-react"
 
+import { dashboardRouteGroups, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+
 export type DashboardNavId =
+  | "home"
+  | "scan"
+  | "resolve"
+  | "reports"
+  | "settings"
   | "control"
   | "scanare"
   | "dovada"
@@ -39,6 +48,7 @@ export type DashboardNavId =
   | "conformitate"
   | "partner"
   | "nis2"
+  | "fiscal"
   | "agents"
   | "vendor-review"
 
@@ -47,6 +57,7 @@ export type DashboardNavItem = {
   label: string
   href: string
   icon: typeof Scan
+  description?: string
   matchers?: string[]
 }
 
@@ -58,46 +69,44 @@ export type DashboardNavSection = {
 
 export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   {
-    id: "dashboard",
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: BarChart3,
-    matchers: ["/dashboard"],
+    id: "home",
+    label: "Acasă",
+    href: dashboardRoutes.home,
+    icon: Home,
+    matchers: [...dashboardRouteGroups.home],
+    description: "stare, urgențe și pasul curent",
   },
   {
-    id: "scanare",
-    label: "Scanare",
-    href: "/dashboard/scanari",
+    id: "scan",
+    label: "Scanează",
+    href: dashboardRoutes.scan,
     icon: Scan,
-    matchers: ["/dashboard/scanari", "/dashboard/documente"],
+    matchers: [...dashboardRouteGroups.scan],
+    description: "surse, rezultate și istoric",
   },
   {
-    id: "control",
-    label: "Control",
-    href: "/dashboard/sisteme",
-    icon: ShieldPlus,
-    matchers: ["/dashboard/sisteme", "/dashboard/alerte", "/dashboard/conformitate", "/dashboard/nis2", "/dashboard/agents", "/dashboard/vendor-review"],
+    id: "resolve",
+    label: "De rezolvat",
+    href: dashboardRoutes.resolve,
+    icon: Flag,
+    matchers: [...dashboardRouteGroups.resolve],
+    description: "findings, drift și acțiuni",
   },
   {
-    id: "dovada",
-    label: "Dovada",
-    href: "/dashboard/checklists",
+    id: "reports",
+    label: "Rapoarte",
+    href: dashboardRoutes.reports,
     icon: FileSearch,
-    matchers: ["/dashboard/checklists", "/dashboard/rapoarte"],
+    matchers: [...dashboardRouteGroups.reports],
+    description: "dovezi, politici și export",
   },
   {
-    id: "politici",
-    label: "Politici",
-    href: "/dashboard/politici",
-    icon: BookOpen,
-    matchers: ["/dashboard/politici", "/dashboard/generator"],
-  },
-  {
-    id: "setari",
-    label: "Setari",
-    href: "/dashboard/setari",
+    id: "settings",
+    label: "Setări",
+    href: dashboardRoutes.settings,
     icon: Settings,
-    matchers: ["/dashboard/setari"],
+    matchers: [...dashboardRouteGroups.settings],
+    description: "workspace, acces și operațional",
   },
 ] as const
 
@@ -106,16 +115,22 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "scanare",
     label: "Scanare",
     items: [
-      { id: "scanari", label: "Flux scanare", href: "/dashboard/scanari", icon: Scan },
-      { id: "documente", label: "Documente", href: "/dashboard/documente", icon: FolderOpen },
+      { id: "scanari", label: "Flux scanare", href: dashboardRoutes.scan, icon: Scan },
+      {
+        id: "documente",
+        label: "Istoric",
+        href: dashboardRoutes.documents,
+        icon: FolderOpen,
+        matchers: [dashboardRoutes.documents],
+      },
     ],
   },
   {
     id: "politici",
-    label: "Politici & Documente",
+    label: "Documente asistate",
     items: [
-      { id: "politici", label: "Politici interne", href: "/dashboard/politici", icon: BookOpen },
-      { id: "generator", label: "Generator documente", href: "/dashboard/generator", icon: Sparkles },
+      { id: "politici", label: "Politici interne", href: dashboardRoutes.policies, icon: BookOpen },
+      { id: "generator", label: "Drafturi asistate", href: dashboardRoutes.generator, icon: Sparkles },
     ],
   },
   {
@@ -126,6 +141,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
       { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
       { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
+      { id: "fiscal", label: "Fiscal", href: dashboardRoutes.fiscal, icon: Receipt },
       { id: "agents", label: "Agenți", href: "/dashboard/agents", icon: Bot },
       { id: "vendor-review", label: "Vendor Review", href: "/dashboard/vendor-review", icon: GitPullRequestArrow },
     ],
@@ -141,15 +157,15 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "dovada",
     label: "Dovada",
     items: [
-      { id: "checklists", label: "Remediere", href: "/dashboard/checklists", icon: CheckCircle2 },
+      { id: "checklists", label: "Remediere", href: dashboardRoutes.resolve, icon: CheckCircle2 },
       {
         id: "auditorVault",
         label: "Auditor Vault",
-        href: "/dashboard/rapoarte/auditor-vault",
+        href: dashboardRoutes.auditorVault,
         icon: FolderKanban,
       },
-      { id: "rapoarte", label: "Audit si export", href: "/dashboard/rapoarte", icon: FileSearch },
-      { id: "auditLog", label: "Log audit", href: "/dashboard/audit-log", icon: ClipboardList },
+      { id: "rapoarte", label: "Audit si export", href: dashboardRoutes.reports, icon: FileSearch },
+      { id: "auditLog", label: "Log audit", href: dashboardRoutes.auditLog, icon: ClipboardList },
     ],
   },
 ] as const
@@ -157,7 +173,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
 export const mobileNavItems = [...dashboardPrimaryNavItems] as const
 
 export function isRouteActive(pathname: string, href: string) {
-  if (href === "/dashboard") return pathname === "/dashboard"
+  if (href === dashboardRoutes.home) return pathname === dashboardRoutes.home
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

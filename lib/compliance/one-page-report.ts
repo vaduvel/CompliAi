@@ -1,8 +1,19 @@
-// V3 P0.1 — One-Page Compliance Report
+// V3 P0.1 + G1 — One-Page Compliance Report (Enhanced)
 // Raport executiv printabil, destinat auditorului sau conducerii.
-// Arată scorul de conformitate, statusul per framework, top riscuri, acțiuni prioritare.
+// G1 enhancements: business language, visual score, top 3 risks,
+// audit readiness indicator, timestamp + SHA-256 hash for authenticity.
+
+import { createHash } from "crypto"
 
 import type { ComplianceState, DashboardSummary, ScanFinding, RemediationAction } from "@/lib/compliance/types"
+
+export type AuditReadiness = "Da" | "Parțial" | "Nu"
+
+export type BusinessRisk = {
+  risk: string          // simplified business language, no jargon
+  impact: string        // what happens if not addressed
+  urgency: "urgent" | "atenție" | "informativ"
+}
 
 export type OnePageReportData = {
   generatedAt: string
@@ -10,8 +21,11 @@ export type OnePageReportData = {
   orgName: string
   score: number
   riskLabel: string
+  auditReadiness: AuditReadiness
+  contentHash: string     // SHA-256 hash for authenticity proof
   frameworks: FrameworkStatus[]
   topFindings: TopFinding[]
+  topBusinessRisks: BusinessRisk[]  // G1: top 3 risks in simple Romanian
   topActions: TopAction[]
   metrics: ReportMetric[]
   disclaimer: string
@@ -142,19 +156,76 @@ export function buildOnePageReport(
     { label: "Drift activ", value: `${openDrifts}`, note: openDrifts > 0 ? "schimbări față de baseline" : "fără drift activ" },
   ]
 
+  // G1: Audit readiness indicator
+  const criticalFindings = findings.filter((f) => f.severity === "critical")
+  const highFindings = findings.filter((f) => f.severity === "high")
+  const auditReadiness: AuditReadiness =
+    criticalFindings.length === 0 && highFindings.length === 0 && summary.score >= 75
+      ? "Da"
+      : criticalFindings.length === 0 && summary.score >= 50
+        ? "Parțial"
+        : "Nu"
+
+  // G1: Top 3 business risks — simple Romanian, no jargon
+  const SEVERITY_TO_URGENCY: Record<string, BusinessRisk["urgency"]> = {
+    critical: "urgent",
+    high: "urgent",
+    medium: "atenție",
+    low: "informativ",
+  }
+
+  const topBusinessRisks: BusinessRisk[] = [...findings]
+    .sort((a, b) => (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3))
+    .slice(0, 3)
+    .map((f) => ({
+      risk: toBusinessLanguage(f.title, f.category),
+      impact: f.resolution?.impact ?? "Risc de amendă sau neconformitate la control.",
+      urgency: SEVERITY_TO_URGENCY[f.severity] ?? "informativ",
+    }))
+
+  // G1: Content hash for authenticity proof
+  const reportPayload = JSON.stringify({
+    generatedAt: nowISO,
+    orgName,
+    score: summary.score,
+    findingsCount: findings.length,
+    auditReadiness,
+  })
+  const contentHash = createHash("sha256").update(reportPayload).digest("hex")
+
   return {
     generatedAt: nowISO,
     generatedAtLabel,
     orgName,
     score: summary.score,
     riskLabel: summary.riskLabel,
+    auditReadiness,
+    contentHash,
     frameworks,
     topFindings,
+    topBusinessRisks,
     topActions,
     metrics,
     disclaimer:
       "Generat de CompliAI. Informațiile sunt orientative — verifică cu un specialist juridic înainte de orice raport oficial. CompliAI nu garantează rezultate juridice.",
   }
+}
+
+// G1: Convert technical finding titles to business-friendly language
+function toBusinessLanguage(title: string, category: string): string {
+  const prefix: Record<string, string> = {
+    GDPR: "Protecția datelor",
+    NIS2: "Securitate cibernetică",
+    EU_AI_ACT: "Inteligență artificială",
+    E_FACTURA: "Facturare electronică",
+  }
+  const p = prefix[category] ?? "Conformitate"
+  // Strip technical prefixes and brackets, simplify
+  const cleaned = title
+    .replace(/^\[.*?\]\s*/, "")
+    .replace(/\(.*?\)\s*$/, "")
+    .trim()
+  return `${p}: ${cleaned}`
 }
 
 // ── Markdown generator (for PDF export) ──────────────────────────────────────
@@ -189,17 +260,36 @@ export function buildOnePageReportMarkdown(data: OnePageReportData): string {
     .map((m) => `- **${m.label}:** ${m.value}${m.note ? ` (${m.note})` : ""}`)
     .join("\n")
 
+  const auditReadinessLabel =
+    data.auditReadiness === "Da" ? "✅ Da — organizația este pregătită"
+    : data.auditReadiness === "Parțial" ? "⚠️ Parțial — există elemente de remediat"
+    : "❌ Nu — riscuri critice nerezolvate"
+
+  const businessRisksSection =
+    data.topBusinessRisks.length === 0
+      ? "Nu există riscuri majore identificate."
+      : data.topBusinessRisks
+          .map((r, i) => `${i + 1}. **${r.risk}** (${r.urgency})\n   Impact: ${r.impact}`)
+          .join("\n")
+
   return `# Raport Executiv de Conformitate
 
 **Organizație:** ${data.orgName || "–"}
 **Generat la:** ${data.generatedAtLabel}
 **Scor conformitate:** ${data.score}/100 — ${data.riskLabel}
+**Pregătit pentru control:** ${auditReadinessLabel}
 
 ---
 
 ## Metrici cheie
 
 ${metricsSection}
+
+---
+
+## Principalele 3 riscuri pentru afacere
+
+${businessRisksSection}
 
 ---
 
@@ -222,6 +312,7 @@ ${actionsSection}
 ---
 
 *${data.disclaimer}*
+Hash autenticitate: \`${data.contentHash}\`
 `
 }
 
@@ -312,6 +403,42 @@ export function buildOnePageReportHtml(data: OnePageReportData): string {
     )
     .join("")
 
+  // G1: Audit readiness badge
+  const auditReadinessColor =
+    data.auditReadiness === "Da" ? "#f0fdf4" : data.auditReadiness === "Parțial" ? "#fefce8" : "#fef2f2"
+  const auditReadinessIcon =
+    data.auditReadiness === "Da" ? "✅" : data.auditReadiness === "Parțial" ? "⚠️" : "❌"
+  const auditReadinessNote =
+    data.auditReadiness === "Da"
+      ? "Niciun risc critic sau high deschis. Scor peste 75."
+      : data.auditReadiness === "Parțial"
+        ? "Există elemente de remediat, dar nu sunt blocante critice."
+        : "Riscuri critice nerezolvate — nu este recomandat un control acum."
+
+  // G1: Business risks in simple Romanian
+  const urgencyColor: Record<string, string> = {
+    urgent: "#dc2626",
+    atenție: "#ca8a04",
+    informativ: "#6b7280",
+  }
+
+  const businessRisksHtml =
+    data.topBusinessRisks.length === 0
+      ? `<p style="color:#16a34a;font-size:13px;font-weight:600">Nu există riscuri majore identificate.</p>`
+      : data.topBusinessRisks
+          .map(
+            (r, i) => `
+          <div style="border-left:3px solid ${urgencyColor[r.urgency] ?? "#6b7280"};padding:10px 14px;margin-bottom:8px;break-inside:avoid">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:14px;font-weight:700;color:#111">${i + 1}.</span>
+              <span style="font-size:13px;font-weight:600;color:#111">${r.risk}</span>
+              <span style="background:${urgencyColor[r.urgency] ?? "#6b7280"};color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;text-transform:uppercase">${r.urgency}</span>
+            </div>
+            <p style="margin:4px 0 0;font-size:12px;color:#4b5563">${r.impact}</p>
+          </div>`
+          )
+          .join("")
+
   return `<!doctype html>
 <html lang="ro">
 <head>
@@ -352,10 +479,27 @@ export function buildOnePageReportHtml(data: OnePageReportData): string {
     </div>
   </div>
 
+  <!-- Audit readiness -->
+  <section>
+    <div style="background:${auditReadinessColor};border-radius:8px;padding:14px 20px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px">${auditReadinessIcon}</span>
+      <div>
+        <p style="margin:0;font-size:14px;font-weight:700;color:#111">Pregătit pentru control: ${data.auditReadiness}</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#4b5563">${auditReadinessNote}</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Metrics grid -->
   <section>
     <h2>Metrici cheie</h2>
     <div class="grid-metrics">${metricsHtml}</div>
+  </section>
+
+  <!-- Business risks -->
+  <section>
+    <h2>Principalele riscuri pentru afacere</h2>
+    ${businessRisksHtml}
   </section>
 
   <!-- Frameworks -->
@@ -377,6 +521,7 @@ export function buildOnePageReportHtml(data: OnePageReportData): string {
   </section>
 
   <p class="disc">${data.disclaimer}</p>
+  <p style="color:#d1d5db;font-size:9px;margin-top:4px;font-family:monospace">Hash autenticitate: ${data.contentHash}</p>
 
 </main>
 </body>

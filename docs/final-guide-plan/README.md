@@ -12,6 +12,7 @@ Ce gasesti aici:
 - `01-guide-map.md` -> harta canonica de citire si folosire a sursei master
 - `02-ux-ia-blueprint.md` -> copie canonica a blueprint-ului de arhitectura UX si IA pentru forma finala a aplicatiei
 - `03-ux-wireframe-prototype.jsx` -> copie canonica a prototipului vizual care traduce blueprint-ul UX in ecrane
+- `04-implementation-reference-eos-v1.md` -> contractul scurt de implementare pentru directia aprobata: IA/UX nou peste UI-ul actual Evidence OS v1
 - `compliscan-ui-prompt.md` -> companion de implementare UI pentru Design System v2.0, folosit in wave-urile de executie vizuala
 - `compliscan-ia-revizuita.md` -> fisierul original, pastrat pentru provenance
 - `compliscan-ux-wireframe.jsx` -> fisierul original, pastrat pentru provenance
@@ -23,6 +24,7 @@ Reguli pentru folder:
 - daca apar clarificari sau normalizari, le punem in fisiere companion din acest folder
 - daca exista conflict intre formularea stricta din corpul vechi si clarificarile finale adaugate la coada documentului, urmam clarificarile finale explicate in `01-guide-map.md`
 - pentru executie si referinta curenta, folosim numele canonice `02-*` si `03-*`, iar fisierele originale raman ca sursa de provenienta
+- pentru directia aprobata curenta de implementare, `04-implementation-reference-eos-v1.md` are prioritate fata de experimentele vizuale sau wave-urile neterminate
 - pentru implementarea vizuala, `compliscan-ui-prompt.md` ramane companion de lucru, iar progresul pe valuri se noteaza separat in `docs/wave0-log/` sau in logul activ al wave-ului
 
 Intentia acestui folder:

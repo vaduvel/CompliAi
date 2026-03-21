@@ -1464,3 +1464,92 @@ Conectam produsul la schimbari reale din cod fara sa incarcam UX-ul.
 
 - `Dashboard` foloseste acum `NextBestAction` ca singur bloc dominant de actiune
 - CTA-urile duplicate si handoff-urile concurente au fost eliminate pentru a respecta regula `one dominant page intent`
+
+### Actualizare 2026-03-20 - IA bridge EOS v1
+
+- [~] shell canonic peste `EOS v1`
+  - `Acasa / Scaneaza / De rezolvat / Rapoarte / Setari`
+  - contract de rute in `lib/compliscan/dashboard-routes.ts`
+- [x] ruta canonica `Scan Rezultate`
+  - `/dashboard/scan/results/[scanId]`
+  - handoff post-analiza mutat din `Documente` in rezultatul scanului curent
+- [~] CTA-uri cross-page primare normalizate
+  - `Dashboard`
+  - `Documente`
+  - `Remediere`
+  - `Audit si export`
+- [ ] mutarea suprafetelor interne pe paginile canonice
+  - `scan` sa nu mai fie doar alias la `scanari`
+  - `resolve` sa nu mai fie doar alias la `checklists`
+  - `reports` sa nu mai fie doar alias la `rapoarte`
+- [ ] reducerea handoff-urilor legacy ramase
+  - permalinkuri user-facing spre `Documente`
+  - CTA-uri secundare spre `Sisteme`, `Vault`, `Rapoarte` vechi unde nu mai sunt necesare
+
+### Actualizare 2026-03-20 - BP-2 partial
+
+- [x] `resolve` are owner canonic comun
+  - `components/compliscan/resolve-page.tsx`
+  - `checklists` ramane alias de compatibilitate
+- [x] `reports` are owner canonic comun
+  - `components/compliscan/reports-page.tsx`
+  - `rapoarte` ramane alias de compatibilitate
+- [x] `scan` are owner canonic comun
+  - `components/compliscan/scan-page.tsx`
+  - `scanari` ramane alias de compatibilitate
+- [~] reducerea handoff-urilor legacy ramase
+  - subnav-ul local `Flux scanare` foloseste acum `/dashboard/scan`
+  - share linkul principal pentru scan copiaza acum rezultatul canonic al ultimei scanari
+
+### Actualizare 2026-03-20 - BP-3 partial
+
+- [x] `settings` are owner canonic comun
+  - `components/compliscan/settings-page.tsx`
+  - `setari` ramane alias de compatibilitate
+- [x] exista si ruta canonica pentru billing
+  - `/dashboard/settings/abonament`
+  - `components/compliscan/settings-billing-page.tsx`
+- [~] reducerea handoff-urilor legacy administrative
+  - Stripe checkout/portal revin acum in familia canonica `settings`
+  - health-check si emailurile de notificare folosesc acum `settings`
+  - subnav-ul local `Dovada` foloseste acum `resolve` si `reports`
+
+### Actualizare 2026-03-20 - BP-3 reports
+
+- [x] familia `reports` are subrutele canonice din blueprint
+  - `reports/vault`
+  - `reports/policies`
+  - `reports/audit-log`
+  - `reports/trust-center`
+- [x] suprafetele de output au owner comun in `components/compliscan/*`
+- [x] rutele vechi de output raman doar aliasuri de compatibilitate
+- [~] reducerea handoff-urilor legacy vizibile
+  - navigatia locala `ReportsTabs` este activa pe subpaginile de output
+  - linkurile principale catre `vault`, `policies` si `audit-log` folosesc acum familia canonica `reports`
+
+### Actualizare 2026-03-20 - BP-3 scan history
+
+- [x] exista ruta canonica pentru arhiva `Scaneaza -> Istoric`
+  - `/dashboard/scan/history`
+  - owner comun in `components/compliscan/scan-history-page.tsx`
+- [x] `/dashboard/documente` ramane alias de compatibilitate
+- [~] reducerea handoff-urilor legacy din `Scanare`
+  - tabul local foloseste acum `Istoric`
+  - `Scan Rezultate` trimite catre `Istoric`, nu catre `Documente`
+  - copy-ul de handoff din `Scanare` foloseste acum `De rezolvat / Rapoarte`, nu `Control / Dovada`
+
+### Actualizare 2026-03-20 - BP-4 home authority
+
+- [x] `Acasa` are din nou un CTA dominant clar
+  - `NextBestAction` este ownerul principal pentru pasul recomandat
+- [x] onboarding-ul a fost scos din `Acasa`
+  - `OnboardingProgress` traieste acum in `Setari`
+- [x] blocurile operationale concurente au fost scoase din `Acasa`
+  - `DriftCommandCenter`
+  - `Snapshot & Activitate recenta`
+- [x] `Framework Readiness` este informativ-only pe `Acasa`
+  - butoanele locale `Vezi detalii` au fost scoase
+- [~] de-emphasis pentru `Generator`
+  - copy-ul si subnav-ul il trateaza acum ca suprafata de draft asistat
+- [~] `Acasa` mai are de apropiat blueprint-ul pe compozitie fina
+  - banner-ele legale raman temporar vizibile pana le mutam in suprafete dedicate

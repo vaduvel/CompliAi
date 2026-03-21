@@ -167,7 +167,7 @@ function determineNextBestAction(
       action: `Răspunde urgent la ${overdueDiscs.length} discrepanță/discrepanțe e-TVA cu termen depășit`,
       reason: "Termenele ANAF depășite pot declanșa control fiscal.",
       priority: "critical",
-      href: "/dashboard/scanari",
+      href: "/dashboard/scan",
     }
   }
 
@@ -177,7 +177,7 @@ function determineNextBestAction(
       action: `Pregătește răspunsuri pentru ${urgentDiscs.length} discrepanță/discrepanțe e-TVA (≤5 zile)`,
       reason: "Termenele se apropie — acționează acum.",
       priority: "high",
-      href: "/dashboard/scanari",
+      href: "/dashboard/scan",
     }
   }
 
@@ -197,7 +197,7 @@ function determineNextBestAction(
       action: `Depune declarațiile lipsă (${filingDiscipline.missing} lipsă)`,
       reason: `Scor disciplină: ${filingDiscipline.score}/100 — risc de amenzi.`,
       priority: "high",
-      href: "/dashboard/scanari",
+      href: "/dashboard/scan",
     }
   }
 

@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { ComplianceSeverity } from "@/lib/compliance/constitution"
 import { formatDriftTypeLabel, getDriftPolicyFromRecord } from "@/lib/compliance/drift-policy"
@@ -153,7 +154,7 @@ function LatestYamlSection({
             </p>
           </div>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/rapoarte/auditor-vault">
+            <Link href={dashboardRoutes.auditorVault}>
               Mergi la Auditor Vault
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
@@ -341,8 +342,8 @@ function LatestManifestSection({
             </p>
           </div>
           <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href="/dashboard/sisteme">
-              Mergi la inventar
+            <Link href={dashboardRoutes.resolve}>
+              Mergi la De rezolvat
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           </Button>

@@ -9,17 +9,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import type { ChatMessage } from "@/lib/compliance/types"
-
-const SUGGESTIONS: Record<string, string[]> = {
-  "/dashboard": ["Care e prioritatea acum?", "Explica-mi scorul de risc"],
-  "/dashboard/scanari": ["Cum scanez un document?", "Ce formate sunt acceptate?"],
-  "/dashboard/documente": ["Ce inseamna 'analiza in asteptare'?", "Cum citesc un raport de scan?"],
-  "/dashboard/checklists": ["Ce e diferenta P1 vs P3?", "Cum rezolv un task?"],
-  "/dashboard/alerte": ["De ce am alerte deschise?", "Cum inchid o alerta?"],
-  "/dashboard/sisteme": ["Ce inseamna high-risk AI Act?", "Cum adaug un sistem AI?"],
-  "/dashboard/rapoarte": ["Cum export dovada?", "Ce contine raportul PDF?"],
-  "/dashboard/setari": ["Ce inseamna motor OCR?", "Cum schimb workspace-ul?"],
-}
+import { dashboardRouteGroups, matchesDashboardRoute } from "@/lib/compliscan/dashboard-routes"
 
 const DEFAULT_SUGGESTIONS = [
   "Care e prioritatea acum?",
@@ -27,6 +17,36 @@ const DEFAULT_SUGGESTIONS = [
   "Explica-mi scorul de risc",
   "Care e statusul e-Factura?",
 ]
+
+const SUGGESTION_GROUPS: Array<{ matchers: string[]; suggestions: string[] }> = [
+  {
+    matchers: [...dashboardRouteGroups.home],
+    suggestions: ["Care e prioritatea acum?", "Explica-mi scorul de risc"],
+  },
+  {
+    matchers: [...dashboardRouteGroups.scan],
+    suggestions: ["Cum scanez un document?", "Ce formate sunt acceptate?"],
+  },
+  {
+    matchers: [...dashboardRouteGroups.resolve],
+    suggestions: ["Cum prioritizez ce am de rezolvat?", "Cum inchid un task cu dovada buna?"],
+  },
+  {
+    matchers: [...dashboardRouteGroups.reports],
+    suggestions: ["Cum export dovada?", "Ce contine raportul PDF?"],
+  },
+  {
+    matchers: [...dashboardRouteGroups.settings],
+    suggestions: ["Ce inseamna motor OCR?", "Cum schimb workspace-ul?"],
+  },
+]
+
+function getSuggestions(pathname: string) {
+  const group = SUGGESTION_GROUPS.find((entry) =>
+    entry.matchers.some((matcher) => matchesDashboardRoute(pathname, matcher))
+  )
+  return group?.suggestions ?? DEFAULT_SUGGESTIONS
+}
 
 export function FloatingAssistant({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false)
@@ -39,7 +59,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const panelId = useId()
 
-  const suggestions = SUGGESTIONS[pathname] ?? DEFAULT_SUGGESTIONS
+  const suggestions = getSuggestions(pathname)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
