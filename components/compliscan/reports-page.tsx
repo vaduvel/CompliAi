@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import dynamic from "next/dynamic"
-import { useEffect, useRef, useState } from "react"
-import { ArrowRight } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { ArrowRight, Briefcase, Copy, Loader2, Scale, Share2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
@@ -303,6 +304,9 @@ export function ReportsPageSurface() {
 
       <InspectorModePanel />
 
+      {/* ── G2: Partner & Counsel Pack ──────────────────────────────────────── */}
+      <PartnerCounselPack />
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <SnapshotStatusCard
           latestSnapshot={latestSnapshot}
@@ -588,5 +592,152 @@ function SnapshotMeta({ label, value }: { label: string; value: number }) {
       <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>
+  )
+}
+
+function PartnerCounselPack() {
+  const [briefLoading, setBriefLoading] = useState(false)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [shareLink, setShareLink] = useState<string | null>(null)
+
+  const handleCounselBrief = useCallback(async () => {
+    setBriefLoading(true)
+    try {
+      const res = await fetch("/api/reports/counsel-brief", { method: "POST" })
+      if (!res.ok) throw new Error("Eroare server")
+      const data = (await res.json()) as {
+        brief?: {
+          summary: string
+          frameworkSummaries: Array<{ framework: string; status: string }>
+          disclaimer: string
+        }
+      }
+      if (!data.brief) throw new Error("Brief gol")
+
+      // Build text and copy to clipboard
+      const text = [
+        "=== COUNSEL BRIEF — CompliScan ===",
+        "",
+        data.brief.summary,
+        "",
+        ...data.brief.frameworkSummaries.map(
+          (f) => `${f.framework}: ${f.status}`
+        ),
+        "",
+        data.brief.disclaimer,
+      ].join("\n")
+
+      await navigator.clipboard.writeText(text)
+      toast.success("Brief juridic copiat în clipboard")
+    } catch {
+      toast.error("Nu am putut genera brieful juridic")
+    } finally {
+      setBriefLoading(false)
+    }
+  }, [])
+
+  const handleShareToken = useCallback(async (recipientType: "accountant" | "counsel") => {
+    setShareLoading(true)
+    try {
+      const res = await fetch("/api/reports/share-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientType }),
+      })
+      if (!res.ok) throw new Error("Eroare server")
+      const data = (await res.json()) as {
+        token?: { token: string; expiresAtISO: string }
+      }
+      if (!data.token) throw new Error("Token gol")
+
+      const link = `${window.location.origin}/shared/${data.token.token}`
+      setShareLink(link)
+      await navigator.clipboard.writeText(link)
+      toast.success(`Link securizat copiat — expiră în 72h`)
+    } catch {
+      toast.error("Nu am putut genera linkul de partajare")
+    } finally {
+      setShareLoading(false)
+    }
+  }, [])
+
+  return (
+    <Card className="border-eos-border bg-eos-surface">
+      <CardHeader className="border-b border-eos-border pb-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-xl">Partner & Counsel Pack</CardTitle>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Partajează starea conformității cu contabilul sau generează un brief juridic pentru DPO/consilier.
+            </p>
+          </div>
+          <Badge variant="outline" className="normal-case tracking-normal">G2 — Output Layer</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+          <div className="flex items-center gap-2 text-eos-text">
+            <Scale className="size-4" strokeWidth={2} />
+            <p className="text-sm font-medium">Brief juridic (Counsel)</p>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+            Sumar legal cu referințe la legislație, gap-uri critice și recomandări. Se copiază în clipboard.
+          </p>
+          <Button
+            variant="outline"
+            size="default"
+            className="mt-4 gap-2"
+            onClick={() => void handleCounselBrief()}
+            disabled={briefLoading}
+          >
+            {briefLoading ? <Loader2 className="size-4 animate-spin" /> : <Briefcase className="size-4" />}
+            Generează brief
+          </Button>
+        </div>
+
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+          <div className="flex items-center gap-2 text-eos-text">
+            <Share2 className="size-4" strokeWidth={2} />
+            <p className="text-sm font-medium">Partajează cu contabilul</p>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+            Generează un link securizat cu expirare 72h. Contabilul vede doar starea, nu poate modifica.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="default"
+              className="gap-2"
+              onClick={() => void handleShareToken("accountant")}
+              disabled={shareLoading}
+            >
+              {shareLoading ? <Loader2 className="size-4 animate-spin" /> : <Share2 className="size-4" />}
+              Link contabil
+            </Button>
+            <Button
+              variant="outline"
+              size="default"
+              className="gap-2"
+              onClick={() => void handleShareToken("counsel")}
+              disabled={shareLoading}
+            >
+              <Scale className="size-4" />
+              Link consilier
+            </Button>
+          </div>
+          {shareLink && (
+            <div className="mt-3 flex items-center gap-2 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2">
+              <p className="flex-1 truncate text-xs text-eos-text-muted">{shareLink}</p>
+              <button
+                className="shrink-0 text-eos-text-muted hover:text-eos-text"
+                onClick={() => void navigator.clipboard.writeText(shareLink).then(() => toast.info("Link copiat"))}
+              >
+                <Copy className="size-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

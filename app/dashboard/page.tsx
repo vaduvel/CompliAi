@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, FileText, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const cockpit = useCockpitData()
   const [nis2Score, setNis2Score] = useState<number | null>(null)
   const [nis2UrgentIncident, setNis2UrgentIncident] = useState(false)
+  const [benchmark, setBenchmark] = useState<{ medie: number; percentil: number; nrFirme: number; sector: string } | null>(null)
 
   useEffect(() => {
     fetch("/api/nis2/assessment", { cache: "no-store" })
@@ -40,6 +41,13 @@ export default function DashboardPage() {
           (i) => i.status !== "closed" && new Date(i.deadline24hISO).getTime() - Date.now() < 4 * 3_600_000
         )
         setNis2UrgentIncident(urgent)
+      })
+      .catch(() => {})
+
+    fetch("/api/benchmark", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { benchmark?: { medie: number; percentil: number; nrFirme: number; sector: string } | null } | null) => {
+        if (data?.benchmark) setBenchmark(data.benchmark)
       })
       .catch(() => {})
   }, [])
@@ -167,6 +175,42 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── Compliance Streak (Addon 1) ──────────────────────────────────────── */}
+      {state.complianceStreak && state.complianceStreak.currentDays > 0 && (
+        <section aria-label="Serie de conformitate">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+            <Flame className="size-4 shrink-0 text-amber-500" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-semibold">
+                {state.complianceStreak.currentDays} zile consecutive peste {state.complianceStreak.threshold}%
+              </span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-80">
+                Record: {state.complianceStreak.longestStreak} zile
+              </span>
+            </div>
+            <Badge variant="warning" className="shrink-0 text-[10px] normal-case tracking-normal">
+              Streak
+            </Badge>
+          </div>
+        </section>
+      )}
+
+      {state.complianceStreak && state.complianceStreak.currentDays === 0 && state.complianceStreak.brokenAt && (
+        <section aria-label="Serie de conformitate întreruptă">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text-muted">
+            <Flame className="size-4 shrink-0 opacity-40" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-medium">Seria ta s-a întrerupt</span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-70">
+                Record: {state.complianceStreak.longestStreak} zile · Crește scorul peste {state.complianceStreak.threshold}% pentru a reporni
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section aria-label="Conformitate pe cadru" className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-eos-text">Conformitate pe cadru</h2>
@@ -244,6 +288,27 @@ export default function DashboardPage() {
           />
         </div>
       </section>
+
+      {/* ── Sector Benchmark (Addon 2) ─────────────────────────────────────── */}
+      {benchmark && (
+        <section aria-label="Benchmark sector">
+          <div className="flex items-center gap-3 rounded-eos-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-900">
+            <BarChart3 className="size-4 shrink-0 text-blue-500" strokeWidth={2} />
+            <div className="flex-1">
+              <span className="font-semibold">
+                Ești mai bun decât {benchmark.percentil}% din firme în {benchmark.sector}
+              </span>
+              <span className="mx-1.5 text-xs opacity-60">·</span>
+              <span className="text-xs opacity-80">
+                Media sector: {benchmark.medie}% · {benchmark.nrFirme} firme comparate
+              </span>
+            </div>
+            <Badge variant="default" className="shrink-0 text-[10px] normal-case tracking-normal">
+              Benchmark
+            </Badge>
+          </div>
+        </section>
+      )}
 
       {/* ── Sprint 3.5: CER cross-signal — informativ, nu modul complet ──────── */}
       {applicability?.tags.includes("cer") && (
