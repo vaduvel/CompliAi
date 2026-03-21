@@ -56,6 +56,108 @@ function scoreDelta(current: number, previous?: number): string {
  * Construiește HTML-ul email-ului digest săptămânal.
  * Pur, determinist, fără I/O.
  */
+// ── B6 — Partner Hub Weekly Digest ──────────────────────────────────────────
+
+export type PartnerClientSummary = {
+  orgName: string
+  orgId: string
+  currentScore: number
+  openAlerts: number
+  redAlerts: number
+  urgentDeadline?: string
+}
+
+export type PartnerDigest = {
+  consultantEmail: string
+  consultantName?: string
+  cabinetName?: string
+  clients: PartnerClientSummary[]
+  generatedAt?: string
+}
+
+export function buildPartnerDigestEmail(digest: PartnerDigest): string {
+  const { consultantName, cabinetName, clients, generatedAt } = digest
+
+  const dateStr = generatedAt
+    ? new Date(generatedAt).toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long" })
+    : new Date().toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long" })
+
+  // Sort: urgente first (red alerts + low score)
+  const sorted = [...clients].sort((a, b) => {
+    if (b.redAlerts !== a.redAlerts) return b.redAlerts - a.redAlerts
+    return a.currentScore - b.currentScore
+  })
+
+  const rowsHtml = sorted.map((c) => {
+    const color = scoreColor(c.currentScore)
+    const urgentBadge = c.redAlerts > 0
+      ? `<span style="background:#fef2f2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:10px">${c.redAlerts} critice</span>`
+      : ""
+    const deadlineInfo = c.urgentDeadline
+      ? `<span style="color:#d97706;font-size:11px">⏰ ${c.urgentDeadline}</span>`
+      : ""
+
+    return `
+      <tr>
+        <td style="padding:8px 4px;border-bottom:1px solid #f1f5f9;color:#0f172a;font-weight:500">${c.orgName}</td>
+        <td style="padding:8px 4px;border-bottom:1px solid #f1f5f9;text-align:center">
+          <span style="color:${color};font-weight:700">${c.currentScore}%</span>
+        </td>
+        <td style="padding:8px 4px;border-bottom:1px solid #f1f5f9;text-align:center">${c.openAlerts}</td>
+        <td style="padding:8px 4px;border-bottom:1px solid #f1f5f9;text-align:right">${urgentBadge} ${deadlineInfo}</td>
+      </tr>`
+  }).join("")
+
+  const greeting = consultantName ? `Salut ${consultantName},` : "Salut,"
+  const footer = cabinetName
+    ? `Trimis de ${cabinetName} via CompliAI`
+    : "Digest automat CompliAI Partner Hub"
+
+  return `<!DOCTYPE html>
+<html lang="ro">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;margin:0;padding:24px">
+  <div style="max-width:600px;margin:0 auto">
+    <div style="background:#0f172a;padding:20px 24px;border-radius:8px 8px 0 0">
+      <h1 style="color:#fff;margin:0;font-size:16px;font-weight:600">🛡 CompliAI · Partner Hub</h1>
+      <p style="color:#94a3b8;margin:4px 0 0;font-size:12px">Digest săptămânal clienți · ${dateStr}</p>
+    </div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
+      <p style="margin:0 0 16px;color:#475569">${greeting}</p>
+      <p style="margin:0 0 20px;color:#475569">Ai <strong>${clients.length}</strong> client${clients.length !== 1 ? "i" : ""} monitorizat${clients.length !== 1 ? "i" : ""}. Rezumat:</p>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+        <thead>
+          <tr style="background:#f8fafc">
+            <th style="padding:8px 4px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Client</th>
+            <th style="padding:8px 4px;text-align:center;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Scor</th>
+            <th style="padding:8px 4px;text-align:center;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Alerte</th>
+            <th style="padding:8px 4px;text-align:right;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Urgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+
+      <div style="text-align:center;margin:24px 0 0">
+        <a href="https://compliai.ro/dashboard"
+           style="display:inline-block;background:#6366f1;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">
+          Deschide Dashboard
+        </a>
+      </div>
+    </div>
+    <p style="text-align:center;color:#94a3b8;font-size:11px;margin:16px 0">
+      ${footer} &mdash;
+      <a href="https://compliai.ro/dashboard/settings" style="color:#6366f1">Gestionează notificările</a>
+    </p>
+  </div>
+</body>
+</html>`
+}
+
+// ── Original Org Digest ─────────────────────────────────────────────────────
+
 export function buildDigestEmail(digest: WeeklyDigest): string {
   const {
     orgName, currentScore, previousScore, riskLabel,
