@@ -159,11 +159,7 @@ export function DashboardShell({
                           {item.description}
                         </span>
                       </div>
-                      {active ? (
-                        <span className="rounded-full bg-eos-primary px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-eos-primary-text">
-                          acum
-                        </span>
-                      ) : item.id === "resolve" && resolveBadgeCount > 0 ? (
+                      {item.id === "resolve" && resolveBadgeCount > 0 && !active ? (
                         <span className="rounded-full bg-eos-error-soft px-2 py-0.5 text-[10px] font-bold text-eos-error">
                           {resolveBadgeCount}
                         </span>
