@@ -218,3 +218,93 @@ function buildPrefillNotes(prefill: VendorPrefillResult): string {
 
   return lines.length > 0 ? `[Auto-prefill] ${lines.join(" · ")}` : ""
 }
+
+// ── C2 — DPA / Transfer Basis Candidate Generation ──────────────────────────
+
+export type DpaCandidateStatus = "suggested" | "confirmed" | "not-needed"
+
+export type DpaCandidate = {
+  dpaNeededed: { value: boolean; status: DpaCandidateStatus; reason: string }
+  transferBasis: { value: string | null; status: DpaCandidateStatus; reason: string }
+  evidenceNeeded: { value: string; status: DpaCandidateStatus }
+}
+
+/**
+ * C2: When a vendor is classified as 'processor', auto-generate DPA/transfer
+ * basis candidates. All marked as 'suggested' — user confirms.
+ */
+export function generateDpaCandidates(
+  prefill: VendorPrefillResult,
+  vendorCountryCode?: string
+): DpaCandidate | null {
+  const vendorType = prefill.vendorType?.value
+  if (!vendorType) return null
+
+  // Only generate for processor-like vendors
+  const processorTypes: VendorType[] = ["processor", "cloud", "software", "ai"]
+  if (!processorTypes.includes(vendorType)) return null
+
+  const processesData = prefill.processesPersonalData?.value ?? false
+  const isOutsideEU = vendorCountryCode
+    ? !EU_COUNTRY_CODES.has(vendorCountryCode.toUpperCase())
+    : false
+
+  return {
+    dpaNeededed: {
+      value: processesData,
+      status: "suggested",
+      reason: processesData
+        ? `Furnizor tip "${vendorType}" — procesează probabil date personale`
+        : `Furnizor tip "${vendorType}" — verifică dacă procesează date personale`,
+    },
+    transferBasis: {
+      value: isOutsideEU ? "SCC (Standard Contractual Clauses)" : null,
+      status: "suggested",
+      reason: isOutsideEU
+        ? "Furnizor în afara UE — necesită bază legală transfer (Art. 46 GDPR)"
+        : "Furnizor în UE — nu necesită bază transfer suplimentară",
+    },
+    evidenceNeeded: {
+      value: buildEvidenceList(vendorType, processesData, isOutsideEU),
+      status: "suggested",
+    },
+  }
+}
+
+function buildEvidenceList(
+  vendorType: VendorType,
+  processesData: boolean,
+  isOutsideEU: boolean
+): string {
+  const evidence: string[] = []
+
+  if (processesData) {
+    evidence.push("DPA semnat de ambele părți")
+    evidence.push("Registru activități prelucrare (Art. 30 GDPR)")
+  }
+
+  if (isOutsideEU) {
+    evidence.push("SCC semnate sau decizie adecvare")
+    evidence.push("Transfer Impact Assessment (TIA)")
+  }
+
+  if (vendorType === "cloud" || vendorType === "ai") {
+    evidence.push("Certificare securitate (ISO 27001 sau SOC 2)")
+  }
+
+  if (vendorType === "ai") {
+    evidence.push("Documentație AI transparency (Art. 13 AI Act)")
+  }
+
+  return evidence.length > 0
+    ? evidence.join("; ")
+    : "Contract servicii cu clauze de conformitate"
+}
+
+const EU_COUNTRY_CODES = new Set([
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+  // EEA
+  "IS", "LI", "NO",
+])
