@@ -362,7 +362,7 @@ export function mergeFindingsDeduplicated(
 
   for (const incoming of incomingFindings) {
     const fingerprint = findingFingerprint(incoming)
-    const existing = existingByFingerprint.get(fingerprint)
+    const existing = existingByFingerprint.get(fingerprint) ?? findSemanticGeminiDuplicate(existingFindings, incoming, consumedExisting)
 
     if (existing) {
       consumedExisting.add(existing.id)
@@ -414,6 +414,114 @@ function normalizeStableRuleId(ruleId: string | undefined) {
   const normalized = normalizeFingerprintPart(ruleId)
   return normalized.startsWith("gemini-") ? "" : normalized
 }
+
+function findSemanticGeminiDuplicate(
+  existingFindings: ScanFinding[],
+  incoming: ScanFinding,
+  consumedExisting: Set<string>
+) {
+  if (!isGeminiSemanticFinding(incoming)) {
+    return undefined
+  }
+
+  const incomingAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(incoming))
+  const incomingDocumentType = normalizeFingerprintPart(incoming.suggestedDocumentType)
+  const incomingSemanticTokens = semanticTitleTokens(incoming.title)
+
+  if (!incomingAnchor || incomingSemanticTokens.size === 0) {
+    return undefined
+  }
+
+  for (const existing of existingFindings) {
+    if (consumedExisting.has(existing.id) || !isGeminiSemanticFinding(existing)) {
+      continue
+    }
+
+    if (
+      normalizeFingerprintPart(existing.category) !== normalizeFingerprintPart(incoming.category) ||
+      normalizeFingerprintPart(existing.severity) !== normalizeFingerprintPart(incoming.severity)
+    ) {
+      continue
+    }
+
+    const existingAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(existing))
+    if (!existingAnchor || existingAnchor !== incomingAnchor) {
+      continue
+    }
+
+    const existingDocumentType = normalizeFingerprintPart(existing.suggestedDocumentType)
+    if (incomingDocumentType && existingDocumentType && incomingDocumentType !== existingDocumentType) {
+      continue
+    }
+
+    const similarity = semanticTokenSimilarity(incomingSemanticTokens, semanticTitleTokens(existing.title))
+    if (similarity >= 0.4) {
+      return existing
+    }
+  }
+
+  return undefined
+}
+
+function isGeminiSemanticFinding(finding: ScanFinding) {
+  const ruleId = normalizeFingerprintPart(finding.provenance?.ruleId)
+  return ruleId.startsWith("gemini-")
+}
+
+function semanticTitleTokens(value: string | undefined) {
+  const normalized = normalizeFingerprintPart(stripRomanianDiacritics(value))
+  const tokens = normalized
+    .split(/[^a-z0-9]+/)
+    .map((token) => normalizeSemanticToken(token))
+    .filter((token) => token.length >= 4 && !SEMANTIC_STOPWORDS.has(token))
+
+  return new Set(tokens)
+}
+
+function semanticTokenSimilarity(a: Set<string>, b: Set<string>) {
+  if (a.size === 0 || b.size === 0) {
+    return 0
+  }
+
+  let overlap = 0
+  for (const token of a) {
+    if (b.has(token)) {
+      overlap += 1
+    }
+  }
+
+  return overlap / Math.min(a.size, b.size)
+}
+
+function normalizeSemanticToken(token: string) {
+  return token
+    .replace(/(urile|ilor|elor|ului|ul|ele|ile|ii|ei|ea|ie|ia|a|e|i|u)$/g, "")
+    .slice(0, 8)
+}
+
+function stripRomanianDiacritics(value: string | undefined) {
+  return (value ?? "")
+    .replace(/[ăâ]/g, "a")
+    .replace(/î/g, "i")
+    .replace(/[șş]/g, "s")
+    .replace(/[țţ]/g, "t")
+}
+
+const SEMANTIC_STOPWORDS = new Set([
+  "lips",
+  "priv",
+  "sist",
+  "date",
+  "ceea",
+  "pentru",
+  "care",
+  "este",
+  "unei",
+  "unui",
+  "prin",
+  "privi",
+  "deta",
+])
 
 function normalizeFindingTextAnchor(finding: ScanFinding) {
   const rawAnchor = finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail ?? ""

@@ -1,5 +1,7 @@
+import path from "node:path"
+
 import { describe, expect, it } from "vitest"
-import { buildPDFFromMarkdown } from "./pdf-generator"
+import { buildPDFFromMarkdown, resolvePdfkitRuntimeDataFallback } from "./pdf-generator"
 
 describe("buildPDFFromMarkdown", () => {
   it("returnează un Buffer non-gol pentru conținut simplu", async () => {
@@ -50,5 +52,12 @@ describe("buildPDFFromMarkdown", () => {
     })
     expect(buf).toBeInstanceOf(Buffer)
     expect(buf.length).toBeGreaterThan(0)
+  })
+
+  it("redirijează lookup-ul AFM din chunks/data către assetele PDFKit trasate", () => {
+    const runtimePath = path.join(process.cwd(), ".next", "server", "chunks", "data", "Helvetica.afm")
+    const fallback = resolvePdfkitRuntimeDataFallback(runtimePath)
+
+    expect(fallback).toBe(path.join(process.cwd(), "node_modules", "pdfkit", "js", "data", "Helvetica.afm"))
   })
 })
