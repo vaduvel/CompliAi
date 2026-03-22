@@ -2,23 +2,14 @@
 
 import {
   BookOpen,
-  Bot,
   Building2,
-  CheckCircle2,
-  ClipboardList,
   FileSearch,
   Flag,
-  FolderKanban,
   FolderOpen,
-  GitPullRequestArrow,
   Home,
   Scan,
   Settings,
-  ShieldAlert,
-  ShieldPlus,
   Sparkles,
-  Receipt,
-  TriangleAlert,
 } from "lucide-react"
 
 import { dashboardRouteGroups, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -29,28 +20,12 @@ export type DashboardNavId =
   | "resolve"
   | "reports"
   | "settings"
-  | "control"
   | "scanare"
-  | "dovada"
-  | "dashboard"
   | "scanari"
   | "documente"
-  | "sisteme"
-  | "checklists"
-  | "alerte"
-  | "auditorVault"
-  | "rapoarte"
-  | "setari"
-  | "asistent"
   | "politici"
-  | "auditLog"
   | "generator"
-  | "conformitate"
   | "partner"
-  | "nis2"
-  | "fiscal"
-  | "agents"
-  | "vendor-review"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -134,38 +109,10 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     ],
   },
   {
-    id: "control",
-    label: "Control",
-    items: [
-      { id: "sisteme", label: "Sisteme", href: "/dashboard/sisteme", icon: ShieldPlus },
-      { id: "conformitate", label: "Conformitate AI", href: "/dashboard/conformitate", icon: CheckCircle2 },
-      { id: "alerte", label: "Drift", href: "/dashboard/alerte", icon: TriangleAlert },
-      { id: "nis2", label: "NIS2", href: "/dashboard/nis2", icon: ShieldAlert },
-      { id: "fiscal", label: "Fiscal", href: dashboardRoutes.fiscal, icon: Receipt },
-      { id: "agents", label: "Agenți", href: "/dashboard/agents", icon: Bot },
-      { id: "vendor-review", label: "Vendor Review", href: "/dashboard/vendor-review", icon: GitPullRequestArrow },
-    ],
-  },
-  {
     id: "partner",
     label: "Partner",
     items: [
       { id: "partner", label: "Dashboard multi-client", href: "/dashboard/partner", icon: Building2 },
-    ],
-  },
-  {
-    id: "dovada",
-    label: "Dovada",
-    items: [
-      { id: "checklists", label: "Remediere", href: dashboardRoutes.resolve, icon: CheckCircle2 },
-      {
-        id: "auditorVault",
-        label: "Auditor Vault",
-        href: dashboardRoutes.auditorVault,
-        icon: FolderKanban,
-      },
-      { id: "rapoarte", label: "Audit si export", href: dashboardRoutes.reports, icon: FileSearch },
-      { id: "auditLog", label: "Log audit", href: dashboardRoutes.auditLog, icon: ClipboardList },
     ],
   },
 ] as const
