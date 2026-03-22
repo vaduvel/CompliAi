@@ -108,6 +108,30 @@ describe("POST /api/shadow-ai", () => {
     expect(body.error).toContain("array")
   })
 
+  it("returnează 400 când answers depășește numărul de întrebări", async () => {
+    const res = await POST(
+      makePostRequest({
+        answers: Array.from({ length: 50 }, (_, index) => ({
+          questionId: `fake-${index}`,
+          value: "no",
+        })),
+      })
+    )
+    expect(res.status).toBe(400)
+  })
+
+  it("returnează 400 pentru questionId duplicat", async () => {
+    const res = await POST(
+      makePostRequest({
+        answers: [
+          { questionId: "sq-general-chatgpt", value: "no" },
+          { questionId: "sq-general-chatgpt", value: "approved" },
+        ],
+      })
+    )
+    expect(res.status).toBe(400)
+  })
+
   it("returnează ShadowAiAssessmentResult valid cu răspunsuri low-risk", async () => {
     const res = await POST(makePostRequest({ answers: lowRiskAnswers }))
     expect(res.status).toBe(200)

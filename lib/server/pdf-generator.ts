@@ -1,9 +1,33 @@
+import { readFileSync } from "node:fs"
+import path from "node:path"
+
 import PDFDocument from "pdfkit"
 
 type PDFMetadata = {
   orgName: string
   documentType: string
   generatedAt?: string
+}
+
+let cachedPdfFont: Buffer | null = null
+
+function getPdfFontBuffer() {
+  if (cachedPdfFont) return cachedPdfFont
+
+  // Use a bundled TTF instead of PDFKit standard AFM fonts, which can be
+  // omitted from serverless traces and break production PDF generation.
+  const fontPath = path.join(
+    process.cwd(),
+    "node_modules",
+    "next",
+    "dist",
+    "compiled",
+    "@vercel",
+    "og",
+    "noto-sans-v27-latin-regular.ttf"
+  )
+  cachedPdfFont = readFileSync(fontPath)
+  return cachedPdfFont
 }
 
 /**
@@ -24,6 +48,10 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
     doc.on("end", () => resolve(Buffer.concat(chunks)))
     doc.on("error", reject)
 
+    const bundledFont = getPdfFontBuffer()
+    doc.registerFont("CompliSans", bundledFont)
+    doc.registerFont("CompliSans-Bold", bundledFont)
+
     const W = doc.page.width - 144 // usable width (minus margins)
     const date = metadata.generatedAt
       ? new Date(metadata.generatedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })
@@ -40,6 +68,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(8)
           .fillColor("#94a3b8")
+          .font("CompliSans")
           .text(
             `Generat de CompliAI · ${metadata.orgName} · ${date}`,
             doc.page.margins.left,
@@ -67,6 +96,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(7)
           .fillColor("#94a3b8")
+          .font("CompliSans")
           .text(
             "Document informativ, nu constituie consiliere juridică. Verificați cu un specialist înainte de utilizare oficială.",
             doc.page.margins.left,
@@ -78,6 +108,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(7)
           .fillColor("#94a3b8")
+          .font("CompliSans")
           .text(
             `${i + 1} / ${pages.count}`,
             doc.page.margins.left,
@@ -105,7 +136,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(18)
           .fillColor("#0f172a")
-          .font("Helvetica-Bold")
+          .font("CompliSans-Bold")
           .text(line.slice(2), { width: W })
         doc.moveDown(0.4)
         firstContent = false
@@ -115,7 +146,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(13)
           .fillColor("#1e293b")
-          .font("Helvetica-Bold")
+          .font("CompliSans-Bold")
           .text(line.slice(3), { width: W })
         doc.moveDown(0.3)
         firstContent = false
@@ -125,7 +156,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(10)
           .fillColor("#475569")
-          .font("Helvetica-Bold")
+          .font("CompliSans-Bold")
           .text(line.slice(4).toUpperCase(), { width: W, characterSpacing: 0.5 })
         doc.moveDown(0.2)
         firstContent = false
@@ -150,7 +181,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(9)
           .fillColor("#92400e")
-          .font("Helvetica")
+          .font("CompliSans")
           .text(line.slice(2), doc.page.margins.left + 10, savedY, { width: W - 10 })
         doc.moveDown(0.4)
         firstContent = false
@@ -159,7 +190,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(10)
           .fillColor("#475569")
-          .font("Helvetica")
+          .font("CompliSans")
           .text(`• ${line.slice(2)}`, doc.page.margins.left + 12, doc.y, { width: W - 12 })
         firstContent = false
       } else if (/^\d+\.\s/.test(line)) {
@@ -167,7 +198,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(10)
           .fillColor("#475569")
-          .font("Helvetica")
+          .font("CompliSans")
           .text(line, doc.page.margins.left + 12, doc.y, { width: W - 12 })
         firstContent = false
       } else if (line.trim() === "") {
@@ -177,7 +208,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
         doc
           .fontSize(10)
           .fillColor("#334155")
-          .font("Helvetica")
+          .font("CompliSans")
           .text(line, { width: W, lineGap: 3 })
         firstContent = false
       }

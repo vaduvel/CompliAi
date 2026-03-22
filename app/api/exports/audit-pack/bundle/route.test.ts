@@ -15,7 +15,10 @@ const mocks = vi.hoisted(() => ({
   buildAuditPackBundleMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   requireRoleMock: vi.fn(),
+  requirePlanMock: vi.fn(),
+  readNis2StateMock: vi.fn(),
   readStateMock: vi.fn(),
 }))
 
@@ -32,8 +35,16 @@ vi.mock("@/lib/server/auth", () => ({
   requireRole: mocks.requireRoleMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
   readState: mocks.readStateMock,
+}))
+
+vi.mock("@/lib/server/nis2-store", () => ({
+  readNis2State: mocks.readNis2StateMock,
 }))
 
 vi.mock("@/lib/server/audit-pack", () => ({
@@ -42,6 +53,14 @@ vi.mock("@/lib/server/audit-pack", () => ({
 
 vi.mock("@/lib/server/audit-pack-bundle", () => ({
   buildAuditPackBundle: mocks.buildAuditPackBundleMock,
+}))
+
+vi.mock("@/lib/server/plan", () => ({
+  PlanError: class PlanError extends Error {
+    status = 403
+    code = "PLAN_REQUIRED"
+  },
+  requirePlan: mocks.requirePlanMock,
 }))
 
 import { GET } from "./route"
@@ -57,7 +76,15 @@ describe("GET /api/exports/audit-pack/bundle", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.requirePlanMock.mockResolvedValue("pro")
+    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-1" })
     mocks.readStateMock.mockResolvedValue({})
+    mocks.readNis2StateMock.mockResolvedValue({
+      assessment: { score: 72 },
+      incidents: [{ id: "incident-1", severity: "high" }],
+      vendors: [],
+      updatedAtISO: "2026-03-13T09:00:00.000Z",
+    })
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         snapshotHistory: [],
@@ -120,6 +147,13 @@ describe("GET /api/exports/audit-pack/bundle", () => {
             }),
           }),
         ],
+      })
+    )
+    expect(mocks.buildAuditPackMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nis2State: expect.objectContaining({
+          incidents: [expect.objectContaining({ id: "incident-1" })],
+        }),
       })
     )
   })

@@ -3218,6 +3218,55 @@ Validare dupa pass:
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
 
+## 2026-03-22 — Mega QA Fix Sprint
+
+### Sprint de corectie pe regresiile gasite in QA real
+
+- a fost reparat exportul PDF server-side pentru productie:
+  - `lib/server/pdf-generator.ts`
+  - `next.config.ts`
+  - fontul folosit la generare este acum inclus explicit in tracing pentru rutele:
+    - `POST /api/reports/pdf`
+    - `POST /api/documents/export-pdf`
+- bundle-ul `Audit Pack` include acum si starea `NIS2` raw, nu doar snapshot-ul general:
+  - `POST /api/exports/audit-pack/bundle`
+- autodiscovery-ul YAML nu mai depinde de numele exact `compliscan.yaml`:
+  - fisierele `.yaml` / `.yml` cu schema CompliScan valida sunt tratate corect
+  - copierea user-facing pentru descoperirea YAML este uniformizata
+- fluxul de applicability nu mai afirma fals TVA pentru cazurile in care prefill-ul ANAF spune explicit `vatRegistered=false`
+  - logica `SAF-T` foloseste acum wording prudent cand are doar semnale fiscale partiale
+- rescan-ul nu mai dubleaza finding-uri deja existente:
+  - finding-urile sunt deduplicate pe fingerprint stabil
+  - statusurile deja aplicate pe finding sunt pastrate
+  - contoarele `highRisk` / `lowRisk` cresc doar pentru finding-uri noi
+- `Response Pack` nu mai umfla artificial inventarul AI si sistemele high-risk:
+  - sistemele detectate dar neconfirmate nu mai intra automat in contorul final
+  - `state.highRisk` nu mai este proiectat direct ca numar de sisteme high-risk
+- confirmarea / respingerea finding-urilor intoarce acum feedback mai bogat pentru UI:
+  - `taskCandidate`
+  - `documentGenerationTriggered`
+  - `feedbackMessage`
+- `shadow-ai` refuza payload-uri abuzive:
+  - raspunsuri duplicate
+  - `questionId` necunoscut
+  - payload prea mare
+- skeleton-ul de dashboard nu mai introduce heading concurent in loading state:
+  - problema cu `duplicate h1` a fost eliminata
+- rate limiting-ul include acum si GET-urile sensibile:
+  - findings
+  - shadow-ai
+  - org profile
+  - exporturile de audit pack
+
+Validare dupa sprint:
+
+- `npm test` -> verde:
+  - `125` fisiere de test
+  - `665` teste verzi
+  - `1` skipped
+- `npm run lint` -> verde, doar warnings vechi nelegate de sprint
+- `npm run build` -> verde
+
 ### BP-2 - Suprafete canonice peste aliasurile vechi
 
 - `Resolve` nu mai este doar alias de ruta; suprafata este acum extrasa in:

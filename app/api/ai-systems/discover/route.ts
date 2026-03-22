@@ -61,7 +61,7 @@ export async function POST(request: Request) {
           entityId: scan.id,
           message:
             discovery.sourceKind === "yaml"
-              ? `Config compliscan.yaml procesat: ${documentName}.`
+              ? `Config YAML CompliScan procesat: ${documentName}.`
               : `Manifest procesat pentru autodiscovery: ${documentName}.`,
           createdAtISO: nowISO,
           metadata: {

@@ -1421,3 +1421,23 @@ Actualizare suplimentara 2026-03-20:
 - `Acasa` nu mai expune `DriftCommandCenter` si `Snapshot & Activitate recenta`
 - cardurile de readiness au ramas informative pe `Acasa`, fara CTA-uri locale concurente
 - `Generatorul` este prezentat acum ca suprafata de `Documente asistate`, nu ca produs separat
+
+Actualizare suplimentara 2026-03-22:
+
+- a fost executat un sprint concentrat de fixuri peste QA real, fara sa deschida feature work nou
+- fixurile P1 inchise in acest pass:
+  - export PDF productie
+  - bundle `Audit Pack` cu `NIS2 raw`
+  - autodiscovery YAML mai robust
+  - mismatch `vatRegistered` vs messaging `SAF-T`
+  - deduplicare finding-uri la rescan
+- fixurile P2/P3 inchise in acelasi pass:
+  - `Response Pack` nu mai umfla artificial sistemele AI
+  - feedback mai bun dupa confirmarea / respingerea unui finding
+  - hardening pentru `shadow-ai`
+  - cleanup `duplicate h1` in loading state
+  - rate limiting si pe GET-uri sensibile
+- validarea ramane verde dupa acest sprint:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`

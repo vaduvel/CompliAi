@@ -178,6 +178,19 @@ Fronturile active acum:
 - [x] RLS real pe tenancy si evidence objects
   - fundatia SQL este acum intarita:
     - helper-ele de membership lookup sunt `SECURITY DEFINER`
+
+Actualizare 2026-03-22:
+
+- [x] export PDF productie harden-uit
+- [x] bundle `Audit Pack` cu `NIS2 raw` inclus
+- [x] autodiscovery YAML decuplat de numele exact `compliscan.yaml`
+- [x] applicabilitatea fiscala nu mai confunda semnalele `e-Factura` cu confirmarea TVA
+- [x] deduplicare finding-uri la rescan cu pastrarea statusurilor deja confirmate
+- [x] `Response Pack` nu mai umfla artificial inventarul AI
+- [x] feedback explicit in API/UI dupa confirmarea sau respingerea unui finding
+- [x] hardening de input pe `shadow-ai`
+- [x] cleanup `duplicate h1` in skeleton-urile dashboard
+- [x] rate limiting si pe GET-uri sensibile
     - este evitata recursia RLS pe `memberships`
     - exista politici de `insert/update/delete` pe `org_state`, `evidence_objects` si `storage.objects`
   - exista acum si endpoint de verificare operationala:

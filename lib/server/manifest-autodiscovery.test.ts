@@ -82,4 +82,32 @@ describe("manifest-autodiscovery fixtures", () => {
       expect.arrayContaining(["EUAI-001", "EUAI-HO-001", "GDPR-INT-001"])
     )
   })
+
+  it("trateaza si fisierele YAML CompliScan cu nume variat, nu doar compliscan.yaml", () => {
+    const yaml = readFixture("yaml", "compliscan-recruitment-high-risk.yaml")
+    const discovery = discoverAISystemsFromManifest({
+      documentName: "compliscan-recruitment-high-risk.yaml",
+      content: yaml,
+      nowISO: "2026-03-13T09:00:00.000Z",
+    })
+
+    expect(discovery.sourceKind).toBe("yaml")
+    expect(discovery.candidates).toHaveLength(1)
+    expect(discovery.candidates[0].name).toBe("Recruitment Screening Assistant")
+    expect(discovery.candidates[0].purpose).toBe("hr-screening")
+    expect(discovery.candidates[0].riskLevel).toBe("high")
+  })
+
+  it("trateaza ca YAML CompliScan si un fisier .yaml generic daca schema este valida", () => {
+    const yaml = readFixture("yaml", "compliscan-customer-support.yaml")
+    const discovery = discoverAISystemsFromManifest({
+      documentName: "customer-support-manifest.yaml",
+      content: yaml,
+      nowISO: "2026-03-13T09:00:00.000Z",
+    })
+
+    expect(discovery.sourceKind).toBe("yaml")
+    expect(discovery.frameworks).toContain("compliscan-yaml")
+    expect(discovery.candidates[0].name).toBe("Customer Support Assistant")
+  })
 })

@@ -29,7 +29,11 @@ type ParsedValue = string | number | boolean | string[]
 const SECTION_KEYS = new Set<string>(COMPLISCAN_YAML_REQUIRED_SECTIONS)
 
 export function isCompliScanYamlFileName(documentName: string) {
-  return /compliscan\.(yaml|yml)$/i.test(documentName.trim())
+  return /compliscan(?:[-_.][\w-]+)*\.(yaml|yml)$/i.test(documentName.trim())
+}
+
+export function isYamlFileName(documentName: string) {
+  return /\.(yaml|yml)$/i.test(documentName.trim())
 }
 
 export function parseCompliScanYaml(content: string): CompliScanYamlParseResult {

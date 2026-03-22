@@ -5,6 +5,8 @@ import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { readState } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
+import { readNis2State } from "@/lib/server/nis2-store"
 import { requirePlan, PlanError } from "@/lib/server/plan"
 
 export const runtime = "nodejs"
@@ -14,7 +16,9 @@ export async function GET(request: Request) {
     requireRole(request, ["owner", "compliance"], "exportul Audit Pack bundle")
     await requirePlan(request, "pro", "Audit Pack complet")
 
-    const payload = await buildDashboardPayload(await readState())
+    const { orgId } = await getOrgContext()
+    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({
       state: payload.state,
@@ -22,6 +26,7 @@ export async function GET(request: Request) {
       workspace: payload.workspace,
       compliancePack: payload.compliancePack,
       snapshot,
+      nis2State,
     })
     const bundle = await buildAuditPackBundle(auditPack)
 

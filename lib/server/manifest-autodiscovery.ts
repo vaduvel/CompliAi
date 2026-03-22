@@ -10,6 +10,7 @@ import type {
 import {
   discoverAISystemsFromCompliScanYaml,
   isCompliScanYamlFileName,
+  isYamlFileName,
 } from "@/lib/server/compliscan-yaml"
 
 type PackageRule = {
@@ -103,30 +104,11 @@ export function discoverAISystemsFromManifest(input: {
   sourceScanId?: string
   nowISO: string
 }): ManifestDiscoveryResult {
-  if (isCompliScanYamlFileName(input.documentName)) {
+  const forceYamlMode = isCompliScanYamlFileName(input.documentName)
+  if (forceYamlMode || isYamlFileName(input.documentName)) {
     const yamlDiscovery = discoverAISystemsFromCompliScanYaml(input)
-    const yamlSignals = buildYamlSignals(yamlDiscovery.config)
-    const compliance = simulateFindings(input.documentName, input.content, input.nowISO, input.sourceScanId, {
-      manifestSignals: yamlSignals,
-    })
-
-    return {
-      sourceType: "manifest",
-      sourceKind: "yaml",
-      packages: [],
-      providers: yamlDiscovery.config ? [yamlDiscovery.config.specs.provider] : [],
-      frameworks: yamlDiscovery.config ? ["compliscan-yaml"] : [],
-      candidates: yamlDiscovery.candidates,
-      findings: compliance.findings,
-      alerts: compliance.alerts,
-      summary: [
-        ...yamlDiscovery.summary,
-        compliance.findings.length > 0
-          ? `${compliance.findings.length} finding${compliance.findings.length === 1 ? "" : "-uri"} generate din configuratia YAML.`
-          : "Nu au fost generate findings suplimentare din configuratia YAML.",
-        ...yamlDiscovery.warnings,
-        ...yamlDiscovery.errors,
-      ],
+    if (forceYamlMode || yamlDiscovery.config) {
+      return buildYamlDiscoveryResult(input, yamlDiscovery)
     }
   }
 
@@ -185,6 +167,40 @@ export function discoverAISystemsFromManifest(input: {
     findings: compliance.findings,
     alerts: compliance.alerts,
     summary,
+  }
+}
+
+function buildYamlDiscoveryResult(
+  input: {
+    documentName: string
+    content: string
+    sourceScanId?: string
+    nowISO: string
+  },
+  yamlDiscovery: ReturnType<typeof discoverAISystemsFromCompliScanYaml>
+): ManifestDiscoveryResult {
+  const yamlSignals = buildYamlSignals(yamlDiscovery.config)
+  const compliance = simulateFindings(input.documentName, input.content, input.nowISO, input.sourceScanId, {
+    manifestSignals: yamlSignals,
+  })
+
+  return {
+    sourceType: "manifest",
+    sourceKind: "yaml",
+    packages: [],
+    providers: yamlDiscovery.config ? [yamlDiscovery.config.specs.provider] : [],
+    frameworks: yamlDiscovery.config ? ["compliscan-yaml"] : [],
+    candidates: yamlDiscovery.candidates,
+    findings: compliance.findings,
+    alerts: compliance.alerts,
+    summary: [
+      ...yamlDiscovery.summary,
+      compliance.findings.length > 0
+        ? `${compliance.findings.length} finding${compliance.findings.length === 1 ? "" : "-uri"} generate din configuratia YAML.`
+        : "Nu au fost generate findings suplimentare din configuratia YAML.",
+      ...yamlDiscovery.warnings,
+      ...yamlDiscovery.errors,
+    ],
   }
 }
 

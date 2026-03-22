@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -70,11 +70,11 @@ function ageLabel(iso: string): string {
 
 export default function FindingDetailPage() {
   const params = useParams<{ findingId: string }>()
-  const router = useRouter()
   const [finding, setFinding] = useState<FindingDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
 
   useEffect(() => {
     if (!params.findingId) return
@@ -102,7 +102,9 @@ export default function FindingDetailPage() {
         body: JSON.stringify({ status }),
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
+      const payload = (await res.json()) as { feedbackMessage?: string }
       setFinding({ ...finding, findingStatus: status, findingStatusUpdatedAtISO: new Date().toISOString() })
+      setStatusFeedback(payload.feedbackMessage ?? null)
     } catch {
       setError("Nu s-a putut actualiza statusul.")
     } finally {
@@ -210,6 +212,14 @@ export default function FindingDetailPage() {
               <CheckCircle2 className="size-3.5" strokeWidth={2} />
               Marchează rezolvat
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {statusFeedback && (
+        <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
+          <CardContent className="px-5 py-4">
+            <p className="text-sm text-eos-text">{statusFeedback}</p>
           </CardContent>
         </Card>
       )}

@@ -17,9 +17,9 @@ export function DashboardSegmentSkeleton({
             <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
               {title}
             </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-eos-text">
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-eos-text">
               {description}
-            </h1>
+            </p>
             <div className="mt-3 flex items-center gap-2 text-sm text-eos-text-muted">
               <Loader2 className="size-4 animate-spin" />
               <span>Segmentul se pregateste pe server.</span>

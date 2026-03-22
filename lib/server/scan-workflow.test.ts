@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import type { ScanFinding } from "@/lib/compliance/types"
 import { RequestValidationError } from "./request-validation"
-import { validateScanInputPayload } from "./scan-workflow"
+import { mergeFindingsDeduplicated, validateScanInputPayload } from "./scan-workflow"
 
 describe("validateScanInputPayload", () => {
   it("accepta text manual simplu", () => {
@@ -33,5 +34,69 @@ describe("validateScanInputPayload", () => {
         imageBase64: "%%%invalid%%%",
       })
     ).toThrow("Imaginea incarcata nu are format base64 valid.")
+  })
+})
+
+function makeFinding(overrides: Partial<ScanFinding> = {}): ScanFinding {
+  return {
+    id: "finding-1",
+    title: "Lipsa DPA cu furnizor IT",
+    detail: "Nu exista DPA semnat cu furnizorul principal.",
+    category: "GDPR",
+    severity: "high",
+    risk: "high",
+    principles: [],
+    createdAtISO: "2026-03-22T10:00:00.000Z",
+    sourceDocument: "scan-1.pdf",
+    scanId: "scan-1",
+    legalReference: "GDPR Art. 28",
+    provenance: {
+      ruleId: "GDPR-ART28",
+      excerpt: "Nu exista acord de prelucrare semnat.",
+    },
+    ...overrides,
+  }
+}
+
+describe("mergeFindingsDeduplicated", () => {
+  it("nu dubleaza finding-ul la rescan si pastreaza statusul existent", () => {
+    const existing = makeFinding({
+      id: "finding-existing",
+      findingStatus: "confirmed",
+      findingStatusUpdatedAtISO: "2026-03-22T10:05:00.000Z",
+    })
+    const incoming = makeFinding({
+      id: "finding-new",
+      scanId: "scan-2",
+      sourceDocument: "scan-2.pdf",
+      createdAtISO: "2026-03-22T11:00:00.000Z",
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-existing")
+    expect(merged.findings[0].findingStatus).toBe("confirmed")
+    expect(merged.findings[0].scanId).toBe("scan-2")
+    expect(merged.findings[0].sourceDocument).toBe("scan-2.pdf")
+    expect(merged.addedHighRiskCount).toBe(0)
+  })
+
+  it("creste highRisk doar pentru finding-uri AI high-risk noi", () => {
+    const incoming = makeFinding({
+      id: "ai-new",
+      category: "EU_AI_ACT",
+      risk: "high",
+      title: "AI high-risk detection",
+      provenance: {
+        ruleId: "EUAI-001",
+        excerpt: "high risk ai",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.addedHighRiskCount).toBe(1)
   })
 })
