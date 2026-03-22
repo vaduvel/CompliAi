@@ -534,8 +534,8 @@ function normalizeFindingTextAnchor(finding: ScanFinding) {
   return withoutDocumentName.replace(/^[\s:/-]+/, "").trim()
 }
 
-const FINDING_SEVERITY_ORDER = ["info", "low", "medium", "high", "critical"] as const
-const FINDING_RISK_ORDER = ["low", "medium", "high"] as const
+const FINDING_SEVERITY_ORDER = ["low", "medium", "high", "critical"] as const
+const FINDING_RISK_ORDER = ["low", "high"] as const
 
 function pickMoreSevereSeverity(current: ScanFinding["severity"], incoming: ScanFinding["severity"]) {
   return pickHigherRank(current, incoming, FINDING_SEVERITY_ORDER)
