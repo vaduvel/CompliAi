@@ -199,4 +199,82 @@ describe("mergeFindingsDeduplicated", () => {
     expect(merged.findings[0].id).toBe("finding-transfer-see")
     expect(merged.addedLowRiskCount).toBe(0)
   })
+
+  it("deduplica finding-uri Gemini pe acelasi paragraf chiar daca severitatea se schimba intre rescan-uri", () => {
+    const existing = makeFinding({
+      id: "finding-ai-transparency-existing",
+      title: "Lipsa transparenței privind utilizarea sistemelor AI",
+      category: "EU_AI_ACT",
+      severity: "high",
+      risk: "high",
+      legalReference: "Articolul 52",
+      suggestedDocumentType: "ai-transparency-notice",
+      sourceParagraph: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      provenance: {
+        ruleId: "gemini-ai-r-old123",
+        excerpt: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-ai-transparency-new",
+      title: "Lipsa transparenței privind sistemele AI",
+      category: "EU_AI_ACT",
+      severity: "medium",
+      risk: "high",
+      legalReference: "Articolul 52",
+      suggestedDocumentType: "ai-transparency-notice",
+      sourceDocument: "scan-2.pdf",
+      sourceParagraph: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      provenance: {
+        ruleId: "gemini-ai-r-new456",
+        excerpt: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-ai-transparency-existing")
+    expect(merged.findings[0].severity).toBe("high")
+    expect(merged.findings[0].risk).toBe("high")
+  })
+
+  it("deduplica finding-uri Gemini AI Act pe aceeasi problema chiar daca ancora se muta intre doua paragrafe", () => {
+    const existing = makeFinding({
+      id: "finding-ai-high-risk-existing",
+      title: "Sistem AI nedeclarat cu potențial risc ridicat",
+      category: "EU_AI_ACT",
+      severity: "critical",
+      risk: "high",
+      legalReference: "Articolul 6",
+      suggestedDocumentType: "ai-risk-assessment",
+      sourceParagraph: "Pentru sistemele automate cu impact asupra utilizatorului final, decizia finala trebuie validata de un operator uman.",
+      provenance: {
+        ruleId: "gemini-ai-r-old789",
+        excerpt:
+          "Pentru sistemele automate cu impact asupra utilizatorului final, decizia finala trebuie validata de un operator uman.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-ai-high-risk-new",
+      title: "Sistem AI nedeclarat cu potențial high-risk",
+      category: "EU_AI_ACT",
+      severity: "critical",
+      risk: "high",
+      legalReference: "Articolul 6",
+      suggestedDocumentType: "ai-risk-assessment",
+      sourceDocument: "scan-2.pdf",
+      sourceParagraph: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      provenance: {
+        ruleId: "gemini-ai-r-new987",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-ai-high-risk-existing")
+    expect(merged.addedHighRiskCount).toBe(0)
+  })
 })

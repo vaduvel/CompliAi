@@ -370,6 +370,8 @@ export function mergeFindingsDeduplicated(
         ...existing,
         ...incoming,
         id: existing.id,
+        severity: pickMoreSevereSeverity(existing.severity, incoming.severity),
+        risk: pickMoreSevereRisk(existing.risk, incoming.risk),
         findingStatus: existing.findingStatus ?? incoming.findingStatus,
         findingStatusUpdatedAtISO: existing.findingStatusUpdatedAtISO ?? incoming.findingStatusUpdatedAtISO,
       })
@@ -437,25 +439,23 @@ function findSemanticGeminiDuplicate(
       continue
     }
 
-    if (
-      normalizeFingerprintPart(existing.category) !== normalizeFingerprintPart(incoming.category) ||
-      normalizeFingerprintPart(existing.severity) !== normalizeFingerprintPart(incoming.severity)
-    ) {
+    if (normalizeFingerprintPart(existing.category) !== normalizeFingerprintPart(incoming.category)) {
       continue
     }
 
     const existingAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(existing))
-    if (!existingAnchor || existingAnchor !== incomingAnchor) {
-      continue
-    }
-
     const existingDocumentType = normalizeFingerprintPart(existing.suggestedDocumentType)
     if (incomingDocumentType && existingDocumentType && incomingDocumentType !== existingDocumentType) {
       continue
     }
 
     const similarity = semanticTokenSimilarity(incomingSemanticTokens, semanticTitleTokens(existing.title))
-    if (similarity >= 0.4) {
+    const sameAnchor = Boolean(existingAnchor && existingAnchor === incomingAnchor)
+    const sameLegalReference =
+      Boolean(incoming.legalReference) &&
+      normalizeFingerprintPart(existing.legalReference) === normalizeFingerprintPart(incoming.legalReference)
+
+    if ((sameAnchor && similarity >= 0.4) || (sameLegalReference && similarity >= 0.6)) {
       return existing
     }
   }
@@ -532,4 +532,30 @@ function normalizeFindingTextAnchor(finding: ScanFinding) {
     : rawAnchor
 
   return withoutDocumentName.replace(/^[\s:/-]+/, "").trim()
+}
+
+const FINDING_SEVERITY_ORDER = ["info", "low", "medium", "high", "critical"] as const
+const FINDING_RISK_ORDER = ["low", "medium", "high"] as const
+
+function pickMoreSevereSeverity(current: ScanFinding["severity"], incoming: ScanFinding["severity"]) {
+  return pickHigherRank(current, incoming, FINDING_SEVERITY_ORDER)
+}
+
+function pickMoreSevereRisk(current: ScanFinding["risk"], incoming: ScanFinding["risk"]) {
+  return pickHigherRank(current, incoming, FINDING_RISK_ORDER)
+}
+
+function pickHigherRank<T extends string>(current: T, incoming: T, order: readonly T[]) {
+  const currentRank = order.indexOf(current)
+  const incomingRank = order.indexOf(incoming)
+
+  if (incomingRank === -1) {
+    return current
+  }
+
+  if (currentRank === -1 || incomingRank > currentRank) {
+    return incoming
+  }
+
+  return current
 }
