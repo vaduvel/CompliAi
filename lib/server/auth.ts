@@ -16,6 +16,7 @@ import {
 } from "@/lib/server/supabase-tenancy-read"
 
 export type UserRole = "owner" | "compliance" | "reviewer" | "viewer"
+export type UserMode = "solo" | "partner" | "compliance" | "viewer"
 export type AuthBackend = "local" | "supabase" | "hybrid"
 export type AuthProvider = "local" | "supabase"
 
@@ -28,6 +29,7 @@ export type PersistedUserRecord = {
   authProvider?: AuthProvider
   orgId?: string
   orgName?: string
+  userMode?: UserMode
 }
 
 export type OrganizationRecord = {
@@ -181,6 +183,15 @@ function isUserRole(value: unknown): value is UserRole {
     value === "owner" ||
     value === "compliance" ||
     value === "reviewer" ||
+    value === "viewer"
+  )
+}
+
+function isUserMode(value: unknown): value is UserMode {
+  return (
+    value === "solo" ||
+    value === "partner" ||
+    value === "compliance" ||
     value === "viewer"
   )
 }
@@ -1070,6 +1081,22 @@ export async function requireFreshRole(
     )
   }
   return session
+}
+
+export async function getUserMode(userId: string): Promise<UserMode | null> {
+  const users = await readJsonFile<PersistedUserRecord[]>(getUsersFile(), [])
+  const user = users.find((entry) => entry.id === userId)
+  if (!user) return null
+  return isUserMode(user.userMode) ? user.userMode : null
+}
+
+export async function setUserMode(userId: string, mode: UserMode): Promise<void> {
+  const users = await readJsonFile<PersistedUserRecord[]>(getUsersFile(), [])
+  const userIndex = users.findIndex((entry) => entry.id === userId)
+  if (userIndex === -1) throw new Error("USER_NOT_FOUND")
+
+  users[userIndex] = { ...users[userIndex], userMode: mode }
+  await writeJsonFile(getUsersFile(), users)
 }
 
 export function getSessionCookieOptions() {

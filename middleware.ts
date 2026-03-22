@@ -147,5 +147,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/((?!auth|demo|stripe/webhook).*)"],
+  matcher: ["/dashboard/:path*", "/onboarding", "/api/((?!auth|demo|stripe/webhook).*)"],
 }

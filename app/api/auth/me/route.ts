@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { AuthzError, readFreshSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, getUserMode, readFreshSessionFromRequest } from "@/lib/server/auth"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const session = await readFreshSessionFromRequest(request)
     if (!session) return NextResponse.json({ user: null }, withRequestIdHeaders(undefined, context))
 
+    const userMode = await getUserMode(session.userId)
+
     return NextResponse.json(
       {
         user: {
@@ -20,6 +22,7 @@ export async function GET(request: Request) {
           orgName: session.orgName,
           role: session.role,
           membershipId: session.membershipId ?? null,
+          userMode: userMode ?? null,
         },
       },
       withRequestIdHeaders(undefined, context)

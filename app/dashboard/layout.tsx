@@ -1,15 +1,21 @@
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 
 import { CockpitProvider } from "@/components/compliscan/use-cockpit"
 import { DashboardShell } from "@/components/compliscan/dashboard-shell"
 import {
   SESSION_COOKIE,
+  getUserMode,
   listUserMemberships,
   refreshSessionPayload,
   verifySessionToken,
 } from "@/lib/server/auth"
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
 import { readState } from "@/lib/server/mvp-store"
+
+function isDemoSession(session: { userId: string; orgId: string }) {
+  return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
+}
 
 export const dynamic = "force-dynamic"
 
@@ -23,6 +29,14 @@ export default async function DashboardLayout({
   const sessionToken = cookieStore.get(SESSION_COOKIE)?.value
   const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
+
+  if (session && !isDemoSession(session)) {
+    const userMode = await getUserMode(session.userId)
+    if (!userMode) {
+      redirect("/onboarding")
+    }
+  }
+
   const memberships = session ? await listUserMemberships(session.userId) : []
   const initialCockpitData = {
     state: corePayload.state,
