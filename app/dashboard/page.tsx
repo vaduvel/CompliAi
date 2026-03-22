@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, FileText, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, ChevronRight, FileText, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
@@ -139,32 +139,7 @@ export default function DashboardPage() {
         <DnscRegistrationBanner />
       )}
 
-      {/* ── Vigilance Strip — sector risk ANAF (Phase A polish) ────────────── */}
-      {state.orgProfile && (() => {
-        const strip = getVigilanceStrip(state.orgProfile.sector)
-        if (!strip.visible) return null
-        const bgClass = strip.level === "high"
-          ? "border-red-200 bg-red-50 text-red-900"
-          : "border-amber-200 bg-amber-50 text-amber-900"
-        const iconColor = strip.level === "high" ? "text-red-500" : "text-amber-500"
-        return (
-          <section aria-label="Sector risk ANAF">
-            <div className={`flex items-center gap-3 rounded-eos-lg border px-4 py-2.5 text-sm ${bgClass}`}>
-              <ShieldAlert className={`size-4 shrink-0 ${iconColor}`} strokeWidth={2} />
-              <div className="flex-1">
-                <span className="font-semibold">Vigilență {strip.label.toLowerCase()}</span>
-                <span className="mx-1.5 text-xs opacity-60">·</span>
-                <span className="text-xs opacity-80">{strip.message}</span>
-              </div>
-              <Badge variant={strip.level === "high" ? "destructive" : "warning"} className="shrink-0 text-[10px] normal-case tracking-normal">
-                ANAF
-              </Badge>
-            </div>
-          </section>
-        )
-      })()}
-
-      {/* ── Summary strip ─────────────────────────────────────────────────────── */}
+      {/* ── Summary strip — compact health ─────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
           <SummaryMetric label="Conformitate globală"  value={`${data.summary.score}%`} />
@@ -175,164 +150,179 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Compliance Streak (Addon 1) ──────────────────────────────────────── */}
-      {state.complianceStreak && state.complianceStreak.currentDays > 0 && (
-        <section aria-label="Serie de conformitate">
-          <div className="flex items-center gap-3 rounded-eos-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
-            <Flame className="size-4 shrink-0 text-amber-500" strokeWidth={2} />
-            <div className="flex-1">
-              <span className="font-semibold">
-                {state.complianceStreak.currentDays} zile consecutive peste {state.complianceStreak.threshold}%
-              </span>
-              <span className="mx-1.5 text-xs opacity-60">·</span>
-              <span className="text-xs opacity-80">
-                Record: {state.complianceStreak.longestStreak} zile
-              </span>
-            </div>
-            <Badge variant="warning" className="shrink-0 text-[10px] normal-case tracking-normal">
-              Streak
-            </Badge>
-          </div>
-        </section>
-      )}
-
-      {state.complianceStreak && state.complianceStreak.currentDays === 0 && state.complianceStreak.brokenAt && (
-        <section aria-label="Serie de conformitate întreruptă">
-          <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text-muted">
-            <Flame className="size-4 shrink-0 opacity-40" strokeWidth={2} />
-            <div className="flex-1">
-              <span className="font-medium">Seria ta s-a întrerupt</span>
-              <span className="mx-1.5 text-xs opacity-60">·</span>
-              <span className="text-xs opacity-70">
-                Record: {state.complianceStreak.longestStreak} zile · Crește scorul peste {state.complianceStreak.threshold}% pentru a reporni
-              </span>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section aria-label="Conformitate pe cadru" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-eos-text">Conformitate pe cadru</h2>
-          <p className="text-xs text-eos-text-muted">
+      {/* ── Detailed breakdown — under fold ──────────────────────────────────── */}
+      <details className="group">
+        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+          Detalii conformitate pe cadru
+          <span className="ml-auto text-xs text-eos-text-muted">
             GDPR {gdprScore}%
-            {applicability?.tags.includes("nis2") && (
-              <> · NIS2 {nis2Score !== null ? `${nis2Score}%` : "—"}</>
-            )}
-            {" "}· AI Act {aiActScore}%
-            · e-Factura {state.efacturaConnected ? "activ" : "inactiv"}
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <ReadinessFrameworkCard
-            framework="GDPR"
-            percent={gdprScore}
-            missing={tasks.filter((t) => t.principles.includes("privacy_data_governance") && t.status !== "done").length}
-            status={gdprStatus}
-            description="Conformitatea prelucrarii datelor"
-            icon={CheckCircle2}
-            ariaLabel={`GDPR: ${gdprScore}% pregatit`}
-            applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
-            legalTag="gdpr"
-            applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
-            legalStatusNote={FRAMEWORK_LEGAL_STATUS.gdpr.note}
-          />
-          <ReadinessFrameworkCard
-            framework="NIS2"
-            percent={nis2Score ?? 0}
-            missing={nis2Score === null ? 1 : nis2Score < 50 ? 1 : 0}
-            status={nis2UrgentIncident ? "blocked" : nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
-            description={nis2UrgentIncident ? "⚠ Incident critic — deadline DNSC < 4h" : nis2Score !== null ? "Maturitate cibernetică evaluată" : "Evaluare maturitate lipsă"}
-            icon={Shield}
-            ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
-            applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
-            legalTag="nis2"
-            applicabilityReason={applicability?.entries.find(e => e.tag === "nis2")?.reason}
-            urgentPulse={nis2UrgentIncident}
-            legalStatusNote={FRAMEWORK_LEGAL_STATUS.nis2.note}
-          />
-          <ReadinessFrameworkCard
-            framework="AI Act"
-            percent={aiActScore}
-            missing={aiHighRisk}
-            status={aiActStatus}
-            description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
-            icon={Layers}
-            ariaLabel={`AI Act: ${aiActScore}% pregatit`}
-            applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
-            legalTag="ai-act"
-            applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
-            legalStatusNote={FRAMEWORK_LEGAL_STATUS["ai-act"].note}
-          />
-          <ReadinessFrameworkCard
-            framework="e-Factura"
-            percent={efacturaScore}
-            missing={state.efacturaConnected ? 0 : 1}
-            status={efacturaStatus}
-            description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
-            icon={FileText}
-            ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
-            applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
-            legalTag="efactura"
-            applicabilityReason={applicability?.entries.find(e => e.tag === "efactura")?.reason}
-            legalStatusNote={FRAMEWORK_LEGAL_STATUS.efactura.note}
-          />
-          <ReadinessFrameworkCard
-            framework="Scor Global"
-            percent={data.summary.score}
-            missing={openTasks.length}
-            status={data.summary.score >= 80 ? "strong" : "review"}
-            description="Media controalelor validate"
-            icon={ShieldCheck}
-            ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
-          />
-        </div>
-      </section>
+            {applicability?.tags.includes("nis2") && <> · NIS2 {nis2Score !== null ? `${nis2Score}%` : "—"}</>}
+            {" "}· AI Act {aiActScore}% · e-Factura {state.efacturaConnected ? "activ" : "inactiv"}
+          </span>
+        </summary>
+        <div className="mt-4 space-y-6">
+          {/* Vigilance Strip */}
+          {state.orgProfile && (() => {
+            const strip = getVigilanceStrip(state.orgProfile.sector)
+            if (!strip.visible) return null
+            const bgClass = strip.level === "high"
+              ? "border-red-200 bg-red-50 text-red-900"
+              : "border-amber-200 bg-amber-50 text-amber-900"
+            const iconColor = strip.level === "high" ? "text-red-500" : "text-amber-500"
+            return (
+              <div className={`flex items-center gap-3 rounded-eos-lg border px-4 py-2.5 text-sm ${bgClass}`}>
+                <ShieldAlert className={`size-4 shrink-0 ${iconColor}`} strokeWidth={2} />
+                <div className="flex-1">
+                  <span className="font-semibold">Vigilență {strip.label.toLowerCase()}</span>
+                  <span className="mx-1.5 text-xs opacity-60">·</span>
+                  <span className="text-xs opacity-80">{strip.message}</span>
+                </div>
+                <Badge variant={strip.level === "high" ? "destructive" : "warning"} className="shrink-0 text-[10px] normal-case tracking-normal">
+                  ANAF
+                </Badge>
+              </div>
+            )
+          })()}
 
-      {/* ── Sector Benchmark (Addon 2) ─────────────────────────────────────── */}
-      {benchmark && (
-        <section aria-label="Benchmark sector">
-          <div className="flex items-center gap-3 rounded-eos-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-900">
-            <BarChart3 className="size-4 shrink-0 text-blue-500" strokeWidth={2} />
-            <div className="flex-1">
-              <span className="font-semibold">
-                Ești mai bun decât {benchmark.percentil}% din firme în {benchmark.sector}
-              </span>
-              <span className="mx-1.5 text-xs opacity-60">·</span>
-              <span className="text-xs opacity-80">
-                Media sector: {benchmark.medie}% · {benchmark.nrFirme} firme comparate
-              </span>
+          {/* Compliance Streak */}
+          {state.complianceStreak && state.complianceStreak.currentDays > 0 && (
+            <div className="flex items-center gap-3 rounded-eos-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+              <Flame className="size-4 shrink-0 text-amber-500" strokeWidth={2} />
+              <div className="flex-1">
+                <span className="font-semibold">
+                  {state.complianceStreak.currentDays} zile consecutive peste {state.complianceStreak.threshold}%
+                </span>
+                <span className="mx-1.5 text-xs opacity-60">·</span>
+                <span className="text-xs opacity-80">
+                  Record: {state.complianceStreak.longestStreak} zile
+                </span>
+              </div>
+              <Badge variant="warning" className="shrink-0 text-[10px] normal-case tracking-normal">
+                Streak
+              </Badge>
             </div>
-            <Badge variant="default" className="shrink-0 text-[10px] normal-case tracking-normal">
-              Benchmark
-            </Badge>
-          </div>
-        </section>
-      )}
+          )}
 
-      {/* ── Sprint 3.5: CER cross-signal — informativ, nu modul complet ──────── */}
-      {applicability?.tags.includes("cer") && (
-        <section aria-label="Directiva CER - semnal informativ">
-          <div className="flex items-start gap-3 rounded-eos-lg border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-            <span className="mt-0.5 shrink-0 text-base">🏛️</span>
-            <div className="flex-1">
-              <p className="font-semibold">Directiva CER — Reziliență Entități Critice ✅</p>
-              <p className="mt-0.5 text-xs text-blue-700">
-                {applicability.entries.find((e) => e.tag === "cer")?.reason}
-              </p>
-              <p className="mt-1 text-xs text-blue-600">
-                Directiva (EU) 2022/2557 vizează reziliența fizică (nu doar cibernetică) a infrastructurii critice — în paralel cu NIS2.
-                Verificați cu un specialist juridic dacă aveți obligații suplimentare de continuitate operațională.
-              </p>
+          {state.complianceStreak && state.complianceStreak.currentDays === 0 && state.complianceStreak.brokenAt && (
+            <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5 text-sm text-eos-text-muted">
+              <Flame className="size-4 shrink-0 opacity-40" strokeWidth={2} />
+              <div className="flex-1">
+                <span className="font-medium">Seria ta s-a întrerupt</span>
+                <span className="mx-1.5 text-xs opacity-60">·</span>
+                <span className="text-xs opacity-70">
+                  Record: {state.complianceStreak.longestStreak} zile · Crește scorul peste {state.complianceStreak.threshold}% pentru a reporni
+                </span>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          )}
 
-      {/* ── Health Check Periodic (V3 P1.2) ──────────────────────────────────── */}
-      <section aria-label="Health check conformitate">
-        <HealthCheckCard />
-      </section>
+          {/* Framework readiness cards */}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <ReadinessFrameworkCard
+              framework="GDPR"
+              percent={gdprScore}
+              missing={tasks.filter((t) => t.principles.includes("privacy_data_governance") && t.status !== "done").length}
+              status={gdprStatus}
+              description="Conformitatea prelucrarii datelor"
+              icon={CheckCircle2}
+              ariaLabel={`GDPR: ${gdprScore}% pregatit`}
+              applicabilityCertainty={applicability?.entries.find(e => e.tag === "gdpr")?.certainty ?? "certain"}
+              legalTag="gdpr"
+              applicabilityReason={applicability?.entries.find(e => e.tag === "gdpr")?.reason}
+              legalStatusNote={FRAMEWORK_LEGAL_STATUS.gdpr.note}
+            />
+            <ReadinessFrameworkCard
+              framework="NIS2"
+              percent={nis2Score ?? 0}
+              missing={nis2Score === null ? 1 : nis2Score < 50 ? 1 : 0}
+              status={nis2UrgentIncident ? "blocked" : nis2Score === null ? "review" : nis2Score >= 75 ? "strong" : nis2Score >= 40 ? "good" : "review"}
+              description={nis2UrgentIncident ? "⚠ Incident critic — deadline DNSC < 4h" : nis2Score !== null ? "Maturitate cibernetică evaluată" : "Evaluare maturitate lipsă"}
+              icon={Shield}
+              ariaLabel={`NIS2: ${nis2Score ?? 0}% pregatit`}
+              applicabilityCertainty={applicability?.entries.find(e => e.tag === "nis2")?.certainty}
+              legalTag="nis2"
+              applicabilityReason={applicability?.entries.find(e => e.tag === "nis2")?.reason}
+              urgentPulse={nis2UrgentIncident}
+              legalStatusNote={FRAMEWORK_LEGAL_STATUS.nis2.note}
+            />
+            <ReadinessFrameworkCard
+              framework="AI Act"
+              percent={aiActScore}
+              missing={aiHighRisk}
+              status={aiActStatus}
+              description={totalAiSystems > 0 ? "Sisteme AI in inventar" : "Nu s-au detectat sisteme AI"}
+              icon={Layers}
+              ariaLabel={`AI Act: ${aiActScore}% pregatit`}
+              applicabilityCertainty={applicability?.entries.find(e => e.tag === "ai-act")?.certainty}
+              legalTag="ai-act"
+              applicabilityReason={applicability?.entries.find(e => e.tag === "ai-act")?.reason}
+              legalStatusNote={FRAMEWORK_LEGAL_STATUS["ai-act"].note}
+            />
+            <ReadinessFrameworkCard
+              framework="e-Factura"
+              percent={efacturaScore}
+              missing={state.efacturaConnected ? 0 : 1}
+              status={efacturaStatus}
+              description={state.efacturaConnected ? "Sincronizare ANAF activa" : "Integrare ANAF lipsa"}
+              icon={FileText}
+              ariaLabel={`e-Factura: ${efacturaScore}% pregatit`}
+              applicabilityCertainty={applicability?.entries.find(e => e.tag === "efactura")?.certainty}
+              legalTag="efactura"
+              applicabilityReason={applicability?.entries.find(e => e.tag === "efactura")?.reason}
+              legalStatusNote={FRAMEWORK_LEGAL_STATUS.efactura.note}
+            />
+            <ReadinessFrameworkCard
+              framework="Scor Global"
+              percent={data.summary.score}
+              missing={openTasks.length}
+              status={data.summary.score >= 80 ? "strong" : "review"}
+              description="Media controalelor validate"
+              icon={ShieldCheck}
+              ariaLabel={`Scor Global: ${data.summary.score}% pregatit`}
+            />
+          </div>
+
+          {/* Sector Benchmark */}
+          {benchmark && (
+            <div className="flex items-center gap-3 rounded-eos-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-900">
+              <BarChart3 className="size-4 shrink-0 text-blue-500" strokeWidth={2} />
+              <div className="flex-1">
+                <span className="font-semibold">
+                  Ești mai bun decât {benchmark.percentil}% din firme în {benchmark.sector}
+                </span>
+                <span className="mx-1.5 text-xs opacity-60">·</span>
+                <span className="text-xs opacity-80">
+                  Media sector: {benchmark.medie}% · {benchmark.nrFirme} firme comparate
+                </span>
+              </div>
+              <Badge variant="default" className="shrink-0 text-[10px] normal-case tracking-normal">
+                Benchmark
+              </Badge>
+            </div>
+          )}
+
+          {/* CER cross-signal */}
+          {applicability?.tags.includes("cer") && (
+            <div className="flex items-start gap-3 rounded-eos-lg border border-dashed border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+              <span className="mt-0.5 shrink-0 text-base">🏛️</span>
+              <div className="flex-1">
+                <p className="font-semibold">Directiva CER — Reziliență Entități Critice</p>
+                <p className="mt-0.5 text-xs text-blue-700">
+                  {applicability.entries.find((e) => e.tag === "cer")?.reason}
+                </p>
+                <p className="mt-1 text-xs text-blue-600">
+                  Directiva (EU) 2022/2557 vizează reziliența fizică (nu doar cibernetică) a infrastructurii critice — în paralel cu NIS2.
+                  Verificați cu un specialist juridic dacă aveți obligații suplimentare de continuitate operațională.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Health Check */}
+          <HealthCheckCard />
+        </div>
+      </details>
     </div>
   )
 }
