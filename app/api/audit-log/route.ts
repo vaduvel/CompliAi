@@ -6,7 +6,7 @@ import { readState } from "@/lib/server/mvp-store"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance", "reviewer", "viewer"], "vizualizarea log-ului de audit")
+    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "vizualizarea log-ului de audit")
     const state = await readState()
     return NextResponse.json({ events: state.events ?? [] })
   } catch (error) {

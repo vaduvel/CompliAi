@@ -17,7 +17,7 @@ const CONFORMITY_FIELD = "conformity_assessment"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance", "reviewer", "viewer"], "conformitate AI")
+    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "conformitate AI")
 
     const { searchParams } = new URL(request.url)
     const systemId = searchParams.get("systemId")
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "salvare evaluare conformitate AI")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "salvare evaluare conformitate AI")
 
     const body = (await request.json()) as { systemId?: string; answers?: AssessmentAnswers }
     const { systemId, answers } = body

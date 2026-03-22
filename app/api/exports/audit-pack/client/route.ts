@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/exports/audit-pack/client")
 
   try {
-    requireRole(request, ["owner", "compliance"], "exportul Audit Pack client-facing")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack client-facing")
 
     const { orgId } = await getOrgContext()
     const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])

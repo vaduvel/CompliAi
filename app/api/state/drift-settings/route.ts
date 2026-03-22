@@ -12,7 +12,7 @@ type DriftSettingsPayload = {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "actualizarea setarilor de drift")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "actualizarea setarilor de drift")
 
     const body = (await request.json().catch(() => ({}))) as DriftSettingsPayload
     const severityOverrides = sanitizeOverrides(body.severityOverrides)

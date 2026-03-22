@@ -122,7 +122,7 @@ export async function POST(
     const { id } = await context.params
     const session = requireRole(
       request,
-      ["owner", "compliance", "reviewer"],
+      ["owner", "partner_manager", "compliance", "reviewer"],
       "incarcarea dovezilor pentru remediere"
     )
     const actor = eventActorFromSession(session)

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/integrations/supabase/status")
 
   try {
-    requireRole(request, ["owner", "compliance"], "verificarea statusului operational Supabase")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "verificarea statusului operational Supabase")
 
     return jsonWithRequestContext(
       {

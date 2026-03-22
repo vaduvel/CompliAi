@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   try {
     const session = await requireFreshRole(
       request,
-      ["owner", "compliance"],
+      ["owner", "partner_manager", "compliance"],
       "vizualizarea membrilor organizatiei"
     )
     const members = await listOrganizationMembers(session.orgId)
@@ -165,7 +165,7 @@ function parseEmail(value: unknown) {
 
 function parseRole(value: unknown): UserRole {
   const role = asTrimmedString(value, 32)
-  if (role === "owner" || role === "compliance" || role === "reviewer" || role === "viewer") {
+  if (role === "owner" || role === "partner_manager" || role === "compliance" || role === "reviewer" || role === "viewer") {
     return role
   }
   throw new RequestValidationError("Rolul trimis nu este valid.", 400, "AUTH_INVALID_ROLE")

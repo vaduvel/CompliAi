@@ -13,7 +13,7 @@ export const runtime = "nodejs"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "exportul Audit Pack bundle")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack bundle")
     await requirePlan(request, "pro", "Audit Pack complet")
 
     const { orgId } = await getOrgContext()

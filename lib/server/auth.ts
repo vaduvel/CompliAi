@@ -15,7 +15,7 @@ import {
   shouldReadTenancyFromSupabase,
 } from "@/lib/server/supabase-tenancy-read"
 
-export type UserRole = "owner" | "compliance" | "reviewer" | "viewer"
+export type UserRole = "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
 export type UserMode = "solo" | "partner" | "compliance" | "viewer"
 export type AuthBackend = "local" | "supabase" | "hybrid"
 export type AuthProvider = "local" | "supabase"
@@ -167,12 +167,14 @@ function rolePriority(role: UserRole) {
   switch (role) {
     case "owner":
       return 0
-    case "compliance":
+    case "partner_manager":
       return 1
-    case "reviewer":
+    case "compliance":
       return 2
-    case "viewer":
+    case "reviewer":
       return 3
+    case "viewer":
+      return 4
     default:
       return 99
   }
@@ -181,6 +183,7 @@ function rolePriority(role: UserRole) {
 function isUserRole(value: unknown): value is UserRole {
   return (
     value === "owner" ||
+    value === "partner_manager" ||
     value === "compliance" ||
     value === "reviewer" ||
     value === "viewer"

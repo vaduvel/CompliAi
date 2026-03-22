@@ -18,7 +18,7 @@ export type CurrentUser = {
   email: string
   orgId: string
   orgName: string
-  role: "owner" | "compliance" | "reviewer" | "viewer"
+  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   membershipId: string | null
 } | null
 
@@ -26,7 +26,7 @@ export type OrganizationMember = {
   membershipId: string
   userId: string
   email: string
-  role: "owner" | "compliance" | "reviewer" | "viewer"
+  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   createdAtISO: string
   orgId: string
   orgName: string

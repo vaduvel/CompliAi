@@ -31,7 +31,7 @@ export type WorkspaceContext = {
   workspaceLabel: string
   workspaceOwner: string
   workspaceInitials: string
-  userRole?: "owner" | "compliance" | "reviewer" | "viewer"  // Sprint 6 RBAC
+  userRole?: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"  // Sprint 6 RBAC
 }
 
 export type NavSection =
@@ -305,7 +305,7 @@ export type ComplianceEvent = {
   createdAtISO: string
   actorId?: string
   actorLabel?: string
-  actorRole?: "owner" | "compliance" | "reviewer" | "viewer"
+  actorRole?: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   actorSource?: "session" | "workspace" | "system"
   metadata?: Record<string, string | number | boolean>
 }

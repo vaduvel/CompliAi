@@ -123,7 +123,7 @@ export async function PATCH(
 
 function parseRole(value: unknown): UserRole {
   const role = asTrimmedString(value, 32)
-  if (role === "owner" || role === "compliance" || role === "reviewer" || role === "viewer") {
+  if (role === "owner" || role === "partner_manager" || role === "compliance" || role === "reviewer" || role === "viewer") {
     return role
   }
   throw new RequestValidationError("Rolul trimis nu este valid.", 400, "AUTH_INVALID_ROLE")

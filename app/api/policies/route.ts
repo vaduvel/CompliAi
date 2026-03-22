@@ -7,7 +7,7 @@ import { readPolicyAcknowledgments } from "@/lib/server/policy-store"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance", "reviewer", "viewer"], "vizualizarea politicilor")
+    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "vizualizarea politicilor")
     const { orgId } = await getOrgContext()
     let acknowledgments = {}
 

@@ -12,7 +12,7 @@ import { readState } from "@/lib/server/mvp-store"
 
 export async function GET(request: NextRequest) {
   try {
-    requireRole(request, ["owner", "compliance"], "exportul CompliScan")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul CompliScan")
 
     const format = request.nextUrl.searchParams.get("format") === "yaml" ? "yaml" : "json"
     const payload = await buildDashboardPayload(await readState())

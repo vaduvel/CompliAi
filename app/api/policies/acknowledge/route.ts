@@ -10,7 +10,7 @@ import { mutateState } from "@/lib/server/mvp-store"
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "confirmarea politicilor")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "confirmarea politicilor")
     const { orgId } = await getOrgContext()
 
     const session = readSessionFromRequest(request)

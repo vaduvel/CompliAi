@@ -11,7 +11,7 @@ type BaselineAction = "set" | "clear"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "compliance"], "administrarea baseline-ului")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "administrarea baseline-ului")
     const actor = eventActorFromSession(session)
 
     const body = (await request.json().catch(() => ({}))) as { action?: BaselineAction }

@@ -10,7 +10,7 @@ import { requirePlan, PlanError } from "@/lib/server/plan"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "exportul Audit Pack")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack")
     await requirePlan(request, "pro", "Audit Pack complet")
 
     const { orgId } = await getOrgContext()

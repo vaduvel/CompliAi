@@ -1,17 +1,17 @@
 // Sprint 6 — RBAC Minim
 // Constante și helpers pentru control acces bazat pe rol.
-// Roluri: owner > compliance > reviewer > viewer
+// Roluri: owner > partner_manager > compliance > reviewer > viewer
 
 import type { UserRole } from "@/lib/server/auth"
 
 /** Roluri care pot efectua operații de scriere (creare, modificare) */
-export const WRITE_ROLES: UserRole[] = ["owner", "compliance", "reviewer"]
+export const WRITE_ROLES: UserRole[] = ["owner", "partner_manager", "compliance", "reviewer"]
 
 /** Roluri care pot efectua operații de ștergere */
-export const DELETE_ROLES: UserRole[] = ["owner", "compliance"]
+export const DELETE_ROLES: UserRole[] = ["owner", "partner_manager", "compliance"]
 
 /** Roluri care pot exporta audit pack / documente sensibile */
-export const EXPORT_ROLES: UserRole[] = ["owner", "compliance", "reviewer"]
+export const EXPORT_ROLES: UserRole[] = ["owner", "partner_manager", "compliance", "reviewer"]
 
 /** Roluri care pot reseta starea workspace-ului */
 export const RESET_ROLES: UserRole[] = ["owner"]

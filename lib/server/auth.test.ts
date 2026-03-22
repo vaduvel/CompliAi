@@ -805,4 +805,179 @@ describe("lib/server/auth", () => {
     delete process.env.COMPLISCAN_AUTH_BACKEND
     expect(getConfiguredAuthBackend()).toBe("local")
   })
+
+  it("accepta partner_manager ca rol valid in token de sesiune", () => {
+    const token = createSessionToken({
+      userId: "user-pm",
+      orgId: "org-client",
+      email: "consultant@example.com",
+      orgName: "Client SRL",
+      role: "partner_manager",
+      membershipId: "membership-pm-1",
+    })
+
+    const payload = verifySessionToken(token)
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        userId: "user-pm",
+        orgId: "org-client",
+        role: "partner_manager",
+        membershipId: "membership-pm-1",
+      })
+    )
+  })
+
+  it("rezolva membership cu rol partner_manager din structura noua", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-pm",
+        email: "consultant@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [
+      { id: "org-own", name: "Cabinet Elena", createdAtISO: "2026-03-13T10:00:00.000Z" },
+      { id: "org-client", name: "LogiTrans SRL", createdAtISO: "2026-03-13T10:05:00.000Z" },
+    ]
+    const memberships = [
+      {
+        id: "membership-own",
+        userId: "user-pm",
+        orgId: "org-own",
+        role: "owner",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+      {
+        id: "membership-client",
+        userId: "user-pm",
+        orgId: "org-client",
+        role: "partner_manager",
+        createdAtISO: "2026-03-13T10:05:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const resolved = await resolveUserForMembership("user-pm", "membership-client")
+
+    expect(resolved).toEqual(
+      expect.objectContaining({
+        membershipId: "membership-client",
+        orgId: "org-client",
+        orgName: "LogiTrans SRL",
+        role: "partner_manager",
+      })
+    )
+
+    const allMemberships = await listUserMemberships("user-pm")
+    expect(allMemberships).toHaveLength(2)
+    expect(allMemberships[1]).toEqual(
+      expect.objectContaining({
+        role: "partner_manager",
+        orgName: "LogiTrans SRL",
+      })
+    )
+  })
+
+  it("permite partner_manager pe rute operationale via requireRole", () => {
+    const token = createSessionToken({
+      userId: "user-pm",
+      orgId: "org-client",
+      email: "consultant@example.com",
+      orgName: "Client SRL",
+      role: "partner_manager",
+      membershipId: "membership-pm-1",
+    })
+
+    const request = new Request("http://localhost/api/scan", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "scanarea documentelor"
+    )
+
+    expect(session.role).toBe("partner_manager")
+  })
+
+  it("blocheaza partner_manager pe rute owner-only via requireRole", () => {
+    const token = createSessionToken({
+      userId: "user-pm",
+      orgId: "org-client",
+      email: "consultant@example.com",
+      orgName: "Client SRL",
+      role: "partner_manager",
+      membershipId: "membership-pm-1",
+    })
+
+    const request = new Request("http://localhost/api/state/reset", {
+      headers: { cookie: `compliscan_session=${token}` },
+    })
+
+    expect(() =>
+      requireRole(request, ["owner"], "resetarea starii workspace-ului")
+    ).toThrowError(/partner_manager/)
+  })
+
+  it("re-hidrateaza sesiunea partner_manager din membership actualizat", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-pm",
+        email: "consultant@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-client", name: "Client SRL", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-pm-1",
+        userId: "user-pm",
+        orgId: "org-client",
+        role: "partner_manager",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const staleSession = {
+      userId: "user-pm",
+      orgId: "org-client",
+      email: "consultant@example.com",
+      orgName: "Client SRL",
+      role: "owner" as const,
+      membershipId: "membership-pm-1",
+      exp: Date.now() + 60_000,
+    }
+
+    const refreshed = await refreshSessionPayload(staleSession)
+
+    expect(refreshed).toEqual(
+      expect.objectContaining({
+        userId: "user-pm",
+        role: "partner_manager",
+        membershipId: "membership-pm-1",
+      })
+    )
+  })
 })

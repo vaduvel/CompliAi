@@ -135,7 +135,7 @@ export function SettingsPageSurface() {
   const [releaseReadinessLoading, setReleaseReadinessLoading] = useState(true)
   const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
   const canViewReleaseReadiness =
-    currentUser?.role === "owner" || currentUser?.role === "compliance"
+    currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
   const [gdprExporting, setGdprExporting] = useState(false)

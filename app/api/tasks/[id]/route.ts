@@ -52,7 +52,7 @@ export async function PATCH(
 
     const session = requireRole(
       request,
-      ["owner", "compliance", "reviewer"],
+      ["owner", "partner_manager", "compliance", "reviewer"],
       "actualizarea task-urilor de remediere"
     )
     const actor = eventActorFromSession(session)

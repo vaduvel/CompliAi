@@ -33,7 +33,7 @@ type CurrentUser = {
   email: string
   orgName: string
   orgId: string
-  role: "owner" | "compliance" | "reviewer" | "viewer"
+  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   membershipId: string | null
 } | null
 
@@ -41,7 +41,7 @@ type UserMembership = {
   membershipId: string
   orgId: string
   orgName: string
-  role: "owner" | "compliance" | "reviewer" | "viewer"
+  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   createdAtISO: string
   status: "active" | "inactive"
 }

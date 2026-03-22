@@ -64,7 +64,7 @@ export async function GET(request: Request) {
       : null
 
     const canViewReleaseReadiness =
-      session?.role === "owner" || session?.role === "compliance"
+      session?.role === "owner" || session?.role === "partner_manager" || session?.role === "compliance"
 
     const repoSyncStatus = buildRepoSyncStatus(request)
 
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
           async () => {
             const freshActor = await requireFreshRole(
               request,
-              ["owner", "compliance"],
+              ["owner", "partner_manager", "compliance"],
               "vizualizarea membrilor organizatiei"
             )
             const members = await listOrganizationMembers(freshActor.orgId)
@@ -97,7 +97,7 @@ export async function GET(request: Request) {
           async () => {
             await requireFreshRole(
               request,
-              ["owner", "compliance"],
+              ["owner", "partner_manager", "compliance"],
               "verificarea statusului operational Supabase"
             )
             return getSupabaseOperationalStatus()
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
               async () => {
                 await requireFreshRole(
                   request,
-                  ["owner", "compliance"],
+                  ["owner", "partner_manager", "compliance"],
                   "verificarea release readiness"
                 )
                 return getReleaseReadinessStatus()

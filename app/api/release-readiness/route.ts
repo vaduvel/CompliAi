@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/release-readiness")
 
   try {
-    requireRole(request, ["owner", "compliance"], "verificarea release readiness")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "verificarea release readiness")
 
     const readiness = await getReleaseReadinessStatus()
 

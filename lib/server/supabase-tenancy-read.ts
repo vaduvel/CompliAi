@@ -7,7 +7,7 @@ export type CloudOrganizationRecord = {
   createdAtISO: string
 }
 
-export type CloudMembershipRole = "owner" | "compliance" | "reviewer" | "viewer"
+export type CloudMembershipRole = "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
 
 export type CloudMembershipRecord = {
   id: string

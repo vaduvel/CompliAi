@@ -6,7 +6,7 @@ import { readState } from "@/lib/server/mvp-store"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "compliance"], "exportul Annex IV lite")
+    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Annex IV lite")
 
     const payload = await buildDashboardPayload(await readState())
     const document = buildClientAnnexLiteDocument(payload.compliancePack)

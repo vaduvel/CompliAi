@@ -16,7 +16,7 @@ export async function GET(
   try {
     const session = requireRole(
       request,
-      ["owner", "compliance", "reviewer", "viewer"],
+      ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "vizualizarea dovezilor de remediere"
     )
 

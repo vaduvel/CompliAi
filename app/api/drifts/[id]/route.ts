@@ -39,7 +39,7 @@ export async function PATCH(
     const action = body.action
     const session = requireRole(
       request,
-      action === "waive" ? ["owner", "compliance"] : ["owner", "compliance", "reviewer"],
+      action === "waive" ? ["owner", "partner_manager", "compliance"] : ["owner", "partner_manager", "compliance", "reviewer"],
       action === "waive" ? "waive pe drift" : "actualizarea lifecycle-ului de drift"
     )
     const actor = eventActorFromSession(session)

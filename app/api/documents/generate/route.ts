@@ -17,7 +17,7 @@ const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "compliance", "reviewer"], "generarea documentelor")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "generarea documentelor")
 
     const body = (await request.json()) as Partial<DocumentGenerationInput>
 

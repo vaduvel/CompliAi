@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/agents")
 
   try {
-    const session = requireRole(request, ["owner", "compliance", "reviewer"], "vizualizare agenți")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "vizualizare agenți")
     const { orgId } = await getOrgContext()
 
     const recentRuns = await safeGetRecentRuns(orgId, 30)
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/agents")
 
   try {
-    const session = requireRole(request, ["owner", "compliance"], "execuție agent manual")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "execuție agent manual")
     const { orgId } = await getOrgContext()
 
     const body = (await request.json()) as { agentType?: string }
