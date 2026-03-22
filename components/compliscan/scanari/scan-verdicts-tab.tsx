@@ -555,9 +555,9 @@ export function ScanVerdictsTab({
   return (
     <div className="space-y-6">
       <SectionDividerCard
-        eyebrow="Verdicts"
+        eyebrow="Rezultat curent"
         title="Ultimul rezultat confirmat"
-        description="Zona aceasta este read-only: te ajuta sa explici verdictul, finding-urile si drift-ul fara sa amesteci fluxul activ."
+        description="Zona aceasta este doar pentru citire: te ajuta sa explici verdictul, finding-urile si drift-ul fara sa amesteci fluxul activ."
       />
 
       <ActionCluster

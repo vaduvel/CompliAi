@@ -1,7 +1,6 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Bell, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "lucide-react"
 import { toast } from "sonner"
@@ -24,15 +23,10 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
-import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
-import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const DRIFT_OVERRIDE_OPTIONS = [
@@ -263,63 +257,10 @@ export function SettingsPageSurface() {
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  const state = cockpit.data.state
-  const totalAiSystems = state.highRisk + state.lowRisk
   const activeSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
-  const releaseReadinessLabel = canViewReleaseReadiness
-    ? releaseReadiness?.state === "ready"
-      ? "pregatit"
-      : releaseReadiness?.state === "blocked"
-        ? "blocat"
-        : releaseReadiness?.state === "review"
-          ? "review"
-          : releaseReadinessLoading
-            ? "in verificare"
-            : releaseReadinessError
-              ? "indisponibil"
-              : "in verificare"
-    : "rol fara acces"
-  const summaryItems: SummaryStripItem[] = [
-    {
-      label: "Workspace activ",
-      value: cockpit.data.workspace.orgName,
-      hint: "organizatia activa si contextul operational curent",
-      tone: "neutral",
-    },
-    {
-      label: "Baseline",
-      value: validatedBaseline ? "validat" : "lipseste",
-      hint: validatedBaseline
-        ? "drift-ul are un reper stabil"
-        : "fara baseline, comparatia si drift-ul raman mai slabe",
-      tone: validatedBaseline ? "success" : "warning",
-    },
-    {
-      label: "Acces curent",
-      value: currentUser ? formatMemberRole(currentUser.role) : "in verificare",
-      hint: currentUser
-        ? "rolul tau defineste ce poti valida, modifica sau exporta"
-        : "sesiunea si rolul se verifica in sumarul operational",
-      tone: currentUser ? "accent" : "neutral",
-    },
-    {
-      label: "Stare operationala",
-      value: releaseReadinessLabel,
-      hint: canViewReleaseReadiness
-        ? releaseReadiness?.summary ?? "release readiness-ul ramane checkpoint separat de configurare"
-        : "health si readiness raman vizibile doar rolurilor administrative potrivite",
-      tone:
-        releaseReadiness?.state === "ready"
-          ? "success"
-          : releaseReadiness?.state === "blocked"
-            ? "danger"
-            : "warning",
-    },
-  ]
-
   return (
     <div className="space-y-8">
       <PageIntro
@@ -333,78 +274,7 @@ export function SettingsPageSurface() {
             </Badge>
           </>
         }
-        aside={
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Snapshot admin
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.workspace.orgName}</p>
-            <p className="text-sm text-eos-text-muted">
-              {currentUser ? formatMemberRole(currentUser.role) : "rol in verificare"}
-            </p>
-          </div>
-        }
-        actions={
-          <>
-            <Button asChild variant="outline">
-              <Link href={dashboardRoutes.home}>Acasă</Link>
-            </Button>
-            <Button asChild>
-              <Link href={dashboardRoutes.resolve}>De rezolvat</Link>
-            </Button>
-          </>
-        }
       />
-
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
-          <SummaryStrip
-            eyebrow="Setari"
-            title="Vezi rapid starea administrativa"
-            description="Context, baseline, acces si readiness."
-            items={summaryItems}
-          />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4">
-        <SectionBoundary
-          eyebrow="Handoff"
-          title="Configurezi aici, lucrezi in produs"
-          description="Setari ramane zona administrativa. Dupa context si acces revii in Dashboard sau in De rezolvat."
-        />
-        <HandoffCard
-          title="Setari nu inlocuieste fluxul principal"
-          description="Dupa configurare si verificare operationala, revii in zona potrivita de lucru."
-          destinationLabel="acasa / de rezolvat"
-          checklist={[
-            "nu tratezi Setari ca overview executiv",
-            "folosesti Setari pentru context, acces si operare",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href={dashboardRoutes.home}>Deschide Acasă</Link>
-              </Button>
-              <Button asChild>
-                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
-              </Button>
-            </>
-          }
-        />
-      </div>
-
-      {state.orgProfile && (
-        <section aria-label="Ghid de pornire mutat din Acasa">
-          <OnboardingProgress
-            hasProfile={true}
-            hasAiSystems={totalAiSystems > 0}
-            gdprProgress={state.gdprProgress}
-            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
-            hasResolvedTasks={cockpit.tasks.some((task) => task.status === "done")}
-          />
-        </section>
-      )}
 
       <Tabs defaultValue="workspace" className="space-y-6">
         <div className="space-y-3">
@@ -939,11 +809,10 @@ export function SettingsPageSurface() {
           </Card>
 
           {/* ── GDPR Rights ──────────────────────────────────────────────── */}
-          <SectionBoundary
-            eyebrow="GDPR"
-            title="Drepturile tale conform GDPR"
-            description="Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile."
-          />
+          <div className="border-t border-eos-border-subtle pt-6">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">GDPR · Drepturile tale</p>
+            <p className="mt-1 text-sm text-eos-text-muted">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
+          </div>
 
           {/* Art. 20 — Export date */}
           <Card className="border-eos-border bg-eos-surface">

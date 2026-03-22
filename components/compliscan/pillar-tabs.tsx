@@ -9,7 +9,7 @@ import {
 } from "@/components/compliscan/navigation"
 
 type PillarTabsProps = {
-  sectionId: "scanare" | "control" | "dovada" | "politici" | string
+  sectionId: "scanare" | "politici" | "partner" | string
   className?: string
 }
 
