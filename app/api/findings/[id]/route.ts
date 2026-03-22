@@ -77,10 +77,32 @@ export async function PATCH(
     const updatedFindings = [...state.findings]
     updatedFindings[findingIdx] = updatedFinding
     const updatedState = { ...state, findings: updatedFindings }
+    let taskCandidateSummary: {
+      id: string
+      title: string
+      suggestedOwner: string
+      deadline: string
+      evidenceNeeded: string
+      documentTrigger: string | null
+    } | null = null
+    let documentGenerationTriggered = false
+    let feedbackMessage =
+      newStatus === "dismissed"
+        ? "Finding respins. A rămas disponibil pentru audit, dar nu mai intră în fluxul activ."
+        : "Finding marcat ca rezolvat."
 
     // B2: On confirmation, generate task candidate + notify
     if (newStatus === "confirmed") {
       const taskCandidate = mapFindingToTask(updatedFinding)
+      taskCandidateSummary = {
+        id: taskCandidate.id,
+        title: taskCandidate.title,
+        suggestedOwner: taskCandidate.suggestedOwner,
+        deadline: taskCandidate.deadline,
+        evidenceNeeded: taskCandidate.evidenceNeeded,
+        documentTrigger: taskCandidate.documentTrigger,
+      }
+      feedbackMessage = `Finding confirmat. Cazul este pregătit pentru ${taskCandidate.suggestedOwner}.`
 
       await createNotification(orgId, {
         type: "info",
@@ -95,6 +117,8 @@ export async function PATCH(
       if (finding.suggestedDocumentType) {
         const docType = finding.suggestedDocumentType as DocumentType
         if (VALID_DOC_TYPES.includes(docType)) {
+          documentGenerationTriggered = true
+          feedbackMessage += ` Draftul ${docType} se generează în fundal.`
           // Fire-and-forget — don't block the response
           generateDocument({ documentType: docType, orgName })
             .then(async (doc) => {
@@ -129,7 +153,15 @@ export async function PATCH(
 
     await writeState(updatedState)
 
-    return NextResponse.json({ ok: true, findingId, status: newStatus })
+    return NextResponse.json({
+      ok: true,
+      findingId,
+      status: newStatus,
+      taskCandidate: taskCandidateSummary,
+      documentGenerationTriggered,
+      suggestedDocumentType: finding.suggestedDocumentType ?? null,
+      feedbackMessage,
+    })
   } catch (error) {
     return jsonError(
       error instanceof Error ? error.message : "Eroare la actualizarea finding-ului.",

@@ -292,6 +292,41 @@ describe("POST /api/org/profile — CUI", () => {
     expect((saved as { orgProfilePrefill?: unknown }).orgProfilePrefill).toBeUndefined()
   })
 
+  it("îmbogățește applicability cu semnalul fiscal din prefill când există match", async () => {
+    let saved: unknown = null
+    vi.mocked(readState).mockResolvedValue({
+      orgProfile: null,
+      applicability: null,
+      findings: [],
+      orgProfilePrefill: {
+        normalizedCui: "RO45758405",
+        vatRegistered: false,
+        requiresEfactura: true,
+        companyName: "Test SRL",
+      },
+    } as never)
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      saved = fn({
+        findings: [],
+        orgProfilePrefill: {
+          normalizedCui: "RO45758405",
+          vatRegistered: false,
+          requiresEfactura: true,
+          companyName: "Test SRL",
+        },
+      } as never) as Record<string, unknown>
+      return saved as never
+    })
+
+    const res = await POST(makeRequest({ ...validBase, cui: "RO45758405", requiresEfactura: true }))
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.orgProfile.vatRegistered).toBe(false)
+    const saft = body.applicability.entries.find((entry: { tag: string }) => entry.tag === "saft")
+    expect(saft.reason).not.toContain("plătitoare de TVA")
+  })
+
   it("păstrează prefill-ul website-only când website-ul salvat se potrivește", async () => {
     let saved: unknown = null
     vi.mocked(mutateState).mockImplementation(async (fn) => {

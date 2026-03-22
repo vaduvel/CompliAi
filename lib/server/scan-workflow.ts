@@ -7,6 +7,7 @@ import { normalizeScanRecord, simulateFindings } from "@/lib/compliance/engine"
 import { geminiSemanticAnalyze, llmAnalyzeScan } from "@/lib/compliance/llm-scan-analysis"
 import type {
   ComplianceState,
+  ScanFinding,
   ScanExtractionMethod,
   ScanRecord,
 } from "@/lib/compliance/types"
@@ -42,6 +43,12 @@ const MAX_CLIENT_ID_LENGTH = 120
 const MAX_MANUAL_CONTENT_LENGTH = 50_000
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 const MAX_PDF_BYTES = 10 * 1024 * 1024
+
+type MergeFindingsResult = {
+  findings: ScanFinding[]
+  addedHighRiskCount: number
+  addedLowRiskCount: number
+}
 
 export function validateScanInputPayload(payload: unknown): ScanInputPayload {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
@@ -316,12 +323,14 @@ export async function analyzeExtractedScan(
     ),
   ]
 
+  const mergedFindings = mergeFindingsDeduplicated(current.findings, result.findings)
+
   return {
     ...current,
     scannedDocuments: current.scannedDocuments + 1,
-    highRisk: current.highRisk + result.highRiskDelta,
-    lowRisk: current.lowRisk + result.lowRiskDelta,
-    findings: [...result.findings, ...current.findings].slice(0, 100),
+    highRisk: current.highRisk + mergedFindings.addedHighRiskCount,
+    lowRisk: current.lowRisk + mergedFindings.addedLowRiskCount,
+    findings: mergedFindings.findings.slice(0, 100),
     alerts: [...result.alerts, ...current.alerts].slice(0, 100),
     scans: current.scans.map((item) =>
       item.id === scan.id
@@ -339,4 +348,66 @@ export async function analyzeExtractedScan(
     ),
     events: appendComplianceEvents(current, events),
   }
+}
+
+export function mergeFindingsDeduplicated(
+  existingFindings: ScanFinding[],
+  incomingFindings: ScanFinding[]
+): MergeFindingsResult {
+  const existingByFingerprint = new Map(existingFindings.map((finding) => [findingFingerprint(finding), finding]))
+  const consumedExisting = new Set<string>()
+  const mergedIncoming: ScanFinding[] = []
+  let addedHighRiskCount = 0
+  let addedLowRiskCount = 0
+
+  for (const incoming of incomingFindings) {
+    const fingerprint = findingFingerprint(incoming)
+    const existing = existingByFingerprint.get(fingerprint)
+
+    if (existing) {
+      consumedExisting.add(existing.id)
+      mergedIncoming.push({
+        ...existing,
+        ...incoming,
+        id: existing.id,
+        findingStatus: existing.findingStatus ?? incoming.findingStatus,
+        findingStatusUpdatedAtISO: existing.findingStatusUpdatedAtISO ?? incoming.findingStatusUpdatedAtISO,
+      })
+      continue
+    }
+
+    mergedIncoming.push(incoming)
+    if (incoming.category === "EU_AI_ACT" && incoming.risk === "high") {
+      addedHighRiskCount += 1
+    } else if (incoming.risk === "low") {
+      addedLowRiskCount += 1
+    }
+  }
+
+  const untouchedExisting = existingFindings.filter((finding) => !consumedExisting.has(finding.id))
+
+  return {
+    findings: [...mergedIncoming, ...untouchedExisting],
+    addedHighRiskCount,
+    addedLowRiskCount,
+  }
+}
+
+function findingFingerprint(finding: ScanFinding) {
+  const ruleId = normalizeFingerprintPart(finding.provenance?.ruleId)
+  const title = normalizeFingerprintPart(finding.title)
+  const category = normalizeFingerprintPart(finding.category)
+  const legalReference = normalizeFingerprintPart(finding.legalReference)
+  const textAnchor = normalizeFingerprintPart(
+    finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail
+  )
+
+  return [category, ruleId || legalReference, title, textAnchor].join("::")
+}
+
+function normalizeFingerprintPart(value: string | undefined) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim()
 }

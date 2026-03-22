@@ -46,6 +46,21 @@ Ci prin:
 - unificarea severitatii, principiilor si flow-ului principal
 - hardening, testare si fundatie operationala mai buna
 
+Actualizare 2026-03-22:
+
+- dupa QA manual real pe productie-safe flows, fundatia a primit un pass de hardening pe zonele care scadeau increderea in produs:
+  - export PDF server-side
+  - autodiscovery YAML / manifest
+  - consistenta applicability intre prefill fiscal si messaging `SAF-T`
+  - deduplicare finding-uri la rescan
+  - consistenta `Response Pack`
+  - feedback operational dupa confirmarea finding-urilor
+  - rate limiting si pe GET-uri sensibile
+- concluzia ramane aceeasi:
+  - problema principala nu este lipsa de functionalitati
+  - problema principala este increderea si coerenta pe fluxurile reale
+- acest pass reduce exact acele fronturi de risc, fara sa deschida un rewrite nou
+
 Sprintul de maturizare activ este:
 
 - `Sprint 7 - Operational readiness` (inchis operational)

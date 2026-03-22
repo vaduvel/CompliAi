@@ -3,7 +3,7 @@
 // Acoperă: GDPR, NIS2, EU AI Act, e-Factura — status, evidențe, angajamente.
 // G2: Partner/Counsel pack — share with accountant, counsel brief, month-over-month delta.
 
-import { createHash, randomBytes } from "crypto"
+import { randomBytes } from "crypto"
 
 import type { ComplianceState, DashboardSummary, RemediationAction } from "@/lib/compliance/types"
 
@@ -160,7 +160,13 @@ export function buildComplianceResponse(
 
   // EU AI Act framework
   const aiActFindings = findings.filter((f) => f.category === "EU_AI_ACT")
-  const aiSystemsCount = (state.aiSystems ?? []).length + (state.detectedAISystems ?? []).length
+  const confirmedDetectedAiSystems = (state.detectedAISystems ?? []).filter(
+    (system) => system.detectionStatus === "confirmed"
+  )
+  const aiSystemsCount = (state.aiSystems ?? []).length + confirmedDetectedAiSystems.length
+  const highRiskAiSystems =
+    (state.aiSystems ?? []).filter((system) => system.riskLevel === "high").length +
+    confirmedDetectedAiSystems.filter((system) => system.riskLevel === "high").length
   const aiStatus: ResponsePackFramework["status"] =
     aiSystemsCount === 0
       ? "not-assessed"
@@ -183,7 +189,7 @@ export function buildComplianceResponse(
       .map((f) => f.title),
     evidenceArtifacts: [
       "Inventar AI cu clasificare risc și proprietar",
-      ...(state.highRisk > 0 ? [`${state.highRisk} sisteme high-risk monitorizate`] : []),
+      ...(highRiskAiSystems > 0 ? [`${highRiskAiSystems} sisteme high-risk monitorizate`] : []),
     ],
   }
 
@@ -231,7 +237,7 @@ export function buildComplianceResponse(
       scannedDocuments: state.scannedDocuments ?? 0,
       validatedBaseline: !!state.validatedBaselineSnapshotId,
       aiSystemsInventoried: aiSystemsCount,
-      highRiskAiSystems: state.highRisk ?? 0,
+      highRiskAiSystems,
     },
     vendorReviews: vendorReviewSummary,
     fiscalStatus,

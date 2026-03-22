@@ -138,6 +138,15 @@ describe("evaluateApplicability", () => {
     expect(result.tags).toContain("saft")
   })
 
+  it("SAF-T nu afirmă greșit TVA când semnalul fiscal spune contrariul", () => {
+    const result = evaluateApplicability(makeProfile({ requiresEfactura: true, vatRegistered: false }))
+    const saft = result.entries.find((e) => e.tag === "saft")
+
+    expect(saft?.certainty).toBe("probable")
+    expect(saft?.reason).not.toContain("plătitoare de TVA")
+    expect(saft?.reason).toContain("nu confirmă explicit")
+  })
+
   it("SAF-T unlikely când requiresEfactura=false", () => {
     const result = evaluateApplicability(makeProfile({ requiresEfactura: false }))
     const saft = result.entries.find((e) => e.tag === "saft")

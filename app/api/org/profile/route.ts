@@ -67,6 +67,7 @@ export async function POST(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
     const body = (await request.json()) as OrgProfileRequestBody
+    const currentState = await readState()
 
     if (!body.sector || !VALID_SECTORS.includes(body.sector)) {
       return jsonError("Câmp invalid: sector.", 400, "INVALID_SECTOR")
@@ -85,12 +86,19 @@ export async function POST(request: Request) {
     const cuiRaw = typeof body.cui === "string" ? body.cui.trim() : undefined
     const cui = cuiRaw && /^(RO)?\d{2,10}$/i.test(cuiRaw) ? cuiRaw.toUpperCase() : undefined
     const website = normalizeWebsiteUrl(body.website)
+    const currentPrefill = currentState.orgProfilePrefill as OrgProfilePrefill | undefined
+    const matchingPrefill = doesPrefillMatchProfile(currentPrefill, cui, website)
+      ? currentPrefill
+      : undefined
 
     const orgProfile: OrgProfile = {
       sector: body.sector,
       employeeCount: body.employeeCount,
       usesAITools: body.usesAITools,
       requiresEfactura: body.requiresEfactura,
+      ...(typeof matchingPrefill?.vatRegistered === "boolean"
+        ? { vatRegistered: matchingPrefill.vatRegistered }
+        : {}),
       ...(cui ? { cui } : {}),
       ...(website ? { website } : {}),
       completedAtISO: new Date().toISOString(),
@@ -105,16 +113,17 @@ export async function POST(request: Request) {
 
     await mutateState((current) => {
       const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
-      const currentPrefill = current.orgProfilePrefill as OrgProfilePrefill | undefined
-      const matchingPrefill = doesPrefillMatchProfile(currentPrefill, cui, website)
-        ? currentPrefill
-        : undefined
+      const fallbackPrefill = matchingPrefill
+        ? matchingPrefill
+        : doesPrefillMatchProfile(current.orgProfilePrefill as OrgProfilePrefill | undefined, cui, website)
+          ? (current.orgProfilePrefill as OrgProfilePrefill)
+          : undefined
 
       return {
         ...current,
         orgProfile,
         applicability,
-        orgProfilePrefill: matchingPrefill,
+        orgProfilePrefill: fallbackPrefill,
         findings: intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings,
         intakeAnswers,
         intakeCompletedAtISO,

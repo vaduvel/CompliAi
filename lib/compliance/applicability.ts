@@ -22,6 +22,7 @@ export type OrgProfile = {
   employeeCount: OrgEmployeeCount
   usesAITools: boolean        // OpenAI, Copilot, Gemini, orice LLM / AI SaaS
   requiresEfactura: boolean   // firme plătitoare de TVA cu tranzacții B2B ≥ 5.000 RON
+  vatRegistered?: boolean     // semnal fiscal din prefill/ANAF, dacă este disponibil
   cui?: string                // CUI fiscal (opțional) — ex: "RO12345678" sau "12345678"
   website?: string            // website public (opțional) — ex: "https://exemplu.ro"
   completedAtISO: string
@@ -155,11 +156,17 @@ export function evaluateApplicability(profile: OrgProfile): ApplicabilityResult 
   // ── SAF-T (D406): obligatoriu din 2025 și pentru contribuabili mici
   // Orice firmă plătitoare de TVA cu e-Factura activă e candidat SAF-T
   if (profile.requiresEfactura) {
+    const saftReason =
+      profile.vatRegistered === true
+        ? "Firma ta apare ca plătitoare de TVA. Din 2025, ANAF a extins obligația SAF-T (D406) și la contribuabili mici. Verifică cu contabilul dacă depui D406 și respectă termenele."
+        : profile.vatRegistered === false
+          ? "Ai semnal de operare fiscală relevant pentru e-Factura, dar lookup-ul fiscal curent nu confirmă explicit statutul de plătitor de TVA. SAF-T (D406) poate fi totuși aplicabil; verifică obligatoriu cu contabilul înainte de a trata concluzia ca certă."
+          : "Ai semnale operaționale relevante pentru e-Factura. SAF-T (D406) poate fi aplicabil din 2025 și pentru contribuabili mici, dar statutul TVA trebuie confirmat cu contabilul."
+
     entries.push({
       tag: "saft",
       certainty: "probable",
-      reason:
-        "Firma ta este plătitoare de TVA. Din 2025, ANAF a extins obligația SAF-T (D406) și la contribuabili mici. Verifică cu contabilul dacă depui D406 și respectă termenele.",
+      reason: saftReason,
     })
   } else {
     entries.push({

@@ -10,19 +10,22 @@ const SESSION_COOKIE = "compliscan_session"
 type RateBucket = { count: number; windowStart: number }
 const rateBuckets = new Map<string, RateBucket>()
 
-const RATE_LIMITS: { pattern: RegExp; maxPerMin: number }[] = [
+const RATE_LIMITS: { pattern: RegExp; maxPerMin: number; methods: string[] }[] = [
   // Expensive generation routes — tight limit
-  { pattern: /^\/api\/documents\/generate/, maxPerMin: 10 },
-  { pattern: /^\/api\/scan\/extract/, maxPerMin: 10 },
+  { pattern: /^\/api\/documents\/generate/, maxPerMin: 10, methods: ["POST"] },
+  { pattern: /^\/api\/scan\/extract/, maxPerMin: 10, methods: ["POST"] },
+  // Sensitive read-heavy routes
+  {
+    pattern: /^\/api\/(findings\/|shadow-ai$|org\/profile$|exports\/audit-pack(?:\/bundle|\/client)?$)/,
+    maxPerMin: 120,
+    methods: ["GET"],
+  },
   // All other mutating routes
-  { pattern: /^\/api\//, maxPerMin: 60 },
+  { pattern: /^\/api\//, maxPerMin: 60, methods: ["POST", "PATCH", "PUT", "DELETE"] },
 ]
 
 function checkRateLimit(orgId: string, pathname: string, method: string): boolean {
-  // Only rate-limit mutating methods
-  if (!["POST", "PATCH", "PUT", "DELETE"].includes(method)) return true
-
-  const limit = RATE_LIMITS.find((r) => r.pattern.test(pathname))
+  const limit = RATE_LIMITS.find((r) => r.pattern.test(pathname) && r.methods.includes(method))
   if (!limit) return true
 
   const key = `${orgId}:${pathname.replace(/\/[a-z0-9-]{8,}/gi, "/:id")}`
