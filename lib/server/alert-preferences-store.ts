@@ -29,8 +29,13 @@ export const DEFAULT_ALERT_PREFERENCES: Omit<AlertPreferences, "updatedAtISO"> =
 const alertPrefsStorage = createAdaptiveStorage<AlertPreferences>("alert-prefs", "alert_preferences")
 
 export async function readAlertPreferences(orgId: string): Promise<AlertPreferences> {
-  const stored = await alertPrefsStorage.read(orgId)
-  if (stored) return stored
+  try {
+    const stored = await alertPrefsStorage.read(orgId)
+    if (stored) return stored
+  } catch (err) {
+    // Storage backend unavailable (e.g. Supabase table missing) — return defaults
+    console.warn(`[alert-prefs] Read failed for ${orgId}, using defaults:`, err instanceof Error ? err.message : err)
+  }
   return {
     ...DEFAULT_ALERT_PREFERENCES,
     events: { ...DEFAULT_ALERT_PREFERENCES.events },
@@ -43,6 +48,11 @@ export async function writeAlertPreferences(
   prefs: AlertPreferences
 ): Promise<AlertPreferences> {
   const updated: AlertPreferences = { ...prefs, updatedAtISO: new Date().toISOString() }
-  await alertPrefsStorage.write(orgId, updated)
+  try {
+    await alertPrefsStorage.write(orgId, updated)
+  } catch (err) {
+    // Storage backend unavailable — log but don't crash, prefs will reset next read
+    console.warn(`[alert-prefs] Write failed for ${orgId}:`, err instanceof Error ? err.message : err)
+  }
   return updated
 }
