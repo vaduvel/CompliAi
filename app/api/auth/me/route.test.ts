@@ -11,11 +11,13 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
+  getUserModeMock: vi.fn(),
   readFreshSessionFromRequestMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
+  getUserMode: mocks.getUserModeMock,
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
 }))
 
@@ -71,6 +73,7 @@ describe("GET /api/auth/me", () => {
       orgName: "Org Demo",
       role: "compliance",
       membershipId: null,
+      userMode: null,
     })
   })
 

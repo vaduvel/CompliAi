@@ -7,7 +7,6 @@ import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
 
 type ModeOption = {
   id: "solo" | "partner" | "compliance"

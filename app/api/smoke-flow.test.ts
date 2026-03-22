@@ -35,6 +35,7 @@ vi.mock("@/lib/server/auth", () => ({
   createSessionToken: mocks.createSessionTokenMock,
   findUserByEmail: mocks.findUserByEmailMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getUserMode: vi.fn().mockResolvedValue(null),
   hashPassword: mocks.hashPasswordMock,
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
