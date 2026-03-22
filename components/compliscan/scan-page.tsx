@@ -1,18 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import { ArrowRight, Bot } from "lucide-react"
+import { Bot, ChevronRight } from "lucide-react"
 
-import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
-import { GuideCard } from "@/components/evidence-os/GuideCard"
-import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
 import {
@@ -20,11 +16,10 @@ import {
   type ScanSourceType,
 } from "@/components/evidence-os/ScanSourceTypeSelector"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
-import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { LoadingScreen, ScanWorkspace } from "@/components/compliscan/route-sections"
 import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
-import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
+import { dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { SourceEnvelope } from "@/lib/compliance/agent-os"
 
 const AgentWorkspace = dynamic(
@@ -90,7 +85,6 @@ export function ScanPageSurface() {
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
   const [viewMode, setViewMode] = useState<ScanViewMode>("flow")
-  const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
     if (agentFlow.agentModeActive) {
@@ -176,8 +170,6 @@ export function ScanPageSurface() {
       yamlFilePattern.test(drift.sourceDocument || "") ||
       (drift.systemLabel ? yamlPanelSystemNames.has(drift.systemLabel) : false)
   )
-  const shouldShowDetails = showDetails || cockpit.data.state.scans.length === 0
-
   const currentEnvelope: SourceEnvelope = {
     sourceId: `temp-${Date.now()}`,
     sourceType:
@@ -226,15 +218,6 @@ export function ScanPageSurface() {
             ) : null}
           </>
         }
-        aside={
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Snapshot curent
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
-          </div>
-        }
         actions={
           <Button
             variant={agentFlow.agentModeActive ? "default" : "outline"}
@@ -246,8 +229,6 @@ export function ScanPageSurface() {
           </Button>
         }
       />
-
-      <PillarTabs sectionId="scanare" />
 
       <ScanViewTabs
         active={viewMode}
@@ -377,38 +358,22 @@ export function ScanPageSurface() {
             <ScanHistoryTabLazy scans={cockpit.data.state.scans} tasks={cockpit.tasks} />
           )}
 
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
-              <div>
-                <p className="text-sm font-semibold text-eos-text">Detalii de context</p>
-                <p className="text-xs text-eos-text-muted">
-                  Handoff-ul si ghidajul complet apar doar la cerere.
-                </p>
-              </div>
-              <Button variant="outline" onClick={() => setShowDetails((current) => !current)}>
-                {showDetails ? "Ascunde detaliile" : "Arata detaliile"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {shouldShowDetails ? (
-            <div className="space-y-6">
-              {viewMode === "flow" ? (
+          {viewMode === "flow" && (
+            <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
+              <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
+                <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+                Detalii context scanare
+              </summary>
+              <div className="mt-4">
                 <ScanFlowOverviewCard
                   sourceType={sourceType}
                   latestDocumentScan={latestDocumentScan}
                   latestManifestScan={latestManifestScan}
                   latestYamlScan={latestYamlScan}
                 />
-              ) : null}
-
-              <ScanWorkflowGuideCard
-                sourceType={sourceType}
-                viewMode={viewMode}
-                agentModeActive={agentFlow.agentModeActive}
-              />
-            </div>
-          ) : null}
+              </div>
+            </details>
+          )}
         </>
       )}
     </div>
@@ -505,128 +470,3 @@ function SectionLoadingCard({ title, detail }: { title: string; detail: string }
   )
 }
 
-function ScanWorkflowGuideCard({
-  sourceType,
-  viewMode,
-  agentModeActive,
-}: {
-  sourceType: ScanSourceType
-  viewMode: ScanViewMode
-  agentModeActive: boolean
-}) {
-  const executionLabel =
-    viewMode === "flow"
-      ? sourceType === "manifest"
-        ? "Autodiscovery si curatare de candidate"
-        : sourceType === "yaml"
-          ? "Validare config declarata"
-          : sourceType === "text"
-            ? "Analiza directa din text manual"
-            : "OCR, review si analiza document"
-      : viewMode === "verdicts"
-        ? "Explici ultimul rezultat confirmat"
-        : "Cauti sursa deja analizata"
-
-  const nextStep =
-    viewMode === "history"
-      ? {
-          title: "Continui in Istoric",
-          description: "Acolo gasesti arhiva completa, nu doar cele mai recente surse.",
-          href: dashboardRoutes.documents,
-          cta: "Deschide Istoric",
-        }
-      : sourceType === "manifest" || sourceType === "yaml"
-        ? {
-            title: "Dupa scanare continui in De rezolvat",
-            description: "Confirmi ce a iesit din sursa tehnica si tratezi actiunile in queue-ul canonic.",
-            href: dashboardRoutes.resolve,
-            cta: "Mergi la De rezolvat",
-          }
-        : {
-            title: "Dupa scanare continui in De rezolvat",
-            description: "Rezultatul documentului se transforma in task-uri, dovezi si pasii urmatori in queue-ul canonic.",
-            href: dashboardRoutes.resolve,
-            cta: "Mergi la De rezolvat",
-          }
-
-  return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-      <SectionBoundary
-        eyebrow="Context curent"
-        title={
-          viewMode === "flow"
-            ? "Lucrezi in fluxul activ"
-            : viewMode === "verdicts"
-              ? "Citesti ultimul verdict confirmat"
-              : "Cauti rapid sursa relevanta"
-        }
-        description={executionLabel}
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {agentModeActive ? "validare umana obligatorie" : "flux operator"}
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              handoff spre De rezolvat
-            </Badge>
-          </>
-        }
-        support={
-          <div className="grid gap-3 md:grid-cols-2">
-            <GuideCard
-              title="Rolul paginii"
-              detail={
-                agentModeActive
-                  ? "Workspace-ul agentului propune, dar omul valideaza."
-                  : "Scanare este poarta de intrare pentru surse, nu locul final pentru rezolvare sau dovezi."
-              }
-            />
-            <GuideCard
-              title="Regula de citire"
-              detail="Sus executi. Mai jos explici sau verifici. Dupa aceea continui in pagina dedicata."
-            />
-          </div>
-        }
-      />
-
-      <HandoffCard
-        title={nextStep.title}
-        description={nextStep.description}
-        destinationLabel={
-          viewMode === "history"
-            ? "istoric complet"
-            : sourceType === "manifest" || sourceType === "yaml"
-              ? "de rezolvat"
-              : "de rezolvat si rapoarte"
-        }
-        checklist={
-          viewMode === "history"
-            ? [
-                "verifici sursa recenta potrivita",
-                "sari in Istoric pentru lista completa",
-                "revii in flux doar daca ai o sursa noua",
-              ]
-            : sourceType === "manifest" || sourceType === "yaml"
-              ? [
-                  "confirmi ce intra real in inventar",
-                  "verifici baseline-ul si drift-ul",
-                  "nu inchizi auditul direct din Scanare",
-                ]
-              : [
-                  "citesti verdictul pentru sursa curenta",
-                  "deschizi task-urile derivate in De rezolvat",
-                  "atasezi dovezi si livrezi separat",
-                ]
-        }
-        actions={
-          <Button asChild variant="outline">
-            <Link href={nextStep.href}>
-              {nextStep.cta}
-              <ArrowRight className="size-4" strokeWidth={2} />
-            </Link>
-          </Button>
-        }
-      />
-    </div>
-  )
-}
