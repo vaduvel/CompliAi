@@ -134,11 +134,6 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── DNSC Registration CTA (Sprint 4) ──────────────────────────────────── */}
-      {state.orgProfile && applicability?.tags.includes("nis2") && (
-        <DnscRegistrationBanner />
-      )}
-
       {/* ── Summary strip — compact health ─────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
@@ -162,6 +157,11 @@ export default function DashboardPage() {
           </span>
         </summary>
         <div className="mt-4 space-y-6">
+          {/* DNSC registration CTA */}
+          {state.orgProfile && applicability?.tags.includes("nis2") && (
+            <DnscRegistrationBanner />
+          )}
+
           {/* Vigilance Strip */}
           {state.orgProfile && (() => {
             const strip = getVigilanceStrip(state.orgProfile.sector)

@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import dynamic from "next/dynamic"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Briefcase, ChevronRight, Copy, Loader2, Scale, Share2 } from "lucide-react"
@@ -91,20 +90,26 @@ export function ReportsPageSurface() {
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
   const activeDrifts = cockpit.activeDrifts
+  const auditStatusLabel =
+    activeDrifts.some((drift) => drift.blocksAudit)
+      ? "Blocat"
+      : cockpit.data.summary.score >= 90
+        ? "Pregătit"
+        : "În progres"
 
   return (
     <div className="space-y-8">
       <PageIntro
         eyebrow="Rapoarte"
-        title="Rapoarte"
-        description="Output-ul conformității tale — exportă, partajează și verifică."
+        title="Dovezi & Export"
+        description="Output-ul conformității tale — generezi livrabilul potrivit și verifici starea de audit."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               read-only
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              Scor: {cockpit.data.summary.score}%
+              Stare audit: {auditStatusLabel}
             </Badge>
           </>
         }
@@ -126,14 +131,11 @@ export function ReportsPageSurface() {
         onShare={() => void cockpitActions.handleShareWithAccountant()}
       />
 
-      {/* Partner & Counsel Pack */}
-      <PartnerCounselPack />
-
       {/* Secondary: detailed info under fold */}
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
           <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-          Detalii snapshot, audit pack și semnale
+          Detalii snapshot, handoff și semnale
         </summary>
         <div className="mt-4 space-y-6">
           <SnapshotStatusCard
@@ -141,6 +143,8 @@ export function ReportsPageSurface() {
             validatedBaseline={validatedBaseline}
             driftCount={activeDrifts.length}
           />
+
+          <PartnerCounselPack />
 
           {cockpit.data.compliancePack && (
             <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
