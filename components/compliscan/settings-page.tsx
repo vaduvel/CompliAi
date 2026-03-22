@@ -27,7 +27,6 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
-import { OnboardingProgress } from "@/components/compliscan/onboarding-progress"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const DRIFT_OVERRIDE_OPTIONS = [
@@ -258,8 +257,6 @@ export function SettingsPageSurface() {
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  const state = cockpit.data.state
-  const totalAiSystems = state.highRisk + state.lowRisk
   const activeSnapshot = cockpit.data.state.snapshotHistory[0]
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
@@ -278,18 +275,6 @@ export function SettingsPageSurface() {
           </>
         }
       />
-
-      {state.orgProfile && (
-        <section aria-label="Ghid de pornire mutat din Acasa">
-          <OnboardingProgress
-            hasProfile={true}
-            hasAiSystems={totalAiSystems > 0}
-            gdprProgress={state.gdprProgress}
-            hasScans={state.scans.length > 0 || state.scannedDocuments > 0}
-            hasResolvedTasks={cockpit.tasks.some((task) => task.status === "done")}
-          />
-        </section>
-      )}
 
       <Tabs defaultValue="workspace" className="space-y-6">
         <div className="space-y-3">
