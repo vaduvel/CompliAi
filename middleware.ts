@@ -58,7 +58,7 @@ function getSessionSecret() {
 
 async function verifyToken(
   token: string
-): Promise<{ userId: string; orgId: string; email: string; orgName: string } | null> {
+): Promise<{ userId: string; orgId: string; email: string; orgName: string; workspaceMode: string } | null> {
   try {
     const secret = getSessionSecret()
     const dotIndex = token.lastIndexOf(".")
@@ -89,10 +89,12 @@ async function verifyToken(
       orgId: string
       email: string
       orgName: string
+      workspaceMode?: string
       exp: number
     }
     if (payload.exp < Date.now()) return null
-    return { userId: payload.userId, orgId: payload.orgId, email: payload.email, orgName: payload.orgName }
+    const workspaceMode = payload.workspaceMode === "portfolio" ? "portfolio" : "org"
+    return { userId: payload.userId, orgId: payload.orgId, email: payload.email, orgName: payload.orgName, workspaceMode }
   } catch {
     return null
   }
@@ -142,10 +144,11 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-compliscan-user-id", session.userId)
   requestHeaders.set("x-compliscan-user-email", session.email)
   requestHeaders.set("x-compliscan-org-name", session.orgName)
+  requestHeaders.set("x-compliscan-workspace-mode", session.workspaceMode)
 
   return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding", "/api/((?!auth|demo|stripe/webhook).*)"],
+  matcher: ["/dashboard/:path*", "/portfolio/:path*", "/onboarding", "/api/((?!auth|demo|stripe/webhook).*)"],
 }

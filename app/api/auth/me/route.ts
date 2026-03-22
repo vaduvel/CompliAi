@@ -23,6 +23,7 @@ export async function GET(request: Request) {
           role: session.role,
           membershipId: session.membershipId ?? null,
           userMode: userMode ?? null,
+          workspaceMode: session.workspaceMode ?? "org",
         },
       },
       withRequestIdHeaders(undefined, context)

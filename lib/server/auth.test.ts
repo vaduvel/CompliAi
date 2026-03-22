@@ -980,4 +980,121 @@ describe("lib/server/auth", () => {
       })
     )
   })
+
+  it("token cu workspaceMode portfolio pastreaza valoarea la verify", () => {
+    const token = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "partner@example.com",
+      orgName: "Cabinet Elena",
+      role: "partner_manager",
+      workspaceMode: "portfolio",
+    })
+
+    const payload = verifySessionToken(token)
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        userId: "user-1",
+        workspaceMode: "portfolio",
+      })
+    )
+  })
+
+  it("token fara workspaceMode primeste default org la verify", () => {
+    const token = createSessionToken({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "demo@site.ro",
+      orgName: "Org Demo",
+      role: "owner",
+    })
+
+    const payload = verifySessionToken(token)
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        userId: "user-1",
+        workspaceMode: "org",
+      })
+    )
+  })
+
+  it("token legacy fara workspaceMode nu crapa si primeste org", () => {
+    const legacyToken = createSessionToken({
+      userId: "user-legacy",
+      orgId: "org-1",
+      email: "legacy@site.ro",
+      orgName: "Legacy Org",
+      role: "owner",
+    })
+
+    const dotIndex = legacyToken.lastIndexOf(".")
+    const encoded = legacyToken.slice(0, dotIndex)
+    const decoded = JSON.parse(Buffer.from(encoded, "base64url").toString()) as Record<string, unknown>
+    delete decoded.workspaceMode
+
+    const legacyPayload = Buffer.from(JSON.stringify(decoded)).toString("base64url")
+    const migratedSignature = crypto
+      .createHmac("sha256", process.env.COMPLISCAN_SESSION_SECRET as string)
+      .update(legacyPayload)
+      .digest("base64url")
+    const migratedToken = `${legacyPayload}.${migratedSignature}`
+    const payload = verifySessionToken(migratedToken)
+
+    expect(payload).not.toBeNull()
+    expect(payload!.workspaceMode).toBe("org")
+    expect(payload!.userId).toBe("user-legacy")
+  })
+
+  it("refresh pastreaza workspaceMode din sesiunea originala", async () => {
+    const users: PersistedUserRecord[] = [
+      {
+        id: "user-1",
+        email: "partner@example.com",
+        passwordHash: "hash",
+        salt: "salt",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+      },
+    ]
+    const orgs = [{ id: "org-1", name: "Client SRL", createdAtISO: "2026-03-13T10:00:00.000Z" }]
+    const memberships = [
+      {
+        id: "membership-1",
+        userId: "user-1",
+        orgId: "org-1",
+        role: "partner_manager",
+        createdAtISO: "2026-03-13T10:00:00.000Z",
+        status: "active",
+      },
+    ]
+
+    await writeFile(process.env.COMPLISCAN_USERS_FILE as string, JSON.stringify(users, null, 2))
+    await writeFile(process.env.COMPLISCAN_ORGS_FILE as string, JSON.stringify(orgs, null, 2))
+    await writeFile(
+      process.env.COMPLISCAN_MEMBERSHIPS_FILE as string,
+      JSON.stringify(memberships, null, 2)
+    )
+
+    const portfolioSession = {
+      userId: "user-1",
+      orgId: "org-1",
+      email: "partner@example.com",
+      orgName: "Client SRL",
+      role: "partner_manager" as const,
+      membershipId: "membership-1",
+      workspaceMode: "portfolio" as const,
+      exp: Date.now() + 60_000,
+    }
+
+    const refreshed = await refreshSessionPayload(portfolioSession)
+
+    expect(refreshed).toEqual(
+      expect.objectContaining({
+        userId: "user-1",
+        role: "partner_manager",
+        workspaceMode: "portfolio",
+      })
+    )
+  })
 })

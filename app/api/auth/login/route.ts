@@ -66,6 +66,7 @@ export async function POST(request: Request) {
       orgName: user.orgName,
       role: user.role,
       membershipId: user.membershipId,
+      workspaceMode: "org",
     })
 
     const response = NextResponse.json(

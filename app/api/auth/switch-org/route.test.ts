@@ -65,7 +65,9 @@ describe("POST /api/auth/switch-org", () => {
     expect(payload.orgId).toBe("org-2")
     expect(payload.membershipId).toBe("membership-2")
     expect(mocks.resolveUserForMembershipMock).toHaveBeenCalledWith("user-1", "membership-2")
-    expect(mocks.createSessionTokenMock).toHaveBeenCalled()
+    expect(mocks.createSessionTokenMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workspaceMode: "org" })
+    )
     expect(response.headers.get("set-cookie")).toContain("compliscan_session=signed-token")
   })
 

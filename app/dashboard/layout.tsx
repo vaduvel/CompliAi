@@ -35,6 +35,9 @@ export default async function DashboardLayout({
     if (!userMode) {
       redirect("/onboarding")
     }
+    if (session.workspaceMode === "portfolio" && userMode === "partner") {
+      redirect("/portfolio")
+    }
   }
 
   const memberships = session ? await listUserMemberships(session.userId) : []

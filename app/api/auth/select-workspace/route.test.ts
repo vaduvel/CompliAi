@@ -1,0 +1,175 @@
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+const mocks = vi.hoisted(() => ({
+  createSessionTokenMock: vi.fn(),
+  getSessionCookieOptionsMock: vi.fn(),
+  getUserModeMock: vi.fn(),
+  listUserMembershipsMock: vi.fn(),
+  readSessionFromRequestMock: vi.fn(),
+  resolveUserForMembershipMock: vi.fn(),
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  createSessionToken: mocks.createSessionTokenMock,
+  getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getUserMode: mocks.getUserModeMock,
+  listUserMemberships: mocks.listUserMembershipsMock,
+  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  resolveUserForMembership: mocks.resolveUserForMembershipMock,
+  SESSION_COOKIE: "compliscan_session",
+}))
+
+import { POST } from "./route"
+
+describe("POST /api/auth/select-workspace", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.getSessionCookieOptionsMock.mockReturnValue({
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    })
+    mocks.createSessionTokenMock.mockReturnValue("new-signed-token")
+    mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "partner@site.ro",
+      orgName: "Cabinet Elena",
+      role: "partner_manager",
+      membershipId: "membership-1",
+      workspaceMode: "org",
+      exp: Date.now() + 60_000,
+    })
+  })
+
+  it("returneaza 401 fara sesiune", async () => {
+    mocks.readSessionFromRequestMock.mockReturnValue(null)
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "portfolio" }),
+      })
+    )
+
+    expect(response.status).toBe(401)
+  })
+
+  it("returneaza 400 pentru workspaceMode invalid", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "invalid" }),
+      })
+    )
+
+    expect(response.status).toBe(400)
+    const payload = await response.json()
+    expect(payload.code).toBe("INVALID_WORKSPACE_MODE")
+  })
+
+  it("activeaza portfolio pentru user cu userMode partner", async () => {
+    mocks.getUserModeMock.mockResolvedValue("partner")
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "portfolio" }),
+      })
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload.ok).toBe(true)
+    expect(payload.workspaceMode).toBe("portfolio")
+    expect(mocks.createSessionTokenMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workspaceMode: "portfolio" })
+    )
+  })
+
+  it("blocheaza portfolio pentru user non-partner", async () => {
+    mocks.getUserModeMock.mockResolvedValue("solo")
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "portfolio" }),
+      })
+    )
+
+    expect(response.status).toBe(403)
+    const payload = await response.json()
+    expect(payload.code).toBe("WORKSPACE_PORTFOLIO_FORBIDDEN")
+  })
+
+  it("activeaza org mode cu orgId valid", async () => {
+    mocks.listUserMembershipsMock.mockResolvedValue([
+      {
+        membershipId: "membership-2",
+        orgId: "org-client",
+        orgName: "Client SRL",
+        role: "partner_manager",
+        status: "active",
+      },
+    ])
+    mocks.resolveUserForMembershipMock.mockResolvedValue({
+      id: "user-1",
+      orgId: "org-client",
+      email: "partner@site.ro",
+      orgName: "Client SRL",
+      role: "partner_manager",
+      membershipId: "membership-2",
+    })
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "org", orgId: "org-client" }),
+      })
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload.ok).toBe(true)
+    expect(payload.workspaceMode).toBe("org")
+    expect(payload.orgId).toBe("org-client")
+    expect(mocks.createSessionTokenMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workspaceMode: "org", orgId: "org-client" })
+    )
+  })
+
+  it("returneaza 400 pentru org mode fara orgId", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "org" }),
+      })
+    )
+
+    expect(response.status).toBe(400)
+    const payload = await response.json()
+    expect(payload.code).toBe("WORKSPACE_ORG_ID_REQUIRED")
+  })
+
+  it("returneaza 403 pentru org fara membership", async () => {
+    mocks.listUserMembershipsMock.mockResolvedValue([])
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "org", orgId: "org-unknown" }),
+      })
+    )
+
+    expect(response.status).toBe(403)
+    const payload = await response.json()
+    expect(payload.code).toBe("WORKSPACE_ORG_NOT_MEMBER")
+  })
+})

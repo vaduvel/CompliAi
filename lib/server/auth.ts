@@ -79,6 +79,8 @@ export type UserMembershipSummary = {
   status: "active" | "inactive"
 }
 
+export type WorkspaceMode = "org" | "portfolio"
+
 export type SessionPayload = {
   userId: string
   orgId: string
@@ -86,6 +88,7 @@ export type SessionPayload = {
   orgName: string
   role: UserRole
   membershipId?: string
+  workspaceMode?: WorkspaceMode
   exp: number
 }
 
@@ -197,6 +200,10 @@ function isUserMode(value: unknown): value is UserMode {
     value === "compliance" ||
     value === "viewer"
   )
+}
+
+function isWorkspaceMode(value: unknown): value is WorkspaceMode {
+  return value === "org" || value === "portfolio"
 }
 
 async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
@@ -938,6 +945,7 @@ export function verifySessionToken(token: string): SessionPayload | null {
       orgName: payload.orgName,
       role: isUserRole(payload.role) ? payload.role : "owner",
       membershipId: payload.membershipId,
+      workspaceMode: isWorkspaceMode(payload.workspaceMode) ? payload.workspaceMode : "org",
       exp: payload.exp,
     }
   } catch {
@@ -994,6 +1002,7 @@ export async function refreshSessionPayload(
       orgName: resolvedUser.orgName,
       role: resolvedUser.role,
       membershipId: resolvedUser.membershipId,
+      workspaceMode: session.workspaceMode ?? "org",
       exp: session.exp,
     }
   } catch (error) {

@@ -74,6 +74,7 @@ describe("GET /api/auth/me", () => {
       role: "compliance",
       membershipId: null,
       userMode: null,
+      workspaceMode: "org",
     })
   })
 

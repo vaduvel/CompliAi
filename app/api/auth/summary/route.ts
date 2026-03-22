@@ -26,6 +26,7 @@ export async function GET(request: Request) {
         orgName: session.orgName,
         role: session.role,
         membershipId: session.membershipId ?? null,
+        workspaceMode: session.workspaceMode ?? "org",
       },
       memberships,
       currentMembershipId: session.membershipId ?? null,

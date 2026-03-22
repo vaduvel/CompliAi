@@ -75,6 +75,7 @@ describe("GET /api/auth/summary", () => {
       orgName: "Org Demo",
       role: "compliance",
       membershipId: "membership-1",
+      workspaceMode: "org",
     })
     expect(payload.currentMembershipId).toBe("membership-1")
     expect(payload.currentOrgId).toBe("org-1")

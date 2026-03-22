@@ -101,7 +101,7 @@ describe("POST /api/auth/login", () => {
     expect(payload.role).toBe("owner")
     expect(response.headers.get("set-cookie")).toContain("compliscan_session=signed-token")
     expect(mocks.createSessionTokenMock).toHaveBeenCalledWith(
-      expect.objectContaining({ role: "owner" })
+      expect.objectContaining({ role: "owner", workspaceMode: "org" })
     )
   })
 
