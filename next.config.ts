@@ -8,8 +8,14 @@ const nextConfig: NextConfig = {
     devtoolSegmentExplorer: false,
   },
   outputFileTracingIncludes: {
-    "/api/reports/pdf": ["./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf"],
-    "/api/documents/export-pdf": ["./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf"],
+    "/api/reports/pdf": [
+      "./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
+      "./node_modules/pdfkit/js/data/**/*",
+    ],
+    "/api/documents/export-pdf": [
+      "./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
+      "./node_modules/pdfkit/js/data/**/*",
+    ],
   },
   env: {
     NEXT_PUBLIC_SENTRY_RELEASE: sentryRelease,

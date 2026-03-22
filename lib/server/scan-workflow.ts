@@ -394,15 +394,13 @@ export function mergeFindingsDeduplicated(
 }
 
 function findingFingerprint(finding: ScanFinding) {
-  const ruleId = normalizeFingerprintPart(finding.provenance?.ruleId)
+  const ruleId = normalizeStableRuleId(finding.provenance?.ruleId)
   const title = normalizeFingerprintPart(finding.title)
   const category = normalizeFingerprintPart(finding.category)
   const legalReference = normalizeFingerprintPart(finding.legalReference)
-  const textAnchor = normalizeFingerprintPart(
-    finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail
-  )
+  const textAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(finding))
 
-  return [category, ruleId || legalReference, title, textAnchor].join("::")
+  return [category, ruleId || legalReference || title, textAnchor || title].join("::")
 }
 
 function normalizeFingerprintPart(value: string | undefined) {
@@ -410,4 +408,20 @@ function normalizeFingerprintPart(value: string | undefined) {
     .toLowerCase()
     .replace(/\s+/g, " ")
     .trim()
+}
+
+function normalizeStableRuleId(ruleId: string | undefined) {
+  const normalized = normalizeFingerprintPart(ruleId)
+  return normalized.startsWith("gemini-") ? "" : normalized
+}
+
+function normalizeFindingTextAnchor(finding: ScanFinding) {
+  const rawAnchor = finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail ?? ""
+  const documentName = finding.sourceDocument?.trim()
+
+  const withoutDocumentName = documentName && rawAnchor.startsWith(documentName)
+    ? rawAnchor.slice(documentName.length)
+    : rawAnchor
+
+  return withoutDocumentName.replace(/^[\s:/-]+/, "").trim()
 }

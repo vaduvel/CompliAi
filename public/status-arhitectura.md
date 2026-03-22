@@ -56,6 +56,9 @@ Actualizare 2026-03-22:
   - consistenta `Response Pack`
   - feedback operational dupa confirmarea finding-urilor
   - rate limiting si pe GET-uri sensibile
+- follow-up-ul de verificare live a inchis si cele 2 restante ramase dupa primul pass:
+  - tracing explicit pentru fonturile standard PDFKit in bundle-ul serverless de export PDF
+  - fingerprint semantic mai stabil pentru deduplicarea finding-urilor la rescan
 - concluzia ramane aceeasi:
   - problema principala nu este lipsa de functionalitati
   - problema principala este increderea si coerenta pe fluxurile reale

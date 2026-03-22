@@ -99,4 +99,65 @@ describe("mergeFindingsDeduplicated", () => {
     expect(merged.findings).toHaveLength(1)
     expect(merged.addedHighRiskCount).toBe(1)
   })
+
+  it("deduplica finding-uri Gemini cu titluri si ruleId-uri instabile, dar acelasi articol si excerpt", () => {
+    const existing = makeFinding({
+      id: "finding-gemini-1",
+      title: "Lipsa mențiunii privind transferurile internaționale de date",
+      legalReference: "Art. 44",
+      provenance: {
+        ruleId: "gemini-gdpr-r-old123",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-gemini-2",
+      title: "Lipsa mențiunii privind transferul datelor în afara SEE",
+      legalReference: "Art. 44",
+      sourceDocument: "scan-2.pdf",
+      provenance: {
+        ruleId: "gemini-gdpr-r-new456",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-gemini-1")
+    expect(merged.addedLowRiskCount).toBe(0)
+  })
+
+  it("deduplica finding-uri keyword cand excerptul difera doar prin numele documentului", () => {
+    const existing = makeFinding({
+      id: "finding-keyword-1",
+      title: "Verificare consimțământ tracking",
+      detail: "Verifica bannerele de consimtamant.",
+      risk: "low",
+      severity: "medium",
+      sourceDocument: "policy-tracking-live-1.txt",
+      provenance: {
+        ruleId: "GDPR-003",
+        excerpt: "policy-tracking-live-1.txt Politica de confidentialitate Folosim analytics si",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-keyword-2",
+      title: "Verificare consimțământ tracking",
+      detail: "Verifica bannerele de consimtamant.",
+      risk: "low",
+      severity: "medium",
+      sourceDocument: "policy-tracking-live-2.txt",
+      provenance: {
+        ruleId: "GDPR-003",
+        excerpt: "policy-tracking-live-2.txt Politica de confidentialitate Folosim analytics si",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-keyword-1")
+    expect(merged.addedLowRiskCount).toBe(0)
+  })
 })
