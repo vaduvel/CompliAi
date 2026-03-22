@@ -23,6 +23,18 @@ import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sectio
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
 
+// Extended finding type — automation fields are optional so the page
+// compiles regardless of which branch supplies the data.
+type FindingDetail = ScanFinding & {
+  findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
+  findingStatusUpdatedAtISO?: string
+  confidenceScore?: number
+  requiresHumanReview?: boolean
+  reasoning?: string
+  sourceParagraph?: string
+  suggestedDocumentType?: string
+}
+
 // ── Resolution Steps ──────────────────────────────────────────────────────────
 
 const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string; icon: React.ElementType }> = [
@@ -59,7 +71,7 @@ function ageLabel(iso: string): string {
 export default function FindingDetailPage() {
   const params = useParams<{ findingId: string }>()
   const router = useRouter()
-  const [finding, setFinding] = useState<ScanFinding | null>(null)
+  const [finding, setFinding] = useState<FindingDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
@@ -72,7 +84,7 @@ export default function FindingDetailPage() {
         if (!r.ok) throw new Error(r.status === 404 ? "Finding inexistent." : "Eroare server.")
         return r.json()
       })
-      .then((data: { finding: ScanFinding }) => {
+      .then((data: { finding: FindingDetail }) => {
         setFinding(data.finding)
         setError(null)
       })
