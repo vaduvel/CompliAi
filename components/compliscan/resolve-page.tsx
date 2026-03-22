@@ -44,6 +44,27 @@ function ageLabel(iso: string): string {
   return `${Math.floor(days / 30)}l`
 }
 
+function getFindingReviewBadge(
+  finding: ScanFinding
+): { label: string; variant: "default" | "warning" | "secondary" | "success" } {
+  if (finding.findingStatus === "resolved") {
+    return { label: "Rezolvat", variant: "success" }
+  }
+  if (finding.findingStatus === "dismissed") {
+    return { label: "Respins", variant: "secondary" }
+  }
+  if (finding.findingStatus === "confirmed") {
+    return { label: "Confirmat", variant: "default" }
+  }
+  if (finding.requiresHumanReview) {
+    return { label: "De revizuit", variant: "warning" }
+  }
+  if (finding.resolution) {
+    return { label: "In remediere", variant: "default" }
+  }
+  return { label: "Detectat", variant: "warning" }
+}
+
 // ── Resolution Layer (inline) ─────────────────────────────────────────────────
 
 const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string }> = [
@@ -113,10 +134,7 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const [expanded, setExpanded] = useState(false)
   const fw = frameworkFromLegal(finding.legalReference)
   const age = ageLabel(finding.createdAtISO)
-
-  const reviewState = finding.resolution ? "remediation" : "detected"
-  const reviewBadgeVariant = reviewState === "remediation" ? "default" : "warning"
-  const reviewBadgeLabel = reviewState === "remediation" ? "În remediere" : "Detectat"
+  const reviewBadge = getFindingReviewBadge(finding)
 
   return (
     <div className={["overflow-hidden rounded-eos-md border transition-colors duration-150", expanded ? "border-eos-border-default" : "border-eos-border-subtle", "bg-eos-surface"].join(" ")}>
@@ -136,8 +154,8 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
           </Badge>
         )}
         <span className="shrink-0 text-[11px] text-eos-text-muted">{age}</span>
-        <Badge variant={reviewBadgeVariant} className="normal-case tracking-normal shrink-0">
-          {reviewBadgeLabel}
+        <Badge variant={reviewBadge.variant} className="normal-case tracking-normal shrink-0">
+          {reviewBadge.label}
         </Badge>
         {expanded
           ? <ChevronDown className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />

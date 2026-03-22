@@ -56,7 +56,7 @@ const ScanVerdictsTab = dynamic(
   {
     loading: () => (
       <SectionLoadingCard
-        title="Verdicts in incarcare"
+        title="Rezultat curent in incarcare"
         detail="Ultimul rezultat confirmat se pregateste separat de fluxul activ."
       />
     ),
@@ -192,7 +192,7 @@ export function ScanPageSurface() {
       <PageIntro
         eyebrow="Scanare"
         title="Pornesti analiza din sursa potrivita"
-        description="Aici alegi sursa si rulezi analiza. Verdicts ramane read-only, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
+        description="Aici alegi sursa si rulezi analiza. Rezultatul curent ramane doar pentru citire, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -208,7 +208,7 @@ export function ScanPageSurface() {
               {viewMode === "flow"
                 ? "flux activ"
                 : viewMode === "verdicts"
-                  ? "verdict read-only"
+                  ? "rezultat curent"
                   : "istoric recent"}
             </Badge>
             {agentFlow.agentModeActive ? (
@@ -403,9 +403,9 @@ function ScanViewTabs({
     },
     {
       id: "verdicts",
-      title: "Verdicts",
+      title: "Rezultat curent",
       description: "Aici citesti ultimul rezultat confirmat, fara sa amesteci fluxul activ.",
-      badge: "read-only",
+      badge: "doar citire",
     },
     {
       id: "history",
@@ -452,7 +452,7 @@ function ScanViewTabs({
       </div>
       {locked && (
         <Badge variant="secondary" className="normal-case tracking-normal">
-          Mod Agent activ: verdicts si istoric raman blocate pana iesi din workspace-ul agentului.
+          Mod Agent activ: rezultatul curent si istoricul raman blocate pana iesi din workspace-ul agentului.
         </Badge>
       )}
     </div>
@@ -469,4 +469,3 @@ function SectionLoadingCard({ title, detail }: { title: string; detail: string }
     </Card>
   )
 }
-
