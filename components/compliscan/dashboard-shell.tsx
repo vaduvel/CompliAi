@@ -3,7 +3,7 @@
 import { startTransition, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Check, ChevronsUpDown, LogOut } from "lucide-react"
+import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/evidence-os/DropdownMenu"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { canSwitchToPortfolio, getMobileNavItems, getSidebarNavSections } from "@/lib/compliscan/nav-config"
 import type { WorkspaceMode } from "@/lib/server/auth"
 
@@ -300,6 +301,11 @@ export function DashboardShell({
                       )
                     })}
                   </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push(dashboardRoutes.accountSettings)}>
+                    <Settings2 className="size-4" strokeWidth={2} />
+                    Setări cont
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"

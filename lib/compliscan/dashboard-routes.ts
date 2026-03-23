@@ -1,5 +1,6 @@
 export const dashboardRoutes = {
   home: "/dashboard",
+  accountSettings: "/account/settings",
   scan: "/dashboard/scan",
   scanResultsBase: "/dashboard/scan/results",
   documents: "/dashboard/scan/history",

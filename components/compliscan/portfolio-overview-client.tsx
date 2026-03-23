@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   AlertTriangle,
@@ -23,6 +24,8 @@ import { Card } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { PARTNER_ACCOUNT_PLAN_LABELS, type PartnerAccountPlan } from "@/lib/shared/plan-constants"
 import type { PortfolioOverviewClientSummary } from "@/lib/server/portfolio"
 
 type ScoreFilter = "all" | "under50" | "50to75" | "over75"
@@ -32,6 +35,14 @@ type SortDir = "asc" | "desc"
 
 type PortfolioOverviewClientProps = {
   mode: "portfolio" | "legacy-partner"
+}
+
+type PortfolioPlanResponse = {
+  planType: PartnerAccountPlan | null
+  maxOrgs: number | null
+  currentOrgs: number
+  canAddOrg: boolean
+  partnerPlanSource: "account" | "legacy_org_partner" | "none"
 }
 
 function formatDate(value: string | null | undefined) {
@@ -335,6 +346,7 @@ function CsvImportModal({
 export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) {
   const router = useRouter()
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
+  const [planData, setPlanData] = useState<PortfolioPlanResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
@@ -361,8 +373,20 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
     }
   }
 
+  async function fetchPlanData() {
+    try {
+      const response = await fetch("/api/plan", { cache: "no-store" })
+      if (!response.ok) return
+      const data = (await response.json()) as PortfolioPlanResponse
+      setPlanData(data)
+    } catch {
+      // UI fallback only — API will still enforce capacity server-side.
+    }
+  }
+
   useEffect(() => {
     void fetchClients()
+    void fetchPlanData()
   }, [])
 
   async function handleDrillDown(orgId: string) {
@@ -481,7 +505,10 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
       {showImport ? (
         <CsvImportModal
           onClose={() => setShowImport(false)}
-          onSuccess={() => void fetchClients()}
+          onSuccess={() => {
+            void fetchClients()
+            void fetchPlanData()
+          }}
         />
       ) : null}
 
@@ -498,6 +525,11 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
             <Badge variant="outline" className="normal-case tracking-normal">
               {activeClients.length} firme active
             </Badge>
+            {planData?.planType && planData.maxOrgs !== null ? (
+              <Badge variant="secondary" className="normal-case tracking-normal">
+                {PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} · {planData.currentOrgs}/{planData.maxOrgs}
+              </Badge>
+            ) : null}
             {alertClients.length > 0 ? (
               <Badge variant="destructive" dot className="normal-case tracking-normal">
                 {alertClients.length} cu alerte critice
@@ -507,21 +539,53 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowImport(true)}
+              disabled={planData ? !planData.canAddOrg : false}
+              className="gap-2"
+            >
               <Upload className="size-3.5" strokeWidth={2} />
-              Import CSV
+              {planData && !planData.canAddOrg ? "Limita atinsă" : "Import CSV"}
             </Button>
             <Button size="sm" variant="outline" onClick={handleExportCsv} className="gap-2">
               <Download className="size-3.5" strokeWidth={2} />
               Exportă CSV
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => void fetchClients()} className="gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                void fetchClients()
+                void fetchPlanData()
+              }}
+              className="gap-2"
+            >
               <RefreshCw className="size-3.5" strokeWidth={2} />
               Actualizează
             </Button>
           </div>
         }
       />
+
+      {planData && !planData.canAddOrg ? (
+        <div className="rounded-eos-xl border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-eos-text">Capacitatea portofoliului este atinsă</p>
+              <p className="mt-1 text-xs leading-5 text-eos-warning/90">
+                {planData.planType
+                  ? `Planul ${PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} permite până la ${planData.maxOrgs} firme.`
+                  : "Ai nevoie de un plan Partner pe cont pentru a adăuga firme noi."}
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link href={dashboardRoutes.accountSettings}>Deschide Setări cont</Link>
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       {(() => {
         const overdueScans = activeClients.filter((client) => {
@@ -667,4 +731,3 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
     </div>
   )
 }
-

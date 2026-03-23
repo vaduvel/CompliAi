@@ -359,3 +359,46 @@ Observații de control:
 Următorul checkpoint permis:
 - `Wave 5`
 - scope strict: billing partner, fără redesign nou și fără a rupe claim flow-ul deja livrat
+
+## Actualizare 2026-03-23 — Wave 5 verificată și aprobată
+
+Verdict:
+- `Wave 5` = aprobată
+- branch verificat: `codex/portfolio-wave-5`
+
+Ce am verificat direct în cod:
+- există acum strat separat de `partner account billing` în:
+  - [lib/server/plan.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/plan.ts)
+  - [lib/shared/plan-constants.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/shared/plan-constants.ts)
+- `/api/plan` expune contractul nou pentru contul partner, fără să rupă răspunsul vechi per-org, în:
+  - [app/api/plan/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/plan/route.ts)
+- checkout și portal Stripe înțeleg acum `billingScope = org | account`, în:
+  - [app/api/stripe/checkout/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/stripe/checkout/route.ts)
+  - [app/api/stripe/portal/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/stripe/portal/route.ts)
+  - [app/api/stripe/webhook/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/stripe/webhook/route.ts)
+- există suprafață reală de `Setări cont` în:
+  - [app/account/layout.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/account/layout.tsx)
+  - [app/account/settings/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/account/settings/page.tsx)
+  - [components/compliscan/account-settings-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/account-settings-page.tsx)
+- shell-ul expune acum intrare spre `Setări cont` prin:
+  - [components/compliscan/dashboard-shell.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/dashboard-shell.tsx)
+- billingul per-org rămâne separat și clar delimitat în:
+  - [components/compliscan/settings-billing-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/settings-billing-page.tsx)
+- blocajul de capacitate pentru adăugarea de firme noi este aplicat și în UI, și în API, în:
+  - [components/compliscan/portfolio-overview-client.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/portfolio-overview-client.tsx)
+  - [app/api/partner/import-csv/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/partner/import-csv/route.ts)
+
+Validare Wave 5:
+- `npm test` -> verde (`138` fișiere, `732` teste, `1 skipped`, `0 failed`)
+- `npm run lint` -> trece; doar warning-uri istorice preexistente
+- `npm run build` -> verde; compilează `/account/settings`, rutele Stripe extinse și guard-urile noi
+
+Observații de control:
+- billingul per-org nu a fost rupt; `free / pro / partner` rămâne compatibil pentru org-urile vechi
+- `partner account billing` este strat nou separat, cu fallback legacy pentru utilizatorii vechi care aveau `partner` la nivel de org
+- `/portfolio` nu a primit agregări noi în afara a ceea ce era deja în `Wave 2`; doar capacitate și blocaj comercial
+- `Evidence OS v1` a rămas baza vizuală
+
+Următorul checkpoint permis:
+- `Wave 6`
+- scope strict: cleanup final, feature flags, route bridges și eventuale rename-uri doar dacă aduc claritate reală

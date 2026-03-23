@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 import { PLAN_LABELS, PLAN_PRICES, type OrgPlan } from "@/lib/shared/plan-constants"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,6 +29,8 @@ type PlanResponse = {
   trialEndsAtISO: string | null
   hasStripeCustomer: boolean
   hasActiveSubscription: boolean
+  userMode: "solo" | "partner" | "compliance" | "viewer" | null
+  canManageOrgBilling: boolean
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -94,7 +97,7 @@ export function SettingsBillingPageSurface() {
       const r = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetPlan }),
+        body: JSON.stringify({ targetPlan, billingScope: "org" }),
       })
       const data = (await r.json()) as { url?: string; demo?: boolean; error?: string }
       if (!r.ok || !data.url) {
@@ -116,7 +119,11 @@ export function SettingsBillingPageSurface() {
   async function handlePortal() {
     setPortalLoading(true)
     try {
-      const r = await fetch("/api/stripe/portal", { method: "POST" })
+      const r = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ billingScope: "org" }),
+      })
       const data = (await r.json()) as { url?: string; error?: string }
       if (!r.ok || !data.url) {
         throw new Error(data.error ?? "Portalul Stripe a eșuat.")
@@ -132,6 +139,8 @@ export function SettingsBillingPageSurface() {
   const currentPlan = planData?.plan ?? "free"
   const trialEndsAtISO = planData?.trialEndsAtISO ?? null
   const isTrialActive = !!trialEndsAtISO && trialEndsAtISO > new Date().toISOString()
+  const isPartnerUser = planData?.userMode === "partner"
+  const canManageOrgBilling = planData?.canManageOrgBilling ?? false
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -147,6 +156,20 @@ export function SettingsBillingPageSurface() {
         </div>
       ) : (
         <div className="mt-6 space-y-6">
+          {isPartnerUser ? (
+            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-4 py-3 text-sm text-eos-warning">
+              <p className="font-medium text-eos-text">Facturarea consultantului s-a mutat în Setări cont</p>
+              <p className="mt-1 text-xs leading-5 text-eos-warning/90">
+                Billingul partner se gestionează la nivel de cont. Pagina curentă rămâne doar pentru planul firmei active.
+              </p>
+              <div className="mt-3">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={dashboardRoutes.accountSettings}>Deschide Setări cont</Link>
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           {/* Current plan card */}
           <Card>
             <CardHeader className="pb-3">
@@ -178,7 +201,7 @@ export function SettingsBillingPageSurface() {
                     </p>
                   )}
                 </div>
-                {planData?.hasActiveSubscription && (
+                {planData?.hasActiveSubscription && canManageOrgBilling && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -194,6 +217,11 @@ export function SettingsBillingPageSurface() {
                   </Button>
                 )}
               </div>
+              {!canManageOrgBilling ? (
+                <p className="mt-3 text-xs text-eos-text-muted">
+                  Doar owner-ul poate modifica billingul firmei active.
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -238,7 +266,7 @@ export function SettingsBillingPageSurface() {
                     <Button
                       className="mt-4 w-full"
                       onClick={() => void handleUpgrade("pro")}
-                      disabled={checkoutLoading !== null}
+                      disabled={checkoutLoading !== null || !canManageOrgBilling}
                     >
                       {checkoutLoading === "pro" ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -250,34 +278,6 @@ export function SettingsBillingPageSurface() {
                   </CardContent>
                 </Card>
               )}
-
-              <Card>
-                <CardContent className="pt-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-warning">
-                    Partner
-                  </p>
-                  <p className="mt-1.5 text-2xl font-bold text-eos-text">
-                    {PLAN_PRICES.partner}
-                  </p>
-                  <p className="mt-1 text-sm text-eos-text-muted">
-                    Multi-client hub pentru contabili și consultanți.
-                    Până la 50 clienți, import CSV, urgency queue.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4 w-full"
-                    onClick={() => void handleUpgrade("partner")}
-                    disabled={checkoutLoading !== null}
-                  >
-                    {checkoutLoading === "partner" ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ArrowUpRight className="size-4" strokeWidth={2} />
-                    )}
-                    Upgrade la Partner
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
           )}
 

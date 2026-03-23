@@ -71,7 +71,7 @@ Actualizare 2026-03-22:
   - produsul actual continua sa functioneze per-org
   - consultantul are acum si stratul `Portfolio Lite`, fara sa piarda drilldown-ul in `firma activa`
   - cleanup-ul per-org este deja pornit si livrat pentru rutele canonice principale
-  - billing si claim flow raman wave-uri separate
+  - billing si claim flow au fost pastrate separate de fundatia UX, apoi livrate in wave-urile dedicate
   - update 2026-03-23:
     - `claim flow` nu mai este teorie; este implementat in runtime
     - ownership-ul pentru firmele create de consultant este acum explicit:
@@ -80,7 +80,9 @@ Actualizare 2026-03-22:
     - consultantul poate porni claim-ul din `Setări > Acces`
     - clientul poate accepta claim-ul prin `/claim`
     - owner-ul real poate elimina consultantul dupa revendicare
-    - billing rămâne singurul wave mare încă separat de fundația portfolio-first
+    - billingul partner există acum la nivel de cont, separat de billingul per-org
+    - `/account/settings` este suprafață reală și nu concurează cu `Setări` per-firmă
+    - portofoliul aplică și comercial limita de capacitate, nu doar roluri și membership-uri
 
 Sprintul de maturizare activ este:
 

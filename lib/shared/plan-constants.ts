@@ -3,6 +3,7 @@
 // Server-side logic stays in lib/server/plan.ts.
 
 export type OrgPlan = "free" | "pro" | "partner"
+export type PartnerAccountPlan = "partner_10" | "partner_25" | "partner_50"
 
 export const PLAN_LABELS: Record<OrgPlan, string> = {
   free: "Gratuit",
@@ -14,6 +15,24 @@ export const PLAN_PRICES: Record<OrgPlan, string> = {
   free: "€0 / lună",
   pro: "€99 / lună",
   partner: "€249 / lună",
+}
+
+export const PARTNER_ACCOUNT_PLAN_LABELS: Record<PartnerAccountPlan, string> = {
+  partner_10: "Partner 10",
+  partner_25: "Partner 25",
+  partner_50: "Partner 50",
+}
+
+export const PARTNER_ACCOUNT_PLAN_LIMITS: Record<PartnerAccountPlan, number> = {
+  partner_10: 10,
+  partner_25: 25,
+  partner_50: 50,
+}
+
+export const LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN: PartnerAccountPlan = "partner_25"
+
+export function isPartnerAccountPlan(value: string): value is PartnerAccountPlan {
+  return value === "partner_10" || value === "partner_25" || value === "partner_50"
 }
 
 // ── Plan feature gates (pentru UI) ───────────────────────────────────────────

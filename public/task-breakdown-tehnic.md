@@ -255,6 +255,15 @@ Actualizare 2026-03-22:
     - seteaza consultantul ca `partner_manager`
     - genereaza claim invite automat
     - este legat explicit de rol si de `userMode = partner`
+- [x] `Wave 5`
+  - `partner account billing` separat de planul per-org
+  - planuri noi:
+    - `partner_10`
+    - `partner_25`
+    - `partner_50`
+  - `/api/plan` cu contract mixt `org billing + partner account billing`
+  - `/account/settings` ca suprafață dedicată
+  - blocaj server-side și UI la adăugarea de firme noi când limita este atinsă
 - [x] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud

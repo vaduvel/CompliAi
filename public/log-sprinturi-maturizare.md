@@ -64,6 +64,34 @@
   - `npm run lint`
   - `npm run build`
 
+### Foundation portfolio-first — Wave 5
+
+- a fost livrat primul strat real de `partner account billing`, separat de billingul per-org:
+  - planuri noi:
+    - `partner_10`
+    - `partner_25`
+    - `partner_50`
+  - fallback legacy pentru utilizatorii care aveau încă `partner` la nivel de org
+- `/api/plan` expune acum și contractul de billing pentru contul partner:
+  - `planType`
+  - `maxOrgs`
+  - `currentOrgs`
+  - `canAddOrg`
+  - plus compatibilitate cu câmpurile vechi per-org
+- checkout și portal Stripe au acum `billingScope` explicit:
+  - `org`
+  - `account`
+- a fost adăugată suprafața reală de `Setări cont`:
+  - `/account/settings`
+  - shell-ul expune intrarea dedicată în dropdown-ul de workspace
+- `Setări > Abonament` a rămas per-org, dar clarifică acum că billingul partner se gestionează la nivel de cont
+- `Portofoliu` afișează capacitatea planului și blochează importul CSV când limita este atinsă
+- `POST /api/partner/import-csv` aplică și server-side limita de portofoliu, nu doar în UI
+- validarea pentru `Wave 5` trece:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 ## 2026-03-13
 
 ### Sprint 7 - Operational readiness

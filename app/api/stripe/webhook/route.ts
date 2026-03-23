@@ -7,10 +7,10 @@
 //   Events: checkout.session.completed, customer.subscription.deleted,
 //           customer.subscription.updated, invoice.payment_failed
 
-import { setOrgPlan } from "@/lib/server/plan"
+import { clearPartnerAccountPlan, setOrgPlan, setPartnerAccountPlan } from "@/lib/server/plan"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext } from "@/lib/server/request-context"
-import type { OrgPlan } from "@/lib/server/plan"
+import type { OrgPlan, PartnerAccountPlan } from "@/lib/server/plan"
 
 // ── Stripe event types (subset) ───────────────────────────────────────────────
 
@@ -23,12 +23,16 @@ interface StripeCheckoutSessionCompletedEvent {
       subscription: string
       subscription_data?: {
         metadata?: {
+          billingScope?: string
           orgId?: string
+          userId?: string
           targetPlan?: string
         }
       }
       metadata?: {
+        billingScope?: string
         orgId?: string
+        userId?: string
         targetPlan?: string
       }
     }
@@ -46,7 +50,9 @@ interface StripeSubscriptionEvent {
       customer: string
       status: string
       metadata?: {
+        billingScope?: string
         orgId?: string
+        userId?: string
         targetPlan?: string
       }
     }
@@ -127,20 +133,57 @@ export async function POST(request: Request) {
       const session = (event as StripeCheckoutSessionCompletedEvent).data.object
       const metadata =
         session.subscription_data?.metadata ?? session.metadata
+      const billingScope = metadata?.billingScope
       const orgId = metadata?.orgId
-      const targetPlan = metadata?.targetPlan as OrgPlan | undefined
+      const userId = metadata?.userId
+      const targetPlan = metadata?.targetPlan
 
-      if (orgId && targetPlan && ["pro", "partner"].includes(targetPlan)) {
-        await setOrgPlan(orgId, targetPlan, {
+      if (billingScope === "account" && userId && targetPlan && ["partner_10", "partner_25", "partner_50"].includes(targetPlan)) {
+        await setPartnerAccountPlan(userId, targetPlan as PartnerAccountPlan, {
+          stripeCustomerId: session.customer,
+          stripeSubscriptionId: session.subscription,
+        })
+      } else if (orgId && targetPlan && ["pro", "partner"].includes(targetPlan)) {
+        await setOrgPlan(orgId, targetPlan as OrgPlan, {
           stripeCustomerId: session.customer,
           stripeSubscriptionId: session.subscription,
         })
       }
     } else if (event.type === "customer.subscription.deleted") {
       const sub = (event as StripeSubscriptionEvent).data.object
+      const billingScope = sub.metadata?.billingScope
       const orgId = sub.metadata?.orgId
-      if (orgId) {
+      const userId = sub.metadata?.userId
+      if (billingScope === "account" && userId) {
+        await clearPartnerAccountPlan(userId)
+      } else if (orgId) {
         await setOrgPlan(orgId, "free")
+      }
+    } else if (event.type === "customer.subscription.updated") {
+      const sub = (event as StripeSubscriptionEvent).data.object
+      const billingScope = sub.metadata?.billingScope
+      const orgId = sub.metadata?.orgId
+      const userId = sub.metadata?.userId
+      const targetPlan = sub.metadata?.targetPlan
+
+      if (billingScope === "account" && userId && targetPlan && ["partner_10", "partner_25", "partner_50"].includes(targetPlan)) {
+        if (sub.status === "active" || sub.status === "trialing") {
+          await setPartnerAccountPlan(userId, targetPlan as PartnerAccountPlan, {
+            stripeCustomerId: sub.customer,
+            stripeSubscriptionId: sub.id,
+          })
+        } else if (sub.status === "canceled" || sub.status === "unpaid") {
+          await clearPartnerAccountPlan(userId)
+        }
+      } else if (orgId && targetPlan && ["pro", "partner"].includes(targetPlan)) {
+        if (sub.status === "active" || sub.status === "trialing") {
+          await setOrgPlan(orgId, targetPlan as OrgPlan, {
+            stripeCustomerId: sub.customer,
+            stripeSubscriptionId: sub.id,
+          })
+        } else if (sub.status === "canceled" || sub.status === "unpaid") {
+          await setOrgPlan(orgId, "free")
+        }
       }
     } else if (event.type === "invoice.payment_failed") {
       // Log only — don't downgrade immediately; Stripe handles retry

@@ -12,10 +12,12 @@ import {
   AuthzError,
   createOrganizationForExistingUser,
   getUserMode,
+  listUserMemberships,
   requireFreshRole,
 } from "@/lib/server/auth"
 import { evaluateApplicability } from "@/lib/compliance/applicability"
 import type { OrgProfile, OrgSector, OrgEmployeeCount } from "@/lib/compliance/applicability"
+import { getPartnerAccountPlanStatus, hasLegacyPartnerOrgPlan } from "@/lib/server/plan"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
@@ -96,6 +98,41 @@ export async function POST(request: Request) {
 
     if (dataLines.length > 50) {
       return jsonError("Maxim 50 de rânduri per import.", 400, "TOO_MANY_ROWS")
+    }
+
+    const activeMemberships = (await listUserMemberships(session.userId)).filter(
+      (membership) => membership.status === "active"
+    )
+    const activeOrgIds = Array.from(new Set(activeMemberships.map((membership) => membership.orgId)))
+    const partnerPlanStatus = await getPartnerAccountPlanStatus({
+      userId: session.userId,
+      currentOrgs: activeOrgIds.length,
+      legacyPartnerEnabled: await hasLegacyPartnerOrgPlan(activeOrgIds),
+    })
+
+    if (!partnerPlanStatus.planType || partnerPlanStatus.maxOrgs === null) {
+      throw new AuthzError(
+        "Ai nevoie de un plan Partner pe cont pentru a adăuga firme noi în portofoliu.",
+        403,
+        "PARTNER_PLAN_REQUIRED"
+      )
+    }
+
+    const remainingSlots = Math.max(partnerPlanStatus.maxOrgs - partnerPlanStatus.currentOrgs, 0)
+    if (remainingSlots <= 0) {
+      throw new AuthzError(
+        `Ai atins limita planului ${partnerPlanStatus.planType}. Gestionează upgrade-ul din Setări cont.`,
+        403,
+        "PARTNER_PLAN_LIMIT_REACHED"
+      )
+    }
+
+    if (dataLines.length > remainingSlots) {
+      throw new AuthzError(
+        `Poți importa cel mult ${remainingSlots} firme în acest moment. Redu fișierul CSV sau fă upgrade din Setări cont.`,
+        403,
+        "PARTNER_PLAN_LIMIT_REACHED"
+      )
     }
 
     const results: ImportRowResult[] = []

@@ -13,15 +13,19 @@ const mocks = vi.hoisted(() => ({
   },
   requireFreshRoleMock: vi.fn(),
   getUserModeMock: vi.fn(),
+  listUserMembershipsMock: vi.fn(),
   createOrganizationForExistingUserMock: vi.fn(),
   createClaimInviteMock: vi.fn(),
   evaluateApplicabilityMock: vi.fn(),
+  getPartnerAccountPlanStatusMock: vi.fn(),
+  hasLegacyPartnerOrgPlanMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   requireFreshRole: mocks.requireFreshRoleMock,
   getUserMode: mocks.getUserModeMock,
+  listUserMemberships: mocks.listUserMembershipsMock,
   createOrganizationForExistingUser: mocks.createOrganizationForExistingUserMock,
 }))
 
@@ -31,6 +35,11 @@ vi.mock("@/lib/server/claim-ownership", () => ({
 
 vi.mock("@/lib/compliance/applicability", () => ({
   evaluateApplicability: mocks.evaluateApplicabilityMock,
+}))
+
+vi.mock("@/lib/server/plan", () => ({
+  getPartnerAccountPlanStatus: mocks.getPartnerAccountPlanStatusMock,
+  hasLegacyPartnerOrgPlan: mocks.hasLegacyPartnerOrgPlanMock,
 }))
 
 import { POST } from "./route"
@@ -50,6 +59,26 @@ describe("POST /api/partner/import-csv", () => {
       orgId: "org-client",
       orgName: "Client SRL",
       membershipId: "membership-client",
+    })
+    mocks.listUserMembershipsMock.mockResolvedValue([
+      {
+        membershipId: "membership-consulting",
+        orgId: "org-consulting",
+        orgName: "Consulting Hub",
+        role: "partner_manager",
+        status: "active",
+      },
+    ])
+    mocks.hasLegacyPartnerOrgPlanMock.mockResolvedValue(false)
+    mocks.getPartnerAccountPlanStatusMock.mockResolvedValue({
+      planType: "partner_25",
+      maxOrgs: 25,
+      currentOrgs: 1,
+      canAddOrg: true,
+      hasStripeCustomer: true,
+      hasActiveSubscription: true,
+      updatedAtISO: "2026-03-23T10:00:00.000Z",
+      source: "account",
     })
     mocks.createClaimInviteMock.mockResolvedValue({
       id: "claim-1",
@@ -106,6 +135,34 @@ describe("POST /api/partner/import-csv", () => {
 
     expect(response.status).toBe(403)
     expect(payload.code).toBe("PORTFOLIO_FORBIDDEN")
+    expect(mocks.createOrganizationForExistingUserMock).not.toHaveBeenCalled()
+  })
+
+  it("blocheaza importul cand limita planului este atinsa", async () => {
+    mocks.getPartnerAccountPlanStatusMock.mockResolvedValueOnce({
+      planType: "partner_10",
+      maxOrgs: 10,
+      currentOrgs: 10,
+      canAddOrg: false,
+      hasStripeCustomer: true,
+      hasActiveSubscription: true,
+      updatedAtISO: "2026-03-23T10:00:00.000Z",
+      source: "account",
+    })
+
+    const response = await POST(
+      new Request("http://localhost/api/partner/import-csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          csvContent: "Client SRL,RO12345678,professional-services,10-49,ceo@client.ro",
+        }),
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(payload.code).toBe("PARTNER_PLAN_LIMIT_REACHED")
     expect(mocks.createOrganizationForExistingUserMock).not.toHaveBeenCalled()
   })
 })

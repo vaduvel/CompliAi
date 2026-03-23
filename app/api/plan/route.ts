@@ -2,8 +2,17 @@
 // GET — returnează planul curent al org-ului din sesiune
 
 import { jsonError } from "@/lib/server/api-response"
-import { requireFreshAuthenticatedSession } from "@/lib/server/auth"
-import { getOrgPlan, getOrgPlanRecord } from "@/lib/server/plan"
+import {
+  getUserMode,
+  listUserMemberships,
+  requireFreshAuthenticatedSession,
+} from "@/lib/server/auth"
+import {
+  getOrgPlan,
+  getOrgPlanRecord,
+  getPartnerAccountPlanStatus,
+  hasLegacyPartnerOrgPlan,
+} from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { logRouteError } from "@/lib/server/operational-logger"
 
@@ -12,10 +21,22 @@ export async function GET(request: Request) {
 
   try {
     const session = await requireFreshAuthenticatedSession(request, "planul organizației")
-    const [plan, record] = await Promise.all([
+    const [plan, record, userMode, memberships] = await Promise.all([
       getOrgPlan(session.orgId),
       getOrgPlanRecord(session.orgId),
+      getUserMode(session.userId),
+      listUserMemberships(session.userId),
     ])
+    const activeMemberships = memberships.filter((membership) => membership.status === "active")
+    const currentOrgs = new Set(activeMemberships.map((membership) => membership.orgId)).size
+    const legacyPartnerEnabled = await hasLegacyPartnerOrgPlan(
+      activeMemberships.map((membership) => membership.orgId)
+    )
+    const partnerPlanStatus = await getPartnerAccountPlanStatus({
+      userId: session.userId,
+      currentOrgs,
+      legacyPartnerEnabled,
+    })
 
     return Response.json({
       plan,
@@ -23,6 +44,18 @@ export async function GET(request: Request) {
       trialEndsAtISO: record.trialEndsAtISO ?? null,
       hasStripeCustomer: !!record.stripeCustomerId,
       hasActiveSubscription: !!record.stripeSubscriptionId,
+      userMode: userMode ?? null,
+      billingScope: userMode === "partner" ? "partner_account" : "org",
+      planType: partnerPlanStatus.planType,
+      maxOrgs: partnerPlanStatus.maxOrgs,
+      currentOrgs: partnerPlanStatus.currentOrgs,
+      canAddOrg: partnerPlanStatus.canAddOrg,
+      partnerPlanSource: partnerPlanStatus.source,
+      partnerHasStripeCustomer: partnerPlanStatus.hasStripeCustomer,
+      partnerHasActiveSubscription: partnerPlanStatus.hasActiveSubscription,
+      partnerUpdatedAtISO: partnerPlanStatus.updatedAtISO,
+      canManageOrgBilling: session.role === "owner",
+      canManagePartnerBilling: userMode === "partner",
     })
   } catch (error) {
     await logRouteError(context, error, {

@@ -7,14 +7,23 @@ import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
 // Re-export client-safe constants so existing imports from lib/server/plan still work
 export {
   type OrgPlan,
+  type PartnerAccountPlan,
   type PlanFeature,
+  LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN,
+  PARTNER_ACCOUNT_PLAN_LABELS,
+  PARTNER_ACCOUNT_PLAN_LIMITS,
   PLAN_LABELS,
   PLAN_PRICES,
   featureRequiresPlan,
+  isPartnerAccountPlan,
   planHasFeature,
 } from "@/lib/shared/plan-constants"
-import type { OrgPlan } from "@/lib/shared/plan-constants"
-import { PLAN_LABELS } from "@/lib/shared/plan-constants"
+import type { OrgPlan, PartnerAccountPlan } from "@/lib/shared/plan-constants"
+import {
+  LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN,
+  PARTNER_ACCOUNT_PLAN_LIMITS,
+  PLAN_LABELS,
+} from "@/lib/shared/plan-constants"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -27,6 +36,25 @@ export type OrgPlanRecord = {
   trialEndsAtISO?: string   // 14 zile Pro gratuit la înregistrare
 }
 
+export type PartnerAccountPlanRecord = {
+  userId: string
+  planType: PartnerAccountPlan
+  updatedAtISO: string
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+}
+
+export type PartnerAccountPlanStatus = {
+  planType: PartnerAccountPlan | null
+  maxOrgs: number | null
+  currentOrgs: number
+  canAddOrg: boolean
+  hasStripeCustomer: boolean
+  hasActiveSubscription: boolean
+  updatedAtISO: string | null
+  source: "account" | "legacy_org_partner" | "none"
+}
+
 export type PlanHierarchy = Record<OrgPlan, number>
 
 const PLAN_PRIORITY: PlanHierarchy = {
@@ -34,6 +62,8 @@ const PLAN_PRIORITY: PlanHierarchy = {
   pro: 1,
   partner: 2,
 }
+
+const PARTNER_ACCOUNT_STORAGE_KEY = "__partner_account_plans__"
 
 // ── Plan Error ────────────────────────────────────────────────────────────────
 
@@ -57,6 +87,8 @@ export class PlanError extends Error {
 // ── Storage ───────────────────────────────────────────────────────────────────
 
 const planStorage = createAdaptiveStorage<Record<string, OrgPlanRecord>>("plans", "plans")
+const partnerAccountPlanStorage =
+  createAdaptiveStorage<Record<string, PartnerAccountPlanRecord>>("plans", "plans")
 
 async function readAllPlans(): Promise<Record<string, OrgPlanRecord>> {
   return (await planStorage.read("global")) ?? {}
@@ -64,6 +96,16 @@ async function readAllPlans(): Promise<Record<string, OrgPlanRecord>> {
 
 async function writeAllPlans(plans: Record<string, OrgPlanRecord>): Promise<void> {
   await planStorage.write("global", plans)
+}
+
+async function readAllPartnerAccountPlans(): Promise<Record<string, PartnerAccountPlanRecord>> {
+  return (await partnerAccountPlanStorage.read(PARTNER_ACCOUNT_STORAGE_KEY)) ?? {}
+}
+
+async function writeAllPartnerAccountPlans(
+  plans: Record<string, PartnerAccountPlanRecord>
+): Promise<void> {
+  await partnerAccountPlanStorage.write(PARTNER_ACCOUNT_STORAGE_KEY, plans)
 }
 
 export async function getOrgPlan(orgId: string): Promise<OrgPlan> {
@@ -108,6 +150,99 @@ export async function activateTrial(orgId: string): Promise<OrgPlanRecord> {
   return setOrgPlan(orgId, "free", { trialEndsAtISO })
 }
 
+export async function getPartnerAccountPlanRecord(
+  userId: string
+): Promise<PartnerAccountPlanRecord | null> {
+  const plans = await readAllPartnerAccountPlans()
+  return plans[userId] ?? null
+}
+
+export async function setPartnerAccountPlan(
+  userId: string,
+  planType: PartnerAccountPlan,
+  extras?: Partial<PartnerAccountPlanRecord>
+): Promise<PartnerAccountPlanRecord> {
+  const plans = await readAllPartnerAccountPlans()
+  const record: PartnerAccountPlanRecord = {
+    userId,
+    planType,
+    updatedAtISO: new Date().toISOString(),
+    ...extras,
+  }
+  plans[userId] = record
+  await writeAllPartnerAccountPlans(plans)
+  return record
+}
+
+export async function clearPartnerAccountPlan(userId: string): Promise<void> {
+  const plans = await readAllPartnerAccountPlans()
+  if (!plans[userId]) return
+  delete plans[userId]
+  await writeAllPartnerAccountPlans(plans)
+}
+
+export async function hasLegacyPartnerOrgPlan(orgIds: string[]): Promise<boolean> {
+  const uniqueOrgIds = Array.from(new Set(orgIds.filter(Boolean)))
+  for (const orgId of uniqueOrgIds) {
+    if ((await getOrgPlan(orgId)) === "partner") {
+      return true
+    }
+  }
+  return false
+}
+
+export async function getPartnerAccountPlanStatus({
+  userId,
+  currentOrgs,
+  legacyPartnerEnabled = false,
+}: {
+  userId: string
+  currentOrgs: number
+  legacyPartnerEnabled?: boolean
+}): Promise<PartnerAccountPlanStatus> {
+  const record = await getPartnerAccountPlanRecord(userId)
+
+  if (record) {
+    const maxOrgs = PARTNER_ACCOUNT_PLAN_LIMITS[record.planType]
+    return {
+      planType: record.planType,
+      maxOrgs,
+      currentOrgs,
+      canAddOrg: currentOrgs < maxOrgs,
+      hasStripeCustomer: Boolean(record.stripeCustomerId),
+      hasActiveSubscription: Boolean(record.stripeSubscriptionId),
+      updatedAtISO: record.updatedAtISO,
+      source: "account",
+    }
+  }
+
+  if (legacyPartnerEnabled) {
+    const planType = LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN
+    const maxOrgs = PARTNER_ACCOUNT_PLAN_LIMITS[planType]
+    return {
+      planType,
+      maxOrgs,
+      currentOrgs,
+      canAddOrg: currentOrgs < maxOrgs,
+      hasStripeCustomer: false,
+      hasActiveSubscription: false,
+      updatedAtISO: null,
+      source: "legacy_org_partner",
+    }
+  }
+
+  return {
+    planType: null,
+    maxOrgs: null,
+    currentOrgs,
+    canAddOrg: false,
+    hasStripeCustomer: false,
+    hasActiveSubscription: false,
+    updatedAtISO: null,
+    source: "none",
+  }
+}
+
 // ── requirePlan helper ────────────────────────────────────────────────────────
 
 /**
@@ -132,4 +267,3 @@ export async function requirePlan(
   }
   return currentPlan
 }
-

@@ -75,6 +75,19 @@ Pe langa hardening-ul operational deja inchis, a pornit si implementarea control
   - `/claim` pentru acceptarea claim-ului
   - owner-ul poate elimina consultantul după revendicare
   - importul CSV din portalul partner creează org-uri neclaim-uite și pregătește claim invite
+- [x] `Wave 5`
+  - `partner account billing` separat de billingul per-org
+  - planuri:
+    - `partner_10`
+    - `partner_25`
+    - `partner_50`
+  - `/api/plan` returnează și:
+    - `planType`
+    - `maxOrgs`
+    - `currentOrgs`
+    - `canAddOrg`
+  - `/account/settings` este acum suprafață reală
+  - portofoliul blochează adăugarea de firme noi când limita planului este depășită
 
 Disciplina ramane:
 
@@ -82,6 +95,7 @@ Disciplina ramane:
 - nu se introduce billing nou inainte de wave-ul dedicat
 - `Portfolio Lite` a fost deschis doar dupa inchiderea fundatiei de sesiune, guards si navigatie
 - ownership / claim a fost livrat inainte de billing, exact pentru a pastra migrarea comerciala separata de UX foundation
+- billingul partner este acum separat de planul per-org, fara sa rupa utilizatorii vechi
 
 ## Sprint 1 - Reliability + Security baseline
 
