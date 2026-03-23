@@ -19,7 +19,9 @@ export async function POST(request: Request) {
   try {
     const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "generarea documentelor")
 
-    const body = (await request.json()) as Partial<DocumentGenerationInput>
+    const body = (await request.json()) as Partial<DocumentGenerationInput> & {
+      sourceFindingId?: string
+    }
 
     const documentType = body.documentType
     if (!documentType || !VALID_TYPES.has(documentType)) {
@@ -47,6 +49,8 @@ export async function POST(request: Request) {
 
     const result = await generateDocument(input)
     const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
+    const sourceFindingId = body.sourceFindingId?.trim() || undefined
+    const approvalStatus = sourceFindingId ? ("draft" as const) : undefined
 
     await mutateState((current) => ({
       ...current,
@@ -55,8 +59,13 @@ export async function POST(request: Request) {
           id: generatedDocumentId,
           documentType: result.documentType,
           title: result.title,
+          content: result.content,
           generatedAtISO: result.generatedAtISO,
           llmUsed: result.llmUsed,
+          sourceFindingId,
+          approvalStatus,
+          expiresAtISO: result.expiresAtISO,
+          nextReviewDateISO: result.nextReviewDateISO,
         },
         ...(current.generatedDocuments ?? []),
       ].slice(0, 100),
@@ -85,7 +94,11 @@ export async function POST(request: Request) {
 
     void trackEvent(session.orgId, "generated_first_document", { docType: input.documentType })
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      ...result,
+      recordId: generatedDocumentId,
+      sourceFindingId: sourceFindingId ?? null,
+    })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     if (error instanceof RequestValidationError) return jsonError(error.message, error.status, error.code)

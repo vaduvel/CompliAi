@@ -35,6 +35,20 @@ type FindingDetail = ScanFinding & {
   suggestedDocumentType?: string
 }
 
+type LinkedGeneratedDocument = {
+  id: string
+  title: string
+  generatedAtISO: string
+  approvalStatus?: "draft" | "approved_as_evidence"
+}
+
+type FindingDetailResponse = {
+  finding: FindingDetail
+  linkedGeneratedDocument?: LinkedGeneratedDocument | null
+  documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+  feedbackMessage?: string
+}
+
 // ── Resolution Steps ──────────────────────────────────────────────────────────
 
 const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string; icon: React.ElementType }> = [
@@ -71,6 +85,10 @@ function ageLabel(iso: string): string {
 export default function FindingDetailPage() {
   const params = useParams<{ findingId: string }>()
   const [finding, setFinding] = useState<FindingDetail | null>(null)
+  const [linkedGeneratedDocument, setLinkedGeneratedDocument] = useState<LinkedGeneratedDocument | null>(null)
+  const [documentFlowState, setDocumentFlowState] = useState<
+    "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+  >("not_required")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
@@ -84,8 +102,10 @@ export default function FindingDetailPage() {
         if (!r.ok) throw new Error(r.status === 404 ? "Finding inexistent." : "Eroare server.")
         return r.json()
       })
-      .then((data: { finding: FindingDetail }) => {
+      .then((data: FindingDetailResponse) => {
         setFinding(data.finding)
+        setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
+        setDocumentFlowState(data.documentFlowState ?? "not_required")
         setError(null)
       })
       .catch((err: Error) => setError(err.message))
@@ -102,8 +122,10 @@ export default function FindingDetailPage() {
         body: JSON.stringify({ status }),
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
-      const payload = (await res.json()) as { feedbackMessage?: string }
-      setFinding({ ...finding, findingStatus: status, findingStatusUpdatedAtISO: new Date().toISOString() })
+      const payload = (await res.json()) as FindingDetailResponse
+      setFinding(payload.finding ?? { ...finding, findingStatus: status, findingStatusUpdatedAtISO: new Date().toISOString() })
+      setLinkedGeneratedDocument(payload.linkedGeneratedDocument ?? null)
+      setDocumentFlowState(payload.documentFlowState ?? "not_required")
       setStatusFeedback(payload.feedbackMessage ?? null)
     } catch {
       setError("Nu s-a putut actualiza statusul.")
@@ -117,6 +139,7 @@ export default function FindingDetailPage() {
 
   const status = (finding.findingStatus ?? "open") as FindingStatus
   const statusCfg = STATUS_CONFIG[status]
+  const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
   const res = finding.resolution
   const activeIdx = res ? RESOLUTION_STEPS.findIndex((s) => !res[s.key]) : 0
   const currentStep = activeIdx === -1 ? RESOLUTION_STEPS.length : activeIdx
@@ -200,18 +223,43 @@ export default function FindingDetailPage() {
       {status === "confirmed" && (
         <Card className="border-eos-border bg-eos-surface">
           <CardContent className="flex flex-wrap items-center gap-3 px-5 py-4">
-            <p className="mr-auto text-sm font-medium text-eos-text">
-              Finding confirmat. Marchează ca rezolvat când ai finalizat acțiunea.
-            </p>
-            <Button
-              size="sm"
-              onClick={() => updateStatus("resolved")}
-              disabled={actionLoading}
-              className="gap-1.5"
-            >
-              <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              Marchează rezolvat
-            </Button>
+            {requiresDocumentFlow ? (
+              <>
+                <div className="mr-auto">
+                  <p className="text-sm font-medium text-eos-text">
+                    Finding confirmat. Închiderea se face doar după draft, preview și confirmare explicită.
+                  </p>
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    {documentFlowState === "draft_ready" && linkedGeneratedDocument
+                      ? `Există deja un draft pentru acest finding: ${linkedGeneratedDocument.title}. Revino în flow și aprobă-l ca dovadă.`
+                      : "Pornește flow-ul ghidat ca să generezi documentul recomandat și să-l atașezi ca dovadă."}
+                  </p>
+                </div>
+                <Button asChild size="sm" className="gap-1.5">
+                  <Link
+                    href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType ?? "")}`}
+                  >
+                    <FileText className="size-3.5" strokeWidth={2} />
+                    {documentFlowState === "draft_ready" ? "Continuă flow-ul documentului" : "Deschide flow-ul documentului"}
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="mr-auto text-sm font-medium text-eos-text">
+                  Finding confirmat. Marchează ca rezolvat când ai finalizat acțiunea.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={() => updateStatus("resolved")}
+                  disabled={actionLoading}
+                  className="gap-1.5"
+                >
+                  <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                  Marchează rezolvat
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
@@ -220,6 +268,51 @@ export default function FindingDetailPage() {
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-eos-text">{statusFeedback}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {requiresDocumentFlow && (
+        <Card className="border-eos-warning-border bg-eos-warning-soft/30">
+          <CardContent className="space-y-3 px-5 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-eos-text">Flow documentar obligatoriu</p>
+                <p className="mt-1 text-sm text-eos-text-muted">
+                  Pentru acest finding, documentul generat trebuie verificat și aprobat explicit înainte de închidere.
+                </p>
+              </div>
+              <Badge variant="warning" className="normal-case tracking-normal">
+                {documentFlowState === "attached_as_evidence"
+                  ? "dovadă atașată"
+                  : documentFlowState === "draft_ready"
+                    ? "draft gata de review"
+                    : "draft lipsă"}
+              </Badge>
+            </div>
+
+            {linkedGeneratedDocument ? (
+              <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
+                <p className="text-sm font-medium text-eos-text">{linkedGeneratedDocument.title}</p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  Generat {new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
+                  {linkedGeneratedDocument.approvalStatus === "approved_as_evidence"
+                    ? " · aprobat ca dovadă"
+                    : " · în așteptare pentru confirmare"}
+                </p>
+              </div>
+            ) : null}
+
+            {status !== "resolved" ? (
+              <Button asChild variant="outline" className="gap-2">
+                <Link
+                  href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType ?? "")}`}
+                >
+                  <FileText className="size-4" strokeWidth={2} />
+                  {linkedGeneratedDocument ? "Revizuiește și aprobă draftul" : "Generează draftul recomandat"}
+                </Link>
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
       )}

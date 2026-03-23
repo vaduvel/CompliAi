@@ -11,7 +11,6 @@ import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
-import { ApplicabilityWizard } from "@/components/compliscan/applicability-wizard"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
@@ -57,7 +56,7 @@ export default function DashboardPage() {
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
-  const { data, activeDrifts, tasks, nextBestAction, openAlerts, reloadDashboard } = cockpit
+  const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
   const state = data.state
   const applicability = state.applicability ?? null
 
@@ -68,8 +67,9 @@ export default function DashboardPage() {
   const aiActScore = totalAiSystems === 0 ? 0 : Math.max(0, 100 - aiHighRisk * 20)
   const aiActStatus = aiHighRisk > 0 ? "review" : totalAiSystems > 0 ? "strong" : "good"
 
+  const gdprOpenActions = tasks.filter((t) => t.principles.includes("privacy_data_governance") && t.status !== "done").length
   const gdprScore = state.gdprProgress
-  const gdprStatus = gdprScore >= 90 ? "strong" : gdprScore >= 50 ? "good" : "review"
+  const gdprStatus = gdprOpenActions > 3 ? "review" : gdprScore >= 90 ? "strong" : gdprScore >= 50 ? "good" : "review"
 
   const efacturaScore = state.efacturaConnected ? 100 : state.efacturaSignalsCount > 0 ? 40 : 10
   const efacturaStatus = state.efacturaConnected
@@ -123,10 +123,26 @@ export default function DashboardPage() {
 
       />
 
-      {/* ── Applicability Wizard (shown only before first profile) ─────────── */}
+      {/* ── Onboarding fallback (the real flow now lives in /onboarding) ───── */}
       {!state.orgProfile && (
-        <section aria-label="Wizard aplicabilitate">
-          <ApplicabilityWizard onComplete={() => { reloadDashboard() }} />
+        <section aria-label="Continua onboarding">
+          <Card className="border-eos-primary/30 bg-eos-primary/5">
+            <div className="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-eos-text">Onboarding-ul asistat continua in ruta dedicata</p>
+                <p className="mt-1 text-sm text-eos-text-muted">
+                  Finalizeaza profilul firmei si primul raport initial inainte sa folosesti dashboard-ul.
+                </p>
+              </div>
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-2 text-sm font-medium text-eos-primary hover:underline"
+              >
+                Continua onboarding
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+          </Card>
         </section>
       )}
 

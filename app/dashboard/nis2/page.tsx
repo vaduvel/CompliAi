@@ -596,6 +596,397 @@ function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
   )
 }
 
+// ── 3-Stage Stepper (S0.1) ──────────────────────────────────────────────────
+
+type StageKey = "earlyWarning" | "fullReport" | "finalReport"
+
+const STAGE_META: { key: StageKey; label: string; deadline: string; article: string }[] = [
+  { key: "earlyWarning", label: "Alertă inițială", deadline: "24h", article: "Art. 23(4)(a)" },
+  { key: "fullReport",   label: "Raport complet",  deadline: "72h", article: "Art. 23(4)(b)" },
+  { key: "finalReport",  label: "Raport final",    deadline: "1 lună", article: "Art. 23(4)(d)" },
+]
+
+function getStageStatus(incident: Nis2Incident, key: StageKey): "done" | "active" | "locked" {
+  if (key === "earlyWarning") return incident.earlyWarningReport ? "done" : "active"
+  if (key === "fullReport") return incident.fullReport72h ? "done" : incident.earlyWarningReport ? "active" : "locked"
+  return incident.finalReport ? "done" : incident.fullReport72h ? "active" : "locked"
+}
+
+function IncidentStageStepper({
+  incident,
+  onSubmitStage,
+}: {
+  incident: Nis2Incident
+  onSubmitStage: (stage: StageKey, data: Record<string, unknown>) => void
+}) {
+  const [expandedStage, setExpandedStage] = useState<StageKey | null>(null)
+  const [formData, setFormData] = useState<Record<string, string>>({})
+  const [crossBorder, setCrossBorder] = useState(false)
+
+  function handleSubmit(stage: StageKey) {
+    const now = new Date().toISOString()
+    if (stage === "earlyWarning") {
+      onSubmitStage(stage, {
+        earlyWarningReport: {
+          submittedAtISO: now,
+          content: formData.content || "",
+          initialImpactAssessment: formData.impactAssessment || "",
+          crossBorderEffect: crossBorder,
+        },
+      })
+    } else if (stage === "fullReport") {
+      onSubmitStage(stage, {
+        fullReport72h: {
+          submittedAtISO: now,
+          content: formData.content || "",
+          detailedAnalysis: formData.detailedAnalysis || "",
+          technicalIndicators: formData.technicalIndicators || "",
+          affectedDataCategories: (formData.dataCategories || "").split(",").map((s) => s.trim()).filter(Boolean),
+          estimatedAffectedUsers: formData.affectedUsers ? parseInt(formData.affectedUsers, 10) : null,
+        },
+      })
+    } else {
+      onSubmitStage(stage, {
+        finalReport: {
+          submittedAtISO: now,
+          content: formData.content || "",
+          rootCauseAnalysis: formData.rootCause || "",
+          lessonsLearned: formData.lessons || "",
+          preventiveMeasures: formData.preventive || "",
+          remediationDeadlineISO: formData.remediationDeadline || undefined,
+        },
+      })
+    }
+    setExpandedStage(null)
+    setFormData({})
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+        Raportare NIS2 Art. 23 — 3 etape
+      </p>
+      <div className="flex gap-1">
+        {STAGE_META.map((stage, idx) => {
+          const status = getStageStatus(incident, stage.key)
+          return (
+            <div
+              key={stage.key}
+              className={`h-1.5 flex-1 rounded-full ${
+                status === "done" ? "bg-green-500" : status === "active" ? "bg-eos-primary" : "bg-eos-surface-variant"
+              }`}
+            />
+          )
+        })}
+      </div>
+      {STAGE_META.map((stage) => {
+        const status = getStageStatus(incident, stage.key)
+        const isExpanded = expandedStage === stage.key
+        return (
+          <div key={stage.key} className={`rounded-eos-md border ${status === "done" ? "border-green-200 bg-green-50/50" : status === "active" ? "border-eos-primary/30 bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant opacity-60"}`}>
+            <button
+              type="button"
+              className="flex w-full items-center justify-between px-3 py-2"
+              onClick={() => status !== "locked" && setExpandedStage(isExpanded ? null : stage.key)}
+              disabled={status === "locked"}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold ${status === "done" ? "bg-green-500 text-white" : status === "active" ? "bg-eos-primary text-white" : "bg-eos-surface text-eos-text-muted"}`}>
+                  {status === "done" ? <CheckCircle2 className="size-3" /> : STAGE_META.indexOf(stage) + 1}
+                </div>
+                <span className={`text-xs font-medium ${status === "locked" ? "text-eos-text-muted" : "text-eos-text"}`}>
+                  {stage.label}
+                </span>
+                <span className="text-[10px] text-eos-text-tertiary">{stage.deadline} · {stage.article}</span>
+              </div>
+              {status === "done" && (
+                <Badge variant="success" className="text-[10px] normal-case tracking-normal">Trimis</Badge>
+              )}
+              {status === "active" && !isExpanded && (
+                <Badge variant="warning" className="text-[10px] normal-case tracking-normal">De completat</Badge>
+              )}
+              {status === "locked" && (
+                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Blocat</Badge>
+              )}
+            </button>
+            {isExpanded && status === "active" && (
+              <div className="space-y-3 border-t border-eos-border-subtle px-3 pb-3 pt-3">
+                <div>
+                  <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Conținut raport</label>
+                  <textarea
+                    className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                    rows={3}
+                    placeholder="Descrierea situației..."
+                    value={formData.content ?? ""}
+                    onChange={(e) => setFormData((p) => ({ ...p, content: e.target.value }))}
+                  />
+                </div>
+                {stage.key === "earlyWarning" && (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Evaluare inițială impact</label>
+                      <textarea
+                        className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                        rows={2}
+                        placeholder="Ce sisteme/servicii sunt afectate..."
+                        value={formData.impactAssessment ?? ""}
+                        onChange={(e) => setFormData((p) => ({ ...p, impactAssessment: e.target.value }))}
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-eos-text">
+                      <input type="checkbox" checked={crossBorder} onChange={(e) => setCrossBorder(e.target.checked)} className="rounded" />
+                      Efect transfrontalier (alte state UE afectate)
+                    </label>
+                  </>
+                )}
+                {stage.key === "fullReport" && (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Analiză detaliată</label>
+                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Cauze, cronologie, amploare..." value={formData.detailedAnalysis ?? ""} onChange={(e) => setFormData((p) => ({ ...p, detailedAnalysis: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Indicatori tehnici (IoC)</label>
+                      <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="IP-uri, hash-uri, domenii..." value={formData.technicalIndicators ?? ""} onChange={(e) => setFormData((p) => ({ ...p, technicalIndicators: e.target.value }))} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Categorii date afectate</label>
+                        <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="personale, financiare, medicale..." value={formData.dataCategories ?? ""} onChange={(e) => setFormData((p) => ({ ...p, dataCategories: e.target.value }))} />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Nr. utilizatori afectați (estimat)</label>
+                        <input type="number" className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="0" value={formData.affectedUsers ?? ""} onChange={(e) => setFormData((p) => ({ ...p, affectedUsers: e.target.value }))} />
+                      </div>
+                    </div>
+                  </>
+                )}
+                {stage.key === "finalReport" && (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Analiză cauză rădăcină (RCA)</label>
+                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce a cauzat incidentul..." value={formData.rootCause ?? ""} onChange={(e) => setFormData((p) => ({ ...p, rootCause: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Lecții învățate</label>
+                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce am învățat..." value={formData.lessons ?? ""} onChange={(e) => setFormData((p) => ({ ...p, lessons: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Măsuri preventive</label>
+                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce măsuri luăm pentru a preveni..." value={formData.preventive ?? ""} onChange={(e) => setFormData((p) => ({ ...p, preventive: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Termen remediere</label>
+                      <input type="date" className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={formData.remediationDeadline ?? ""} onChange={(e) => setFormData((p) => ({ ...p, remediationDeadline: e.target.value }))} />
+                    </div>
+                  </>
+                )}
+                <Button size="sm" className="w-full gap-2" onClick={() => handleSubmit(stage.key)} disabled={!(formData.content ?? "").trim()}>
+                  <Shield className="size-3.5" strokeWidth={2} />
+                  Trimite {stage.label}
+                </Button>
+              </div>
+            )}
+            {isExpanded && status === "done" && (
+              <div className="border-t border-eos-border-subtle px-3 pb-3 pt-2 text-xs text-eos-text-muted">
+                {stage.key === "earlyWarning" && incident.earlyWarningReport && (
+                  <div className="space-y-1">
+                    <p><span className="font-medium text-eos-text">Trimis:</span> {new Date(incident.earlyWarningReport.submittedAtISO).toLocaleString("ro-RO")}</p>
+                    <p>{incident.earlyWarningReport.content}</p>
+                    {incident.earlyWarningReport.crossBorderEffect && <Badge variant="warning" className="text-[10px] normal-case tracking-normal">Efect transfrontalier</Badge>}
+                  </div>
+                )}
+                {stage.key === "fullReport" && incident.fullReport72h && (
+                  <div className="space-y-1">
+                    <p><span className="font-medium text-eos-text">Trimis:</span> {new Date(incident.fullReport72h.submittedAtISO).toLocaleString("ro-RO")}</p>
+                    <p>{incident.fullReport72h.detailedAnalysis}</p>
+                  </div>
+                )}
+                {stage.key === "finalReport" && incident.finalReport && (
+                  <div className="space-y-1">
+                    <p><span className="font-medium text-eos-text">Trimis:</span> {new Date(incident.finalReport.submittedAtISO).toLocaleString("ro-RO")}</p>
+                    <p><span className="font-medium text-eos-text">Cauză:</span> {incident.finalReport.rootCauseAnalysis}</p>
+                    <p><span className="font-medium text-eos-text">Lecții:</span> {incident.finalReport.lessonsLearned}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Post-Incident Tracking (S2.4) ──────────────────────────────────────────
+
+function PostIncidentPanel({
+  incident,
+  onUpdate,
+}: {
+  incident: Nis2Incident
+  onUpdate: (patch: Record<string, unknown>) => void
+}) {
+  const tracking = incident.postIncidentTracking
+  const [notes, setNotes] = useState(tracking?.notes ?? "")
+  const [dnscRef, setDnscRef] = useState(tracking?.dnscReference ?? "")
+  const [newCorr, setNewCorr] = useState({ direction: "received" as "sent" | "received", summary: "" })
+
+  if (incident.status !== "closed") return null
+
+  function saveDnscRef() {
+    onUpdate({
+      postIncidentTracking: {
+        ...tracking,
+        isRemediated: tracking?.isRemediated ?? false,
+        dnscReference: dnscRef,
+      },
+    })
+  }
+
+  function addCorrespondence() {
+    if (!newCorr.summary.trim()) return
+    const entry = {
+      id: `corr-${Math.random().toString(36).slice(2, 8)}`,
+      date: new Date().toISOString(),
+      direction: newCorr.direction,
+      summary: newCorr.summary.trim(),
+      createdAtISO: new Date().toISOString(),
+    }
+    onUpdate({
+      postIncidentTracking: {
+        ...tracking,
+        isRemediated: tracking?.isRemediated ?? false,
+        dnscCorrespondence: [...(tracking?.dnscCorrespondence ?? []), entry],
+      },
+    })
+    setNewCorr({ direction: "received", summary: "" })
+  }
+
+  return (
+    <div className="rounded-eos-md border border-blue-200 bg-blue-50/50 px-3 py-3 space-y-3">
+      <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-blue-700">
+        Post-incident tracking
+      </p>
+      {/* DNSC Reference */}
+      <div>
+        <label className="text-[10px] font-medium text-blue-700">Nr. înregistrare DNSC</label>
+        <div className="mt-1 flex gap-2">
+          <input
+            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            placeholder="DNSC-2026-..."
+            value={dnscRef}
+            onChange={(e) => setDnscRef(e.target.value)}
+          />
+          <Button size="sm" variant="outline" onClick={saveDnscRef} disabled={dnscRef === (tracking?.dnscReference ?? "")}>
+            Salvează
+          </Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { key: "remediationStartedAtISO", label: "Remediere începută" },
+          { key: "remediationCompletedAtISO", label: "Remediere finalizată" },
+          { key: "followUpValidationAtISO", label: "Validare follow-up" },
+        ].map(({ key, label }) => {
+          const value = tracking?.[key as keyof typeof tracking] as string | undefined
+          return (
+            <div key={key}>
+              <label className="text-[10px] font-medium text-blue-700">{label}</label>
+              {value ? (
+                <p className="mt-0.5 text-xs text-eos-text">{new Date(value).toLocaleDateString("ro-RO")}</p>
+              ) : (
+                <button
+                  type="button"
+                  className="mt-0.5 text-[10px] font-medium text-eos-primary hover:underline"
+                  onClick={() =>
+                    onUpdate({
+                      postIncidentTracking: {
+                        ...tracking,
+                        isRemediated: key === "remediationCompletedAtISO" ? true : tracking?.isRemediated ?? false,
+                        [key]: new Date().toISOString(),
+                      },
+                    })
+                  }
+                >
+                  Marchează acum
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      {/* DNSC Correspondence */}
+      <div>
+        <label className="text-[10px] font-medium text-blue-700">Corespondență DNSC</label>
+        {(tracking?.dnscCorrespondence ?? []).length > 0 && (
+          <div className="mt-1 space-y-1">
+            {(tracking?.dnscCorrespondence ?? []).map((c) => (
+              <div key={c.id} className="flex items-start gap-2 text-xs text-eos-text">
+                <span className={`shrink-0 text-[10px] font-medium ${c.direction === "sent" ? "text-blue-600" : "text-amber-600"}`}>
+                  {c.direction === "sent" ? "Trimis" : "Primit"}
+                </span>
+                <span className="text-eos-text-muted">{new Date(c.date).toLocaleDateString("ro-RO")}</span>
+                <span className="flex-1">{c.summary}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="mt-1.5 flex gap-2">
+          <select
+            className="rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+            value={newCorr.direction}
+            onChange={(e) => setNewCorr((p) => ({ ...p, direction: e.target.value as "sent" | "received" }))}
+          >
+            <option value="received">Primit de la DNSC</option>
+            <option value="sent">Trimis către DNSC</option>
+          </select>
+          <input
+            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            placeholder="Rezumat corespondență..."
+            value={newCorr.summary}
+            onChange={(e) => setNewCorr((p) => ({ ...p, summary: e.target.value }))}
+          />
+          <Button size="sm" variant="outline" onClick={addCorrespondence} disabled={!newCorr.summary.trim()}>
+            Adaugă
+          </Button>
+        </div>
+      </div>
+      <div>
+        <label className="text-[10px] font-medium text-blue-700">Note post-incident</label>
+        <div className="mt-1 flex gap-2">
+          <input
+            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            placeholder="Observații, acțiuni rămase..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              onUpdate({
+                postIncidentTracking: {
+                  ...tracking,
+                  isRemediated: tracking?.isRemediated ?? false,
+                  notes,
+                },
+              })
+            }
+          >
+            Salvează
+          </Button>
+        </div>
+      </div>
+      {tracking?.isRemediated && (
+        <Badge variant="success" className="text-[10px] normal-case tracking-normal">Remediat complet</Badge>
+      )}
+    </div>
+  )
+}
+
+// ── IncidentRow (refactored cu 3-stage stepper + post-incident) ──────────────
+
 function IncidentRow({
   incident,
   orgName,
@@ -611,6 +1002,9 @@ function IncidentRow({
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
   const isOpen = incident.status !== "closed"
   const [showChecklist, setShowChecklist] = useState(false)
+  const [showStages, setShowStages] = useState(true)
+
+  const completedStages = [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
 
   return (
     <div className="space-y-3 px-5 py-4">
@@ -624,6 +1018,9 @@ function IncidentRow({
             <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
               {INCIDENT_STATUS_LABELS[incident.status]}
             </Badge>
+            <Badge variant={completedStages === 3 ? "success" : "warning"} className="text-[10px] normal-case tracking-normal">
+              {completedStages}/3 etape
+            </Badge>
           </div>
           {incident.description && (
             <p className="mt-1 text-xs text-eos-text-muted">{incident.description}</p>
@@ -633,22 +1030,6 @@ function IncidentRow({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {isOpen && (
-            <select
-              className="h-8 rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 text-xs text-eos-text outline-none"
-              value={incident.status}
-              aria-label="Schimbă status"
-              onChange={(e) =>
-                onUpdate(incident.id, { status: e.target.value as Nis2IncidentStatus })
-              }
-            >
-              {(Object.entries(INCIDENT_STATUS_LABELS) as [Nis2IncidentStatus, string][]).map(
-                ([val, lbl]) => (
-                  <option key={val} value={val}>{lbl}</option>
-                )
-              )}
-            </select>
-          )}
           <button
             type="button"
             onClick={() => downloadDNSCReport(incident, orgName)}
@@ -670,41 +1051,29 @@ function IncidentRow({
         </div>
       </div>
 
-      {/* SLA timers cu progress bar */}
+      {/* SLA timers */}
       {isOpen && (
-        <div className="space-y-2">
-          {/* 24h early warning */}
+        <div className="grid grid-cols-2 gap-2">
           <div className={`rounded-eos-md border px-3 py-2 ${sla24.expired ? "border-red-300 bg-red-50" : sla24.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-red-700" : "text-eos-text-muted"}`}>
-                Alertă inițială DNSC (24h)
-              </span>
-              <span className={`text-xs font-bold ${sla24.expired ? "text-red-700 animate-pulse" : sla24.urgent ? "text-orange-700" : "text-eos-text"}`}>
-                {sla24.expired ? "⚠ DEPĂȘIT" : `Rămase: ${sla24.label}`}
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-red-700" : "text-eos-text-muted"}`}>24h Early Warning</span>
+              <span className={`text-xs font-bold ${sla24.expired ? "text-red-700" : sla24.urgent ? "text-orange-700" : "text-eos-text"}`}>
+                {sla24.expired ? "DEPASIT" : sla24.label}
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
-              <div
-                className={`h-full rounded-full transition-all ${sla24.expired ? "bg-red-500" : sla24.urgent ? "bg-orange-500" : "bg-eos-primary"}`}
-                style={{ width: `${sla24.progressPct}%` }}
-              />
+              <div className={`h-full rounded-full transition-all ${sla24.expired ? "bg-red-500" : sla24.urgent ? "bg-orange-500" : "bg-eos-primary"}`} style={{ width: `${sla24.progressPct}%` }} />
             </div>
           </div>
-          {/* 72h full report */}
           <div className={`rounded-eos-md border px-3 py-2 ${sla72.expired ? "border-red-300 bg-red-50" : sla72.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-red-700" : "text-eos-text-muted"}`}>
-                Raport complet DNSC (72h)
-              </span>
-              <span className={`text-xs font-bold ${sla72.expired ? "text-red-700 animate-pulse" : sla72.urgent ? "text-orange-700" : "text-eos-text"}`}>
-                {sla72.expired ? "⚠ DEPĂȘIT" : `Rămase: ${sla72.label}`}
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-red-700" : "text-eos-text-muted"}`}>72h Raport Complet</span>
+              <span className={`text-xs font-bold ${sla72.expired ? "text-red-700" : sla72.urgent ? "text-orange-700" : "text-eos-text"}`}>
+                {sla72.expired ? "DEPASIT" : sla72.label}
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
-              <div
-                className={`h-full rounded-full transition-all ${sla72.expired ? "bg-red-500" : sla72.urgent ? "bg-orange-500" : "bg-eos-primary"}`}
-                style={{ width: `${sla72.progressPct}%` }}
-              />
+              <div className={`h-full rounded-full transition-all ${sla72.expired ? "bg-red-500" : sla72.urgent ? "bg-orange-500" : "bg-eos-primary"}`} style={{ width: `${sla72.progressPct}%` }} />
             </div>
           </div>
         </div>
@@ -714,19 +1083,36 @@ function IncidentRow({
       {(incident.attackType || incident.operationalImpact) && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
           {incident.attackType && (
-            <span>
-              <span className="font-medium text-eos-text">Tip atac:</span>{" "}
-              {ATTACK_TYPE_LABELS[incident.attackType]}
-            </span>
+            <span><span className="font-medium text-eos-text">Tip atac:</span> {ATTACK_TYPE_LABELS[incident.attackType]}</span>
           )}
           {incident.operationalImpact && (
-            <span>
-              <span className="font-medium text-eos-text">Impact:</span>{" "}
-              {OPERATIONAL_IMPACT_LABELS[incident.operationalImpact]}
-            </span>
+            <span><span className="font-medium text-eos-text">Impact:</span> {OPERATIONAL_IMPACT_LABELS[incident.operationalImpact]}</span>
           )}
         </div>
       )}
+
+      {/* 3-Stage Stepper */}
+      <div>
+        <button type="button" className="flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline" onClick={() => setShowStages((v) => !v)}>
+          <Shield className="size-3.5" />
+          {showStages ? "Ascunde etapele de raportare" : "Etapele de raportare NIS2"}
+          {showStages ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+        </button>
+        {showStages && (
+          <div className="mt-2">
+            <IncidentStageStepper
+              incident={incident}
+              onSubmitStage={(_stage, data) => onUpdate(incident.id, data as Partial<Nis2Incident>)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Post-incident tracking */}
+      <PostIncidentPanel
+        incident={incident}
+        onUpdate={(patch) => onUpdate(incident.id, patch as Partial<Nis2Incident>)}
+      />
 
       {/* Checklist răspuns incident */}
       <div>

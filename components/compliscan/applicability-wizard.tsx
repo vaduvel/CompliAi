@@ -45,7 +45,14 @@ import {
 import type { ScanFinding } from "@/lib/compliance/types"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 
-type WizardStep = "cui" | "sector" | "size" | "ai" | "efactura" | "intake" | "done"
+export type ApplicabilityWizardStep =
+  | "cui"
+  | "sector"
+  | "size"
+  | "ai"
+  | "efactura"
+  | "intake"
+  | "done"
 
 type WizardState = {
   cui: string
@@ -70,6 +77,7 @@ type ProfilePrefillResponse = {
 
 type Props = {
   onComplete: (result: ApplicabilityResult) => void
+  onStepChange?: (step: ApplicabilityWizardStep) => void
 }
 
 const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
@@ -88,7 +96,7 @@ const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
   low: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
 }
 
-export function ApplicabilityWizard({ onComplete }: Props) {
+export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
   const { track, trackOnce } = useTrackEvent()
   const completedRef = useRef(false)
 
@@ -100,7 +108,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
     if (!completedRef.current) track("abandoned_applicability")
   }, [track])
 
-  const [step, setStep] = useState<WizardStep>("cui")
+  const [step, setStep] = useState<ApplicabilityWizardStep>("cui")
   const [values, setValues] = useState<WizardState>({
     cui: "",
     website: "",
@@ -122,6 +130,10 @@ export function ApplicabilityWizard({ onComplete }: Props) {
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
   const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
   const [prefillInvoiceStatus, setPrefillInvoiceStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+
+  useEffect(() => {
+    onStepChange?.(step)
+  }, [onStepChange, step])
 
   const profileSnapshot = buildProfileSnapshot(values)
   const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
@@ -269,7 +281,7 @@ export function ApplicabilityWizard({ onComplete }: Props) {
     if (result) onComplete(result)
   }
 
-  const STEP_LABELS: Record<WizardStep, string> = {
+  const STEP_LABELS: Record<ApplicabilityWizardStep, string> = {
     cui: "1 / 6",
     sector: "2 / 6",
     size: "3 / 6",

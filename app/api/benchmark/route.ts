@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readState } from "@/lib/server/mvp-store"
-import { normalizeComplianceState } from "@/lib/compliance/engine"
+import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { getSectorBenchmark } from "@/lib/sector-benchmark"
 import type { OrgSector } from "@/lib/compliance/applicability"
 
@@ -38,7 +38,8 @@ export async function GET() {
     if (!sector) return NextResponse.json({ benchmark: null, reason: "no-profile" })
 
     const caenPrefix = SECTOR_CAEN_MAP[sector] ?? "82"
-    const score = state.gdprProgress ?? 0
+    const summary = computeDashboardSummary(state)
+    const score = summary.score
 
     const benchmark = await getSectorBenchmark(ctx.orgId, caenPrefix, score)
     return NextResponse.json({ benchmark })

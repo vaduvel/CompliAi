@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   createNotificationMock: vi.fn(),
   mapFindingToTaskMock: vi.fn(),
-  generateDocumentMock: vi.fn(),
+  readFreshSessionFromRequestMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -18,6 +18,10 @@ vi.mock("@/lib/server/org-context", () => ({
   getOrgContext: mocks.getOrgContextMock,
 }))
 
+vi.mock("@/lib/server/auth", () => ({
+  readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
+}))
+
 vi.mock("@/lib/server/notifications-store", () => ({
   createNotification: mocks.createNotificationMock,
 }))
@@ -26,16 +30,16 @@ vi.mock("@/lib/finding-to-task-mapper", () => ({
   mapFindingToTask: mocks.mapFindingToTaskMock,
 }))
 
-vi.mock("@/lib/server/document-generator", () => ({
-  generateDocument: mocks.generateDocumentMock,
-}))
-
 import { PATCH } from "./route"
 
 describe("PATCH /api/findings/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-1", orgName: "Demo SRL" })
+    mocks.readFreshSessionFromRequestMock.mockResolvedValue({
+      userId: "user-1",
+      email: "owner@example.com",
+    })
     mocks.readStateMock.mockResolvedValue({
       findings: [
         {
@@ -63,10 +67,9 @@ describe("PATCH /api/findings/[id]", () => {
     })
     mocks.writeStateMock.mockResolvedValue(undefined)
     mocks.createNotificationMock.mockResolvedValue(undefined)
-    mocks.generateDocumentMock.mockResolvedValue(null)
   })
 
-  it("returnează feedback util când finding-ul este confirmat", async () => {
+  it("returnează feedback util când finding-ul este confirmat fără auto-generare", async () => {
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
         method: "PATCH",
@@ -84,7 +87,56 @@ describe("PATCH /api/findings/[id]", () => {
         documentTrigger: "dpa",
       })
     )
-    expect(payload.documentGenerationTriggered).toBe(true)
+    expect(payload.documentFlowState).toBe("draft_missing")
     expect(payload.feedbackMessage).toContain("Finding confirmat")
+    expect(payload.feedbackMessage).toContain("flow-ul ghidat")
+  })
+
+  it("blocheaza rezolvarea daca draftul nu este confirmat explicit", async () => {
+    mocks.readStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          generatedDocumentId: "doc-1",
+          confirmationChecklist: ["content-reviewed"],
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("DOCUMENT_CONFIRMATION_INCOMPLETE")
   })
 })

@@ -141,8 +141,16 @@ export type GeneratedDocumentRecord = {
   id: string
   documentType: GeneratedDocumentKind
   title: string
+  content?: string
   generatedAtISO: string
   llmUsed: boolean
+  sourceFindingId?: string
+  approvalStatus?: "draft" | "approved_as_evidence"
+  approvedAtISO?: string
+  approvedByUserId?: string
+  approvedByEmail?: string
+  confirmationChecklist?: string[]
+  evidenceNote?: string
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
   nextReviewDateISO?: string      // when to review this document

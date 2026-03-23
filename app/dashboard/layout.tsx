@@ -31,9 +31,10 @@ export default async function DashboardLayout({
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
 
   const userMode = session && !isDemoSession(session) ? await resolveUserMode(session) : null
+  const hasCompletedOnboarding = Boolean(userMode && state.orgProfile && state.applicability)
 
   if (session && !isDemoSession(session)) {
-    if (!userMode) {
+    if (!hasCompletedOnboarding) {
       redirect("/onboarding")
     }
     if (session.workspaceMode === "portfolio" && userMode === "partner") {
