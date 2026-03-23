@@ -191,6 +191,23 @@ Actualizare 2026-03-22:
 - [x] hardening de input pe `shadow-ai`
 - [x] cleanup `duplicate h1` in skeleton-urile dashboard
 - [x] rate limiting si pe GET-uri sensibile
+- [x] `Wave 0A` din modelul `portfolio-first`
+  - `userMode`
+  - `/onboarding`
+  - `POST /api/auth/set-user-mode`
+  - redirect controlat pentru user autenticat fara `userMode`
+- [x] `Wave 0B1`
+  - rol nou `partner_manager`
+  - suport in auth, RBAC, membership parsing si guards
+- [x] `Wave 0B2`
+  - `workspaceMode = org | portfolio` in sesiune
+  - `POST /api/auth/select-workspace`
+  - redirect de baza intre `/dashboard` si `/portfolio`
+- [~] `Wave 1`
+  - `nav-config` adaptiv
+  - shell adaptiv pe desktop si mobile
+  - switcher explicit `org <-> portfolio`
+  - `/portfolio` ramane shell + placeholder, nu `Portfolio Lite`
     - este evitata recursia RLS pe `memberships`
     - exista politici de `insert/update/delete` pe `org_state`, `evidence_objects` si `storage.objects`
   - exista acum si endpoint de verificare operationala:

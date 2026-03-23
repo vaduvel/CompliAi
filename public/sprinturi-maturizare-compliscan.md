@@ -37,6 +37,35 @@ in:
    - aplicația oferă suport și structură
    - omul validează
 
+## Actualizare 2026-03-22 - Fundatie portfolio-first
+
+Pe langa hardening-ul operational deja inchis, a pornit si implementarea controlata a noului model `portfolio-first`, pe wave-uri separate si cu checkpoint explicit:
+
+- [x] `Wave 0A`
+  - `userMode`
+  - `/onboarding`
+  - `POST /api/auth/set-user-mode`
+- [x] `Wave 0B1`
+  - rol nou `partner_manager`
+  - suport end-to-end in auth, RBAC, membership parsing si guards
+- [x] `Wave 0B2`
+  - `workspaceMode = org | portfolio` in sesiune
+  - `POST /api/auth/select-workspace`
+  - redirect controlat intre `/dashboard` si `/portfolio`
+- [~] `Wave 1`
+  - shell si navigatie adaptiva pe baza `userMode + workspaceMode + role`
+  - switcher explicit `org <-> portfolio`
+  - `/portfolio` ramane placeholder minim
+- [ ] `Wave 2`
+  - `Portfolio Lite` real
+  - reuse controlat din `/dashboard/partner`
+
+Disciplina ramane:
+
+- `Evidence OS v1` ramane baza vizuala
+- nu se introduce billing nou inainte de wave-ul dedicat
+- nu se deschide `Portfolio Lite` real inainte sa fie inchisa fundatia de sesiune, guards si navigatie
+
 ## Sprint 1 - Reliability + Security baseline
 
 Status: `done`

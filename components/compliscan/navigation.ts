@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 
 import { dashboardRouteGroups, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import type { WorkspaceMode } from "@/lib/server/auth"
 
 export type DashboardNavId =
   | "home"
@@ -34,6 +35,7 @@ export type DashboardNavItem = {
   icon: typeof Scan
   description?: string
   matchers?: string[]
+  workspaceModeTarget?: WorkspaceMode
 }
 
 export type DashboardNavSection = {

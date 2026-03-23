@@ -1274,6 +1274,67 @@ export function useCockpitData(): CockpitDataSlice {
   }
 }
 
+export function useOptionalCockpitData(): CockpitDataSlice | null {
+  const store = useContext(CockpitContext)
+  if (!store) return null
+
+  const {
+    loading,
+    scanning,
+    busy,
+    error,
+    data,
+    tasks,
+    latestScan,
+    latestScanText,
+    latestScanFindings,
+    recentEvents,
+    latestScanInsights,
+    nextBestAction,
+    lastScanLabel,
+    pendingScanId,
+    pendingExtractedText,
+    documentName,
+    documentContent,
+    documentFile,
+    scanInfo,
+    openAlerts,
+    activeDrifts,
+    validatedInvoicesToday,
+    efacturaErrorsToday,
+    gdprQuickFixes,
+    reloadDashboard,
+  } = store
+
+  return {
+    loading,
+    scanning,
+    busy,
+    error,
+    data,
+    tasks,
+    latestScan,
+    latestScanText,
+    latestScanFindings,
+    recentEvents,
+    latestScanInsights,
+    nextBestAction,
+    lastScanLabel,
+    pendingScanId,
+    pendingExtractedText,
+    documentName,
+    documentContent,
+    documentFile,
+    scanInfo,
+    openAlerts,
+    activeDrifts,
+    validatedInvoicesToday,
+    efacturaErrorsToday,
+    gdprQuickFixes,
+    reloadDashboard,
+  }
+}
+
 export function useCockpitMutations(): CockpitActionSlice {
   const store = useCockpit()
   const {

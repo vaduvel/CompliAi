@@ -30,8 +30,9 @@ export default async function DashboardLayout({
   const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
 
+  const userMode = session && !isDemoSession(session) ? await getUserMode(session.userId) : null
+
   if (session && !isDemoSession(session)) {
-    const userMode = await getUserMode(session.userId)
     if (!userMode) {
       redirect("/onboarding")
     }
@@ -39,7 +40,6 @@ export default async function DashboardLayout({
       redirect("/portfolio")
     }
   }
-
   const memberships = session ? await listUserMemberships(session.userId) : []
   const initialCockpitData = {
     state: corePayload.state,
@@ -54,6 +54,8 @@ export default async function DashboardLayout({
         orgId: session.orgId,
         role: session.role,
         membershipId: session.membershipId ?? null,
+        userMode: userMode ?? null,
+        workspaceMode: (session.workspaceMode ?? "org") as "org" | "portfolio",
       }
     : null
 

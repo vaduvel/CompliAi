@@ -1,9 +1,11 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
+import { PortfolioShell } from "@/components/compliscan/portfolio-shell"
 import {
   SESSION_COOKIE,
   getUserMode,
+  listUserMemberships,
   refreshSessionPayload,
   verifySessionToken,
 } from "@/lib/server/auth"
@@ -30,5 +32,20 @@ export default async function PortfolioLayout({
     redirect("/dashboard")
   }
 
-  return <>{children}</>
+  const memberships = await listUserMemberships(session.userId)
+  const initialUser = {
+    email: session.email,
+    orgName: session.orgName,
+    orgId: session.orgId,
+    role: session.role,
+    membershipId: session.membershipId ?? null,
+    userMode,
+    workspaceMode: session.workspaceMode ?? "org",
+  }
+
+  return (
+    <PortfolioShell initialUser={initialUser} initialMemberships={memberships}>
+      {children}
+    </PortfolioShell>
+  )
 }

@@ -1,5 +1,33 @@
 # CompliScan - Log sprinturi de maturizare
 
+## 2026-03-22
+
+### Foundation portfolio-first — Wave 0A / 0B1 / 0B2 / 1
+
+- a fost pornita fundatia canonica pentru modelul `portfolio-first`, pe branchuri separate de implementare:
+  - `Wave 0A`:
+    - `userMode`
+    - `/onboarding`
+    - `POST /api/auth/set-user-mode`
+    - redirect controlat spre onboarding pentru user fara `userMode`
+  - `Wave 0B1`:
+    - rol nou `partner_manager`
+    - suport end-to-end in auth, RBAC, membership parsing si guards
+  - `Wave 0B2`:
+    - `workspaceMode = org | portfolio` in sesiune
+    - `POST /api/auth/select-workspace`
+    - redirect controlat intre `/dashboard` si `/portfolio`
+    - compatibilitate pentru token-uri vechi, fara modelul riscant `activeOrgId = null`
+  - `Wave 1`:
+    - navigatie adaptiva pe baza `userMode + workspaceMode + role`
+    - shell minim de portfolio
+    - switcher explicit `org <-> portfolio`
+    - fara `Portfolio Lite` real si fara billing nou
+- validarea pentru acest pachet trece pe branchul curent:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 ## 2026-03-13
 
 ### Sprint 7 - Operational readiness

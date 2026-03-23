@@ -60,6 +60,15 @@ Actualizare 2026-03-22:
   - problema principala nu este lipsa de functionalitati
   - problema principala este increderea si coerenta pe fluxurile reale
 - acest pass reduce exact acele fronturi de risc, fara sa deschida un rewrite nou
+- a pornit si fundatia noului model `portfolio-first`, fara sa rupa runtime-ul actual:
+  - `Wave 0A`: `userMode` + onboarding
+  - `Wave 0B1`: `partner_manager`
+  - `Wave 0B2`: `workspaceMode` + `select-workspace`
+  - `Wave 1`: shell si navigatie adaptiva, cu `/portfolio` inca placeholder
+- starea reala acum:
+  - produsul actual continua sa functioneze per-org
+  - fundatia noua pentru consultant cu portofoliu exista deja
+  - `Portfolio Lite` real nu este inca livrat; intra abia in wave-ul urmator
 
 Sprintul de maturizare activ este:
 

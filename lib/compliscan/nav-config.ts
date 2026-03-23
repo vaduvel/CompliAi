@@ -1,0 +1,100 @@
+import { Building2 } from "lucide-react"
+
+import {
+  dashboardPrimaryNavItems,
+  type DashboardNavItem,
+  type DashboardNavSection,
+} from "@/components/compliscan/navigation"
+import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+
+export type AdaptiveNavSection = DashboardNavSection
+
+export type AdaptiveNavContext = {
+  userMode: UserMode | null
+  workspaceMode: WorkspaceMode
+  role: UserRole
+}
+
+const PORTFOLIO_OVERVIEW_ITEM: DashboardNavItem = {
+  id: "partner",
+  label: "Portofoliu",
+  href: "/portfolio",
+  icon: Building2,
+  description: "vedere agregata pe toate firmele",
+  matchers: ["/portfolio"],
+  workspaceModeTarget: "portfolio",
+}
+
+const ORG_NAV_FULL: DashboardNavItem[] = [...dashboardPrimaryNavItems]
+const ORG_NAV_VIEWER: DashboardNavItem[] = ORG_NAV_FULL.filter(
+  (item) => item.id !== "scan" && item.id !== "settings"
+)
+
+export function canSwitchToPortfolio(userMode: UserMode | null) {
+  return userMode === "partner"
+}
+
+export function getSidebarNavSections({
+  userMode,
+  workspaceMode,
+  role,
+}: AdaptiveNavContext): AdaptiveNavSection[] {
+  if (userMode === "partner" && workspaceMode === "portfolio") {
+    return [
+      {
+        id: "portfolio",
+        label: "Portofoliu",
+        items: [{ ...PORTFOLIO_OVERVIEW_ITEM, workspaceModeTarget: undefined }],
+      },
+    ]
+  }
+
+  if (userMode === "partner") {
+    return [
+      {
+        id: "portfolio",
+        label: "Portofoliu",
+        items: [PORTFOLIO_OVERVIEW_ITEM],
+      },
+      {
+        id: "org",
+        label: "Firma activa",
+        items: ORG_NAV_FULL,
+      },
+    ]
+  }
+
+  if (role === "viewer") {
+    return [
+      {
+        id: "org",
+        label: "Flux principal",
+        items: ORG_NAV_VIEWER,
+      },
+    ]
+  }
+
+  return [
+    {
+      id: "org",
+      label: "Flux principal",
+      items: ORG_NAV_FULL,
+    },
+  ]
+}
+
+export function getMobileNavItems({
+  userMode,
+  workspaceMode,
+  role,
+}: AdaptiveNavContext): DashboardNavItem[] {
+  if (userMode === "partner" && workspaceMode === "portfolio") {
+    return [{ ...PORTFOLIO_OVERVIEW_ITEM, workspaceModeTarget: undefined }]
+  }
+
+  if (role === "viewer") {
+    return ORG_NAV_VIEWER
+  }
+
+  return ORG_NAV_FULL
+}
