@@ -99,4 +99,182 @@ describe("mergeFindingsDeduplicated", () => {
     expect(merged.findings).toHaveLength(1)
     expect(merged.addedHighRiskCount).toBe(1)
   })
+
+  it("deduplica finding-uri Gemini cu titluri si ruleId-uri instabile, dar acelasi articol si excerpt", () => {
+    const existing = makeFinding({
+      id: "finding-gemini-1",
+      title: "Lipsa mențiunii privind transferurile internaționale de date",
+      legalReference: "Art. 44",
+      provenance: {
+        ruleId: "gemini-gdpr-r-old123",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-gemini-2",
+      title: "Lipsa mențiunii privind transferul datelor în afara SEE",
+      legalReference: "Art. 44",
+      sourceDocument: "scan-2.pdf",
+      provenance: {
+        ruleId: "gemini-gdpr-r-new456",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-gemini-1")
+    expect(merged.addedLowRiskCount).toBe(0)
+  })
+
+  it("deduplica finding-uri keyword cand excerptul difera doar prin numele documentului", () => {
+    const existing = makeFinding({
+      id: "finding-keyword-1",
+      title: "Verificare consimțământ tracking",
+      detail: "Verifica bannerele de consimtamant.",
+      risk: "low",
+      severity: "medium",
+      sourceDocument: "policy-tracking-live-1.txt",
+      provenance: {
+        ruleId: "GDPR-003",
+        excerpt: "policy-tracking-live-1.txt Politica de confidentialitate Folosim analytics si",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-keyword-2",
+      title: "Verificare consimțământ tracking",
+      detail: "Verifica bannerele de consimtamant.",
+      risk: "low",
+      severity: "medium",
+      sourceDocument: "policy-tracking-live-2.txt",
+      provenance: {
+        ruleId: "GDPR-003",
+        excerpt: "policy-tracking-live-2.txt Politica de confidentialitate Folosim analytics si",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-keyword-1")
+    expect(merged.addedLowRiskCount).toBe(0)
+  })
+
+  it("deduplica finding-uri Gemini semantice pe acelasi paragraf cand LLM-ul reformuleaza aceeasi problema", () => {
+    const existing = makeFinding({
+      id: "finding-transfer-see",
+      title: "Lipsa mențiunii privind transferul de date în afara SEE",
+      detail: "Scripturile de analytics implica adesea transferuri internationale.",
+      severity: "medium",
+      risk: "low",
+      legalReference: "Art. 44",
+      sourceDocument: "policy-tracking-live-a.txt",
+      sourceParagraph: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      suggestedDocumentType: "privacy-policy",
+      provenance: {
+        ruleId: "gemini-gdpr-r-old123",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-transfer-terti",
+      title: "Lipsa detaliilor privind transferul de date către terți",
+      detail: "Utilizarea analytics implica transferul datelor catre furnizori terti.",
+      severity: "medium",
+      risk: "low",
+      legalReference: "Art. 13 alin. (1) lit. (e)",
+      sourceDocument: "policy-tracking-live-b.txt",
+      sourceParagraph: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      suggestedDocumentType: "privacy-policy",
+      provenance: {
+        ruleId: "gemini-gdpr-r-new456",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-transfer-see")
+    expect(merged.addedLowRiskCount).toBe(0)
+  })
+
+  it("deduplica finding-uri Gemini pe acelasi paragraf chiar daca severitatea se schimba intre rescan-uri", () => {
+    const existing = makeFinding({
+      id: "finding-ai-transparency-existing",
+      title: "Lipsa transparenței privind utilizarea sistemelor AI",
+      category: "EU_AI_ACT",
+      severity: "high",
+      risk: "high",
+      legalReference: "Articolul 52",
+      suggestedDocumentType: "ai-transparency-notice",
+      sourceParagraph: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      provenance: {
+        ruleId: "gemini-ai-r-old123",
+        excerpt: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-ai-transparency-new",
+      title: "Lipsa transparenței privind sistemele AI",
+      category: "EU_AI_ACT",
+      severity: "medium",
+      risk: "high",
+      legalReference: "Articolul 52",
+      suggestedDocumentType: "ai-transparency-notice",
+      sourceDocument: "scan-2.pdf",
+      sourceParagraph: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      provenance: {
+        ruleId: "gemini-ai-r-new456",
+        excerpt: "Folosim analytics si tracking pentru a intelege cum interactioneaza utilizatorii cu site-ul.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-ai-transparency-existing")
+    expect(merged.findings[0].severity).toBe("high")
+    expect(merged.findings[0].risk).toBe("high")
+  })
+
+  it("deduplica finding-uri Gemini AI Act pe aceeasi problema chiar daca ancora se muta intre doua paragrafe", () => {
+    const existing = makeFinding({
+      id: "finding-ai-high-risk-existing",
+      title: "Sistem AI nedeclarat cu potențial risc ridicat",
+      category: "EU_AI_ACT",
+      severity: "critical",
+      risk: "high",
+      legalReference: "Articolul 6",
+      suggestedDocumentType: "ai-risk-assessment",
+      sourceParagraph: "Pentru sistemele automate cu impact asupra utilizatorului final, decizia finala trebuie validata de un operator uman.",
+      provenance: {
+        ruleId: "gemini-ai-r-old789",
+        excerpt:
+          "Pentru sistemele automate cu impact asupra utilizatorului final, decizia finala trebuie validata de un operator uman.",
+      },
+    })
+    const incoming = makeFinding({
+      id: "finding-ai-high-risk-new",
+      title: "Sistem AI nedeclarat cu potențial high-risk",
+      category: "EU_AI_ACT",
+      severity: "critical",
+      risk: "high",
+      legalReference: "Articolul 6",
+      suggestedDocumentType: "ai-risk-assessment",
+      sourceDocument: "scan-2.pdf",
+      sourceParagraph: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      provenance: {
+        ruleId: "gemini-ai-r-new987",
+        excerpt: "Scripturile de masurare pot colecta date despre dispozitiv, comportament si sesiune.",
+      },
+    })
+
+    const merged = mergeFindingsDeduplicated([existing], [incoming])
+
+    expect(merged.findings).toHaveLength(1)
+    expect(merged.findings[0].id).toBe("finding-ai-high-risk-existing")
+    expect(merged.addedHighRiskCount).toBe(0)
+  })
 })

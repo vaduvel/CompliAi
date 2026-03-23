@@ -1504,6 +1504,9 @@ Actualizare suplimentara 2026-03-22:
   - hardening pentru `shadow-ai`
   - cleanup `duplicate h1` in loading state
   - rate limiting si pe GET-uri sensibile
+- follow-up dupa verificarea live pe productie:
+  - exportul PDF include acum si fonturile standard PDFKit in tracing-ul serverless
+  - deduplicarea la rescan nu mai depinde de `ruleId`-uri Gemini instabile sau de excerpt-uri contaminate cu numele documentului
 - validarea ramane verde dupa acest sprint:
   - `npm test`
   - `npm run lint`

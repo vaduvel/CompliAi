@@ -362,7 +362,7 @@ export function mergeFindingsDeduplicated(
 
   for (const incoming of incomingFindings) {
     const fingerprint = findingFingerprint(incoming)
-    const existing = existingByFingerprint.get(fingerprint)
+    const existing = existingByFingerprint.get(fingerprint) ?? findSemanticGeminiDuplicate(existingFindings, incoming, consumedExisting)
 
     if (existing) {
       consumedExisting.add(existing.id)
@@ -370,6 +370,8 @@ export function mergeFindingsDeduplicated(
         ...existing,
         ...incoming,
         id: existing.id,
+        severity: pickMoreSevereSeverity(existing.severity, incoming.severity),
+        risk: pickMoreSevereRisk(existing.risk, incoming.risk),
         findingStatus: existing.findingStatus ?? incoming.findingStatus,
         findingStatusUpdatedAtISO: existing.findingStatusUpdatedAtISO ?? incoming.findingStatusUpdatedAtISO,
       })
@@ -394,15 +396,13 @@ export function mergeFindingsDeduplicated(
 }
 
 function findingFingerprint(finding: ScanFinding) {
-  const ruleId = normalizeFingerprintPart(finding.provenance?.ruleId)
+  const ruleId = normalizeStableRuleId(finding.provenance?.ruleId)
   const title = normalizeFingerprintPart(finding.title)
   const category = normalizeFingerprintPart(finding.category)
   const legalReference = normalizeFingerprintPart(finding.legalReference)
-  const textAnchor = normalizeFingerprintPart(
-    finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail
-  )
+  const textAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(finding))
 
-  return [category, ruleId || legalReference, title, textAnchor].join("::")
+  return [category, ruleId || legalReference || title, textAnchor || title].join("::")
 }
 
 function normalizeFingerprintPart(value: string | undefined) {
@@ -410,4 +410,152 @@ function normalizeFingerprintPart(value: string | undefined) {
     .toLowerCase()
     .replace(/\s+/g, " ")
     .trim()
+}
+
+function normalizeStableRuleId(ruleId: string | undefined) {
+  const normalized = normalizeFingerprintPart(ruleId)
+  return normalized.startsWith("gemini-") ? "" : normalized
+}
+
+function findSemanticGeminiDuplicate(
+  existingFindings: ScanFinding[],
+  incoming: ScanFinding,
+  consumedExisting: Set<string>
+) {
+  if (!isGeminiSemanticFinding(incoming)) {
+    return undefined
+  }
+
+  const incomingAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(incoming))
+  const incomingDocumentType = normalizeFingerprintPart(incoming.suggestedDocumentType)
+  const incomingSemanticTokens = semanticTitleTokens(incoming.title)
+
+  if (!incomingAnchor || incomingSemanticTokens.size === 0) {
+    return undefined
+  }
+
+  for (const existing of existingFindings) {
+    if (consumedExisting.has(existing.id) || !isGeminiSemanticFinding(existing)) {
+      continue
+    }
+
+    if (normalizeFingerprintPart(existing.category) !== normalizeFingerprintPart(incoming.category)) {
+      continue
+    }
+
+    const existingAnchor = normalizeFingerprintPart(normalizeFindingTextAnchor(existing))
+    const existingDocumentType = normalizeFingerprintPart(existing.suggestedDocumentType)
+    if (incomingDocumentType && existingDocumentType && incomingDocumentType !== existingDocumentType) {
+      continue
+    }
+
+    const similarity = semanticTokenSimilarity(incomingSemanticTokens, semanticTitleTokens(existing.title))
+    const sameAnchor = Boolean(existingAnchor && existingAnchor === incomingAnchor)
+    const sameLegalReference =
+      Boolean(incoming.legalReference) &&
+      normalizeFingerprintPart(existing.legalReference) === normalizeFingerprintPart(incoming.legalReference)
+
+    if ((sameAnchor && similarity >= 0.4) || (sameLegalReference && similarity >= 0.6)) {
+      return existing
+    }
+  }
+
+  return undefined
+}
+
+function isGeminiSemanticFinding(finding: ScanFinding) {
+  const ruleId = normalizeFingerprintPart(finding.provenance?.ruleId)
+  return ruleId.startsWith("gemini-")
+}
+
+function semanticTitleTokens(value: string | undefined) {
+  const normalized = normalizeFingerprintPart(stripRomanianDiacritics(value))
+  const tokens = normalized
+    .split(/[^a-z0-9]+/)
+    .map((token) => normalizeSemanticToken(token))
+    .filter((token) => token.length >= 4 && !SEMANTIC_STOPWORDS.has(token))
+
+  return new Set(tokens)
+}
+
+function semanticTokenSimilarity(a: Set<string>, b: Set<string>) {
+  if (a.size === 0 || b.size === 0) {
+    return 0
+  }
+
+  let overlap = 0
+  for (const token of a) {
+    if (b.has(token)) {
+      overlap += 1
+    }
+  }
+
+  return overlap / Math.min(a.size, b.size)
+}
+
+function normalizeSemanticToken(token: string) {
+  return token
+    .replace(/(urile|ilor|elor|ului|ul|ele|ile|ii|ei|ea|ie|ia|a|e|i|u)$/g, "")
+    .slice(0, 8)
+}
+
+function stripRomanianDiacritics(value: string | undefined) {
+  return (value ?? "")
+    .replace(/[ăâ]/g, "a")
+    .replace(/î/g, "i")
+    .replace(/[șş]/g, "s")
+    .replace(/[țţ]/g, "t")
+}
+
+const SEMANTIC_STOPWORDS = new Set([
+  "lips",
+  "priv",
+  "sist",
+  "date",
+  "ceea",
+  "pentru",
+  "care",
+  "este",
+  "unei",
+  "unui",
+  "prin",
+  "privi",
+  "deta",
+])
+
+function normalizeFindingTextAnchor(finding: ScanFinding) {
+  const rawAnchor = finding.sourceParagraph ?? finding.provenance?.excerpt ?? finding.detail ?? ""
+  const documentName = finding.sourceDocument?.trim()
+
+  const withoutDocumentName = documentName && rawAnchor.startsWith(documentName)
+    ? rawAnchor.slice(documentName.length)
+    : rawAnchor
+
+  return withoutDocumentName.replace(/^[\s:/-]+/, "").trim()
+}
+
+const FINDING_SEVERITY_ORDER = ["low", "medium", "high", "critical"] as const
+const FINDING_RISK_ORDER = ["low", "high"] as const
+
+function pickMoreSevereSeverity(current: ScanFinding["severity"], incoming: ScanFinding["severity"]) {
+  return pickHigherRank(current, incoming, FINDING_SEVERITY_ORDER)
+}
+
+function pickMoreSevereRisk(current: ScanFinding["risk"], incoming: ScanFinding["risk"]) {
+  return pickHigherRank(current, incoming, FINDING_RISK_ORDER)
+}
+
+function pickHigherRank<T extends string>(current: T, incoming: T, order: readonly T[]) {
+  const currentRank = order.indexOf(current)
+  const incomingRank = order.indexOf(incoming)
+
+  if (incomingRank === -1) {
+    return current
+  }
+
+  if (currentRank === -1 || incomingRank > currentRank) {
+    return incoming
+  }
+
+  return current
 }

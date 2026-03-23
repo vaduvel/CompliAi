@@ -191,6 +191,19 @@ Actualizare 2026-03-22:
 - [x] hardening de input pe `shadow-ai`
 - [x] cleanup `duplicate h1` in skeleton-urile dashboard
 - [x] rate limiting si pe GET-uri sensibile
+- [x] follow-up post-verificare live:
+  - tracing explicit si pentru fonturile standard PDFKit (`*.afm`) pe exportul PDF productie
+  - deduplicare mai stabila la rescan pentru finding-uri Gemini cu titluri/ruleId-uri instabile
+  - deduplicare pentru finding-uri keyword unde excerpt-ul difera doar prin numele documentului
+  - este evitata recursia RLS pe `memberships`
+  - exista politici de `insert/update/delete` pe `org_state`, `evidence_objects` si `storage.objects`
+  - exista acum si endpoint de verificare operationala:
+    - `GET /api/integrations/supabase/status`
+    - vizibil si in `Setari`
+  - exista si runbook de verificare manuala:
+    - `public/supabase-rls-verification-runbook.md`
+  - verificarea operationala live in proiectul Supabase real trece prin:
+    - `npm run verify:supabase:rls`
 - [x] `Wave 0A` din modelul `portfolio-first`
   - `userMode`
   - `/onboarding`

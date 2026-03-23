@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import fs from "node:fs"
 import path from "node:path"
 
 import PDFDocument from "pdfkit"
@@ -10,6 +10,45 @@ type PDFMetadata = {
 }
 
 let cachedPdfFont: Buffer | null = null
+let pdfkitDataLookupPatched = false
+
+const PDFKIT_RUNTIME_DATA_SEGMENT = `${path.sep}.next${path.sep}server${path.sep}chunks${path.sep}data${path.sep}`
+const PDFKIT_VENDOR_DATA_DIR = path.join(process.cwd(), "node_modules", "pdfkit", "js", "data")
+
+export function resolvePdfkitRuntimeDataFallback(filePath: string) {
+  if (!filePath.includes(PDFKIT_RUNTIME_DATA_SEGMENT)) {
+    return undefined
+  }
+
+  const fallbackPath = path.join(PDFKIT_VENDOR_DATA_DIR, path.basename(filePath))
+  return fs.existsSync(fallbackPath) ? fallbackPath : undefined
+}
+
+function patchPdfkitDataLookup() {
+  if (pdfkitDataLookupPatched) return
+
+  const originalReadFileSync = fs.readFileSync.bind(fs) as typeof fs.readFileSync
+
+  fs.readFileSync = ((filePath: fs.PathOrFileDescriptor, options?: Parameters<typeof fs.readFileSync>[1]) => {
+    const rawPath =
+      typeof filePath === "string"
+        ? filePath
+        : Buffer.isBuffer(filePath)
+          ? filePath.toString("utf8")
+          : filePath instanceof URL
+            ? filePath.toString()
+            : ""
+
+    const fallbackPath = rawPath ? resolvePdfkitRuntimeDataFallback(rawPath) : undefined
+    if (fallbackPath) {
+      return originalReadFileSync(fallbackPath, options as never)
+    }
+
+    return originalReadFileSync(filePath as never, options as never)
+  }) as typeof fs.readFileSync
+
+  pdfkitDataLookupPatched = true
+}
 
 function getPdfFontBuffer() {
   if (cachedPdfFont) return cachedPdfFont
@@ -26,7 +65,7 @@ function getPdfFontBuffer() {
     "og",
     "noto-sans-v27-latin-regular.ttf"
   )
-  cachedPdfFont = readFileSync(fontPath)
+  cachedPdfFont = fs.readFileSync(fontPath)
   return cachedPdfFont
 }
 
@@ -37,6 +76,8 @@ function getPdfFontBuffer() {
  */
 export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadata): Promise<Buffer> {
   return new Promise((resolve, reject) => {
+    patchPdfkitDataLookup()
+
     const doc = new PDFDocument({
       size: "A4",
       margins: { top: 72, bottom: 72, left: 72, right: 72 },

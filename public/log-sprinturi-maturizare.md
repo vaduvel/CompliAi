@@ -3357,6 +3357,19 @@ Validare dupa pass:
 - skeleton-ul de dashboard nu mai introduce heading concurent in loading state:
   - problema cu `duplicate h1` a fost eliminata
 - rate limiting-ul include acum si GET-urile sensibile:
+
+### Follow-up dupa verificarea live pe productie
+
+- auditul scurt facut direct pe Vercel a confirmat ca mai ramasesera 2 probleme reale:
+  - exportul PDF cauta inca `Helvetica.afm` in bundle-ul serverless
+  - rescan-ul putea dubla finding-uri generate de Gemini sau excerpt-uri care includeau numele documentului
+- a fost aplicat un follow-up de hardening strict pe aceste 2 puncte:
+  - tracing-ul pentru `POST /api/reports/pdf` si `POST /api/documents/export-pdf` include acum si `node_modules/pdfkit/js/data/**/*`
+  - fingerprint-ul de deduplicare ignora `ruleId`-urile Gemini instabile si normalizeaza excerpt-urile care pornesc cu numele documentului
+- validare follow-up:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
   - findings
   - shadow-ai
   - org profile
