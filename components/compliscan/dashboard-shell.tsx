@@ -91,7 +91,7 @@ export function DashboardShell({
     router.push("/login")
   }
 
-  async function handleSwitchWorkspaceMode(mode: WorkspaceMode) {
+  async function handleSwitchWorkspaceMode(mode: WorkspaceMode, destinationHref?: string) {
     if (!currentUser || switchingWorkspaceMode === mode) return
 
     setSwitchingWorkspaceMode(mode)
@@ -123,7 +123,7 @@ export function DashboardShell({
       )
 
       startTransition(() => {
-        router.push(mode === "portfolio" ? "/portfolio" : "/dashboard")
+        router.push(destinationHref ?? (mode === "portfolio" ? "/portfolio" : "/dashboard"))
         router.refresh()
       })
     } catch (error) {
@@ -178,7 +178,7 @@ export function DashboardShell({
   function handleNavItemSelection(item: DashboardNavItem) {
     if (!currentUser || !item.workspaceModeTarget) return false
     if (item.workspaceModeTarget === currentUser.workspaceMode) return false
-    void handleSwitchWorkspaceMode(item.workspaceModeTarget)
+    void handleSwitchWorkspaceMode(item.workspaceModeTarget, item.href)
     return true
   }
 

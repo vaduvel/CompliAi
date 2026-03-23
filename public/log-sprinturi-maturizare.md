@@ -2,7 +2,7 @@
 
 ## 2026-03-22
 
-### Foundation portfolio-first — Wave 0A / 0B1 / 0B2 / 1
+### Foundation portfolio-first — Wave 0A / 0B1 / 0B2 / 1 / 2
 
 - a fost pornita fundatia canonica pentru modelul `portfolio-first`, pe branchuri separate de implementare:
   - `Wave 0A`:
@@ -23,6 +23,11 @@
     - shell minim de portfolio
     - switcher explicit `org <-> portfolio`
     - fara `Portfolio Lite` real si fara billing nou
+  - `Wave 2`:
+    - `Portfolio Lite` real pe `/portfolio`, `/portfolio/alerts`, `/portfolio/tasks`, `/portfolio/vendors`, `/portfolio/reports`
+    - API-uri noi aggregate in `/api/portfolio/*`
+    - reutilizare controlata din `/dashboard/partner`, fara rescriere oarba
+    - drilldown din portofoliu spre `firma activa` prin `select-workspace`
 - validarea pentru acest pachet trece pe branchul curent:
   - `npm test`
   - `npm run lint`

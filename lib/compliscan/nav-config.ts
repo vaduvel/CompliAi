@@ -1,7 +1,6 @@
-import { Building2 } from "lucide-react"
-
 import {
   dashboardPrimaryNavItems,
+  portfolioNavItems,
   type DashboardNavItem,
   type DashboardNavSection,
 } from "@/components/compliscan/navigation"
@@ -15,20 +14,18 @@ export type AdaptiveNavContext = {
   role: UserRole
 }
 
-const PORTFOLIO_OVERVIEW_ITEM: DashboardNavItem = {
-  id: "partner",
-  label: "Portofoliu",
-  href: "/portfolio",
-  icon: Building2,
-  description: "vedere agregata pe toate firmele",
-  matchers: ["/portfolio"],
-  workspaceModeTarget: "portfolio",
-}
-
 const ORG_NAV_FULL: DashboardNavItem[] = [...dashboardPrimaryNavItems]
 const ORG_NAV_VIEWER: DashboardNavItem[] = ORG_NAV_FULL.filter(
   (item) => item.id !== "scan" && item.id !== "settings"
 )
+const PORTFOLIO_NAV_ORG_TARGET: DashboardNavItem[] = portfolioNavItems.map((item) => ({
+  ...item,
+  workspaceModeTarget: "portfolio",
+}))
+const PORTFOLIO_NAV_ACTIVE: DashboardNavItem[] = portfolioNavItems.map((item) => ({
+  ...item,
+  workspaceModeTarget: undefined,
+}))
 
 export function canSwitchToPortfolio(userMode: UserMode | null) {
   return userMode === "partner"
@@ -44,7 +41,7 @@ export function getSidebarNavSections({
       {
         id: "portfolio",
         label: "Portofoliu",
-        items: [{ ...PORTFOLIO_OVERVIEW_ITEM, workspaceModeTarget: undefined }],
+        items: PORTFOLIO_NAV_ACTIVE,
       },
     ]
   }
@@ -54,7 +51,7 @@ export function getSidebarNavSections({
       {
         id: "portfolio",
         label: "Portofoliu",
-        items: [PORTFOLIO_OVERVIEW_ITEM],
+        items: PORTFOLIO_NAV_ORG_TARGET,
       },
       {
         id: "org",
@@ -89,7 +86,7 @@ export function getMobileNavItems({
   role,
 }: AdaptiveNavContext): DashboardNavItem[] {
   if (userMode === "partner" && workspaceMode === "portfolio") {
-    return [{ ...PORTFOLIO_OVERVIEW_ITEM, workspaceModeTarget: undefined }]
+    return PORTFOLIO_NAV_ACTIVE
   }
 
   if (role === "viewer") {

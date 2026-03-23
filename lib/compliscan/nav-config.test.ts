@@ -22,6 +22,13 @@ describe("lib/compliscan/nav-config", () => {
         workspaceModeTarget: "portfolio",
       })
     )
+    expect(sections[0]?.items.map((item) => item.href)).toEqual([
+      "/portfolio",
+      "/portfolio/alerts",
+      "/portfolio/tasks",
+      "/portfolio/vendors",
+      "/portfolio/reports",
+    ])
   })
 
   it("arata doar shell-ul portfolio pentru partner in portfolio mode", () => {
@@ -33,7 +40,7 @@ describe("lib/compliscan/nav-config", () => {
 
     expect(sections).toHaveLength(1)
     expect(sections[0]?.label).toBe("Portofoliu")
-    expect(sections[0]?.items).toHaveLength(1)
+    expect(sections[0]?.items).toHaveLength(5)
     expect(sections[0]?.items[0]?.workspaceModeTarget).toBeUndefined()
   })
 
@@ -75,5 +82,21 @@ describe("lib/compliscan/nav-config", () => {
     expect(canSwitchToPortfolio("compliance")).toBe(false)
     expect(canSwitchToPortfolio("viewer")).toBe(false)
     expect(canSwitchToPortfolio(null)).toBe(false)
+  })
+
+  it("expune toate suprafetele portfolio pe mobile in portfolio mode", () => {
+    const items = getMobileNavItems({
+      userMode: "partner",
+      workspaceMode: "portfolio",
+      role: "partner_manager",
+    })
+
+    expect(items.map((item) => item.href)).toEqual([
+      "/portfolio",
+      "/portfolio/alerts",
+      "/portfolio/tasks",
+      "/portfolio/vendors",
+      "/portfolio/reports",
+    ])
   })
 })

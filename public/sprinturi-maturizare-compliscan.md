@@ -52,19 +52,21 @@ Pe langa hardening-ul operational deja inchis, a pornit si implementarea control
   - `workspaceMode = org | portfolio` in sesiune
   - `POST /api/auth/select-workspace`
   - redirect controlat intre `/dashboard` si `/portfolio`
-- [~] `Wave 1`
+- [x] `Wave 1`
   - shell si navigatie adaptiva pe baza `userMode + workspaceMode + role`
   - switcher explicit `org <-> portfolio`
   - `/portfolio` ramane placeholder minim
-- [ ] `Wave 2`
+- [x] `Wave 2`
   - `Portfolio Lite` real
   - reuse controlat din `/dashboard/partner`
+  - API-uri noi aggregate pentru overview / alerts / tasks / vendors / reports
+  - drilldown controlat din portofoliu spre workspace-ul per-org
 
 Disciplina ramane:
 
 - `Evidence OS v1` ramane baza vizuala
 - nu se introduce billing nou inainte de wave-ul dedicat
-- nu se deschide `Portfolio Lite` real inainte sa fie inchisa fundatia de sesiune, guards si navigatie
+- `Portfolio Lite` a fost deschis doar dupa inchiderea fundatiei de sesiune, guards si navigatie
 
 ## Sprint 1 - Reliability + Security baseline
 

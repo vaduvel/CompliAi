@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  Bell,
   BookOpen,
   Building2,
   FileSearch,
@@ -21,6 +22,11 @@ export type DashboardNavId =
   | "resolve"
   | "reports"
   | "settings"
+  | "portfolio-overview"
+  | "portfolio-alerts"
+  | "portfolio-tasks"
+  | "portfolio-vendors"
+  | "portfolio-reports"
   | "scanare"
   | "scanari"
   | "documente"
@@ -116,6 +122,49 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     items: [
       { id: "partner", label: "Dashboard multi-client", href: "/dashboard/partner", icon: Building2 },
     ],
+  },
+] as const
+
+export const portfolioNavItems: DashboardNavItem[] = [
+  {
+    id: "portfolio-overview",
+    label: "Portofoliu",
+    href: "/portfolio",
+    icon: Building2,
+    matchers: ["/portfolio"],
+    description: "stare agregată pe toate firmele",
+  },
+  {
+    id: "portfolio-alerts",
+    label: "Alerte",
+    href: "/portfolio/alerts",
+    icon: Bell,
+    matchers: ["/portfolio/alerts"],
+    description: "toate alertele active",
+  },
+  {
+    id: "portfolio-tasks",
+    label: "Remediere",
+    href: "/portfolio/tasks",
+    icon: Flag,
+    matchers: ["/portfolio/tasks"],
+    description: "taskuri deschise cross-client",
+  },
+  {
+    id: "portfolio-vendors",
+    label: "Furnizori",
+    href: "/portfolio/vendors",
+    icon: FolderOpen,
+    matchers: ["/portfolio/vendors"],
+    description: "vendori și review-uri comune",
+  },
+  {
+    id: "portfolio-reports",
+    label: "Rapoarte",
+    href: "/portfolio/reports",
+    icon: FileSearch,
+    matchers: ["/portfolio/reports"],
+    description: "metadata și livrabile pe portofoliu",
   },
 ] as const
 

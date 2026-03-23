@@ -243,3 +243,43 @@ Observații de control:
 Următorul checkpoint permis:
 - `Wave 2`
 - scope strict: `Portfolio Lite` real, cu reutilizare controlată din `/dashboard/partner`, fără billing nou
+
+## Actualizare 2026-03-23 — Wave 2 verificată și aprobată
+
+Verdict:
+- `Wave 2` = aprobată
+- branch verificat: `codex/portfolio-wave-2`
+
+Ce am verificat direct în cod:
+- agregarea server-side pentru portofoliu există în [lib/server/portfolio.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/portfolio.ts)
+- API-urile noi sunt prezente în:
+  - [app/api/portfolio/overview/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/portfolio/overview/route.ts)
+  - [app/api/portfolio/alerts/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/portfolio/alerts/route.ts)
+  - [app/api/portfolio/tasks/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/portfolio/tasks/route.ts)
+  - [app/api/portfolio/vendors/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/portfolio/vendors/route.ts)
+  - [app/api/portfolio/reports/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/portfolio/reports/route.ts)
+- overview-ul de portofoliu reutilizează controlat suprafața existentă din [app/dashboard/partner/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/partner/page.tsx) prin [components/compliscan/portfolio-overview-client.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/portfolio-overview-client.tsx)
+- subpaginile `Portfolio Lite` există în:
+  - [app/portfolio/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/page.tsx)
+  - [app/portfolio/alerts/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/alerts/page.tsx)
+  - [app/portfolio/tasks/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/tasks/page.tsx)
+  - [app/portfolio/vendors/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/vendors/page.tsx)
+  - [app/portfolio/reports/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/reports/page.tsx)
+- drilldown-ul din portofoliu spre lucru per-org folosește [app/api/auth/select-workspace/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/select-workspace/route.ts) prin [components/compliscan/portfolio-org-action-button.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/portfolio-org-action-button.tsx)
+- compatibilitatea cu vechiul `/dashboard/partner` a fost păstrată; nu există route rename timpuriu
+
+Validare Wave 2:
+- `npx vitest run lib/server/portfolio.test.ts app/api/portfolio/portfolio-routes.test.ts lib/compliscan/nav-config.test.ts` -> verde (`18` teste)
+- `npm test` -> verde (`130` fișiere, `707` teste, `1 skipped`, `0 failed`)
+- `npm run lint` -> trece; doar warning-uri istorice preexistente
+- `npm run build` -> verde; build-ul generează `117` pagini și compilează `/portfolio/*`
+
+Observații de control:
+- `Evidence OS v1` a rămas baza vizuală
+- `Wave 2` livrează `Portfolio Lite`, nu încă ownership claim sau billing nou
+- drilldown-ul schimbă explicit `workspaceMode` și păstrează modelul de sesiune cu `orgId`
+- deduplicarea vendorilor cross-org folosește acum fallback pe nume când review-ul nu are `CUI`
+
+Următorul checkpoint permis:
+- `Wave 3`
+- scope strict: cleanup runtime per-org ca să se potrivească mai bine cu noul strat portfolio-first, fără billing nou și fără claim flow

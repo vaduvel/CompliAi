@@ -203,20 +203,26 @@ Actualizare 2026-03-22:
   - `workspaceMode = org | portfolio` in sesiune
   - `POST /api/auth/select-workspace`
   - redirect de baza intre `/dashboard` si `/portfolio`
-- [~] `Wave 1`
+- [x] `Wave 1`
   - `nav-config` adaptiv
   - shell adaptiv pe desktop si mobile
   - switcher explicit `org <-> portfolio`
   - `/portfolio` ramane shell + placeholder, nu `Portfolio Lite`
-    - este evitata recursia RLS pe `memberships`
-    - exista politici de `insert/update/delete` pe `org_state`, `evidence_objects` si `storage.objects`
-  - exista acum si endpoint de verificare operationala:
-    - `GET /api/integrations/supabase/status`
-    - vizibil si in `Setari`
-  - exista si runbook de verificare manuala:
-    - `public/supabase-rls-verification-runbook.md`
-  - verificarea operationala live in proiectul Supabase real trece prin:
-    - `npm run verify:supabase:rls`
+- [x] `Wave 2`
+  - `Portfolio Lite` real pe `/portfolio`
+  - subpagini dedicate:
+    - `/portfolio/alerts`
+    - `/portfolio/tasks`
+    - `/portfolio/vendors`
+    - `/portfolio/reports`
+  - API-uri noi:
+    - `GET /api/portfolio/overview`
+    - `GET /api/portfolio/alerts`
+    - `GET /api/portfolio/tasks`
+    - `GET /api/portfolio/vendors`
+    - `GET /api/portfolio/reports`
+  - reutilizare controlata din `/dashboard/partner`
+  - drilldown din portofoliu in `firma activa` prin `POST /api/auth/select-workspace`
 - [x] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud

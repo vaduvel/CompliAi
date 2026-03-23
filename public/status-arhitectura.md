@@ -64,11 +64,12 @@ Actualizare 2026-03-22:
   - `Wave 0A`: `userMode` + onboarding
   - `Wave 0B1`: `partner_manager`
   - `Wave 0B2`: `workspaceMode` + `select-workspace`
-  - `Wave 1`: shell si navigatie adaptiva, cu `/portfolio` inca placeholder
+  - `Wave 1`: shell si navigatie adaptiva
+  - `Wave 2`: `Portfolio Lite` real, bazat pe agregari cross-org controlate
 - starea reala acum:
   - produsul actual continua sa functioneze per-org
-  - fundatia noua pentru consultant cu portofoliu exista deja
-  - `Portfolio Lite` real nu este inca livrat; intra abia in wave-ul urmator
+  - consultantul are acum si stratul `Portfolio Lite`, fara sa piarda drilldown-ul in `firma activa`
+  - billing, claim flow si cleanup-ul per-org raman wave-uri separate
 
 Sprintul de maturizare activ este:
 
