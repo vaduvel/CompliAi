@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
     }
   },
   requireFreshRoleMock: vi.fn(),
+  deactivateOrganizationMemberMock: vi.fn(),
   updateOrganizationMemberRoleMock: vi.fn(),
   mutateStateMock: vi.fn(),
   appendComplianceEventsMock: vi.fn(),
@@ -22,6 +23,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
+  deactivateOrganizationMember: mocks.deactivateOrganizationMemberMock,
   requireFreshRole: mocks.requireFreshRoleMock,
   updateOrganizationMemberRole: mocks.updateOrganizationMemberRoleMock,
 }))
@@ -40,7 +42,7 @@ vi.mock("@/lib/server/event-actor", () => ({
   formatEventActorLabel: mocks.formatEventActorLabelMock,
 }))
 
-import { PATCH } from "./route"
+import { DELETE, PATCH } from "./route"
 
 describe("PATCH /api/auth/members/[membershipId]", () => {
   beforeEach(() => {
@@ -150,5 +152,29 @@ describe("PATCH /api/auth/members/[membershipId]", () => {
 
     expect(response.status).toBe(409)
     expect(payload.code).toBe("AUTH_LAST_OWNER_REQUIRED")
+  })
+
+  it("permite owner-ului sa elimine consultantul", async () => {
+    mocks.deactivateOrganizationMemberMock.mockResolvedValueOnce({
+      membershipId: "membership-3",
+      userId: "user-3",
+      email: "consultant@site.ro",
+      role: "partner_manager",
+      createdAtISO: "2026-03-13T10:00:00.000Z",
+      orgId: "org-1",
+      orgName: "Org Demo",
+    })
+
+    const response = await DELETE(
+      new Request("http://localhost/api/auth/members/membership-3", {
+        method: "DELETE",
+      }),
+      { params: Promise.resolve({ membershipId: "membership-3" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.ok).toBe(true)
+    expect(mocks.deactivateOrganizationMemberMock).toHaveBeenCalledWith("org-1", "membership-3")
   })
 })

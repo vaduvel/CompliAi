@@ -1,6 +1,7 @@
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import {
   AuthzError,
+  deactivateOrganizationMember,
   requireFreshRole,
   updateOrganizationMemberRole,
   type UserRole,
@@ -115,6 +116,122 @@ export async function PATCH(
       error instanceof Error ? error.message : "Nu am putut actualiza rolul membrului.",
       500,
       "AUTH_MEMBER_ROLE_UPDATE_FAILED",
+      undefined,
+      requestContext
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ membershipId: string }> }
+) {
+  const requestContext = createRequestContext(request, "/api/auth/members/[membershipId]")
+
+  try {
+    const session = await requireFreshRole(
+      request,
+      ["owner"],
+      "eliminarea unui membru din organizatie"
+    )
+    const actor = eventActorFromSession(session)
+    const actorLabel = formatEventActorLabel(actor)
+    const { membershipId } = await context.params
+
+    const member = await deactivateOrganizationMember(session.orgId, membershipId)
+
+    await mutateState((current) => ({
+      ...current,
+      events: appendComplianceEvents(current, [
+        createComplianceEvent(
+          {
+            type: "auth.member-removed",
+            entityType: "system",
+            entityId: membershipId,
+            message: `${actorLabel} a eliminat ${member.email} din organizatie.`,
+            createdAtISO: new Date().toISOString(),
+            metadata: {
+              email: member.email,
+              role: member.role,
+              orgId: member.orgId,
+            },
+          },
+          actor
+        ),
+      ]),
+    }))
+
+    return jsonWithRequestContext(
+      {
+        ok: true,
+        member,
+        message: "Membrul a fost eliminat din organizatia curenta.",
+      },
+      requestContext
+    )
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code, undefined, requestContext)
+    }
+
+    if (error instanceof Error) {
+      if (error.message === "MEMBERSHIP_NOT_FOUND") {
+        return jsonError(
+          "Membrul selectat nu exista in organizatia curenta.",
+          404,
+          "AUTH_MEMBER_NOT_FOUND",
+          undefined,
+          requestContext
+        )
+      }
+      if (error.message === "ORGANIZATION_NOT_FOUND") {
+        return jsonError("Organizatia curenta nu exista.", 404, "AUTH_ORG_NOT_FOUND", undefined, requestContext)
+      }
+      if (error.message === "LAST_OWNER_REQUIRED") {
+        return jsonError(
+          "Nu poti elimina ultimul owner activ din organizatia curenta.",
+          409,
+          "AUTH_LAST_OWNER_REQUIRED",
+          undefined,
+          requestContext
+        )
+      }
+      if (error.message === "MEMBERSHIP_ALREADY_INACTIVE") {
+        return jsonError(
+          "Membrul selectat este deja inactiv.",
+          409,
+          "AUTH_MEMBER_ALREADY_INACTIVE",
+          undefined,
+          requestContext
+        )
+      }
+      if (error.message === "MEMBERSHIP_USER_NOT_FOUND") {
+        await logRouteError(requestContext, error, {
+          code: "AUTH_MEMBER_USER_MISSING",
+          durationMs: getRequestDurationMs(requestContext),
+          status: 500,
+        })
+
+        return jsonError(
+          "Membrul selectat nu are un utilizator valid asociat.",
+          500,
+          "AUTH_MEMBER_USER_MISSING",
+          undefined,
+          requestContext
+        )
+      }
+    }
+
+    await logRouteError(requestContext, error, {
+      code: "AUTH_MEMBER_REMOVE_FAILED",
+      durationMs: getRequestDurationMs(requestContext),
+      status: 500,
+    })
+
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut elimina membrul.",
+      500,
+      "AUTH_MEMBER_REMOVE_FAILED",
       undefined,
       requestContext
     )

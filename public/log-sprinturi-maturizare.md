@@ -37,6 +37,33 @@
   - `npm run lint`
   - `npm run build`
 
+### Foundation portfolio-first — Wave 4
+
+- a fost livrat flow-ul de `ownership + claim` fără să rupă modelul actual de memberships:
+  - `owner = system` rămâne stare derivată când clientul nu a revendicat încă firma
+  - consultantul operează firma ca `partner_manager` până la acceptarea claim-ului
+- au fost adăugate rute noi de auth pentru flow-ul de claim:
+  - `POST /api/auth/claim-invite`
+  - `GET /api/auth/claim-status/[orgId]`
+  - `POST /api/auth/claim-accept`
+- `Setări > Acces` are acum suprafață reală pentru:
+  - status ownership
+  - invite pending
+  - generare claim link
+  - eliminarea consultantului de către owner
+- a fost adăugată și pagina minimă de acceptare:
+  - `/claim`
+- `login` suportă acum `next` sigur pentru întoarcerea în flow-ul de claim
+- importul CSV de clienți din portalul partner:
+  - creează org neclaim-uit
+  - setează consultantul ca `partner_manager`
+  - pregătește automat claim invite pentru emailul clientului
+  - este acum legat explicit de rol și de `userMode = partner`
+- validarea pentru `Wave 4` trece:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 ## 2026-03-13
 
 ### Sprint 7 - Operational readiness

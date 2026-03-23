@@ -1,12 +1,19 @@
 // POST /api/partner/import-csv
-// Sprint 12 — Partner Portal: import clienți bulk din CSV.
+// Portfolio-first Wave 4: import clienți bulk din CSV.
 // Format: orgName,cui,sector,employeeCount,email
-// Parse → creează org + membership → rulează applicability engine automat.
+// Parse → creează org neclaim-uită cu consultantul ca partner_manager
+// și pregătește claim ownership pentru emailul clientului.
 
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest, registerUser, addOrganizationMemberByEmail } from "@/lib/server/auth"
+import { createClaimInvite } from "@/lib/server/claim-ownership"
+import {
+  AuthzError,
+  createOrganizationForExistingUser,
+  getUserMode,
+  requireFreshRole,
+} from "@/lib/server/auth"
 import { evaluateApplicability } from "@/lib/compliance/applicability"
 import type { OrgProfile, OrgSector, OrgEmployeeCount } from "@/lib/compliance/applicability"
 
@@ -50,9 +57,18 @@ function parseCsvRow(line: string): string[] {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) {
-      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(
+      request,
+      ["owner", "partner_manager"],
+      "importul CSV de clienți"
+    )
+    const userMode = await getUserMode(session.userId)
+    if (userMode !== "partner") {
+      throw new AuthzError(
+        "Importul CSV este disponibil doar în modul partner.",
+        403,
+        "PORTFOLIO_FORBIDDEN"
+      )
     }
 
     const body = await request.json() as { csvContent?: string }
@@ -122,21 +138,14 @@ export async function POST(request: Request) {
       }
 
       try {
-        // Creează org cu userul client ca owner
-        const tempPassword = `tmp-${Math.random().toString(36).slice(2, 14)}`
-        const newUser = await registerUser(email, tempPassword, orgName)
-        const newOrgId = newUser.orgId
-
-        // Adaugă partenerul curent ca membro compliance
-        try {
-          await addOrganizationMemberByEmail(newOrgId, session.email, "compliance")
-        } catch (memberErr) {
-          // Dacă adăugarea ca membro eșuează, org-ul tot a fost creat
-          const errMsg = memberErr instanceof Error ? memberErr.message : "UNKNOWN"
-          if (errMsg !== "MEMBER_ALREADY_EXISTS") {
-            // Continuăm — parteneru nu a putut fi adăugat, dar org-ul e creat
-          }
-        }
+        const newOrg = await createOrganizationForExistingUser(session.userId, orgName, "partner_manager")
+        const newOrgId = newOrg.orgId
+        await createClaimInvite({
+          orgId: newOrg.orgId,
+          orgName: newOrg.orgName,
+          invitedEmail: email,
+          invitedByUserId: session.userId,
+        })
 
         // Rulează applicability engine cu profilul CSV
         const profile: OrgProfile = {
@@ -157,8 +166,11 @@ export async function POST(request: Request) {
         })
       } catch (err) {
         const msg = err instanceof Error ? err.message : "UNKNOWN"
-        if (msg.includes("deja inregistrata") || msg.includes("already")) {
-          results.push({ ok: false, error: `Linia ${lineNum}: email "${email}" deja înregistrat` })
+        if (msg === "USER_NOT_SYNCABLE") {
+          results.push({
+            ok: false,
+            error: `Linia ${lineNum}: consultantul curent nu poate crea clienți în modul cloud-first`,
+          })
         } else {
           results.push({ ok: false, error: `Linia ${lineNum}: eroare la crearea org "${orgName}" — ${msg}` })
         }

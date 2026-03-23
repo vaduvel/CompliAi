@@ -319,3 +319,43 @@ Observații de control:
 Următorul checkpoint permis:
 - `Wave 4`
 - scope strict: ownership și claim flow, fără billing nou
+
+## Actualizare 2026-03-23 — Wave 4 verificată și aprobată
+
+Verdict:
+- `Wave 4` = aprobată
+- branch verificat: `codex/portfolio-wave-4`
+
+Ce am verificat direct în cod:
+- modelul de ownership este acum derivat și nu introduce membership-uri false:
+  - [lib/server/auth.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/auth.ts)
+  - [lib/server/claim-ownership.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/claim-ownership.ts)
+- există API-uri dedicate pentru claim flow:
+  - [app/api/auth/claim-invite/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/claim-invite/route.ts)
+  - [app/api/auth/claim-status/[orgId]/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/claim-status/[orgId]/route.ts)
+  - [app/api/auth/claim-accept/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/claim-accept/route.ts)
+- owner-ul poate elimina consultantul din organizatie prin:
+  - [app/api/auth/members/[membershipId]/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/members/[membershipId]/route.ts)
+- `Setări > Acces` afișează acum suprafața reală de `Ownership și claim` în:
+  - [components/compliscan/settings-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/settings-page.tsx)
+  - [components/compliscan/settings/settings-shared.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/settings/settings-shared.tsx)
+- există și suprafață minimă de acceptare claim în:
+  - [app/claim/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/claim/page.tsx)
+  - [app/login/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/login/page.tsx) pentru `next` safe redirect
+- importul CSV pentru partener creează acum org neclaim-uit și pregătește claim invite, cu guard explicit pentru modul `partner`, în:
+  - [app/api/partner/import-csv/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/partner/import-csv/route.ts)
+
+Validare Wave 4:
+- `npm test` -> verde (`133` fișiere, `722` teste, `1 skipped`, `0 failed`)
+- `npm run lint` -> trece; doar warning-uri istorice preexistente
+- `npm run build` -> verde; compilează `/claim` și rutele noi de auth
+
+Observații de control:
+- `owner = system` rămâne stare derivată, nu record fake în memberships
+- `claim flow` este separat de billing și nu schimbă modelul de planuri
+- `/portfolio` și runtime-ul per-org rămân compatibile cu `workspaceMode`
+- importul CSV este acum legat de rol și de `userMode = partner`, nu doar de existența sesiunii
+
+Următorul checkpoint permis:
+- `Wave 5`
+- scope strict: billing partner, fără redesign nou și fără a rupe claim flow-ul deja livrat

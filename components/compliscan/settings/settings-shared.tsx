@@ -276,6 +276,8 @@ export function formatMemberRole(role: OrganizationMember["role"]) {
   switch (role) {
     case "owner":
       return "Administrator"
+    case "partner_manager":
+      return "Consultant portofoliu"
     case "compliance":
       return "Responsabil conformitate"
     case "reviewer":

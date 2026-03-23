@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
@@ -12,8 +12,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 
 type Mode = "login" | "register"
 
+function resolveSafeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/dashboard"
+  }
+  return value
+}
+
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath = resolveSafeNextPath(searchParams.get("next"))
   const [mode, setMode] = useState<Mode>("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -62,7 +79,7 @@ export default function LoginPage() {
       }
 
       toast.success(mode === "login" ? "Autentificat cu succes" : "Cont creat cu succes")
-      router.push("/dashboard")
+      router.push(nextPath)
     } catch {
       setError("Eroare de retea. Incearca din nou.")
     } finally {

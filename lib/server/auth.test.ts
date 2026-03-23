@@ -7,14 +7,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   addOrganizationMemberByEmail,
+  claimOrganizationOwnership,
+  createOrganizationForExistingUser,
   createSessionToken,
+  deactivateOrganizationMember,
   findUserByEmail,
   findUserById,
-  getConfiguredAuthBackend,
-  linkUserToExternalIdentity,
-  loadMemberships,
-  loadOrganizations,
-  listUserMemberships,
+    getConfiguredAuthBackend,
+    getOrganizationOwnership,
+    linkUserToExternalIdentity,
+    loadMemberships,
+    loadOrganizations,
+    listOrganizationMembers,
+    listUserMemberships,
   readSessionFromRequest,
   readFreshSessionFromRequest,
   refreshSessionPayload,
@@ -1096,5 +1101,104 @@ describe("lib/server/auth", () => {
         workspaceMode: "portfolio",
       })
     )
+  })
+
+  it("creeaza organizatie client cu consultantul ca partner_manager si ownership derivat system", async () => {
+    const consultant = await registerUser("consultant@example.com", "secret123", "Cabinet Elena")
+
+    const clientMembership = await createOrganizationForExistingUser(
+      consultant.id,
+      "Client SRL",
+      "partner_manager"
+    )
+    const ownership = await getOrganizationOwnership(clientMembership.orgId)
+    const memberships = await listUserMemberships(consultant.id)
+
+    expect(clientMembership.role).toBe("partner_manager")
+    expect(ownership).toEqual(
+      expect.objectContaining({
+        orgId: clientMembership.orgId,
+        ownerState: "system",
+        owner: expect.objectContaining({ type: "system" }),
+      })
+    )
+    expect(memberships).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ orgId: clientMembership.orgId, role: "partner_manager" }),
+      ])
+    )
+  })
+
+  it("permite claim ownership pentru email nou si creeaza owner real", async () => {
+    const consultant = await registerUser("consultant@example.com", "secret123", "Cabinet Elena")
+    const clientMembership = await createOrganizationForExistingUser(
+      consultant.id,
+      "LogiTrans SRL",
+      "partner_manager"
+    )
+
+    const claimedUser = await claimOrganizationOwnership(clientMembership.orgId, "ceo@logitrans.ro", {
+      password: "super-secret",
+    })
+    const ownership = await getOrganizationOwnership(clientMembership.orgId)
+
+    expect(claimedUser.email).toBe("ceo@logitrans.ro")
+    expect(claimedUser.role).toBe("owner")
+    expect(ownership).toEqual(
+      expect.objectContaining({
+        ownerState: "claimed",
+        owner: expect.objectContaining({ email: "ceo@logitrans.ro" }),
+      })
+    )
+  })
+
+  it("cere autentificare pentru claim cand emailul exista deja", async () => {
+    const consultant = await registerUser("consultant@example.com", "secret123", "Cabinet Elena")
+    const existingOwner = await registerUser("ceo@logitrans.ro", "secret123", "Holding CEO")
+    const clientMembership = await createOrganizationForExistingUser(
+      consultant.id,
+      "LogiTrans SRL",
+      "partner_manager"
+    )
+
+    await expect(
+      claimOrganizationOwnership(clientMembership.orgId, existingOwner.email)
+    ).rejects.toThrow("CLAIM_LOGIN_REQUIRED")
+  })
+
+  it("permite claim pentru un user existent autentificat", async () => {
+    const consultant = await registerUser("consultant@example.com", "secret123", "Cabinet Elena")
+    const existingOwner = await registerUser("ceo@logitrans.ro", "secret123", "Holding CEO")
+    const clientMembership = await createOrganizationForExistingUser(
+      consultant.id,
+      "LogiTrans SRL",
+      "partner_manager"
+    )
+
+    const claimedUser = await claimOrganizationOwnership(clientMembership.orgId, existingOwner.email, {
+      currentUserId: existingOwner.id,
+    })
+    const ownership = await getOrganizationOwnership(clientMembership.orgId)
+
+    expect(claimedUser.id).toBe(existingOwner.id)
+    expect(claimedUser.role).toBe("owner")
+    expect(ownership).toEqual(
+      expect.objectContaining({
+        ownerState: "claimed",
+        owner: expect.objectContaining({ userId: existingOwner.id }),
+      })
+    )
+  })
+
+  it("permite owner-ului sa elimine consultantul din organizatie", async () => {
+    const owner = await registerUser("owner@example.com", "secret123", "Org Control")
+    await registerUser("consultant@example.com", "secret123", "Cabinet Elena")
+    const consultant = await addOrganizationMemberByEmail(owner.orgId, "consultant@example.com", "partner_manager")
+
+    const removed = await deactivateOrganizationMember(owner.orgId, consultant.membershipId)
+    const members = await listOrganizationMembers(owner.orgId)
+
+    expect(removed.role).toBe("partner_manager")
+    expect(members.find((member) => member.membershipId === consultant.membershipId)).toBeUndefined()
   })
 })

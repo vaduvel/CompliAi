@@ -65,12 +65,23 @@ Pe langa hardening-ul operational deja inchis, a pornit si implementarea control
   - runtime per-org curățat pe noua structură
   - `Mod Solo` are nav dedicat și `/dashboard/documente` real
   - `De rezolvat`, `Rapoarte` și `Setări` se simplifică fără logică dublată
+- [x] `Wave 4`
+  - ownership derivat `system -> claimed`
+  - claim flow:
+    - `POST /api/auth/claim-invite`
+    - `GET /api/auth/claim-status/[orgId]`
+    - `POST /api/auth/claim-accept`
+  - UI în `Setări > Acces` pentru ownership și invite
+  - `/claim` pentru acceptarea claim-ului
+  - owner-ul poate elimina consultantul după revendicare
+  - importul CSV din portalul partner creează org-uri neclaim-uite și pregătește claim invite
 
 Disciplina ramane:
 
 - `Evidence OS v1` ramane baza vizuala
 - nu se introduce billing nou inainte de wave-ul dedicat
 - `Portfolio Lite` a fost deschis doar dupa inchiderea fundatiei de sesiune, guards si navigatie
+- ownership / claim a fost livrat inainte de billing, exact pentru a pastra migrarea comerciala separata de UX foundation
 
 ## Sprint 1 - Reliability + Security baseline
 

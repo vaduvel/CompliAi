@@ -231,6 +231,30 @@ Actualizare 2026-03-22:
     - `De rezolvat` și `Rapoarte` se simplifică fără rute paralele
   - `Setări` filtrează zonele vizibile pentru Solo fără a dubla logica
   - `Acasă` și `Scanează` își adaptează copy-ul la contextul de lucru
+- [x] `Wave 4`
+  - ownership derivat pentru firmele create de consultant:
+    - `system` pana la claim
+    - `claimed` dupa claim
+  - API-uri noi:
+    - `POST /api/auth/claim-invite`
+    - `GET /api/auth/claim-status/[orgId]`
+    - `POST /api/auth/claim-accept`
+  - helper dedicat pentru invite store:
+    - `lib/server/claim-ownership.ts`
+  - `Setări > Acces` afiseaza:
+    - status ownership
+    - pending invite
+    - generare claim link
+    - eliminare consultant de catre owner
+  - ruta noua:
+    - `/claim`
+  - `login` suporta acum redirect sigur inapoi in flow-ul de claim prin `next`
+  - `DELETE /api/auth/members/[membershipId]` permite owner-ului sa elimine consultantul
+  - `POST /api/partner/import-csv`:
+    - creeaza org neclaim-uit
+    - seteaza consultantul ca `partner_manager`
+    - genereaza claim invite automat
+    - este legat explicit de rol si de `userMode = partner`
 - [x] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud

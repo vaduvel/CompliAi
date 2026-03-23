@@ -49,12 +49,46 @@ const DRIFT_OVERRIDE_FIELDS = [
 
 const MEMBER_ROLE_OPTIONS = [
   { value: "owner", label: "Administrator" },
+  { value: "partner_manager", label: "Consultant portofoliu" },
   { value: "compliance", label: "Responsabil conformitate" },
   { value: "reviewer", label: "Revizor" },
   { value: "viewer", label: "Vizualizator" },
 ] as const
 
 const SETTINGS_SUMMARY_ENDPOINT = "/api/settings/summary"
+
+type ClaimInviteSummary = {
+  id: string
+  invitedEmail: string
+  createdAtISO: string
+  expiresAtISO: string
+  claimUrl: string
+}
+
+type ClaimStatusResponse = {
+  orgId: string
+  orgName: string
+  role: NonNullable<CurrentUser>["role"]
+  ownership:
+    | {
+        ownerState: "system"
+        owner: {
+          type: "system"
+          label: "system"
+        }
+      }
+    | {
+        ownerState: "claimed"
+        owner: {
+          type: "user"
+          membershipId: string
+          userId: string
+          email: string
+          createdAtISO: string
+        }
+      }
+  pendingInvite: ClaimInviteSummary | null
+} | null
 
 const SettingsIntegrationsTab = dynamic(
   () =>
@@ -138,6 +172,14 @@ export function SettingsPageSurface() {
   const [releaseReadinessLoading, setReleaseReadinessLoading] = useState(true)
   const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
   const canViewReleaseReadiness =
+    currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
+  const [claimStatus, setClaimStatus] = useState<ClaimStatusResponse>(null)
+  const [claimStatusLoading, setClaimStatusLoading] = useState(true)
+  const [claimStatusError, setClaimStatusError] = useState<string | null>(null)
+  const [claimInviteEmail, setClaimInviteEmail] = useState("")
+  const [creatingClaimInvite, setCreatingClaimInvite] = useState(false)
+  const [removingMembershipId, setRemovingMembershipId] = useState<string | null>(null)
+  const canViewClaimStatus =
     currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
   const isSolo = runtime?.userMode === "solo"
   const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) =>
@@ -240,6 +282,54 @@ export function SettingsPageSurface() {
       active = false
     }
   }, [])
+
+  useEffect(() => {
+    let active = true
+
+    if (!currentUserResolved || !currentUser?.orgId || !canViewClaimStatus) {
+      setClaimStatus(null)
+      setClaimStatusError(null)
+      setClaimStatusLoading(false)
+      return () => {
+        active = false
+      }
+    }
+
+    const loadClaimStatus = async () => {
+      setClaimStatusLoading(true)
+      setClaimStatusError(null)
+
+      try {
+        const response = await fetch(`/api/auth/claim-status/${currentUser.orgId}`, { cache: "no-store" })
+        const payload = (await response.json()) as ClaimStatusResponse | { error?: string }
+
+        if (!response.ok) {
+          throw new Error(
+            payload && typeof payload === "object" && "error" in payload && payload.error
+              ? payload.error
+              : "Nu am putut incarca ownership-ul."
+          )
+        }
+
+        if (!active) return
+        setClaimStatus(payload as ClaimStatusResponse)
+      } catch (error) {
+        if (!active) return
+        setClaimStatus(null)
+        setClaimStatusError(error instanceof Error ? error.message : "Nu am putut incarca ownership-ul.")
+      } finally {
+        if (active) {
+          setClaimStatusLoading(false)
+        }
+      }
+    }
+
+    void loadClaimStatus()
+
+    return () => {
+      active = false
+    }
+  }, [canViewClaimStatus, currentUser?.orgId, currentUserResolved])
 
   useEffect(() => {
     if (!cockpit.data) return
@@ -413,13 +503,119 @@ export function SettingsPageSurface() {
             description="Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare."
           />
 
+          {canViewClaimStatus ? (
+            <Card className="border-eos-border bg-eos-surface">
+              <CardHeader>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <CardTitle className="text-xl">Ownership și claim</CardTitle>
+                    <p className="mt-2 text-sm text-eos-text-muted">
+                      Consultantul poate opera firma ca <strong>partner_manager</strong>, dar ownership-ul final
+                      rămâne la client. Aici vezi dacă organizația este deja revendicată și poți pregăti transferul.
+                    </p>
+                  </div>
+                  {claimStatus?.ownership.ownerState === "claimed" ? (
+                    <Badge variant="success">owner revendicat</Badge>
+                  ) : (
+                    <Badge variant="warning">owner placeholder system</Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {claimStatusLoading ? (
+                  <OperationalLoadingCard>Incarcam statusul de ownership...</OperationalLoadingCard>
+                ) : claimStatusError ? (
+                  <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
+                    {claimStatusError}
+                  </div>
+                ) : claimStatus ? (
+                  <>
+                    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-eos-text">Status curent</p>
+                          {claimStatus.ownership.ownerState === "claimed" ? (
+                            <p className="mt-1 text-sm leading-6 text-eos-text-muted">
+                              Owner-ul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
+                              poate controla membrii, billing-ul și poate elimina consultantul din organizație.
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-sm leading-6 text-eos-text-muted">
+                              Organizația nu are încă un owner real. Consultantul operează firma ca{" "}
+                              <strong>partner_manager</strong> până când clientul acceptă claim-ul.
+                            </p>
+                          )}
+                        </div>
+                        {claimStatus.pendingInvite ? (
+                          <Badge variant="outline">claim activ</Badge>
+                        ) : (
+                          <Badge variant="secondary">fără claim activ</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {claimStatus.pendingInvite ? (
+                      <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                        <p className="text-sm font-semibold text-eos-text">
+                          Claim pregătit pentru {claimStatus.pendingInvite.invitedEmail}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                          Expiră la {new Date(claimStatus.pendingInvite.expiresAtISO).toLocaleString("ro-RO")}. Linkul
+                          de mai jos poate fi trimis manual clientului.
+                        </p>
+                        <input
+                          readOnly
+                          value={claimStatus.pendingInvite.claimUrl}
+                          className="mt-3 h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 text-xs text-eos-text outline-none"
+                          aria-label="Link claim ownership"
+                        />
+                      </div>
+                    ) : null}
+
+                    {currentUser?.role === "partner_manager" && claimStatus.ownership.ownerState === "system" ? (
+                      <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+                        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-eos-text">Trimite claim ownership</p>
+                            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                              Introdu emailul clientului care trebuie să devină owner. Dacă persoana nu are cont,
+                              își va seta parola direct din linkul de claim.
+                            </p>
+                          </div>
+                          <Badge variant="outline">partner-only</Badge>
+                        </div>
+                        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                          <input
+                            type="email"
+                            value={claimInviteEmail}
+                            onChange={(event) => setClaimInviteEmail(event.target.value)}
+                            placeholder="owner@client.ro"
+                            aria-label="Email pentru claim ownership"
+                            className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                          />
+                          <Button
+                            disabled={creatingClaimInvite || !claimInviteEmail.trim()}
+                            onClick={() => void handleCreateClaimInvite()}
+                          >
+                            Trimite claim
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Card className="border-eos-border bg-eos-surface">
             <CardHeader>
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <CardTitle className="text-xl">Membri si roluri</CardTitle>
                   <p className="mt-2 text-sm text-eos-text-muted">
-                    Owner-ul poate ajusta rolurile. Compliance vede lista pentru audit si separarea responsabilitatilor.
+                    Owner-ul poate ajusta rolurile si poate elimina consultantul. Compliance si partner manager vad lista
+                    pentru audit si separarea responsabilitatilor.
                   </p>
                 </div>
                 {currentUser?.role && (
@@ -491,6 +687,10 @@ export function SettingsPageSurface() {
                   {membersData.members.map((member) => {
                     const isSelf = member.membershipId === currentUser?.membershipId
                     const canManageRoles = currentUser?.role === "owner"
+                    const canRemoveConsultant =
+                      currentUser?.role === "owner" &&
+                      !isSelf &&
+                      member.role === "partner_manager"
 
                     return (
                       <div
@@ -517,23 +717,37 @@ export function SettingsPageSurface() {
                           )}
                         </div>
 
-                        <div className="flex items-center justify-start lg:justify-end">
+                        <div className="flex items-center justify-start gap-2 lg:justify-end">
                           {canManageRoles ? (
-                            <select
-                              className="h-9 min-w-[180px] rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                              value={member.role}
-                              aria-label={`Rol pentru ${member.email}`}
-                              disabled={isSelf || updatingMembershipId === member.membershipId}
-                              onChange={(event) =>
-                                void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
-                              }
-                            >
-                              {MEMBER_ROLE_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
+                            <>
+                              <select
+                                className="h-9 min-w-[180px] rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                value={member.role}
+                                aria-label={`Rol pentru ${member.email}`}
+                                disabled={isSelf || updatingMembershipId === member.membershipId}
+                                onChange={(event) =>
+                                  void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
+                                }
+                              >
+                                {MEMBER_ROLE_OPTIONS.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              {canRemoveConsultant ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={removingMembershipId === member.membershipId}
+                                  onClick={() => void handleRemoveMember(member.membershipId, member.email)}
+                                  className="gap-1.5"
+                                >
+                                  <Trash2 className="size-3.5" strokeWidth={2} />
+                                  Elimină
+                                </Button>
+                              ) : null}
+                            </>
                           ) : (
                             <p className="text-xs text-eos-text-muted">
                               Doar owner-ul poate schimba rolurile.
@@ -1149,6 +1363,88 @@ export function SettingsPageSurface() {
       toast.error("Adaugarea a esuat", { description: message })
     } finally {
       setCreatingMember(false)
+    }
+  }
+
+  async function handleCreateClaimInvite() {
+    const email = claimInviteEmail.trim().toLowerCase()
+    if (!email || !currentUser?.orgId) return
+
+    setCreatingClaimInvite(true)
+    setClaimStatusError(null)
+
+    try {
+      const response = await fetch("/api/auth/claim-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const payload = (await response.json()) as {
+        ok?: boolean
+        error?: string
+        invite?: ClaimInviteSummary
+      }
+
+      if (!response.ok || !payload.invite) {
+        throw new Error(payload.error || "Invitatia de claim nu a putut fi generata.")
+      }
+
+      setClaimStatus((current) =>
+        current
+          ? {
+              ...current,
+              pendingInvite: payload.invite ?? null,
+            }
+          : current
+      )
+      setClaimInviteEmail("")
+      toast.success("Claim pregatit", {
+        description: `Linkul pentru ${payload.invite.invitedEmail} este gata de trimis.`,
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Invitatia de claim nu a putut fi generata."
+      setClaimStatusError(message)
+      toast.error("Claim nereusit", { description: message })
+    } finally {
+      setCreatingClaimInvite(false)
+    }
+  }
+
+  async function handleRemoveMember(membershipId: string, email: string) {
+    setRemovingMembershipId(membershipId)
+    setMembersError(null)
+
+    try {
+      const response = await fetch(`/api/auth/members/${membershipId}`, {
+        method: "DELETE",
+      })
+      const payload = (await response.json()) as {
+        ok?: boolean
+        error?: string
+      }
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Membrul nu a putut fi eliminat.")
+      }
+
+      setMembersData((current) => {
+        if (!current) return current
+        return {
+          ...current,
+          members: current.members.filter((member) => member.membershipId !== membershipId),
+        }
+      })
+
+      toast.success("Consultant eliminat", {
+        description: `${email} nu mai are acces operational la aceasta organizatie.`,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Membrul nu a putut fi eliminat."
+      setMembersError(message)
+      toast.error("Eliminarea a esuat", { description: message })
+    } finally {
+      setRemovingMembershipId(null)
     }
   }
 }

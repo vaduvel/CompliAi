@@ -70,6 +70,29 @@ export type OrganizationMember = {
   orgName: string
 }
 
+export type OrganizationOwnershipSummary =
+  | {
+      orgId: string
+      orgName: string
+      ownerState: "system"
+      owner: {
+        type: "system"
+        label: "system"
+      }
+    }
+  | {
+      orgId: string
+      orgName: string
+      ownerState: "claimed"
+      owner: {
+        type: "user"
+        membershipId: string
+        userId: string
+        email: string
+        createdAtISO: string
+      }
+    }
+
 export type UserMembershipSummary = {
   membershipId: string
   orgId: string
@@ -435,6 +458,22 @@ async function saveMemberships(records: OrganizationMembershipRecord[]) {
   await writeJsonFile(getMembershipsFile(), records)
 }
 
+function buildOrganizationMember(
+  user: PersistedUserRecord,
+  membership: OrganizationMembershipRecord,
+  organization: OrganizationRecord
+): OrganizationMember {
+  return {
+    membershipId: membership.id,
+    userId: user.id,
+    email: normalizeEmail(user.email),
+    role: membership.role,
+    createdAtISO: membership.createdAtISO,
+    orgId: organization.id,
+    orgName: organization.name,
+  }
+}
+
 function resolveMembershipUser(
   user: PersistedUserRecord,
   organizations: OrganizationRecord[],
@@ -560,17 +599,56 @@ export async function listOrganizationMembers(orgId: string) {
     .map((membership) => {
       const user = graph.users.find((entry) => entry.id === membership.userId)
       if (!user) return null
-      return {
-        membershipId: membership.id,
-        userId: user.id,
-        email: normalizeEmail(user.email),
-        role: membership.role,
-        createdAtISO: membership.createdAtISO,
-        orgId: organization.id,
-        orgName: organization.name,
-      }
+      return buildOrganizationMember(user, membership, organization)
     })
     .filter(Boolean) as OrganizationMember[]
+}
+
+export async function getOrganizationOwnership(orgId: string): Promise<OrganizationOwnershipSummary> {
+  const graph = await loadAuthGraph()
+  const organization = graph.organizations.find((entry) => entry.id === orgId)
+  if (!organization) {
+    throw new Error("ORGANIZATION_NOT_FOUND")
+  }
+
+  const ownerMembership = graph.memberships
+    .filter(
+      (membership) =>
+        membership.orgId === orgId &&
+        membership.status !== "inactive" &&
+        membership.role === "owner"
+    )
+    .sort((left, right) => left.createdAtISO.localeCompare(right.createdAtISO))[0]
+
+  if (!ownerMembership) {
+    return {
+      orgId: organization.id,
+      orgName: organization.name,
+      ownerState: "system",
+      owner: {
+        type: "system",
+        label: "system",
+      },
+    }
+  }
+
+  const ownerUser = graph.users.find((entry) => entry.id === ownerMembership.userId)
+  if (!ownerUser) {
+    throw new Error("MEMBERSHIP_USER_NOT_FOUND")
+  }
+
+  return {
+    orgId: organization.id,
+    orgName: organization.name,
+    ownerState: "claimed",
+    owner: {
+      type: "user",
+      membershipId: ownerMembership.id,
+      userId: ownerUser.id,
+      email: normalizeEmail(ownerUser.email),
+      createdAtISO: ownerMembership.createdAtISO,
+    },
+  }
 }
 
 export async function listUserMemberships(userId: string): Promise<UserMembershipSummary[]> {
@@ -740,6 +818,218 @@ export async function addOrganizationMemberByEmail(
     orgId: organization.id,
     orgName: organization.name,
   }
+}
+
+export async function deactivateOrganizationMember(
+  orgId: string,
+  membershipId: string
+): Promise<OrganizationMember> {
+  const graph = await loadAuthGraph()
+  const organization = graph.organizations.find((entry) => entry.id === orgId)
+  if (!organization) {
+    throw new Error("ORGANIZATION_NOT_FOUND")
+  }
+
+  const membershipIndex = graph.memberships.findIndex(
+    (membership) => membership.id === membershipId && membership.orgId === orgId
+  )
+  if (membershipIndex === -1) {
+    throw new Error("MEMBERSHIP_NOT_FOUND")
+  }
+
+  const currentMembership = graph.memberships[membershipIndex]
+  if (currentMembership.status === "inactive") {
+    throw new Error("MEMBERSHIP_ALREADY_INACTIVE")
+  }
+  if (currentMembership.role === "owner" && countActiveOwners(graph.memberships, orgId) <= 1) {
+    throw new Error("LAST_OWNER_REQUIRED")
+  }
+
+  const resolvedMembership: OrganizationMembershipRecord = {
+    ...currentMembership,
+    status: "inactive",
+  }
+  const nextMemberships = [...graph.memberships]
+  nextMemberships[membershipIndex] = resolvedMembership
+
+  const syncResult = await syncOrganizationTenancyToSupabase({
+    orgId,
+    users: graph.users,
+    organizations: graph.organizations,
+    memberships: nextMemberships,
+  })
+  if (shouldUseSupabaseTenancyAsPrimary() && !syncResult.synced) {
+    throw new Error(syncResult.reason)
+  }
+  await saveMemberships(nextMemberships)
+
+  const user = graph.users.find((entry) => entry.id === resolvedMembership.userId)
+  if (!user) {
+    throw new Error("MEMBERSHIP_USER_NOT_FOUND")
+  }
+
+  return buildOrganizationMember(user, resolvedMembership, organization)
+}
+
+export async function createOrganizationForExistingUser(
+  userId: string,
+  orgName: string,
+  role: UserRole
+): Promise<OrganizationMember> {
+  const graph = await loadAuthGraph()
+  const user = graph.users.find((entry) => entry.id === userId)
+  if (!user) {
+    throw new Error("USER_NOT_FOUND")
+  }
+  if (
+    shouldUseSupabaseTenancyAsPrimary() &&
+    !(user.authProvider === "supabase" && isLikelyUuid(user.id))
+  ) {
+    throw new Error("USER_NOT_SYNCABLE")
+  }
+
+  const createdAtISO = new Date().toISOString()
+  const organizationId = `org-${crypto.randomBytes(8).toString("hex")}`
+  const organizationRecord: OrganizationRecord = {
+    id: organizationId,
+    name: orgName.trim() || normalizeEmail(user.email).split("@")[0] || "Organizatie noua",
+    createdAtISO,
+  }
+  const membershipRecord: OrganizationMembershipRecord = {
+    id: `membership-${user.id}-${organizationId}`,
+    userId: user.id,
+    orgId: organizationId,
+    role,
+    createdAtISO,
+    status: "active",
+  }
+
+  const nextOrganizations = [...graph.organizations, organizationRecord]
+  const nextMemberships = [...graph.memberships, membershipRecord]
+
+  const syncResult = await syncUserTenancyToSupabase({
+    userId: user.id,
+    users: graph.users,
+    organizations: nextOrganizations,
+    memberships: nextMemberships,
+  })
+  if (shouldUseSupabaseTenancyAsPrimary() && !syncResult.synced) {
+    throw new Error(syncResult.reason)
+  }
+  await saveOrganizations(nextOrganizations)
+  await saveMemberships(nextMemberships)
+
+  return buildOrganizationMember(user, membershipRecord, organizationRecord)
+}
+
+export async function claimOrganizationOwnership(
+  orgId: string,
+  email: string,
+  options?: {
+    password?: string
+    currentUserId?: string
+  }
+): Promise<User> {
+  const graph = await loadAuthGraph()
+  const organization = graph.organizations.find((entry) => entry.id === orgId)
+  if (!organization) {
+    throw new Error("ORGANIZATION_NOT_FOUND")
+  }
+
+  const emailNorm = normalizeEmail(email)
+  const owners = graph.memberships.filter(
+    (membership) =>
+      membership.orgId === orgId &&
+      membership.status !== "inactive" &&
+      membership.role === "owner"
+  )
+
+  let user = graph.users.find((entry) => normalizeEmail(entry.email) === emailNorm)
+  const nextUsers = [...graph.users]
+
+  if (owners.length > 0) {
+    const currentOwner = owners[0]
+    if (!user || currentOwner.userId !== user.id) {
+      throw new Error("OWNER_ALREADY_CLAIMED")
+    }
+  }
+
+  if (options?.currentUserId) {
+    if (!user || user.id !== options.currentUserId) {
+      throw new Error("CLAIM_EMAIL_MISMATCH")
+    }
+  } else if (user) {
+    throw new Error("CLAIM_LOGIN_REQUIRED")
+  }
+
+  if (!user) {
+    const password = options?.password?.trim()
+    if (!password || password.length < 8) {
+      throw new Error("CLAIM_PASSWORD_REQUIRED")
+    }
+
+    const salt = crypto.randomBytes(16).toString("hex")
+    user = {
+      id: crypto.randomBytes(8).toString("hex"),
+      email: emailNorm,
+      passwordHash: hashPassword(password, salt),
+      salt,
+      createdAtISO: new Date().toISOString(),
+      authProvider: "local",
+    }
+    nextUsers.push(user)
+  }
+
+  if (
+    shouldUseSupabaseTenancyAsPrimary() &&
+    !(user.authProvider === "supabase" && isLikelyUuid(user.id))
+  ) {
+    throw new Error("USER_NOT_SYNCABLE")
+  }
+
+  const membershipIndex = graph.memberships.findIndex(
+    (membership) => membership.userId === user!.id && membership.orgId === orgId
+  )
+
+  const nextMemberships = [...graph.memberships]
+  let resolvedMembership: OrganizationMembershipRecord
+
+  if (membershipIndex !== -1) {
+    const existingMembership = graph.memberships[membershipIndex]
+    resolvedMembership = {
+      ...existingMembership,
+      role: "owner",
+      status: "active",
+    }
+    nextMemberships[membershipIndex] = resolvedMembership
+  } else {
+    resolvedMembership = {
+      id: `membership-${user.id}-${orgId}`,
+      userId: user.id,
+      orgId,
+      role: "owner",
+      createdAtISO: new Date().toISOString(),
+      status: "active",
+    }
+    nextMemberships.push(resolvedMembership)
+  }
+
+  const syncResult = await syncUserTenancyToSupabase({
+    userId: user.id,
+    users: nextUsers,
+    organizations: graph.organizations,
+    memberships: nextMemberships,
+  })
+  if (shouldUseSupabaseTenancyAsPrimary() && !syncResult.synced) {
+    throw new Error(syncResult.reason)
+  }
+
+  if (nextUsers !== graph.users) {
+    await saveUsers(nextUsers)
+  }
+  await saveMemberships(nextMemberships)
+
+  return buildResolvedUser(user, resolvedMembership, organization)
 }
 
 export async function resolveUserForMembership(
