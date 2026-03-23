@@ -58,7 +58,7 @@ function buildPartnerMonthlyHtml(
     return `
       <tr>
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0">
-          <a href="${APP_URL}/dashboard/partner/${c.orgId}" style="color:#6366f1;text-decoration:none;font-weight:500">${c.orgName}</a>
+          <a href="${APP_URL}/portfolio" style="color:#6366f1;text-decoration:none;font-weight:500">${c.orgName}</a>
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center">
           <strong style="color:${scoreColor}">${c.score}</strong>/100
