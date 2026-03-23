@@ -83,6 +83,10 @@ Actualizare 2026-03-22:
     - billingul partner există acum la nivel de cont, separat de billingul per-org
     - `/account/settings` este suprafață reală și nu concurează cu `Setări` per-firmă
     - portofoliul aplică și comercial limita de capacitate, nu doar roluri și membership-uri
+    - bridge-urile istorice `partner` au fost reduse la rolul lor final:
+      - `/dashboard/partner` intră în `Portofoliu`
+      - `/dashboard/partner/[orgId]` intră în runtime-ul per-org
+    - nu mai există o suprafață paralelă de `Partner Portal`; `Portofoliu` este canonul, iar legacy-ul este doar bridge
 
 Sprintul de maturizare activ este:
 

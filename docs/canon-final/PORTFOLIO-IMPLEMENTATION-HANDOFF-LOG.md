@@ -402,3 +402,39 @@ Observații de control:
 Următorul checkpoint permis:
 - `Wave 6`
 - scope strict: cleanup final, feature flags, route bridges și eventuale rename-uri doar dacă aduc claritate reală
+
+## Actualizare 2026-03-23 — Wave 6 verificată și aprobată
+
+Verdict:
+- `Wave 6` = aprobată
+- branch verificat: `codex/portfolio-wave-6`
+
+Ce am verificat direct în cod:
+- `/dashboard/partner` nu mai randă o suprafață paralelă; este acum bridge controlat spre `workspaceMode = portfolio`, prin:
+  - [app/dashboard/partner/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/partner/page.tsx)
+  - [components/compliscan/legacy-workspace-bridge.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/legacy-workspace-bridge.tsx)
+- `/dashboard/partner/[orgId]` nu mai ține un drilldown vechi și greu; selectează firma și intră în runtime-ul per-org, prin:
+  - [app/dashboard/partner/[orgId]/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/partner/[orgId]/page.tsx)
+- overview-ul de portofoliu a rămas cu un singur mod canonic, fără ramură `legacy-partner`, în:
+  - [components/compliscan/portfolio-overview-client.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/portfolio-overview-client.tsx)
+  - [app/portfolio/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/page.tsx)
+- referința secundară de navigație pentru `Partner` pointează acum spre suprafața canonică `/portfolio`, în:
+  - [components/compliscan/navigation.ts](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/navigation.ts)
+- CTA-ul principal din raportul lunar de portofoliu merge acum la `/portfolio`, iar deep-link-urile per client rămân compatibile prin bridge, în:
+  - [app/api/cron/partner-monthly-report/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/cron/partner-monthly-report/route.ts)
+
+Validare Wave 6:
+- `npm test`
+- `npm run lint`
+- `npm run build`
+
+Observații de control:
+- `Wave 6` nu a introdus `Portfolio Lite` nou, billing nou sau redesign nou
+- `Evidence OS v1` a rămas baza vizuală
+- bridge-urile vechi `partner` au fost reduse la rolul lor final:
+  - root -> intrare în portofoliu
+  - deep-link per client -> intrare în firmă activă
+
+Stare după Wave 6:
+- pachetul principal de implementare portfolio-first este închis cap-coadă pe wave-urile canonice `0A -> 6`
+- orice pas următor este hardening / QA / polish, nu fundație nouă

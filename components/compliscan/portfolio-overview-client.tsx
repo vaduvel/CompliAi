@@ -33,10 +33,6 @@ type AlertFilter = "all" | "withAlerts"
 type SortKey = "orgName" | "score" | "alerts" | "tasks"
 type SortDir = "asc" | "desc"
 
-type PortfolioOverviewClientProps = {
-  mode: "portfolio" | "legacy-partner"
-}
-
 type PortfolioPlanResponse = {
   planType: PartnerAccountPlan | null
   maxOrgs: number | null
@@ -98,11 +94,9 @@ function SortHeader({
 
 function ClientRow({
   client,
-  mode,
   onDrillDown,
 }: {
   client: PortfolioOverviewClientSummary
-  mode: "portfolio" | "legacy-partner"
   onDrillDown: (id: string) => void
 }) {
   const c = client.compliance
@@ -193,11 +187,9 @@ function ClientRow({
       </div>
 
       <div className="flex items-center gap-2">
-        {mode === "portfolio" ? (
-          <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-            Drilldown firmă
-          </Badge>
-        ) : null}
+        <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
+          Intră în firmă
+        </Badge>
         <a
           href={`/trust/${client.orgId}`}
           target="_blank"
@@ -343,7 +335,7 @@ function CsvImportModal({
   )
 }
 
-export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) {
+export function PortfolioOverviewClient() {
   const router = useRouter()
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
   const [planData, setPlanData] = useState<PortfolioPlanResponse | null>(null)
@@ -390,11 +382,6 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
   }, [])
 
   async function handleDrillDown(orgId: string) {
-    if (mode === "legacy-partner") {
-      router.push(`/dashboard/partner/${orgId}`)
-      return
-    }
-
     const response = await fetch("/api/auth/select-workspace", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -407,7 +394,7 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
       return
     }
 
-    router.push("/dashboard")
+    router.replace("/dashboard")
     router.refresh()
   }
 
@@ -513,13 +500,9 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
       ) : null}
 
       <PageIntro
-        eyebrow={mode === "portfolio" ? "Portofoliu" : "Partner Portal"}
-        title={mode === "portfolio" ? "Portofoliu firme" : "Dashboard multi-client"}
-        description={
-          mode === "portfolio"
-            ? "Lucrezi cross-client dintr-un singur loc. Vezi cine arde, apoi intri în firmă doar pentru drilldown și execuție."
-            : "Vizualizare centralizată a tuturor organizațiilor unde ești înregistrat. Monitorizează conformitatea clienților tăi dintr-un singur loc."
-        }
+        eyebrow="Portofoliu"
+        title="Portofoliu firme"
+        description="Lucrezi cross-client dintr-un singur loc. Vezi cine arde, apoi intri în firmă doar pentru drilldown și execuție."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -702,7 +685,6 @@ export function PortfolioOverviewClient({ mode }: PortfolioOverviewClientProps) 
               <ClientRow
                 key={client.orgId}
                 client={client}
-                mode={mode}
                 onDrillDown={(orgId) => {
                   void handleDrillDown(orgId)
                 }}

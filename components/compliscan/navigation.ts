@@ -206,7 +206,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     id: "partner",
     label: "Partner",
     items: [
-      { id: "partner", label: "Dashboard multi-client", href: "/dashboard/partner", icon: Building2 },
+      { id: "partner", label: "Portofoliu firme", href: "/portfolio", icon: Building2 },
     ],
   },
 ] as const

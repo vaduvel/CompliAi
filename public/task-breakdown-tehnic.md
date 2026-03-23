@@ -264,6 +264,11 @@ Actualizare 2026-03-22:
   - `/api/plan` cu contract mixt `org billing + partner account billing`
   - `/account/settings` ca suprafață dedicată
   - blocaj server-side și UI la adăugarea de firme noi când limita este atinsă
+- [x] `Wave 6`
+  - `app/dashboard/partner/page.tsx` devine bridge spre `workspaceMode = portfolio`
+  - `app/dashboard/partner/[orgId]/page.tsx` devine bridge spre `workspaceMode = org`
+  - `components/compliscan/portfolio-overview-client.tsx` pierde ramura `legacy-partner`
+  - `app/api/cron/partner-monthly-report/route.ts` pointează spre `/portfolio` pentru CTA-ul principal
 - [x] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud

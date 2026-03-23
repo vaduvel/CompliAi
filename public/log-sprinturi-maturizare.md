@@ -92,6 +92,18 @@
   - `npm run lint`
   - `npm run build`
 
+### Foundation portfolio-first — Wave 6
+
+- bridge-urile istorice `partner` au fost reduse la forma finală, fără suprafețe paralele:
+  - `/dashboard/partner` mută sesiunea în `Portofoliu`
+  - `/dashboard/partner/[orgId]` selectează firma și intră în runtime-ul per-org
+- overview-ul de portofoliu are acum un singur mod canonic; ramura `legacy-partner` a fost eliminată
+- CTA-ul principal din raportul lunar partner pointează acum spre `/portfolio`
+- validarea pentru `Wave 6` trece:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+
 ## 2026-03-13
 
 ### Sprint 7 - Operational readiness

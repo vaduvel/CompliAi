@@ -114,10 +114,10 @@ function buildPartnerMonthlyHtml(
     ` : ""}
 
     <div style="margin-top:24px;text-align:center">
-      <a href="${APP_URL}/dashboard/partner"
+      <a href="${APP_URL}/portfolio"
          style="display:inline-block;background:#6366f1;color:#fff;padding:10px 24px;
                 border-radius:8px;text-decoration:none;font-weight:600;font-size:13px">
-        Deschide Partner Hub →
+        Deschide Portofoliu →
       </a>
     </div>
 

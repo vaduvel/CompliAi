@@ -88,6 +88,12 @@ Pe langa hardening-ul operational deja inchis, a pornit si implementarea control
     - `canAddOrg`
   - `/account/settings` este acum suprafață reală
   - portofoliul blochează adăugarea de firme noi când limita planului este depășită
+- [x] `Wave 6`
+  - cleanup final pe route bridges
+  - `/dashboard/partner` devine punte reală spre `/portfolio`
+  - `/dashboard/partner/[orgId]` devine punte reală spre runtime-ul per-org
+  - overview-ul de portofoliu rămâne cu un singur mod canonic
+  - rapoartele partner pointează spre suprafața canonică de portofoliu
 
 Disciplina ramane:
 
@@ -96,6 +102,7 @@ Disciplina ramane:
 - `Portfolio Lite` a fost deschis doar dupa inchiderea fundatiei de sesiune, guards si navigatie
 - ownership / claim a fost livrat inainte de billing, exact pentru a pastra migrarea comerciala separata de UX foundation
 - billingul partner este acum separat de planul per-org, fara sa rupa utilizatorii vechi
+- route bridge-urile istorice partner au fost curatate fara route rename agresiv
 
 ## Sprint 1 - Reliability + Security baseline
 
