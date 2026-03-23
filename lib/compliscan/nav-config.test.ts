@@ -54,6 +54,14 @@ describe("lib/compliscan/nav-config", () => {
     expect(sections).toHaveLength(1)
     expect(sections[0]?.label).toBe("Flux principal")
     expect(sections[0]?.items.some((item) => item.href === "/portfolio")).toBe(false)
+    expect(sections[0]?.items.map((item) => item.href)).toEqual([
+      "/dashboard",
+      "/dashboard/scan",
+      "/dashboard/resolve",
+      "/dashboard/documente",
+      "/dashboard/reports",
+      "/dashboard/settings",
+    ])
   })
 
   it("restrange nav-ul viewer in org mode", () => {
@@ -63,7 +71,7 @@ describe("lib/compliscan/nav-config", () => {
       role: "viewer",
     })
 
-    expect(items.map((item) => item.id)).toEqual(["home", "resolve", "reports"])
+    expect(items.map((item) => item.id)).toEqual(["home", "resolve", "documente", "settings"])
   })
 
   it("pastreaza nav-ul org pentru compliance", () => {

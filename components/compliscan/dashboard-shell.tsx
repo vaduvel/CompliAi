@@ -10,6 +10,11 @@ import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
 import { NotificationBell } from "@/components/compliscan/notification-bell"
+import {
+  DashboardRuntimeProvider,
+  type DashboardRuntimeMembership as DashboardShellUserMembership,
+  type DashboardRuntimeUser as DashboardShellCurrentUser,
+} from "@/components/compliscan/dashboard-runtime"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 import { isNavItemActive, type DashboardNavItem } from "@/components/compliscan/navigation"
 import { useOptionalCockpitData } from "@/components/compliscan/use-cockpit"
@@ -26,26 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/evidence-os/DropdownMenu"
 import { canSwitchToPortfolio, getMobileNavItems, getSidebarNavSections } from "@/lib/compliscan/nav-config"
-import type { UserMode, WorkspaceMode } from "@/lib/server/auth"
-
-export type DashboardShellCurrentUser = {
-  email: string
-  orgName: string
-  orgId: string
-  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
-  membershipId: string | null
-  userMode: UserMode | null
-  workspaceMode: WorkspaceMode
-} | null
-
-export type DashboardShellUserMembership = {
-  membershipId: string
-  orgId: string
-  orgName: string
-  role: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
-  createdAtISO: string
-  status: "active" | "inactive"
-}
+import type { WorkspaceMode } from "@/lib/server/auth"
 
 export function DashboardShell({
   children,
@@ -349,10 +335,12 @@ export function DashboardShell({
               />
             </div>
           ) : null}
-          {children}
-          <footer className="mt-12 pb-4">
-            <LegalDisclaimer variant="short" />
-          </footer>
+          <DashboardRuntimeProvider user={currentUser}>
+            {children}
+            <footer className="mt-12 pb-4">
+              <LegalDisclaimer variant="short" />
+            </footer>
+          </DashboardRuntimeProvider>
         </main>
       </div>
 

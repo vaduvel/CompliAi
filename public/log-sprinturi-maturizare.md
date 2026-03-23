@@ -2,7 +2,7 @@
 
 ## 2026-03-22
 
-### Foundation portfolio-first — Wave 0A / 0B1 / 0B2 / 1 / 2
+### Foundation portfolio-first — Wave 0A / 0B1 / 0B2 / 1 / 2 / 3
 
 - a fost pornita fundatia canonica pentru modelul `portfolio-first`, pe branchuri separate de implementare:
   - `Wave 0A`:
@@ -28,6 +28,10 @@
     - API-uri noi aggregate in `/api/portfolio/*`
     - reutilizare controlata din `/dashboard/partner`, fara rescriere oarba
     - drilldown din portofoliu spre `firma activa` prin `select-workspace`
+  - `Wave 3`:
+    - runtime-ul per-org a fost curatat pentru modelul `portfolio-first`
+    - `Mod Solo` are nav dedicat si suprafata reala `/dashboard/documente`
+    - `De rezolvat`, `Rapoarte`, `Setari`, `Scaneaza` si `Acasa` citesc acum contextul de runtime si se simplifica fara route dupes
 - validarea pentru acest pachet trece pe branchul curent:
   - `npm test`
   - `npm run lint`

@@ -283,3 +283,39 @@ Observații de control:
 Următorul checkpoint permis:
 - `Wave 3`
 - scope strict: cleanup runtime per-org ca să se potrivească mai bine cu noul strat portfolio-first, fără billing nou și fără claim flow
+
+## Actualizare 2026-03-23 — Wave 3 verificată și aprobată
+
+Verdict:
+- `Wave 3` = aprobată
+- branch verificat: `codex/portfolio-wave-3`
+
+Ce am verificat direct în cod:
+- contextul runtime pentru paginile per-org există în [components/compliscan/dashboard-runtime.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/dashboard-runtime.tsx) și este injectat din [components/compliscan/dashboard-shell.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/dashboard-shell.tsx)
+- `Mod Solo` are nav dedicat în:
+  - [components/compliscan/navigation.ts](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/navigation.ts)
+  - [lib/compliscan/nav-config.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/compliscan/nav-config.ts)
+- `/dashboard/documente` nu mai este redirect; suprafața reală este în:
+  - [app/dashboard/documente/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/documente/page.tsx)
+  - [components/compliscan/documents-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/documents-page.tsx)
+- paginile canonice per-org citesc acum contextul de runtime și se simplifică fără route dupes:
+  - [app/dashboard/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/page.tsx)
+  - [components/compliscan/scan-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/scan-page.tsx)
+  - [components/compliscan/resolve-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/resolve-page.tsx)
+  - [components/compliscan/reports-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/reports-page.tsx)
+  - [components/compliscan/settings-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/settings-page.tsx)
+
+Validare Wave 3:
+- `npx vitest run lib/compliscan/nav-config.test.ts` -> verde (`7` teste)
+- `npm test` -> verde (`130` fișiere, `707` teste, `1 skipped`, `0 failed`)
+- `npm run lint` -> trece; doar warning-uri istorice preexistente
+- `npm run build` -> verde; build-ul generează `117` pagini și compilează `/dashboard/documente`
+
+Observații de control:
+- `Evidence OS v1` a rămas baza vizuală
+- `Wave 3` nu introduce billing nou, claim flow sau route rename
+- `Mod Solo` refolosește rutele existente și nu creează produs paralel
+
+Următorul checkpoint permis:
+- `Wave 4`
+- scope strict: ownership și claim flow, fără billing nou

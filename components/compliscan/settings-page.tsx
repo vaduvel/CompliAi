@@ -1,11 +1,13 @@
 "use client"
 
 import dynamic from "next/dynamic"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Bell, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "lucide-react"
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import {
   CurrentUser,
   formatMemberRole,
@@ -112,6 +114,7 @@ const SETTINGS_VIEW_TABS = [
 ] as const
 
 export function SettingsPageSurface() {
+  const runtime = useDashboardRuntime()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [repoSyncStatus, setRepoSyncStatus] = useState<RepoSyncStatus>(null)
@@ -136,6 +139,10 @@ export function SettingsPageSurface() {
   const [releaseReadinessError, setReleaseReadinessError] = useState<string | null>(null)
   const canViewReleaseReadiness =
     currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
+  const isSolo = runtime?.userMode === "solo"
+  const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) =>
+    isSolo ? ["workspace", "acces", "notificari"].includes(tab.value) : true
+  )
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
   const [gdprExporting, setGdprExporting] = useState(false)
@@ -265,14 +272,25 @@ export function SettingsPageSurface() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Setari"
-        title="Administrezi contextul operational"
-        description="Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."
+        title={isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
+        description={
+          isSolo
+            ? "Aici rămân doar organizația, membrii, notificările și drumul către planul de facturare."
+            : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."
+        }
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              operational admin
+              {isSolo ? "admin firmă" : "operational admin"}
             </Badge>
           </>
+        }
+        actions={
+          isSolo ? (
+            <Button asChild variant="outline">
+              <Link href="/dashboard/settings/abonament">Plan & Facturare</Link>
+            </Button>
+          ) : undefined
         }
       />
 
@@ -283,7 +301,7 @@ export function SettingsPageSurface() {
           </p>
           <div className="overflow-x-auto pb-1">
             <TabsList className="min-w-max gap-0 border-b border-eos-border text-eos-text-muted">
-              {SETTINGS_VIEW_TABS.map((tab) => (
+              {visibleTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}

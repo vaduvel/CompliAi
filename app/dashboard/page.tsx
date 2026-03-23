@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, ChevronRight, FileText, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -20,6 +21,7 @@ import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 
 export default function DashboardPage() {
+  const runtime = useDashboardRuntime()
   const router = useRouter()
   const cockpit = useCockpitData()
   const [nis2Score, setNis2Score] = useState<number | null>(null)
@@ -92,13 +94,18 @@ export default function DashboardPage() {
           : data.summary.score >= 60
             ? "În progres"
             : "Neînceput"
+  const isSolo = runtime?.userMode === "solo"
 
   return (
     <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
       <PageIntro
         eyebrow="Acasă"
-        title="Starea actuala a conformitatii tale"
-        description="Vezi rapid starea curenta si porneste urmatorul pas corect."
+        title={isSolo ? "Starea actuală a firmei tale" : "Starea actuala a conformitatii tale"}
+        description={
+          isSolo
+            ? "Vezi pe scurt unde există risc și pornește următorul pas concret fără să navighezi prin suprafețe specializate."
+            : "Vezi rapid starea curenta si porneste urmatorul pas corect."
+        }
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

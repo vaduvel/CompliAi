@@ -1,6 +1,10 @@
 "use client"
 
-import { DashboardShell, type DashboardShellCurrentUser, type DashboardShellUserMembership } from "@/components/compliscan/dashboard-shell"
+import type {
+  DashboardRuntimeMembership as DashboardShellUserMembership,
+  DashboardRuntimeUser as DashboardShellCurrentUser,
+} from "@/components/compliscan/dashboard-runtime"
+import { DashboardShell } from "@/components/compliscan/dashboard-shell"
 
 export function PortfolioShell({
   children,

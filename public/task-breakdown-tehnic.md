@@ -223,6 +223,14 @@ Actualizare 2026-03-22:
     - `GET /api/portfolio/reports`
   - reutilizare controlata din `/dashboard/partner`
   - drilldown din portofoliu in `firma activa` prin `POST /api/auth/select-workspace`
+- [x] `Wave 3`
+  - context runtime comun pentru paginile per-org
+  - `Mod Solo`:
+    - nav dedicat
+    - `/dashboard/documente` devine suprafață reală, nu redirect
+    - `De rezolvat` și `Rapoarte` se simplifică fără rute paralele
+  - `Setări` filtrează zonele vizibile pentru Solo fără a dubla logica
+  - `Acasă` și `Scanează` își adaptează copy-ul la contextul de lucru
 - [x] registru operational evidence in DB
   - `public.evidence_objects` este deja populat si consumat pe traseul de acces / bundle
   - `DashboardPayload` hidrateaza acum metadata de evidence din registrul cloud

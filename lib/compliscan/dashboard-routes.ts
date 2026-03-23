@@ -3,6 +3,7 @@ export const dashboardRoutes = {
   scan: "/dashboard/scan",
   scanResultsBase: "/dashboard/scan/results",
   documents: "/dashboard/scan/history",
+  documentsHub: "/dashboard/documente",
   resolve: "/dashboard/resolve",
   aiSystems: "/dashboard/sisteme",
   aiConformity: "/dashboard/conformitate",

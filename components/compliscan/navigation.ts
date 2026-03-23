@@ -93,6 +93,92 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   },
 ] as const
 
+export const soloNavItems: DashboardNavItem[] = [
+  {
+    id: "home",
+    label: "Acasă",
+    href: dashboardRoutes.home,
+    icon: Home,
+    matchers: [...dashboardRouteGroups.home],
+    description: "stare simplificată și pasul curent",
+  },
+  {
+    id: "scan",
+    label: "Scanează",
+    href: dashboardRoutes.scan,
+    icon: Scan,
+    matchers: [...dashboardRouteGroups.scan],
+    description: "upload și analiză",
+  },
+  {
+    id: "resolve",
+    label: "De rezolvat",
+    href: dashboardRoutes.resolve,
+    icon: Flag,
+    matchers: [...dashboardRouteGroups.resolve],
+    description: "finding-uri și task-uri",
+  },
+  {
+    id: "documente",
+    label: "Documente",
+    href: dashboardRoutes.documentsHub,
+    icon: FolderOpen,
+    matchers: [dashboardRoutes.documentsHub],
+    description: "politici și documente scanate",
+  },
+  {
+    id: "reports",
+    label: "Rapoarte",
+    href: dashboardRoutes.reports,
+    icon: FileSearch,
+    matchers: [...dashboardRouteGroups.reports],
+    description: "export simplificat",
+  },
+  {
+    id: "settings",
+    label: "Setări",
+    href: dashboardRoutes.settings,
+    icon: Settings,
+    matchers: [...dashboardRouteGroups.settings],
+    description: "org și plan",
+  },
+] as const
+
+export const viewerNavItems: DashboardNavItem[] = [
+  {
+    id: "home",
+    label: "Acasă",
+    href: dashboardRoutes.home,
+    icon: Home,
+    matchers: [...dashboardRouteGroups.home],
+    description: "status read-only",
+  },
+  {
+    id: "resolve",
+    label: "Taskurile mele",
+    href: dashboardRoutes.resolve,
+    icon: Flag,
+    matchers: [...dashboardRouteGroups.resolve],
+    description: "ce ai de revizuit",
+  },
+  {
+    id: "documente",
+    label: "Documente",
+    href: dashboardRoutes.documentsHub,
+    icon: FolderOpen,
+    matchers: [dashboardRoutes.documentsHub],
+    description: "read-only",
+  },
+  {
+    id: "settings",
+    label: "Setări",
+    href: dashboardRoutes.settings,
+    icon: Settings,
+    matchers: [...dashboardRouteGroups.settings],
+    description: "profil și acces",
+  },
+] as const
+
 export const dashboardSecondaryNavSections: DashboardNavSection[] = [
   {
     id: "scanare",

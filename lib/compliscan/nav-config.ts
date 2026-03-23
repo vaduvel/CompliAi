@@ -1,8 +1,10 @@
 import {
   dashboardPrimaryNavItems,
   portfolioNavItems,
+  soloNavItems,
   type DashboardNavItem,
   type DashboardNavSection,
+  viewerNavItems,
 } from "@/components/compliscan/navigation"
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
 
@@ -15,9 +17,8 @@ export type AdaptiveNavContext = {
 }
 
 const ORG_NAV_FULL: DashboardNavItem[] = [...dashboardPrimaryNavItems]
-const ORG_NAV_VIEWER: DashboardNavItem[] = ORG_NAV_FULL.filter(
-  (item) => item.id !== "scan" && item.id !== "settings"
-)
+const ORG_NAV_SOLO: DashboardNavItem[] = [...soloNavItems]
+const ORG_NAV_VIEWER: DashboardNavItem[] = [...viewerNavItems]
 const PORTFOLIO_NAV_ORG_TARGET: DashboardNavItem[] = portfolioNavItems.map((item) => ({
   ...item,
   workspaceModeTarget: "portfolio",
@@ -61,6 +62,16 @@ export function getSidebarNavSections({
     ]
   }
 
+  if (userMode === "solo") {
+    return [
+      {
+        id: "org",
+        label: "Flux principal",
+        items: ORG_NAV_SOLO,
+      },
+    ]
+  }
+
   if (role === "viewer") {
     return [
       {
@@ -87,6 +98,10 @@ export function getMobileNavItems({
 }: AdaptiveNavContext): DashboardNavItem[] {
   if (userMode === "partner" && workspaceMode === "portfolio") {
     return PORTFOLIO_NAV_ACTIVE
+  }
+
+  if (userMode === "solo") {
+    return ORG_NAV_SOLO
   }
 
   if (role === "viewer") {

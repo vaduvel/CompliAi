@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { Bot, ChevronRight } from "lucide-react"
 
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -79,6 +80,7 @@ const ScanHistoryTabLazy = dynamic(
 type ScanViewMode = "flow" | "verdicts" | "history"
 
 export function ScanPageSurface() {
+  const runtime = useDashboardRuntime()
   const router = useRouter()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
@@ -186,13 +188,18 @@ export function ScanPageSurface() {
     sourceSignals: [],
     extractedAtISO: new Date().toISOString(),
   }
+  const isSolo = runtime?.userMode === "solo"
 
   return (
     <div className="space-y-8">
       <PageIntro
         eyebrow="Scanare"
-        title="Pornesti analiza din sursa potrivita"
-        description="Aici alegi sursa si rulezi analiza. Rezultatul curent ramane doar pentru citire, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
+        title={isSolo ? "Scanezi și revii în fluxul firmei" : "Pornesti analiza din sursa potrivita"}
+        description={
+          isSolo
+            ? "Încarci sursa, verifici rezultatul curent și continui în De rezolvat sau Documente, fără suprafețe secundare paralele."
+            : "Aici alegi sursa si rulezi analiza. Rezultatul curent ramane doar pentru citire, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
+        }
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">

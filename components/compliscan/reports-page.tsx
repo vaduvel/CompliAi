@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Briefcase, ChevronRight, Copy, Loader2, Scale, Share2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -72,6 +73,7 @@ const InspectorModePanel = dynamic(
 )
 
 export function ReportsPageSurface() {
+  const runtime = useDashboardRuntime()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const heavyPayloadRequested = useRef(false)
@@ -96,13 +98,18 @@ export function ReportsPageSurface() {
       : cockpit.data.summary.score >= 90
         ? "Pregătit"
         : "În progres"
+  const isSolo = runtime?.userMode === "solo"
 
   return (
     <div className="space-y-8">
       <PageIntro
         eyebrow="Rapoarte"
-        title="Dovezi & Export"
-        description="Output-ul conformității tale — generezi livrabilul potrivit și verifici starea de audit."
+        title={isSolo ? "Exporturi și livrabile" : "Dovezi & Export"}
+        description={
+          isSolo
+            ? "Aici generezi livrabilele esențiale ale firmei, fără taburi secundare de audit sau handoff."
+            : "Output-ul conformității tale — generezi livrabilul potrivit și verifici starea de audit."
+        }
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -115,7 +122,7 @@ export function ReportsPageSurface() {
         }
       />
 
-      <ReportsTabs />
+      {!isSolo ? <ReportsTabs /> : null}
 
       {/* Primary: Export Center */}
       <ExportCenter
@@ -135,7 +142,7 @@ export function ReportsPageSurface() {
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
           <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-          Detalii snapshot, handoff și semnale
+          {isSolo ? "Detalii snapshot și semnale" : "Detalii snapshot, handoff și semnale"}
         </summary>
         <div className="mt-4 space-y-6">
           <SnapshotStatusCard
@@ -144,7 +151,7 @@ export function ReportsPageSurface() {
             driftCount={activeDrifts.length}
           />
 
-          <PartnerCounselPack />
+          {!isSolo ? <PartnerCounselPack /> : null}
 
           {cockpit.data.compliancePack && (
             <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
@@ -152,7 +159,7 @@ export function ReportsPageSurface() {
 
           <EFacturaRiskCard />
 
-          <InspectorModePanel />
+          {!isSolo ? <InspectorModePanel /> : null}
         </div>
       </details>
     </div>

@@ -66,10 +66,12 @@ Actualizare 2026-03-22:
   - `Wave 0B2`: `workspaceMode` + `select-workspace`
   - `Wave 1`: shell si navigatie adaptiva
   - `Wave 2`: `Portfolio Lite` real, bazat pe agregari cross-org controlate
+  - `Wave 3`: cleanup runtime per-org, cu `Mod Solo` mai coerent
 - starea reala acum:
   - produsul actual continua sa functioneze per-org
   - consultantul are acum si stratul `Portfolio Lite`, fara sa piarda drilldown-ul in `firma activa`
-  - billing, claim flow si cleanup-ul per-org raman wave-uri separate
+  - cleanup-ul per-org este deja pornit si livrat pentru rutele canonice principale
+  - billing si claim flow raman wave-uri separate
 
 Sprintul de maturizare activ este:
 

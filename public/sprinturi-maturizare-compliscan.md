@@ -61,6 +61,10 @@ Pe langa hardening-ul operational deja inchis, a pornit si implementarea control
   - reuse controlat din `/dashboard/partner`
   - API-uri noi aggregate pentru overview / alerts / tasks / vendors / reports
   - drilldown controlat din portofoliu spre workspace-ul per-org
+- [x] `Wave 3`
+  - runtime per-org curățat pe noua structură
+  - `Mod Solo` are nav dedicat și `/dashboard/documente` real
+  - `De rezolvat`, `Rapoarte` și `Setări` se simplifică fără logică dublată
 
 Disciplina ramane:
 

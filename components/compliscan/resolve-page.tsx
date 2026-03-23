@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react"
 
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
@@ -182,7 +183,7 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
 
 // ── Finding Queue with framework filter ──────────────────────────────────────
 
-function FindingQueue({ findings }: { findings: ScanFinding[] }) {
+function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMode: boolean }) {
   const [activeFilter, setActiveFilter] = useState<FrameworkFilter>("toate")
 
   const filterTabs: Array<{ id: FrameworkFilter; label: string }> = [
@@ -208,31 +209,50 @@ function FindingQueue({ findings }: { findings: ScanFinding[] }) {
 
   return (
     <div>
-      <div className="mb-4 flex border-b border-eos-border-subtle">
-        {filterTabs.map((tab) => {
-          const active = activeFilter === tab.id
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveFilter(tab.id)}
-              className={[
-                "border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150",
-                active
-                  ? "border-eos-primary text-eos-text"
-                  : "border-transparent text-eos-text-muted hover:text-eos-text",
-              ].join(" ")}
-            >
-              {tab.label}
-              {counts[tab.id] > 0 && (
-                <span className={["ml-1.5 rounded-full px-1.5 py-0.5 text-[11px]", active ? "bg-eos-primary-soft text-eos-primary" : "bg-eos-bg-inset text-eos-text-muted"].join(" ")}>
-                  {counts[tab.id]}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      {soloMode ? (
+        <div className="mb-4 flex items-center justify-between rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-eos-text">Prioritatea de azi</p>
+            <p className="mt-1 text-xs text-eos-text-muted">
+              Findings și task-uri în aceeași listă, fără filtre complexe pe framework.
+            </p>
+          </div>
+          <Badge variant="outline" className="normal-case tracking-normal">
+            {filtered.length} deschise
+          </Badge>
+        </div>
+      ) : (
+        <div className="mb-4 flex border-b border-eos-border-subtle">
+          {filterTabs.map((tab) => {
+            const active = activeFilter === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveFilter(tab.id)}
+                className={[
+                  "border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150",
+                  active
+                    ? "border-eos-primary text-eos-text"
+                    : "border-transparent text-eos-text-muted hover:text-eos-text",
+                ].join(" ")}
+              >
+                {tab.label}
+                {counts[tab.id] > 0 && (
+                  <span
+                    className={[
+                      "ml-1.5 rounded-full px-1.5 py-0.5 text-[11px]",
+                      active ? "bg-eos-primary-soft text-eos-primary" : "bg-eos-bg-inset text-eos-text-muted",
+                    ].join(" ")}
+                  >
+                    {counts[tab.id]}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <EmptyState
@@ -253,6 +273,7 @@ function FindingQueue({ findings }: { findings: ScanFinding[] }) {
 // ── Page Surface ─────────────────────────────────────────────────────────────
 
 export function ResolvePageSurface() {
+  const runtime = useDashboardRuntime()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
@@ -265,13 +286,18 @@ export function ResolvePageSurface() {
   const highCount = findings.filter((f) => f.severity === "high").length
   const mediumCount = findings.filter((f) => f.severity === "medium").length
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
+  const isSolo = runtime?.userMode === "solo"
 
   return (
     <div className="space-y-8">
       <PageIntro
         eyebrow="De rezolvat"
-        title={`De rezolvat · ${findings.length} deschise`}
-        description="Tot ce necesită acțiune umană — finding-uri, drift și remediere. Un singur loc, indiferent de framework."
+        title={isSolo ? `De rezolvat · ${findings.length} urgente` : `De rezolvat · ${findings.length} deschise`}
+        description={
+          isSolo
+            ? "Aici vezi simplificat ce trebuie rezolvat acum: findings și task-uri într-un singur flux, fără filtre complexe."
+            : "Tot ce necesită acțiune umană — finding-uri, drift și remediere. Un singur loc, indiferent de framework."
+        }
         badges={
           <>
             {criticalCount > 0 && (
@@ -295,7 +321,7 @@ export function ResolvePageSurface() {
 
       {/* Primary: Finding Queue with framework filter tabs */}
       <section aria-label="Finding-uri de rezolvat">
-        <FindingQueue findings={findings} />
+      <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
 
       {/* Secondary: Task board — under disclosure, not competing */}
