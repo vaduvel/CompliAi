@@ -4,9 +4,9 @@ import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/compliscan/dashboard-shell"
 import {
   SESSION_COOKIE,
-  getUserMode,
   listUserMemberships,
   refreshSessionPayload,
+  resolveUserMode,
   verifySessionToken,
 } from "@/lib/server/auth"
 
@@ -26,7 +26,7 @@ export default async function AccountLayout({
     redirect("/login")
   }
 
-  const userMode = await getUserMode(session.userId)
+  const userMode = await resolveUserMode(session)
   if (!userMode) {
     redirect("/onboarding")
   }

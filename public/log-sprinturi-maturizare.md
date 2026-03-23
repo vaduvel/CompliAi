@@ -3335,6 +3335,21 @@ Validare:
 - `npm run lint` -> trece, doar warnings istorice
 - `npm run build` -> verde
 
+### 2026-03-23 - Hotfix onboarding continuation pe sesiune serverless
+
+- onboarding-ul nu se mai bazează doar pe persistența locală a lui `userMode`; după salvare, valoarea intră și în cookie-ul de sesiune semnat
+- asta elimină bucla în care userul selecta modul, primea `200`, dar următoarea cerere la `/dashboard` vedea încă `userMode = null` și îl trimitea înapoi la `/onboarding`
+- runtime-ul citește acum `userMode` prin fallback sigur:
+  - mai întâi din sesiune
+  - apoi din persistența auth
+- layout-urile `dashboard / portfolio / account / onboarding`, `GET /api/auth/me`, `POST /api/auth/select-workspace`, `POST /api/auth/switch-org` și submit-ul UI din onboarding folosesc acum același model
+
+Validare:
+
+- `npm test` -> verde
+- `npm run lint` -> trece, doar warnings istorice
+- `npm run build` -> verde
+
 ## 2026-03-22 — Mega QA Fix Sprint
 
 ### Sprint de corectie pe regresiile gasite in QA real

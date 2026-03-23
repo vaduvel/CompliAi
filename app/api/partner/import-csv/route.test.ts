@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
     }
   },
   requireFreshRoleMock: vi.fn(),
-  getUserModeMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
   listUserMembershipsMock: vi.fn(),
   createOrganizationForExistingUserMock: vi.fn(),
   createClaimInviteMock: vi.fn(),
@@ -24,7 +24,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   requireFreshRole: mocks.requireFreshRoleMock,
-  getUserMode: mocks.getUserModeMock,
+  resolveUserMode: mocks.resolveUserModeMock,
   listUserMemberships: mocks.listUserMembershipsMock,
   createOrganizationForExistingUser: mocks.createOrganizationForExistingUserMock,
 }))
@@ -54,7 +54,7 @@ describe("POST /api/partner/import-csv", () => {
       email: "consultant@example.com",
       role: "partner_manager",
     })
-    mocks.getUserModeMock.mockResolvedValue("partner")
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
     mocks.createOrganizationForExistingUserMock.mockResolvedValue({
       orgId: "org-client",
       orgName: "Client SRL",
@@ -120,7 +120,7 @@ describe("POST /api/partner/import-csv", () => {
   })
 
   it("blocheaza importul daca userul nu este in modul partner", async () => {
-    mocks.getUserModeMock.mockResolvedValueOnce("solo")
+    mocks.resolveUserModeMock.mockResolvedValueOnce("solo")
 
     const response = await POST(
       new Request("http://localhost/api/partner/import-csv", {

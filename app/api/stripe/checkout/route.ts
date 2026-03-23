@@ -4,7 +4,7 @@
 
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, getUserMode, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession, resolveUserMode } from "@/lib/server/auth"
 import { getOrgPlan, getOrgPlanRecord, isPartnerAccountPlan } from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const userMode = await getUserMode(session.userId)
+    const userMode = await resolveUserMode(session)
 
     if (billingScope === "org" && session.role !== "owner") {
       throw new AuthzError(

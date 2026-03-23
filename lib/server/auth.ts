@@ -110,6 +110,7 @@ export type SessionPayload = {
   email: string
   orgName: string
   role: UserRole
+  userMode?: UserMode
   membershipId?: string
   workspaceMode?: WorkspaceMode
   exp: number
@@ -1235,6 +1236,7 @@ export function verifySessionToken(token: string): SessionPayload | null {
       email: payload.email,
       orgName: payload.orgName,
       role: isUserRole(payload.role) ? payload.role : "owner",
+      userMode: isUserMode(payload.userMode) ? payload.userMode : undefined,
       membershipId: payload.membershipId,
       workspaceMode: isWorkspaceMode(payload.workspaceMode) ? payload.workspaceMode : "org",
       exp: payload.exp,
@@ -1292,6 +1294,7 @@ export async function refreshSessionPayload(
       email: resolvedUser.email,
       orgName: resolvedUser.orgName,
       role: resolvedUser.role,
+      userMode: session.userMode,
       membershipId: resolvedUser.membershipId,
       workspaceMode: session.workspaceMode ?? "org",
       exp: session.exp,
@@ -1391,6 +1394,15 @@ export async function getUserMode(userId: string): Promise<UserMode | null> {
   const user = graph.users.find((entry) => entry.id === userId)
   if (!user) return null
   return isUserMode(user.userMode) ? user.userMode : null
+}
+
+export async function resolveUserMode(
+  session: Pick<SessionPayload, "userId" | "userMode">
+): Promise<UserMode | null> {
+  if (isUserMode(session.userMode)) {
+    return session.userMode
+  }
+  return getUserMode(session.userId)
 }
 
 export async function setUserMode(userId: string, mode: UserMode): Promise<void> {

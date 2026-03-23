@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   requireFreshAuthenticatedSessionMock: vi.fn(),
-  getUserModeMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
   listUserMembershipsMock: vi.fn(),
   getOrgPlanMock: vi.fn(),
   getOrgPlanRecordMock: vi.fn(),
@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
-  getUserMode: mocks.getUserModeMock,
+  resolveUserMode: mocks.resolveUserModeMock,
   listUserMemberships: mocks.listUserMembershipsMock,
 }))
 
@@ -51,7 +51,7 @@ describe("GET /api/plan", () => {
   })
 
   it("returneaza si contractul de partner account billing pentru user partner", async () => {
-    mocks.getUserModeMock.mockResolvedValue("partner")
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
     mocks.getPartnerAccountPlanStatusMock.mockResolvedValue({
       planType: "partner_25",
       maxOrgs: 25,
@@ -78,7 +78,7 @@ describe("GET /api/plan", () => {
   })
 
   it("ramane compatibil pentru user non-partner", async () => {
-    mocks.getUserModeMock.mockResolvedValue("solo")
+    mocks.resolveUserModeMock.mockResolvedValue("solo")
     mocks.getPartnerAccountPlanStatusMock.mockResolvedValue({
       planType: null,
       maxOrgs: null,

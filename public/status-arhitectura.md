@@ -1901,3 +1901,18 @@ Asta este sanatos arhitectural pentru ca:
   - userul poate intra in onboarding
   - isi poate salva modul
   - nu mai primeste eroarea bruta `USER_NOT_FOUND`
+
+## Actualizare 2026-03-23 - Hotfix onboarding continuation pe Vercel
+
+- a mai existat o ruptura intre persistenta lui `userMode` si modelul serverless:
+  - salvarea reusea
+  - dar redirect-ul imediat spre `/dashboard` putea ajunge pe alt worker care nu vedea inca valoarea noua din storage local
+- pentru a inchide asta, `userMode` este acum purtat si in cookie-ul de sesiune semnat imediat dupa selectie
+- runtime-ul foloseste acum rezolvare conservatoare:
+  - `session.userMode` daca exista
+  - fallback la persistența auth daca nu exista
+- arhitectural, asta inseamna ca `Wave 0A` nu mai depinde de consistenta instantanee a unui store local intre doua cereri consecutive
+- efectul vizibil este:
+  - userul selecteaza modul
+  - onboarding-ul continua spre `/dashboard`
+  - nu mai ramane blocat in bucla `/onboarding -> /dashboard -> /onboarding`

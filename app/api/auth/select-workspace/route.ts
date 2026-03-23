@@ -1,9 +1,9 @@
 import {
   createSessionToken,
   getSessionCookieOptions,
-  getUserMode,
   listUserMemberships,
   readSessionFromRequest,
+  resolveUserMode,
   resolveUserForMembership,
   SESSION_COOKIE,
   type WorkspaceMode,
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     if (workspaceMode === "portfolio") {
-      const userMode = await getUserMode(session.userId)
+      const userMode = await resolveUserMode(session)
       if (userMode !== "partner") {
         return jsonError(
           "Doar utilizatorii cu modul partner pot activa vizualizarea portfolio.",
@@ -55,6 +55,7 @@ export async function POST(request: Request) {
         email: session.email,
         orgName: session.orgName,
         role: session.role,
+        userMode: userMode ?? undefined,
         membershipId: session.membershipId,
         workspaceMode: "portfolio",
       })
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
       email: resolvedUser.email,
       orgName: resolvedUser.orgName,
       role: resolvedUser.role,
+      userMode: session.userMode,
       membershipId: resolvedUser.membershipId,
       workspaceMode: "org",
     })

@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       email: user.email,
       orgName: user.orgName,
       role: user.role,
+      userMode: session.userMode,
       membershipId: user.membershipId,
       workspaceMode: "org",
     })

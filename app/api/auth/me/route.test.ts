@@ -11,14 +11,14 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  getUserModeMock: vi.fn(),
   readFreshSessionFromRequestMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  getUserMode: mocks.getUserModeMock,
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
+  resolveUserMode: mocks.resolveUserModeMock,
 }))
 
 import { GET } from "./route"
@@ -53,11 +53,13 @@ describe("GET /api/auth/me", () => {
 
   it("returneaza userul din sesiune valida", async () => {
     mocks.readFreshSessionFromRequestMock.mockResolvedValueOnce({
+      userId: "user-1",
       email: "demo@site.ro",
       orgId: "org-1",
       orgName: "Org Demo",
       role: "compliance",
     })
+    mocks.resolveUserModeMock.mockResolvedValueOnce(null)
 
     const response = await GET(
       new Request("http://localhost/api/auth/me", {

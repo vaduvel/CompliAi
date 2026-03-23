@@ -3,7 +3,7 @@
 
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, getUserMode, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession, resolveUserMode } from "@/lib/server/auth"
 import { getOrgPlanRecord, getPartnerAccountPlanRecord } from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }
 
     if (billingScope === "account") {
-      const userMode = await getUserMode(session.userId)
+      const userMode = await resolveUserMode(session)
       if (userMode !== "partner") {
         throw new AuthzError(
           "Billingul de cont partner este disponibil doar in modul partner.",

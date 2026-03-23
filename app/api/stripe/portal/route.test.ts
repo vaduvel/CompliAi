@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => {
   process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com"
   return {
     requireFreshAuthenticatedSessionMock: vi.fn(),
-    getUserModeMock: vi.fn(),
+    resolveUserModeMock: vi.fn(),
     getOrgPlanRecordMock: vi.fn(),
     getPartnerAccountPlanRecordMock: vi.fn(),
   }
@@ -16,7 +16,7 @@ vi.mock("@/lib/server/auth", async () => {
   return {
     ...actual,
     requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
-    getUserMode: mocks.getUserModeMock,
+    resolveUserMode: mocks.resolveUserModeMock,
   }
 })
 
@@ -43,7 +43,7 @@ describe("POST /api/stripe/portal", () => {
       email: "partner@example.com",
       role: "owner",
     })
-    mocks.getUserModeMock.mockResolvedValue("partner")
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
     mocks.getOrgPlanRecordMock.mockResolvedValue({
       orgId: "org-1",
       plan: "pro",

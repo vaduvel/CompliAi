@@ -12,7 +12,7 @@ import type {
   UserMembershipSummary,
   UserRole,
 } from "@/lib/server/auth"
-import { AuthzError, getUserMode, listUserMemberships, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, listUserMemberships, readSessionFromRequest, resolveUserMode } from "@/lib/server/auth"
 import { readNis2State, type Nis2OrgState, type Nis2Vendor } from "@/lib/server/nis2-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -118,7 +118,7 @@ export async function requirePortfolioAccess(request: Request) {
 }
 
 export async function listAccessiblePortfolioMemberships(session: Pick<SessionPayload, "userId">) {
-  const userMode = await getUserMode(session.userId)
+  const userMode = await resolveUserMode(session)
   if (userMode !== "partner") {
     throw new AuthzError(
       "Doar utilizatorii în modul partner pot accesa portofoliul.",

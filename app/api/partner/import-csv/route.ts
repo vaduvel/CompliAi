@@ -11,9 +11,9 @@ import { createClaimInvite } from "@/lib/server/claim-ownership"
 import {
   AuthzError,
   createOrganizationForExistingUser,
-  getUserMode,
   listUserMemberships,
   requireFreshRole,
+  resolveUserMode,
 } from "@/lib/server/auth"
 import { evaluateApplicability } from "@/lib/compliance/applicability"
 import type { OrgProfile, OrgSector, OrgEmployeeCount } from "@/lib/compliance/applicability"
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       ["owner", "partner_manager"],
       "importul CSV de clienți"
     )
-    const userMode = await getUserMode(session.userId)
+    const userMode = await resolveUserMode(session)
     if (userMode !== "partner") {
       throw new AuthzError(
         "Importul CSV este disponibil doar în modul partner.",

@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server"
 
-import { readSessionFromRequest, setUserMode } from "@/lib/server/auth"
+import {
+  createSessionToken,
+  getSessionCookieOptions,
+  readSessionFromRequest,
+  SESSION_COOKIE,
+  setUserMode,
+} from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -32,7 +38,22 @@ export async function POST(request: Request) {
 
     await setUserMode(session.userId, mode as (typeof ALLOWED_MODES)[number])
 
-    return NextResponse.json({ ok: true, userMode: mode })
+    const response = NextResponse.json({ ok: true, userMode: mode })
+    response.cookies.set(
+      SESSION_COOKIE,
+      createSessionToken({
+        userId: session.userId,
+        orgId: session.orgId,
+        email: session.email,
+        orgName: session.orgName,
+        role: session.role,
+        userMode: mode as (typeof ALLOWED_MODES)[number],
+        membershipId: session.membershipId,
+        workspaceMode: session.workspaceMode ?? "org",
+      }),
+      getSessionCookieOptions()
+    )
+    return response
   } catch (error) {
     if (error instanceof RequestValidationError) {
       return jsonError(error.message, error.status, error.code, undefined, context)

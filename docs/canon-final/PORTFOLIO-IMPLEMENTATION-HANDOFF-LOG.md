@@ -458,3 +458,32 @@ Testare:
 - `npm test` -> verde
 - `npm run lint` -> trece; doar warning-uri istorice
 - `npm run build` -> verde
+
+## Actualizare 2026-03-23 — Hotfix onboarding continuation după selecție
+
+Verdict:
+- hotfix aprobat pentru bucla `/onboarding -> /dashboard -> /onboarding`
+
+Ce am corectat:
+- `SessionPayload` poartă acum și `userMode`, iar verificarea / refresh-ul de sesiune îl păstrează, în:
+  - [lib/server/auth.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/auth.ts)
+- a fost introdus helper-ul `resolveUserMode(session)` pentru fallback sigur:
+  - întâi din sesiune
+  - apoi din persistența auth
+- `POST /api/auth/set-user-mode` rescrie acum și cookie-ul de sesiune imediat după salvare, în:
+  - [app/api/auth/set-user-mode/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/set-user-mode/route.ts)
+- layout-urile și rutele critice citesc acum `userMode` prin rezolvarea nouă, în:
+  - [app/onboarding/page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/onboarding/page.tsx)
+  - [app/dashboard/layout.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/layout.tsx)
+  - [app/portfolio/layout.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/portfolio/layout.tsx)
+  - [app/account/layout.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/account/layout.tsx)
+  - [app/api/auth/me/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/me/route.ts)
+  - [app/api/auth/select-workspace/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/select-workspace/route.ts)
+  - [app/api/auth/switch-org/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/switch-org/route.ts)
+- submit-ul din UI face acum `replace + refresh`, nu doar `push`, în:
+  - [components/compliscan/onboarding-form.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/onboarding-form.tsx)
+
+Testare:
+- `npm test` -> verde (`139` fișiere, `741` teste, `1 skipped`, `0 failed`)
+- `npm run lint` -> trece; doar warning-uri istorice
+- `npm run build` -> verde

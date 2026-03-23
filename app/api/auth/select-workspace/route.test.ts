@@ -3,18 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
   createSessionTokenMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
-  getUserModeMock: vi.fn(),
   listUserMembershipsMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
   resolveUserForMembershipMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   createSessionToken: mocks.createSessionTokenMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
-  getUserMode: mocks.getUserModeMock,
   listUserMemberships: mocks.listUserMembershipsMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
+  resolveUserMode: mocks.resolveUserModeMock,
   resolveUserForMembership: mocks.resolveUserForMembershipMock,
   SESSION_COOKIE: "compliscan_session",
 }))
@@ -71,7 +71,7 @@ describe("POST /api/auth/select-workspace", () => {
   })
 
   it("activeaza portfolio pentru user cu userMode partner", async () => {
-    mocks.getUserModeMock.mockResolvedValue("partner")
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
 
     const response = await POST(
       new Request("http://localhost/api/auth/select-workspace", {
@@ -91,7 +91,7 @@ describe("POST /api/auth/select-workspace", () => {
   })
 
   it("blocheaza portfolio pentru user non-partner", async () => {
-    mocks.getUserModeMock.mockResolvedValue("solo")
+    mocks.resolveUserModeMock.mockResolvedValue("solo")
 
     const response = await POST(
       new Request("http://localhost/api/auth/select-workspace", {

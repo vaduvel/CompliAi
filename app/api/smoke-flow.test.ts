@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   readStateMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
   requireRoleMock: vi.fn(),
   serializeCompliScanYamlMock: vi.fn(),
 }))
@@ -35,10 +36,10 @@ vi.mock("@/lib/server/auth", () => ({
   createSessionToken: mocks.createSessionTokenMock,
   findUserByEmail: mocks.findUserByEmailMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
-  getUserMode: vi.fn().mockResolvedValue(null),
   hashPassword: mocks.hashPasswordMock,
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
+  resolveUserMode: mocks.resolveUserModeMock,
   requireRole: mocks.requireRoleMock,
   SESSION_COOKIE: "compliscan_session",
 }))
@@ -99,6 +100,7 @@ describe("api smoke flow", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.resolveUserModeMock.mockResolvedValue(null)
     mocks.requireRoleMock.mockReturnValue({
       userId: "user-1",
       email: "demo@site.ro",

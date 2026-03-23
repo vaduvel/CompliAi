@@ -5,9 +5,9 @@ import { CockpitProvider } from "@/components/compliscan/use-cockpit"
 import { DashboardShell } from "@/components/compliscan/dashboard-shell"
 import {
   SESSION_COOKIE,
-  getUserMode,
   listUserMemberships,
   refreshSessionPayload,
+  resolveUserMode,
   verifySessionToken,
 } from "@/lib/server/auth"
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
@@ -30,7 +30,7 @@ export default async function DashboardLayout({
   const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
 
-  const userMode = session && !isDemoSession(session) ? await getUserMode(session.userId) : null
+  const userMode = session && !isDemoSession(session) ? await resolveUserMode(session) : null
 
   if (session && !isDemoSession(session)) {
     if (!userMode) {

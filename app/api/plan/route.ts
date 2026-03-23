@@ -3,9 +3,9 @@
 
 import { jsonError } from "@/lib/server/api-response"
 import {
-  getUserMode,
   listUserMemberships,
   requireFreshAuthenticatedSession,
+  resolveUserMode,
 } from "@/lib/server/auth"
 import {
   getOrgPlan,
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const [plan, record, userMode, memberships] = await Promise.all([
       getOrgPlan(session.orgId),
       getOrgPlanRecord(session.orgId),
-      getUserMode(session.userId),
+      resolveUserMode(session),
       listUserMemberships(session.userId),
     ])
     const activeMemberships = memberships.filter((membership) => membership.status === "active")

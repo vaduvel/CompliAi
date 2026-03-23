@@ -65,7 +65,8 @@ export function OnboardingForm() {
       }
 
       toast.success("Mod de utilizare salvat")
-      router.push("/dashboard")
+      router.replace("/dashboard")
+      router.refresh()
     } catch {
       setError("Eroare de retea. Incearca din nou.")
     } finally {
