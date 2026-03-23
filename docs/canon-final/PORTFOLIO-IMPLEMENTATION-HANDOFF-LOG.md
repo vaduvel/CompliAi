@@ -438,3 +438,23 @@ Observații de control:
 Stare după Wave 6:
 - pachetul principal de implementare portfolio-first este închis cap-coadă pe wave-urile canonice `0A -> 6`
 - orice pas următor este hardening / QA / polish, nu fundație nouă
+
+## Actualizare 2026-03-23 — Hotfix onboarding `userMode`
+
+Verdict:
+- hotfix aprobat pentru onboarding live
+
+Ce am corectat:
+- `setUserMode` nu mai citește doar `users.json`; folosește acum graph-ul auth complet, astfel încât userii existenți doar în profilul cloud/Supabase pot salva `userMode` fără eroarea `USER_NOT_FOUND`, în:
+  - [lib/server/auth.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/auth.ts)
+- merge-ul dintre userii locali și profilele cloud păstrează acum și `userMode`, astfel încât alegerea din onboarding rămâne stabilă la citire ulterioară, în:
+  - [lib/server/auth.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/auth.ts)
+- ruta `POST /api/auth/set-user-mode` nu mai expune mesajul brut `USER_NOT_FOUND`; mapează controlat la eroare auth explicită, în:
+  - [app/api/auth/set-user-mode/route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/auth/set-user-mode/route.ts)
+
+Testare:
+- test nou de auth pentru user disponibil doar prin graph-ul cloud
+- test nou pentru maparea controlată a erorii pe `set-user-mode`
+- `npm test` -> verde
+- `npm run lint` -> trece; doar warning-uri istorice
+- `npm run build` -> verde

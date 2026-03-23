@@ -3322,6 +3322,19 @@ Validare dupa pass:
 - `npm run lint` -> verde, doar warnings vechi
 - `npm run build` -> verde
 
+### 2026-03-23 - Hotfix onboarding userMode pentru useri cloud
+
+- `POST /api/auth/set-user-mode` nu mai cade cu `USER_NOT_FOUND` pentru useri autentificați care există doar în graph-ul cloud/Supabase
+- `setUserMode` folosește acum graph-ul auth complet, nu doar `users.json`
+- merge-ul profilurilor cloud păstrează și `userMode`, astfel încât onboarding-ul rămâne stabil după salvare
+- ruta mapează controlat cazul lipsă user la `AUTH_USER_NOT_FOUND`, fără a afișa mesaj brut în UI
+
+Validare:
+
+- `npm test` -> verde
+- `npm run lint` -> trece, doar warnings istorice
+- `npm run build` -> verde
+
 ## 2026-03-22 — Mega QA Fix Sprint
 
 ### Sprint de corectie pe regresiile gasite in QA real

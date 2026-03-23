@@ -5,6 +5,32 @@ import path from "node:path"
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+const supabaseRestMocks = vi.hoisted(() => ({
+  hasSupabaseConfig: vi.fn(() => false),
+}))
+
+const supabaseTenancyReadMocks = vi.hoisted(() => ({
+  loadTenancyGraphFromSupabase: vi.fn(async () => ({
+    organizations: [],
+    memberships: [],
+    profiles: [],
+  })),
+  shouldReadTenancyFromSupabase: vi.fn(() => false),
+}))
+
+vi.mock("@/lib/server/supabase-rest", () => ({
+  hasSupabaseConfig: supabaseRestMocks.hasSupabaseConfig,
+  supabaseInsert: vi.fn(),
+  supabaseSelect: vi.fn(),
+  supabaseUpdate: vi.fn(),
+  supabaseUpsert: vi.fn(),
+}))
+
+vi.mock("@/lib/server/supabase-tenancy-read", () => ({
+  loadTenancyGraphFromSupabase: supabaseTenancyReadMocks.loadTenancyGraphFromSupabase,
+  shouldReadTenancyFromSupabase: supabaseTenancyReadMocks.shouldReadTenancyFromSupabase,
+}))
+
 import {
   addOrganizationMemberByEmail,
   claimOrganizationOwnership,
@@ -13,13 +39,14 @@ import {
   deactivateOrganizationMember,
   findUserByEmail,
   findUserById,
-    getConfiguredAuthBackend,
-    getOrganizationOwnership,
-    linkUserToExternalIdentity,
-    loadMemberships,
-    loadOrganizations,
-    listOrganizationMembers,
-    listUserMemberships,
+  getConfiguredAuthBackend,
+  getOrganizationOwnership,
+  getUserMode,
+  linkUserToExternalIdentity,
+  loadMemberships,
+  loadOrganizations,
+  listOrganizationMembers,
+  listUserMemberships,
   readSessionFromRequest,
   readFreshSessionFromRequest,
   refreshSessionPayload,
@@ -28,6 +55,7 @@ import {
   requireFreshAuthenticatedSession,
   requireFreshRole,
   requireRole,
+  setUserMode,
   updateOrganizationMemberRole,
   verifySessionToken,
   type PersistedUserRecord,
@@ -49,6 +77,13 @@ describe("lib/server/auth", () => {
     process.env.COMPLISCAN_MEMBERSHIPS_FILE = path.join(tempDir, "memberships.json")
     process.env.COMPLISCAN_SESSION_SECRET = "test-secret"
     process.env.COMPLISCAN_DATA_BACKEND = "local"
+    supabaseRestMocks.hasSupabaseConfig.mockReturnValue(false)
+    supabaseTenancyReadMocks.shouldReadTenancyFromSupabase.mockReturnValue(false)
+    supabaseTenancyReadMocks.loadTenancyGraphFromSupabase.mockResolvedValue({
+      organizations: [],
+      memberships: [],
+      profiles: [],
+    })
   })
 
   afterEach(async () => {
@@ -257,6 +292,57 @@ describe("lib/server/auth", () => {
         role: "owner",
       })
     )
+  })
+
+  it("salveaza userMode si pentru user disponibil doar prin graph-ul cloud", async () => {
+    process.env.COMPLISCAN_DATA_BACKEND = "supabase"
+    supabaseRestMocks.hasSupabaseConfig.mockReturnValue(true)
+    supabaseTenancyReadMocks.shouldReadTenancyFromSupabase.mockReturnValue(true)
+    supabaseTenancyReadMocks.loadTenancyGraphFromSupabase.mockResolvedValue({
+      organizations: [
+        {
+          id: "org-cloud",
+          name: "Org Cloud",
+          createdAtISO: "2026-03-23T05:00:00.000Z",
+        },
+      ],
+      memberships: [
+        {
+          id: "membership-cloud",
+          userId: "11111111-1111-1111-1111-111111111111",
+          orgId: "org-cloud",
+          role: "owner",
+          status: "active",
+          createdAtISO: "2026-03-23T05:00:00.000Z",
+        },
+      ],
+      profiles: [
+        {
+          id: "11111111-1111-1111-1111-111111111111",
+          email: "cloud@example.com",
+          createdAtISO: "2026-03-23T05:00:00.000Z",
+        },
+      ],
+    })
+
+    expect(await getUserMode("11111111-1111-1111-1111-111111111111")).toBeNull()
+
+    await setUserMode("11111111-1111-1111-1111-111111111111", "partner")
+
+    expect(await getUserMode("11111111-1111-1111-1111-111111111111")).toBe("partner")
+
+    const usersRaw = JSON.parse(
+      await readFile(process.env.COMPLISCAN_USERS_FILE as string, "utf8")
+    ) as PersistedUserRecord[]
+
+    expect(usersRaw).toEqual([
+      expect.objectContaining({
+        id: "11111111-1111-1111-1111-111111111111",
+        email: "cloud@example.com",
+        authProvider: "supabase",
+        userMode: "partner",
+      }),
+    ])
   })
 
   it("blocheaza un rol insuficient la requireRole", () => {

@@ -553,6 +553,7 @@ function mergeUsersWithCloudProfiles(
       authProvider: "supabase",
       orgId: existing?.orgId,
       orgName: existing?.orgName,
+      userMode: existing?.userMode,
     }
 
     byId.set(profile.id, merged)
@@ -1386,19 +1387,20 @@ export async function requireFreshRole(
 }
 
 export async function getUserMode(userId: string): Promise<UserMode | null> {
-  const users = await readJsonFile<PersistedUserRecord[]>(getUsersFile(), [])
-  const user = users.find((entry) => entry.id === userId)
+  const graph = await loadAuthGraph()
+  const user = graph.users.find((entry) => entry.id === userId)
   if (!user) return null
   return isUserMode(user.userMode) ? user.userMode : null
 }
 
 export async function setUserMode(userId: string, mode: UserMode): Promise<void> {
-  const users = await readJsonFile<PersistedUserRecord[]>(getUsersFile(), [])
-  const userIndex = users.findIndex((entry) => entry.id === userId)
+  const graph = await loadAuthGraph()
+  const userIndex = graph.users.findIndex((entry) => entry.id === userId)
   if (userIndex === -1) throw new Error("USER_NOT_FOUND")
 
-  users[userIndex] = { ...users[userIndex], userMode: mode }
-  await writeJsonFile(getUsersFile(), users)
+  const nextUsers = [...graph.users]
+  nextUsers[userIndex] = { ...nextUsers[userIndex], userMode: mode }
+  await saveUsers(nextUsers)
 }
 
 export function getSessionCookieOptions() {

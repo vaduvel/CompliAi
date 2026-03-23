@@ -1889,3 +1889,15 @@ Asta este sanatos arhitectural pentru ca:
 - `RemediationBoard` ramane mai jos pentru executia task-urilor existente
 - page header actualizat cu badge-uri de severitate per blueprint
 - `PillarTabs` ramane ca punte spre suprafetele de dovada existente
+
+## Actualizare 2026-03-23 - Hotfix onboarding cloud-first
+
+- onboarding-ul `userMode` este acum compatibil cu modelul auth cloud-first introdus in valurile portfolio
+- problema era de aliniere intre:
+  - sesiune valida + profil disponibil in graph-ul Supabase
+  - salvare care scria doar in `users.json`
+- `setUserMode` citeste acum din auth graph-ul complet si persista rezultatul local fara a pierde profilurile cloud
+- arhitectural, asta inchide ruptura dintre `Wave 0A` si autentificarea cloud:
+  - userul poate intra in onboarding
+  - isi poate salva modul
+  - nu mai primeste eroarea bruta `USER_NOT_FOUND`

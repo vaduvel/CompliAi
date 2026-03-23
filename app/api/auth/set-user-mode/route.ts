@@ -38,6 +38,10 @@ export async function POST(request: Request) {
       return jsonError(error.message, error.status, error.code, undefined, context)
     }
 
+    if (error instanceof Error && error.message === "USER_NOT_FOUND") {
+      return jsonError("Utilizatorul curent nu exista.", 404, "AUTH_USER_NOT_FOUND", undefined, context)
+    }
+
     const message = error instanceof Error ? error.message : "Eroare la setarea modului de utilizare."
     await logRouteError(context, error, {
       code: "SET_USER_MODE_FAILED",
