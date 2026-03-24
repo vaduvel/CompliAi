@@ -17,6 +17,7 @@ import {
   ThumbsDown,
   Upload,
   RotateCcw,
+  Download,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -36,6 +37,11 @@ import {
   type VendorReviewUrgency,
   type EvidenceType,
 } from "@/lib/compliance/vendor-review-engine"
+import {
+  fingerprintMatch,
+  VENDOR_CATEGORY_LABELS,
+  type VendorFingerprint,
+} from "@/lib/compliance/vendor-library"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -84,6 +90,87 @@ function statusVariant(s: VendorReviewStatus) {
   if (s === "overdue-review") return "destructive" as const
   if (s === "needs-context" || s === "awaiting-evidence") return "warning" as const
   return "secondary" as const
+}
+
+function getLibraryMatch(vendorName: string): { vendor: VendorFingerprint; confidence: number } | null {
+  const match = fingerprintMatch(vendorName)
+  if (!match || match.confidence < 0.4) return null
+  return { vendor: match.vendor, confidence: match.confidence }
+}
+
+function LibraryBadges({ vendorName }: { vendorName: string }) {
+  const match = getLibraryMatch(vendorName)
+  if (!match) return null
+
+  const { vendor } = match
+  return (
+    <>
+      <Badge variant="outline" className="text-[10px] normal-case tracking-normal gap-1">
+        <CheckCircle2 className="size-2.5" strokeWidth={2.5} />
+        Library
+      </Badge>
+      {vendor.dpaUrl && (
+        <a
+          href={vendor.dpaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1 rounded-full border border-eos-success/30 bg-eos-success/10 px-2 py-0.5 text-[10px] font-medium text-eos-success hover:bg-eos-success/20 transition-colors"
+        >
+          DPA public ↗
+        </a>
+      )}
+      {!vendor.dpaUrl && vendor.typicallyProcessor && (
+        <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+          DPA lipsă
+        </Badge>
+      )}
+    </>
+  )
+}
+
+function LibraryDetailPanel({ vendorName }: { vendorName: string }) {
+  const match = getLibraryMatch(vendorName)
+  if (!match) return null
+
+  const { vendor, confidence } = match
+  return (
+    <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 p-3 space-y-1.5">
+      <div className="flex items-center gap-2">
+        <p className="text-xs font-semibold text-eos-primary">
+          Recunoscut din Library: {vendor.canonicalName}
+        </p>
+        <Badge variant="outline" className="text-[9px]">
+          {Math.round(confidence * 100)}% match
+        </Badge>
+      </div>
+      <div className="grid gap-1 text-xs text-eos-text-muted sm:grid-cols-2">
+        <p><span className="font-medium">Categorie:</span> {VENDOR_CATEGORY_LABELS[vendor.category]}</p>
+        <p><span className="font-medium">HQ:</span> {vendor.hqCountry} {vendor.hasEuEntity ? "(entitate UE)" : ""}</p>
+        <p><span className="font-medium">Transfer:</span> {vendor.transferClue}</p>
+        <p><span className="font-medium">Processor GDPR:</span> {vendor.typicallyProcessor ? "Da" : "Nu (controller)"}</p>
+        {vendor.certifications.length > 0 && (
+          <p className="sm:col-span-2"><span className="font-medium">Certificări:</span> {vendor.certifications.join(", ")}</p>
+        )}
+        {vendor.dataTypes.length > 0 && (
+          <p className="sm:col-span-2"><span className="font-medium">Date procesate:</span> {vendor.dataTypes.join(", ")}</p>
+        )}
+        {vendor.complianceNote && (
+          <p className="sm:col-span-2 italic">{vendor.complianceNote}</p>
+        )}
+      </div>
+      {vendor.dpaUrl && (
+        <a
+          href={vendor.dpaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs font-medium text-eos-primary hover:underline"
+        >
+          Deschide DPA public ↗
+        </a>
+      )}
+    </div>
+  )
 }
 
 function inferVendorValidationLabel(review: VendorReview) {
@@ -461,6 +548,9 @@ function ReviewPanel({
         </div>
       )}
 
+      {/* Library match info */}
+      <LibraryDetailPanel vendorName={review.vendorName} />
+
       {/* Header info */}
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
@@ -501,6 +591,46 @@ function ReviewPanel({
           </p>
         </div>
       </div>
+
+      {/* Stale evidence warning */}
+      {review.status === "closed" && review.closedAtISO && (() => {
+        const closedAt = new Date(review.closedAtISO).getTime()
+        const daysSinceClosed = Math.floor((Date.now() - closedAt) / (1000 * 60 * 60 * 24))
+        const evidenceAge = daysSinceClosed > 365 ? "expirate" : daysSinceClosed > 270 ? "aproape expirate" : null
+        if (!evidenceAge) return null
+        return (
+          <div className="flex items-start gap-2 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 p-2.5">
+            <Clock className="mt-0.5 size-3.5 shrink-0 text-eos-warning" strokeWidth={2} />
+            <p className="text-xs text-eos-text">
+              <span className="font-medium">Dovezile sunt {evidenceAge}</span> ({daysSinceClosed} zile de la închidere).
+              {daysSinceClosed > 365
+                ? " Revalidare recomandată imediat."
+                : " Planifică revalidarea în curând."}
+            </p>
+          </div>
+        )
+      })()}
+
+      {/* DPA expiry warning for library vendors */}
+      {review.status !== "closed" && (() => {
+        const match = getLibraryMatch(review.vendorName)
+        if (!match) return null
+        const { vendor } = match
+        if (!vendor.typicallyProcessor) return null
+        const hasDpaEvidence = review.evidenceItems?.some((e) => e.type === "dpa-signed")
+        if (hasDpaEvidence) return null
+        return (
+          <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-2.5">
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-eos-error" strokeWidth={2} />
+            <p className="text-xs text-eos-text">
+              <span className="font-medium">{vendor.canonicalName} este processor GDPR</span> dar nu are dovadă DPA atașată.
+              {vendor.dpaUrl
+                ? " DPA public disponibil — descarcă, semnează și atașează."
+                : " Solicită DPA direct de la furnizor."}
+            </p>
+          </div>
+        )
+      })()}
 
       {/* Specialist escalation for high-urgency vendors */}
       {(review.urgency === "critical" || review.urgency === "high") && review.status !== "closed" && (
@@ -660,6 +790,18 @@ function ReviewPanel({
 
       {/* Audit trail (V5.3) */}
       <AuditTrailViewer trail={review.auditTrail} />
+
+      {/* Counsel-ready brief export (GOLD 3) */}
+      <div className="border-t border-eos-border-subtle pt-3">
+        <a
+          href={`/api/vendor-review/${review.id}/brief`}
+          download
+          className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
+        >
+          <Download className="size-3.5" strokeWidth={2} />
+          Descarcă brief counsel-ready
+        </a>
+      </div>
     </div>
   )
 }
@@ -927,6 +1069,7 @@ export default function VendorReviewPage() {
                               {statusIcon(review.status)}
                               {REVIEW_STATUS_LABELS[review.status]}
                             </Badge>
+                            <LibraryBadges vendorName={review.vendorName} />
                             <span className="text-xs text-eos-text-tertiary capitalize">
                               {review.category}
                             </span>

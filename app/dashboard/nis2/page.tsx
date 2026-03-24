@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
+  Bell,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -39,6 +40,7 @@ import {
   type Nis2Category,
 } from "@/lib/compliance/nis2-rules"
 import type {
+  AnspdcpBreachNotification,
   Nis2AssessmentRecord,
   Nis2AttackType,
   Nis2Incident,
@@ -1002,6 +1004,199 @@ function PostIncidentPanel({
   )
 }
 
+// ── ANSPDCP Breach Notification Panel (GOLD 6) ─────────────────────────────
+
+function AnspdcpNotificationPanel({
+  incident,
+  onUpdate,
+}: {
+  incident: Nis2Incident
+  onUpdate: (patch: Record<string, unknown>) => void
+}) {
+  const notif = incident.anspdcpNotification
+  const [form, setForm] = useState({
+    dataCategories: notif?.dataCategories.join(", ") ?? "",
+    estimatedDataSubjects: notif?.estimatedDataSubjects?.toString() ?? "",
+    dpoContact: notif?.dpoContact ?? "",
+    consequencesDescription: notif?.consequencesDescription ?? "",
+    measuresTaken: notif?.measuresTaken ?? "",
+    anspdcpReference: notif?.anspdcpReference ?? "",
+    notifyDataSubjects: notif?.notifyDataSubjects ?? false,
+  })
+  const [saving, setSaving] = useState(false)
+
+  if (!incident.involvesPersonalData) return null
+
+  const deadline72h = notif?.deadlineISO
+    ? slaLabel(notif.deadlineISO, 72 * 3_600_000)
+    : null
+
+  async function handleSubmit(submitted: boolean) {
+    setSaving(true)
+    const updated: AnspdcpBreachNotification = {
+      required: true,
+      deadlineISO: notif?.deadlineISO ?? new Date(new Date(incident.detectedAtISO).getTime() + 72 * 3_600_000).toISOString(),
+      status: submitted ? "submitted" : (notif?.status ?? "pending"),
+      dataCategories: form.dataCategories.split(",").map((s) => s.trim()).filter(Boolean),
+      estimatedDataSubjects: form.estimatedDataSubjects ? parseInt(form.estimatedDataSubjects, 10) : null,
+      dpoContact: form.dpoContact.trim() || undefined,
+      consequencesDescription: form.consequencesDescription.trim() || undefined,
+      measuresTaken: form.measuresTaken.trim() || undefined,
+      submittedAtISO: submitted ? new Date().toISOString() : notif?.submittedAtISO,
+      anspdcpReference: form.anspdcpReference.trim() || undefined,
+      notifyDataSubjects: form.notifyDataSubjects,
+      dataSubjectsNotifiedAtISO: notif?.dataSubjectsNotifiedAtISO,
+    }
+    onUpdate({ anspdcpNotification: updated })
+    setSaving(false)
+    if (submitted) toast.success("Notificare ANSPDCP marcată ca trimisă")
+  }
+
+  const statusColors: Record<string, string> = {
+    pending: "border-amber-200 bg-amber-50",
+    submitted: "border-blue-200 bg-blue-50",
+    acknowledged: "border-emerald-200 bg-emerald-50",
+  }
+  const statusLabels: Record<string, string> = {
+    pending: "De trimis",
+    submitted: "Trimisă",
+    acknowledged: "Confirmată de ANSPDCP",
+  }
+
+  return (
+    <div className={`rounded-eos-md border px-3 py-3 space-y-3 ${statusColors[notif?.status ?? "pending"]}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Bell className="size-3.5 text-amber-600" strokeWidth={2} />
+          <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-amber-700">
+            Notificare ANSPDCP — GDPR Art. 33
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {deadline72h && notif?.status === "pending" && (
+            <span className={`text-[10px] font-bold ${deadline72h.expired ? "text-red-700" : deadline72h.urgent ? "text-orange-700" : "text-amber-700"}`}>
+              {deadline72h.expired ? "DEPĂȘIT" : `${deadline72h.label} rămas`}
+            </span>
+          )}
+          <Badge
+            variant={notif?.status === "submitted" ? "default" : notif?.status === "acknowledged" ? "success" : "warning"}
+            className="text-[10px] normal-case tracking-normal"
+          >
+            {statusLabels[notif?.status ?? "pending"]}
+          </Badge>
+        </div>
+      </div>
+
+      <p className="text-[10px] text-amber-700/80">
+        Incidentul implică date cu caracter personal. Notificarea ANSPDCP este obligatorie în 72h de la descoperire (GDPR Art. 33). Aceasta este <strong>separată</strong> de raportarea DNSC.
+      </p>
+
+      <div className="space-y-2">
+        <div>
+          <label className="text-[10px] font-medium text-amber-800">Categorii date afectate (virgulă)</label>
+          <input
+            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            placeholder="ex: date identitate, date financiare, date medicale..."
+            value={form.dataCategories}
+            onChange={(e) => setForm((p) => ({ ...p, dataCategories: e.target.value }))}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-medium text-amber-800">Nr. persoane vizate (estimat)</label>
+            <input
+              type="number"
+              min={0}
+              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              placeholder="0"
+              value={form.estimatedDataSubjects}
+              onChange={(e) => setForm((p) => ({ ...p, estimatedDataSubjects: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-medium text-amber-800">DPO / Responsabil conformitate</label>
+            <input
+              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              placeholder="email@exemplu.ro"
+              value={form.dpoContact}
+              onChange={(e) => setForm((p) => ({ ...p, dpoContact: e.target.value }))}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-[10px] font-medium text-amber-800">Consecințe probabile (Art. 33(3)(c))</label>
+          <textarea
+            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            rows={2}
+            placeholder="Consecințe probabile pentru persoanele vizate..."
+            value={form.consequencesDescription}
+            onChange={(e) => setForm((p) => ({ ...p, consequencesDescription: e.target.value }))}
+          />
+        </div>
+        <div>
+          <label className="text-[10px] font-medium text-amber-800">Măsuri luate / propuse (Art. 33(3)(d))</label>
+          <textarea
+            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            rows={2}
+            placeholder="Măsuri de remediere adoptate sau propuse..."
+            value={form.measuresTaken}
+            onChange={(e) => setForm((p) => ({ ...p, measuresTaken: e.target.value }))}
+          />
+        </div>
+
+        {/* Art. 34 — notificare persoane vizate */}
+        <label className="flex items-start gap-2 text-xs text-amber-800 cursor-pointer">
+          <input
+            type="checkbox"
+            className="mt-0.5 rounded"
+            checked={form.notifyDataSubjects}
+            onChange={(e) => setForm((p) => ({ ...p, notifyDataSubjects: e.target.checked }))}
+          />
+          <span>
+            <span className="font-medium">Art. 34 — Notifică persoanele vizate individual</span>
+            <span className="block text-[10px] text-amber-700/70">Dacă breach-ul prezintă risc ridicat pentru drepturile și libertățile persoanelor.</span>
+          </span>
+        </label>
+
+        {notif?.status !== "pending" && (
+          <div>
+            <label className="text-[10px] font-medium text-amber-800">Nr. înregistrare ANSPDCP</label>
+            <input
+              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              placeholder="ANSPDCP-2026-..."
+              value={form.anspdcpReference}
+              onChange={(e) => setForm((p) => ({ ...p, anspdcpReference: e.target.value }))}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1 gap-1.5 border-amber-300 text-amber-800 hover:bg-amber-100"
+          disabled={saving}
+          onClick={() => void handleSubmit(false)}
+        >
+          Salvează
+        </Button>
+        {notif?.status === "pending" && (
+          <Button
+            size="sm"
+            className="flex-1 gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+            disabled={saving || !form.dataCategories.trim()}
+            onClick={() => void handleSubmit(true)}
+          >
+            <Bell className="size-3.5" strokeWidth={2} />
+            Marchează ca trimisă la ANSPDCP
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── IncidentRow (refactored cu 3-stage stepper + post-incident) ──────────────
 
 function IncidentRow({
@@ -1038,6 +1233,15 @@ function IncidentRow({
             <Badge variant={completedStages === 3 ? "success" : "warning"} className="text-[10px] normal-case tracking-normal">
               {completedStages}/3 etape
             </Badge>
+            {incident.involvesPersonalData && (
+              <Badge
+                variant={incident.anspdcpNotification?.status === "submitted" || incident.anspdcpNotification?.status === "acknowledged" ? "default" : "destructive"}
+                className="text-[10px] normal-case tracking-normal gap-1"
+              >
+                <Bell className="size-2.5" strokeWidth={2.5} />
+                ANSPDCP {incident.anspdcpNotification?.status === "pending" ? "— de notificat" : incident.anspdcpNotification?.status === "submitted" ? "— trimis" : "— confirmat"}
+              </Badge>
+            )}
           </div>
           {incident.description && (
             <p className="mt-1 text-xs text-eos-text-muted">{incident.description}</p>
@@ -1131,6 +1335,12 @@ function IncidentRow({
         onUpdate={(patch) => onUpdate(incident.id, patch as Partial<Nis2Incident>)}
       />
 
+      {/* ANSPDCP breach notification panel (GOLD 6) */}
+      <AnspdcpNotificationPanel
+        incident={incident}
+        onUpdate={(patch) => onUpdate(incident.id, patch as Partial<Nis2Incident>)}
+      />
+
       {/* Checklist răspuns incident */}
       <div>
         <button
@@ -1168,6 +1378,7 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
     operationalImpact: "" as Nis2OperationalImpact | "",
     operationalImpactDetails: "",
     measuresTaken: "",
+    involvesPersonalData: false,
   })
 
   useEffect(() => {
@@ -1225,6 +1436,7 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
           ...(form.operationalImpact && { operationalImpact: form.operationalImpact }),
           ...(form.operationalImpactDetails.trim() && { operationalImpactDetails: form.operationalImpactDetails.trim() }),
           ...(form.measuresTaken.trim() && { measuresTaken: form.measuresTaken.trim() }),
+          involvesPersonalData: form.involvesPersonalData || form.attackType === "data-breach",
         }),
       })
       const data = (await res.json()) as { incident?: Nis2Incident; error?: string }
@@ -1233,7 +1445,7 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
       setForm({
         title: "", description: "", severity: "high", affectedSystems: "",
         attackType: "", attackVector: "", operationalImpact: "",
-        operationalImpactDetails: "", measuresTaken: "",
+        operationalImpactDetails: "", measuresTaken: "", involvesPersonalData: false,
       })
       setShowForm(false)
       toast.success("Incident înregistrat", { description: "Termenele SLA au fost calculate automat." })
@@ -1378,6 +1590,26 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
               rows={2}
               className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
             />
+            {/* ANSPDCP: personal data flag */}
+            <label className={`flex items-start gap-2 cursor-pointer rounded-eos-md border px-3 py-2.5 text-xs transition-colors ${
+              form.involvesPersonalData || form.attackType === "data-breach"
+                ? "border-amber-300 bg-amber-50 text-amber-800"
+                : "border-eos-border bg-eos-surface-variant text-eos-text"
+            }`}>
+              <input
+                type="checkbox"
+                className="mt-0.5 rounded"
+                checked={form.involvesPersonalData || form.attackType === "data-breach"}
+                onChange={(e) => setForm((f) => ({ ...f, involvesPersonalData: e.target.checked }))}
+              />
+              <span>
+                <span className="font-medium">Implică date cu caracter personal</span>
+                <span className="block text-[10px] opacity-70 mt-0.5">
+                  Activează notificarea ANSPDCP în 72h (GDPR Art. 33), separată de raportarea DNSC.
+                  {form.attackType === "data-breach" && " (detectat automat din tipul atacului)"}
+                </span>
+              </span>
+            </label>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
                 Anulează

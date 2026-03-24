@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -22,6 +22,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { ImportWizard } from "@/components/compliscan/import-wizard"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -164,9 +165,14 @@ function ClientRow({
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-        {c?.efacturaConnected && (
+        {c?.efacturaConnected && (c?.efacturaRiskCount ?? 0) === 0 && (
           <Badge variant="success" className="text-[10px] normal-case tracking-normal">
             e-Factura
+          </Badge>
+        )}
+        {(c?.efacturaRiskCount ?? 0) > 0 && (
+          <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+            {c!.efacturaRiskCount} semnale e-Factura
           </Badge>
         )}
         {c && c.gdprProgress >= 70 && (
@@ -182,6 +188,16 @@ function ClientRow({
         {c?.nis2RescueNeeded && (
           <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
             NIS2 neînregistrat
+          </Badge>
+        )}
+        {(c?.urgentDsarCount ?? 0) > 0 && (
+          <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+            {c!.urgentDsarCount} DSAR urgente
+          </Badge>
+        )}
+        {(c?.activeDsarCount ?? 0) > 0 && (c?.urgentDsarCount ?? 0) === 0 && (
+          <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+            {c!.activeDsarCount} DSAR
           </Badge>
         )}
       </div>
@@ -217,16 +233,22 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
         )
       : 0
 
+  const efacturaRiskClients = active.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0)
+  const totalEfacturaRisks = active.reduce((sum, client) => sum + (client.compliance?.efacturaRiskCount ?? 0), 0)
+
   const stats = [
     { label: "Total firme", value: active.length },
     { label: "Cu date", value: withData.length },
     { label: "Scor mediu", value: withData.length > 0 ? `${avgScore}%` : "—" },
     { label: "Taskuri active", value: activeTasks },
     { label: "Alerte critice", value: redClients.length },
+    ...(totalEfacturaRisks > 0
+      ? [{ label: "Semnale e-Factura", value: `${totalEfacturaRisks} (${efacturaRiskClients.length} firme)` }]
+      : []),
   ]
 
   return (
-    <div className="grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface md:grid-cols-5">
+    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-0.5 px-5 py-3.5">
           <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
@@ -235,102 +257,6 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
           <span className="text-lg font-semibold text-eos-text">{stat.value}</span>
         </div>
       ))}
-    </div>
-  )
-}
-
-function CsvImportModal({
-  onClose,
-  onSuccess,
-}: {
-  onClose: () => void
-  onSuccess: () => void
-}) {
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [importing, setImporting] = useState(false)
-  const [result, setResult] = useState<{ message: string; errors: string[] } | null>(null)
-
-  async function handleImport() {
-    const file = fileRef.current?.files?.[0]
-    if (!file) return
-    const csvContent = await file.text()
-    setImporting(true)
-    setResult(null)
-    try {
-      const response = await fetch("/api/partner/import-csv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csvContent }),
-      })
-      const data = (await response.json()) as { message: string; errors: string[] }
-      setResult(data)
-      if ((data.errors?.length ?? 0) === 0) {
-        setTimeout(() => {
-          onSuccess()
-          onClose()
-        }, 1200)
-      }
-    } catch (error) {
-      setResult({
-        message: error instanceof Error ? error.message : "Eroare la import.",
-        errors: [],
-      })
-    } finally {
-      setImporting(false)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-xl">
-        <h2 className="text-base font-semibold text-eos-text">Import clienți CSV</h2>
-        <p className="mt-1 text-xs text-eos-text-muted">
-          Format: <code className="rounded bg-eos-bg-inset px-1">orgName,cui,sector,employeeCount,email</code>
-        </p>
-        <p className="mt-1 text-[10px] text-eos-text-tertiary">
-          Sectoare valide: energy, transport, banking, health, digital-infrastructure,
-          public-admin, finance, retail, manufacturing, professional-services, other
-        </p>
-        <p className="mt-0.5 text-[10px] text-eos-text-tertiary">Angajați: 1-9 · 10-49 · 50-249 · 250+</p>
-
-        <div className="mt-4">
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-eos-primary file:px-2 file:py-1 file:text-[11px] file:text-white"
-          />
-        </div>
-
-        {result ? (
-          <div
-            className={`mt-3 rounded-eos-md p-3 text-xs ${
-              result.errors.length > 0
-                ? "bg-eos-warning-soft text-eos-warning-fg"
-                : "bg-eos-success-soft text-eos-success-fg"
-            }`}
-          >
-            <p className="font-medium">{result.message}</p>
-            {result.errors.length > 0 ? (
-              <ul className="mt-1 list-disc space-y-0.5 pl-4">
-                {result.errors.map((error, index) => (
-                  <li key={`${error}-${index}`}>{error}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Button size="sm" variant="ghost" onClick={onClose}>
-            Anulează
-          </Button>
-          <Button size="sm" onClick={() => void handleImport()} disabled={importing} className="gap-1.5">
-            <Upload className="size-3.5" strokeWidth={2} />
-            {importing ? "Se importă..." : "Importă"}
-          </Button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -490,7 +416,7 @@ export function PortfolioOverviewClient() {
   return (
     <div className="space-y-6">
       {showImport ? (
-        <CsvImportModal
+        <ImportWizard
           onClose={() => setShowImport(false)}
           onSuccess={() => {
             void fetchClients()
@@ -530,7 +456,7 @@ export function PortfolioOverviewClient() {
               className="gap-2"
             >
               <Upload className="size-3.5" strokeWidth={2} />
-              {planData && !planData.canAddOrg ? "Limita atinsă" : "Import CSV"}
+              {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
             </Button>
             <Button size="sm" variant="outline" onClick={handleExportCsv} className="gap-2">
               <Download className="size-3.5" strokeWidth={2} />
@@ -588,6 +514,14 @@ export function PortfolioOverviewClient() {
           overdueScans.length > 0 && {
             label: `${overdueScans.length} firme fără scan recent`,
             filter: () => setScoreFilter("all"),
+          },
+          activeClients.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0).length > 0 && {
+            label: `${activeClients.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0).length} firme cu semnale e-Factura`,
+            filter: () => setSortKey("alerts"),
+          },
+          activeClients.filter((client) => (client.compliance?.activeDsarCount ?? 0) > 0).length > 0 && {
+            label: `${activeClients.reduce((sum, c) => sum + (c.compliance?.activeDsarCount ?? 0), 0)} DSAR active cross-client`,
+            filter: () => setSortKey("alerts"),
           },
         ].filter(Boolean) as Array<{ label: string; filter: () => void }>
 

@@ -38,6 +38,18 @@ function getDataFile(orgId: string): string {
   return path.join(DATA_DIR, `state-${orgId}.json`)
 }
 
+/** List all org IDs that have state files on disk. Used by cron jobs. */
+export async function listAllOrgIds(): Promise<string[]> {
+  try {
+    const files = await fs.readdir(DATA_DIR)
+    return files
+      .filter((f) => f.startsWith("state-") && f.endsWith(".json"))
+      .map((f) => f.replace(/^state-/, "").replace(/\.json$/, ""))
+  } catch {
+    return []
+  }
+}
+
 export async function readState(): Promise<ComplianceState> {
   const { orgId, orgName } = await getOrgContext()
 
