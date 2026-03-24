@@ -273,13 +273,20 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
 
 // ── Urgency Items (cross-module: DSAR + NIS2 + Vendor) ───────────────────────
 
+const URGENCY_REFRESH_MS = 5 * 60 * 1000
+
 function useUrgencyItems() {
   const [items, setItems] = useState<UrgencyItem[]>([])
   useEffect(() => {
-    fetch("/api/dashboard/urgency")
-      .then((r) => r.ok ? r.json() : { items: [] })
-      .then((d) => setItems(d.items ?? []))
-      .catch(() => {})
+    const fetch_ = () => {
+      fetch("/api/dashboard/urgency")
+        .then((r) => r.ok ? r.json() : { items: [] })
+        .then((d) => setItems(d.items ?? []))
+        .catch(() => {})
+    }
+    fetch_()
+    const id = setInterval(fetch_, URGENCY_REFRESH_MS)
+    return () => clearInterval(id)
   }, [])
   return items
 }

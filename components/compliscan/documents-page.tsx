@@ -69,8 +69,13 @@ export function DocumentsPageSurface() {
           {generatedDocuments.length === 0 ? (
             <EmptyState
               title="Nu există documente generate"
-              label="Generează primul document din Rapoarte sau după ce confirmi un finding."
+              label="Generează primul document asistat — Privacy Policy, DPA sau Politică Internă."
               className="rounded-eos-xl border border-eos-border bg-eos-surface px-5 py-10"
+              actions={
+                <Button asChild size="sm">
+                  <Link href={dashboardRoutes.generator}>Mergi la Generator</Link>
+                </Button>
+              }
             />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">

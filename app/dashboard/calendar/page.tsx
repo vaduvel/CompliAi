@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { AlertTriangle, Calendar, CheckCircle2, Clock } from "lucide-react"
+import { AlertTriangle, Calendar, CheckCircle2, Clock, RefreshCw } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -118,17 +118,26 @@ function GroupSection({ group, events }: { group: CalendarEventGroup; events: Ca
   )
 }
 
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000 // 5 minute
+
 export default function CalendarPage() {
   const [data, setData] = useState<CalendarData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch("/api/dashboard/calendar")
       .then((r) => r.ok ? r.json() : null)
-      .then(setData)
+      .then((d) => { setData(d); setLastUpdated(new Date()) })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(fetchData, REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasEvents = data && data.total > 0
 
@@ -155,6 +164,17 @@ export default function CalendarPage() {
                 {data.thisWeekCount} săptămâna asta
               </Badge>
             ) : null}
+            {lastUpdated && (
+              <button
+                type="button"
+                onClick={fetchData}
+                className="inline-flex items-center gap-1 text-xs text-eos-text-muted hover:text-eos-text"
+                title="Actualizează manual"
+              >
+                <RefreshCw className="size-3" strokeWidth={2} />
+                {lastUpdated.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })}
+              </button>
+            )}
           </>
         }
       />

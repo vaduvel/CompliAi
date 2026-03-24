@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import Link from "next/link"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -158,6 +159,12 @@ export default function DsarPage() {
       <PageIntro
         title="DSAR — Cereri persoane vizate"
         description="Tracking cereri GDPR Art. 15-22. Deadline legal: 30 zile de la primire."
+        badges={
+          <Link href="/dashboard/calendar" className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline">
+            <CalendarPlus className="size-3.5" strokeWidth={2} />
+            Vezi Calendar deadline-uri
+          </Link>
+        }
       />
 
       {/* Summary badges */}
