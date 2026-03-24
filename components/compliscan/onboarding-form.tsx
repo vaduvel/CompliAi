@@ -152,8 +152,8 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-4 py-10">
-      <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-3 py-6 sm:px-4 sm:py-10">
+      <div className="mx-auto grid w-full max-w-6xl gap-4 sm:gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
         <div className="space-y-4">
           <div>
             <CompliScanLogoLockup

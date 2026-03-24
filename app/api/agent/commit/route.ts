@@ -210,12 +210,23 @@ export async function POST(request: NextRequest) {
       return state
     })
 
+    // S2.2: Agent OS hardening — persist run metadata for repeatability
+    const runId = `run-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+    const runLog = {
+      runId,
+      sourceId: bundle.sourceId,
+      committedAtISO: nowISO,
+      reviewState: bundle.reviewState,
+      systemsCount: bundle.intake?.proposedSystems.length || 0,
+      findingsCount: bundle.findings?.length || 0,
+      driftsCount: bundle.drifts?.length || 0,
+      evidencePersisted: true,
+    }
+
     return jsonWithRequestContext(
       {
         success: true,
-        systemsCount: bundle.intake?.proposedSystems.length || 0,
-        findingsCount: bundle.findings?.length || 0,
-        driftsCount: bundle.drifts?.length || 0,
+        ...runLog,
       },
       context
     )

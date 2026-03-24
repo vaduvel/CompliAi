@@ -97,7 +97,7 @@ export default function DashboardPage() {
   const isSolo = runtime?.userMode === "solo"
 
   return (
-    <div className="space-y-8" role="main" aria-labelledby="dashboard-title">
+    <div className="space-y-5 sm:space-y-8 pb-20 sm:pb-0" role="main" aria-labelledby="dashboard-title">
       <PageIntro
         eyebrow="Acasă"
         title={isSolo ? "Starea actuală a firmei tale" : "Starea actuala a conformitatii tale"}

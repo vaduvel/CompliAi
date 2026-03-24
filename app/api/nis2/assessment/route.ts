@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
-    const body = (await request.json()) as { sector: Nis2Sector; answers: Nis2Answers }
+    const body = (await request.json()) as { sector: Nis2Sector; answers: Nis2Answers; answersMeta?: Record<string, unknown> }
 
     if (!body.sector || !body.answers) {
       return jsonError("Câmpuri obligatorii: sector, answers.", 400, "MISSING_FIELDS")
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     await saveNis2Assessment(orgId, {
       sector: body.sector,
       answers: body.answers,
+      ...(body.answersMeta ? { answersMeta: body.answersMeta as import("@/lib/compliance/nis2-rules").Nis2AnswersMeta } : {}),
       savedAtISO: now,
       score: result.score,
       maturityLabel: result.maturityLabel,

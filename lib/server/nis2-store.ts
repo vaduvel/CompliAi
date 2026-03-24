@@ -2,7 +2,7 @@
 // Holds: assessment answers, incident log, vendor risk register
 // Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
-import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import type { Nis2Answers, Nis2AnswersMeta, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
 import type { EfacturaSupplierImportRecord } from "@/lib/server/efactura-vendor-signals"
 import { validateCUI } from "@/lib/server/request-validation"
@@ -140,6 +140,7 @@ export type Nis2Vendor = {
 export type Nis2AssessmentRecord = {
   sector: Nis2Sector
   answers: Nis2Answers
+  answersMeta?: Nis2AnswersMeta  // S2.1: per-answer source, confidence, confirmed
   savedAtISO: string
   score: number
   maturityLabel: string

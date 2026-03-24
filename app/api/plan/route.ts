@@ -7,6 +7,7 @@ import {
   requireFreshAuthenticatedSession,
   resolveUserMode,
 } from "@/lib/server/auth"
+import { deriveAccountState } from "@/lib/billing/account-state"
 import {
   getOrgPlan,
   getOrgPlanRecord,
@@ -38,10 +39,14 @@ export async function GET(request: Request) {
       legacyPartnerEnabled,
     })
 
+    const accountState = deriveAccountState(plan, record.trialEndsAtISO)
+
     return Response.json({
       plan,
       updatedAtISO: record.updatedAtISO,
       trialEndsAtISO: record.trialEndsAtISO ?? null,
+      accountState: accountState.state,
+      isReadOnly: accountState.isReadOnly,
       hasStripeCustomer: !!record.stripeCustomerId,
       hasActiveSubscription: !!record.stripeSubscriptionId,
       userMode: userMode ?? null,

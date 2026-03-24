@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { TrialBanner } from "@/components/compliscan/billing/trial-banner"
 import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
@@ -341,6 +342,7 @@ export function DashboardShell({
               />
             </div>
           ) : null}
+          <TrialBanner />
           <DashboardRuntimeProvider user={currentUser}>
             {children}
             <footer className="mt-12 pb-4">

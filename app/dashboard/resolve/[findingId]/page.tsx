@@ -147,11 +147,11 @@ export default function FindingDetailPage() {
   const totalSteps = RESOLUTION_STEPS.length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
       {/* Back nav */}
       <Link
         href={dashboardRoutes.resolve}
-        className="inline-flex items-center gap-1.5 text-sm text-eos-text-muted transition-colors hover:text-eos-text"
+        className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-eos-text-muted transition-colors hover:text-eos-text"
       >
         <ArrowLeft className="size-3.5" strokeWidth={2} />
         Înapoi la De rezolvat

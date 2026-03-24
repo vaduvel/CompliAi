@@ -78,9 +78,27 @@ const TRUST_DOCUMENTS = [
 ] as const
 
 const AI_SYSTEMS = [
-  "drafting asistat pentru politici si documente de conformitate",
-  "OCR si extractie asistata pentru documente incarcate",
-  "triaj de findings, sugestii de remediere si clasificare operationala",
+  {
+    name: "Document Generator (Gemini)",
+    purpose: "Drafting asistat pentru politici si documente de conformitate",
+    riskClass: "Limited risk — Art. 50 transparency",
+    humanOversight: "Obligatoriu: draft-ul necesita confirmare umana explicita inainte de utilizare",
+    dataUsed: "Text-ul din profilul organizatiei si findings-urile detectate",
+  },
+  {
+    name: "OCR / Vision Extractor",
+    purpose: "Extractie asistata din documente incarcate (PDF, imagini)",
+    riskClass: "Minimal risk",
+    humanOversight: "Rezultatele sunt prezentate utilizatorului pentru review, nu sunt aplicate automat",
+    dataUsed: "Fisierele incarcate de utilizator in cadrul scanarii",
+  },
+  {
+    name: "Agent OS (Finding Triage + Classification)",
+    purpose: "Triaj de findings, sugestii de remediere si clasificare operationala",
+    riskClass: "Limited risk — Art. 50 transparency",
+    humanOversight: "Toate propunerile Agent OS trec prin review uman obligatoriu (needs_review → confirmed)",
+    dataUsed: "Starea de conformitate a organizatiei, documente scanate, semnale detectate",
+  },
 ] as const
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -214,22 +232,45 @@ export default function TrustLandingPage() {
                 </Badge>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm font-medium text-eos-text">Sisteme AI folosite in produs</p>
-                <ul className="space-y-2 text-sm text-eos-text-muted">
-                  {AI_SYSTEMS.map((system) => (
-                    <li key={system} className="flex gap-2">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
-                      <span>{system}</span>
-                    </li>
-                  ))}
-                </ul>
+                {AI_SYSTEMS.map((system) => (
+                  <div
+                    key={system.name}
+                    className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3 space-y-1.5"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                      <p className="text-sm font-medium text-eos-text">{system.name}</p>
+                    </div>
+                    <p className="text-xs text-eos-text-muted">{system.purpose}</p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Badge variant="outline" className="text-[10px] normal-case tracking-normal">{system.riskClass}</Badge>
+                    </div>
+                    <p className="text-xs text-eos-text-muted"><span className="font-medium text-eos-text-secondary">Human oversight:</span> {system.humanOversight}</p>
+                    <p className="text-xs text-eos-text-muted"><span className="font-medium text-eos-text-secondary">Date folosite:</span> {system.dataUsed}</p>
+                  </div>
+                ))}
               </div>
 
               <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3 text-sm leading-6 text-eos-text-muted">
                 CompliScan este pozitionat operational ca sistem informativ si asistiv: propune, explica si
                 structureaza, dar nu trimite automat catre autoritati, nu semneaza documente si nu marcheaza
                 ireversibil conformitatea fara confirmare umana explicita.
+              </div>
+
+              <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3 space-y-2">
+                <p className="text-sm font-medium text-eos-text">CE Decision Gate</p>
+                <div className="flex items-center gap-2">
+                  <CeBadge mode="decision-gate" className="normal-case tracking-normal" />
+                </div>
+                <p className="text-xs leading-5 text-eos-text-muted">
+                  Clasificarea finala a CompliScan sub AI Act (Art. 50 limited risk vs. Annex III high-risk)
+                  depinde de analiza juridica asupra modului in care sistemele AI influenteaza deciziile
+                  utilizatorilor. Pana la validarea explicita de catre counsel, CompliScan opereaza sub
+                  prezumtia de <strong>limited risk cu obligatii de transparenta</strong> si nu revendica
+                  CE marking.
+                </p>
               </div>
 
               <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft/30 px-4 py-3 text-sm leading-6 text-eos-text-muted">

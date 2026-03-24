@@ -9,6 +9,37 @@ export type DnscDraftMetadata = {
   orgName: string
   orgProfile: Partial<OrgProfile> | null
   generatedAt?: string
+  // S3.2: enrichment fields from ANAF signals
+  anafAddress?: string
+  anafJudet?: string
+  anafCaen?: string
+  responsabilSecuritate?: string
+  emailResponsabil?: string
+  telefonResponsabil?: string
+}
+
+// S3.2: per-field help text + mandatory manual flags
+export type DnscFieldMeta = {
+  field: string
+  label: string
+  source: "auto" | "anaf" | "manual"
+  helpText: string
+  isMandatory: boolean
+  value?: string
+}
+
+export function getDnscFieldChecklist(meta: DnscDraftMetadata): DnscFieldMeta[] {
+  return [
+    { field: "orgName", label: "Denumire completă", source: meta.orgName ? "auto" : "manual", helpText: "Numele oficial al organizației din RECOM.", isMandatory: true, value: meta.orgName },
+    { field: "cui", label: "CUI / CIF", source: meta.orgProfile?.cui ? "auto" : "manual", helpText: "Codul unic de identificare fiscală al organizației.", isMandatory: true, value: meta.orgProfile?.cui },
+    { field: "sector", label: "Sector NIS2", source: meta.orgProfile?.sector ? "auto" : "manual", helpText: "Sectorul conform Anexa I/II din Directiva NIS2.", isMandatory: true, value: meta.orgProfile?.sector },
+    { field: "adresa", label: "Adresă sediu social", source: meta.anafAddress ? "anaf" : "manual", helpText: "Adresa completă a sediului social (stradă, nr, localitate).", isMandatory: true, value: meta.anafAddress },
+    { field: "judet", label: "Județ", source: meta.anafJudet ? "anaf" : "manual", helpText: "Județul în care se află sediul social.", isMandatory: true, value: meta.anafJudet },
+    { field: "caen", label: "Cod CAEN principal", source: meta.anafCaen ? "anaf" : "manual", helpText: "Codul CAEN al activității principale (ex: 6201 pentru IT).", isMandatory: true, value: meta.anafCaen },
+    { field: "responsabil", label: "Persoana responsabilă securitate", source: "manual", helpText: "Numele persoanei desemnate ca responsabil NIS2. Aceasta NU poate fi completată automat.", isMandatory: true, value: meta.responsabilSecuritate },
+    { field: "emailResp", label: "Email responsabil", source: "manual", helpText: "Email-ul de contact al responsabilului de securitate.", isMandatory: true, value: meta.emailResponsabil },
+    { field: "telefonResp", label: "Telefon responsabil", source: "manual", helpText: "Număr de telefon al responsabilului (format internațional +40...).", isMandatory: true, value: meta.telefonResponsabil },
+  ]
 }
 
 /**
@@ -52,9 +83,9 @@ export function buildDNSCNotificationDraft(meta: DnscDraftMetadata): string {
 | **CUI / CIF** | ${cui} |
 | **Sector de activitate NIS2** | ${sectorLabel} |
 | **Dimensiune** | ${sizeLabel} |
-| **Adresă sediu social** | [DE COMPLETAT] |
-| **Județ** | [DE COMPLETAT] |
-| **Cod CAEN principal** | [DE COMPLETAT] |
+| **Adresă sediu social** | ${meta.anafAddress ?? "[DE COMPLETAT — adresă sediu social]"} |
+| **Județ** | ${meta.anafJudet ?? "[DE COMPLETAT — județ]"} |
+| **Cod CAEN principal** | ${meta.anafCaen ?? "[DE COMPLETAT — cod CAEN]"} |
 
 ---
 

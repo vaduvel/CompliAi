@@ -117,6 +117,7 @@ function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
 function AssessmentTab({ orgName }: { orgName?: string }) {
   const [sector, setSector] = useState<Nis2Sector>("general")
   const [answers, setAnswers] = useState<Nis2Answers>({})
+  const [answersMeta, setAnswersMeta] = useState<Record<string, { source: string; confidence: string; userConfirmed: boolean }>>({})
   const [saving, setSaving] = useState(false)
   const [generatingIR, setGeneratingIR] = useState(false)
   const [savedRecord, setSavedRecord] = useState<Nis2AssessmentRecord | null>(null)
@@ -133,6 +134,7 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
           setSavedRecord(d.assessment)
           setSector(d.assessment.sector)
           setAnswers(d.assessment.answers)
+          if (d.assessment.answersMeta) setAnswersMeta(d.assessment.answersMeta)
         }
       })
       .catch(() => null)
@@ -194,7 +196,7 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
       const res = await fetch("/api/nis2/assessment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sector, answers }),
+        body: JSON.stringify({ sector, answers, answersMeta }),
       })
       const data = (await res.json()) as { result?: Nis2Result; error?: string }
       if (!res.ok) throw new Error(data.error ?? "Salvarea a eșuat.")
@@ -359,6 +361,20 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
                               {q.article}{q.dnscRef ? ` · ${q.dnscRef}` : ""}
                             </p>
                           </div>
+                          {answersMeta[q.id] && !answersMeta[q.id].userConfirmed && (
+                            <div className="mb-1 flex items-center gap-2">
+                              <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${answersMeta[q.id].confidence === "high" ? "bg-green-100 text-green-700" : answersMeta[q.id].confidence === "medium" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                                {answersMeta[q.id].source === "vendor_data" ? "Vendor" : answersMeta[q.id].source === "org_profile" ? "Profil org" : "Prefill"} · {answersMeta[q.id].confidence}
+                              </span>
+                              <button
+                                type="button"
+                                className="text-[9px] font-medium text-eos-primary hover:underline"
+                                onClick={() => setAnswersMeta((prev) => ({ ...prev, [q.id]: { ...prev[q.id], userConfirmed: true } }))}
+                              >
+                                Confirmă
+                              </button>
+                            </div>
+                          )}
                           <div className="flex flex-wrap gap-2">
                             {ANSWER_OPTIONS.map((opt) => {
                               const selected = ans === opt.value
@@ -366,9 +382,10 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
                                 <button
                                   key={opt.value}
                                   type="button"
-                                  onClick={() =>
+                                  onClick={() => {
                                     setAnswers((prev) => ({ ...prev, [q.id]: opt.value }))
-                                  }
+                                    setAnswersMeta((prev) => ({ ...prev, [q.id]: { source: "manual", confidence: "high", userConfirmed: true } }))
+                                  }}
                                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                                     selected
                                       ? opt.value === "yes"
