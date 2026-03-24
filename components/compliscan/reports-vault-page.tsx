@@ -547,7 +547,7 @@ function EvidenceLedgerCard({
               <>
                 {evidenceReadyTasks.length === 0 && (
                   <EmptyState
-                    title="Nu exista inca dovezi validate"
+                    title="Nu există încă dovezi validate"
                     label="Incepe din Remediere, ataseaza o dovada si ruleaza `Mark as fixed & rescan`, apoi revino aici."
                     className="rounded-eos-md py-8"
                   />
@@ -613,7 +613,7 @@ function EvidenceLedgerCard({
           <div className="mt-4 space-y-3">
             {evidenceMissingTasks.length === 0 && (
               <EmptyState
-                title="Nu exista gap-uri de dovada"
+                title="Nu există gap-uri de dovadă"
                 label="Toate task-urile deschise au deja dovada atasata sau validata in ultimul ciclu."
                 className="rounded-eos-md py-8"
               />
@@ -680,7 +680,7 @@ function LegalMatrixCard({
       <CardContent className="space-y-3 pt-6">
         {tasks.length === 0 && (
           <VaultEmptyState
-            title="Nu exista inca mapare legala"
+            title="Nu există încă mapare legală"
             description="Zona asta apare dupa ce findings-urile si remedierea au suficient context ca sa fie aparate in audit."
           />
         )}
@@ -747,7 +747,7 @@ function SnapshotAuditCard({
       <CardContent className="space-y-4 pt-6">
         {!latestSnapshot && (
           <VaultEmptyState
-            title="Nu exista inca snapshot pentru audit"
+            title="Nu există încă snapshot pentru audit"
             description="Ruleaza o scanare sau confirma un sistem, iar primul snapshot va aparea automat aici."
           />
         )}
@@ -777,7 +777,7 @@ function SnapshotAuditCard({
               <p className="mt-2 text-sm text-eos-text-muted">
                 {validatedBaseline
                   ? `${validatedBaseline.snapshotId} · ${formatRelativeRomanian(validatedBaseline.generatedAt)}`
-                  : "Nu exista baseline validat inca."}
+                  : "Nu există baseline validat încă."}
               </p>
             </div>
           </>
@@ -800,8 +800,8 @@ function DriftWatchCard({
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (
           <VaultEmptyState
-            title="Nu exista drift activ"
-            description="Nu exista drift activ fata de baseline sau snapshot-ul comparat. Dupa urmatorul review stabil poti valida baseline-ul nou."
+            title="Nu există drift activ"
+            description="Nu există drift activ fata de baseline sau snapshot-ul comparat. Dupa urmatorul review stabil poti valida baseline-ul nou."
           />
         )}
         {drifts.slice(0, 6).map((drift) => (
@@ -941,7 +941,7 @@ function ValidationLedgerCard({
       <CardContent className="space-y-3 pt-6">
         {entries.length === 0 && (
           <VaultEmptyState
-            title="Nu exista inca validari salvate"
+            title="Nu există încă validări salvate"
             description="Zona asta incepe sa se populeze dupa primul ciclu complet: atasezi dovada, rulezi rescan si apoi primesti validarea."
           />
         )}
@@ -1018,7 +1018,7 @@ function AuditTimelineCard({
       <CardContent className="space-y-3 pt-6">
         {events.length === 0 && (
           <VaultEmptyState
-            title="Nu exista inca evenimente de audit"
+            title="Nu există încă evenimente de audit"
             description="Primul review, primul rescan sau prima confirmare va deschide automat jurnalul de audit."
           />
         )}

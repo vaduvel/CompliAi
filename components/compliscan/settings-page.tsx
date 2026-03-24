@@ -102,6 +102,11 @@ const SettingsIntegrationsTab = dynamic(
   }
 )
 
+const OrgKnowledgePanelLazy = dynamic(
+  () => import("@/components/compliscan/org-knowledge-panel").then((m) => m.OrgKnowledgePanel),
+  { ssr: false }
+)
+
 const SettingsOperationalTab = dynamic(
   () =>
     import("@/components/compliscan/settings/settings-operational-tab").then(
@@ -770,6 +775,7 @@ export function SettingsPageSurface() {
         </TabsContent>
 
         <TabsContent value="operational" className="space-y-6">
+          <OrgKnowledgePanelLazy />
           <SettingsOperationalTab
             currentUserResolved={currentUserResolved}
             canViewReleaseReadiness={canViewReleaseReadiness}

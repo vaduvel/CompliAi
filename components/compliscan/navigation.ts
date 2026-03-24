@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  CalendarClock,
   FileSearch,
   Flag,
   FolderOpen,
@@ -20,6 +21,7 @@ export type DashboardNavId =
   | "home"
   | "scan"
   | "resolve"
+  | "calendar"
   | "reports"
   | "settings"
   | "portfolio-overview"
@@ -76,6 +78,14 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     description: "findings, drift și acțiuni",
   },
   {
+    id: "calendar",
+    label: "Calendar",
+    href: dashboardRoutes.calendar,
+    icon: CalendarClock,
+    matchers: [dashboardRoutes.calendar],
+    description: "deadlines DSAR, NIS2, Vendor",
+  },
+  {
     id: "reports",
     label: "Rapoarte",
     href: dashboardRoutes.reports,
@@ -117,6 +127,14 @@ export const soloNavItems: DashboardNavItem[] = [
     icon: Flag,
     matchers: [...dashboardRouteGroups.resolve],
     description: "finding-uri și task-uri",
+  },
+  {
+    id: "calendar",
+    label: "Calendar",
+    href: dashboardRoutes.calendar,
+    icon: CalendarClock,
+    matchers: [dashboardRoutes.calendar],
+    description: "deadlines DSAR, NIS2, Vendor",
   },
   {
     id: "documente",

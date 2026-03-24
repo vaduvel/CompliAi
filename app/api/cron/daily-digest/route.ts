@@ -10,10 +10,11 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { loadOrganizations } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
@@ -169,6 +170,18 @@ export async function POST(request: Request) {
         }
 
         const state = normalizeComplianceState(rawState)
+
+        // Multiplicator B: upsert/remove stale knowledge finding
+        const staleFinding = buildOrgKnowledgeStaleFinding(state.orgKnowledge, new Date().toISOString())
+        const findingsWithoutStale = state.findings.filter((f) => f.id !== "org-knowledge-stale")
+        if (staleFinding) {
+          state.findings = [...findingsWithoutStale, staleFinding]
+          await writeStateForOrg(org.id, state, org.name)
+        } else if (state.findings.some((f) => f.id === "org-knowledge-stale")) {
+          state.findings = findingsWithoutStale
+          await writeStateForOrg(org.id, state, org.name)
+        }
+
         const summary = computeDashboardSummary(state)
         const { scoreToday, delta } = await getScoreDelta(org.id)
 

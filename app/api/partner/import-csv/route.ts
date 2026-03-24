@@ -110,29 +110,42 @@ export async function POST(request: Request) {
       legacyPartnerEnabled: await hasLegacyPartnerOrgPlan(activeOrgIds),
     })
 
-    if (!partnerPlanStatus.planType || partnerPlanStatus.maxOrgs === null) {
-      throw new AuthzError(
-        "Ai nevoie de un plan Partner pe cont pentru a adăuga firme noi în portofoliu.",
-        403,
-        "PARTNER_PLAN_REQUIRED"
-      )
-    }
+    const TRIAL_LIMIT = 3
+    const isTrialMode = !partnerPlanStatus.planType || partnerPlanStatus.maxOrgs === null
 
-    const remainingSlots = Math.max(partnerPlanStatus.maxOrgs - partnerPlanStatus.currentOrgs, 0)
-    if (remainingSlots <= 0) {
-      throw new AuthzError(
-        `Ai atins limita planului ${partnerPlanStatus.planType}. Gestionează upgrade-ul din Setări cont.`,
-        403,
-        "PARTNER_PLAN_LIMIT_REACHED"
-      )
-    }
-
-    if (dataLines.length > remainingSlots) {
-      throw new AuthzError(
-        `Poți importa cel mult ${remainingSlots} firme în acest moment. Redu fișierul CSV sau fă upgrade din Setări cont.`,
-        403,
-        "PARTNER_PLAN_LIMIT_REACHED"
-      )
+    if (isTrialMode) {
+      // Trial: maxim 3 firme total, fără plan
+      if (activeOrgIds.length >= TRIAL_LIMIT) {
+        throw new AuthzError(
+          `Ai atins limita trial (${TRIAL_LIMIT} firme). Activează un plan Partner din Setări cont pentru a adăuga mai multe.`,
+          403,
+          "PARTNER_TRIAL_LIMIT_REACHED"
+        )
+      }
+      const trialSlotsLeft = TRIAL_LIMIT - activeOrgIds.length
+      if (dataLines.length > trialSlotsLeft) {
+        throw new AuthzError(
+          `În modul trial poți adăuga cel mult ${trialSlotsLeft} firm${trialSlotsLeft === 1 ? "ă" : "e"} acum. Activează un plan Partner pentru mai multe.`,
+          403,
+          "PARTNER_TRIAL_LIMIT_REACHED"
+        )
+      }
+    } else {
+      const remainingSlots = Math.max(partnerPlanStatus.maxOrgs! - partnerPlanStatus.currentOrgs, 0)
+      if (remainingSlots <= 0) {
+        throw new AuthzError(
+          `Ai atins limita planului ${partnerPlanStatus.planType}. Gestionează upgrade-ul din Setări cont.`,
+          403,
+          "PARTNER_PLAN_LIMIT_REACHED"
+        )
+      }
+      if (dataLines.length > remainingSlots) {
+        throw new AuthzError(
+          `Poți importa cel mult ${remainingSlots} firme în acest moment. Redu fișierul CSV sau fă upgrade din Setări cont.`,
+          403,
+          "PARTNER_PLAN_LIMIT_REACHED"
+        )
+      }
     }
 
     const results: ImportRowResult[] = []
@@ -221,6 +234,7 @@ export async function POST(request: Request) {
       imported,
       errors: errors.map((e) => (!e.ok ? e.error : "")),
       total: results.length,
+      trialMode: isTrialMode,
       message:
         errors.length === 0
           ? `${imported} clienți importați cu succes.`

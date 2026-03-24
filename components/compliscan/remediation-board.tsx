@@ -30,7 +30,7 @@ const filters: Array<{ value: FilterValue; label: string }> = [
   { value: "L1", label: "L1 · Auto-validat" },
   { value: "L2", label: "L2 · Confirmare internă" },
   { value: "L3", label: "L3 · Validare specialist" },
-  { value: "DONE", label: "Inchise" },
+  { value: "DONE", label: "Închise" },
 ]
 
 const filterGroups: Array<{ label: string; values: FilterValue[] }> = [

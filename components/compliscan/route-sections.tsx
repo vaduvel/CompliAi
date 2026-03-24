@@ -711,7 +711,7 @@ export function LatestDocumentSection({
                   {latestScanTasks.length === 0 && (
                     <EmptyState
                       title="Fara task-uri derivate"
-                      label="Nu exista task-uri derivate direct din acest document."
+                      label="Nu există task-uri derivate direct din acest document."
                       className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                     />
                   )}
@@ -779,8 +779,8 @@ export function RecentScansCard({
       <CardContent className="space-y-4 pt-6">
         {scans.length === 0 && (
           <EmptyState
-            title="Nu exista surse scanate inca"
-            label="Mergi la Scanari pentru a adauga primul document sau primul manifest."
+            title="Nu există surse scanate încă"
+            label="Mergi la Scanează pentru a adăuga primul document sau primul manifest."
             className="border-eos-border bg-eos-surface-variant py-8"
             actions={
               <Button asChild variant="default">

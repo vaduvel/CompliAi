@@ -1448,10 +1448,10 @@ function formatTaskStatusFeedback(feedback?: TaskUpdateFeedback) {
     impactLabels.push(
       alertCount === 1
         ? feedback.status === "done"
-          ? "1 semnal inchis automat"
+          ? "1 semnal închis automat"
           : "1 semnal redeschis"
         : feedback.status === "done"
-          ? `${alertCount} semnale inchise automat`
+          ? `${alertCount} semnale închise automat`
           : `${alertCount} semnale redeschise`
     )
   }
@@ -1460,10 +1460,10 @@ function formatTaskStatusFeedback(feedback?: TaskUpdateFeedback) {
     impactLabels.push(
       driftCount === 1
         ? feedback.status === "done"
-          ? "1 drift inchis automat"
+          ? "1 drift închis automat"
           : "1 drift redeschis"
         : feedback.status === "done"
-          ? `${driftCount} drift-uri inchise automat`
+          ? `${driftCount} drift-uri închise automat`
           : `${driftCount} drift-uri redeschise`
     )
   }
@@ -1485,6 +1485,6 @@ function formatTaskStatusFeedback(feedback?: TaskUpdateFeedback) {
     return `${scoreDeltaLabel}.`
   }
   return feedback.status === "done"
-    ? "Task-ul este inchis, fara impact imediat in scor."
+    ? "Task-ul este închis, fără impact imediat în scor."
     : "Task-ul a fost redeschis."
 }
