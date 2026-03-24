@@ -19,6 +19,16 @@ export type Nis2Answer = "yes" | "partial" | "no" | "na"
 
 export type Nis2Answers = Record<string, Nis2Answer>
 
+// S2.1: Per-answer metadata for prefill with confidence
+export type Nis2AnswerMeta = {
+  source: "manual" | "vendor_data" | "org_profile" | "evidence_vault" | "ai_prefill"
+  confidence: "low" | "medium" | "high"
+  userConfirmed: boolean
+  reason?: string  // why this answer was prefilled
+}
+
+export type Nis2AnswersMeta = Record<string, Nis2AnswerMeta>
+
 export type Nis2Question = {
   id: string
   text: string

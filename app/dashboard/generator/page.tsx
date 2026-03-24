@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Clipboard, ClipboardCheck, Download, FileText, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
@@ -15,6 +16,7 @@ import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 // ── Input field + textarea helpers ────────────────────────────────────────────
 
@@ -35,6 +37,55 @@ const inputClass =
 
 const textareaClass =
   "ring-focus w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
+
+type GeneratedDocumentResponse = GeneratedDocument & {
+  recordId?: string
+  sourceFindingId?: string | null
+}
+
+type FindingGeneratorContext = {
+  finding: {
+    id: string
+    title: string
+    detail: string
+    findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
+    suggestedDocumentType?: string
+    readyTextLabel?: string
+    readyText?: string
+    remediationHint?: string
+    sourceDocument?: string
+  }
+  linkedGeneratedDocument?: {
+    id: string
+    documentType: DocumentType
+    title: string
+    content?: string
+    generatedAtISO: string
+    llmUsed: boolean
+    approvalStatus?: "draft" | "approved_as_evidence"
+    expiresAtISO?: string
+    nextReviewDateISO?: string
+  } | null
+  documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+}
+
+const FINDING_CONFIRMATION_ITEMS = [
+  {
+    id: "content-reviewed",
+    label: "Am citit draftul integral",
+    hint: "nu închid finding-ul pe baza unui document neverificat",
+  },
+  {
+    id: "facts-confirmed",
+    label: "Datele reflectă firma reală",
+    hint: "am verificat scopurile, furnizorii și particularitățile organizației",
+  },
+  {
+    id: "approved-for-evidence",
+    label: "Îl aprob ca dovadă de conformitate",
+    hint: "îmi asum că poate fi prezentat mai departe în fluxul real",
+  },
+] as const
 
 // ── Document type card ─────────────────────────────────────────────────────────
 
@@ -150,10 +201,30 @@ function DocumentPreview({ content }: { content: string }) {
   )
 }
 
+function FlowStep({ label, hint, active = false }: { label: string; hint: string; active?: boolean }) {
+  return (
+    <div
+      className={[
+        "rounded-eos-md border px-3 py-3",
+        active
+          ? "border-eos-primary/30 bg-eos-primary/10"
+          : "border-eos-border bg-eos-surface",
+      ].join(" ")}
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-eos-text-muted">{label}</p>
+      <p className="mt-1 text-xs text-eos-text-muted">{hint}</p>
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function GeneratorPage() {
   const cockpit = useCockpitData()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const findingId = searchParams.get("findingId")
+  const requestedDocumentType = searchParams.get("documentType")
 
   const [selectedType, setSelectedType] = useState<DocumentType>("privacy-policy")
   const [orgName, setOrgName] = useState("")
@@ -163,11 +234,17 @@ export default function GeneratorPage() {
   const [dpoEmail, setDpoEmail] = useState("")
   const [dataFlows, setDataFlows] = useState("")
   const [generating, setGenerating] = useState(false)
-  const [result, setResult] = useState<GeneratedDocument | null>(null)
+  const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
   const [copied, setCopied] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
+  const [findingContext, setFindingContext] = useState<FindingGeneratorContext | null>(null)
+  const [findingContextLoading, setFindingContextLoading] = useState(false)
+  const [attaching, setAttaching] = useState(false)
+  const [confirmationChecklist, setConfirmationChecklist] = useState<string[]>([])
+  const [evidenceNote, setEvidenceNote] = useState("")
   const { track } = useTrackEvent()
   const downloadedRef = useRef(false)
+  const findingFlowActive = Boolean(findingId && findingContext?.finding)
 
   // Stuck event: doc generated but never downloaded
   useEffect(() => {
@@ -191,6 +268,76 @@ export default function GeneratorPage() {
       if (!orgCui && profile.cui) setOrgCui(profile.cui)
     }
   }, [cockpit.data]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!requestedDocumentType) return
+    if (DOCUMENT_TYPES.some((document) => document.id === requestedDocumentType)) {
+      setSelectedType(requestedDocumentType as DocumentType)
+    }
+  }, [requestedDocumentType])
+
+  useEffect(() => {
+    if (!findingId) {
+      setFindingContext(null)
+      return
+    }
+
+    let cancelled = false
+    setFindingContextLoading(true)
+
+    fetch(`/api/findings/${encodeURIComponent(findingId)}`, { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu am putut încărca finding-ul.")
+        return res.json()
+      })
+      .then((payload: FindingGeneratorContext) => {
+        if (cancelled) return
+        setFindingContext(payload)
+        if (
+          payload.finding.suggestedDocumentType &&
+          DOCUMENT_TYPES.some((document) => document.id === payload.finding.suggestedDocumentType)
+        ) {
+          setSelectedType(payload.finding.suggestedDocumentType as DocumentType)
+        }
+        setDataFlows((current) =>
+          current ||
+          payload.finding.readyText ||
+          payload.finding.remediationHint ||
+          payload.finding.detail
+        )
+        if (
+          payload.linkedGeneratedDocument?.content &&
+          payload.linkedGeneratedDocument.approvalStatus !== "approved_as_evidence"
+        ) {
+          setResult({
+            recordId: payload.linkedGeneratedDocument.id,
+            sourceFindingId: payload.finding.id,
+            documentType: payload.linkedGeneratedDocument.documentType,
+            title: payload.linkedGeneratedDocument.title,
+            content: payload.linkedGeneratedDocument.content,
+            generatedAtISO: payload.linkedGeneratedDocument.generatedAtISO,
+            llmUsed: payload.linkedGeneratedDocument.llmUsed,
+            expiresAtISO: payload.linkedGeneratedDocument.expiresAtISO ?? payload.linkedGeneratedDocument.generatedAtISO,
+            nextReviewDateISO:
+              payload.linkedGeneratedDocument.nextReviewDateISO ?? payload.linkedGeneratedDocument.generatedAtISO,
+          })
+        }
+      })
+      .catch((err: Error) => {
+        if (!cancelled) {
+          toast.error("Nu am putut porni flow-ul ghidat.", {
+            description: err.message,
+          })
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setFindingContextLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [findingId])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -228,6 +375,8 @@ export default function GeneratorPage() {
 
     setGenerating(true)
     setResult(null)
+    setConfirmationChecklist([])
+    setEvidenceNote("")
 
     try {
       const res = await fetch("/api/documents/generate", {
@@ -241,6 +390,7 @@ export default function GeneratorPage() {
           orgCui: orgCui || undefined,
           dpoEmail: dpoEmail || undefined,
           dataFlows: dataFlows || undefined,
+          sourceFindingId: findingId || undefined,
         }),
       })
 
@@ -249,8 +399,29 @@ export default function GeneratorPage() {
         throw new Error(payload.error ?? "Generarea a eșuat.")
       }
 
-      const doc = (await res.json()) as GeneratedDocument
+      const doc = (await res.json()) as GeneratedDocumentResponse
       setResult(doc)
+      if (findingId) {
+        setFindingContext((current) =>
+          current
+            ? {
+                ...current,
+                linkedGeneratedDocument: {
+                  id: doc.recordId ?? `generated-${doc.generatedAtISO}`,
+                  documentType: doc.documentType,
+                  title: doc.title,
+                  content: doc.content,
+                  generatedAtISO: doc.generatedAtISO,
+                  llmUsed: doc.llmUsed,
+                  approvalStatus: "draft",
+                  expiresAtISO: doc.expiresAtISO,
+                  nextReviewDateISO: doc.nextReviewDateISO,
+                },
+                documentFlowState: "draft_ready",
+              }
+            : current
+        )
+      }
       toast.success(`${doc.title} generat`)
     } catch (err) {
       toast.error("Eroare la generare", {
@@ -258,6 +429,49 @@ export default function GeneratorPage() {
       })
     } finally {
       setGenerating(false)
+    }
+  }
+
+  function toggleConfirmationItem(itemId: string) {
+    setConfirmationChecklist((current) =>
+      current.includes(itemId)
+        ? current.filter((value) => value !== itemId)
+        : [...current, itemId]
+    )
+  }
+
+  async function handleAttachAsEvidence() {
+    if (!findingId || !result?.recordId) return
+
+    setAttaching(true)
+    try {
+      const res = await fetch(`/api/findings/${encodeURIComponent(findingId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          generatedDocumentId: result.recordId,
+          confirmationChecklist,
+          evidenceNote: evidenceNote || undefined,
+        }),
+      })
+
+      const payload = (await res.json()) as { error?: string; feedbackMessage?: string }
+      if (!res.ok) {
+        throw new Error(payload.error ?? "Nu am putut atașa draftul ca dovadă.")
+      }
+
+      toast.success("Draft aprobat și atașat ca dovadă.", {
+        description: payload.feedbackMessage,
+      })
+      router.replace(`${dashboardRoutes.resolve}/${encodeURIComponent(findingId)}`)
+      router.refresh()
+    } catch (err) {
+      toast.error("Nu am putut închide flow-ul.", {
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
+      })
+    } finally {
+      setAttaching(false)
     }
   }
 
@@ -304,26 +518,92 @@ export default function GeneratorPage() {
   }
 
   const selectedDocMeta = DOCUMENT_TYPES.find((d) => d.id === selectedType)
+  const isChecklistComplete = FINDING_CONFIRMATION_ITEMS.every((item) =>
+    confirmationChecklist.includes(item.id)
+  )
+  const visibleDocumentTypes =
+    findingFlowActive && findingContext?.finding.suggestedDocumentType
+      ? DOCUMENT_TYPES.filter((document) => document.id === findingContext.finding.suggestedDocumentType)
+      : DOCUMENT_TYPES
 
   return (
     <div className="space-y-6">
       <PageIntro
-        eyebrow="Documente asistate"
-        title="Creezi drafturi de politici și proceduri"
-        description="Aici generezi drafturi asistate pentru politici și proceduri. Validarea umană, publicarea și atașarea dovezilor rămân pași separați."
+        eyebrow={findingFlowActive ? "Flow finding -> document -> dovadă" : "Documente asistate"}
+        title={
+          findingFlowActive
+            ? "Verifici draftul și îl atașezi ca dovadă"
+            : "Creezi drafturi de politici și proceduri"
+        }
+        description={
+          findingFlowActive
+            ? "Rămâi în flow-ul ghidat al finding-ului. Generezi draftul, îl verifici, confirmi că reflectă realitatea firmei și abia apoi îl atașezi ca dovadă."
+            : "Aici generezi drafturi asistate pentru politici și proceduri. Validarea umană, publicarea și atașarea dovezilor rămân pași separați."
+        }
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              draft asistat
+              {findingFlowActive ? "flow ghidat" : "draft asistat"}
             </Badge>
-            <Badge variant="success" dot className="normal-case tracking-normal">
-              Privacy Policy gratuit
-            </Badge>
+            {findingFlowActive ? (
+              <Badge variant="warning" dot className="normal-case tracking-normal">
+                confirmare obligatorie
+              </Badge>
+            ) : (
+              <Badge variant="success" dot className="normal-case tracking-normal">
+                Privacy Policy gratuit
+              </Badge>
+            )}
           </>
         }
       />
 
-      <PillarTabs sectionId="politici" />
+      {!findingFlowActive ? <PillarTabs sectionId="politici" /> : null}
+
+      {findingFlowActive ? (
+        <Card className="border-eos-primary/30 bg-eos-primary/5">
+          <CardContent className="space-y-3 pt-5">
+            {findingContextLoading ? (
+              <div className="flex items-center gap-2 text-sm text-eos-text-muted">
+                <Loader2 className="size-4 animate-spin" />
+                Încărcăm contextul finding-ului...
+              </div>
+            ) : findingContext ? (
+              <>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{findingContext.finding.title}</p>
+                    <p className="mt-1 text-sm text-eos-text-muted">{findingContext.finding.detail}</p>
+                  </div>
+                  <Badge variant="outline" className="normal-case tracking-normal">
+                    {findingContext.documentFlowState === "draft_ready"
+                      ? "draft gata de review"
+                      : findingContext.documentFlowState === "attached_as_evidence"
+                        ? "dovadă atașată"
+                        : "draft necesar"}
+                  </Badge>
+                </div>
+                <div className="grid gap-2 md:grid-cols-4">
+                  <FlowStep label="1. Draft" hint="generezi documentul sugerat" active />
+                  <FlowStep label="2. Preview" hint="citești draftul cap-coadă" active={Boolean(result)} />
+                  <FlowStep label="3. Confirmare" hint="bifezi checklist-ul obligatoriu" active={isChecklistComplete} />
+                  <FlowStep
+                    label="4. Dovadă"
+                    hint="atașezi draftul și închizi finding-ul"
+                    active={findingContext.documentFlowState === "attached_as_evidence"}
+                  />
+                </div>
+                {findingContext.linkedGeneratedDocument ? (
+                  <p className="text-xs text-eos-text-muted">
+                    Ultimul draft legat de acest finding: <span className="font-medium text-eos-text">{findingContext.linkedGeneratedDocument.title}</span>{" "}
+                    · {new Date(findingContext.linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         {/* ── Left: form ── */}
@@ -334,7 +614,7 @@ export default function GeneratorPage() {
               <CardTitle className="text-sm">Tip document</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2 pt-0">
-              {DOCUMENT_TYPES.map((doc) => (
+              {visibleDocumentTypes.map((doc) => (
                 <DocumentTypeCard
                   key={doc.id}
                   doc={doc}
@@ -342,6 +622,11 @@ export default function GeneratorPage() {
                   onSelect={() => setSelectedType(doc.id)}
                 />
               ))}
+              {findingFlowActive ? (
+                <p className="text-xs text-eos-text-muted">
+                  În flow-ul din finding păstrăm doar documentul recomandat, ca să nu rupi traseul.
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -350,7 +635,9 @@ export default function GeneratorPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm">Date organizație</CardTitle>
-                <span className="text-xs text-eos-text-muted">Pre-completat din profilul tău</span>
+                <span className="text-xs text-eos-text-muted">
+                  {findingFlowActive ? "Confirmi contextul înainte de aprobare" : "Pre-completat din profilul tău"}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4 pt-0">
@@ -503,7 +790,80 @@ export default function GeneratorPage() {
                   <DocumentPreview content={result.content} />
                 </CardContent>
               </Card>
-              <FeedbackPrompt context="after_document" />
+              {findingFlowActive ? (
+                <Card className="border-eos-warning-border bg-eos-warning-soft/40">
+                  <CardContent className="space-y-4 pt-5">
+                    <div>
+                      <p className="text-sm font-semibold text-eos-text">
+                        Confirmare activă înainte de atașare
+                      </p>
+                      <p className="mt-1 text-sm text-eos-text-muted">
+                        Acest finding nu poate fi închis până când nu confirmi explicit că draftul reflectă
+                        realitatea firmei și îl aprobi ca dovadă.
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {FINDING_CONFIRMATION_ITEMS.map((item) => {
+                        const checked = confirmationChecklist.includes(item.id)
+                        return (
+                          <label
+                            key={item.id}
+                            className={[
+                              "flex cursor-pointer items-start gap-3 rounded-eos-md border px-3 py-3",
+                              checked
+                                ? "border-eos-primary/30 bg-eos-primary/10"
+                                : "border-eos-border bg-eos-surface",
+                            ].join(" ")}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleConfirmationItem(item.id)}
+                              className="mt-0.5"
+                            />
+                            <span className="min-w-0">
+                              <span className="block text-sm font-medium text-eos-text">{item.label}</span>
+                              <span className="mt-1 block text-xs text-eos-text-muted">{item.hint}</span>
+                            </span>
+                          </label>
+                        )
+                      })}
+                    </div>
+
+                    <Field label="Notă de confirmare / dovadă">
+                      <textarea
+                        value={evidenceNote}
+                        onChange={(e) => setEvidenceNote(e.target.value)}
+                        rows={3}
+                        placeholder="Ex: am verificat scopurile, categoriile de date și furnizorii menționați; draftul poate fi folosit ca dovadă internă."
+                        className={textareaClass}
+                      />
+                    </Field>
+
+                    <Button
+                      size="lg"
+                      className="w-full gap-2"
+                      disabled={!result.recordId || !isChecklistComplete || attaching}
+                      onClick={() => void handleAttachAsEvidence()}
+                    >
+                      {attaching ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          Se atașează...
+                        </>
+                      ) : (
+                        <>
+                          Aprobă și atașează ca dovadă
+                          <Sparkles className="size-4" />
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <FeedbackPrompt context="after_document" />
+              )}
             </>
           ) : (
             <Card className="border-eos-border bg-eos-surface">

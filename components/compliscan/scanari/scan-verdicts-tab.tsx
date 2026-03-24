@@ -265,7 +265,16 @@ function LatestYamlSection({
                     />
                   )}
                   {findings.map((finding) => (
-                    <DenseListItem key={finding.id} className="bg-eos-bg-inset">
+                    <DenseListItem
+                      key={finding.id}
+                      className={`bg-eos-bg-inset border-l-4 ${
+                        finding.severity === "critical" || finding.severity === "high"
+                          ? "border-l-eos-error"
+                          : finding.severity === "medium"
+                            ? "border-l-eos-warning"
+                            : "border-l-eos-success"
+                      }`}
+                    >
                       <div className="p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>

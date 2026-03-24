@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto"
+
 import {
   appendComplianceEvents,
   createComplianceEvent,
@@ -36,6 +38,10 @@ export type ExtractionResult = {
   ocrUsed: boolean
   ocrWarning: string | null
   extractedTextPreview: string
+}
+
+function computeRepeatableRunHash(documentName: string, content: string): string {
+  return createHash("sha256").update(`${documentName}\n${content}`).digest("hex").slice(0, 16)
 }
 
 const MAX_DOCUMENT_NAME_LENGTH = 180
@@ -193,6 +199,8 @@ export async function createExtractedScan(
     extractionStatus: extracted.ocrUsed ? "needs_review" : "completed",
     analysisStatus: "pending",
     reviewRequired: extracted.ocrUsed,
+    repeatableRunHash: computeRepeatableRunHash(extracted.documentName, extracted.finalContent),
+    baselineSnapshotId: current.validatedBaselineSnapshotId,
   })
 
   const nextState = {

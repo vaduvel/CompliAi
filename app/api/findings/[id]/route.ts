@@ -1,16 +1,17 @@
 // GET /api/findings/[id]  — Returns a single ScanFinding
 // PATCH /api/findings/[id] — Update finding status (confirm/dismiss/resolve)
 //   B2: Auto-generates task candidate on confirmation
-//   B3: Auto-triggers document generation when confirmed + suggestedDocumentType
+//   B3: Document flow must be explicitly reviewed and attached before resolve
 
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
+import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readState, writeState } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
-import { generateDocument } from "@/lib/server/document-generator"
+import type { FindingResolution } from "@/lib/compliance/types"
 import type { DocumentType } from "@/lib/server/document-generator"
 
 const VALID_DOC_TYPES: DocumentType[] = [
@@ -20,6 +21,25 @@ const VALID_DOC_TYPES: DocumentType[] = [
   "nis2-incident-response",
   "ai-governance",
 ]
+
+const REQUIRED_CONFIRMATION_CHECKLIST = [
+  "content-reviewed",
+  "facts-confirmed",
+  "approved-for-evidence",
+] as const
+
+type FindingFlowState =
+  | "not_required"
+  | "draft_missing"
+  | "draft_ready"
+  | "attached_as_evidence"
+
+type FindingPatchBody = {
+  status?: string
+  generatedDocumentId?: string
+  confirmationChecklist?: string[]
+  evidenceNote?: string
+}
 
 export async function GET(
   _request: Request,
@@ -34,7 +54,16 @@ export async function GET(
       return jsonError("Finding inexistent.", 404, "NOT_FOUND")
     }
 
-    return NextResponse.json({ finding })
+    const linkedGeneratedDocument =
+      [...(state.generatedDocuments ?? [])]
+        .filter((document) => document.sourceFindingId === id)
+        .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
+
+    return NextResponse.json({
+      finding,
+      linkedGeneratedDocument,
+      documentFlowState: getDocumentFlowState(finding.suggestedDocumentType, linkedGeneratedDocument?.approvalStatus),
+    })
   } catch {
     return jsonError("Eroare la citirea finding-ului.", 500)
   }
@@ -46,7 +75,12 @@ export async function PATCH(
 ) {
   try {
     const { id: findingId } = await params
-    const { orgId, orgName } = await getOrgContext()
+    const session = await readFreshSessionFromRequest(request)
+    if (!session) {
+      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    }
+
+    const { orgId } = await getOrgContext()
     const state = await readState()
 
     const findingIdx = state.findings.findIndex((f) => f.id === findingId)
@@ -54,7 +88,7 @@ export async function PATCH(
       return jsonError("Finding-ul nu a fost găsit.", 404, "FINDING_NOT_FOUND")
     }
 
-    const body = (await request.json()) as { status?: string }
+    const body = (await request.json()) as FindingPatchBody
     const newStatus = body.status
 
     if (!newStatus || !["confirmed", "dismissed", "resolved"].includes(newStatus)) {
@@ -66,6 +100,10 @@ export async function PATCH(
     }
 
     const finding = state.findings[findingIdx]
+    const linkedGeneratedDocument =
+      [...(state.generatedDocuments ?? [])]
+        .filter((document) => document.sourceFindingId === findingId)
+        .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
 
     // Update finding status (B2)
     const updatedFinding = {
@@ -75,8 +113,6 @@ export async function PATCH(
     }
 
     const updatedFindings = [...state.findings]
-    updatedFindings[findingIdx] = updatedFinding
-    const updatedState = { ...state, findings: updatedFindings }
     let taskCandidateSummary: {
       id: string
       title: string
@@ -85,7 +121,7 @@ export async function PATCH(
       evidenceNeeded: string
       documentTrigger: string | null
     } | null = null
-    let documentGenerationTriggered = false
+    const generatedDocuments = [...(state.generatedDocuments ?? [])]
     let feedbackMessage =
       newStatus === "dismissed"
         ? "Finding respins. A rămas disponibil pentru audit, dar nu mai intră în fluxul activ."
@@ -113,52 +149,115 @@ export async function PATCH(
         linkTo: "/dashboard/resolve",
       }).catch(() => {})
 
-      // B3: Auto-trigger document generation if suggestedDocumentType
       if (finding.suggestedDocumentType) {
         const docType = finding.suggestedDocumentType as DocumentType
         if (VALID_DOC_TYPES.includes(docType)) {
-          documentGenerationTriggered = true
-          feedbackMessage += ` Draftul ${docType} se generează în fundal.`
-          // Fire-and-forget — don't block the response
-          generateDocument({ documentType: docType, orgName })
-            .then(async (doc) => {
-              if (!doc) return
-
-              const currentState = await readState()
-              const generatedDocuments = currentState.generatedDocuments ?? []
-              const docRecord = {
-                id: `doc-${Math.random().toString(36).slice(2, 10)}`,
-                documentType: doc.documentType,
-                title: doc.title,
-                generatedAtISO: new Date().toISOString(),
-                llmUsed: true,
-              }
-
-              await writeState({
-                ...currentState,
-                generatedDocuments: [docRecord, ...generatedDocuments].slice(0, 50),
-              })
-
-              await createNotification(orgId, {
-                type: "info",
-                title: "Draft document generat",
-                message: `${doc.title} generat ca draft pentru "${finding.title}". Verifică și semnează.`,
-                linkTo: "/dashboard/resolve",
-              }).catch(() => {})
-            })
-            .catch((err) => console.error("[B3] Document auto-generate failed:", err))
+          feedbackMessage += ` Deschide flow-ul ghidat pentru ${docType}, verifică draftul și atașează-l ca dovadă înainte de închidere.`
         }
       }
+    }
+
+    if (newStatus === "resolved" && finding.suggestedDocumentType) {
+      const confirmationChecklist = normalizeConfirmationChecklist(body.confirmationChecklist)
+      const generatedDocumentId = body.generatedDocumentId?.trim()
+
+      if (!generatedDocumentId) {
+        return jsonError(
+          "Pentru acest finding trebuie să aprobi și să atașezi draftul generat înainte de închidere.",
+          400,
+          "DOCUMENT_APPROVAL_REQUIRED"
+        )
+      }
+
+      if (!hasRequiredConfirmation(confirmationChecklist)) {
+        return jsonError(
+          "Confirmarea este incompletă. Bifează review-ul, verificarea faptelor și aprobarea ca dovadă.",
+          400,
+          "DOCUMENT_CONFIRMATION_INCOMPLETE"
+        )
+      }
+
+      const documentIndex = generatedDocuments.findIndex(
+        (document) => document.id === generatedDocumentId && document.sourceFindingId === findingId
+      )
+
+      if (documentIndex === -1) {
+        return jsonError(
+          "Draftul selectat nu aparține acestui finding.",
+          400,
+          "DOCUMENT_NOT_LINKED_TO_FINDING"
+        )
+      }
+
+      const approvedDocument = {
+        ...generatedDocuments[documentIndex],
+        approvalStatus: "approved_as_evidence" as const,
+        approvedAtISO: new Date().toISOString(),
+        approvedByUserId: session.userId,
+        approvedByEmail: session.email,
+        confirmationChecklist,
+        evidenceNote: body.evidenceNote?.trim() || undefined,
+      }
+      const nextResolution: FindingResolution = {
+        problem:
+          finding.resolution?.problem ??
+          finding.detail,
+        impact:
+          finding.resolution?.impact ??
+          finding.impactSummary ??
+          "Riscul rămâne deschis până când documentul și confirmarea sunt finalizate explicit.",
+        action:
+          finding.resolution?.action ??
+          finding.remediationHint ??
+          "Generează documentul recomandat, verifică-l cap-coadă și aprobă-l explicit ca dovadă.",
+        generatedAsset:
+          finding.resolution?.generatedAsset ??
+          `${approvedDocument.title} pregătit ca draft verificat`,
+        humanStep:
+          body.evidenceNote?.trim() ||
+          finding.resolution?.humanStep ||
+          "Ai confirmat manual că documentul reflectă realitatea firmei înainte de a-l folosi ca dovadă.",
+        closureEvidence:
+          body.evidenceNote?.trim() ||
+          `Draft aprobat și atașat ca dovadă: ${approvedDocument.title}.`,
+        revalidation: finding.resolution?.revalidation,
+      }
+
+      generatedDocuments[documentIndex] = approvedDocument
+      updatedFindings[findingIdx] = {
+        ...updatedFinding,
+        resolution: nextResolution,
+      }
+      feedbackMessage =
+        "Draftul a fost verificat, aprobat și atașat ca dovadă. Finding-ul a fost închis cu confirmare explicită."
+    }
+
+    if (newStatus !== "resolved" || !finding.suggestedDocumentType) {
+      updatedFindings[findingIdx] = updatedFinding
+    }
+
+    const updatedState = {
+      ...state,
+      findings: updatedFindings,
+      generatedDocuments,
     }
 
     await writeState(updatedState)
 
     return NextResponse.json({
       ok: true,
+      finding: updatedFindings[findingIdx],
       findingId,
       status: newStatus,
       taskCandidate: taskCandidateSummary,
-      documentGenerationTriggered,
+      linkedGeneratedDocument:
+        newStatus === "resolved" && body.generatedDocumentId
+          ? generatedDocuments.find((document) => document.id === body.generatedDocumentId) ?? linkedGeneratedDocument
+          : linkedGeneratedDocument,
+      documentFlowState: getDocumentFlowState(
+        finding.suggestedDocumentType,
+        generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus
+      ),
       suggestedDocumentType: finding.suggestedDocumentType ?? null,
       feedbackMessage,
     })
@@ -169,4 +268,22 @@ export async function PATCH(
       "FINDING_UPDATE_FAILED"
     )
   }
+}
+
+function normalizeConfirmationChecklist(values: string[] | undefined) {
+  return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)))
+}
+
+function hasRequiredConfirmation(values: string[]) {
+  return REQUIRED_CONFIRMATION_CHECKLIST.every((value) => values.includes(value))
+}
+
+function getDocumentFlowState(
+  suggestedDocumentType: string | undefined,
+  approvalStatus: "draft" | "approved_as_evidence" | undefined
+): FindingFlowState {
+  if (!suggestedDocumentType) return "not_required"
+  if (approvalStatus === "approved_as_evidence") return "attached_as_evidence"
+  if (approvalStatus === "draft") return "draft_ready"
+  return "draft_missing"
 }

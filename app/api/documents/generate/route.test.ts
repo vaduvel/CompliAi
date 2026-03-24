@@ -92,6 +92,7 @@ describe("POST /api/documents/generate", () => {
 
     expect(res.status).toBe(200)
     expect(body.title).toBe("Politică de Confidențialitate")
+    expect(body.recordId).toBeTruthy()
     expect((saved as { generatedDocuments: Array<Record<string, unknown>> }).generatedDocuments[0]).toEqual(
       expect.objectContaining({
         documentType: "privacy-policy",
@@ -110,6 +111,40 @@ describe("POST /api/documents/generate", () => {
     expect(mocks.trackEventMock).toHaveBeenCalledWith("org-1", "generated_first_document", {
       docType: "privacy-policy",
     })
+  })
+
+  it("leaga draftul de finding cand vine din flow-ul ghidat", async () => {
+    let saved: unknown = null
+    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
+      saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
+      return saved
+    })
+    mocks.generateDocumentMock.mockResolvedValue({
+      documentType: "dpa",
+      title: "Acord DPA",
+      content: "# DPA",
+      generatedAtISO: "2026-03-20T10:00:00.000Z",
+      llmUsed: false,
+    })
+
+    const res = await POST(
+      makeRequest({
+        documentType: "dpa",
+        orgName: "CompliScan SRL",
+        sourceFindingId: "finding-1",
+      })
+    )
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.sourceFindingId).toBe("finding-1")
+    expect((saved as { generatedDocuments: Array<Record<string, unknown>> }).generatedDocuments[0]).toEqual(
+      expect.objectContaining({
+        documentType: "dpa",
+        sourceFindingId: "finding-1",
+        approvalStatus: "draft",
+      })
+    )
   })
 
   it("respinge tipurile de document invalide", async () => {

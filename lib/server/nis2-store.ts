@@ -2,7 +2,7 @@
 // Holds: assessment answers, incident log, vendor risk register
 // Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
-import type { Nis2Answers, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import type { Nis2Answers, Nis2AnswersMeta, Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
 import type { EfacturaSupplierImportRecord } from "@/lib/server/efactura-vendor-signals"
 import { validateCUI } from "@/lib/server/request-validation"
@@ -30,6 +30,55 @@ export type Nis2AttackType =
 
 export type Nis2OperationalImpact = "none" | "partial" | "full"
 
+// ── NIS2 Art. 23 — Raportare în 3 etape ───────────────────────────────────────
+// Etapa 1: Early warning (24h) — notificare inițială DNSC
+// Etapa 2: Raport complet (72h) — analiză detaliată, impact, măsuri
+// Etapa 3: Raport final (1 lună) — cauză rădăcină, lecții, plan preventiv
+
+export type Nis2StageReport = {
+  submittedAtISO: string
+  submittedBy?: string       // email-ul celui care a trimis
+  content: string            // textul / rezumatul raportului
+  notifiedDNSCAtISO?: string // momentul trimiterii efective la DNSC
+}
+
+export type Nis2EarlyWarningReport = Nis2StageReport & {
+  initialImpactAssessment: string
+  crossBorderEffect: boolean
+}
+
+export type Nis2FullReport72h = Nis2StageReport & {
+  detailedAnalysis: string
+  technicalIndicators: string
+  affectedDataCategories: string[]
+  estimatedAffectedUsers: number | null
+}
+
+export type Nis2FinalReport = Nis2StageReport & {
+  rootCauseAnalysis: string
+  lessonsLearned: string
+  preventiveMeasures: string
+  remediationDeadlineISO?: string
+}
+
+export type Nis2DnscCorrespondence = {
+  id: string
+  date: string           // ISO date
+  direction: "sent" | "received"
+  summary: string
+  createdAtISO: string
+}
+
+export type Nis2PostIncidentTracking = {
+  dnscReference?: string           // număr înregistrare DNSC primit după early warning
+  dnscCorrespondence?: Nis2DnscCorrespondence[]
+  remediationStartedAtISO?: string
+  remediationCompletedAtISO?: string
+  followUpValidationAtISO?: string
+  isRemediated: boolean
+  notes?: string
+}
+
 export type Nis2Incident = {
   id: string
   title: string
@@ -52,6 +101,12 @@ export type Nis2Incident = {
   // ── SLA alert tracking (A6) ─────────────────────────────────────────────────
   alert50SentAtISO?: string       // timestamp when 50% SLA alert was sent
   alert80SentAtISO?: string       // timestamp when 80% SLA alert was sent
+  // ── Raportare 3 etape NIS2 Art. 23 (S0.1) ─────────────────────────────────
+  earlyWarningReport?: Nis2EarlyWarningReport
+  fullReport72h?: Nis2FullReport72h
+  finalReport?: Nis2FinalReport
+  // ── Post-incident tracking (S2.4) ─────────────────────────────────────────
+  postIncidentTracking?: Nis2PostIncidentTracking
   createdAtISO: string
   updatedAtISO: string
 }
@@ -85,6 +140,7 @@ export type Nis2Vendor = {
 export type Nis2AssessmentRecord = {
   sector: Nis2Sector
   answers: Nis2Answers
+  answersMeta?: Nis2AnswersMeta  // S2.1: per-answer source, confidence, confirmed
   savedAtISO: string
   score: number
   maturityLabel: string
@@ -278,6 +334,7 @@ export async function updateIncident(
     | "attackType" | "attackVector" | "operationalImpact" | "operationalImpactDetails"
     | "measuresTaken" | "reportedToDNSCAtISO"
     | "alert50SentAtISO" | "alert80SentAtISO"
+    | "earlyWarningReport" | "fullReport72h" | "finalReport" | "postIncidentTracking"
   >>
 ): Promise<Nis2Incident | null> {
   const state = await readNis2State(orgId)

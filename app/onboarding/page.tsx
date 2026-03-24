@@ -2,6 +2,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { SESSION_COOKIE, resolveUserMode, verifySessionToken } from "@/lib/server/auth"
+import { readState } from "@/lib/server/mvp-store"
 import { OnboardingForm } from "@/components/compliscan/onboarding-form"
 
 export const dynamic = "force-dynamic"
@@ -16,9 +17,19 @@ export default async function OnboardingPage() {
   }
 
   const userMode = await resolveUserMode(session)
-  if (userMode) {
+  const state = await readState()
+  const hasCompletedOnboarding = Boolean(state.orgProfile && state.applicability)
+
+  if (userMode === "viewer") {
     redirect("/dashboard")
   }
 
-  return <OnboardingForm />
+  if (userMode && hasCompletedOnboarding) {
+    if (session.workspaceMode === "portfolio" && userMode === "partner") {
+      redirect("/portfolio")
+    }
+    redirect("/dashboard")
+  }
+
+  return <OnboardingForm initialUserMode={userMode ?? null} orgName={session.orgName} />
 }

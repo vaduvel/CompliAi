@@ -117,6 +117,12 @@ export type AgentRun = {
   completedAtISO?: string
   reviewState: HumanReviewState
   confidence?: AgentProposalConfidence
+  // S2.2: hardening fields
+  baselineSnapshotId?: string   // links drift to validated baseline
+  evidencePersisted?: boolean   // evidence saved to vault
+  repeatableRunHash?: string    // hash of inputs for dedup/replay
+  driftCount?: number           // number of drifts detected
+  findingCount?: number         // number of findings detected
 }
 
 export type AgentValidationResult = {

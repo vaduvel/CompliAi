@@ -31,7 +31,7 @@ export function MobileBottomNav({
                   event.preventDefault()
                 }
               }}
-              className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-eos-md border px-2 py-2 text-[11px] ${
+              className={`relative flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-eos-md border px-2 py-2 text-[11px] ${
                 active
                   ? "border-eos-border-subtle bg-eos-surface-active text-eos-text"
                   : "border-transparent text-eos-text-muted"

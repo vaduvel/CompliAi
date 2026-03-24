@@ -1,11 +1,12 @@
 "use client"
 
-import { startTransition, useState } from "react"
+import { startTransition, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { TrialBanner } from "@/components/compliscan/billing/trial-banner"
 import { FloatingAssistant } from "@/components/compliscan/floating-assistant"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { MobileBottomNav } from "@/components/compliscan/mobile-bottom-nav"
@@ -50,13 +51,27 @@ export function DashboardShell({
   const currentUser = initialUser
   const memberships = initialMemberships
 
-  // Blueprint rule 8: badge on "De rezolvat" = critical + high findings count
+  // Blueprint rule 8: badge on "De rezolvat" = critical + high findings count + active DSARs
   const cockpit = useOptionalCockpitData()
-  const resolveBadgeCount = cockpit?.data
+  const [dsarActiveCount, setDsarActiveCount] = useState(0)
+  useEffect(() => {
+    fetch("/api/dsar", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.requests) return
+        const active = (d.requests as Array<{ status: string }>).filter(
+          (r) => r.status !== "responded" && r.status !== "refused"
+        ).length
+        setDsarActiveCount(active)
+      })
+      .catch(() => {})
+  }, [])
+  const findingsBadgeCount = cockpit?.data
     ? cockpit.data.state.findings.filter(
         (f) => f.severity === "critical" || f.severity === "high"
       ).length
     : 0
+  const resolveBadgeCount = findingsBadgeCount + dsarActiveCount
   const navSections = currentUser
     ? getSidebarNavSections({
         userMode: currentUser.userMode,
@@ -341,6 +356,7 @@ export function DashboardShell({
               />
             </div>
           ) : null}
+          <TrialBanner />
           <DashboardRuntimeProvider user={currentUser}>
             {children}
             <footer className="mt-12 pb-4">

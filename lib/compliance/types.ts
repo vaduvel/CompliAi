@@ -135,14 +135,25 @@ export type ScanRecord = {
   extractionStatus?: ScanExtractionStatus
   analysisStatus?: ScanAnalysisStatus
   analyzedAtISO?: string
+  // S2.2: repeatable scan hardening
+  repeatableRunHash?: string      // SHA-256 of (documentName + content) for dedup/replay
+  baselineSnapshotId?: string     // validated baseline at time of scan
 }
 
 export type GeneratedDocumentRecord = {
   id: string
   documentType: GeneratedDocumentKind
   title: string
+  content?: string
   generatedAtISO: string
   llmUsed: boolean
+  sourceFindingId?: string
+  approvalStatus?: "draft" | "approved_as_evidence"
+  approvedAtISO?: string
+  approvedByUserId?: string
+  approvedByEmail?: string
+  confirmationChecklist?: string[]
+  evidenceNote?: string
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
   nextReviewDateISO?: string      // when to review this document

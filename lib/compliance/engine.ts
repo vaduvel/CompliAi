@@ -187,6 +187,49 @@ function normalizeGeneratedDocuments(
           : null
       const title = typeof item.title === "string" ? item.title.trim() : ""
       const generatedAtISO = isValidIso(item.generatedAtISO) ? item.generatedAtISO : null
+      const content =
+        typeof item.content === "string" && item.content.trim().length > 0
+          ? item.content
+          : undefined
+      const sourceFindingId =
+        typeof item.sourceFindingId === "string" && item.sourceFindingId.trim()
+          ? item.sourceFindingId.trim()
+          : undefined
+      const approvalStatus =
+        item.approvalStatus === "draft" || item.approvalStatus === "approved_as_evidence"
+          ? item.approvalStatus
+          : undefined
+      const approvedAtISO = isValidIso(item.approvedAtISO) ? item.approvedAtISO : undefined
+      const approvedByUserId =
+        typeof item.approvedByUserId === "string" && item.approvedByUserId.trim()
+          ? item.approvedByUserId.trim()
+          : undefined
+      const approvedByEmail =
+        typeof item.approvedByEmail === "string" && item.approvedByEmail.trim()
+          ? item.approvedByEmail.trim()
+          : undefined
+      const confirmationChecklist = Array.isArray(item.confirmationChecklist)
+        ? Array.from(
+            new Set(
+              item.confirmationChecklist
+                .filter((entry): entry is string => typeof entry === "string")
+                .map((entry) => entry.trim())
+                .filter(Boolean)
+            )
+          )
+        : undefined
+      const evidenceNote =
+        typeof item.evidenceNote === "string" && item.evidenceNote.trim()
+          ? item.evidenceNote.trim()
+          : undefined
+      const expiresAtISO = isValidIso(item.expiresAtISO) ? item.expiresAtISO : undefined
+      const nextReviewDateISO = isValidIso(item.nextReviewDateISO) ? item.nextReviewDateISO : undefined
+      const refreshStatus =
+        item.refreshStatus === "current" ||
+        item.refreshStatus === "refresh-candidate" ||
+        item.refreshStatus === "expired"
+          ? item.refreshStatus
+          : undefined
 
       if (!documentType || !title || !generatedAtISO) return []
 
@@ -198,8 +241,19 @@ function normalizeGeneratedDocuments(
               : `generated-doc-${Math.random().toString(36).slice(2, 10)}`,
           documentType,
           title,
+          content,
           generatedAtISO,
           llmUsed: Boolean(item.llmUsed),
+          sourceFindingId,
+          approvalStatus,
+          approvedAtISO,
+          approvedByUserId,
+          approvedByEmail,
+          confirmationChecklist,
+          evidenceNote,
+          expiresAtISO,
+          nextReviewDateISO,
+          refreshStatus,
         },
       ]
     })

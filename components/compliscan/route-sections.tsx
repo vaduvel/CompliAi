@@ -661,7 +661,16 @@ export function LatestDocumentSection({
                       />
                     )}
                     {latestScanFindings.slice(0, 3).map((finding) => (
-                      <DenseListItem key={finding.id} className="bg-eos-bg">
+                      <DenseListItem
+                        key={finding.id}
+                        className={`bg-eos-bg border-l-4 ${
+                          finding.severity === "critical" || finding.severity === "high"
+                            ? "border-l-eos-error"
+                            : finding.severity === "medium"
+                              ? "border-l-eos-warning"
+                              : "border-l-eos-success"
+                        }`}
+                      >
                         <div className="p-4">
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
