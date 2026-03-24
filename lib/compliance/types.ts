@@ -423,6 +423,19 @@ export type ComplianceState = {
   intakeCompletedAtISO?: string
   // ── Addon 1: Compliance Streak ─────────────────────────────────────────
   complianceStreak?: ComplianceStreak
+  // ── Multiplicator A: Site Intelligence Layer ────────────────────────────
+  siteScan?: SiteScanSummary
+}
+
+export type SiteScanSummary = {
+  scannedAtISO: string
+  websiteUrl: string
+  trackerCount: number
+  vendorCandidateCount: number
+  formCount: number
+  hasCookieBanner: boolean
+  hasPrivacyPolicy: boolean
+  findingCount: number
 }
 
 export type ComplianceStreak = {

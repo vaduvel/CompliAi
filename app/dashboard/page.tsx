@@ -18,6 +18,7 @@ import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
+import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 
 export default function DashboardPage() {
   const runtime = useDashboardRuntime()
@@ -187,6 +188,13 @@ export default function DashboardPage() {
 
       {/* ── DSAR countdown card ───────────────────────────────────────────────── */}
       {state.orgProfile && <DsarCountdownCard />}
+
+      {/* ── Site scan — Multiplicator A onboarding ───────────────────────────── */}
+      {state.orgProfile && (
+        <section aria-label="Scanare site">
+          <SiteScanCard existingScan={state.siteScan ?? null} />
+        </section>
+      )}
 
       {/* ── NIS2 Applicability Gate ───────────────────────────────────────────── */}
       {state.orgProfile && (
