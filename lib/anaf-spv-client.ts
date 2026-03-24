@@ -19,6 +19,32 @@ const ANAF_TOKEN_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/token"
 const ANAF_SPV_BASE = "https://api.anaf.ro/prod/FCTEL/rest"
 const CALLBACK_PATH = "/api/anaf/callback"
 
+// ── Rate Limiter (S1.3) ────────────────────────────────────────────────────
+// ANAF APIs have undocumented rate limits. We enforce a simple sliding-window
+// limiter: max N requests per window (in ms) across all orgs.
+
+const RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW_MS = 60_000
+const requestTimestamps: number[] = []
+
+function checkAnafRateLimit(): boolean {
+  const now = Date.now()
+  // Evict old entries
+  while (requestTimestamps.length > 0 && requestTimestamps[0]! < now - RATE_LIMIT_WINDOW_MS) {
+    requestTimestamps.shift()
+  }
+  if (requestTimestamps.length >= RATE_LIMIT_MAX) return false
+  requestTimestamps.push(now)
+  return true
+}
+
+class AnafRateLimitError extends Error {
+  constructor() {
+    super("ANAF rate limit exceeded. Try again later.")
+    this.name = "AnafRateLimitError"
+  }
+}
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export type AnafTokenRecord = {
@@ -87,6 +113,8 @@ export async function exchangeCodeForTokens(
   if (!ANAF_CLIENT_ID || !ANAF_CLIENT_SECRET) return null
 
   try {
+    if (!checkAnafRateLimit()) throw new AnafRateLimitError()
+
     const res = await fetch(ANAF_TOKEN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -142,6 +170,8 @@ export async function refreshAccessToken(
   if (!ANAF_CLIENT_ID || !ANAF_CLIENT_SECRET) return null
 
   try {
+    if (!checkAnafRateLimit()) throw new AnafRateLimitError()
+
     const res = await fetch(ANAF_TOKEN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -197,6 +227,8 @@ export async function fetchSpvMessages(
   zile = 1
 ): Promise<SpvListResponse | null> {
   try {
+    if (!checkAnafRateLimit()) throw new AnafRateLimitError()
+
     const url = `${ANAF_SPV_BASE}/listaMesajeFactura?cif=${encodeURIComponent(cif)}&zile=${zile}`
     const res = await fetch(url, {
       headers: {
@@ -223,6 +255,8 @@ export async function downloadSpvMessage(
   messageId: string
 ): Promise<ArrayBuffer | null> {
   try {
+    if (!checkAnafRateLimit()) throw new AnafRateLimitError()
+
     const url = `${ANAF_SPV_BASE}/descarcare?id=${encodeURIComponent(messageId)}`
     const res = await fetch(url, {
       headers: {

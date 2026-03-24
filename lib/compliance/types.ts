@@ -135,6 +135,9 @@ export type ScanRecord = {
   extractionStatus?: ScanExtractionStatus
   analysisStatus?: ScanAnalysisStatus
   analyzedAtISO?: string
+  // S2.2: repeatable scan hardening
+  repeatableRunHash?: string      // SHA-256 of (documentName + content) for dedup/replay
+  baselineSnapshotId?: string     // validated baseline at time of scan
 }
 
 export type GeneratedDocumentRecord = {
