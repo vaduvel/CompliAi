@@ -6,6 +6,7 @@ export const dashboardRoutes = {
   documents: "/dashboard/scan/history",
   documentsHub: "/dashboard/documente",
   resolve: "/dashboard/resolve",
+  calendar: "/dashboard/calendar",
   aiSystems: "/dashboard/sisteme",
   aiConformity: "/dashboard/conformitate",
   drifts: "/dashboard/alerte",
@@ -35,6 +36,7 @@ export const dashboardRouteGroups = {
   scan: [dashboardRoutes.scan, dashboardRoutes.documents],
   resolve: [
     dashboardRoutes.resolve,
+    dashboardRoutes.calendar,
     dashboardRoutes.aiSystems,
     dashboardRoutes.drifts,
     dashboardRoutes.aiConformity,
