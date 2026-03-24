@@ -21,10 +21,10 @@ import {
 } from "@/components/compliscan/settings/settings-shared"
 
 function recommendedHealthAction(appHealth: ApplicationHealthStatus) {
-  if (!appHealth) return "Se verifica starea aplicatiei."
-  if (appHealth.blockers.length > 0) return "Inchide blocajele inainte de operare critica."
-  if (appHealth.warnings.length > 0) return "Revizuieste avertismentele si confirma traseul cloud."
-  return "Nu este nevoie de actiune imediata."
+  if (!appHealth) return "Se verifică starea aplicației."
+  if (appHealth.blockers.length > 0) return "Închide blocajele înainte de operare critică."
+  if (appHealth.warnings.length > 0) return "Revizuiește avertismentele și confirmă traseul cloud."
+  return "Nu este nevoie de acțiune imediată."
 }
 
 function recommendedReleaseAction(releaseReadiness: ReleaseReadinessStatus) {

@@ -156,8 +156,8 @@ export function RecentDriftCard({
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (
           <ReportsEmptyState
-            title="Nu exista drift activ"
-            description="Snapshot-ul va iesi curat din acest punct de vedere."
+            title="Nu există drift activ"
+            description="Snapshot-ul va ieși curat din acest punct de vedere."
           />
         )}
         {drifts.map((drift) => {
