@@ -7,6 +7,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { mutateState } from "@/lib/server/mvp-store"
 import { scanSite } from "@/lib/compliance/site-scanner"
+import { knowledgeFromSiteScan, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 
 export const maxDuration = 60 // Vercel Pro: până la 60s pentru Puppeteer
 
@@ -36,6 +37,15 @@ export async function POST(request: Request) {
         // Salvăm și URL-ul în orgProfile dacă nu e setat
         if (state.orgProfile && !state.orgProfile.website) {
           state.orgProfile.website = result.url
+        }
+        // Multiplicator B: populăm orgKnowledge din rezultatele scan-ului
+        const newItems = knowledgeFromSiteScan(result)
+        if (newItems.length > 0) {
+          const existing = state.orgKnowledge?.items ?? []
+          state.orgKnowledge = {
+            items: mergeKnowledgeItems(existing, newItems),
+            lastUpdatedAtISO: new Date().toISOString(),
+          }
         }
         return state
       })

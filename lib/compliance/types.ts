@@ -425,6 +425,8 @@ export type ComplianceState = {
   complianceStreak?: ComplianceStreak
   // ── Multiplicator A: Site Intelligence Layer ────────────────────────────
   siteScan?: SiteScanSummary
+  // ── Multiplicator B: Progressive Data Enrichment ─────────────────────────
+  orgKnowledge?: import("@/lib/compliance/org-knowledge").OrgKnowledge
 }
 
 export type SiteScanSummary = {

@@ -1,0 +1,102 @@
+// GET  /api/org-knowledge — citește cunoștințele organizației
+// POST /api/org-knowledge — confirma/adaugă itemi noi
+// DELETE /api/org-knowledge?id=... — șterge un item
+
+import { NextResponse } from "next/server"
+
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { readState, mutateState } from "@/lib/server/mvp-store"
+import {
+  makeKnowledgeItem,
+  mergeKnowledgeItems,
+  withStaleFlags,
+} from "@/lib/compliance/org-knowledge"
+import type { OrgKnowledgeCategory, OrgKnowledgeSource } from "@/lib/compliance/org-knowledge"
+
+export async function GET(request: Request) {
+  try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+
+    const state = await readState()
+    const knowledge = state.orgKnowledge ?? { items: [], lastUpdatedAtISO: new Date().toISOString() }
+    const itemsWithStale = withStaleFlags(knowledge.items)
+    const hasStale = itemsWithStale.some((i) => i.stale)
+
+    return NextResponse.json({ knowledge: { ...knowledge, items: itemsWithStale }, hasStale })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la citirea cunoștințelor.", 500, "ORG_KNOWLEDGE_READ_FAILED")
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+
+    const body = await request.json() as {
+      items?: Array<{
+        category: OrgKnowledgeCategory
+        value: string
+        source: OrgKnowledgeSource
+        sourceLabel?: string
+        confidence?: "high" | "medium" | "low"
+      }>
+    }
+
+    if (!body.items?.length) return jsonError("items lipsesc.", 400, "MISSING_ITEMS")
+
+    const now = new Date()
+    const dateLabel = now.toLocaleDateString("ro-RO")
+
+    const incoming = body.items.map((it) =>
+      makeKnowledgeItem(
+        it.category,
+        it.value,
+        it.source,
+        it.sourceLabel ?? `Manual la ${dateLabel}`,
+        it.confidence ?? "medium",
+      )
+    )
+
+    const updated = await mutateState((state) => {
+      const existing = state.orgKnowledge?.items ?? []
+      state.orgKnowledge = {
+        items: mergeKnowledgeItems(existing, incoming),
+        lastUpdatedAtISO: now.toISOString(),
+      }
+      return state
+    })
+
+    return NextResponse.json({ knowledge: updated.orgKnowledge })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la salvarea cunoștințelor.", 500, "ORG_KNOWLEDGE_WRITE_FAILED")
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+    if (!id) return jsonError("id lipsește.", 400, "MISSING_ID")
+
+    await mutateState((state) => {
+      if (state.orgKnowledge) {
+        state.orgKnowledge.items = state.orgKnowledge.items.filter((i) => i.id !== id)
+        state.orgKnowledge.lastUpdatedAtISO = new Date().toISOString()
+      }
+      return state
+    })
+
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la ștergerea itemului.", 500, "ORG_KNOWLEDGE_DELETE_FAILED")
+  }
+}
