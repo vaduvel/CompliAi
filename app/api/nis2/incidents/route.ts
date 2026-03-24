@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       Pick<Nis2Incident,
         | "title" | "description" | "severity" | "affectedSystems" | "detectedAtISO"
         | "attackType" | "attackVector" | "operationalImpact" | "operationalImpactDetails"
-        | "measuresTaken"
+        | "measuresTaken" | "involvesPersonalData"
       >
     >
 
@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       operationalImpact: body.operationalImpact,
       operationalImpactDetails: body.operationalImpactDetails?.trim(),
       measuresTaken: body.measuresTaken?.trim(),
+      involvesPersonalData: body.involvesPersonalData,
     })
 
     return NextResponse.json({ incident }, { status: 201 })

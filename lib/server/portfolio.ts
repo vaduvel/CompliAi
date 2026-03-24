@@ -13,6 +13,7 @@ import type {
   UserRole,
 } from "@/lib/server/auth"
 import { AuthzError, listUserMemberships, readSessionFromRequest, resolveUserMode } from "@/lib/server/auth"
+import { readDsarState, type DsarOrgState } from "@/lib/server/dsar-store"
 import { readNis2State, type Nis2OrgState, type Nis2Vendor } from "@/lib/server/nis2-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -28,6 +29,7 @@ export type PortfolioOrgBundle = {
   remediationPlan: RemediationAction[]
   nis2: Nis2OrgState
   vendorReviews: VendorReview[]
+  dsar: DsarOrgState
 }
 
 export type PortfolioOverviewClientSummary = {
@@ -52,6 +54,8 @@ export type PortfolioOverviewClientSummary = {
     criticalFindings: number
     totalTasks: number
     lastScanAtISO: string | null
+    activeDsarCount: number
+    urgentDsarCount: number
   } | null
 }
 
@@ -148,10 +152,11 @@ export async function loadPortfolioBundles(
 ): Promise<PortfolioOrgBundle[]> {
   return Promise.all(
     memberships.map(async (membership) => {
-      const [rawState, nis2, vendorReviews] = await Promise.all([
+      const [rawState, nis2, vendorReviews, dsar] = await Promise.all([
         readStateForOrg(membership.orgId),
         readNis2State(membership.orgId),
         safeListReviews(membership.orgId),
+        readDsarState(membership.orgId),
       ])
 
       if (!rawState) {
@@ -162,6 +167,7 @@ export async function loadPortfolioBundles(
           remediationPlan: [],
           nis2,
           vendorReviews,
+          dsar,
         } satisfies PortfolioOrgBundle
       }
 
@@ -173,13 +179,14 @@ export async function loadPortfolioBundles(
         remediationPlan: buildRemediationPlan(state),
         nis2,
         vendorReviews,
+        dsar,
       } satisfies PortfolioOrgBundle
     })
   )
 }
 
 export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): PortfolioOverviewClientSummary[] {
-  return bundles.map(({ membership, state, summary, remediationPlan, nis2 }) => {
+  return bundles.map(({ membership, state, summary, remediationPlan, nis2, dsar }) => {
     if (!state || !summary) {
       return {
         orgId: membership.orgId,
@@ -222,6 +229,8 @@ export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): Portf
         criticalFindings,
         totalTasks,
         lastScanAtISO,
+        activeDsarCount: countActiveDsar(dsar),
+        urgentDsarCount: countUrgentDsar(dsar),
       },
     }
   })
@@ -414,6 +423,19 @@ function categoryLabel(category?: ScanFinding["category"]) {
     default:
       return "General"
   }
+}
+
+function countActiveDsar(dsar: DsarOrgState): number {
+  return dsar.requests.filter((r) => !["responded", "refused"].includes(r.status)).length
+}
+
+function countUrgentDsar(dsar: DsarOrgState): number {
+  const now = Date.now()
+  return dsar.requests.filter((r) => {
+    if (["responded", "refused"].includes(r.status)) return false
+    const dl = new Date(r.extendedDeadlineISO ?? r.deadlineISO).getTime()
+    return (dl - now) / (24 * 60 * 60 * 1000) <= 5
+  }).length
 }
 
 function countEfacturaRisks(state: ComplianceState) {

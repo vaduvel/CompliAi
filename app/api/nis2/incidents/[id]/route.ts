@@ -15,6 +15,7 @@ import type {
   Nis2FullReport72h,
   Nis2FinalReport,
   Nis2PostIncidentTracking,
+  AnspdcpBreachNotification,
 } from "@/lib/server/nis2-store"
 
 const VALID_STATUSES = ["open", "reported-24h", "reported-72h", "closed"] as const
@@ -65,6 +66,7 @@ export async function PATCH(
       fullReport72h?: Nis2FullReport72h
       finalReport?: Nis2FinalReport
       postIncidentTracking?: Nis2PostIncidentTracking
+      anspdcpNotification?: AnspdcpBreachNotification
     }
 
     // Validare status

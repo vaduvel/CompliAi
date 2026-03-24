@@ -10,6 +10,7 @@ import {
   FileStack,
   FolderKanban,
   Mail,
+  Share2,
   ShieldCheck,
 } from "lucide-react"
 
@@ -121,14 +122,6 @@ export function ExportCenter({
       hint: "Lista pentru inchidere.",
       icon: ClipboardCheck,
       onClick: onExportChecklist,
-      variant: "outline" as const,
-    },
-    {
-      key: "share",
-      label: "Trimite spre review",
-      hint: "Partajare pentru review extern.",
-      icon: Mail,
-      onClick: onShare,
       variant: "outline" as const,
     },
   ]
@@ -311,6 +304,33 @@ export function ExportCenter({
             </div>
           </details>
         )}
+
+        {/* Share / handoff CTA — always visible (GOLD 7 polish) */}
+        <section className="flex flex-col gap-3 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary">
+              Partajează spre review
+            </p>
+            <p className="text-sm font-medium text-eos-text">Trimite pachetul spre contabil, auditor sau client</p>
+            <p className="text-xs text-eos-text-muted">
+              Generează un link securizat cu valabilitate 72h — fără cont necesar pentru destinatar.
+            </p>
+          </div>
+          <Button
+            onClick={onShare}
+            variant="outline"
+            size="lg"
+            className="h-auto shrink-0 items-center gap-2 border-eos-primary/40 bg-eos-primary/10 text-eos-primary hover:bg-eos-primary/20"
+          >
+            <Share2 className="size-4 shrink-0" strokeWidth={2} />
+            <span className="text-left">
+              <span className="block whitespace-normal leading-5">Partajează</span>
+              <span className="block whitespace-normal text-xs font-normal normal-case tracking-normal opacity-80">
+                Link securizat 72h
+              </span>
+            </span>
+          </Button>
+        </section>
       </CardContent>
     </Card>
   )

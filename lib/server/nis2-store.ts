@@ -79,6 +79,31 @@ export type Nis2PostIncidentTracking = {
   notes?: string
 }
 
+// ── ANSPDCP Breach Notification (GDPR Art. 33) — parallel cu DNSC ────────────
+// Dacă incidentul implică date personale, notificarea ANSPDCP e separată:
+// - Deadline propriu (72h de la descoperire)
+// - Formular propriu (categorii date, nr persoane, DPO, măsuri)
+// - Tracking propriu (status, nr înregistrare, corespondență)
+
+export type AnspdcpNotificationStatus = "pending" | "submitted" | "acknowledged"
+
+export type AnspdcpBreachNotification = {
+  required: boolean                     // user confirmă că e necesar
+  deadlineISO: string                   // detectedAt + 72h
+  status: AnspdcpNotificationStatus
+  // GDPR Art. 33(3) — conținut obligatoriu:
+  dataCategories: string[]              // categorii date personale afectate
+  estimatedDataSubjects: number | null  // nr. aproximativ persoane vizate
+  dpoContact?: string                   // DPO / responsabil conformitate
+  consequencesDescription?: string      // consecințe probabile
+  measuresTaken?: string                // măsuri luate / propuse
+  // Tracking
+  submittedAtISO?: string
+  anspdcpReference?: string             // nr. înregistrare ANSPDCP
+  notifyDataSubjects: boolean           // Art. 34 — dacă trebuie notificați individual
+  dataSubjectsNotifiedAtISO?: string
+}
+
 export type Nis2Incident = {
   id: string
   title: string
@@ -107,6 +132,9 @@ export type Nis2Incident = {
   finalReport?: Nis2FinalReport
   // ── Post-incident tracking (S2.4) ─────────────────────────────────────────
   postIncidentTracking?: Nis2PostIncidentTracking
+  // ── ANSPDCP breach notification (GOLD 6) ──────────────────────────────────
+  involvesPersonalData?: boolean
+  anspdcpNotification?: AnspdcpBreachNotification
   createdAtISO: string
   updatedAtISO: string
 }
@@ -294,12 +322,18 @@ export async function createIncident(
     operationalImpact?: Nis2OperationalImpact
     operationalImpactDetails?: string
     measuresTaken?: string
+    involvesPersonalData?: boolean
   }
 ): Promise<Nis2Incident> {
   const state = await readNis2State(orgId)
   const now = new Date().toISOString()
   const detectedAt = input.detectedAtISO ?? now
   const deadlines = incidentDeadlines(detectedAt)
+
+  // Auto-detect personal data involvement from attack type
+  const personalData = input.involvesPersonalData ??
+    input.attackType === "data-breach"
+
   const incident: Nis2Incident = {
     id: uid(),
     title: input.title,
@@ -314,6 +348,18 @@ export async function createIncident(
     ...(input.operationalImpact !== undefined && { operationalImpact: input.operationalImpact }),
     ...(input.operationalImpactDetails !== undefined && { operationalImpactDetails: input.operationalImpactDetails }),
     ...(input.measuresTaken !== undefined && { measuresTaken: input.measuresTaken }),
+    // ANSPDCP breach notification (GOLD 6)
+    involvesPersonalData: personalData,
+    ...(personalData && {
+      anspdcpNotification: {
+        required: true,
+        deadlineISO: new Date(new Date(detectedAt).getTime() + 72 * 60 * 60 * 1000).toISOString(),
+        status: "pending" as const,
+        dataCategories: [],
+        estimatedDataSubjects: null,
+        notifyDataSubjects: false,
+      },
+    }),
     createdAtISO: now,
     updatedAtISO: now,
   }
@@ -335,6 +381,7 @@ export async function updateIncident(
     | "measuresTaken" | "reportedToDNSCAtISO"
     | "alert50SentAtISO" | "alert80SentAtISO"
     | "earlyWarningReport" | "fullReport72h" | "finalReport" | "postIncidentTracking"
+    | "involvesPersonalData" | "anspdcpNotification"
   >>
 ): Promise<Nis2Incident | null> {
   const state = await readNis2State(orgId)

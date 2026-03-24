@@ -27,6 +27,7 @@ import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import { cn } from "@/lib/utils"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
 import type { AISystemPurpose } from "@/lib/compliance/types"
+import { classifyAISystem, RISK_LEVEL_LABELS, RISK_LEVEL_COLORS } from "@/lib/compliance/ai-act-classifier"
 
 type ControlPrimaryViewMode = "overview" | "systems" | "drift" | "review"
 type SystemsSubViewMode = "inventory" | "discovery" | "baseline" | "pack"
@@ -655,36 +656,63 @@ function ControlSystemsWorkspace({
                   className="border-eos-border bg-eos-surface-variant py-8"
                 />
               )}
-              {recentInventory.map((system) => (
-                <DenseListItem key={system.id} className="bg-eos-surface-variant">
-                  <div className="p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="break-words text-sm font-semibold text-eos-text">
-                          {system.name}
-                        </p>
-                        <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
-                          {system.vendor} · {formatPurposeLabel(system.purpose)}
-                        </p>
+              {recentInventory.map((system) => {
+                const aiActClass = classifyAISystem(system.purpose)
+                return (
+                  <DenseListItem key={system.id} className="bg-eos-surface-variant">
+                    <div className="p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="break-words text-sm font-semibold text-eos-text">
+                            {system.name}
+                          </p>
+                          <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
+                            {system.vendor} · {formatPurposeLabel(system.purpose)}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={
+                            system.riskLevel === "high"
+                              ? "destructive"
+                              : system.riskLevel === "limited"
+                                ? "warning"
+                                : "success"
+                          }
+                        >
+                          {system.riskLevel}
+                        </Badge>
                       </div>
-                      <Badge
-                        variant={
-                          system.riskLevel === "high"
-                            ? "destructive"
-                            : system.riskLevel === "limited"
-                              ? "warning"
-                              : "success"
-                        }
-                      >
-                        {system.riskLevel}
-                      </Badge>
+                      <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
+                        {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
+                      </p>
+                      {/* GOLD 8 — AI Act classification (propusa, nu verdict final) */}
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-flex items-center rounded border px-2 py-0.5 text-[11px] font-medium ${RISK_LEVEL_COLORS[aiActClass.riskLevel]}`}
+                        >
+                          {RISK_LEVEL_LABELS[aiActClass.riskLevel]}
+                        </span>
+                        <span className="text-[11px] text-eos-text-muted">
+                          {aiActClass.article} · propus automat — confirmă
+                        </span>
+                        {aiActClass.riskLevel === "high_risk" && (
+                          <Link
+                            href={`/dashboard/sisteme/eu-db-wizard?system=${system.id}`}
+                            className="text-[11px] font-medium text-eos-primary underline-offset-2 hover:underline"
+                          >
+                            Pregătire EU DB → deadline 2 aug 2026
+                          </Link>
+                        )}
+                        {aiActClass.riskLevel === "prohibited" && (
+                          <span className="text-[11px] font-semibold text-red-700">
+                            Verifică imediat — posibil interzis
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
-                      {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
-                    </p>
-                  </div>
-                </DenseListItem>
-              ))}
+                  </DenseListItem>
+                )
+              })}
             </CardContent>
           </Card>
 

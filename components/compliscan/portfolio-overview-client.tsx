@@ -165,9 +165,14 @@ function ClientRow({
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-        {c?.efacturaConnected && (
+        {c?.efacturaConnected && (c?.efacturaRiskCount ?? 0) === 0 && (
           <Badge variant="success" className="text-[10px] normal-case tracking-normal">
             e-Factura
+          </Badge>
+        )}
+        {(c?.efacturaRiskCount ?? 0) > 0 && (
+          <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+            {c!.efacturaRiskCount} semnale e-Factura
           </Badge>
         )}
         {c && c.gdprProgress >= 70 && (
@@ -183,6 +188,16 @@ function ClientRow({
         {c?.nis2RescueNeeded && (
           <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
             NIS2 neînregistrat
+          </Badge>
+        )}
+        {(c?.urgentDsarCount ?? 0) > 0 && (
+          <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+            {c!.urgentDsarCount} DSAR urgente
+          </Badge>
+        )}
+        {(c?.activeDsarCount ?? 0) > 0 && (c?.urgentDsarCount ?? 0) === 0 && (
+          <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+            {c!.activeDsarCount} DSAR
           </Badge>
         )}
       </div>
@@ -218,16 +233,22 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
         )
       : 0
 
+  const efacturaRiskClients = active.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0)
+  const totalEfacturaRisks = active.reduce((sum, client) => sum + (client.compliance?.efacturaRiskCount ?? 0), 0)
+
   const stats = [
     { label: "Total firme", value: active.length },
     { label: "Cu date", value: withData.length },
     { label: "Scor mediu", value: withData.length > 0 ? `${avgScore}%` : "—" },
     { label: "Taskuri active", value: activeTasks },
     { label: "Alerte critice", value: redClients.length },
+    ...(totalEfacturaRisks > 0
+      ? [{ label: "Semnale e-Factura", value: `${totalEfacturaRisks} (${efacturaRiskClients.length} firme)` }]
+      : []),
   ]
 
   return (
-    <div className="grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface md:grid-cols-5">
+    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-0.5 px-5 py-3.5">
           <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
@@ -493,6 +514,14 @@ export function PortfolioOverviewClient() {
           overdueScans.length > 0 && {
             label: `${overdueScans.length} firme fără scan recent`,
             filter: () => setScoreFilter("all"),
+          },
+          activeClients.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0).length > 0 && {
+            label: `${activeClients.filter((client) => (client.compliance?.efacturaRiskCount ?? 0) > 0).length} firme cu semnale e-Factura`,
+            filter: () => setSortKey("alerts"),
+          },
+          activeClients.filter((client) => (client.compliance?.activeDsarCount ?? 0) > 0).length > 0 && {
+            label: `${activeClients.reduce((sum, c) => sum + (c.compliance?.activeDsarCount ?? 0), 0)} DSAR active cross-client`,
+            filter: () => setSortKey("alerts"),
           },
         ].filter(Boolean) as Array<{ label: string; filter: () => void }>
 
