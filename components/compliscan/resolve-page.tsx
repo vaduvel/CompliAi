@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react"
+import { useEffect, useState } from "react"
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
+import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 type FrameworkFilter = "toate" | "gdpr" | "nis2" | "ai-act" | "furnizori"
@@ -270,6 +271,74 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
   )
 }
 
+// ── Urgency Items (cross-module: DSAR + NIS2 + Vendor) ───────────────────────
+
+function useUrgencyItems() {
+  const [items, setItems] = useState<UrgencyItem[]>([])
+  useEffect(() => {
+    fetch("/api/dashboard/urgency")
+      .then((r) => r.ok ? r.json() : { items: [] })
+      .then((d) => setItems(d.items ?? []))
+      .catch(() => {})
+  }, [])
+  return items
+}
+
+const SOURCE_LABELS: Record<UrgencyItem["source"], string> = {
+  dsar: "DSAR",
+  nis2: "NIS2",
+  vendor: "Vendor",
+}
+
+function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
+  if (items.length === 0) return null
+  const critical = items.filter((i) => i.severity === "critical")
+  const rest = items.filter((i) => i.severity !== "critical")
+
+  return (
+    <section aria-label="Urgențe cu deadline" className="space-y-2">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="size-4 text-red-500" strokeWidth={2} />
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-muted">
+          Urgențe cu deadline — {items.length} active
+        </p>
+      </div>
+      <div className="divide-y divide-eos-border rounded-eos-md border border-eos-border bg-eos-surface">
+        {[...critical, ...rest].map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+            className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-eos-surface-variant"
+          >
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                  item.severity === "critical" ? "bg-red-100 text-red-700"
+                  : item.severity === "high" ? "bg-amber-100 text-amber-700"
+                  : "bg-blue-100 text-blue-700"
+                }`}>
+                  {SOURCE_LABELS[item.source]}
+                </span>
+                <p className="truncate text-sm font-medium text-eos-text">{item.title}</p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-eos-text-muted">
+                {item.daysLeft !== undefined && (
+                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-red-600 font-medium" : item.daysLeft <= 3 ? "text-red-500" : ""}`}>
+                    <Clock className="size-3" strokeWidth={2} />
+                    {item.daysLeft < 0 ? `Depășit cu ${Math.abs(item.daysLeft)}z` : `${item.daysLeft}z rămase`}
+                  </span>
+                )}
+                <span>{item.detail}</span>
+              </div>
+            </div>
+            <ArrowRight className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 // ── Page Surface ─────────────────────────────────────────────────────────────
 
 export function ResolvePageSurface() {
@@ -277,6 +346,7 @@ export function ResolvePageSurface() {
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
+  const urgencyItems = useUrgencyItems()
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
@@ -300,6 +370,11 @@ export function ResolvePageSurface() {
         }
         badges={
           <>
+            {urgencyItems.length > 0 && (
+              <Badge variant="destructive" className="normal-case tracking-normal">
+                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "s" : ""}
+              </Badge>
+            )}
             {criticalCount > 0 && (
               <Badge variant="destructive" className="normal-case tracking-normal">
                 {criticalCount} critice
@@ -318,6 +393,9 @@ export function ResolvePageSurface() {
           </>
         }
       />
+
+      {/* Cross-module urgency: DSAR deadlines + NIS2 incidents + Vendor overdue */}
+      <UrgentItemsSection items={urgencyItems} />
 
       {/* Primary: Finding Queue with framework filter tabs */}
       <section aria-label="Finding-uri de rezolvat">

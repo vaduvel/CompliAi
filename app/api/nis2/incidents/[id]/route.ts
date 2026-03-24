@@ -1,4 +1,4 @@
-// NIS2 incident — PATCH update / DELETE
+// NIS2 incident — GET / PATCH update / DELETE
 // S0.1: validare secvențială 3 etape (early warning → 72h → final)
 // S2.4: post-incident tracking
 
@@ -51,6 +51,24 @@ function validateStageSequence(
     }
   }
   return null
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    requireRole(request, WRITE_ROLES, "vizualizarea incidentului")
+    const { id } = await params
+    const { orgId } = await getOrgContext()
+    const state = await readNis2State(orgId)
+    const incident = state.incidents.find((i) => i.id === id)
+    if (!incident) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
+    return NextResponse.json({ incident })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Nu am putut citi incidentul.", 500, "NIS2_INCIDENT_READ_FAILED")
+  }
 }
 
 export async function PATCH(
