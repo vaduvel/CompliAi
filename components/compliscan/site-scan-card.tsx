@@ -16,11 +16,13 @@ type SiteScanCardProps = {
     hasCookieBanner: boolean
     hasPrivacyPolicy: boolean
   } | null
+  /** URL pre-completat din orgProfile.website dacă nu există un scan anterior */
+  defaultUrl?: string
   onScanComplete?: (result: SiteScanResult) => void
 }
 
-export function SiteScanCard({ existingScan, onScanComplete }: SiteScanCardProps) {
-  const [url, setUrl] = useState(existingScan?.websiteUrl ?? "")
+export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteScanCardProps) {
+  const [url, setUrl] = useState(existingScan?.websiteUrl ?? defaultUrl ?? "")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<SiteScanResult | null>(null)
   const [error, setError] = useState<string | null>(null)

@@ -65,10 +65,10 @@ function headerState(
       statusLabel: "0 riscuri active",
       scoreLabel: "scor curent de risc activ",
       primaryMessage:
-        "Nu exista probleme active. Scanarile anterioare raman salvate ca istoric de control si dovada.",
-      actionTitle: "Monitorizezi doar schimbarile reale",
+        "Nu există probleme active. Scanările anterioare rămân salvate ca istoric de control și dovadă.",
+      actionTitle: "Monitorizezi doar schimbările reale",
       actionDescription:
-        "Nu ai de inchis nimic acum. Rulezi un scan nou doar cand apar schimbari reale in documente, politici sau fluxuri.",
+        "Nu ai de închis nimic acum. Rulezi un scan nou doar când apar schimbări reale în documente, politici sau fluxuri.",
       actionHint:
         "Istoricul ramane salvat. Rescanezi doar la o versiune noua sau la o schimbare reala.",
       ctaLabel: "Mergi la Scanari",

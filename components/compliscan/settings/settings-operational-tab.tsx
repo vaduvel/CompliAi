@@ -28,10 +28,10 @@ function recommendedHealthAction(appHealth: ApplicationHealthStatus) {
 }
 
 function recommendedReleaseAction(releaseReadiness: ReleaseReadinessStatus) {
-  if (!releaseReadiness) return "Se verifica verdictul de release."
-  if (releaseReadiness.state === "blocked") return "Nu promova build-ul pana cand blocajele sunt inchise."
+  if (!releaseReadiness) return "Se verifică verdictul de release."
+  if (releaseReadiness.state === "blocked") return "Nu promova build-ul până când blocajele sunt închise."
   if (releaseReadiness.warnings.length > 0 || releaseReadiness.state === "review") {
-    return "Verifica avertismentele inainte de promovare."
+    return "Verifică avertismentele înainte de promovare."
   }
   return "Build-ul poate fi promovat controlat."
 }
@@ -294,7 +294,7 @@ export function SettingsOperationalTab({
                 <SettingsSignalCard
                   title="Release blocat"
                   items={[
-                    "Build-ul nu trebuie promovat pana cand blocajele operationale sunt inchise.",
+                    "Build-ul nu trebuie promovat până când blocajele operaționale sunt închise.",
                   ]}
                   tone="destructive"
                 />

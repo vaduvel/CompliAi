@@ -152,13 +152,13 @@ function nextActionLabel(task: CockpitTask) {
 }
 
 function auditBlockerLabel(task: CockpitTask) {
-  if (!task.attachedEvidence) return "Lipseste dovada pentru inchidere si audit."
-  if (task.validationStatus === "failed") return "Ultima verificare a respins task-ul si cere revenire."
-  if (task.validationStatus === "needs_review") return "Task-ul cere confirmare umana inainte de inchidere."
-  if (task.status === "done") return "Task-ul este inchis si poate fi verificat separat in Vault."
-  if (task.validationLevel === 3) return "Cazul este pregatit pentru validare de specialitate. Dovezile si red flags sunt deja organizate."
-  if (task.validationLevel === 2) return "Cazul necesita confirmare interna inainte de inchidere."
-  return "Nu exista blocaje majore vizibile pentru task-ul curent."
+  if (!task.attachedEvidence) return "Lipsește dovada pentru închidere și audit."
+  if (task.validationStatus === "failed") return "Ultima verificare a respins task-ul și cere revenire."
+  if (task.validationStatus === "needs_review") return "Task-ul cere confirmare umană înainte de închidere."
+  if (task.status === "done") return "Task-ul este închis și poate fi verificat separat în Vault."
+  if (task.validationLevel === 3) return "Cazul este pregătit pentru validare de specialitate. Dovezile și red flags sunt deja organizate."
+  if (task.validationLevel === 2) return "Cazul necesită confirmare internă înainte de închidere."
+  return "Nu există blocaje majore vizibile pentru task-ul curent."
 }
 
 function primaryActionCopy(
@@ -273,7 +273,7 @@ export function TaskCard({
                   ) : null}
                   {task.status === "done" ? (
                     <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.24em] text-[11px] text-eos-text-muted">
-                      inchis
+                      închis
                     </Badge>
                   ) : null}
                 </div>

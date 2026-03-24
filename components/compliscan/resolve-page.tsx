@@ -62,7 +62,7 @@ function getFindingReviewBadge(
     return { label: "De revizuit", variant: "warning" }
   }
   if (finding.resolution) {
-    return { label: "In remediere", variant: "default" }
+    return { label: "În remediere", variant: "default" }
   }
   return { label: "Detectat", variant: "warning" }
 }

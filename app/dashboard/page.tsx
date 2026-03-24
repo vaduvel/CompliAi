@@ -192,7 +192,10 @@ export default function DashboardPage() {
       {/* ── Site scan — Multiplicator A onboarding ───────────────────────────── */}
       {state.orgProfile && (
         <section aria-label="Scanare site">
-          <SiteScanCard existingScan={state.siteScan ?? null} />
+          <SiteScanCard
+            existingScan={state.siteScan ?? null}
+            defaultUrl={state.orgProfile?.website ?? undefined}
+          />
         </section>
       )}
 
