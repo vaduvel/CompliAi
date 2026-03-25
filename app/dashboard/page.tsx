@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, BarChart3, CheckCircle2, ChevronRight, FileText, FileWarning, Flame, Layers, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, CalendarClock, CheckCircle2, ChevronRight, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -177,6 +177,14 @@ export default function DashboardPage() {
           <SummaryMetric label="Stare audit"           value={auditStatusLabel} />
         </div>
       </section>
+
+      {/* ── Calendar widget (MULT C) ─────────────────────────────────────────── */}
+      {state.orgProfile && <CalendarWidget />}
+
+      {/* ── Pay Transparency 2026 — RULE PACK ────────────────────────────────── */}
+      {state.orgProfile && (
+        <PayTransparencyWidget employeeCount={state.orgProfile.employeeCount} />
+      )}
 
       {/* ── e-Factura health card ────────────────────────────────────────────── */}
       {state.orgProfile && (
@@ -388,6 +396,121 @@ export default function DashboardPage() {
         </div>
       </details>
     </div>
+  )
+}
+
+// ── Calendar Widget (MULT C) ──────────────────────────────────────────────────
+
+type DashCalEvent = {
+  id: string
+  title: string
+  detail: string
+  deadlineISO: string
+  daysLeft: number
+  group: "overdue" | "today" | "this-week" | "this-month" | "later"
+  severity: "critical" | "high" | "medium" | "low"
+  href: string
+}
+
+function CalendarWidget() {
+  const [events, setEvents] = useState<DashCalEvent[]>([])
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/dashboard/calendar", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { events?: DashCalEvent[] } | null) => {
+        setEvents(data?.events ?? [])
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true))
+  }, [])
+
+  if (!loaded) return null
+
+  const urgent = events.filter((e) => e.group === "overdue" || e.group === "today")
+  const thisWeek = events.filter((e) => e.group === "this-week")
+
+  if (urgent.length === 0 && thisWeek.length === 0) return null
+
+  const sevColor = (s: DashCalEvent["severity"]) =>
+    s === "critical" || s === "high"
+      ? "text-eos-error"
+      : s === "medium"
+        ? "text-eos-warning"
+        : "text-eos-text-muted"
+
+  return (
+    <section aria-label="Deadline-uri calendar">
+      <div className="overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface">
+        <div className="flex items-center gap-2 border-b border-eos-border-subtle px-5 py-3">
+          <CalendarClock className="size-4 shrink-0 text-eos-text-muted" strokeWidth={1.8} />
+          <span className="text-sm font-semibold text-eos-text">Calendar deadline-uri</span>
+          <Link
+            href="/dashboard/calendar"
+            className="ml-auto text-xs font-medium text-eos-primary hover:underline"
+          >
+            Vezi tot →
+          </Link>
+        </div>
+
+        <div className="divide-y divide-eos-border-subtle">
+          {urgent.length > 0 && (
+            <div className="px-5 py-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-error">
+                Urgențe azi{urgent.some((e) => e.group === "overdue") ? " · Depășite" : ""}
+              </p>
+              <div className="space-y-1.5">
+                {urgent.map((e) => (
+                  <Link
+                    key={e.id}
+                    href={e.href}
+                    className="flex items-center gap-3 rounded-eos-md px-2 py-1.5 hover:bg-eos-surface-variant"
+                  >
+                    <span className={`shrink-0 text-xs font-semibold tabular-nums ${sevColor(e.severity)}`}>
+                      {e.daysLeft < 0 ? `−${Math.abs(e.daysLeft)}z` : e.daysLeft === 0 ? "Azi" : `${e.daysLeft}z`}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm text-eos-text">{e.title}</span>
+                    <ChevronRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {thisWeek.length > 0 && (
+            <div className="px-5 py-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+                Săptămâna asta
+              </p>
+              <div className="space-y-1.5">
+                {thisWeek.slice(0, 3).map((e) => (
+                  <Link
+                    key={e.id}
+                    href={e.href}
+                    className="flex items-center gap-3 rounded-eos-md px-2 py-1.5 hover:bg-eos-surface-variant"
+                  >
+                    <span className={`shrink-0 text-xs font-semibold tabular-nums ${sevColor(e.severity)}`}>
+                      {e.daysLeft}z
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm text-eos-text">{e.title}</span>
+                    <ChevronRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+                  </Link>
+                ))}
+                {thisWeek.length > 3 && (
+                  <Link
+                    href="/dashboard/calendar"
+                    className="block px-2 text-xs text-eos-text-muted hover:text-eos-primary"
+                  >
+                    + {thisWeek.length - 3} mai mult...
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -668,6 +791,56 @@ function Nis2ApplicabilityGate({
           >
             Evaluează acum
             <ArrowRight className="size-3.5" strokeWidth={2} />
+          </Link>
+        </div>
+      </Card>
+    </section>
+  )
+}
+
+// ── Pay Transparency 2026 — RULE PACK aggregate widget ───────────────────────
+function PayTransparencyWidget({ employeeCount }: { employeeCount: string }) {
+  const isLarge = employeeCount === "250+"
+  const isCandidate = employeeCount === "50-249" || isLarge
+
+  if (!isCandidate) return null
+
+  const deadline = "7 iunie 2026"
+  const reportingNote = isLarge
+    ? "Raportare anuală a ecartului salarial de gen (din 2027)"
+    : "Raportare la 3 ani a ecartului salarial de gen (din 2031)"
+
+  return (
+    <section aria-label="Pay Transparency 2026">
+      <Card className="border-eos-border bg-eos-surface">
+        <div className="flex items-start gap-3 px-5 py-4">
+          <Scale className="mt-0.5 size-5 shrink-0 text-eos-primary" strokeWidth={2} />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold text-eos-text">Pregătire Pay Transparency — Directiva UE 2023/970</p>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                Deadline transpunere: {deadline}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-eos-text-muted">{reportingNote}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              {[
+                { label: "Inventar roluri", note: "Clasifică funcții pe benzi salariale" },
+                { label: "Calcul ecart", note: "Gen pay gap per categorie" },
+                { label: "Politică salarială", note: "Documente transparente" },
+              ].map((step) => (
+                <div key={step.label} className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-2">
+                  <p className="text-[11px] font-semibold text-eos-text">{step.label}</p>
+                  <p className="mt-0.5 text-[10px] text-eos-text-muted">{step.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Link
+            href="/dashboard/resolve"
+            className="shrink-0 text-xs font-medium text-eos-primary hover:underline"
+          >
+            Vezi finding →
           </Link>
         </div>
       </Card>

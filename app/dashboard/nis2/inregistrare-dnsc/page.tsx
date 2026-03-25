@@ -12,9 +12,13 @@ import {
   Download,
   ExternalLink,
   FileText,
+  Hash,
   Loader2,
+  Mail,
+  Plus,
   Send,
   Shield,
+  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -25,7 +29,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { buildDNSCNotificationDraft } from "@/lib/compliance/dnsc-wizard"
-import type { DnscRegistrationStatus } from "@/lib/server/nis2-store"
+import type { DnscRegistrationStatus, Nis2DnscCorrespondence } from "@/lib/server/nis2-store"
 import type { ApplicabilityCertainty } from "@/lib/compliance/applicability"
 import { ORG_SECTOR_LABELS, ORG_EMPLOYEE_COUNT_LABELS } from "@/lib/compliance/applicability"
 
@@ -48,16 +52,24 @@ export default function DnscRegistrationPage() {
   const cockpit = useCockpitData()
   const [step, setStep] = useState<WizardStep>("eligibility")
   const [dnscStatus, setDnscStatus] = useState<DnscRegistrationStatus>("not-started")
+  const [registrationNumber, setRegistrationNumber] = useState("")
+  const [correspondence, setCorrespondence] = useState<Nis2DnscCorrespondence[]>([])
   const [loadingStatus, setLoadingStatus] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingNumber, setSavingNumber] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [draftContent, setDraftContent] = useState<string>("")
+  const [showAddCorrespondence, setShowAddCorrespondence] = useState(false)
+  const [newEntry, setNewEntry] = useState({ date: new Date().toISOString().slice(0, 10), direction: "received" as "sent" | "received", summary: "" })
+  const [savingEntry, setSavingEntry] = useState(false)
 
   useEffect(() => {
     fetch("/api/nis2/dnsc-status")
       .then((r) => r.json())
-      .then((data: { status: DnscRegistrationStatus }) => {
+      .then((data: { status: DnscRegistrationStatus; registrationNumber: string | null; correspondence: Nis2DnscCorrespondence[] }) => {
         setDnscStatus(data.status)
+        setRegistrationNumber(data.registrationNumber ?? "")
+        setCorrespondence(data.correspondence ?? [])
         // Dacă deja confirmed → sari direct la confirmare
         if (data.status === "confirmed") setStep("confirm")
       })
@@ -90,6 +102,53 @@ export default function DnscRegistrationPage() {
       toast.error("Nu s-a putut salva statusul")
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function saveRegistrationNumber() {
+    if (!registrationNumber.trim()) return
+    setSavingNumber(true)
+    try {
+      await fetch("/api/nis2/dnsc-status", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationNumber }),
+      })
+      toast.success("Număr înregistrare salvat")
+    } catch {
+      toast.error("Nu s-a putut salva numărul")
+    } finally {
+      setSavingNumber(false)
+    }
+  }
+
+  async function addCorrespondenceEntry() {
+    if (!newEntry.summary.trim()) return
+    setSavingEntry(true)
+    try {
+      const r = await fetch("/api/nis2/dnsc-correspondence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newEntry),
+      })
+      const data = (await r.json()) as { correspondence: Nis2DnscCorrespondence[] }
+      setCorrespondence(data.correspondence)
+      setNewEntry({ date: new Date().toISOString().slice(0, 10), direction: "received", summary: "" })
+      setShowAddCorrespondence(false)
+    } catch {
+      toast.error("Nu s-a putut adăuga înregistrarea")
+    } finally {
+      setSavingEntry(false)
+    }
+  }
+
+  async function deleteCorrespondenceEntry(id: string) {
+    try {
+      const r = await fetch(`/api/nis2/dnsc-correspondence?id=${id}`, { method: "DELETE" })
+      const data = (await r.json()) as { correspondence: Nis2DnscCorrespondence[] }
+      setCorrespondence(data.correspondence)
+    } catch {
+      toast.error("Nu s-a putut șterge înregistrarea")
     }
   }
 
@@ -617,6 +676,112 @@ export default function DnscRegistrationPage() {
                 <li>• Actualizare anuală a datelor de contact</li>
               </ul>
             </div>
+
+            {/* ── Corespondență DNSC ───────────────────────────────────────── */}
+            {(dnscStatus === "submitted" || dnscStatus === "confirmed") && (
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-eos-text flex items-center gap-2">
+                  <Mail className="size-4 text-eos-primary" strokeWidth={2} />
+                  Corespondență DNSC
+                </p>
+
+                {/* Număr înregistrare */}
+                <div className="flex items-center gap-2">
+                  <Hash className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                  <input
+                    type="text"
+                    placeholder="Număr înregistrare DNSC (ex: DNSC-2026-00123)"
+                    value={registrationNumber}
+                    onChange={(e) => setRegistrationNumber(e.target.value)}
+                    className="flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void saveRegistrationNumber()}
+                    disabled={savingNumber || !registrationNumber.trim()}
+                  >
+                    {savingNumber ? <Loader2 className="size-3.5 animate-spin" /> : "Salvează"}
+                  </Button>
+                </div>
+
+                {/* Lista corespondență */}
+                {correspondence.length > 0 && (
+                  <div className="divide-y divide-eos-border-subtle rounded-eos-md border border-eos-border bg-eos-surface">
+                    {correspondence.map((entry) => (
+                      <div key={entry.id} className="flex items-start gap-3 px-3 py-2.5">
+                        <span
+                          className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                            entry.direction === "received"
+                              ? "bg-eos-primary/10 text-eos-primary"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {entry.direction === "received" ? "Primit" : "Trimis"}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-eos-text-muted">{new Date(entry.date).toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                          <p className="text-sm text-eos-text">{entry.summary}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void deleteCorrespondenceEntry(entry.id)}
+                          className="shrink-0 rounded p-1 text-eos-text-muted hover:bg-eos-surface-variant hover:text-red-500"
+                          title="Șterge"
+                        >
+                          <Trash2 className="size-3.5" strokeWidth={2} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add entry form */}
+                {showAddCorrespondence ? (
+                  <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/5 p-3 space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="date"
+                        value={newEntry.date}
+                        onChange={(e) => setNewEntry((p) => ({ ...p, date: e.target.value }))}
+                        className="rounded-eos-md border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
+                      />
+                      <select
+                        value={newEntry.direction}
+                        onChange={(e) => setNewEntry((p) => ({ ...p, direction: e.target.value as "sent" | "received" }))}
+                        className="rounded-eos-md border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
+                      >
+                        <option value="received">Primit de la DNSC</option>
+                        <option value="sent">Trimis la DNSC</option>
+                      </select>
+                    </div>
+                    <textarea
+                      rows={2}
+                      placeholder="Rezumat (ex: Confirmare înregistrare nr. DNSC-2026-00123)"
+                      value={newEntry.summary}
+                      onChange={(e) => setNewEntry((p) => ({ ...p, summary: e.target.value }))}
+                      className="w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => void addCorrespondenceEntry()} disabled={savingEntry || !newEntry.summary.trim()}>
+                        {savingEntry ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
+                        Adaugă
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setShowAddCorrespondence(false)}>Anulează</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCorrespondence(true)}
+                    className="flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
+                  >
+                    <Plus className="size-3.5" strokeWidth={2.5} />
+                    Adaugă corespondență
+                  </button>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
               {dnscStatus !== "confirmed" && (

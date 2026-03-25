@@ -4,6 +4,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import {
   getDnscRegistrationStatus,
   readNis2State,
+  saveDnscRegistrationNumber,
   saveDnscRegistrationStatus,
   type DnscRegistrationStatus,
 } from "@/lib/server/nis2-store"
@@ -20,13 +21,23 @@ const VALID_STATUSES: DnscRegistrationStatus[] = [
 
 export async function GET() {
   const { orgId } = await getOrgContext()
-  const status = await getDnscRegistrationStatus(orgId)
-  return NextResponse.json({ status })
+  const nis2State = await readNis2State(orgId)
+  return NextResponse.json({
+    status: nis2State.dnscRegistrationStatus ?? "not-started",
+    registrationNumber: nis2State.dnscRegistrationNumber ?? null,
+    correspondence: nis2State.dnscRegistrationCorrespondence ?? [],
+  })
 }
 
 export async function PUT(req: Request) {
   const { orgId } = await getOrgContext()
-  const body = (await req.json()) as { status?: string }
+  const body = (await req.json()) as { status?: string; registrationNumber?: string }
+
+  // Update registration number if provided (without changing status)
+  if (body.registrationNumber !== undefined && !body.status) {
+    await saveDnscRegistrationNumber(orgId, body.registrationNumber)
+    return NextResponse.json({ ok: true })
+  }
 
   if (!body.status || !VALID_STATUSES.includes(body.status as DnscRegistrationStatus)) {
     return NextResponse.json({ error: "Status invalid" }, { status: 400 })
@@ -34,6 +45,9 @@ export async function PUT(req: Request) {
 
   const newStatus = body.status as DnscRegistrationStatus
   const state = await saveDnscRegistrationStatus(orgId, newStatus)
+  if (body.registrationNumber !== undefined) {
+    await saveDnscRegistrationNumber(orgId, body.registrationNumber)
+  }
 
   // Sync rescue finding in central board when DNSC status changes (V3 P0.2)
   const nis2State = await readNis2State(orgId)

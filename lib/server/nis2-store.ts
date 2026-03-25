@@ -218,6 +218,8 @@ export type Nis2OrgState = {
   vendors: Nis2Vendor[]
   updatedAtISO: string
   dnscRegistrationStatus?: DnscRegistrationStatus  // Sprint 4 — opțional, backward-safe
+  dnscRegistrationNumber?: string                  // GOLD 6 — număr înregistrare DNSC primit
+  dnscRegistrationCorrespondence?: Nis2DnscCorrespondence[]  // GOLD 6 — corespondență înregistrare
   maturityAssessment?: MaturityAssessment           // Sprint 2.6
   boardMembers?: BoardMember[]                      // Sprint 2.7
 }
@@ -563,6 +565,32 @@ export async function saveDnscRegistrationStatus(
 export async function getDnscRegistrationStatus(orgId: string): Promise<DnscRegistrationStatus> {
   const state = await readNis2State(orgId)
   return state.dnscRegistrationStatus ?? "not-started"
+}
+
+export async function saveDnscRegistrationNumber(orgId: string, number: string): Promise<void> {
+  const state = await readNis2State(orgId)
+  await writeNis2State(orgId, { ...state, dnscRegistrationNumber: number.trim() })
+}
+
+export async function addDnscRegistrationCorrespondenceEntry(
+  orgId: string,
+  entry: Omit<Nis2DnscCorrespondence, "id" | "createdAtISO">
+): Promise<Nis2DnscCorrespondence[]> {
+  const state = await readNis2State(orgId)
+  const newEntry: Nis2DnscCorrespondence = { ...entry, id: uid(), createdAtISO: new Date().toISOString() }
+  const correspondence = [...(state.dnscRegistrationCorrespondence ?? []), newEntry]
+  await writeNis2State(orgId, { ...state, dnscRegistrationCorrespondence: correspondence })
+  return correspondence
+}
+
+export async function deleteDnscRegistrationCorrespondenceEntry(
+  orgId: string,
+  entryId: string
+): Promise<Nis2DnscCorrespondence[]> {
+  const state = await readNis2State(orgId)
+  const correspondence = (state.dnscRegistrationCorrespondence ?? []).filter((e) => e.id !== entryId)
+  await writeNis2State(orgId, { ...state, dnscRegistrationCorrespondence: correspondence })
+  return correspondence
 }
 
 // ── Sprint 2.6: Maturity Assessment DNSC ─────────────────────────────────────
