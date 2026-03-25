@@ -7,6 +7,7 @@ import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
+import { executeAgent } from "@/lib/server/agent-orchestrator"
 
 export async function GET(request: Request) {
   try {
@@ -68,6 +69,10 @@ export async function POST(request: Request) {
       operationalImpactDetails: body.operationalImpactDetails?.trim(),
       measuresTaken: body.measuresTaken?.trim(),
     })
+
+    // Event trigger: run compliance_monitor immediately after incident creation (fire-and-forget).
+    // This kicks off SLA timer check (checkIncidentTimers) without waiting for next cron.
+    void executeAgent(orgId, "compliance_monitor").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ incident }, { status: 201 })
   } catch (error) {

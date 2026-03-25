@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import {
   Activity,
   Bot,
@@ -14,6 +15,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  ArrowRight,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -279,6 +281,79 @@ function ActionItem({ action }: { action: AgentAction }) {
   )
 }
 
+// ── L2 Pending Actions ────────────────────────────────────────────────────────
+
+/** Map action type → destination page where user takes action */
+function l2ActionHref(action: AgentAction): string {
+  switch (action.type) {
+    case "document_drafted": return "/dashboard/generator"
+    case "escalation_raised": return "/dashboard/resolve"
+    case "finding_created": return "/dashboard/resolve"
+    case "vendor_rescored": return "/dashboard/vendor-review"
+    case "review_triggered": return "/dashboard/vendor-review"
+    default: return "/dashboard/resolve"
+  }
+}
+
+type PendingL2Action = AgentAction & { agentType: AgentType; runId: string }
+
+function PendingActionsSection({ runs }: { runs: AgentOutput[] }) {
+  const router = useRouter()
+
+  // Collect all L2 actions (approvalLevel >= 2, not auto-applied) from all recent runs
+  const pendingActions: PendingL2Action[] = runs.flatMap((run) =>
+    run.actions
+      .filter((a) => !a.autoApplied && a.approvalLevel >= 2)
+      .map((a) => ({ ...a, agentType: run.agentType, runId: run.runId }))
+  )
+
+  if (pendingActions.length === 0) return null
+
+  return (
+    <section>
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-eos-text">Acțiuni în așteptare</h2>
+        <Badge variant="warning">{pendingActions.length}</Badge>
+      </div>
+      <Card className="border-eos-warning/30 bg-eos-warning-soft/10">
+        <CardContent className="p-0">
+          {pendingActions.map((action, i) => (
+            <div
+              key={`${action.runId}-${i}`}
+              className="flex items-start gap-3 border-b border-eos-border-subtle p-4 last:border-0"
+            >
+              <Clock className="mt-0.5 size-4 shrink-0 text-eos-warning" />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-xs font-medium text-eos-text-muted">
+                    {AGENT_LABELS[action.agentType]}
+                  </span>
+                  <Badge variant="outline" className="text-[10px]">
+                    {ACTION_TYPE_LABELS[action.type] ?? action.type}
+                  </Badge>
+                  <Badge variant="warning" className="text-[10px]">
+                    Nivel {action.approvalLevel} — necesită aprobare
+                  </Badge>
+                </div>
+                <p className="text-sm text-eos-text">{action.description}</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => router.push(l2ActionHref(action))}
+              >
+                Deschide
+                <ArrowRight className="ml-1.5 size-3.5" />
+              </Button>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </section>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AgentDashboardPage() {
@@ -376,6 +451,9 @@ export default function AgentDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* L2 Pending actions — shown only when there are actions waiting human approval */}
+      <PendingActionsSection runs={recentRuns} />
 
       {/* Agent cards */}
       <section>

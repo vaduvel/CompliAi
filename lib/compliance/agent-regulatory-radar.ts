@@ -40,35 +40,51 @@ type RegulatoryDeadline = {
 
 const KNOWN_DEADLINES: RegulatoryDeadline[] = [
   {
+    // Deadline trecut (aug 2025) — Art. 5 prohibitions sunt active
+    // Rămâne în lista pentru a genera escalare dacă ai sisteme AI interzise nereviewed
     id: "ai-act-art5-prohibitions",
     framework: "ai-act",
-    description: "EU AI Act — Art. 5 interdicții sisteme AI interzise intră în vigoare",
+    description: "EU AI Act — Art. 5 interdicții sisteme AI interzise (în vigoare din aug 2025)",
     deadlineISO: "2025-08-02T00:00:00.000Z",
     impactLevel: "critical",
     requiresAssessment: true,
   },
   {
+    // Deadline viitor (aug 2026) — cel mai important acum
     id: "ai-act-high-risk-annex-iii",
     framework: "ai-act",
-    description: "EU AI Act — Sisteme high-risk Annex III: obligații complete",
+    description: "EU AI Act — Sisteme high-risk Annex III: obligații complete + înregistrare EU DB",
     deadlineISO: "2026-08-02T00:00:00.000Z",
     impactLevel: "high",
     requiresAssessment: true,
   },
   {
+    // Deadline trecut (oct 2025) — NIS2 obligatorie, orice gap e escalare activă
     id: "nis2-full-compliance",
     framework: "nis2",
-    description: "NIS2 — Conformitate completă OUG 155/2024 + Legea 124/2025",
+    description: "NIS2 — Conformitate completă OUG 155/2024 + Legea 124/2025 (în vigoare din oct 2025)",
     deadlineISO: "2025-10-17T00:00:00.000Z",
     impactLevel: "critical",
     requiresAssessment: true,
   },
   {
+    // Deadline trecut (ian 2025) — e-Factura B2B obligatorie
+    // requiresAssessment: false → nu generează escalare pentru "assessment lipsă"
+    // Dar dacă nu ai SPV conectat → fiscal_sensor prinde asta separat
     id: "efactura-b2b-mandatory",
     framework: "efactura",
-    description: "e-Factura — Obligatoriu B2B pentru toți plătitorii de TVA",
+    description: "e-Factura — Obligatoriu B2B pentru toți plătitorii de TVA (în vigoare din ian 2025)",
     deadlineISO: "2025-01-01T00:00:00.000Z",
     impactLevel: "high",
+    requiresAssessment: false,
+  },
+  {
+    // Deadline viitor: GDPR — revizuire ghiduri EDPB pentru AI (estimat)
+    id: "gdpr-edpb-ai-guidelines",
+    framework: "gdpr",
+    description: "GDPR — Ghiduri EDPB privind AI și date personale: conformitate recomandată",
+    deadlineISO: "2026-12-31T00:00:00.000Z",
+    impactLevel: "medium",
     requiresAssessment: false,
   },
 ]
