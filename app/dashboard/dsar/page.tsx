@@ -80,6 +80,7 @@ export default function DsarPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [initialDrafts, setInitialDrafts] = useState<Record<string, DsarDraft>>({})
   const [form, setForm] = useState({
     requesterName: "",
     requesterEmail: "",
@@ -111,11 +112,16 @@ export default function DsarPage() {
         const err = await res.json()
         throw new Error(err.error ?? "Eroare")
       }
-      const { request } = await res.json()
+      const { request, draft } = await res.json()
       setRequests((prev) => [request, ...prev])
+      if (draft) setInitialDrafts((prev) => ({ ...prev, [request.id]: draft }))
       setForm({ requesterName: "", requesterEmail: "", requestType: "access", notes: "" })
       setShowForm(false)
-      toast.success("Cerere DSAR creată", { description: `Deadline: ${new Date(request.deadlineISO).toLocaleDateString("ro-RO")}` })
+      toast.success("Cerere DSAR creată", {
+        description: draft
+          ? `Deadline: ${new Date(request.deadlineISO).toLocaleDateString("ro-RO")} · Draft generat automat — expandează cererea.`
+          : `Deadline: ${new Date(request.deadlineISO).toLocaleDateString("ro-RO")}`,
+      })
     } catch (err) {
       toast.error("Eroare la creare", { description: err instanceof Error ? err.message : "Încearcă din nou." })
     } finally {
@@ -264,7 +270,7 @@ export default function DsarPage() {
 
       {/* Requests list */}
       {requests.map((req) => (
-        <DsarRow key={req.id} request={req} onUpdate={handleUpdate} onDelete={handleDelete} />
+        <DsarRow key={req.id} request={req} onUpdate={handleUpdate} onDelete={handleDelete} initialDraft={initialDrafts[req.id] ?? null} />
       ))}
     </div>
   )
@@ -283,16 +289,18 @@ function DsarRow({
   request: req,
   onUpdate,
   onDelete,
+  initialDraft = null,
 }: {
   request: DsarRequest
   onUpdate: (id: string, patch: Record<string, unknown>) => void
   onDelete: (id: string) => void
+  initialDraft?: DsarDraft | null
 }) {
   const dl = daysLeft(req.extendedDeadlineISO ?? req.deadlineISO)
   const isClosed = req.status === "responded" || req.status === "refused"
   const nextStatuses = NEXT_STATUSES[req.status]
-  const [expanded, setExpanded] = useState(false)
-  const [draft, setDraft] = useState<DsarDraft | null>(null)
+  const [expanded, setExpanded] = useState(initialDraft !== null)
+  const [draft, setDraft] = useState<DsarDraft | null>(initialDraft)
   const [draftLoading, setDraftLoading] = useState(false)
   const [showExtend, setShowExtend] = useState(false)
 

@@ -144,11 +144,14 @@ export function ReportsPageSurface() {
         <GeneratedDocumentsVault docs={cockpit.data.state.generatedDocuments} />
       )}
 
+      {/* Share token — vizibil deasupra fold pentru non-solo */}
+      {!isSolo ? <PartnerCounselPack /> : null}
+
       {/* Secondary: detailed info under fold */}
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
           <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-          {isSolo ? "Detalii snapshot și semnale" : "Detalii snapshot, handoff și semnale"}
+          {isSolo ? "Detalii snapshot și semnale" : "Detalii snapshot și semnale"}
         </summary>
         <div className="mt-4 space-y-6">
           <SnapshotStatusCard
@@ -156,8 +159,6 @@ export function ReportsPageSurface() {
             validatedBaseline={validatedBaseline}
             driftCount={activeDrifts.length}
           />
-
-          {!isSolo ? <PartnerCounselPack /> : null}
 
           {cockpit.data.compliancePack && (
             <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
