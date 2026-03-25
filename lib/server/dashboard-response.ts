@@ -11,6 +11,7 @@ import {
   hydrateEvidenceAttachmentsFromSupabase,
   loadEvidenceLedgerFromSupabase,
 } from "@/lib/server/supabase-evidence-read"
+import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
 
 export type DashboardPayload = {
   state: ComplianceState
@@ -35,7 +36,17 @@ export async function buildDashboardCorePayload(state: ComplianceState): Promise
   const workspace = await getOrgContext()
   const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
   const evidenceLedger = await loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId })
-  const normalizedState = normalizeComplianceState(hydratedState)
+
+  // MULT B — inject stale orgKnowledge finding at read time (time-dependent, computed from age)
+  const staleFinding = buildOrgKnowledgeStaleFinding(hydratedState.orgKnowledge, new Date().toISOString())
+  const stateWithStale = {
+    ...hydratedState,
+    findings: staleFinding
+      ? [...(hydratedState.findings ?? []).filter((f) => f.id !== "org-knowledge-stale"), staleFinding]
+      : (hydratedState.findings ?? []).filter((f) => f.id !== "org-knowledge-stale"),
+  }
+
+  const normalizedState = normalizeComplianceState(stateWithStale)
   const summary = computeDashboardSummary(normalizedState)
   const remediationPlan = buildRemediationPlan(normalizedState)
   const snapshot =

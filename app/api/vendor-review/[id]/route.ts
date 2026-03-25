@@ -9,6 +9,8 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { getReview, updateReview, deleteReview } from "@/lib/server/vendor-review-store"
+import { mutateState } from "@/lib/server/mvp-store"
+import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import {
   determineReviewCase,
   determineUrgency,
@@ -136,13 +138,35 @@ export async function PATCH(
       if (!hasEvidence) {
         return jsonError("Cel puțin o dovadă este obligatorie pentru închidere.", 400, "MISSING_EVIDENCE")
       }
+      const closedAtISO = new Date().toISOString()
       const updated = await updateReview(orgId, id, {
         status: "closed",
         closureEvidence: body.closureEvidence?.trim() || existing.closureEvidence,
-        closedAtISO: new Date().toISOString(),
+        closedAtISO,
         reviewCount: (existing.reviewCount ?? 0) + 1,
         auditTrail: appendAudit(existing.auditTrail, "closed", session.email),
       })
+
+      // MULT B — write vendor name to orgKnowledge when review is closed
+      const dateLabel = new Date(closedAtISO).toLocaleDateString("ro-RO")
+      void mutateState((s) => {
+        const knowledgeItems = s.orgKnowledge?.items ?? []
+        const vendorItem = makeKnowledgeItem(
+          "vendors",
+          existing.vendorName,
+          "vendor-review",
+          `Vendor review la ${dateLabel}`,
+          "high",
+        )
+        return {
+          ...s,
+          orgKnowledge: {
+            items: mergeKnowledgeItems(knowledgeItems, [vendorItem]),
+            lastUpdatedAtISO: closedAtISO,
+          },
+        }
+      })
+
       return NextResponse.json({ review: updated })
     }
 
