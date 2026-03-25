@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock } from "lucide-react"
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, FileText, RefreshCw, ClipboardCheck } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
@@ -69,63 +69,123 @@ function getFindingReviewBadge(
 
 // ── Resolution Layer (inline) ─────────────────────────────────────────────────
 
-const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string }> = [
-  { key: "problem",         label: "Problemă detectată" },
-  { key: "impact",          label: "Impact" },
-  { key: "action",          label: "Acțiune recomandată" },
-  { key: "generatedAsset",  label: "Asset generat" },
-  { key: "humanStep",       label: "Pas uman obligatoriu" },
-  { key: "closureEvidence", label: "Dovadă de închidere" },
-  { key: "revalidation",    label: "Revalidare" },
-]
+const DOC_LABELS: Record<string, string> = {
+  "privacy-policy":        "Politică de confidențialitate",
+  "cookie-policy":         "Politică de cookies",
+  "dpa":                   "DPA (Acord de prelucrare date)",
+  "ai-governance":         "Politică de utilizare AI",
+  "nis2-incident-response":"Plan de răspuns NIS2",
+}
+
+function getAutoAction(finding: ScanFinding): { label: string; href: string; icon: React.ReactNode } | null {
+  const id = finding.id
+  const docType = finding.suggestedDocumentType
+
+  // Finding generat de NIS2 assessment → du-te să actualizezi evaluarea
+  if (id.startsWith("nis2-finding-")) {
+    return {
+      label: "Actualizează evaluarea NIS2",
+      href: "/dashboard/nis2",
+      icon: <ClipboardCheck className="size-3.5" strokeWidth={2} />,
+    }
+  }
+
+  // Finding de site scan → re-scanează
+  if (id.startsWith("site-") || finding.sourceDocument?.toLowerCase().includes("scan")) {
+    return {
+      label: "Re-scanează site-ul",
+      href: "/dashboard/scan",
+      icon: <RefreshCw className="size-3.5" strokeWidth={2} />,
+    }
+  }
+
+  // Finding cu document sugerat → generează documentul direct
+  if (docType && DOC_LABELS[docType]) {
+    return {
+      label: `Generează ${DOC_LABELS[docType]}`,
+      href: `/dashboard/documente?generate=${docType}`,
+      icon: <FileText className="size-3.5" strokeWidth={2} />,
+    }
+  }
+
+  return null
+}
 
 function ResolutionLayer({ finding }: { finding: ScanFinding }) {
   const res = finding.resolution
-  const activeIdx = res ? RESOLUTION_STEPS.findIndex((s) => !res[s.key]) : 0
-  const currentStep = activeIdx === -1 ? RESOLUTION_STEPS.length : activeIdx
+  const [showMore, setShowMore] = useState(false)
+
+  const action = res?.humanStep || res?.action || finding.remediationHint || finding.detail
+  const evidence = res?.closureEvidence
+  const impact = res?.impact
+  const generated = res?.generatedAsset
+  const autoAction = getAutoAction(finding)
 
   return (
-    <div className="border-t border-eos-border-subtle px-5 py-5">
-      <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.06em] text-eos-text-tertiary">
-        Resolution Layer{finding.legalReference ? ` · ${finding.legalReference}` : ""}
-      </p>
-      <div className="space-y-4">
-        {RESOLUTION_STEPS.map((step, idx) => {
-          const isDone = idx < currentStep
-          const isActive = idx === currentStep
-          const text = (res?.[step.key] as string | undefined)
-            ?? (isActive ? (finding.remediationHint ?? finding.detail) : undefined)
-          return (
-            <div key={step.key} className="flex gap-3.5">
-              <div className="flex w-6 flex-col items-center">
-                <div
-                  className={[
-                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                    isDone
-                      ? "border border-eos-success/40 bg-eos-success-soft text-eos-success"
-                      : isActive
-                        ? "border border-eos-border-strong bg-eos-bg-inset text-eos-text shadow-[0_0_0_3px_hsl(145_60%_48%/0.15)]"
-                        : "border border-eos-border-subtle bg-eos-bg-inset text-eos-text-muted",
-                  ].join(" ")}
-                >
-                  {isDone ? "✓" : idx + 1}
-                </div>
-                {idx < RESOLUTION_STEPS.length - 1 && (
-                  <div className="mt-1 w-px flex-1 bg-eos-border-subtle" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1 pt-0.5">
-                <p className={["mb-0.5 text-[11px] font-semibold", isDone ? "text-eos-success" : isActive ? "text-eos-text-tertiary" : "text-eos-text-muted"].join(" ")}>
-                  {step.label}
-                </p>
-                <p className={["text-sm leading-relaxed", isDone ? "text-eos-text-muted" : isActive ? "text-eos-text" : "text-eos-text-muted"].join(" ")}>
-                  {text ?? "—"}
-                </p>
-              </div>
+    <div className="border-t border-eos-border-subtle px-5 py-4 space-y-3">
+
+      {/* Acțiune automată — dacă avem ceva de declanșat */}
+      {autoAction && (
+        <Link
+          href={autoAction.href}
+          className="flex items-center gap-2.5 rounded-eos-md bg-eos-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-eos-primary/90 transition-colors w-fit"
+        >
+          {autoAction.icon}
+          {autoAction.label}
+          <ArrowRight className="size-3.5 ml-auto" strokeWidth={2} />
+        </Link>
+      )}
+
+      {/* Ce faci tu — acțiunea manuală (dacă nu e totul automatizat) */}
+      {action && (
+        <div className={["rounded-eos-md border px-4 py-3", autoAction ? "bg-eos-bg-inset border-eos-border-subtle" : "bg-eos-primary/8 border-eos-primary/20"].join(" ")}>
+          <p className={["text-[11px] font-semibold uppercase tracking-[0.05em] mb-1", autoAction ? "text-eos-text-muted" : "text-eos-primary"].join(" ")}>
+            {autoAction ? "Sau faci manual" : "Ce faci acum"}
+          </p>
+          <p className="text-sm text-eos-text leading-relaxed">{action}</p>
+        </div>
+      )}
+
+      {/* Dovada necesară */}
+      {evidence && (
+        <div className="rounded-eos-md bg-eos-bg-inset border border-eos-border-subtle px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted mb-1">
+            Ce dovadă încarci
+          </p>
+          <p className="text-sm text-eos-text-secondary leading-relaxed">{evidence}</p>
+        </div>
+      )}
+
+      {/* Detalii suplimentare — colapsate */}
+      {(impact || generated || finding.legalReference) && (
+        <button
+          type="button"
+          onClick={() => setShowMore((v) => !v)}
+          className="flex items-center gap-1.5 text-[11px] text-eos-text-muted hover:text-eos-text transition-colors"
+        >
+          {showMore ? <ChevronDown className="size-3" strokeWidth={2} /> : <ChevronRight className="size-3" strokeWidth={2} />}
+          {showMore ? "Ascunde detalii" : "Impact · ce generează CompliAI"}
+        </button>
+      )}
+      {showMore && (
+        <div className="space-y-2 pl-1">
+          {impact && (
+            <div>
+              <p className="text-[11px] font-semibold text-eos-text-muted mb-0.5">Impact dacă nu rezolvi</p>
+              <p className="text-sm text-eos-text-muted leading-relaxed">{impact}</p>
             </div>
-          )
-        })}
-      </div>
+          )}
+          {generated && (
+            <div>
+              <p className="text-[11px] font-semibold text-eos-text-muted mb-0.5">Ce generează CompliAI</p>
+              <p className="text-sm text-eos-text-muted leading-relaxed">{generated}</p>
+            </div>
+          )}
+          {finding.legalReference && (
+            <p className="text-[11px] text-eos-text-tertiary">Ref. legală: {finding.legalReference}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

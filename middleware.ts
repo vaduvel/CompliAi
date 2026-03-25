@@ -105,8 +105,9 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith("/api/")
   const isDemoBootRoute = pathname.startsWith("/api/demo/")
   const isStripeWebhookRoute = pathname === "/api/stripe/webhook"
+  const isPublicWhistleblowingSubmit = pathname === "/api/whistleblowing/submit"
 
-  if (isDemoBootRoute || isStripeWebhookRoute) {
+  if (isDemoBootRoute || isStripeWebhookRoute || isPublicWhistleblowingSubmit) {
     return NextResponse.next()
   }
 
@@ -155,6 +156,6 @@ export const config = {
     "/dashboard/:path*",
     "/portfolio/:path*",
     "/onboarding",
-    "/api/((?!auth|demo|stripe/webhook).*)",
+    "/api/((?!auth|demo|stripe/webhook|whistleblowing/submit).*)",
   ],
 }
