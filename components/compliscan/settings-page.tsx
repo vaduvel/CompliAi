@@ -107,6 +107,18 @@ const OrgKnowledgePanelLazy = dynamic(
   { ssr: false }
 )
 
+const SettingsBillingEmbed = dynamic(
+  () =>
+    import("@/components/compliscan/settings-billing-page").then(
+      (mod) => mod.SettingsBillingPageSurface
+    ),
+  {
+    loading: () => (
+      <OperationalLoadingCard>Incarcam datele de facturare...</OperationalLoadingCard>
+    ),
+  }
+)
+
 const SettingsOperationalTab = dynamic(
   () =>
     import("@/components/compliscan/settings/settings-operational-tab").then(
@@ -144,6 +156,11 @@ const SETTINGS_VIEW_TABS = [
     value: "notificari",
     label: "Notificari",
     description: "Email si webhook la evenimente.",
+  },
+  {
+    value: "facturare",
+    label: "Plan & Facturare",
+    description: "Abonament, upgrade si facturi.",
   },
   {
     value: "avansat",
@@ -188,7 +205,7 @@ export function SettingsPageSurface() {
     currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
   const isSolo = runtime?.userMode === "solo"
   const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) =>
-    isSolo ? ["workspace", "acces", "notificari"].includes(tab.value) : true
+    isSolo ? ["workspace", "acces", "notificari", "facturare"].includes(tab.value) : true
   )
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
@@ -380,13 +397,7 @@ export function SettingsPageSurface() {
             </Badge>
           </>
         }
-        actions={
-          isSolo ? (
-            <Button asChild variant="outline">
-              <Link href="/dashboard/settings/abonament">Plan & Facturare</Link>
-            </Button>
-          ) : undefined
-        }
+        actions={undefined}
       />
 
       <Tabs defaultValue="workspace" className="space-y-6">
@@ -944,6 +955,10 @@ export function SettingsPageSurface() {
               </Button>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="facturare" className="space-y-6">
+          <SettingsBillingEmbed />
         </TabsContent>
 
         <TabsContent value="avansat" className="space-y-6">

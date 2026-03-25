@@ -12,7 +12,9 @@ import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type NextBestActionProps = {
   task: CockpitTask | null
+  additionalTasks?: CockpitTask[]
   onResolve: () => void
+  onResolveTask?: (taskId: string) => void
   hasEvidence: boolean
   activeRiskCount: number
 }
@@ -63,7 +65,9 @@ function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
 
 export function NextBestAction({
   task,
+  additionalTasks = [],
   onResolve,
+  onResolveTask,
   hasEvidence,
   activeRiskCount,
 }: NextBestActionProps) {
@@ -173,6 +177,34 @@ export function NextBestAction({
             <ArrowRight className="size-5" strokeWidth={2} />
           </Button>
         </div>
+
+        {additionalTasks.length > 0 ? (
+          <div className="mt-5 border-t border-eos-border-subtle pt-4 space-y-2">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted mb-3">
+              Urmează în coadă
+            </p>
+            {additionalTasks.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center gap-3 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2.5"
+              >
+                <Badge className={`shrink-0 text-[10px] ${priorityClasses(t.priority)}`}>
+                  {t.priority}
+                </Badge>
+                <span className="min-w-0 flex-1 truncate text-sm text-eos-text">{t.title}</span>
+                <Badge className={`shrink-0 text-[10px] ${severityClasses(t.severity)}`}>
+                  {severityLabel(t.severity)}
+                </Badge>
+                <button
+                  onClick={() => onResolveTask?.(t.id)}
+                  className="shrink-0 text-xs text-eos-primary hover:underline"
+                >
+                  Deschide
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )
