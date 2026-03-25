@@ -294,6 +294,10 @@ export function TaskCard({
               </div>
 
               {task.resolution && <ResolutionPath resolution={task.resolution} />}
+
+              {task.validationLevel >= 2 && (
+                <ValidationLevelBlock level={task.validationLevel} />
+              )}
             </div>
 
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
