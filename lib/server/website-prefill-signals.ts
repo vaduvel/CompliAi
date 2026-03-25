@@ -320,6 +320,7 @@ function createWebsiteSeedPrefill(normalizedWebsite: string): OrgProfilePrefill 
     address: null,
     legalForm: null,
     mainCaen: null,
+    caenDescription: null,
     fiscalStatus: null,
     vatRegistered: false,
     vatOnCashAccounting: false,

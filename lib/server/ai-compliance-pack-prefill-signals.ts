@@ -114,6 +114,7 @@ function createAICompliancePackSeedPrefill(pack: AICompliancePack): OrgProfilePr
     address: null,
     legalForm: null,
     mainCaen: null,
+    caenDescription: null,
     fiscalStatus: null,
     vatRegistered: false,
     vatOnCashAccounting: false,

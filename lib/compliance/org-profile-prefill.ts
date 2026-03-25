@@ -50,6 +50,7 @@ export type OrgProfilePrefill = {
   address: string | null
   legalForm: string | null
   mainCaen: string | null
+  caenDescription: string | null   // ex: "Activități de publicitate" pentru CAEN 7311
   fiscalStatus: string | null
   vatRegistered: boolean
   vatOnCashAccounting: boolean
