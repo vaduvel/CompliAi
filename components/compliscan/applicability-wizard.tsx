@@ -314,12 +314,24 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
         <div className="mt-5">
           {step === "cui" && (
             <div className="space-y-3">
-              <p className="text-sm font-medium text-eos-text">
-                CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional)</span>
-              </p>
-              <p className="text-xs text-eos-text-muted">
-                Îl folosim pentru prefill ANAF. Dacă îl combini cu website-ul public, onboarding-ul poate deduce și obligațiile de site.
-              </p>
+              <div>
+                <p className="text-sm font-medium text-eos-text">
+                  CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional, recomandat)</span>
+                </p>
+                <p className="mt-0.5 text-xs text-eos-text-muted">
+                  Codul de identificare fiscală (8–10 cifre, ex: RO12345678).{" "}
+                  <span className="text-eos-text-muted">Îl găsești pe orice factură emisă de firmă sau pe{" "}
+                    <a
+                      href="https://www.anaf.ro/anaf/internet/RO/cautare-persoane-juridice"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-eos-text"
+                    >
+                      anaf.ro
+                    </a>.
+                  </span>
+                </p>
+              </div>
               <input
                 type="text"
                 value={values.cui}
@@ -329,7 +341,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
                   setOrgPrefill(null)
                   setPrefillError(null)
                 }}
-                placeholder="Ex: RO12345678"
+                placeholder="Ex: RO12345678 sau 12345678"
                 className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
                 onBlur={() => void handleCuiBlur()}
                 onKeyDown={(e) => {
@@ -349,14 +361,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
                     setOrgPrefill(null)
                     setPrefillError(null)
                   }}
-                  placeholder="Ex: https://exemplu.ro"
+                  placeholder="Ex: https://firmatamea.ro"
                   className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
                   }}
                 />
                 <p className="text-xs text-eos-text-muted">
-                  Detectăm doar semnalele publice vizibile: formulare, privacy policy, cookies sau newsletter.
+                  Analizăm semnalele publice: formulare de contact, cookie banner, newsletter, politica de confidențialitate.
                 </p>
               </div>
               {prefillError ? (
@@ -463,12 +475,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
 
           {step === "ai" && (
             <div className="space-y-3">
-              <p className="text-sm font-medium text-eos-text">
-                Folosiți unelte AI în firmă?
-              </p>
-              <p className="text-xs text-eos-text-muted">
-                Exemplu: ChatGPT, Copilot, Gemini sau orice clasificator / asistent automat.
-              </p>
+              <div>
+                <p className="text-sm font-medium text-eos-text">
+                  Folosiți unelte AI în activitatea firmei?
+                </p>
+                <p className="mt-0.5 text-xs text-eos-text-muted">
+                  Exemple: ChatGPT, Copilot, Gemini, Google Translate, un chatbot pe site, un tool de recrutare automatizat sau orice alt asistent automat. Dacă nu ești sigur, alege <strong className="font-medium">Da</strong> — poți corecta mai târziu.
+                </p>
+              </div>
               {orgPrefill?.aiSignals ? (
                 <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
@@ -527,9 +541,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
 
           {step === "efactura" && (
             <div className="space-y-3">
-              <p className="text-sm font-medium text-eos-text">
-                Facturezi B2B cu obligație de e-Factura / SPV ANAF?
-              </p>
+              <div>
+                <p className="text-sm font-medium text-eos-text">
+                  Trimiți facturi electronice prin SPV ANAF (e-Factura)?
+                </p>
+                <p className="mt-0.5 text-xs text-eos-text-muted">
+                  E-Factura este obligatorie pentru firmele care emit facturi B2B în România. Dacă facturezi alte companii (nu doar persoane fizice), probabil da. Dacă nu ești sigur, alege <strong className="font-medium">Da</strong>.
+                </p>
+              </div>
               {orgPrefill?.suggestions.requiresEfactura ? (
                 <PrefillSuggestionCard
                   label="Sugestie ANAF"

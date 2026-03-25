@@ -27,9 +27,9 @@ const filters: Array<{ value: FilterValue; label: string }> = [
   { value: "P1", label: "P1 · Urgente" },
   { value: "P2", label: "P2 · Importante" },
   { value: "P3", label: "P3 · Optionale" },
-  { value: "L1", label: "L1 · Auto-validat" },
-  { value: "L2", label: "L2 · Confirmare internă" },
-  { value: "L3", label: "L3 · Validare specialist" },
+  { value: "L1", label: "Validat automat" },
+  { value: "L2", label: "Confirmat intern" },
+  { value: "L3", label: "Validat de expert" },
   { value: "DONE", label: "Închise" },
 ]
 

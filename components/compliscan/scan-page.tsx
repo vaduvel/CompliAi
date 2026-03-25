@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import { Bot, ChevronRight } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -190,8 +191,30 @@ export function ScanPageSurface() {
   }
   const isSolo = runtime?.userMode === "solo"
 
+  const criticalOrHighFindings = latestDocumentFindings.filter(
+    (f) => f.severity === "critical" || f.severity === "high"
+  )
+
   return (
     <div className="space-y-8">
+      {latestDocumentFindings.length > 0 && viewMode === "flow" ? (
+        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft px-4 py-3">
+          <AlertTriangle className="size-4 shrink-0 text-eos-warning" strokeWidth={2} />
+          <p className="flex-1 text-sm text-eos-text">
+            <span className="font-semibold">{latestDocumentFindings.length} probleme identificate</span>
+            {criticalOrHighFindings.length > 0
+              ? ` — ${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată`
+              : " din ultima scanare"}
+          </p>
+          <Link
+            href="/dashboard/resolve"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-md bg-eos-warning px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+          >
+            Rezolvă acum
+            <ArrowRight className="size-3" strokeWidth={2.5} />
+          </Link>
+        </div>
+      ) : null}
       <PageIntro
         eyebrow="Scanare"
         title={isSolo ? "Scanezi și revii în fluxul firmei" : "Pornesti analiza din sursa potrivita"}

@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
+import { ArrowLeft, Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { TrialBanner } from "@/components/compliscan/billing/trial-banner"
@@ -357,6 +357,20 @@ export function DashboardShell({
             </div>
           ) : null}
           <TrialBanner />
+          {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" ? (
+            <div className="mb-4 flex items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary-soft px-4 py-2.5">
+              <span className="text-xs font-medium text-eos-primary shrink-0">Lucrezi pentru:</span>
+              <span className="truncate text-sm font-semibold text-eos-text">{currentUser.orgName}</span>
+              <button
+                onClick={() => void handleSwitchWorkspaceMode("portfolio")}
+                disabled={switchingWorkspaceMode === "portfolio"}
+                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-eos-md px-2.5 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
+              >
+                <ArrowLeft className="size-3" strokeWidth={2} />
+                Portofoliu
+              </button>
+            </div>
+          ) : null}
           <DashboardRuntimeProvider user={currentUser}>
             {children}
             <footer className="mt-12 pb-4">

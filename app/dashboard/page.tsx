@@ -160,7 +160,11 @@ export default function DashboardPage() {
         <section aria-label="Actiunea recomandata acum">
           <NextBestAction
             task={nextBestAction}
+            additionalTasks={openTasks
+              .filter((t) => t.id !== nextBestAction?.id)
+              .slice(0, 2)}
             onResolve={() => router.push(dashboardRoutes.resolve)}
+            onResolveTask={(id) => router.push(`${dashboardRoutes.resolve}?taskId=${id}`)}
             hasEvidence={hasBaselineEvidence}
             activeRiskCount={activeRiskCount}
           />
@@ -170,13 +174,55 @@ export default function DashboardPage() {
       {/* ── Summary strip — compact health ─────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
-          <SummaryMetric label="Conformitate globală"  value={`${data.summary.score}%`} />
+          <SummaryMetric
+            label="Conformitate globală"
+            value={`${data.summary.score}%`}
+            trend={
+              benchmark
+                ? {
+                    delta: data.summary.score - benchmark.medie,
+                    label: "% față de sector",
+                  }
+                : undefined
+            }
+          />
           <SummaryMetric label="Acțiuni active"        value={String(openTasks.length)}     alert={openTasks.length > 0} />
           <SummaryMetric label="Modificări detectate"  value={String(activeDrifts.length)}  alert={activeDrifts.length > 0} />
           <SummaryMetric label="Documente procesate"   value={String(state.scans.length)} />
           <SummaryMetric label="Stare audit"           value={auditStatusLabel} />
         </div>
       </section>
+
+      {/* ── Benchmark sector widget ─────────────────────────────────────────── */}
+      {benchmark && state.orgProfile && (
+        <section aria-label="Comparatie sector">
+          <div className="flex items-center gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+            <BarChart3 className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-eos-text">
+                Ești în top{" "}
+                <span className={benchmark.percentil <= 33 ? "text-eos-success" : benchmark.percentil <= 66 ? "text-eos-warning" : "text-eos-error"}>
+                  {benchmark.percentil}%
+                </span>{" "}
+                din firme din sectorul{" "}
+                <span className="font-semibold">{benchmark.sector}</span>
+              </p>
+              <p className="mt-0.5 text-xs text-eos-text-muted">
+                Media sectorului: {benchmark.medie}% · Scorul tău: {data.summary.score}% · Bazat pe {benchmark.nrFirme} firme similare
+              </p>
+            </div>
+            <Badge
+              className={`shrink-0 ${
+                data.summary.score >= benchmark.medie
+                  ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+                  : "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+              }`}
+            >
+              {data.summary.score >= benchmark.medie ? "Peste medie" : "Sub medie"}
+            </Badge>
+          </div>
+        </section>
+      )}
 
       {/* ── Calendar widget (MULT C) ─────────────────────────────────────────── */}
       {state.orgProfile && <CalendarWidget />}
@@ -541,15 +587,36 @@ function DnscRegistrationBanner() {
   )
 }
 
-function SummaryMetric({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+function SummaryMetric({
+  label,
+  value,
+  alert = false,
+  trend,
+}: {
+  label: string
+  value: string
+  alert?: boolean
+  trend?: { delta: number; label: string }
+}) {
   return (
     <div className="flex flex-col gap-0.5 px-5 py-3.5">
       <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
         {label}
       </span>
-      <span className={`text-lg font-semibold ${alert ? "text-eos-warning" : "text-eos-text"}`}>
-        {value}
-      </span>
+      <div className="flex items-baseline gap-1.5">
+        <span className={`text-lg font-semibold ${alert ? "text-eos-warning" : "text-eos-text"}`}>
+          {value}
+        </span>
+        {trend && trend.delta !== 0 ? (
+          <span
+            className={`text-[11px] font-medium ${
+              trend.delta > 0 ? "text-eos-success" : "text-eos-error"
+            }`}
+          >
+            {trend.delta > 0 ? "▲" : "▼"} {Math.abs(trend.delta)}{trend.label}
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }
