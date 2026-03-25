@@ -12,6 +12,13 @@ import {
   loadEvidenceLedgerFromSupabase,
 } from "@/lib/server/supabase-evidence-read"
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
+import { readDsarState } from "@/lib/server/dsar-store"
+
+export type DsarDashboardSummary = {
+  total: number
+  urgent: number   // deadline ≤ 5 zile
+  dueToday: number // deadline azi
+}
 
 export type DashboardPayload = {
   state: ComplianceState
@@ -21,6 +28,7 @@ export type DashboardPayload = {
   compliancePack: AICompliancePack
   traceabilityMatrix: ComplianceTraceRecord[]
   evidenceLedger?: EvidenceRegistryEntry[]
+  dsarSummary: DsarDashboardSummary
 }
 
 export type DashboardCorePayload = {
@@ -71,6 +79,22 @@ export async function buildDashboardCorePayload(state: ComplianceState): Promise
 export async function buildDashboardPayload(state: ComplianceState) {
   const core = await buildDashboardCorePayload(state)
 
+  // Fix #3 — aggregate DSAR summary for sidebar badge + dashboard widgets
+  const dsarState = await readDsarState(core.workspace.orgId)
+  const nowMs = Date.now()
+  const openDsar = dsarState.requests.filter((r) => r.status !== "responded" && r.status !== "refused")
+  const dsarSummary: DsarDashboardSummary = {
+    total: openDsar.length,
+    urgent: openDsar.filter((r) => {
+      const ms = new Date(r.deadlineISO).getTime() - nowMs
+      return ms >= 0 && ms <= 5 * 86_400_000
+    }).length,
+    dueToday: openDsar.filter((r) => {
+      const ms = new Date(r.deadlineISO).getTime() - nowMs
+      return ms >= 0 && ms <= 86_400_000
+    }).length,
+  }
+
   return {
     state: core.state,
     summary: core.summary,
@@ -88,5 +112,6 @@ export async function buildDashboardPayload(state: ComplianceState) {
       snapshot: core.snapshot,
     }),
     evidenceLedger: core.evidenceLedger,
+    dsarSummary,
   } satisfies DashboardPayload
 }

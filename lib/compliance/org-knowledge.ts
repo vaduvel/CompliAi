@@ -21,6 +21,7 @@ export type OrgKnowledgeSource =
   | "privacy-policy-wizard"
   | "dsar"
   | "ai-systems"
+  | "orgProfile"
   | "manual"
 
 export type OrgKnowledgeItem = {

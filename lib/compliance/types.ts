@@ -427,6 +427,8 @@ export type ComplianceState = {
   siteScan?: SiteScanSummary
   // ── Multiplicator B: Progressive Data Enrichment ─────────────────────────
   orgKnowledge?: import("@/lib/compliance/org-knowledge").OrgKnowledge
+  // ── Fix #7: Async site scan jobs ─────────────────────────────────────────
+  siteScanJobs?: Record<string, SiteScanJob>
 }
 
 export type SiteScanSummary = {
@@ -438,6 +440,16 @@ export type SiteScanSummary = {
   hasCookieBanner: boolean
   hasPrivacyPolicy: boolean
   findingCount: number
+}
+
+export type SiteScanJob = {
+  jobId: string
+  url: string
+  status: "queued" | "processing" | "done" | "error" | "timeout"
+  createdAtISO: string
+  completedAtISO?: string
+  result?: import("@/lib/compliance/site-scanner").SiteScanResult
+  error?: string
 }
 
 export type ComplianceStreak = {

@@ -134,7 +134,7 @@ export async function PATCH(
         incident.anspdcpNotification?.status,
         new Date().toISOString()
       )
-      void mutateState((s) => ({
+      await mutateState((s) => ({
         ...s,
         findings: finding
           ? [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding]
