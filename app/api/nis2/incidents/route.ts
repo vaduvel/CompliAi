@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         new Date().toISOString()
       )
       if (finding) {
-        void mutateState((s) => ({
+        await mutateState((s) => ({
           ...s,
           findings: [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding],
         }))

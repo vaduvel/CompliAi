@@ -1,4 +1,5 @@
 // S2.3 — DSAR per-request: PATCH update / DELETE
+// Auto C: acceptă și câmpul `action` pentru workflow shortcuts
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
@@ -12,6 +13,21 @@ const VALID_STATUSES: DsarStatus[] = [
   "received", "in_progress", "awaiting_verification", "responded", "refused",
 ]
 
+// Action → field update map for common workflow steps
+function resolveAction(action: string): Record<string, unknown> | null {
+  const now = new Date().toISOString()
+  const extended = new Date(Date.now() + 60 * 86_400_000).toISOString()
+  const actions: Record<string, Record<string, unknown>> = {
+    "verify-identity":     { identityVerified: true, status: "in_progress" },
+    "start-processing":    { status: "in_progress" },
+    "await-verification":  { status: "awaiting_verification" },
+    "mark-responded":      { status: "responded", respondedAtISO: now },
+    "refuse":              { status: "refused" },
+    "extend-deadline":     { extendedDeadlineISO: extended },
+  }
+  return actions[action] ?? null
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -21,12 +37,21 @@ export async function PATCH(
     const { id } = await params
     const body = await request.json()
 
-    if (body.status && !VALID_STATUSES.includes(body.status)) {
+    // Auto C: resolve action shortcut to field updates
+    let updates = { ...body }
+    if (body.action) {
+      const resolved = resolveAction(body.action)
+      if (!resolved) return jsonError(`Acțiune necunoscută: ${body.action}.`, 400, "INVALID_ACTION")
+      const { action: _removed, ...rest } = updates
+      updates = { ...resolved, ...rest }
+    }
+
+    if (updates.status && !VALID_STATUSES.includes(updates.status as DsarStatus)) {
       return jsonError("Status invalid.", 400, "INVALID_STATUS")
     }
 
     const { orgId } = await getOrgContext()
-    const updated = await updateDsar(orgId, id, body)
+    const updated = await updateDsar(orgId, id, updates)
     if (!updated) return jsonError("Cererea DSAR nu a fost găsită.", 404, "NOT_FOUND")
 
     return NextResponse.json({ request: updated })

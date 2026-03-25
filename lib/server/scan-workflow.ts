@@ -283,9 +283,28 @@ export async function analyzeExtractedScan(
   })
 
   // Merge: Gemini (primary) → keyword (complement) → legacy LLM (supplement)
+  // Deduplicate within the batch on (title, sourceDocument) before persisting
+  const rawFindings = [...geminiResult.findings, ...keywordResult.findings, ...llmResult.findings]
+  const seenFindingKeys = new Set<string>()
+  const dedupedFindings = rawFindings.filter((f) => {
+    const key = `${f.title.toLowerCase().trim()}__${(f.sourceDocument ?? "").toLowerCase().trim()}`
+    if (seenFindingKeys.has(key)) return false
+    seenFindingKeys.add(key)
+    return true
+  })
+
+  const rawAlerts = keywordResult.alerts
+  const seenAlertKeys = new Set<string>()
+  const dedupedAlerts = rawAlerts.filter((a) => {
+    const key = `${a.message.toLowerCase().trim()}__${a.scanId ?? ""}`
+    if (seenAlertKeys.has(key)) return false
+    seenAlertKeys.add(key)
+    return true
+  })
+
   const result = {
-    findings: [...geminiResult.findings, ...keywordResult.findings, ...llmResult.findings],
-    alerts: keywordResult.alerts,
+    findings: dedupedFindings,
+    alerts: dedupedAlerts,
     highRiskDelta: keywordResult.highRiskDelta,
     lowRiskDelta: keywordResult.lowRiskDelta,
   }

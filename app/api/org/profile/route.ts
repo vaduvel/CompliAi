@@ -25,12 +25,27 @@ import {
   buildPayTransparencyFinding,
   PAY_TRANSPARENCY_FINDING_ID,
 } from "@/lib/compliance/pay-transparency-rule"
+import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import { trackEvent } from "@/lib/server/analytics"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
   "public-admin", "finance", "retail", "manufacturing", "professional-services", "other",
 ]
+
+const SECTOR_LABELS: Record<OrgSector, string> = {
+  energy: "Energie",
+  transport: "Transport",
+  banking: "Servicii financiar-bancare",
+  health: "Sănătate",
+  "digital-infrastructure": "Infrastructură digitală",
+  "public-admin": "Administrație publică",
+  finance: "Finanțe",
+  retail: "Comerț",
+  manufacturing: "Producție",
+  "professional-services": "Servicii profesionale",
+  other: "Alte servicii",
+}
 
 const VALID_EMPLOYEE_COUNTS: OrgEmployeeCount[] = ["1-9", "10-49", "50-249", "250+"]
 const VALID_INTAKE_ANSWERS: IntakeAnswer[] = [
@@ -137,6 +152,29 @@ export async function POST(request: Request) {
         findings: allFindings,
         intakeAnswers,
         intakeCompletedAtISO,
+      }
+    })
+
+    // Auto A — write orgKnowledge from org profile (sector + tools)
+    const profileSavedAtISO = orgProfile.completedAtISO
+    const profileDateLabel = new Date(profileSavedAtISO).toLocaleDateString("ro-RO")
+    void mutateState((s) => {
+      const items = s.orgKnowledge?.items ?? []
+      const newItems = []
+      const sectorLabel = SECTOR_LABELS[orgProfile.sector] ?? orgProfile.sector
+      newItems.push(makeKnowledgeItem("processing-purposes", sectorLabel, "orgProfile", `Profil org actualizat la ${profileDateLabel}`, "high"))
+      if (orgProfile.usesAITools) {
+        newItems.push(makeKnowledgeItem("tools", "Instrumente AI", "orgProfile", `Profil org actualizat la ${profileDateLabel}`, "high"))
+      }
+      if (orgProfile.requiresEfactura) {
+        newItems.push(makeKnowledgeItem("tools", "e-Factura / SPV", "orgProfile", `Profil org actualizat la ${profileDateLabel}`, "high"))
+      }
+      return {
+        ...s,
+        orgKnowledge: {
+          items: mergeKnowledgeItems(items, newItems),
+          lastUpdatedAtISO: profileSavedAtISO,
+        },
       }
     })
 

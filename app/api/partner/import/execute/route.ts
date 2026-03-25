@@ -65,10 +65,11 @@ export async function POST(request: Request) {
     })
 
     if (!planStatus.planType || planStatus.maxOrgs === null) {
-      throw new AuthzError(
-        "Ai nevoie de un plan Partner pe cont.",
+      return jsonError(
+        "Import multiplu clienți necesită planul Partner. Upgradează-ți contul pentru a importa firme.",
         403,
-        "PARTNER_PLAN_REQUIRED"
+        "PARTNER_PLAN_REQUIRED",
+        { upgradeUrl: "/pricing", hint: "Planul Partner permite import nelimitat de clienți." }
       )
     }
 
