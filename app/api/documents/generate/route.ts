@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 
+export const maxDuration = 60
+
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole, AuthzError } from "@/lib/server/auth"

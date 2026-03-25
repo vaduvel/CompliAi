@@ -266,6 +266,7 @@ export async function generateDocument(
         },
       }),
       cache: "no-store",
+      signal: AbortSignal.timeout(55_000),
     }
   )
 

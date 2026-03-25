@@ -722,7 +722,7 @@ export default function GeneratorPage() {
                 {generating ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Se generează…
+                    Se generează… (poate dura 20–30s)
                   </>
                 ) : (
                   <>
