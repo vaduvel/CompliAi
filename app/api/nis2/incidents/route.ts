@@ -9,6 +9,7 @@ import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 import { mutateState } from "@/lib/server/mvp-store"
+import { executeAgent } from "@/lib/server/agent-orchestrator"
 
 export async function GET(request: Request) {
   try {
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
       involvesPersonalData: body.involvesPersonalData,
     })
 
-    // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP în De rezolvat
+    // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP
     if (incident.involvesPersonalData) {
       const finding = buildAnspdcpBreachFinding(
         incident.id,
@@ -88,6 +89,9 @@ export async function POST(request: Request) {
         }))
       }
     }
+
+    // Event trigger: compliance_monitor imediat după creare (fire-and-forget)
+    void executeAgent(orgId, "compliance_monitor").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ incident }, { status: 201 })
   } catch (error) {

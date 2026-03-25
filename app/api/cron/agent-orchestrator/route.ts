@@ -1,6 +1,7 @@
 // POST /api/cron/agent-orchestrator
 // V6 — Agentic Engine daily cron.
-// Runs compliance_monitor + fiscal_sensor for all active orgs.
+// Runs compliance_monitor, fiscal_sensor, document, vendor_risk for all active orgs.
+// regulatory_radar runs weekly via /api/cron/agent-regulatory-radar.
 // Invoked by Vercel Cron (daily 06:00 UTC) or external trigger.
 
 export const runtime = "nodejs"
@@ -13,7 +14,14 @@ import { executeAgents } from "@/lib/server/agent-orchestrator"
 import type { AgentType } from "@/lib/compliance/agentic-engine"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
-const DAILY_AGENTS: AgentType[] = ["compliance_monitor", "fiscal_sensor"]
+// Daily: compliance_monitor + fiscal_sensor (high-frequency) + document + vendor_risk.
+// regulatory_radar runs weekly (lower frequency, legislative changes are slow).
+const DAILY_AGENTS: AgentType[] = [
+  "compliance_monitor",
+  "fiscal_sensor",
+  "document",
+  "vendor_risk",
+]
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET

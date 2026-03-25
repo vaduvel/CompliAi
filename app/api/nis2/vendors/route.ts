@@ -7,6 +7,7 @@ import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createVendor } from "@/lib/server/nis2-store"
 import type { Nis2VendorRiskLevel } from "@/lib/server/nis2-store"
+import { executeAgent } from "@/lib/server/agent-orchestrator"
 
 export async function GET(request: Request) {
   try {
@@ -56,6 +57,10 @@ export async function POST(request: Request) {
       contractReviewAtISO: body.contractReviewAtISO,
       notes: (body.notes ?? "").trim(),
     })
+
+    // Event trigger: run vendor_risk after new vendor is added (fire-and-forget).
+    // Checks for missing DPA, contract gaps, re-scores existing vendors in context.
+    void executeAgent(orgId, "vendor_risk").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ vendor }, { status: 201 })
   } catch (error) {
