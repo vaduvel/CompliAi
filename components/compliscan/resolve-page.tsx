@@ -103,7 +103,7 @@ function getAutoAction(finding: ScanFinding): { label: string; href: string; ico
   if (docType && DOC_LABELS[docType]) {
     return {
       label: `Generează ${DOC_LABELS[docType]}`,
-      href: `/dashboard/documente?generate=${docType}`,
+      href: `/dashboard/generator?documentType=${docType}`,
       icon: <FileText className="size-3.5" strokeWidth={2} />,
     }
   }

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   XCircle,
   AlertTriangle,
@@ -20,6 +21,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import { useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
 
@@ -93,6 +95,7 @@ export default function FindingDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
+  const { reloadDashboard } = useCockpitMutations()
 
   useEffect(() => {
     if (!params.findingId) return
@@ -127,6 +130,7 @@ export default function FindingDetailPage() {
       setLinkedGeneratedDocument(payload.linkedGeneratedDocument ?? null)
       setDocumentFlowState(payload.documentFlowState ?? "not_required")
       setStatusFeedback(payload.feedbackMessage ?? null)
+      void reloadDashboard()
     } catch {
       setError("Nu s-a putut actualiza statusul.")
     } finally {
@@ -143,7 +147,7 @@ export default function FindingDetailPage() {
   const res = finding.resolution
   const activeIdx = res ? RESOLUTION_STEPS.findIndex((s) => !res[s.key]) : 0
   const currentStep = activeIdx === -1 ? RESOLUTION_STEPS.length : activeIdx
-  const completedSteps = currentStep
+  const completedSteps = status === "resolved" ? RESOLUTION_STEPS.length : currentStep
   const totalSteps = RESOLUTION_STEPS.length
 
   return (
@@ -379,6 +383,16 @@ export default function FindingDetailPage() {
                     ].join(" ")}>
                       {text ?? "—"}
                     </p>
+                    {step.key === "generatedAsset" && !isDone && finding.suggestedDocumentType && status !== "resolved" && (
+                      <Link
+                        href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType)}`}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-eos-primary/90 transition-colors"
+                      >
+                        <FileText className="size-3" strokeWidth={2} />
+                        Generează din CompliAI
+                        <ArrowRight className="size-3" strokeWidth={2} />
+                      </Link>
+                    )}
                   </div>
                 </div>
               )
