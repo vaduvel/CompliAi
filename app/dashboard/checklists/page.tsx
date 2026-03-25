@@ -154,6 +154,7 @@ export default function RemediationPage() {
           activeFilter={taskFilter}
           onFilterChange={setTaskFilter}
           onMarkDone={cockpitActions.handleMarkDone}
+          onBulkMarkDone={cockpitActions.handleBulkMarkDone}
           onAttachEvidence={cockpitActions.attachEvidence}
           onExport={cockpitActions.handleTaskExport}
         />

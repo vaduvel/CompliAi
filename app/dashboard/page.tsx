@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, BarChart3, Bot, CalendarClock, CheckCircle2, ChevronRight, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, Bot, CalendarClock, CheckCircle2, ChevronRight, Download, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -227,6 +227,47 @@ export default function DashboardPage() {
               {data.summary.score >= benchmark.medie ? "Peste medie" : "Sub medie"}
             </Badge>
           </div>
+        </section>
+      )}
+
+      {/* ── R2 — Executive summary one-pager ─────────────────────────────────── */}
+      {state.orgProfile && (
+        <section aria-label="Rezumat executiv">
+          <Card className="border-eos-border bg-eos-surface">
+            <div className="px-5 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
+                  <p className="text-sm font-semibold text-eos-text">Rezumat executiv</p>
+                  <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Board / Investitor</Badge>
+                </div>
+                <Link
+                  href={dashboardRoutes.reports}
+                  className="flex items-center gap-1 text-xs text-eos-primary hover:underline"
+                >
+                  <Download className="size-3" />
+                  Descarcă PDF
+                </Link>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <ExecMetric label="Scor conformitate" value={`${data.summary.score}%`} good={data.summary.score >= 70} />
+                <ExecMetric label="Acțiuni deschise" value={String(openTasks.length)} good={openTasks.length === 0} />
+                <ExecMetric label="Riscuri active" value={String(activeRiskCount)} good={activeRiskCount === 0} />
+                <ExecMetric label="Documente auditate" value={String(state.scans.length)} good={state.scans.length > 0} />
+              </div>
+              {openTasks.slice(0, 3).length > 0 && (
+                <div className="mt-3 space-y-1">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-eos-text-muted">Priorități cheie</p>
+                  {openTasks.slice(0, 3).map((t) => (
+                    <div key={t.id} className="flex items-center gap-2 text-xs text-eos-text-muted">
+                      <span className={`size-1.5 rounded-full shrink-0 ${t.priority === "P1" ? "bg-eos-error" : t.priority === "P2" ? "bg-eos-warning" : "bg-eos-text-muted"}`} />
+                      {t.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
         </section>
       )}
 
@@ -642,6 +683,15 @@ function DnscRegistrationBanner() {
         </Link>
       </div>
     </section>
+  )
+}
+
+function ExecMetric({ label, value, good }: { label: string; value: string; good: boolean }) {
+  return (
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-eos-text-tertiary">{label}</p>
+      <p className={`mt-1 text-base font-semibold ${good ? "text-eos-success" : "text-eos-warning"}`}>{value}</p>
+    </div>
   )
 }
 

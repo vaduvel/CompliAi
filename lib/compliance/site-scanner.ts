@@ -35,7 +35,7 @@ export type SiteScanResult = {
 }
 
 export type FindingSuggestion = {
-  type: "missing-consent" | "missing-dpa" | "missing-privacy-policy" | "vendor-candidate" | "data-collection"
+  type: "missing-consent" | "missing-dpa" | "missing-privacy-policy" | "vendor-candidate" | "data-collection" | "cookie-banner-mismatch"
   title: string
   detail: string
   severity: "high" | "medium" | "low"
@@ -298,6 +298,15 @@ function analyzeHtml(url: string, scannedAtISO: string, html: string, networkReq
       type: "missing-consent",
       title: `${consentTrackers.length} tracker${consentTrackers.length > 1 ? "e" : ""} fără banner consimțământ`,
       detail: `${consentTrackers.map((t) => t.name).join(", ")} — GDPR Art. 6 + ePrivacy necesită consimțământ explicit.`,
+      severity: "high",
+    })
+  }
+  // P8 — Cookie banner mismatch: banner present but trackers still load on page load (pre-consent)
+  if (consentTrackers.length > 0 && hasCookieBanner) {
+    findingSuggestions.push({
+      type: "cookie-banner-mismatch",
+      title: `Banner cookie detectat, dar ${consentTrackers.length} tracker${consentTrackers.length > 1 ? "e" : ""} se încarcă înainte de consimțământ`,
+      detail: `${consentTrackers.map((t) => t.name).join(", ")} — Bannerul nu blochează aceste cookieuri la prima vizită. ePrivacy + GDPR Art. 6 impun consimțământ prealabil.`,
       severity: "high",
     })
   }

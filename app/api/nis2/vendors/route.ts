@@ -8,6 +8,9 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createVendor } from "@/lib/server/nis2-store"
 import type { Nis2VendorRiskLevel } from "@/lib/server/nis2-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
+import { createReview } from "@/lib/server/vendor-review-store"
+import { appendAudit } from "@/lib/compliance/vendor-review-engine"
+import { randomBytes } from "node:crypto"
 
 export async function GET(request: Request) {
   try {
@@ -58,8 +61,26 @@ export async function POST(request: Request) {
       notes: (body.notes ?? "").trim(),
     })
 
+    // A6 — Auto-create vendor review record on vendor creation
+    const urgency = vendor.riskLevel === "critical" ? "critical"
+      : vendor.riskLevel === "high" ? "high" : "medium"
+    const now = new Date().toISOString()
+    void createReview(orgId, {
+      id: `vr-${randomBytes(8).toString("hex")}`,
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      status: "needs-context",
+      urgency,
+      category: "unknown",
+      confidence: "low",
+      detectionSource: "vendor-registry",
+      reviewCount: 0,
+      auditTrail: appendAudit(undefined, "created", session.email),
+      createdAtISO: now,
+      updatedAtISO: now,
+    }).catch(() => {/* non-blocking */})
+
     // Event trigger: run vendor_risk after new vendor is added (fire-and-forget).
-    // Checks for missing DPA, contract gaps, re-scores existing vendors in context.
     void executeAgent(orgId, "vendor_risk").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ vendor }, { status: 201 })

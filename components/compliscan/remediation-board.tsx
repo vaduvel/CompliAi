@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Badge } from "@/components/evidence-os/Badge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Button } from "@/components/evidence-os/Button"
@@ -16,6 +17,7 @@ type RemediationBoardProps = {
   highlightedTaskId?: string | null
   onFilterChange: (value: FilterValue) => void
   onMarkDone: (id: string) => void
+  onBulkMarkDone?: (ids: string[]) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
   onExport: (id: string) => void
 }
@@ -46,9 +48,29 @@ export function RemediationBoard({
   highlightedTaskId,
   onFilterChange,
   onMarkDone,
+  onBulkMarkDone,
   onAttachEvidence,
   onExport,
 }: RemediationBoardProps) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function selectAll(ids: string[]) {
+    setSelectedIds(new Set(ids))
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set())
+  }
+
   const visibleTasks = tasks.filter((task) => {
     if (activeFilter === "ALL") return task.status !== "done"
     if (activeFilter === "RAPID") return task.remediationMode === "rapid" && task.status !== "done"
@@ -125,7 +147,43 @@ export function RemediationBoard({
         </div>
       </CardHeader>
 
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between border-b border-eos-primary/20 bg-eos-primary/5 px-6 py-3">
+          <span className="text-sm text-eos-text">{selectedIds.size} task-uri selectate</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={clearSelection}>Anulează</Button>
+            {onBulkMarkDone && (
+              <Button
+                size="sm"
+                onClick={() => { onBulkMarkDone(Array.from(selectedIds)); clearSelection() }}
+              >
+                Marchează rezolvate ({selectedIds.size})
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       <CardContent className="space-y-4 pt-6">
+        {/* Select all */}
+        {visibleTasks.filter((t) => t.status !== "done").length > 1 && onBulkMarkDone && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="text-xs text-eos-primary hover:underline"
+              onClick={() => selectAll(visibleTasks.filter((t) => t.status !== "done").map((t) => t.id))}
+            >
+              Selectează toate ({visibleTasks.filter((t) => t.status !== "done").length})
+            </button>
+            {selectedIds.size > 0 && (
+              <button type="button" className="text-xs text-eos-text-muted hover:underline" onClick={clearSelection}>
+                · Deselectează
+              </button>
+            )}
+          </div>
+        )}
+
         {visibleTasks.length === 0 && activeFilter === "ALL" && (
           <EmptyState
             title="Niciun finding activ"
@@ -148,6 +206,8 @@ export function RemediationBoard({
             tone="danger"
             tasks={evidenceBlockedTasks}
             highlightedTaskId={highlightedTaskId}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
             onExport={onExport}
@@ -161,6 +221,8 @@ export function RemediationBoard({
             tone="warning"
             tasks={urgentTasks}
             highlightedTaskId={highlightedTaskId}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
             onExport={onExport}
@@ -174,6 +236,8 @@ export function RemediationBoard({
             tone="info"
             tasks={rapidTasks}
             highlightedTaskId={highlightedTaskId}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
             onExport={onExport}
@@ -187,6 +251,8 @@ export function RemediationBoard({
             tone="warning"
             tasks={structuralTasks}
             highlightedTaskId={highlightedTaskId}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
             onExport={onExport}
@@ -195,14 +261,25 @@ export function RemediationBoard({
 
         {activeFilter !== "ALL" &&
           visibleTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              highlighted={highlightedTaskId === task.id}
-              onMarkDone={onMarkDone}
-              onAttachEvidence={onAttachEvidence}
-              onExport={onExport}
-            />
+            <div key={task.id} className="flex items-start gap-2">
+              {onBulkMarkDone && task.status !== "done" && (
+                <input
+                  type="checkbox"
+                  className="mt-4 size-4 rounded border-eos-border accent-eos-primary shrink-0"
+                  checked={selectedIds.has(task.id)}
+                  onChange={() => toggleSelect(task.id)}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <TaskCard
+                  task={task}
+                  highlighted={highlightedTaskId === task.id}
+                  onMarkDone={onMarkDone}
+                  onAttachEvidence={onAttachEvidence}
+                  onExport={onExport}
+                />
+              </div>
+            </div>
           ))}
       </CardContent>
     </Card>
@@ -255,6 +332,8 @@ function TaskGroup({
   tone,
   tasks,
   highlightedTaskId,
+  selectedIds,
+  onToggleSelect,
   onMarkDone,
   onAttachEvidence,
   onExport,
@@ -264,6 +343,8 @@ function TaskGroup({
   tone: "info" | "warning" | "danger"
   tasks: CockpitTask[]
   highlightedTaskId?: string | null
+  selectedIds?: Set<string>
+  onToggleSelect?: (id: string) => void
   onMarkDone: (id: string) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
   onExport: (id: string) => void
@@ -290,14 +371,25 @@ function TaskGroup({
       </div>
 
       {tasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          highlighted={highlightedTaskId === task.id}
-          onMarkDone={onMarkDone}
-          onAttachEvidence={onAttachEvidence}
-          onExport={onExport}
-        />
+        <div key={task.id} className="flex items-start gap-2">
+          {onToggleSelect && task.status !== "done" && (
+            <input
+              type="checkbox"
+              className="mt-4 size-4 rounded border-eos-border accent-eos-primary shrink-0"
+              checked={selectedIds?.has(task.id) ?? false}
+              onChange={() => onToggleSelect(task.id)}
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <TaskCard
+              task={task}
+              highlighted={highlightedTaskId === task.id}
+              onMarkDone={onMarkDone}
+              onAttachEvidence={onAttachEvidence}
+              onExport={onExport}
+            />
+          </div>
+        </div>
       ))}
     </div>
   )
