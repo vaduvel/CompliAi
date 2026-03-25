@@ -28,10 +28,42 @@
 - [x] P3 — Trending scores (săgeți ▲▼) pe dashboard
 - [x] P4 — "Câștiguri rapide": filtrul RAPID redenumit proeminent în remediation-board
 - [x] P5 — Agent status: `AgentStatusWidget` pe dashboard home cu fetch /api/agents + link la /agents
-- [ ] P2 — Empty states prietenoase pentru useri noi (planificat)
-- [ ] P6 — Share token mai proeminent în Rapoarte (planificat)
+- [ ] P2 — Empty states prietenoase pentru useri noi
+- [ ] P6 — Share token mai proeminent în Rapoarte
 - [ ] P7 — Whistleblowing module — gap de piață (sprint separat)
-- [ ] P8 — Cookie consent auto-audit pe site scan (planificat)
+- [ ] P8 — Cookie consent auto-audit pe site scan
+
+---
+
+## Backlog complet — Neatins din audit
+
+### 🔴 CRITIC neatins
+- [ ] C4b — `/account/settings` (partner billing) e accesibil doar dacă știi URL-ul; nu apare în nav sau settings tabs
+
+### 🟡 IMPORTANT neatins
+- [ ] I6 — Email notifications configurabile din UI (declanșatoare, frecvență)
+
+### 🤖 Automatizări lipsă (Secțiunea 5 din audit)
+- [ ] A1 — DSAR creat → auto-generate draft răspuns cu date din org profile
+- [ ] A2 — NIS2 incident logat → push alert in-app + email "24h deadline în X ore"
+- [ ] A3 — Politici generate → reminder automat la 12 luni de la generare (expiry)
+- [ ] A4 — e-Factura XML → live validation pe paste (onChange debounce, nu doar la submit)
+- [ ] A5 — Scoring → live-update la orice task marcat rezolvat (nu doar la reload)
+- [ ] A6 — Vendor adăugat → auto-generate vendor risk assessment imediat
+
+### 📊 Reports neatinse
+- [ ] R1 — Trust Center vs Trust Profile: naming confuz (una internă, una publică) — redenumire
+- [ ] R2 — Raport executiv one-pager vizibil pe dashboard (rezumat pentru board/investitor)
+- [ ] P6 — Share token mai proeminent (link audit extern pentru auditeur/partener)
+
+### 🏗️ Structurale mari
+- [ ] S1 — Bulk actions în Resolve: marcare simultană a mai multor task-uri
+- [ ] S2 — DORA module (Financial sector) — gap de piață pentru fintech/banking
+- [ ] P7 — Whistleblowing module — Directiva EU 2019/1937, obligatorie >50 angajați
+- [ ] P8 — Cookie consent auto-audit: scanare discrepanțe cookie banner vs. cookieuri reale
+
+### 🟢 Polish neatins
+- [ ] P2 — Empty states prietenoase: primul login = ecran gol (lipsă mesaj "Bun venit")
 
 ---
 
