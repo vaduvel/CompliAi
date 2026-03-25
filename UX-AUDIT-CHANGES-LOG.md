@@ -14,19 +14,24 @@
 - [x] C5 — Partner: banner context după workspace switch
 
 ### 🟡 IMPORTANT (I)
-- [x] I1 — Terminologie: DSAR → "Cerere acces date", Drift → "Schimbări detectate", L1/L2/L3 → labels prietenoase
+- [x] I1 — Terminologie completă: DSAR heading → "Cereri acces date (DSAR)", portfolio nav "Alerte" → "Schimbări detectate", L1/L2/L3 prietenoase
+- [x] I2 — NIS2: `Nis2ProgressStepper` cu 4 pași (Clasificare/Maturitate/Incidente/Guvernanță), status real per API
+- [x] I3 — Documente hub: tab "Generează" cu 5 tipuri doc ca quick links, buton Vault în header
 - [x] I4 — Rute legacy: redirect sau cleanup (setari, scanari, rapoarte, audit-log, findings/[id])
 - [x] I5 — Benchmark: widget pe dashboard home (API există, UI lipsea)
-- [ ] I2 — NIS2: stepper intern cu progresie (planificat sprint următor)
-- [ ] I3 — Documente: hub unificat (planificat sprint următor)
 - [ ] I6 — Email notifications configurabile din UI (planificat sprint următor)
+- [x] I7 — Vendor review: în NIS2 tab "Furnizori ICT" (corect conceptual), nu duplicat în nav
+- [x] I8 — Mobile nav: Calendar + Rapoarte incluse în primary nav (verificat — 6 items)
 
 ### 🟢 POLISH (P)
 - [x] P1 — Microcopy: terminologie plain RO în resolve page
 - [x] P3 — Trending scores (săgeți ▲▼) pe dashboard
+- [x] P4 — "Câștiguri rapide": filtrul RAPID redenumit proeminent în remediation-board
+- [x] P5 — Agent status: `AgentStatusWidget` pe dashboard home cu fetch /api/agents + link la /agents
 - [ ] P2 — Empty states prietenoase pentru useri noi (planificat)
-- [ ] P4 — "Quick wins" tab (planificat)
-- [ ] P5 — Agent status pe dashboard home (planificat)
+- [ ] P6 — Share token mai proeminent în Rapoarte (planificat)
+- [ ] P7 — Whistleblowing module — gap de piață (sprint separat)
+- [ ] P8 — Cookie consent auto-audit pe site scan (planificat)
 
 ---
 
@@ -68,6 +73,29 @@
 
 ### P3 — Trending scores
 - `app/dashboard/page.tsx` — delta față de snapshot anterior
+
+---
+
+## Sprint 2 — Implementat 2026-03-25
+
+### I1 complet — Terminologie
+- `app/dashboard/dsar/page.tsx` — heading → "Cereri acces date (DSAR)"
+- `components/compliscan/navigation.ts` — portfolio "Alerte" → "Schimbări detectate"
+
+### I2 — NIS2 Stepper
+- `app/dashboard/nis2/page.tsx` — `Nis2ProgressStepper` adăugat (3 fetch-uri paralele: maturity + incidents + governance)
+
+### I3 — Documente Hub
+- `components/compliscan/documents-page.tsx` — tab "Generează" cu 5 quick links, buton Vault în header
+
+### C4 — Settings unificat
+- `components/compliscan/settings-page.tsx` — tab "Plan & Facturare" adăugat (lazy-load `SettingsBillingPageSurface`), eliminat buton redundant din PageIntro
+
+### P4 — Quick wins
+- `components/compliscan/remediation-board.tsx` — "Rapide" → "Câștiguri rapide"
+
+### P5 — Agent status
+- `app/dashboard/page.tsx` — `AgentStatusWidget` adăugat înainte de detalii conformitate
 
 ---
 

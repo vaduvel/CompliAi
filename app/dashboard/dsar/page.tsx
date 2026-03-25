@@ -158,8 +158,8 @@ export default function DsarPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <PageIntro
-        title="DSAR — Cereri persoane vizate"
-        description="Tracking cereri GDPR Art. 15-22. Deadline legal: 30 zile de la primire."
+        title="Cereri acces date (DSAR)"
+        description="Gestionează cererile de acces, rectificare și ștergere GDPR Art. 15-22. Deadline legal: 30 zile de la primire."
         badges={
           <Link href="/dashboard/calendar" className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline">
             <CalendarPlus className="size-3.5" strokeWidth={2} />

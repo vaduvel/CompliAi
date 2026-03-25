@@ -2105,6 +2105,91 @@ function VendorsTab() {
   )
 }
 
+// ── NIS2 Progress Stepper ───────────────────────────────────────────────────────
+
+type StepStatus = "done" | "in_progress" | "pending"
+
+function Nis2ProgressStepper() {
+  const [maturityDone, setMaturityDone] = useState<boolean | null>(null)
+  const [hasIncidents, setHasIncidents] = useState<boolean | null>(null)
+  const [governanceDone, setGovernanceDone] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch("/api/nis2/maturity", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { assessment: MaturityAssessment | null }) => setMaturityDone(!!d.assessment))
+      .catch(() => setMaturityDone(false))
+
+    fetch("/api/nis2/incidents", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { incidents: Nis2Incident[] }) => setHasIncidents(Array.isArray(d.incidents)))
+      .catch(() => setHasIncidents(false))
+
+    fetch("/api/nis2/governance", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { members: BoardMember[] }) => setGovernanceDone((d.members ?? []).length > 0))
+      .catch(() => setGovernanceDone(false))
+  }, [])
+
+  const steps: { label: string; sub: string; status: StepStatus; href: string; anchor?: string }[] = [
+    {
+      label: "Clasificare",
+      sub: "Sector și tip entitate",
+      status: "done",
+      href: "/dashboard/nis2",
+    },
+    {
+      label: "Maturitate",
+      sub: "Auto-evaluare DNSC",
+      status: maturityDone === null ? "pending" : maturityDone ? "done" : "in_progress",
+      href: "/dashboard/nis2/maturitate",
+    },
+    {
+      label: "Incidente",
+      sub: "Log SLA 24h / 72h",
+      status: hasIncidents === null ? "pending" : hasIncidents ? "done" : "pending",
+      href: "/dashboard/nis2",
+      anchor: "incidents",
+    },
+    {
+      label: "Guvernanță",
+      sub: "Board & CISO training",
+      status: governanceDone === null ? "pending" : governanceDone ? "done" : "in_progress",
+      href: "/dashboard/nis2/governance",
+    },
+  ]
+
+  const statusIcon: Record<StepStatus, string> = {
+    done: "✓",
+    in_progress: "⚠",
+    pending: "—",
+  }
+  const statusColor: Record<StepStatus, string> = {
+    done: "border-green-200 bg-green-50 text-green-700",
+    in_progress: "border-amber-200 bg-amber-50 text-amber-700",
+    pending: "border-eos-border bg-eos-surface text-eos-text-muted",
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {steps.map((step, i) => (
+        <Link
+          key={step.label}
+          href={step.anchor ? `${step.href}#${step.anchor}` : step.href}
+          className={`flex flex-col gap-1 rounded-eos-lg border px-3 py-2.5 transition-all hover:border-eos-primary/40 ${statusColor[step.status]}`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-eos-text-tertiary">Pasul {i + 1}</span>
+            <span className="text-[11px] font-bold">{statusIcon[step.status]}</span>
+          </div>
+          <p className="text-sm font-semibold leading-tight">{step.label}</p>
+          <p className="text-[11px] leading-tight opacity-70">{step.sub}</p>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 function MaturityCard() {
@@ -2247,6 +2332,7 @@ export default function Nis2Page() {
         }
       />
 
+      <Nis2ProgressStepper />
       <Nis2RescueBanner />
       <MaturityCard />
       <GovernanceCard />

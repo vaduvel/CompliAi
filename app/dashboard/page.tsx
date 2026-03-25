@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowRight, BarChart3, CalendarClock, CheckCircle2, ChevronRight, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, BarChart3, Bot, CalendarClock, CheckCircle2, ChevronRight, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -263,6 +263,9 @@ export default function DashboardPage() {
         />
       )}
 
+      {/* ── Agent status ─────────────────────────────────────────────────────── */}
+      {state.orgProfile && <AgentStatusWidget />}
+
       {/* ── Detailed breakdown — under fold ──────────────────────────────────── */}
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
@@ -456,6 +459,55 @@ type DashCalEvent = {
   group: "overdue" | "today" | "this-week" | "this-month" | "later"
   severity: "critical" | "high" | "medium" | "low"
   href: string
+}
+
+type AgentSummary = {
+  agentType: string
+  label: string
+  implemented: boolean
+  lastRun: { completedAt: string; status: string } | null
+}
+
+function AgentStatusWidget() {
+  const [agents, setAgents] = useState<AgentSummary[]>([])
+
+  useEffect(() => {
+    fetch("/api/agents", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { agents?: AgentSummary[] }) => { if (d.agents) setAgents(d.agents) })
+      .catch(() => null)
+  }, [])
+
+  if (agents.length === 0) return null
+
+  const activeCount = agents.filter((a) => a.lastRun).length
+
+  return (
+    <section aria-label="Agenți CompliAI">
+      <Link href={dashboardRoutes.agents} className="block">
+        <div className="flex items-center justify-between gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 transition-all hover:border-eos-primary/40">
+          <div className="flex items-center gap-3">
+            <Bot className="size-5 shrink-0 text-eos-primary" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-semibold text-eos-text">
+                Agenții CompliAI monitorizează activ
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                {agents.slice(0, 3).map((a) => a.label).join(", ")}
+                {agents.length > 3 && ` +${agents.length - 3} mai mulți`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={activeCount > 0 ? "success" : "outline"} className="text-[10px] normal-case tracking-normal">
+              {activeCount}/{agents.length} activi
+            </Badge>
+            <ChevronRight className="size-4 text-eos-text-muted" strokeWidth={2} />
+          </div>
+        </div>
+      </Link>
+    </section>
+  )
 }
 
 function CalendarWidget() {

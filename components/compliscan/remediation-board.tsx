@@ -21,8 +21,8 @@ type RemediationBoardProps = {
 }
 
 const filters: Array<{ value: FilterValue; label: string }> = [
-  { value: "ALL", label: "Deschise" },
-  { value: "RAPID", label: "Rapide" },
+  { value: "ALL", label: "Toate deschise" },
+  { value: "RAPID", label: "Câștiguri rapide" },
   { value: "STRUCTURAL", label: "Structurale" },
   { value: "P1", label: "P1 · Urgente" },
   { value: "P2", label: "P2 · Importante" },

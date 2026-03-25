@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { ArrowRight, BookOpen, FolderOpen, Sparkles } from "lucide-react"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
@@ -12,6 +13,14 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
+
+const QUICK_DOC_TYPES = [
+  { id: "privacy-policy", label: "Politică de Confidențialitate", desc: "GDPR Art. 13–14 — obligatorie", icon: "📄" },
+  { id: "cookie-policy", label: "Politică de Cookies", desc: "ePrivacy + GDPR", icon: "🍪" },
+  { id: "dpa", label: "Acord DPA", desc: "GDPR Art. 28 — cu procesatorii", icon: "🤝" },
+  { id: "nis2-incident-response", label: "Plan Incidente NIS2", desc: "NIS2 + GDPR Art. 33–34", icon: "🛡️" },
+  { id: "ai-governance", label: "Politică Guvernanță AI", desc: "EU AI Act Art. 9, 17", icon: "🤖" },
+] as const
 
 export function DocumentsPageSurface() {
   const runtime = useDashboardRuntime()
@@ -53,17 +62,61 @@ export function DocumentsPageSurface() {
           </>
         }
         actions={
-          <Button asChild>
-            <Link href={dashboardRoutes.scan}>Scanează un document</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href={dashboardRoutes.auditorVault}>
+                <FolderOpen className="mr-1.5 size-3.5" />
+                Vault audit
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href={dashboardRoutes.generator}>
+                <Sparkles className="mr-1.5 size-3.5" />
+                Generator
+              </Link>
+            </Button>
+          </div>
         }
       />
 
-      <Tabs defaultValue="generated" className="space-y-6">
+      <Tabs defaultValue="generate" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="generated">Politici generate</TabsTrigger>
+          <TabsTrigger value="generate">
+            <Sparkles className="mr-1.5 size-3.5" />
+            Generează
+          </TabsTrigger>
+          <TabsTrigger value="generated">
+            <BookOpen className="mr-1.5 size-3.5" />
+            Politici generate
+          </TabsTrigger>
           <TabsTrigger value="scanned">Documente scanate</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="generate">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {QUICK_DOC_TYPES.map((doc) => (
+              <Link
+                key={doc.id}
+                href={`${dashboardRoutes.generator}?documentType=${doc.id}`}
+                className="flex items-start gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5 transition-all hover:border-eos-primary/40 hover:bg-eos-surface-hover"
+              >
+                <span className="text-2xl leading-none">{doc.icon}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-eos-text">{doc.label}</p>
+                  <p className="mt-0.5 text-xs text-eos-text-muted">{doc.desc}</p>
+                </div>
+                <ArrowRight className="mt-0.5 size-4 shrink-0 text-eos-text-tertiary" />
+              </Link>
+            ))}
+            <Link
+              href={dashboardRoutes.generator}
+              className="flex items-center justify-center gap-2 rounded-eos-lg border border-dashed border-eos-border px-4 py-3.5 text-sm text-eos-text-muted transition-all hover:border-eos-primary/40 hover:text-eos-text"
+            >
+              <Sparkles className="size-4" />
+              Toate tipurile de documente
+            </Link>
+          </div>
+        </TabsContent>
 
         <TabsContent value="generated">
           {generatedDocuments.length === 0 ? (

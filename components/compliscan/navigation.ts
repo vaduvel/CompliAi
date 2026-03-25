@@ -240,11 +240,11 @@ export const portfolioNavItems: DashboardNavItem[] = [
   },
   {
     id: "portfolio-alerts",
-    label: "Alerte",
+    label: "Schimbări detectate",
     href: "/portfolio/alerts",
     icon: Bell,
     matchers: ["/portfolio/alerts"],
-    description: "toate alertele active",
+    description: "alerte și schimbări detectate",
   },
   {
     id: "portfolio-tasks",
