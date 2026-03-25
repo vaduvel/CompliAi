@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 import type { DsarRequest, DsarRequestType, DsarStatus } from "@/lib/server/dsar-store"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -227,6 +228,12 @@ export default function DsarPage() {
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Note (opțional)</label>
+              <OrgKnowledgePrefill
+                categories={["data-categories", "processing-purposes", "hr-data"]}
+                onPrefill={(text) => setForm((p) => ({ ...p, notes: p.notes ? `${p.notes}\n${text}` : text }))}
+                prefillLabel="Preia categorii de date confirmate"
+                className="mt-1 mb-2"
+              />
               <textarea
                 className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                 rows={2}

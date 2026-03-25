@@ -17,6 +17,7 @@ import { useTrackEvent } from "@/lib/client/use-track-event"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 
 // ── Input field + textarea helpers ────────────────────────────────────────────
 
@@ -697,6 +698,12 @@ export default function GeneratorPage() {
                 label="Fluxuri de date principale"
                 hint="(opțional — crește precizia)"
               >
+                <OrgKnowledgePrefill
+                  categories={["data-categories", "vendors", "cookies", "tools", "processing-purposes"]}
+                  onPrefill={(text) => setDataFlows((prev) => prev ? `${prev}\n${text}` : text)}
+                  prefillLabel="Preia date confirmate anterior"
+                  className="mb-2"
+                />
                 <textarea
                   value={dataFlows}
                   onChange={(e) => setDataFlows(e.target.value)}

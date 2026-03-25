@@ -20,6 +20,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import {
   MATURITY_DOMAINS,
   scoreMaturity,
@@ -212,7 +213,35 @@ function ResultsView({
 
 // ── Wizard ─────────────────────────────────────────────────────────────────────
 
+type SuggestedAnswer = { answer: MaturityAnswer; source: string }
+
+function buildSuggestedAnswers(
+  hasAssessment: boolean,
+  hasIncidents: boolean,
+  hasVendors: boolean,
+  hasOrgProfile: boolean
+): Record<string, SuggestedAnswer> {
+  const s: Record<string, SuggestedAnswer> = {}
+  if (hasAssessment) {
+    s["rm1"] = { answer: "partial", source: "Evaluare risc NIS2" }
+    s["rm2"] = { answer: "yes", source: "Evaluare risc NIS2" }
+    s["rm3"] = { answer: "partial", source: "Evaluare risc NIS2" }
+  }
+  if (hasIncidents) {
+    s["ir2"] = { answer: "partial", source: "Registru incidente NIS2" }
+    s["ir3"] = { answer: "yes", source: "Registru incidente NIS2" }
+  }
+  if (hasVendors) {
+    s["sc1"] = { answer: "partial", source: "Registru furnizori NIS2" }
+  }
+  if (hasOrgProfile) {
+    s["bh3"] = { answer: "partial", source: "Profil organizație" }
+  }
+  return s
+}
+
 export default function MaturitatePage() {
+  const cockpit = useCockpitData()
   const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState<MaturityAssessment | null>(null)
   const [answers, setAnswers] = useState<MaturityAnswers>({})
@@ -280,6 +309,16 @@ export default function MaturitatePage() {
     setSubmitted(false)
     setResult(null)
   }
+
+  const cockpitData = cockpit.data
+  const nis2Entry = cockpitData?.state?.applicability?.entries.find((e) => e.tag === "nis2")
+  const nis2Findings = cockpitData?.state?.findings?.filter((f) => f.category === "NIS2") ?? []
+  const suggestedAnswers = buildSuggestedAnswers(
+    !!(nis2Entry && (nis2Entry.certainty === "certain" || nis2Entry.certainty === "probable")),
+    nis2Findings.some((f) => f.id.startsWith("nis2-incident")),
+    nis2Findings.some((f) => f.id.startsWith("nis2-vendor") || f.title.toLowerCase().includes("furnizor")),
+    !!(cockpitData?.state?.orgProfile)
+  )
 
   if (loading) return <LoadingScreen variant="section" />
 
@@ -377,12 +416,32 @@ export default function MaturitatePage() {
             <CardContent className="divide-y divide-eos-border-subtle px-5 pb-4">
               {domain.questions.map((q, qi) => {
                 const current = answers[q.id]
+                const suggestion = suggestedAnswers[q.id]
                 return (
                   <div key={q.id} className="py-4">
-                    <p className="mb-3 text-sm text-eos-text">
+                    <p className="mb-2 text-sm text-eos-text">
                       <span className="mr-1.5 text-eos-text-muted">{qi + 1}.</span>
                       {q.text}
                     </p>
+                    {suggestion && current === undefined && (
+                      <div className="mb-2 flex items-center gap-2 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 px-2.5 py-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-eos-primary">
+                          Propus automat
+                        </span>
+                        <span className="text-xs text-eos-text-muted">·</span>
+                        <span className="text-xs font-medium text-eos-text">
+                          {ANSWER_OPTIONS.find((o) => o.value === suggestion.answer)?.label}
+                        </span>
+                        <span className="text-xs text-eos-text-muted">din {suggestion.source}</span>
+                        <button
+                          type="button"
+                          onClick={() => setAnswer(q.id, suggestion.answer)}
+                          className="ml-auto shrink-0 rounded-eos-md border border-eos-primary/30 bg-eos-surface px-2 py-0.5 text-[11px] font-medium text-eos-primary hover:bg-eos-primary/10"
+                        >
+                          Confirmă
+                        </button>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       {ANSWER_OPTIONS.map((opt) => (
                         <button

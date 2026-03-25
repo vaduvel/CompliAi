@@ -21,6 +21,10 @@ import {
   type OrgSector,
   type OrgEmployeeCount,
 } from "@/lib/compliance/applicability"
+import {
+  buildPayTransparencyFinding,
+  PAY_TRANSPARENCY_FINDING_ID,
+} from "@/lib/compliance/pay-transparency-rule"
 import { trackEvent } from "@/lib/server/analytics"
 
 const VALID_SECTORS: OrgSector[] = [
@@ -111,20 +115,26 @@ export async function POST(request: Request) {
     const nextBestAction = intakeAnswers ? buildNextBestAction(initialFindings) : null
     const intakeCompletedAtISO = intakeAnswers ? new Date().toISOString() : undefined
 
+    const payTransparencyFinding = buildPayTransparencyFinding(orgProfile.employeeCount, new Date().toISOString())
+
     await mutateState((current) => {
-      const previousFindings = (current.findings ?? []).filter((finding) => !finding.id.startsWith("intake-"))
+      const previousFindings = (current.findings ?? [])
+        .filter((finding) => !finding.id.startsWith("intake-") && finding.id !== PAY_TRANSPARENCY_FINDING_ID)
       const fallbackPrefill = matchingPrefill
         ? matchingPrefill
         : doesPrefillMatchProfile(current.orgProfilePrefill as OrgProfilePrefill | undefined, cui, website)
           ? (current.orgProfilePrefill as OrgProfilePrefill)
           : undefined
 
+      const baseFindings = intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings
+      const allFindings = payTransparencyFinding ? [...baseFindings, payTransparencyFinding] : baseFindings
+
       return {
         ...current,
         orgProfile,
         applicability,
         orgProfilePrefill: fallbackPrefill,
-        findings: intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings,
+        findings: allFindings,
         intakeAnswers,
         intakeCompletedAtISO,
       }

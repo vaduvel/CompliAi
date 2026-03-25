@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
   Check,
+  CalendarClock,
 } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
@@ -162,6 +163,26 @@ export default function SistemePage() {
       />
 
       <PillarTabs sectionId="control" />
+
+      {/* ── GOLD 8: AI Act deadline banner ───────────────────────────────────── */}
+      <div className="flex items-start gap-3 rounded-eos-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800/40 dark:bg-amber-950/20">
+        <CalendarClock className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-amber-900 dark:text-amber-200">
+            AI Act — deadline 2 august 2026
+          </p>
+          <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+            Sistemele AI cu risc ridicat trebuie înregistrate în EU AI Database înainte de 2 aug 2026
+            (Regulament (UE) 2024/1689, Art. 49). Folosește wizardul per sistem pentru pregătire.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/sisteme/eu-db-wizard"
+          className="shrink-0 rounded-eos-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition hover:bg-amber-50 dark:border-amber-700 dark:bg-transparent dark:text-amber-300"
+        >
+          Wizard EU DB →
+        </Link>
+      </div>
 
       <ControlPrimaryTabs
         active={primaryView}

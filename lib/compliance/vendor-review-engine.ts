@@ -117,7 +117,7 @@ export type VendorReview = {
   urgency: VendorReviewUrgency
   category: "ai" | "cloud" | "tech" | "possible-processor" | "unknown"
   confidence: "high" | "medium" | "low"
-  detectionSource: "efactura" | "ai-inventory" | "vendor-registry" | "manual"
+  detectionSource: "efactura" | "ai-inventory" | "vendor-registry" | "manual" | "site-scan"
 
   // Context capture (V5.2)
   context?: VendorReviewContext

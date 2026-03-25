@@ -42,6 +42,7 @@ import {
   VENDOR_CATEGORY_LABELS,
   type VendorFingerprint,
 } from "@/lib/compliance/vendor-library"
+import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -199,6 +200,10 @@ function ContextForm({
       <p className="text-sm font-medium text-eos-text">
         Completează contextul minim necesar pentru a genera review-ul corect.
       </p>
+      <OrgKnowledgePrefill
+        categories={["vendors", "tools", "data-categories"]}
+        prefillLabel="Vezi date confirmate anterior"
+      />
       {CONTEXT_QUESTIONS.map((q) => (
         <div key={q.key} className="space-y-1.5">
           <p className="text-sm text-eos-text-muted">{q.label}</p>
@@ -1070,6 +1075,11 @@ export default function VendorReviewPage() {
                               {REVIEW_STATUS_LABELS[review.status]}
                             </Badge>
                             <LibraryBadges vendorName={review.vendorName} />
+                            {review.detectionSource === "site-scan" && (
+                              <Badge variant="secondary" className="text-[10px] normal-case tracking-normal gap-1">
+                                🔍 detectat din site
+                              </Badge>
+                            )}
                             <span className="text-xs text-eos-text-tertiary capitalize">
                               {review.category}
                             </span>
