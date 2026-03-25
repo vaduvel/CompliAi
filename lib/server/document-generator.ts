@@ -86,15 +86,71 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   },
 }
 
+const DOCUMENT_DATE_TIMEZONE = "Europe/Bucharest"
+
+function formatDocumentDateRo(generatedAtISO: string) {
+  return new Intl.DateTimeFormat("ro-RO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: DOCUMENT_DATE_TIMEZONE,
+  }).format(new Date(generatedAtISO))
+}
+
+function getPreferredDocumentDateLabel(documentType: DocumentType) {
+  switch (documentType) {
+    case "privacy-policy":
+    case "cookie-policy":
+      return "Ultima actualizare"
+    default:
+      return "Data generării"
+  }
+}
+
+export function normalizeGeneratedDocumentContent(
+  content: string,
+  documentType: DocumentType,
+  generatedAtISO: string
+) {
+  const formattedDate = formatDocumentDateRo(generatedAtISO)
+  const preferredLabel = getPreferredDocumentDateLabel(documentType)
+  const replacementLine = `**${preferredLabel}:** ${formattedDate}`
+  const dateLinePattern =
+    /^(?:\*\*)?\s*(Ultima actualizare|Data ultimei actualizări|Data actualizării|Data generării)(?:\*\*)?\s*:\s*.*$/im
+
+  if (dateLinePattern.test(content)) {
+    return content.replace(dateLinePattern, replacementLine)
+  }
+
+  const lines = content.split("\n")
+  const firstHeadingIndex = lines.findIndex((line) => line.startsWith("# "))
+  if (firstHeadingIndex === -1) {
+    return [replacementLine, "", content].filter(Boolean).join("\n")
+  }
+
+  lines.splice(firstHeadingIndex + 1, 0, "", replacementLine)
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n")
+}
+
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
-function buildPrompt(input: DocumentGenerationInput): string {
+function buildPrompt(input: DocumentGenerationInput, generatedAtISO: string): string {
   const meta = DOC_META[input.documentType]
+  const generatedDate = formatDocumentDateRo(generatedAtISO)
+  const preferredDateLabel = getPreferredDocumentDateLabel(input.documentType)
   const orgLine = `Organizație: ${input.orgName}${input.orgCui ? ` (CUI: ${input.orgCui})` : ""}${input.orgWebsite ? `, website: ${input.orgWebsite}` : ""}${input.orgSector ? `, sector: ${input.orgSector}` : ""}.`
   const dpoLine = input.dpoEmail ? `Responsabil protecția datelor (DPO): ${input.dpoEmail}.` : ""
   const flowsLine = input.dataFlows ? `Fluxuri de date / servicii principale: ${input.dataFlows}.` : ""
+  const dateLine = `**${preferredDateLabel}:** ${generatedDate}`
 
-  const contextBlock = [orgLine, dpoLine, flowsLine].filter(Boolean).join("\n")
+  const contextBlock = [
+    orgLine,
+    dpoLine,
+    flowsLine,
+    `Data exactă a documentului (fus orar România): ${generatedDate}.`,
+  ]
+    .filter(Boolean)
+    .join("\n")
 
   const prompts: Record<DocumentType, string> = {
     "privacy-policy": `
@@ -106,11 +162,13 @@ ${contextBlock}
 
 Cerințe:
 - Structură conformă GDPR Art. 13 + Art. 14 (toate punctele obligatorii)
+- Include imediat sub titlu linia exactă: ${dateLine}
 - Categorii de date colectate, scopul prelucrării, temeiul juridic, durata păstrării
 - Drepturile persoanelor vizate (acces, rectificare, ștergere, portabilitate, opoziție)
 - Transferuri internaționale (dacă e cazul)
 - Date de contact DPO sau persoană responsabilă
 - Clauza de actualizare
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Ton profesional, limbaj clar pentru publicul larg
 - Format Markdown cu titluri clare (# ## ###)
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
@@ -124,11 +182,13 @@ ${contextBlock}
 
 Cerințe:
 - Ce sunt cookies-urile și de ce sunt folosite
+- Include imediat sub titlu linia exactă: ${dateLine}
 - Categorii de cookies: strict necesare, funcționale, analitice, de marketing
 - Durata de valabilitate pentru fiecare categorie
 - Parteneri terți (ex. Google Analytics, Facebook Pixel — dacă e relevant din context)
 - Cum poate utilizatorul să gestioneze/retragă consimțământul
 - Link spre Politica de Confidențialitate
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
@@ -141,6 +201,7 @@ ${contextBlock}
 
 Cerințe:
 - Denumire contract, operator și procesator (folosim [PROCESATOR] ca placeholder)
+- Include imediat sub titlu linia exactă: ${dateLine}
 - Obiectul prelucrării: categorii de date, scopul, durata
 - Obligațiile procesatorului (Art. 28.3 a-h GDPR): confidențialitate, securitate, subcontractare, audit, ștergere
 - Obligațiile operatorului
@@ -149,6 +210,7 @@ Cerințe:
 - Notificare breșe de date (fără întârziere nejustificată)
 - Transferuri internaționale — clauze contractuale standard
 - Durata și rezilierea acordului
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
@@ -161,6 +223,7 @@ ${contextBlock}
 
 Cerințe:
 - Scopul și domeniul de aplicare
+- Include imediat sub titlu linia exactă: ${dateLine}
 - Clasificarea incidentelor (P1/P2/P3 cu criterii clare)
 - Echipa de răspuns: roluri și responsabilități
 - Pași detaliați: Detectare → Evaluare → Conținere → Eradicare → Recuperare → Post-mortem
@@ -169,6 +232,7 @@ Cerințe:
 - Template de raport incident (câmpuri de completat)
 - Canale de escaladare și comunicare
 - Lista contacte externe: DNSC, ANSPDCP, CERT-RO
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
@@ -181,6 +245,7 @@ ${contextBlock}
 
 Cerințe:
 - Scopul și domeniul de aplicare al politicii
+- Include imediat sub titlu linia exactă: ${dateLine}
 - Clasificarea sistemelor AI utilizate (risc minim / limitat / ridicat / inacceptabil)
 - Obligații pentru sisteme de risc ridicat: sistem de management al riscului, date de antrenament, documentație tehnică, logare, transparență, supraveghere umană
 - Obligații de transparență pentru sisteme limitate (chatbots etc.)
@@ -189,6 +254,7 @@ Cerințe:
 - Post-market monitoring: cum se urmăresc incidentele AI
 - Registrul sistemelor AI (trimitere spre inventarul CompliScan)
 - Politica de utilizare acceptabilă a AI generativ intern
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
@@ -250,7 +316,7 @@ export async function generateDocument(
     return buildFallbackDocument(input)
   }
 
-  const prompt = buildPrompt(input)
+  const prompt = buildPrompt(input, now)
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
@@ -289,12 +355,14 @@ export async function generateDocument(
     throw new Error("Gemini a returnat un document gol.")
   }
 
+  const normalizedContent = normalizeGeneratedDocumentContent(content, input.documentType, now)
+
   const expiry = calculateExpiryDates(input.documentType, now)
 
   return {
     documentType: input.documentType,
     title: meta.title,
-    content,
+    content: normalizedContent,
     generatedAtISO: now,
     llmUsed: true,
     ...expiry,
