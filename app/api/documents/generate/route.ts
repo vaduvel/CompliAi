@@ -12,6 +12,7 @@ import {
   type DocumentType,
   type DocumentGenerationInput,
 } from "@/lib/server/document-generator"
+import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 
 const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
 
@@ -93,6 +94,29 @@ export async function POST(request: Request) {
     }))
 
     void trackEvent(session.orgId, "generated_first_document", { docType: input.documentType })
+
+    // MULT B — write dataFlows as processing-purposes knowledge when privacy policy is generated
+    if (input.documentType === "privacy-policy" && input.dataFlows) {
+      const knowledgeAtISO = result.generatedAtISO
+      const dateLabel = new Date(knowledgeAtISO).toLocaleDateString("ro-RO")
+      void mutateState((s) => {
+        const knowledgeItems = s.orgKnowledge?.items ?? []
+        const item = makeKnowledgeItem(
+          "processing-purposes",
+          input.dataFlows!,
+          "privacy-policy-wizard",
+          `Politică confidențialitate la ${dateLabel}`,
+          "medium",
+        )
+        return {
+          ...s,
+          orgKnowledge: {
+            items: mergeKnowledgeItems(knowledgeItems, [item]),
+            lastUpdatedAtISO: knowledgeAtISO,
+          },
+        }
+      })
+    }
 
     return NextResponse.json({
       ...result,

@@ -7,6 +7,8 @@ import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
+import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
+import { mutateState } from "@/lib/server/mvp-store"
 
 export async function GET(request: Request) {
   try {
@@ -69,6 +71,23 @@ export async function POST(request: Request) {
       measuresTaken: body.measuresTaken?.trim(),
       involvesPersonalData: body.involvesPersonalData,
     })
+
+    // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP în De rezolvat
+    if (incident.involvesPersonalData) {
+      const finding = buildAnspdcpBreachFinding(
+        incident.id,
+        incident.title,
+        incident.detectedAtISO,
+        incident.anspdcpNotification?.status,
+        new Date().toISOString()
+      )
+      if (finding) {
+        void mutateState((s) => ({
+          ...s,
+          findings: [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding],
+        }))
+      }
+    }
 
     return NextResponse.json({ incident }, { status: 201 })
   } catch (error) {

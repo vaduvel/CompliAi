@@ -9,6 +9,8 @@ import { AuthzError, readSessionFromRequest, requireRole } from "@/lib/server/au
 import { getOrgContext } from "@/lib/server/org-context"
 import { updateIncident, deleteIncident, readNis2State } from "@/lib/server/nis2-store"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
+import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
+import { mutateState } from "@/lib/server/mvp-store"
 import type {
   Nis2Incident,
   Nis2EarlyWarningReport,
@@ -121,6 +123,24 @@ export async function PATCH(
 
     const incident = await updateIncident(orgId, id, patch)
     if (!incident) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
+
+    // GOLD 6: sincronizează finding ANSPDCP în coada centrală la orice update
+    const involvesPersonalData = incident.involvesPersonalData ?? current.involvesPersonalData
+    if (involvesPersonalData) {
+      const finding = buildAnspdcpBreachFinding(
+        incident.id,
+        incident.title,
+        incident.detectedAtISO,
+        incident.anspdcpNotification?.status,
+        new Date().toISOString()
+      )
+      void mutateState((s) => ({
+        ...s,
+        findings: finding
+          ? [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding]
+          : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+      }))
+    }
 
     return NextResponse.json({ incident })
   } catch (error) {
