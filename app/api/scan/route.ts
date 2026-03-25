@@ -8,9 +8,11 @@ import {
   validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError } from "@/lib/server/request-validation"
+import { executeAgent } from "@/lib/server/agent-orchestrator"
 
 export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/scan")
@@ -29,6 +31,11 @@ export async function POST(request: Request) {
     if (!extractionResult) {
       throw new Error("Extragerea s-a terminat fara rezultat utilizabil.")
     }
+
+    // Event trigger: run compliance_monitor after scan completes (fire-and-forget)
+    // New findings may change compliance score — agent updates notifications asynchronously.
+    const { orgId } = await getOrgContext()
+    void executeAgent(orgId, "compliance_monitor").catch(() => {/* non-blocking */})
 
     return jsonWithRequestContext(
       {
