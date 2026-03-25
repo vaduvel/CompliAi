@@ -135,20 +135,26 @@ export default function DashboardPage() {
 
       {/* ── Onboarding fallback (the real flow now lives in /onboarding) ───── */}
       {!state.orgProfile && (
-        <section aria-label="Continua onboarding">
+        <section aria-label="Bun venit">
           <Card className="border-eos-primary/30 bg-eos-primary/5">
-            <div className="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-eos-text">Onboarding-ul asistat continua in ruta dedicata</p>
-                <p className="mt-1 text-sm text-eos-text-muted">
-                  Finalizeaza profilul firmei si primul raport initial inainte sa folosesti dashboard-ul.
-                </p>
+            <div className="flex flex-col gap-5 px-6 py-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="text-3xl leading-none">👋</span>
+                <div>
+                  <p className="text-base font-semibold text-eos-text">Bun venit în CompliAI!</p>
+                  <p className="mt-1 text-sm text-eos-text-muted">
+                    Completează profilul firmei în 2 minute — primești imediat o analiză de conformitate personalizată: ce legi se aplică, ce documente ai nevoie și ce riscuri există.
+                  </p>
+                  <p className="mt-2 text-xs text-eos-text-tertiary">
+                    GDPR · NIS2 · EU AI Act · e-Factura — toate calculate pentru firma ta.
+                  </p>
+                </div>
               </div>
               <Link
                 href="/onboarding"
-                className="inline-flex items-center gap-2 text-sm font-medium text-eos-primary hover:underline"
+                className="inline-flex shrink-0 items-center gap-2 rounded-eos-md bg-eos-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-eos-primary/90"
               >
-                Continua onboarding
+                Începe analiza gratuită
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </div>

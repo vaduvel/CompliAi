@@ -15,12 +15,15 @@ import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
+import { readNis2State } from "@/lib/server/nis2-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
 const SCORE_DROP_THRESHOLD = -3
 const DEADLINE_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 const FINDING_RECENCY_MS = 24 * 60 * 60 * 1000
+const NIS2_SLA_WARN_MS = 4 * 60 * 60 * 1000    // alertă când < 4h rămase
+const POLICY_EXPIRY_WARN_MS = 30 * 24 * 60 * 60 * 1000 // alertă la 30 zile înainte de expirare
 
 type DailyDigestPayload = {
   orgName: string
@@ -58,6 +61,47 @@ function getUrgentDeadlines(state: ComplianceState): string[] {
   }
 
   return deadlines.slice(0, 5)
+}
+
+// A2 — NIS2 SLA: detectează incidente cu deadline 24h sau 72h aproape
+async function getNis2SlaDeadlines(orgId: string): Promise<string[]> {
+  try {
+    const nis2 = await readNis2State(orgId)
+    const now = Date.now()
+    const deadlines: string[] = []
+    for (const incident of nis2.incidents) {
+      if (incident.status === "closed") continue
+      const d24 = new Date(incident.deadline24hISO).getTime()
+      const d72 = new Date(incident.deadline72hISO).getTime()
+      if (d24 > now && d24 - now < NIS2_SLA_WARN_MS) {
+        deadlines.push(`NIS2 SLA 24h: "${incident.title}" — deadline în ${Math.ceil((d24 - now) / 3_600_000)}h`)
+      } else if (d72 > now && d72 - now < NIS2_SLA_WARN_MS) {
+        deadlines.push(`NIS2 SLA 72h: "${incident.title}" — deadline în ${Math.ceil((d72 - now) / 3_600_000)}h`)
+      } else if (d24 < now && incident.status === "open") {
+        deadlines.push(`NIS2 SLA 24h DEPĂȘIT: "${incident.title}"`)
+      }
+    }
+    return deadlines.slice(0, 3)
+  } catch {
+    return []
+  }
+}
+
+// A3 — Politici expirate: detectează documente care expiră în POLICY_EXPIRY_WARN_MS
+function getPolicyExpiryDeadlines(state: ComplianceState): string[] {
+  const now = Date.now()
+  const deadlines: string[] = []
+  for (const doc of state.generatedDocuments) {
+    if (!doc.expiresAtISO) continue
+    const exp = new Date(doc.expiresAtISO).getTime()
+    if (exp > now && exp - now < POLICY_EXPIRY_WARN_MS) {
+      const daysLeft = Math.ceil((exp - now) / (24 * 3_600_000))
+      deadlines.push(`Document expiră în ${daysLeft} zile: "${doc.title}"`)
+    } else if (exp < now) {
+      deadlines.push(`Document EXPIRAT: "${doc.title}"`)
+    }
+  }
+  return deadlines.slice(0, 2)
 }
 
 function buildDailyDigestHtml(payload: DailyDigestPayload): string {
@@ -186,7 +230,12 @@ export async function POST(request: Request) {
         const { scoreToday, delta } = await getScoreDelta(org.id)
 
         const newFindings = getNewFindingsCount(state)
-        const urgentDeadlines = getUrgentDeadlines(state)
+        const [baseDeadlines, nis2Deadlines] = await Promise.all([
+          Promise.resolve(getUrgentDeadlines(state)),
+          getNis2SlaDeadlines(org.id),
+        ])
+        const policyDeadlines = getPolicyExpiryDeadlines(state)
+        const urgentDeadlines = [...baseDeadlines, ...nis2Deadlines, ...policyDeadlines].slice(0, 7)
 
         // ANTI-SPAM: only send when something actionable happened
         const hasScoreDrop = delta !== null && delta <= SCORE_DROP_THRESHOLD

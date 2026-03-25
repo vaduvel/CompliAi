@@ -4,7 +4,8 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { createDsar, readDsarState } from "@/lib/server/dsar-store"
+import { createDsar, readDsarState, updateDsar } from "@/lib/server/dsar-store"
+import { generateDsarDraft } from "@/lib/compliance/dsar-drafts"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import type { DsarRequestType } from "@/lib/server/dsar-store"
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     if (!requesterEmail?.trim()) return jsonError("Email-ul solicitantului este obligatoriu.", 400, "MISSING_FIELD")
     if (!VALID_TYPES.includes(requestType)) return jsonError("Tip cerere invalid.", 400, "INVALID_TYPE")
 
-    const { orgId } = await getOrgContext()
+    const { orgId, orgName } = await getOrgContext()
     const dsar = await createDsar(orgId, {
       requesterName: requesterName.trim(),
       requesterEmail: requesterEmail.trim(),
@@ -43,7 +44,15 @@ export async function POST(request: Request) {
       notes,
     })
 
-    return NextResponse.json({ request: dsar }, { status: 201 })
+    // A1 — Auto-generate draft on creation
+    const draft = generateDsarDraft({
+      requestType: dsar.requestType,
+      requesterName: dsar.requesterName,
+      orgName: orgName || orgId,
+    })
+    const updatedDsar = await updateDsar(orgId, dsar.id, { draftResponseGenerated: true })
+
+    return NextResponse.json({ request: updatedDsar ?? dsar, draft }, { status: 201 })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Nu am putut crea cererea DSAR.", 500, "DSAR_CREATE_FAILED")

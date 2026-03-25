@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { AlertTriangle, CheckCircle2, FileCode2 } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { AlertTriangle, CheckCircle2, FileCode2, Zap } from "lucide-react"
 
 import type { EFacturaValidationRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -22,6 +22,19 @@ export function EFacturaValidatorCard({
   const [documentName, setDocumentName] = useState("factura-anaf.xml")
   const [xml, setXml] = useState("")
   const latestValidation = validations[0] ?? null
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // A4 — Live validation on paste: auto-validate with 800ms debounce
+  useEffect(() => {
+    if (xml.trim().length < 50) return
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      void onValidate({ documentName, xml })
+    }, 800)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [xml, documentName, onValidate])
 
   async function handleFileChange(file: File | null) {
     if (!file) return
@@ -69,14 +82,22 @@ export function EFacturaValidatorCard({
             className="ring-focus min-h-[280px] w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
           />
 
-          <Button
-            onClick={() => void onValidate({ documentName, xml })}
-            disabled={!xml.trim() || busy}
-            size="lg"
-            className="w-full bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
-          >
-            Valideaza XML-ul
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => void onValidate({ documentName, xml })}
+              disabled={!xml.trim() || busy}
+              size="lg"
+              className="flex-1 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+            >
+              Valideaza XML-ul
+            </Button>
+            {xml.trim().length >= 50 && (
+              <span className="flex items-center gap-1 text-[10px] text-eos-text-muted whitespace-nowrap">
+                <Zap className="size-3 text-eos-primary" />
+                Live
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
