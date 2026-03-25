@@ -637,6 +637,7 @@ function ReviewPanel({
         )
       })()}
 
+
       {/* Specialist escalation for high-urgency vendors */}
       {(review.urgency === "critical" || review.urgency === "high") && review.status !== "closed" && (
         <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-2.5">
