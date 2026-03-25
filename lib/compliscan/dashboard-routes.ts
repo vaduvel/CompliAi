@@ -25,6 +25,8 @@ export const dashboardRoutes = {
   generator: "/dashboard/generator",
   settings: "/dashboard/settings",
   settingsBilling: "/dashboard/settings/abonament",
+  whistleblowing: "/dashboard/whistleblowing",
+  dora: "/dashboard/dora",
 } as const
 
 export function dashboardScanResultsRoute(scanId: string) {
@@ -45,6 +47,8 @@ export const dashboardRouteGroups = {
     dashboardRoutes.agents,
     dashboardRoutes.fiscal,
     dashboardRoutes.vendorReview,
+    dashboardRoutes.whistleblowing,
+    dashboardRoutes.dora,
   ],
   reports: [
     dashboardRoutes.reports,

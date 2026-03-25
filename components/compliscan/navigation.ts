@@ -11,6 +11,7 @@ import {
   Home,
   Scan,
   Settings,
+  Shield,
   Sparkles,
 } from "lucide-react"
 
@@ -35,6 +36,8 @@ export type DashboardNavId =
   | "politici"
   | "generator"
   | "partner"
+  | "whistleblowing"
+  | "dora"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -225,6 +228,14 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     label: "Partner",
     items: [
       { id: "partner", label: "Portofoliu firme", href: "/portfolio", icon: Building2 },
+    ],
+  },
+  {
+    id: "canale",
+    label: "Canale conformitate",
+    items: [
+      { id: "whistleblowing", label: "Canal sesizări", href: dashboardRoutes.whistleblowing, icon: Flag, matchers: [dashboardRoutes.whistleblowing] },
+      { id: "dora", label: "DORA", href: dashboardRoutes.dora, icon: Shield, matchers: [dashboardRoutes.dora] },
     ],
   },
 ] as const

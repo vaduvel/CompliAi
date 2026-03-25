@@ -917,6 +917,7 @@ export function SettingsPageSurface() {
                       { id: "drift.detected" as AlertEventType, label: "Drift detectat", hint: "Schimbare fata de baseline validat" },
                       { id: "task.overdue" as AlertEventType, label: "Task expirat", hint: "Task de remediere cu termen depasit" },
                       { id: "alert.critical" as AlertEventType, label: "Alerta critica", hint: "Finding de severitate ridicata sau critica" },
+                      { id: "score.dropped" as AlertEventType, label: "Scor scăzut", hint: "Scorul de conformitate a scăzut față de ziua anterioară" },
                     ] as const
                   ).map((ev) => (
                     <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">

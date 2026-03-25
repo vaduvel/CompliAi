@@ -62,6 +62,7 @@
 | EOS-S6 | EOS Sprint 6: D2 task re-open + E1 document expiry + E2 drift-linked refresh | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 | EOS-S7 | EOS Sprint 7: F1-F4 legislation/ANAF + G1-G2 reports + Addons streak/benchmark/prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 | EOS-S8 | EOS S8 UI Features — Streak, Benchmark, Counsel Brief, Share Token, Invoice Prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
+| EOS-BL1 | Backlog UX Audit — I6/A5/S1/A6/R2/P8 + P7 Whistleblowing (EU 2019/1937) + S2 DORA (EU 2022/2554) | 🟢 Închis | 2026-03-25 | 2026-03-25 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -76,6 +77,7 @@
 > **Sesiunea 7 (2026-03-18):** V6 Agentic Engine Phase 1 — implementat complet dar **PARCAT pe branch separat `feat/v6-agentic-engine-wip`**. Nu intră în release V4/V5. Conține: core types, orchestrator, compliance monitor (6 checks), fiscal sensor (clasificare+escalare), agent run store, cron, API, dashboard UI.
 > **Sesiunea 7b (2026-03-18):** Worktree cleanup — separare V4/V5 release-safe de V6 WIP. V6 → `feat/v6-agentic-engine-wip`. Junk docs `(1)` șterse. `.claude/` adăugat la .gitignore. Navigation agents entry eliminat. Build clean, 491 teste, 0 erori TS.
 > **Sesiunea EOS (2026-03-21):** Automation Layer complet — 8 sprint-uri (S2→S8) pe branch `codex/eos-v1-blueprint-main`. Implementat Faze A→G din `00-master-source.md`: Gemini primary scan engine, finding→task mapper, auto-doc generation, vendor sync/prefill/DPA, evidence quality, task re-open rules, document expiry, legislation radar (ANSPDCP/DNSC/ANAF), NIS2@RO tool importer, ANAF OAuth2+SPV, enhanced one-page report (audit readiness, content hash), partner/counsel pack, compliance streak, sector benchmark, invoice smart prefill. S8: conectare UI — streak strip, benchmark strip, counsel brief button, share token buttons, invoice prefill trigger în wizard. Definition of Done: 12/12 criterii. 0 erori TS non-test. Commits: b075724→93ff3c5.
+> **Sesiunea EOS-BL1 (2026-03-25):** Backlog UX Audit complet — 8 itemi din `docs/final-guide-plan/`. I6: score.dropped event în Settings Notificări. A5: scoring live-update (era deja implementat). S1: bulk mark done în Resolve (checkbox selection + batch PATCH). A6: auto vendor review la creare vendor nou. R2: ExecutiveSummaryCard pe dashboard (scor, taskuri, riscuri, top 3 priorități). P8: cookie-banner-mismatch detection în site-scanner. P7: modul complet Whistleblowing (EU 2019/1937) — store, 3 API-uri, dashboard management, formular public anonim. S2: modul complet DORA (EU 2022/2554) — store, 4 API-uri (incidents + TPRM), dashboard cu KPI strip + tabs + forms cu validare deadline 4h/72h. Navigare actualizată (whistleblowing + DORA în sidebar). Build clean, 0 erori TS non-test.
 
 ---
 

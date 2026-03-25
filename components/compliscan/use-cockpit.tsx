@@ -934,6 +934,28 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function handleBulkMarkDone(ids: string[]) {
+    if (ids.length === 0) return
+    setBusy(true)
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/tasks/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "mark_done_and_validate" }),
+          })
+        )
+      )
+      toast.success(`${ids.length} task-uri marcate ca rezolvate`)
+      await reloadDashboard()
+    } catch {
+      toast.error("Eroare la marcarea în bloc")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function handleMarkDone(taskId: string) {
     const task = tasks.find((item) => item.id === taskId)
     if (!task) return
@@ -1101,6 +1123,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleShareWithAccountant,
     handleSyncNow,
     handleMarkDone,
+    handleBulkMarkDone,
     attachEvidence,
     handleTaskExport,
     handleSandbox,
@@ -1213,6 +1236,7 @@ export type CockpitActionSlice = Pick<
   | "updateTraceabilityReview"
   | "reuseFamilyEvidence"
   | "updateDriftLifecycle"
+  | "handleBulkMarkDone"
 >
 
 export function useCockpitData(): CockpitDataSlice {
@@ -1376,6 +1400,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     updateTraceabilityReview,
     reuseFamilyEvidence,
     updateDriftLifecycle,
+    handleBulkMarkDone,
   } = store
 
   return {
@@ -1417,6 +1442,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     updateTraceabilityReview,
     reuseFamilyEvidence,
     updateDriftLifecycle,
+    handleBulkMarkDone,
   }
 }
 
