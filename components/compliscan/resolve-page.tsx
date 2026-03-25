@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, FileText, RefreshCw, ClipboardCheck } from "lucide-react"
+import { useDeferredValue, useEffect, useState } from "react"
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, FileText, RefreshCw, ClipboardCheck, Search } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
@@ -13,11 +13,13 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
-import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
+import type { ScanFinding } from "@/lib/compliance/types"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 type FrameworkFilter = "toate" | "gdpr" | "nis2" | "ai-act" | "furnizori"
+type SeverityFilter = "toate" | "critical" | "high" | "medium" | "low"
+type FindingStatusFilter = "active" | "all"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -36,6 +38,28 @@ function frameworkLabel(fw: FrameworkFilter): string {
     toate: "General", gdpr: "GDPR", nis2: "NIS2", "ai-act": "AI Act", furnizori: "Furnizori",
   }
   return labels[fw]
+}
+
+function isFindingActive(finding: ScanFinding): boolean {
+  return finding.findingStatus !== "resolved" && finding.findingStatus !== "dismissed"
+}
+
+function matchesFindingSearch(finding: ScanFinding, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return true
+
+  const haystack = [
+    finding.title,
+    finding.detail,
+    finding.remediationHint,
+    finding.legalReference,
+    finding.sourceDocument,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+
+  return haystack.includes(normalizedQuery)
 }
 
 function ageLabel(iso: string): string {
@@ -246,6 +270,10 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
 
 function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMode: boolean }) {
   const [activeFilter, setActiveFilter] = useState<FrameworkFilter>("toate")
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("toate")
+  const [statusFilter, setStatusFilter] = useState<FindingStatusFilter>("active")
+  const [query, setQuery] = useState("")
+  const deferredQuery = useDeferredValue(query)
 
   const filterTabs: Array<{ id: FrameworkFilter; label: string }> = [
     { id: "toate",     label: "Toate" },
@@ -255,71 +283,167 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
     { id: "furnizori", label: "Furnizori" },
   ]
 
+  const severityTabs: Array<{ id: SeverityFilter; label: string }> = [
+    { id: "toate", label: "Toate severitățile" },
+    { id: "critical", label: "Critice" },
+    { id: "high", label: "Ridicate" },
+    { id: "medium", label: "Medii" },
+    { id: "low", label: "Scăzute" },
+  ]
+
+  const findingsForStatus = findings.filter((finding) =>
+    statusFilter === "all" ? true : isFindingActive(finding)
+  )
+
   const counts: Record<FrameworkFilter, number> = {
-    toate: findings.length,
-    gdpr:      findings.filter((f) => frameworkFromLegal(f.legalReference) === "gdpr").length,
-    nis2:      findings.filter((f) => frameworkFromLegal(f.legalReference) === "nis2").length,
-    "ai-act":  findings.filter((f) => frameworkFromLegal(f.legalReference) === "ai-act").length,
-    furnizori: findings.filter((f) => frameworkFromLegal(f.legalReference) === "furnizori").length,
+    toate: findingsForStatus.length,
+    gdpr:      findingsForStatus.filter((f) => frameworkFromLegal(f.legalReference) === "gdpr").length,
+    nis2:      findingsForStatus.filter((f) => frameworkFromLegal(f.legalReference) === "nis2").length,
+    "ai-act":  findingsForStatus.filter((f) => frameworkFromLegal(f.legalReference) === "ai-act").length,
+    furnizori: findingsForStatus.filter((f) => frameworkFromLegal(f.legalReference) === "furnizori").length,
+  }
+
+  const severityCounts: Record<SeverityFilter, number> = {
+    toate: findingsForStatus.length,
+    critical: findingsForStatus.filter((f) => f.severity === "critical").length,
+    high: findingsForStatus.filter((f) => f.severity === "high").length,
+    medium: findingsForStatus.filter((f) => f.severity === "medium").length,
+    low: findingsForStatus.filter((f) => f.severity === "low").length,
   }
 
   const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
-  const filtered = findings
+  const filtered = findingsForStatus
     .filter((f) => activeFilter === "toate" || frameworkFromLegal(f.legalReference) === activeFilter)
+    .filter((f) => severityFilter === "toate" || f.severity === severityFilter)
+    .filter((f) => matchesFindingSearch(f, deferredQuery))
     .sort((a, b) => (SEVERITY_RANK[a.severity] ?? 4) - (SEVERITY_RANK[b.severity] ?? 4))
 
   return (
     <div>
-      {soloMode ? (
-        <div className="mb-4 flex items-center justify-between rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3">
+      <div className="mb-4 space-y-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-sm font-medium text-eos-text">Prioritatea de azi</p>
+            <p className="text-sm font-medium text-eos-text">
+              {soloMode ? "Prioritatea de azi" : "Queue de finding-uri"}
+            </p>
             <p className="mt-1 text-xs text-eos-text-muted">
-              Findings și task-uri în aceeași listă, fără filtre complexe pe framework.
+              Vezi doar problemele active implicit. Poți căuta, filtra după severitate și afișa și finding-urile închise.
             </p>
           </div>
-          <Badge variant="outline" className="normal-case tracking-normal">
-            {filtered.length} deschise
-          </Badge>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("active")}
+              className={[
+                "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                statusFilter === "active"
+                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                  : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+              ].join(" ")}
+            >
+              Deschise · {findings.filter((finding) => isFindingActive(finding)).length}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              className={[
+                "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                statusFilter === "all"
+                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                  : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+              ].join(" ")}
+            >
+              Toate · {findings.length}
+            </button>
+          </div>
         </div>
-      ) : (
-        <div className="mb-4 flex border-b border-eos-border-subtle">
-          {filterTabs.map((tab) => {
-            const active = activeFilter === tab.id
+
+        <label className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2">
+          <Search className="size-4 text-eos-text-muted" strokeWidth={2} />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Caută după titlu, sursă sau referință legală"
+            className="w-full bg-transparent text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+          />
+        </label>
+
+        <div className="flex flex-wrap gap-2">
+          {severityTabs.map((tab) => {
+            const active = severityFilter === tab.id
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveFilter(tab.id)}
+                onClick={() => setSeverityFilter(tab.id)}
                 className={[
-                  "border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150",
+                  "rounded-full border px-3 py-1.5 text-xs transition-colors",
                   active
-                    ? "border-eos-primary text-eos-text"
-                    : "border-transparent text-eos-text-muted hover:text-eos-text",
+                    ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                    : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
                 ].join(" ")}
               >
                 {tab.label}
-                {counts[tab.id] > 0 && (
-                  <span
-                    className={[
-                      "ml-1.5 rounded-full px-1.5 py-0.5 text-[11px]",
-                      active ? "bg-eos-primary-soft text-eos-primary" : "bg-eos-bg-inset text-eos-text-muted",
-                    ].join(" ")}
-                  >
-                    {counts[tab.id]}
-                  </span>
-                )}
+                <span className="ml-1.5 text-[11px] text-inherit">{severityCounts[tab.id]}</span>
               </button>
             )
           })}
         </div>
-      )}
+
+        {!soloMode ? (
+          <div className="flex border-b border-eos-border-subtle">
+            {filterTabs.map((tab) => {
+              const active = activeFilter === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveFilter(tab.id)}
+                  className={[
+                    "border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150",
+                    active
+                      ? "border-eos-primary text-eos-text"
+                      : "border-transparent text-eos-text-muted hover:text-eos-text",
+                  ].join(" ")}
+                >
+                  {tab.label}
+                  {counts[tab.id] > 0 && (
+                    <span
+                      className={[
+                        "ml-1.5 rounded-full px-1.5 py-0.5 text-[11px]",
+                        active ? "bg-eos-primary-soft text-eos-primary" : "bg-eos-bg-inset text-eos-text-muted",
+                      ].join(" ")}
+                    >
+                      {counts[tab.id]}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">Lucrezi pe ce e activ acum</p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                Lista rămâne simplă, dar poți restrânge severitatea sau căuta direct problema.
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {filtered.length} vizibile
+            </Badge>
+          </div>
+        )}
+      </div>
 
       {filtered.length === 0 ? (
         <EmptyState
           label={findings.length === 0
             ? "Nu există finding-uri. Rulează o scanare pentru a detecta probleme."
-            : "Nu există finding-uri în această categorie."}
+            : statusFilter === "active"
+              ? "Nu există finding-uri active pentru filtrul curent. Poți afișa și pe cele închise."
+              : "Nu există finding-uri care să se potrivească filtrelor curente."}
           className="border-eos-border bg-eos-surface-variant"
         />
       ) : (
@@ -419,9 +543,10 @@ export function ResolvePageSurface() {
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   const findings = cockpit.data.state.findings
-  const criticalCount = findings.filter((f) => f.severity === "critical").length
-  const highCount = findings.filter((f) => f.severity === "high").length
-  const mediumCount = findings.filter((f) => f.severity === "medium").length
+  const activeFindings = findings.filter((finding) => isFindingActive(finding))
+  const criticalCount = activeFindings.filter((f) => f.severity === "critical").length
+  const highCount = activeFindings.filter((f) => f.severity === "high").length
+  const mediumCount = activeFindings.filter((f) => f.severity === "medium").length
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const isSolo = runtime?.userMode === "solo"
 
@@ -429,7 +554,7 @@ export function ResolvePageSurface() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="De rezolvat"
-        title={isSolo ? `De rezolvat · ${findings.length} urgente` : `De rezolvat · ${findings.length} deschise`}
+        title={isSolo ? `De rezolvat · ${activeFindings.length} urgente` : `De rezolvat · ${activeFindings.length} deschise`}
         description={
           isSolo
             ? "Aici vezi simplificat ce trebuie rezolvat acum: findings și task-uri într-un singur flux, fără filtre complexe."
@@ -464,30 +589,35 @@ export function ResolvePageSurface() {
       {/* Cross-module urgency: DSAR deadlines + NIS2 incidents + Vendor overdue */}
       <UrgentItemsSection items={urgencyItems} />
 
-      {/* Primary: Finding Queue with framework filter tabs */}
-      <section aria-label="Finding-uri de rezolvat">
-      <FindingQueue findings={findings} soloMode={isSolo} />
-      </section>
-
-      {/* Secondary: Task board — under disclosure, not competing */}
+      {/* Primary execution surface */}
       {cockpit.tasks.length > 0 && (
-        <details className="group">
-          <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
-            <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-            Board de task-uri · {openTasks.length} deschise
-          </summary>
-          <div className="mt-4">
-            <RemediationBoard
-              tasks={cockpit.tasks}
-              activeFilter={taskFilter}
-              onFilterChange={setTaskFilter}
-              onMarkDone={cockpitActions.handleMarkDone}
-              onAttachEvidence={cockpitActions.attachEvidence}
-              onExport={cockpitActions.handleTaskExport}
-            />
+        <section aria-label="Plan de remediere">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-eos-text">Planul de lucru recomandat</p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                Lucrezi direct din board: atașezi dovada, validezi și revii la listă doar pentru context.
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {openTasks.length} task-uri deschise
+            </Badge>
           </div>
-        </details>
+          <RemediationBoard
+            tasks={cockpit.tasks}
+            activeFilter={taskFilter}
+            onFilterChange={setTaskFilter}
+            onMarkDone={cockpitActions.handleMarkDone}
+            onAttachEvidence={cockpitActions.attachEvidence}
+            onExport={cockpitActions.handleTaskExport}
+          />
+        </section>
       )}
+
+      {/* Supporting context: finding queue */}
+      <section aria-label="Finding-uri de rezolvat">
+        <FindingQueue findings={findings} soloMode={isSolo} />
+      </section>
     </div>
   )
 }

@@ -112,6 +112,10 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const activeOverviewStep = getOverviewStep(currentMode, wizardStep)
+  const activeOverviewStepIndex = Math.max(
+    0,
+    ONBOARDING_OVERVIEW_STEPS.findIndex((step) => step.id === activeOverviewStep)
+  )
   const selectedModeMeta = currentMode
     ? MODE_OPTIONS.find((option) => option.id === currentMode) ?? null
     : null
@@ -146,9 +150,15 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   }
 
   function handleOnboardingComplete() {
-    toast.success("Onboarding finalizat. Te ducem in dashboard.")
-    router.replace("/dashboard")
-    router.refresh()
+    router.replace("/onboarding/finish")
+  }
+
+  function handleBackToModeSelection() {
+    if (!currentMode) return
+    setSelectedMode(currentMode)
+    setCurrentMode(null)
+    setWizardStep(null)
+    setError(null)
   }
 
   return (
@@ -238,9 +248,18 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                     </p>
                   </div>
                 </div>
-                <p className="mt-3 text-xs text-eos-text-muted">
-                  Il poti schimba ulterior din Setari cont.
-                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs text-eos-text-muted">
+                    Îl poți schimba ulterior din Setări cont.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleBackToModeSelection}
+                    className="text-xs font-medium text-eos-primary hover:underline"
+                  >
+                    Schimbă modul
+                  </button>
+                </div>
               </CardContent>
             </Card>
           ) : null}
@@ -252,14 +271,16 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
-                    {currentMode ? "Pasii 2-4 din 4" : "Pasul 1 din 4"}
+                    Pasul {activeOverviewStepIndex + 1} din {ONBOARDING_OVERVIEW_STEPS.length}
                   </p>
                   <h2 className="mt-2 text-xl font-semibold text-eos-text">
-                    {currentMode ? "Configuram profilul initial al firmei" : "Cum vei folosi CompliScan?"}
+                    {currentMode
+                      ? ONBOARDING_OVERVIEW_STEPS[activeOverviewStepIndex]?.label ?? "Configurăm profilul inițial al firmei"
+                      : "Cum vei folosi CompliScan?"}
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-eos-text-muted">
                     {currentMode
-                      ? `${orgName ?? "Organizatia ta"} ramane in acelasi flow pana cand primesti findings si urmatorul pas clar.`
+                      ? `${orgName ?? "Organizația ta"} rămâne în același flow până când primești findings și următorul pas clar. Poți reveni cu Înapoi dacă vrei să corectezi răspunsurile.`
                       : "Alege rolul care descrie cel mai bine modul in care vei lucra in produs."}
                   </p>
                 </div>
@@ -338,6 +359,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             <ApplicabilityWizard
               onComplete={handleOnboardingComplete}
               onStepChange={setWizardStep}
+              onBackToModeSelection={handleBackToModeSelection}
             />
           )}
         </div>

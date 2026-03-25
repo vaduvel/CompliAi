@@ -34,9 +34,13 @@ export function buildDNSCReport(incident: Nis2Incident, orgName?: string): strin
   const detected = fmt(incident.detectedAtISO)
   const deadline24 = fmt(incident.deadline24hISO)
   const deadline72 = fmt(incident.deadline72hISO)
+  const deadlineFinal = incident.deadlineFinalISO ? fmt(incident.deadlineFinalISO) : "—"
 
   const sla24Passed = Date.now() > new Date(incident.deadline24hISO).getTime()
   const sla72Passed = Date.now() > new Date(incident.deadline72hISO).getTime()
+  const slaFinalPassed = incident.deadlineFinalISO
+    ? Date.now() > new Date(incident.deadlineFinalISO).getTime()
+    : false
 
   const attackLabel = incident.attackType
     ? ATTACK_TYPE_LABELS[incident.attackType]
@@ -109,7 +113,7 @@ ${incident.measuresTaken || "Măsurile luate nu au fost documentate încă."}
 |---|---|---|
 | Alertă inițială 24h | ${deadline24} | ${sla24Passed ? "⚠️ DEPĂȘIT" : "✓ În termen"} |
 | Raport complet 72h | ${deadline72} | ${sla72Passed ? "⚠️ DEPĂȘIT" : "✓ În termen"} |
-| Raport final 30 zile | — | — |
+| Raport final (30 zile de la raport 72h) | ${deadlineFinal} | ${incident.deadlineFinalISO ? (slaFinalPassed ? "⚠️ DEPĂȘIT" : "✓ În termen") : "—"} |
 
 **Status curent incident:** ${incident.status}
 ${incident.resolvedAtISO ? `**Rezolvat la:** ${fmt(incident.resolvedAtISO)}` : "**Incident activ** — în curs de remediere."}

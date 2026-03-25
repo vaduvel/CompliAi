@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 import {
+  ArrowLeft,
   CheckCircle2,
   ChevronRight,
   FileText,
@@ -26,7 +27,6 @@ import {
   type OrgSector,
 } from "@/lib/compliance/applicability"
 import {
-  prefillSuggestionSourceLabel,
   type OrgProfilePrefill,
   type PrefillSuggestion,
 } from "@/lib/compliance/org-profile-prefill"
@@ -78,6 +78,7 @@ type ProfilePrefillResponse = {
 type Props = {
   onComplete: (result: ApplicabilityResult) => void
   onStepChange?: (step: ApplicabilityWizardStep) => void
+  onBackToModeSelection?: () => void
 }
 
 const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
@@ -96,7 +97,27 @@ const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
   low: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
 }
 
-export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
+const WIZARD_SEQUENCE: ApplicabilityWizardStep[] = [
+  "cui",
+  "sector",
+  "size",
+  "ai",
+  "efactura",
+  "intake",
+  "done",
+]
+
+const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
+  cui: "Profil firmă",
+  sector: "Sector de activitate",
+  size: "Dimensiunea firmei",
+  ai: "Utilizare AI",
+  efactura: "e-Factura",
+  intake: "Confirmări finale",
+  done: "Raport inițial pregătit",
+}
+
+export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSelection }: Props) {
   const { track, trackOnce } = useTrackEvent()
   const completedRef = useRef(false)
 
@@ -146,6 +167,30 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
     visibleQuestionIds.has(suggestion.questionId)
   )
   const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
+  const visibleQuestionCount = INTAKE_QUESTIONS.length + visibleConditionalQuestions.length
+  const answeredQuestionCount = Math.max(0, visibleQuestionCount - unansweredQuestions.length)
+  const currentStepIndex = WIZARD_SEQUENCE.indexOf(step)
+  const progressSteps = WIZARD_SEQUENCE.length - 1
+  const progressPercent = step === "done" ? 100 : ((currentStepIndex + 1) / progressSteps) * 100
+
+  function goBack() {
+    setError(null)
+
+    if (step === "done") {
+      setStep("intake")
+      return
+    }
+
+    if (step === "cui") {
+      onBackToModeSelection?.()
+      return
+    }
+
+    const previousStep = WIZARD_SEQUENCE[Math.max(0, currentStepIndex - 1)]
+    if (previousStep) {
+      setStep(previousStep)
+    }
+  }
 
   function hydrateIntakeStep(nextRequiresEfactura: boolean) {
     if (!values.sector || !values.employeeCount || values.usesAITools === null) return
@@ -281,16 +326,6 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
     if (result) onComplete(result)
   }
 
-  const STEP_LABELS: Record<ApplicabilityWizardStep, string> = {
-    cui: "1 / 6",
-    sector: "2 / 6",
-    size: "3 / 6",
-    ai: "4 / 6",
-    efactura: "5 / 6",
-    intake: "6 / 6",
-    done: "✓",
-  }
-
   return (
     <Card className="border-eos-border bg-eos-surface shadow-sm">
       <CardContent className="border-l-4 border-l-eos-primary px-5 py-5">
@@ -306,14 +341,45 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
               </p>
             </div>
           </div>
-          <span className="shrink-0 text-xs font-medium text-eos-text-muted tabular-nums">
-            {STEP_LABELS[step]}
-          </span>
+          {(step !== "cui" || onBackToModeSelection) && step !== "done" ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={goBack}
+            >
+              <ArrowLeft className="size-3.5" />
+              Înapoi
+            </Button>
+          ) : null}
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between gap-3 text-xs text-eos-text-muted">
+            <span>{WIZARD_PROGRESS_LABELS[step]}</span>
+            <span>{step === "done" ? "gata" : "flow ghidat"}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
+            <div
+              className="h-full bg-eos-primary transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
         <div className="mt-5">
           {step === "cui" && (
             <div className="space-y-3">
+              <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/10 px-4 py-3">
+                <p className="text-sm font-medium text-eos-text">
+                  Dacă adaugi CUI-ul sau website-ul, pregătim automat profilul firmei și reducem întrebările manuale.
+                </p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  Nu sunt obligatorii, dar scurtează flow-ul și cresc precizia primelor findings.
+                </p>
+              </div>
+
               <div>
                 <p className="text-sm font-medium text-eos-text">
                   CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional, recomandat)</span>
@@ -504,7 +570,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
                       </p>
                     </div>
                     <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-                      Sursa: AI inventory
+                      Din inventarul AI
                     </Badge>
                   </div>
                 </div>
@@ -582,6 +648,33 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
           {step === "intake" && (
             <div className="space-y-5">
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-eos-text">
+                      Confirmările finale sunt toate pe aceeași pagină
+                    </p>
+                    <p className="mt-1 text-xs text-eos-text-muted">
+                      Ai răspuns la {answeredQuestionCount} din {visibleQuestionCount} întrebări relevante.
+                      {unansweredQuestions.length === 0
+                        ? " Poți genera primul plan."
+                        : ` Mai sunt ${unansweredQuestions.length} pentru precizie maximă.`}
+                    </p>
+                  </div>
+                  <Badge className="border-eos-border bg-eos-surface text-eos-text-muted">
+                    {answeredQuestionCount}/{visibleQuestionCount}
+                  </Badge>
+                </div>
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
+                  <div
+                    className="h-full bg-eos-primary transition-all duration-300"
+                    style={{
+                      width: `${visibleQuestionCount === 0 ? 100 : (answeredQuestionCount / visibleQuestionCount) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
                 <div className="flex items-start gap-2">
                   <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
                   <div>
@@ -656,9 +749,9 @@ export function ApplicabilityWizard({ onComplete, onStepChange }: Props) {
                 <div className="text-xs text-eos-text-muted">
                   {unansweredQuestions.length === 0
                     ? "Toate răspunsurile care contează pentru prima rundă de findings sunt confirmate."
-                    : `${unansweredQuestions.length} răspunsuri mai schimbă findings sau documentele recomandate.`}
+                    : `Mai sunt ${unansweredQuestions.length} răspunsuri care schimbă findings sau documentele recomandate.`}
                 </div>
-                <Button onClick={() => void handleSubmit()} disabled={saving}>
+                <Button onClick={() => void handleSubmit()} disabled={saving || unansweredQuestions.length > 0}>
                   {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
                   Generează primul plan
                 </Button>
@@ -809,7 +902,7 @@ function PrefillContextCard({
   const subtitleParts = [prefill.companyName]
   if (prefill.normalizedCui) subtitleParts.push(prefill.normalizedCui)
   if (prefill.normalizedWebsite) subtitleParts.push(formatWebsiteLabel(prefill.normalizedWebsite))
-  const sourceLabel = prefillSuggestionSourceLabel(prefill.source)
+  const sourceLabel = humanizePrefillSource(prefill.source)
   const title =
     prefill.source === "anaf_vat_registry"
       ? "Am găsit firma în ANAF"
@@ -827,7 +920,7 @@ function PrefillContextCard({
           </p>
         </div>
         <Badge className="shrink-0 border-eos-border bg-eos-success-soft text-eos-success">
-          ✓ Sugerat din {sourceLabel} — confirmă
+          ✓ Detectat din {sourceLabel}
         </Badge>
       </div>
 
@@ -872,7 +965,7 @@ function PrefillContextCard({
               </p>
             </div>
             <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE.high}`}>
-              Încredere mare
+              Semnal solid
             </Badge>
           </div>
         </div>
@@ -898,7 +991,7 @@ function PrefillContextCard({
               </p>
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-              Sursa: AI inventory
+              Din inventarul AI
             </Badge>
           </div>
         </div>
@@ -928,7 +1021,7 @@ function PrefillContextCard({
               </p>
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-              Sursa: AI Compliance Pack
+              Din AI Compliance Pack
             </Badge>
           </div>
         </div>
@@ -957,7 +1050,7 @@ function PrefillContextCard({
               </p>
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-              Sursa: document memory
+              Din documentele existente
             </Badge>
           </div>
         </div>
@@ -981,7 +1074,7 @@ function PrefillContextCard({
               </p>
             </div>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-              Sursa: site public
+              Din site-ul public
             </Badge>
           </div>
         </div>
@@ -996,9 +1089,9 @@ function PrefillContextCard({
               </p>
               <p className="mt-1 text-xs text-eos-text-muted">{sectorSuggestion.reason}</p>
             </div>
-            <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[sectorSuggestion.confidence]}`}>
-              {confidenceLabel(sectorSuggestion.confidence)}
-            </Badge>
+        <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[sectorSuggestion.confidence]}`}>
+          {confidenceLabel(sectorSuggestion.confidence)}
+        </Badge>
           </div>
           {selectedSector !== sectorSuggestion.value ? (
             <Button
@@ -1035,12 +1128,9 @@ function PrefillSuggestionCard({
           <p className="mt-1 text-xs text-eos-text-muted">{suggestion.reason}</p>
         </div>
         <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}>
-          {confidenceLabel(suggestion.confidence)}
+          Sugestie automată
         </Badge>
       </div>
-      <p className="mt-2 text-[11px] text-eos-text-muted">
-        Sursa: {prefillSuggestionSourceLabel(suggestion.source)}
-      </p>
     </div>
   )
 }
@@ -1065,10 +1155,7 @@ function QuestionCard({
             <div className="mt-1 space-y-2">
               <div className="flex flex-wrap gap-2">
                 <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}>
-                  {confidenceLabel(suggestion.confidence)}
-                </Badge>
-                <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-                  Sursa: {prefillSuggestionSourceLabel(suggestion.source)}
+                  Sugestie automată
                 </Badge>
               </div>
               <p className="text-xs text-eos-text-muted">
@@ -1183,11 +1270,24 @@ function answerLabel(value: string) {
 function confidenceLabel(value: SuggestedAnswer["confidence"]) {
   switch (value) {
     case "high":
-      return "Încredere mare"
+      return "Detectat sigur"
     case "medium":
-      return "Încredere medie"
+      return "Necesită confirmare"
     default:
-      return "Semnal slab"
+      return "Semnal orientativ"
+  }
+}
+
+function humanizePrefillSource(source: OrgProfilePrefill["source"]) {
+  switch (source) {
+    case "anaf_vat_registry":
+      return "datele fiscale"
+    case "website_signals":
+      return "site-ul public"
+    case "ai_compliance_pack":
+      return "AI Compliance Pack"
+    default:
+      return "semnalele detectate"
   }
 }
 

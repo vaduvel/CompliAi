@@ -12,7 +12,7 @@ import { hasSupabaseConfig, supabaseInsert } from "@/lib/server/supabase-rest"
 // ── Event types ───────────────────────────────────────────────────────────────
 
 export type AnalyticsEvent =
-  // Success events (8)
+  // Success events
   | "started_applicability"
   | "completed_applicability"
   | "generated_first_document"
@@ -21,11 +21,14 @@ export type AnalyticsEvent =
   | "closed_first_finding"
   | "entered_accountant_hub"
   | "clicked_late_nis2_rescue"
-  // Stuck / abandon events (3)
+  | "onboarding_finish_viewed"
+  | "onboarding_finish_cta_clicked"
+  | "renewal_email_cta_clicked"
+  // Stuck / abandon events
   | "abandoned_applicability"
   | "opened_finding_but_not_closed"
   | "started_checkout_not_completed"
-  // Feedback events (1)
+  // Feedback events
   | "submitted_feedback"
 
 export type AnalyticsRecord = {

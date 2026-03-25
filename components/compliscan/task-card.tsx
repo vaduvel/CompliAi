@@ -54,9 +54,9 @@ function priorityTone(priority: CockpitTask["priority"]) {
 }
 
 function confidenceLabel(confidence: CockpitTask["confidence"]) {
-  if (confidence === "high") return "mare"
-  if (confidence === "med") return "medie"
-  return "redusa"
+  if (confidence === "high") return "solid"
+  if (confidence === "med") return "mediu"
+  return "orientativ"
 }
 
 function validationTone(status: CockpitTask["validationStatus"]) {
@@ -478,7 +478,7 @@ export function TaskCard({
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-eos-text-muted">
                   <span className="[overflow-wrap:anywhere]">Sursa: {task.source}</span>
                   <span className="[overflow-wrap:anywhere]">
-                    Incredere: {confidenceLabel(task.confidence)}
+                    Semnal: {confidenceLabel(task.confidence)}
                   </span>
                   <span className="[overflow-wrap:anywhere]">{task.lawReference}</span>
                 </div>

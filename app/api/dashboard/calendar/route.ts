@@ -124,6 +124,22 @@ export async function GET(request: Request) {
             legalBasis: "NIS2 Art. 23(4)(b)",
           })
         }
+        // Raport final 30 zile — de la raportul inițial 72h (NIS2 Art. 23(4)(c))
+        if (inc.deadlineFinalISO && inc.status !== "closed") {
+          const days = daysUntil(inc.deadlineFinalISO)
+          events.push({
+            id: `nis2-final-${inc.id}`,
+            type: "nis2-final",
+            title: `Raport final DNSC — ${inc.title}`,
+            detail: "Raport final NIS2 Art. 23(4)(c) — 30 zile de la raportul inițial 72h",
+            deadlineISO: inc.deadlineFinalISO,
+            daysLeft: days,
+            group: getGroup(days),
+            severity: days < 0 ? "critical" : days <= 7 ? "high" : "medium",
+            href: "/dashboard/nis2",
+            legalBasis: "NIS2 Art. 23(4)(c)",
+          })
+        }
         // ANSPDCP breach notification — dacă există și e pending
         if (inc.anspdcpNotification?.required && inc.anspdcpNotification.status === "pending" && inc.anspdcpNotification.deadlineISO) {
           const days = daysUntil(inc.anspdcpNotification.deadlineISO)

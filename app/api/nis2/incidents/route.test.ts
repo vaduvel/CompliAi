@@ -44,6 +44,7 @@ const MOCK_INCIDENT = {
   detectedAtISO: "2026-03-17T10:00:00.000Z",
   deadline24hISO: "2026-03-18T10:00:00.000Z",
   deadline72hISO: "2026-03-20T10:00:00.000Z",
+  deadlineFinalISO: "2026-04-19T10:00:00.000Z",
   affectedSystems: ["ERP"],
   createdAtISO: "2026-03-17T10:00:00.000Z",
   updatedAtISO: "2026-03-17T10:00:00.000Z",

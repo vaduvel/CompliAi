@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { AlertTriangle, ArrowRight, BarChart3, Bot, CalendarClock, CheckCircle2, ChevronRight, Download, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react"
 
@@ -15,6 +15,7 @@ import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
 import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
+import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
@@ -23,12 +24,14 @@ import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 export default function DashboardPage() {
   const runtime = useDashboardRuntime()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const [nis2Score, setNis2Score] = useState<number | null>(null)
   const [nis2EntityType, setNis2EntityType] = useState<"essential" | "important" | null>(null)
   const [nis2AssessmentDone, setNis2AssessmentDone] = useState(false)
   const [nis2UrgentIncident, setNis2UrgentIncident] = useState(false)
   const [benchmark, setBenchmark] = useState<{ medie: number; percentil: number; nrFirme: number; sector: string } | null>(null)
+  const [highlightAccumulation, setHighlightAccumulation] = useState(false)
 
   useEffect(() => {
     fetch("/api/nis2/assessment", { cache: "no-store" })
@@ -62,6 +65,29 @@ export default function DashboardPage() {
       })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get("focus") !== "accumulation") return
+
+    const scrollToAccumulation = () => {
+      const node = document.getElementById("dashboard-accumulation-card")
+      if (!node) return false
+
+      node.scrollIntoView({ behavior: "smooth", block: "center" })
+      setHighlightAccumulation(true)
+      window.setTimeout(() => setHighlightAccumulation(false), 2600)
+
+      const nextUrl = new URL(window.location.href)
+      nextUrl.searchParams.delete("focus")
+      window.history.replaceState(window.history.state, "", nextUrl.toString())
+      return true
+    }
+
+    if (scrollToAccumulation()) return
+
+    const timeoutId = window.setTimeout(scrollToAccumulation, 450)
+    return () => window.clearTimeout(timeoutId)
+  }, [searchParams])
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
@@ -174,6 +200,21 @@ export default function DashboardPage() {
             hasEvidence={hasBaselineEvidence}
             activeRiskCount={activeRiskCount}
           />
+        </section>
+      )}
+
+      {/* ── Accumulation card — valoare acumulată, lângă acțiuni ─────────── */}
+      {state.orgProfile && (
+        <section
+          id="dashboard-accumulation-card"
+          aria-label="Valoare acumulată"
+          className={`scroll-mt-24 rounded-eos-xl transition-all duration-500 ${
+            highlightAccumulation
+              ? "ring-2 ring-eos-primary/45 ring-offset-2 ring-offset-eos-bg"
+              : ""
+          }`}
+        >
+          <AccumulationCard />
         </section>
       )}
 

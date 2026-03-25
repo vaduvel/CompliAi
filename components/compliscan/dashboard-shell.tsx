@@ -51,7 +51,7 @@ export function DashboardShell({
   const currentUser = initialUser
   const memberships = initialMemberships
 
-  // Blueprint rule 8: badge on "De rezolvat" = critical + high findings count + active DSARs
+  // Badge-ul din "De rezolvat" trebuie să reflecte problemele încă active, nu doar severitățile mari.
   const cockpit = useOptionalCockpitData()
   const [dsarActiveCount, setDsarActiveCount] = useState(0)
   useEffect(() => {
@@ -66,12 +66,13 @@ export function DashboardShell({
       })
       .catch(() => {})
   }, [])
-  const findingsBadgeCount = cockpit?.data
+  const activeFindingsCount = cockpit?.data
     ? cockpit.data.state.findings.filter(
-        (f) => f.severity === "critical" || f.severity === "high"
+        (finding) =>
+          finding.findingStatus !== "resolved" && finding.findingStatus !== "dismissed"
       ).length
     : 0
-  const resolveBadgeCount = findingsBadgeCount + dsarActiveCount
+  const resolveBadgeCount = activeFindingsCount + dsarActiveCount
   const navSections = currentUser
     ? getSidebarNavSections({
         userMode: currentUser.userMode,

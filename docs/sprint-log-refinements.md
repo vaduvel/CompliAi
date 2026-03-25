@@ -50,7 +50,7 @@
 | V3-QA.2 | Audit complet V1+V2+V3+definitia-perfecta — fixuri UX copy + test R-10 | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V4-P2.1 | V4.2 Commercial Readiness — Pricing page, Plan logic, Stripe, Legal pages, Landing page | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V4-P4.4 | V4.4 Pilot Infrastructure — analytics, onboarding emails, micro-feedback | 🟢 Închis | 2026-03-18 | 2026-03-18 |
-| V4-PARK | Parcate extern V4 — deploy Vercel, domeniu/email propriu, Sentry, smoke matrix, asset QA | 🔴 Blocat | 2026-03-18 | — |
+| V4-PARK | Parcate extern V4 — deploy Vercel, domeniu/email propriu, Sentry, Resend, Stripe | 🟢 Închis | 2026-03-18 | 2026-03-25 |
 | V5-S1 | V5.1+V5.2 Vendor Review Workbench + Contextual Review Generator | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V5-S2 | V5.3+V5.4 Human Approval + Closure + Revalidation Cycle | 🟢 Închis | 2026-03-18 | 2026-03-18 |
 | V5-S3 | V5.5+V5.6 Partner Launch Mode + Response Pack Integration | 🟢 Închis | 2026-03-18 | 2026-03-18 |
@@ -63,6 +63,8 @@
 | EOS-S7 | EOS Sprint 7: F1-F4 legislation/ANAF + G1-G2 reports + Addons streak/benchmark/prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 | EOS-S8 | EOS S8 UI Features — Streak, Benchmark, Counsel Brief, Share Token, Invoice Prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 | EOS-BL1 | Backlog UX Audit — I6/A5/S1/A6/R2/P8 + P7 Whistleblowing (EU 2019/1937) + S2 DORA (EU 2022/2554) | 🟢 Închis | 2026-03-25 | 2026-03-25 |
+| EOS-BL2 | UX Resolve Page + Fix DORA/WB — simplifică Resolution Layer, buton auto-acțiune per finding, fix WB submit middleware, Supabase migrations dora+whistleblowing | 🟢 Închis | 2026-03-25 | 2026-03-25 |
+| F1 | Etapa 1 Faza1 Sprint Ready — NIS2 hotfix + Onboarding finish screen + Dashboard accumulation card + Email reînnoire rewrite | 🟡 În progres | 2026-03-25 | — |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -1037,3 +1039,56 @@ V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțion
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-18 | Claude | V5 Sprint 3 complet — Partner Launch Mode (V5.5) + Response Pack Integration (V5.6). Fișiere: app/api/partner/clients/[orgId]/route.ts, app/dashboard/partner/[orgId]/page.tsx, lib/compliance/response-pack.ts, app/api/reports/response-pack/route.ts, lib/server/audit-pack-bundle.ts |
+
+---
+
+## F1 — Etapa 1 Faza1 Sprint Ready
+
+**Origine:** `docs/Final Clean/compliscan-faza1-sprint-ready.md` — document produs de strategie produs, prioritizat pentru retenție și perceived value
+**Impact:** Critic — 4 task-uri care transformă app-ul dintr-un audit tool într-un „scut" activ cu valoare acumulată vizibilă
+**Efort estimat:** 4–5 zile total (TASK 0: 0.5z · TASK 1: 1z · TASK 2: 2z · TASK 3: 1z)
+
+### Descriere
+4 task-uri independente cu obiectiv comun: face vizibilă valoarea acumulată de CompliAI pentru fiecare firmă, creând lock-in prin date, nu prin funcționalitate.
+
+### Scope tehnic
+
+**TASK 0 — Hotfix NIS2 deadline (prioritate: ziua 1)**
+- `lib/server/nis2-store.ts` — adaugă `deadlineFinalISO` = `deadline72hISO + 30 zile` în `incidentDeadlines()`
+- `lib/compliance/dnsc-report.ts` — afișează `deadlineFinalISO` în tabelul SLA (nu mai `—`)
+- `app/api/dashboard/calendar/route.ts` — adaugă eveniment „Raport final 30 zile" în calendar
+
+**TASK 1 — Finish Screen Onboarding**
+- `app/onboarding/finish/page.tsx` (fișier nou) — ecran de confirmare cu 4 checkmark-uri + CTA „Văd ce am acumulat →"
+- Link de la ultimul pas al onboarding-ului existent → noul finish screen
+
+**TASK 2 — Dashboard Accumulation Card**
+- `components/compliscan/dashboard/accumulation-card.tsx` (fișier nou) — 5 cifre: dovezi, rapoarte, furnizori, luni, audit pack age
+- `app/dashboard/page.tsx` — integrează cardul lângă findings section
+- Date din state-ul org existent (org store)
+
+**TASK 3 — Rewrite Email Reînnoire**
+- Template email reînnoire — subiect și body nou cu date personalizate per org
+- Conector la aceleași surse de date ca accumulation card
+
+### Fișiere afectate
+- `lib/server/nis2-store.ts`
+- `lib/compliance/dnsc-report.ts`
+- `app/api/dashboard/calendar/route.ts`
+- `app/onboarding/finish/page.tsx` (nou)
+- `app/onboarding/page.tsx`
+- `components/compliscan/dashboard/accumulation-card.tsx` (nou)
+- `app/dashboard/page.tsx`
+
+### Definition of Done
+- [ ] TASK 0: `deadlineFinalISO` calculat corect (= deadline72h + 30 zile, nu detectedAt + 30 zile). Test: incident creat ieri → deadline final = ziua 32+, nu ziua 30.
+- [ ] TASK 1: Finish screen live, CTA clickabil, duce la dashboard. Build clean.
+- [ ] TASK 2: Accumulation card vizibil pe dashboard cu 5 cifre reale (sau `—` dacă 0). Build clean, 0 erori TS.
+- [ ] TASK 3: Template email nou cu subiect și body actualizat. Cifrele `[X]` populate sau fallback text.
+- [ ] TypeScript: 0 erori non-test
+- [ ] Next.js build: 0 erori
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-25 | Claude | Sprint F1 deschis — 4 task-uri din compliscan-faza1-sprint-ready.md |

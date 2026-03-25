@@ -755,6 +755,7 @@ function buildNis2OrgState(): Nis2OrgState {
       detectedAtISO: "2026-03-18T06:00:00.000Z",
       deadline24hISO: "2026-03-19T06:00:00.000Z",
       deadline72hISO: "2026-03-21T06:00:00.000Z",
+      deadlineFinalISO: "2026-04-20T06:00:00.000Z",
       affectedSystems: ["server-files-01", "ws-prod-01..15"],
       attackType: "ransomware",
       attackVector: "Email phishing cu atașament .exe deghizat ca factură",

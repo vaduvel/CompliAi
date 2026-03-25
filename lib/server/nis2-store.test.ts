@@ -82,10 +82,12 @@ describe("nis2-store", () => {
     expect(incident.status).toBe("open")
     expect(incident.id).toMatch(/^nis2-/)
 
-    // SLA: 24h si 72h de la detectie
+    // SLA: 24h si 72h de la detectie, final = 72h + 30 zile (nu de la incident)
     const detected = new Date("2026-03-17T10:00:00.000Z").getTime()
+    const deadline72 = detected + 72 * 3600_000
     expect(new Date(incident.deadline24hISO).getTime()).toBe(detected + 24 * 3600_000)
-    expect(new Date(incident.deadline72hISO).getTime()).toBe(detected + 72 * 3600_000)
+    expect(new Date(incident.deadline72hISO).getTime()).toBe(deadline72)
+    expect(new Date(incident.deadlineFinalISO).getTime()).toBe(deadline72 + 30 * 24 * 3600_000)
 
     expect(fsMocks.writeFileMock).toHaveBeenCalledOnce()
   })
@@ -120,6 +122,7 @@ describe("nis2-store", () => {
           detectedAtISO: "2026-01-01T00:00:00.000Z",
           deadline24hISO: "2026-01-02T00:00:00.000Z",
           deadline72hISO: "2026-01-04T00:00:00.000Z",
+          deadlineFinalISO: "2026-02-03T00:00:00.000Z",
           affectedSystems: [],
           createdAtISO: "2026-01-01T00:00:00.000Z",
           updatedAtISO: "2026-01-01T00:00:00.000Z",
@@ -164,6 +167,7 @@ describe("nis2-store", () => {
           detectedAtISO: "2026-03-17T10:00:00.000Z",
           deadline24hISO: "2026-03-18T10:00:00.000Z",
           deadline72hISO: "2026-03-20T10:00:00.000Z",
+          deadlineFinalISO: "2026-04-19T10:00:00.000Z",
           affectedSystems: [],
           createdAtISO: "2026-03-17T10:00:00.000Z",
           updatedAtISO: "2026-03-17T10:00:00.000Z",

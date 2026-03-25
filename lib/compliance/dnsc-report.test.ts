@@ -13,6 +13,7 @@ function makeIncident(overrides: Partial<Nis2Incident> = {}): Nis2Incident {
     detectedAtISO: now,
     deadline24hISO: "2026-03-18T10:00:00.000Z",
     deadline72hISO: "2026-03-20T10:00:00.000Z",
+    deadlineFinalISO: "2026-04-19T10:00:00.000Z",
     affectedSystems: ["ERP", "backup server"],
     createdAtISO: now,
     updatedAtISO: now,

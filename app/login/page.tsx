@@ -31,12 +31,14 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextPath = resolveSafeNextPath(searchParams.get("next"))
-  const [mode, setMode] = useState<Mode>("login")
+  const initialMode = searchParams.get("mode") === "register" ? "register" : "login"
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [orgName, setOrgName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -78,8 +80,16 @@ function LoginContent() {
         return
       }
 
-      toast.success(mode === "login" ? "Autentificat cu succes" : "Cont creat cu succes")
-      router.push(nextPath)
+      const destination =
+        mode === "register" && nextPath === "/dashboard" ? "/onboarding" : nextPath
+
+      toast.success(mode === "login" ? "Autentificat cu succes" : "Cont creat cu succes", {
+        description:
+          mode === "register"
+            ? "Te ducem direct în configurarea inițială a organizației."
+            : undefined,
+      })
+      router.push(destination)
     } catch {
       setError("Eroare de retea. Incearca din nou.")
     } finally {
@@ -194,15 +204,29 @@ function LoginContent() {
               {mode === "register" && (
                 <div className="space-y-1.5">
                   <label className="text-sm text-eos-text-muted">Confirmă parola</label>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Tastează parola încă o dată"
-                    required
-                    autoComplete="new-password"
-                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Tastează parola încă o dată"
+                      required
+                      autoComplete="new-password"
+                      className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((value) => !value)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-muted hover:text-eos-text"
+                      aria-label={showConfirmPassword ? "Ascunde confirmarea parolei" : "Arată confirmarea parolei"}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="size-4" strokeWidth={2} />
+                      ) : (
+                        <Eye className="size-4" strokeWidth={2} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -329,6 +353,28 @@ function LoginContent() {
           Verificați cu un specialist înainte de orice raport oficial.
         </p>
       </div>
+
+      {loading ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:rgb(11_18_32/0.68)] px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-eos-xl border border-eos-border bg-eos-surface px-5 py-5 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-eos-primary/10 p-2 text-eos-primary">
+                <Loader2 className="size-5 animate-spin" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-sm font-semibold text-eos-text">
+                  {mode === "login" ? "Te autentificăm acum" : "Creăm contul și pregătim onboarding-ul"}
+                </p>
+                <p className="text-sm text-eos-text-muted">
+                  {mode === "login"
+                    ? "Îți păstrăm contextul și te trimitem direct în workspace."
+                    : "Creăm organizația, activăm sesiunea și te ducem direct în configurarea inițială."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -113,6 +113,7 @@ export type Nis2Incident = {
   detectedAtISO: string
   deadline24hISO: string // detectedAt + 24h → early warning to DNSC
   deadline72hISO: string // detectedAt + 72h → full report to DNSC
+  deadlineFinalISO: string // deadline72h + 30 days → final report (NIS2 Art. 23(4)(c))
   reportedAtISO?: string
   resolvedAtISO?: string
   affectedSystems: string[]
@@ -309,9 +310,12 @@ function uid() {
 
 function incidentDeadlines(detectedAtISO: string) {
   const t = new Date(detectedAtISO).getTime()
+  const deadline72h = t + 72 * 60 * 60 * 1000
   return {
     deadline24hISO: new Date(t + 24 * 60 * 60 * 1000).toISOString(),
-    deadline72hISO: new Date(t + 72 * 60 * 60 * 1000).toISOString(),
+    deadline72hISO: new Date(deadline72h).toISOString(),
+    // Final report: 30 days from initial 72h report (NIS2 Art. 23(4)(c)), NOT from detection
+    deadlineFinalISO: new Date(deadline72h + 30 * 24 * 60 * 60 * 1000).toISOString(),
   }
 }
 

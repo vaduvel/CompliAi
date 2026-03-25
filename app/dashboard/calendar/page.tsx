@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { AlertTriangle, Calendar, CheckCircle2, Clock, RefreshCw } from "lucide-react"
 
+import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -194,8 +195,16 @@ export default function CalendarPage() {
             <div className="space-y-1">
               <p className="text-base font-medium text-eos-text">Niciun deadline activ</p>
               <p className="text-sm text-eos-text-muted">
-                Nu există cereri DSAR active, incidente NIS2 deschise sau vendori cu revalidare depășită.
+                Deadlines-urile apar automat când ai cereri DSAR active, incidente NIS2, notificări ANSPDCP sau vendori care cer revalidare.
               </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              <Button asChild className="gap-2">
+                <Link href="/dashboard/scan">Scanează primul document</Link>
+              </Button>
+              <Button asChild variant="outline" className="gap-2">
+                <Link href="/dashboard/resolve">Deschide De rezolvat</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

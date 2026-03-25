@@ -198,9 +198,14 @@ export default function FindingDetailPage() {
       {status === "open" && (
         <Card className="border-eos-border bg-eos-surface">
           <CardContent className="flex flex-wrap items-center gap-3 px-5 py-4">
-            <p className="mr-auto text-sm font-medium text-eos-text">
-              Acest finding necesită decizia ta:
-            </p>
+            <div className="mr-auto space-y-1">
+              <p className="text-sm font-medium text-eos-text">
+                Acest finding necesită decizia ta:
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită; rămâne în istoric cu statusul aferent.
+              </p>
+            </div>
             <Button
               size="sm"
               onClick={() => updateStatus("confirmed")}
@@ -250,9 +255,14 @@ export default function FindingDetailPage() {
               </>
             ) : (
               <>
-                <p className="mr-auto text-sm font-medium text-eos-text">
-                  Finding confirmat. Marchează ca rezolvat când ai finalizat acțiunea.
-                </p>
+                <div className="mr-auto space-y-1">
+                  <p className="text-sm font-medium text-eos-text">
+                    Finding confirmat. Marchează ca rezolvat când ai finalizat acțiunea.
+                  </p>
+                  <p className="text-xs text-eos-text-muted">
+                    Confirmat înseamnă că accepți problema și lucrezi la ea. Rezolvat îl folosești doar după ce ai aplicat măsura și ai dovada pregătită.
+                  </p>
+                </div>
                 <Button
                   size="sm"
                   onClick={() => updateStatus("resolved")}
