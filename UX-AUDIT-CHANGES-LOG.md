@@ -1,7 +1,7 @@
 # UX/UI/IA Audit — Change Log
-**Branch:** `claude/thirsty-bassi`
 **Audit date:** 2026-03-25
-**Based on:** Full UX/UI/IA/User Flow audit — CompliAI live
+**Live la:** `compliscanag.vercel.app`
+**Ultima actualizare:** 2026-03-25 (după Sprint 3, PR #84)
 
 ---
 
@@ -11,6 +11,7 @@
 - [x] C1 — Onboarding: CUI field fără explicații → tooltip, exemplu, link ANAF
 - [x] C2 — Scan → Findings: flow fragmentat → auto-trigger analyze + CTA inline
 - [x] C3 — Dashboard home: Top 3 acțiuni (nu 1) + restructurare densitate
+- [x] C4 — Settings: tab "Plan & Facturare" integrat în settings page (billing accesibil din nav)
 - [x] C5 — Partner: banner context după workspace switch
 
 ### 🟡 IMPORTANT (I)
@@ -19,51 +20,47 @@
 - [x] I3 — Documente hub: tab "Generează" cu 5 tipuri doc ca quick links, buton Vault în header
 - [x] I4 — Rute legacy: redirect sau cleanup (setari, scanari, rapoarte, audit-log, findings/[id])
 - [x] I5 — Benchmark: widget pe dashboard home (API există, UI lipsea)
-- [ ] I6 — Email notifications configurabile din UI (planificat sprint următor)
+- [ ] I6 — Email notifications configurabile din UI (declanșatoare, frecvență) — **neimplementat**
 - [x] I7 — Vendor review: în NIS2 tab "Furnizori ICT" (corect conceptual), nu duplicat în nav
 - [x] I8 — Mobile nav: Calendar + Rapoarte incluse în primary nav (verificat — 6 items)
 
 ### 🟢 POLISH (P)
 - [x] P1 — Microcopy: terminologie plain RO în resolve page
+- [x] P2 — Empty states prietenoase: card welcome cu CTA /onboarding pentru useri noi *(Sprint 3)*
 - [x] P3 — Trending scores (săgeți ▲▼) pe dashboard
 - [x] P4 — "Câștiguri rapide": filtrul RAPID redenumit proeminent în remediation-board
 - [x] P5 — Agent status: `AgentStatusWidget` pe dashboard home cu fetch /api/agents + link la /agents
-- [ ] P2 — Empty states prietenoase pentru useri noi
-- [ ] P6 — Share token mai proeminent în Rapoarte
-- [ ] P7 — Whistleblowing module — gap de piață (sprint separat)
-- [ ] P8 — Cookie consent auto-audit pe site scan
+- [x] P6 — Share token mai proeminent: `PartnerCounselPack` mutat deasupra fold în Rapoarte *(Sprint 3)*
+- [ ] P7 — Whistleblowing module — Directiva EU 2019/1937, obligatorie >50 angajați — **sprint separat**
+- [ ] P8 — Cookie consent auto-audit pe site scan — **neimplementat**
+
+### 🤖 AUTOMATIZĂRI (A)
+- [x] A1 — DSAR creat → auto-generate draft răspuns din org profile, returnat imediat în response *(Sprint 3)*
+- [x] A2 — NIS2 incident → email alert "24h/72h deadline în X ore" în daily-digest cron *(Sprint 3)*
+- [x] A3 — Politici generate → reminder expiry la 30 zile în daily-digest cron *(Sprint 3)*
+- [x] A4 — e-Factura XML → live validation pe paste (onChange debounce 800ms) *(Sprint 3)*
+- [ ] A5 — Scoring → live-update la orice task marcat rezolvat (nu doar la reload) — **neimplementat**
+- [ ] A6 — Vendor adăugat → auto-generate vendor risk assessment imediat — **neimplementat**
 
 ---
 
-## Backlog complet — Neatins din audit
+## Backlog rămas neimplementat
 
-### 🔴 CRITIC neatins
-- [ ] C4b — `/account/settings` (partner billing) e accesibil doar dacă știi URL-ul; nu apare în nav sau settings tabs
-
-### 🟡 IMPORTANT neatins
+### 🟡 IMPORTANT
 - [ ] I6 — Email notifications configurabile din UI (declanșatoare, frecvență)
 
-### 🤖 Automatizări lipsă (Secțiunea 5 din audit)
-- [ ] A1 — DSAR creat → auto-generate draft răspuns cu date din org profile
-- [ ] A2 — NIS2 incident logat → push alert in-app + email "24h deadline în X ore"
-- [ ] A3 — Politici generate → reminder automat la 12 luni de la generare (expiry)
-- [ ] A4 — e-Factura XML → live validation pe paste (onChange debounce, nu doar la submit)
-- [ ] A5 — Scoring → live-update la orice task marcat rezolvat (nu doar la reload)
-- [ ] A6 — Vendor adăugat → auto-generate vendor risk assessment imediat
+### 🤖 Automatizări
+- [ ] A5 — Scoring live-update la task rezolvat (fără reload)
+- [ ] A6 — Vendor adăugat → auto-generate vendor risk assessment
 
-### 📊 Reports neatinse
-- [ ] R1 — Trust Center vs Trust Profile: naming confuz (una internă, una publică) — redenumire
+### 📊 Reports
 - [ ] R2 — Raport executiv one-pager vizibil pe dashboard (rezumat pentru board/investitor)
-- [ ] P6 — Share token mai proeminent (link audit extern pentru auditeur/partener)
 
 ### 🏗️ Structurale mari
 - [ ] S1 — Bulk actions în Resolve: marcare simultană a mai multor task-uri
 - [ ] S2 — DORA module (Financial sector) — gap de piață pentru fintech/banking
 - [ ] P7 — Whistleblowing module — Directiva EU 2019/1937, obligatorie >50 angajați
 - [ ] P8 — Cookie consent auto-audit: scanare discrepanțe cookie banner vs. cookieuri reale
-
-### 🟢 Polish neatins
-- [ ] P2 — Empty states prietenoase: primul login = ecran gol (lipsă mesaj "Bun venit")
 
 ---
 
