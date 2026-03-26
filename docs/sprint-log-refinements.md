@@ -69,6 +69,7 @@
 | F3 | Sprint 6B — EF-001 SPV state model | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F4 | Sprint 6C — EF-004/EF-005/EF-006 Fiscal Operational Risk Flows | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F5 | Sprint 7 — NIS2 maturity/governance handoff + evidence per control | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F6 | Sprint 8 — Activity Feed + Ce am verificat + Continuity Layer | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -1210,3 +1211,31 @@ V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțion
 |---|---|---|
 | 2026-03-26 | Claude | Sprint 7 — NIS2 evidence per control — local. Fișiere: lib/compliscan/finding-kernel.ts, tests/finding-kernel.test.ts |
 | 2026-03-26 | Claude | Sprint închis — DoD verificat. 125 teste trecute, build clean. |
+
+---
+
+## F6 — Sprint 8: Activity Feed + Ce am verificat + Continuity Layer
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 8 Activity Feed si Continuity Layer
+**Impact:** Mediu-Înalt — feed-ul devine viu și protector: utilizatorul vede acum ce a verificat sistemul pentru el (scor, GDPR %, drift-uri), nu doar evenimente tehnice. Produsul pare inteligent și activ chiar când nu există probleme.
+**Efort estimat:** 1–2 ore
+
+### Scope tehnic
+- `lib/compliscan/feed-sources.ts` — `ExternalFeedItem.sourceType` += `"system"`, `buildProactiveSystemChecks(state, score, redAlerts)` — 3 itemi proactivi: scor conformitate, GDPR %, drift/NIS2 stable
+- `app/dashboard/page.tsx` — import + integrare `buildProactiveSystemChecks` în `activityFeedItems`, slice crescut la 10, subtitlu `ActivityMonitorCard` actualizat cu "Ce am verificat pentru tine"
+- `/api/cron/weekly-digest/route.ts` — confirmat existent și funcțional (creat în Sprint 13)
+
+### Definition of Done
+- [x] `buildProactiveSystemChecks()` exportat din `feed-sources.ts`
+- [x] 3 itemi proactivi generați per stare: scor, GDPR %, drift check
+- [x] `sourceType: "system"` adăugat în union type `ExternalFeedItem`
+- [x] Dashboard integrează system checks în `activityFeedItems`
+- [x] `ActivityMonitorCard` subtitlu include "Ce am verificat pentru tine"
+- [x] Weekly digest cron confirmat existent (`/api/cron/weekly-digest/route.ts`)
+- [x] Build clean, 0 erori TypeScript
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint 8 (F6) — Activity Feed + Ce am verificat + Continuity Layer — local. Fișiere: lib/compliscan/feed-sources.ts, app/dashboard/page.tsx |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean. |
