@@ -175,7 +175,7 @@ export default function FindingDetailPage() {
       </Link>
 
       <PageIntro
-        eyebrow={`Finding · ${finding.category.replace("_", " ")}`}
+        eyebrow={`Caz · ${finding.category.replace("_", " ")}`}
         title={finding.title}
         description={finding.detail}
         badges={
@@ -291,8 +291,8 @@ export default function FindingDetailPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <FindingNarrativeCard
           finding={finding}
-          title="Cockpit finding"
-          description="Problema, impactul și dovada rămân în același context, fără pași decorativi separați."
+          title="Rezolvare în același loc"
+          description="Vezi problema, impactul și traseul de închidere fără să pleci din acest caz."
         />
         <FindingExecutionCard
           finding={finding}

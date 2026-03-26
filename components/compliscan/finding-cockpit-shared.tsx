@@ -36,8 +36,8 @@ type FindingNarrativeCardProps = {
 
 export function FindingNarrativeCard({
   finding,
-  title = "Rezumat de rezolvare",
-  description = "Aici vezi ce a găsit Compli, ce faci acum și ce dovadă rămâne după închidere.",
+  title = "Rezolvare în același loc",
+  description = "Problema, impactul, pașii și dovada rămân în același context, fără să te plimbe între suprafețe.",
 }: FindingNarrativeCardProps) {
   const narrative = getFindingNarrative(finding)
   const status = getFindingStatusPresentation(finding.findingStatus)
@@ -187,9 +187,9 @@ export function FindingExecutionCard({
       <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Progres și dovadă</CardTitle>
+            <CardTitle className="text-base">Progres, dosar și monitorizare</CardTitle>
             <p className="mt-2 text-sm text-eos-text-muted">
-              Harta de progres, reguli de închidere și legătura cu dosarul.
+              Harta de progres, regulile de închidere și ce rămâne sub watch după rezolvare.
             </p>
           </div>
           <Badge variant={status.variant} className="normal-case tracking-normal">

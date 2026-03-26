@@ -148,11 +148,11 @@ export async function PATCH(
 
       await createNotification(orgId, {
         type: "info",
-        title: `Task generat: ${taskCandidate.title}`,
+        title: "Ți-am pregătit cazul pentru rezolvare",
         message:
-          `Finding "${finding.title}" confirmat → task candidat creat ` +
-          `(${taskCandidate.suggestedOwner}, deadline ${new Date(taskCandidate.deadline).toLocaleDateString("ro-RO")}).`,
-        linkTo: "/dashboard/resolve",
+          `Finding-ul "${finding.title}" este confirmat. ` +
+          `${taskCandidate.suggestedOwner} poate închide cazul până la ${new Date(taskCandidate.deadline).toLocaleDateString("ro-RO")}.`,
+        linkTo: `/dashboard/resolve/${findingId}`,
       }).catch(() => {})
 
       if (finding.suggestedDocumentType) {

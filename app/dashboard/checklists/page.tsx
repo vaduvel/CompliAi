@@ -141,8 +141,8 @@ export default function RemediationPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm" className="shrink-0 gap-2">
-              <Link href="/dashboard/scanari">
-                Deschide Scanari
+              <Link href="/dashboard/scan">
+                Deschide Scanarea
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>

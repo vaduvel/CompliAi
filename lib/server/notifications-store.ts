@@ -44,8 +44,73 @@ type NotificationsState = {
 
 const notifStorage = createAdaptiveStorage<NotificationsState>("notifications", "notifications_state")
 
+const LEGACY_AGENT_PREFIX: Record<string, string> = {
+  compliance_monitor: "Am verificat pentru tine",
+  fiscal_sensor: "Compli a verificat facturile",
+  document: "Ți-am pregătit un document",
+  vendor_risk: "Am verificat furnizorii",
+  regulatory_radar: "Schimbare legislativă detectată",
+}
+
+const STALE_ROUTE_MAP: Record<string, string> = {
+  "/dashboard/scanari": "/dashboard/scan",
+}
+
 function uid() {
   return `notif-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function stripLegacyPrefix(text: string): {
+  prefix: string | null
+  content: string
+} {
+  const trimmed = text.trim()
+  const match = trimmed.match(/^\[([^\]]+)\]\s*(.+)$/)
+  if (!match) {
+    return { prefix: null, content: trimmed }
+  }
+
+  return {
+    prefix: match[1]?.trim() ?? null,
+    content: match[2]?.trim() ?? trimmed,
+  }
+}
+
+function normalizeNotificationLink(linkTo: string | undefined, rawText: string): string | undefined {
+  const normalizedLink = linkTo ? (STALE_ROUTE_MAP[linkTo] ?? linkTo) : undefined
+  const text = rawText.toLowerCase()
+
+  if (/f[aă]r[aă].*dovad[aă]/i.test(text)) {
+    return "/dashboard/resolve"
+  }
+
+  if (/scor.+declin/i.test(text) || /problemele deschise/i.test(text)) {
+    return normalizedLink ?? "/dashboard"
+  }
+
+  return normalizedLink
+}
+
+export function normalizeNotificationForDisplay(notification: AppNotification): AppNotification {
+  const titleMeta = stripLegacyPrefix(notification.title)
+  const messageMeta = stripLegacyPrefix(notification.message)
+  const legacyLabel = titleMeta.prefix ? LEGACY_AGENT_PREFIX[titleMeta.prefix] : undefined
+
+  const title =
+    legacyLabel ??
+    (titleMeta.prefix && titleMeta.content ? titleMeta.content : notification.title.trim())
+
+  const message =
+    legacyLabel
+      ? messageMeta.content || titleMeta.content || notification.message.trim()
+      : messageMeta.content || notification.message.trim()
+
+  return {
+    ...notification,
+    title,
+    message,
+    linkTo: normalizeNotificationLink(notification.linkTo, `${notification.title} ${notification.message}`),
+  }
 }
 
 async function readState(orgId: string): Promise<NotificationsState> {
@@ -64,6 +129,7 @@ export async function listNotifications(orgId: string): Promise<AppNotification[
   return [...state.notifications]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 50)
+    .map(normalizeNotificationForDisplay)
 }
 
 export async function safeListNotifications(orgId: string): Promise<AppNotification[]> {
@@ -94,14 +160,14 @@ export async function createNotification(
 ): Promise<AppNotification> {
   const state = await readState(orgId)
   const now = new Date().toISOString()
-  const notif: AppNotification = {
+  const notif = normalizeNotificationForDisplay({
     id: uid(),
     type: input.type,
     title: input.title,
     message: input.message,
     ...(input.linkTo !== undefined && { linkTo: input.linkTo }),
     createdAt: now,
-  }
+  })
   // Keep max 100 notifications, discard oldest
   const notifications = [notif, ...state.notifications].slice(0, 100)
   await writeState(orgId, { notifications })

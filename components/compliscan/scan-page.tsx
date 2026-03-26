@@ -23,6 +23,7 @@ import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/compon
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
 import { dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { SourceEnvelope } from "@/lib/compliance/agent-os"
+import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 
 const AgentWorkspace = dynamic(
   () => import("@/components/compliscan/agent-workspace").then((mod) => mod.AgentWorkspace),
@@ -190,6 +191,9 @@ export function ScanPageSurface() {
     extractedAtISO: new Date().toISOString(),
   }
   const isSolo = runtime?.userMode === "solo"
+  const activeFindingsCount = cockpit.data.state.findings.filter(
+    (finding) => !isFindingResolvedLike(finding.findingStatus)
+  ).length
 
   const criticalOrHighFindings = latestDocumentFindings.filter(
     (f) => f.severity === "critical" || f.severity === "high"
@@ -222,7 +226,7 @@ export function ScanPageSurface() {
       ) : null}
       <PageIntro
         eyebrow="Intake"
-        title={isSolo ? "Alimentezi Compli cu surse noi" : "Pornești analiza din sursa potrivită"}
+        title="Alimentezi Compli cu surse noi"
         description={
           isSolo
             ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
@@ -254,16 +258,47 @@ export function ScanPageSurface() {
           </>
         }
         actions={
-          <Button
-            variant={agentFlow.agentModeActive ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
-          >
-            <Bot className="size-4" />
-            {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {activeFindingsCount > 0 ? (
+              <Button asChild>
+                <Link href="/dashboard/resolve" className="gap-2">
+                  Mergi la De rezolvat
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            ) : null}
+            <Button
+              variant={agentFlow.agentModeActive ? "default" : "outline"}
+              className="gap-2"
+              onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
+            >
+              <Bot className="size-4" />
+              {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
+            </Button>
+          </div>
         }
       />
+
+      {!agentFlow.agentModeActive && activeFindingsCount > 0 ? (
+        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+          <AlertTriangle className="size-5 shrink-0 text-eos-warning" strokeWidth={2} />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-eos-text">
+              Scanarea alimentează cockpitul, nu îl dublează
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              {activeFindingsCount} finding-uri sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/resolve"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border px-4 py-2 text-sm font-medium text-eos-text transition hover:bg-eos-surface-variant"
+          >
+            Deschide cockpiturile
+            <ArrowRight className="size-3.5" strokeWidth={2.5} />
+          </Link>
+        </div>
+      ) : null}
 
       <ScanViewTabs
         active={viewMode}

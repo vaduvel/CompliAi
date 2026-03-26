@@ -580,6 +580,31 @@ Statusurile corecte acum sunt:
 
 **TOATE WAVE-URILE COMPLETATE — `2026-03-25`**
 
+Update executie `2026-03-26` (polish si inchidere gap-uri live):
+- **Wave E curatat pe runtime, nu doar in cod local**:
+  - [notifications-store.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/notifications-store.ts) normalizeaza acum notificarile legacy la citire si la creare:
+    - scoate prefixe de tip `[compliance_monitor]`
+    - traduce titlurile in limbaj uman
+    - repara rutele stale de tip `/dashboard/scanari`
+    - impinge alertele fara dovada direct spre `De rezolvat`
+  - [notifications-store.test.ts](/Users/vaduvageorge/Desktop/CompliAI/lib/server/notifications-store.test.ts) protejeaza explicit aceste cazuri
+- **Wave C intarit ca intake clar**:
+  - [scan-page.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/scan-page.tsx) afiseaza acum handoff explicit spre `De rezolvat` atunci cand exista findings active in workspace
+  - CTA-ul catre cockpit nu mai sta ascuns doar in cazurile cu ultima scanare relevanta
+- **Wave A / D polish de ierarhie si limbaj**:
+  - [page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/resolve/[findingId]/page.tsx) foloseste copy mai clar (`Caz`, `Rezolvare in acelasi loc`)
+  - [finding-cockpit-shared.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/finding-cockpit-shared.tsx) redenumeste cardul secundar la `Progres, dosar si monitorizare`
+  - [route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/findings/[id]/route.ts) genereaza notificari umane la confirmarea cazului si le leaga direct de finding detail
+- **Wave B polish de snapshot**:
+  - [page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/page.tsx) foloseste titlu si descriere unificate in jurul limbajului de snapshot orientat pe user
+- **Urme vechi inchise in IA**:
+  - [page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/checklists/page.tsx) nu mai trimite spre ruta legacy `/dashboard/scanari`
+
+Validare:
+- `npm test -- lib/server/notifications-store.test.ts 'app/api/findings/[id]/route.test.ts'` trece
+- `npm test -- app/api/smoke-flow.test.ts tests/canonical-runtime-audit.test.ts` trece
+- `npm run build` trece; warning-urile ESLint ramase sunt vechi si in afara acestei taieri
+
 Cand incepe implementarea reala:
 - acest log trebuie actualizat inainte sa se piarda contextul
 - nu trebuie mutat in arhiva

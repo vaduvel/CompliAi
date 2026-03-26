@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { AlertTriangle, ArrowRight, BarChart3, Bot, CalendarClock, CheckCircle2, ChevronRight, Download, FileText, FileWarning, Flame, Layers, Scale, Shield, ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react"
 
-import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -27,7 +26,6 @@ import type {
 } from "@/lib/compliance/types"
 
 export default function DashboardPage() {
-  const runtime = useDashboardRuntime()
   const router = useRouter()
   const searchParams = useSearchParams()
   const cockpit = useCockpitData()
@@ -140,18 +138,12 @@ export default function DashboardPage() {
           : data.summary.score >= 60
             ? "În progres"
             : "Neînceput"
-  const isSolo = runtime?.userMode === "solo"
-
   return (
     <div className="space-y-5 sm:space-y-8 pb-20 sm:pb-0" role="main" aria-labelledby="dashboard-title">
       <PageIntro
         eyebrow="Snapshot"
-        title={isSolo ? "Starea firmei tale acum" : "Starea conformității acum"}
-        description={
-          isSolo
-            ? "Ce am găsit, ce faci acum și ce ai acumulat. Pornește rezolvarea din butonul de mai jos."
-            : "Ce ți se aplică, ce e deschis și unde e nevoie de acțiune. Rezolvarea pornește de aici."
-        }
+        title="Starea firmei tale acum"
+        description="Ce ți se aplică, ce este deschis, ce faci acum și ce ai acumulat deja. Rezolvarea pornește de aici."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
