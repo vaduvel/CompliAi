@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
+  ArrowLeft,
   CheckCircle2,
   Clock,
   FileText,
@@ -695,8 +697,35 @@ function EFacturaSignalsTab() {
 // ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function FiscalPage() {
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get("tab")
+  const findingIdParam = searchParams.get("findingId")
+  const fromCockpit = tabParam === "spv" && Boolean(findingIdParam)
+  const defaultTab = tabParam === "spv" ? "spv" : "discrepante"
+
   return (
     <div className="space-y-8">
+      {fromCockpit && (
+        <div className="flex items-start gap-3 rounded-lg border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-warning" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-eos-text">
+              Vii din cockpit pentru un finding SPV
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding.
+            </p>
+          </div>
+          <a
+            href={`/dashboard/resolve/${findingIdParam}`}
+            className="flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
+          >
+            <ArrowLeft className="size-3" />
+            Înapoi la finding
+          </a>
+        </div>
+      )}
+
       <PageIntro
         eyebrow="Fiscal"
         title="Monitorizezi conformitatea fiscala"
@@ -708,7 +737,7 @@ export default function FiscalPage() {
         }
       />
 
-      <Tabs defaultValue="discrepante" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="gap-0 border-b border-eos-border text-eos-text-muted">
           <TabsTrigger
             value="discrepante"

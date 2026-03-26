@@ -15,10 +15,12 @@ import type { FindingResolution } from "@/lib/compliance/types"
 import type { DocumentType } from "@/lib/server/document-generator"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 import {
+  buildCockpitRecipe,
   classifyFinding,
   computeNextMonitoringDateISO,
   getCloseGatingRequirements,
 } from "@/lib/compliscan/finding-kernel"
+import type { ScanFinding } from "@/lib/compliance/types"
 
 const VALID_DOC_TYPES: DocumentType[] = [
   "privacy-policy",
@@ -382,6 +384,13 @@ export async function PATCH(
 
     await writeState(updatedState)
 
+    if (newStatus === "resolved" && updatedFindings[findingIdx]?.category === "E_FACTURA") {
+      const fiscalNotification = buildFiscalMonitoringNotification(updatedFindings[findingIdx])
+      if (fiscalNotification) {
+        await createNotification(orgId, fiscalNotification).catch(() => {})
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       finding: updatedFindings[findingIdx],
@@ -447,4 +456,64 @@ function normalizeReviewDateISO(value: string | undefined) {
 
 function formatRoDate(iso: string) {
   return new Date(iso).toLocaleDateString("ro-RO")
+}
+
+function buildFiscalMonitoringNotification(
+  finding: ScanFinding
+): { type: "fiscal_alert"; title: string; message: string; linkTo: string } | null {
+  if (finding.category !== "E_FACTURA") return null
+
+  const recipe = buildCockpitRecipe(finding)
+  const nextControlLabel = finding.nextMonitoringDateISO
+    ? ` Următorul control este programat pentru ${formatRoDate(finding.nextMonitoringDateISO)}.`
+    : ""
+  const recheckSignal =
+    recipe.monitoringSignals.find((signal) => !signal.startsWith("Următor control la")) ??
+    recipe.monitoringSignals[0] ??
+    "Cazul fiscal rămâne în monitorizare activă."
+
+  switch (recipe.findingTypeId) {
+    case "EF-001":
+      return {
+        type: "fiscal_alert",
+        title: "Reverificăm SPV-ul firmei",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: recipe.workflowLink?.href ?? `/dashboard/fiscal?tab=spv&findingId=${finding.id}`,
+      }
+    case "EF-003":
+      return {
+        type: "fiscal_alert",
+        title: "Reverificăm factura retransmisă",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: `/dashboard/resolve/${finding.id}`,
+      }
+    case "EF-004":
+      return {
+        type: "fiscal_alert",
+        title: "Verificăm dacă factura a ieșit din prelucrare",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: `/dashboard/resolve/${finding.id}`,
+      }
+    case "EF-005":
+      return {
+        type: "fiscal_alert",
+        title: "Verificăm confirmarea transmiterii în SPV",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: `/dashboard/resolve/${finding.id}`,
+      }
+    case "EF-006":
+      return {
+        type: "fiscal_alert",
+        title: "Verificăm factura după corecția datelor clientului",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: `/dashboard/resolve/${finding.id}`,
+      }
+    default:
+      return {
+        type: "fiscal_alert",
+        title: "Monitorizare fiscală activă",
+        message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
+        linkTo: `/dashboard/resolve/${finding.id}`,
+      }
+  }
 }

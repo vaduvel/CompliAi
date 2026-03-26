@@ -5,6 +5,7 @@
 import type { AppNotification } from "@/lib/server/notifications-store"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +48,9 @@ export function buildExternalFeedItems(
 ): ExternalFeedItem[] {
   const items: ExternalFeedItem[] = []
   const tags = state.applicability?.tags ?? []
+  const monitoredFiscalItems = buildFiscalMonitoringFeedItems(state)
+
+  items.push(...monitoredFiscalItems)
 
   // 1. Legislation change notifications → feed items (Tip 2 + Tip 3)
   for (const notif of notifications) {
@@ -90,12 +94,13 @@ export function buildExternalFeedItems(
       (f: ScanFinding) =>
         f.id.startsWith("site-") === false &&
         f.category === "E_FACTURA" &&
+        f.findingStatus !== "under_monitoring" &&
         f.findingStatus !== "resolved" &&
         f.findingStatus !== "dismissed"
     )
     const hasOpenEfacturaFindings = findingsWithSpv.length > 0
 
-    if (hasRejected || hasOpenEfacturaFindings) {
+    if ((hasRejected || hasOpenEfacturaFindings) && monitoredFiscalItems.length === 0) {
       items.push({
         id: "ext-spv-warning",
         eyebrow: "SPV ANAF",
@@ -108,7 +113,7 @@ export function buildExternalFeedItems(
         href: "/dashboard/fiscal",
         sourceType: "spv",
       })
-    } else {
+    } else if (monitoredFiscalItems.length === 0) {
       items.push({
         id: "ext-spv-ok",
         eyebrow: "SPV ANAF",
@@ -144,4 +149,86 @@ export function buildExternalFeedItems(
   return items
     .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
     .slice(0, 5)
+}
+
+function buildFiscalMonitoringFeedItems(state: ComplianceState): ExternalFeedItem[] {
+  return (state.findings ?? [])
+    .filter(
+      (finding) =>
+        finding.category === "E_FACTURA" &&
+        finding.findingStatus === "under_monitoring"
+    )
+    .map((finding) => buildFiscalMonitoringFeedItem(finding))
+    .filter((item): item is ExternalFeedItem => Boolean(item))
+}
+
+function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem | null {
+  const recipe = buildCockpitRecipe(finding)
+  const nextControlLabel = finding.nextMonitoringDateISO
+    ? ` Următorul control este programat pentru ${new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}.`
+    : ""
+  const mainSignal =
+    recipe.monitoringSignals.find((signal) => !signal.startsWith("Următor control la")) ??
+    recipe.monitoringSignals[0] ??
+    "Cazul rămâne sub watch fiscal."
+
+  switch (recipe.findingTypeId) {
+    case "EF-001":
+      return {
+        id: `ext-fiscal-monitor-${finding.id}`,
+        eyebrow: "SPV ANAF",
+        title: "Reverificăm SPV-ul firmei",
+        detail: `${mainSignal}${nextControlLabel}`.trim(),
+        dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
+        tone: "warning",
+        href: recipe.workflowLink?.href ?? `/dashboard/fiscal?tab=spv&findingId=${finding.id}`,
+        sourceType: "spv",
+      }
+    case "EF-003":
+      return {
+        id: `ext-fiscal-monitor-${finding.id}`,
+        eyebrow: "e-Factura",
+        title: "Reverificăm factura retransmisă",
+        detail: `${mainSignal}${nextControlLabel}`.trim(),
+        dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
+        tone: "warning",
+        href: `/dashboard/resolve/${finding.id}`,
+        sourceType: "anaf",
+      }
+    case "EF-004":
+      return {
+        id: `ext-fiscal-monitor-${finding.id}`,
+        eyebrow: "e-Factura",
+        title: "Verificăm dacă factura a ieșit din prelucrare",
+        detail: `${mainSignal}${nextControlLabel}`.trim(),
+        dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
+        tone: "warning",
+        href: `/dashboard/resolve/${finding.id}`,
+        sourceType: "anaf",
+      }
+    case "EF-005":
+      return {
+        id: `ext-fiscal-monitor-${finding.id}`,
+        eyebrow: "e-Factura",
+        title: "Verificăm confirmarea transmiterii în SPV",
+        detail: `${mainSignal}${nextControlLabel}`.trim(),
+        dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
+        tone: "warning",
+        href: `/dashboard/resolve/${finding.id}`,
+        sourceType: "anaf",
+      }
+    case "EF-006":
+      return {
+        id: `ext-fiscal-monitor-${finding.id}`,
+        eyebrow: "e-Factura",
+        title: "Verificăm factura după corecția datelor clientului",
+        detail: `${mainSignal}${nextControlLabel}`.trim(),
+        dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
+        tone: "warning",
+        href: `/dashboard/resolve/${finding.id}`,
+        sourceType: "anaf",
+      }
+    default:
+      return null
+  }
 }

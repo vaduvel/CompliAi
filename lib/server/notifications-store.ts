@@ -76,9 +76,25 @@ function stripLegacyPrefix(text: string): {
   }
 }
 
-function normalizeNotificationLink(linkTo: string | undefined, rawText: string): string | undefined {
+function normalizeNotificationLink(
+  linkTo: string | undefined,
+  rawText: string,
+  type?: NotificationType
+): string | undefined {
   const normalizedLink = linkTo ? (STALE_ROUTE_MAP[linkTo] ?? linkTo) : undefined
   const text = rawText.toLowerCase()
+
+  if (!normalizedLink && (type === "fiscal_alert" || type === "anaf_signal" || type === "anaf_deadline")) {
+    if (text.includes("spv")) {
+      return "/dashboard/fiscal"
+    }
+
+    if (text.includes("factur") || text.includes("anaf")) {
+      return "/dashboard/resolve"
+    }
+
+    return "/dashboard/fiscal"
+  }
 
   if (/f[aă]r[aă].*dovad[aă]/i.test(text)) {
     return "/dashboard/resolve"
@@ -109,7 +125,11 @@ export function normalizeNotificationForDisplay(notification: AppNotification): 
     ...notification,
     title,
     message,
-    linkTo: normalizeNotificationLink(notification.linkTo, `${notification.title} ${notification.message}`),
+    linkTo: normalizeNotificationLink(
+      notification.linkTo,
+      `${notification.title} ${notification.message}`,
+      notification.type
+    ),
   }
 }
 

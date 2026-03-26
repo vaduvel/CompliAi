@@ -16,6 +16,7 @@ import type { ScanFinding } from "@/lib/compliance/types"
 import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
 import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
 import { ANSPDCP_FINDING_PREFIX, getIncidentIdFromAnspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
+import { lookupAnafError, type AnafErrorEntry } from "@/lib/compliance/efactura-error-codes"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TYPES
@@ -441,6 +442,51 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "yes",
     closingRule: "status nou valid sau dovada corecției",
   },
+  "EF-004": {
+    findingTypeId: "EF-004",
+    framework: "eFactura",
+    title: "Factură în prelucrare blocată",
+    category: "Processing delay",
+    typicalSeverity: "medium",
+    signalTypes: ["direct"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["explică statusul și ce înseamnă 'în prelucrare'", "cere verificarea în SPV"],
+    userResponsibilities: ["verifică în SPV ANAF", "retransmite dacă depășit termenul"],
+    requiredEvidenceKinds: ["screenshot"],
+    autoRecheck: "yes",
+    closingRule: "confirmare status final din SPV (ok sau respinsă)",
+  },
+  "EF-005": {
+    findingTypeId: "EF-005",
+    framework: "eFactura",
+    title: "Factură generată, netransmisă SPV",
+    category: "Unsubmitted invoice",
+    typicalSeverity: "medium",
+    signalTypes: ["direct"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["explică obligația de transmitere", "cere dovada transmiterii"],
+    userResponsibilities: ["transmite factura spre SPV ANAF"],
+    requiredEvidenceKinds: ["screenshot", "xml"],
+    autoRecheck: "partial",
+    closingRule: "confirmare transmitere și acceptare în SPV ANAF",
+  },
+  "EF-006": {
+    findingTypeId: "EF-006",
+    framework: "eFactura",
+    title: "Date identificare client invalide",
+    category: "Buyer identification",
+    typicalSeverity: "high",
+    signalTypes: ["direct"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["identifică câmpul client cu problemă", "explică corecția necesară"],
+    userResponsibilities: ["verifică CUI/CNP client", "corectează în soft", "retransmite"],
+    requiredEvidenceKinds: ["screenshot", "official_reference"],
+    autoRecheck: "yes",
+    closingRule: "factură cu date client corecte transmisă și confirmată",
+  },
   "SYS-001": {
     findingTypeId: "SYS-001",
     framework: "Cross",
@@ -758,6 +804,39 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Status nou valid sau dovada retransmiterii.",
     revalidationTriggers: ["până la validare"],
   },
+  "EF-004": {
+    findingTypeId: "EF-004",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Verifică statusul în SPV",
+    secondaryCTA: "Ce înseamnă în prelucrare",
+    whatUserSees: "O factură este blocată în prelucrare ANAF de prea mult timp.",
+    whatCompliDoes: "Aceasta nu este o respingere — factura e în coada ANAF. Verificăm dacă s-a blocat sau e întârziere normală.",
+    whatUserMustDo: "Verifică statusul în SPV ANAF. Dacă depășit 72h, retransmite sau contactează ANAF.",
+    closeCondition: "Status final confirmat din SPV: ok sau respinsă (cu acțiune corectivă).",
+    revalidationTriggers: ["după 24h dacă statusul nu se schimbă", "după retransmitere"],
+  },
+  "EF-005": {
+    findingTypeId: "EF-005",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Transmite spre SPV ANAF",
+    secondaryCTA: "Validează XML înainte",
+    whatUserSees: "O factură a fost generată local dar nu a fost niciodată transmisă spre ANAF.",
+    whatCompliDoes: "Factura există în sistem dar ANAF nu o știe. TVA-ul nu poate fi dedus până la transmitere.",
+    whatUserMustDo: "Transmite factura XML spre SPV ANAF. Validează XML-ul cu validatorul e-Factura înainte de upload.",
+    closeCondition: "Confirmare transmitere și acceptare în SPV ANAF.",
+    revalidationTriggers: ["dacă termenul de 5 zile lucrătoare se apropie", "la fiecare run de reconciliere"],
+  },
+  "EF-006": {
+    findingTypeId: "EF-006",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Corectează datele clientului",
+    secondaryCTA: "Verifică CUI la ANAF",
+    whatUserSees: "Datele de identificare ale clientului (CUI sau denumire) sunt invalide sau lipsesc din factură.",
+    whatCompliDoes: "Aceasta este o eroare buyer-side — problema este la datele clientului din factură, nu la structura XML.",
+    whatUserMustDo: "Verifică CUI-ul clientului la anaf.ro/verificare-cif. Corectează în softul de facturare și retransmite.",
+    closeCondition: "Factură cu date client corecte transmisă și confirmată în SPV.",
+    revalidationTriggers: ["la fiecare factură pentru același client", "dacă clientul schimbă datele fiscale"],
+  },
   "SYS-001": {
     findingTypeId: "SYS-001",
     initialFlowState: "evidence_required",
@@ -948,15 +1027,97 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "intake-vendor-no-dpa") return "GDPR-010"
   if (id === "intake-site-cookies") return "GDPR-005"
   if (id === "saft-d406-registration") return "EF-001"
+  // SPV-specific findings from /api/fiscal/spv-check → EF-001
+  if (
+    framework === "eFactura" &&
+    (
+      id.startsWith("spv-missing-") ||
+      (id.startsWith("spv-") && !id.includes("ok")) ||
+      title.includes("înregistrare spv lipsă") ||
+      title.includes("inregistrare spv lipsa") ||
+      title.includes("spv neverificat") ||
+      title.includes("token spv expirat") ||
+      title.includes("acces spv lipsă") ||
+      title.includes("acces spv lipsa") ||
+      title.includes("spv lipsă") ||
+      title.includes("spv lipsa") ||
+      (
+        title.includes("spv") &&
+        (
+          detail.includes("nu este înregistrat") ||
+          detail.includes("nu este inregistrat") ||
+          detail.includes("neînregistrat") ||
+          detail.includes("neinregistrat") ||
+          detail.includes("nu am putut verifica") ||
+          detail.includes("neverificat") ||
+          detail.includes("token expirat") ||
+          detail.includes("acces lipsă") ||
+          detail.includes("acces lipsa")
+        )
+      )
+    )
+  ) {
+    return "EF-001"
+  }
   if (id.startsWith("saft-")) return "EF-GENERIC"
   if (id === "nis2-finding-eligibility") return "NIS2-001"
   if (id.startsWith("nis2-finding-")) return "NIS2-005"
+
+  // processing-delayed findings → EF-004 (check before EF-003 to avoid misclassification)
+  if (
+    framework === "eFactura" &&
+    (
+      title.includes("prelucrare blocată") ||
+      title.includes("prelucrare blocata") ||
+      detail.includes("prelucrare anaf de peste") ||
+      (detail.includes("în prelucrare") && (detail.includes("72") || detail.includes("48") || detail.includes("ore"))) ||
+      (detail.includes("prelucrare") && detail.includes("blocat"))
+    )
+  ) {
+    return "EF-004"
+  }
+
+  // unsubmitted findings → EF-005
+  if (
+    framework === "eFactura" &&
+    (
+      title.includes("netransmisă spv") ||
+      title.includes("netransmisa spv") ||
+      detail.includes("netransmisă spre spv") ||
+      detail.includes("netransmisa spre spv") ||
+      detail.includes("generată local") ||
+      detail.includes("generata local") ||
+      (detail.includes("netransmis") && detail.includes("spv"))
+    )
+  ) {
+    return "EF-005"
+  }
+
+  // buyer-side / client identification risk → EF-006
+  if (
+    framework === "eFactura" &&
+    (
+      title.includes("date identificare client") ||
+      (detail.includes("c002") || detail.includes("v008")) ||
+      (detail.includes("accountingcustomerparty") && (detail.includes("invalid") || detail.includes("lipsă") || detail.includes("lipsa"))) ||
+      (
+        (detail.includes("client") || detail.includes("cumparător") || detail.includes("cumparator")) &&
+        (detail.includes("cui") || detail.includes("cnp")) &&
+        (detail.includes("invalid") || detail.includes("lipsă") || detail.includes("lipsa") || detail.includes("neidentificat"))
+      )
+    )
+  ) {
+    return "EF-006"
+  }
 
   if (
     framework === "eFactura" &&
     (
       title.includes("factură anaf respinsă") ||
       title.includes("factura anaf respinsa") ||
+      title.includes("respinsă anaf") ||
+      title.includes("respinsa anaf") ||
+      title.includes("eroare xml") ||
       detail.includes("respinsă de spv anaf") ||
       detail.includes("respinsa de spv anaf") ||
       detail.includes("taxtotal") ||
@@ -1325,6 +1486,16 @@ function getWorkflowLink(
         label: "Scanează site-ul din nou",
       }
     }
+    case "EF-001": {
+      const search = new URLSearchParams({
+        tab: "spv",
+        findingId: record.id,
+      })
+      return {
+        href: `/dashboard/fiscal?${search.toString()}`,
+        label: "Verifică SPV în Fiscal",
+      }
+    }
     default:
       return undefined
   }
@@ -1345,6 +1516,8 @@ function getClosureCTA(
       return "Marchează ștergerea / anonimizarea"
     case "GDPR-019":
       return "Marchează notificarea ANSPDCP"
+    case "EF-001":
+      return "Confirmă activarea SPV"
     default:
       return primaryMode === "external_action" ? "Marchează rezolvat" : undefined
   }
@@ -1368,6 +1541,9 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "AI-005": 180,
   "EF-001": 30,
   "EF-003": 7,
+  "EF-004": 2,
+  "EF-005": 3,
+  "EF-006": 7,
   "SYS-001": 30,
   "SYS-002": 90,
   "GDPR-GENERIC": 180,
@@ -1393,7 +1569,294 @@ export type FindingArtifacts = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. PUBLIC API
+// 8. EF-003 EXPLAINABILITY (Sprint 6A)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type EF003Explainability = {
+  /** Codul ANAF/CIUS-RO extras din finding (ex. "V009") */
+  errorCode: string | null
+  /** Intrarea completă din ANAF_ERROR_MAP, dacă codul a fost recunoscut */
+  errorEntry: AnafErrorEntry | null
+  /** Referința facturii extrasă din titlu (ex. "FACT-2026-001") */
+  invoiceRef: string | null
+  /** Textul brut al problemei din finding (fallback când nu există cod clar) */
+  rawReasonText: string | null
+}
+
+/**
+ * Extrage explainability structurat pentru un finding EF-003.
+ * Normalizează codul ANAF/CIUS-RO și returnează fix-ul concret.
+ * Dacă nu există cod recunoscut, returnează textul brut ca fallback.
+ */
+export function extractEF003Explainability(record: ScanFinding): EF003Explainability {
+  const allText = [
+    record.title,
+    record.detail,
+    record.remediationHint ?? "",
+    record.resolution?.problem ?? "",
+    record.resolution?.action ?? "",
+  ].join(" ")
+
+  // Caută coduri ANAF: E001, V009, D001, S001, C001, T001 etc.
+  const codeMatch = allText.match(/\b([EVDSTC]\d{3})\b/)
+  const errorCode = codeMatch ? codeMatch[1].toUpperCase() : null
+  const errorEntry = errorCode ? lookupAnafError(errorCode) : null
+
+  // Referință factură din titlu: pattern "— FACT-2026-001" sau "# FAC-001"
+  const invoiceMatch = record.title.match(/(?:—\s*|#\s*)([\w-]*\d{3,}[\w-]*)/)
+  const invoiceRef = invoiceMatch ? invoiceMatch[1] : null
+
+  const rawReasonText = record.resolution?.problem ?? record.detail ?? null
+
+  return { errorCode, errorEntry, invoiceRef, rawReasonText }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. EF-001 SPV STATE MODEL (Sprint 6B)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sub-stările SPV derivate la runtime din semnalele din finding.
+ * Nu sunt câmpuri persistate — se derivă din titlu/detail/provenance.
+ */
+export type SpvSubState =
+  | "spv_not_registered"   // SPV nu este activat deloc pentru CUI
+  | "spv_access_missing"   // Accesul la API SPV nu a fost configurat
+  | "spv_token_expired"    // Token-ul SPV a expirat
+  | "spv_check_needed"     // SPV-ul există dar nu a fost verificat recent
+
+export type EF001SpvExplainability = {
+  spvSubState: SpvSubState
+  /** Eticheta umană a sub-stării, folosită în cockpit */
+  stateLabel: string
+  /** Textul explicativ pentru user — ce s-a detectat concret */
+  description: string
+  /** Acțiunea concretă de remediere */
+  fix: string
+  /** Dovada care închide cazul */
+  evidenceNote: string
+  /** Regula de închidere, distinctă de dovadă */
+  closeCondition: string
+  /** Semnalul de reverificare */
+  recheckSignal: string
+  /** CUI-ul firmei dacă e inclus în finding id */
+  cuiRef: string | null
+}
+
+const SPV_SUB_STATE_CONTENT: Record<
+  SpvSubState,
+  { stateLabel: string; description: string; fix: string; evidenceNote: string; closeCondition: string; recheckSignal: string }
+> = {
+  spv_not_registered: {
+    stateLabel: "SPV neînregistrat",
+    description: "Firma nu are SPV activat în Spațiul Privat Virtual ANAF. Fără SPV, facturile e-Factura nu pot fi primite sau transmise legal.",
+    fix: "Accesează portalul ANAF (anaf.ro), autentifică-te cu certificat digital sau card electronic, și înregistrează firma în SPV. Permite accesul pentru transmiterea facturilor e-Factura.",
+    evidenceNote: "Screenshot din SPV ANAF care confirmă înregistrarea firmei, sau referința oficială primită de la ANAF.",
+    closeCondition: "SPV este activat pentru firmă și dovada înregistrării este salvată la dosar.",
+    recheckSignal: "Verifică statusul SPV la 30 de zile după înregistrare.",
+  },
+  spv_access_missing: {
+    stateLabel: "Acces SPV neconfigurat",
+    description: "Accesul API la SPV ANAF nu a fost configurat. CompliScan nu poate verifica automat statusul facturilor.",
+    fix: "Configurează credențialele ANAF OAuth2 în Setări → Integrări ANAF pentru a permite verificarea automată.",
+    evidenceNote: "Confirmare din setări că integrarea ANAF este activă și testată.",
+    closeCondition: "Integrarea SPV este configurată și verificarea automată răspunde corect.",
+    recheckSignal: "Reverificare automată după configurarea integrării.",
+  },
+  spv_token_expired: {
+    stateLabel: "Token SPV expirat",
+    description: "Token-ul de acces la SPV ANAF a expirat. Facturile nu mai pot fi verificate sau transmise automat.",
+    fix: "Reautentifică-te în Setări → Integrări ANAF pentru a reînnoi token-ul de acces.",
+    evidenceNote: "Confirmare că token-ul ANAF este reînnoit și verificarea automată funcționează.",
+    closeCondition: "Token-ul SPV este reînnoit și verificarea automată funcționează din nou.",
+    recheckSignal: "Verifică statusul token-ului la 7 zile după reînnoire.",
+  },
+  spv_check_needed: {
+    stateLabel: "Verificare SPV necesară",
+    description: "SPV-ul nu a fost verificat recent. Nu putem confirma că facturile sunt procesate corect.",
+    fix: "Rulează verificarea SPV din pagina Fiscal → SPV pentru a confirma statusul curent.",
+    evidenceNote: "Rezultatul verificării SPV cu status activ și fără erori.",
+    closeCondition: "Verificarea SPV confirmă status activ și fără erori relevante.",
+    recheckSignal: "Verifică statusul SPV la 30 de zile.",
+  },
+}
+
+/**
+ * Derivă sub-starea SPV din semnalele unui finding EF-001.
+ * Runtime — nu persistat.
+ */
+export function extractEF001SpvState(record: ScanFinding): EF001SpvExplainability {
+  const allText = [
+    record.title,
+    record.detail,
+    record.remediationHint ?? "",
+    record.resolution?.problem ?? "",
+    record.operationalEvidenceNote ?? "",
+  ].join(" ").toLowerCase()
+
+  // Extrage CUI din id-ul finding-ului (pattern: spv-missing-{cui})
+  const cuiMatch = record.id.match(/spv-missing-(\d+)/)
+  const cuiRef = cuiMatch ? cuiMatch[1] : null
+
+  // Detectează sub-starea
+  let spvSubState: SpvSubState
+
+  if (
+    allText.includes("token") &&
+    (allText.includes("expirat") || allText.includes("expired") || allText.includes("token_expired"))
+  ) {
+    spvSubState = "spv_token_expired"
+  } else if (
+    allText.includes("acces") &&
+    (allText.includes("lipsă") || allText.includes("lipsa") || allText.includes("neconfigurata") || allText.includes("neconfigurată"))
+  ) {
+    spvSubState = "spv_access_missing"
+  } else if (
+    record.id.startsWith("spv-missing-") ||
+    allText.includes("nu este înregistrat") ||
+    allText.includes("nu este inregistrat") ||
+    allText.includes("înregistrare spv lipsă") ||
+    allText.includes("inregistrare spv lipsa") ||
+    allText.includes("neînregistrat") ||
+    allText.includes("neinregistrat")
+  ) {
+    spvSubState = "spv_not_registered"
+  } else {
+    spvSubState = "spv_check_needed"
+  }
+
+  const content = SPV_SUB_STATE_CONTENT[spvSubState]
+  const description = cuiRef && spvSubState === "spv_not_registered"
+    ? `${content.description} CUI verificat: ${cuiRef}.`
+    : content.description
+
+  return {
+    spvSubState,
+    stateLabel: content.stateLabel,
+    description,
+    fix: content.fix,
+    evidenceNote: content.evidenceNote,
+    closeCondition: content.closeCondition,
+    recheckSignal: content.recheckSignal,
+    cuiRef,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. FISCAL OPERATIONAL RISK EXPLAINABILITY (Sprint 6C)
+// EF-004 processing-delayed · EF-005 unsubmitted · EF-006 buyer-side risk
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type FiscalRiskClass = "processing_delayed" | "unsubmitted" | "buyer_side_risk"
+
+export type FiscalOperationalExplainability = {
+  riskClass: FiscalRiskClass
+  description: string
+  fix: string
+  evidenceNote: string
+  recheckSignal: string
+  invoiceRef: string | null
+  entityRef: string | null
+}
+
+const FISCAL_RISK_CLASS_LABELS: Record<FiscalRiskClass, string> = {
+  processing_delayed: "factură blocată în prelucrare",
+  unsubmitted: "factură netransmisă în SPV",
+  buyer_side_risk: "date client invalide",
+}
+
+function extractEntityRef(record: ScanFinding): string | null {
+  const dashMatch = record.title.match(/—\s+(.+)$/)
+  if (dashMatch) return dashMatch[1].trim()
+  const delaMatch = record.detail.match(/de la ([^(.\n]+)/)
+  if (delaMatch) return delaMatch[1].trim()
+  return null
+}
+
+/**
+ * Explainability pentru EF-004 — factură în prelucrare blocată.
+ * Distinge clar: NU este o respingere, e blocare în coada de procesare.
+ */
+export function extractEF004State(record: ScanFinding): FiscalOperationalExplainability {
+  const entityRef = extractEntityRef(record)
+  const invoiceMatch =
+    record.title.match(/(?:—\s*|#\s*)([\w/-]*\d{3,}[\w/-]*)/) ??
+    record.detail.match(/#([\w/-]*\d{3,}[\w/-]*)/)
+  const invoiceRef = invoiceMatch ? invoiceMatch[1] : null
+
+  const pendingMatch = (record.detail + (record.resolution?.problem ?? "")).match(/(\d+)\s*(?:ore|zile)/)
+  const pendingInfo = pendingMatch ? ` (blocat de ${pendingMatch[0]})` : ""
+  const entityDesc = entityRef ? ` de la ${entityRef}` : ""
+  const invoiceDesc = invoiceRef ? ` (#${invoiceRef})` : ""
+
+  return {
+    riskClass: "processing_delayed",
+    description: `Factura${invoiceDesc}${entityDesc} este în prelucrare la ANAF de prea mult timp${pendingInfo}. Aceasta NU este o respingere — factura e în coada ANAF. Trebuie verificat dacă s-a blocat sau e o întârziere temporară.`,
+    fix: "Accesează portalul SPV ANAF și verifică statusul facturii. Dacă a depășit 72 de ore fără confirmare, retransmite sau contactează helpdesk ANAF.",
+    evidenceNote: "Screenshot din SPV ANAF cu statusul curent al facturii (ok, în prelucrare sau respinsă).",
+    recheckSignal: `Verifică statusul${invoiceRef ? ` facturii ${invoiceRef}` : ""} în SPV ANAF la 24 ore după verificare.`,
+    invoiceRef,
+    entityRef,
+  }
+}
+
+/**
+ * Explainability pentru EF-005 — factură generată, netransmisă SPV.
+ * Distinge clar: factura există local dar ANAF nu o știe.
+ */
+export function extractEF005State(record: ScanFinding): FiscalOperationalExplainability {
+  const entityRef = extractEntityRef(record)
+  const invoiceMatch =
+    record.title.match(/(?:—\s*|#\s*)([\w/-]*\d{3,}[\w/-]*)/) ??
+    record.detail.match(/#([\w/-]*\d{3,}[\w/-]*)/)
+  const invoiceRef = invoiceMatch ? invoiceMatch[1] : null
+
+  const entityDesc = entityRef ? ` pentru ${entityRef}` : ""
+  const invoiceDesc = invoiceRef ? ` (#${invoiceRef})` : ""
+
+  return {
+    riskClass: "unsubmitted",
+    description: `Factura${invoiceDesc}${entityDesc} a fost generată local dar NU a fost transmisă spre SPV ANAF. ANAF nu are cunoștință de această factură — TVA-ul nu poate fi dedus și există risc de penalitate pentru transmitere tardivă.`,
+    fix: "Transmite factura XML spre SPV ANAF. Validează fișierul XML cu validatorul e-Factura înainte de upload. Termen legal: 5 zile lucrătoare de la emitere.",
+    evidenceNote: "Screenshot din SPV ANAF cu status ok sau numărul mesajului de acceptare după transmitere.",
+    recheckSignal: `Verifică că factura${invoiceRef ? ` ${invoiceRef}` : ""} a fost transmisă și confirmată în termen.`,
+    invoiceRef,
+    entityRef,
+  }
+}
+
+/**
+ * Explainability pentru EF-006 — date identificare client invalide (buyer-side risk).
+ * Distinge clar: problema nu e la structura XML, ci la datele clientului.
+ */
+export function extractEF006State(record: ScanFinding): FiscalOperationalExplainability {
+  const entityRef = extractEntityRef(record)
+  const invoiceMatch =
+    record.title.match(/(?:—\s*|#\s*)([\w/-]*\d{3,}[\w/-]*)/) ??
+    record.detail.match(/#([\w/-]*\d{3,}[\w/-]*)/)
+  const invoiceRef = invoiceMatch ? invoiceMatch[1] : null
+
+  const allText = [record.title, record.detail, record.remediationHint ?? ""].join(" ").toLowerCase()
+  const isC002 = allText.includes("c002") || (allText.includes("cui") && allText.includes("client") && allText.includes("neidentificat"))
+  const fieldHint = isC002
+    ? "CUI-ul clientului destinatar nu există sau nu este activ în ANAF."
+    : "Datele de identificare ale clientului (AccountingCustomerParty) sunt incomplete sau incorecte."
+
+  const entityDesc = entityRef ? ` pentru clientul ${entityRef}` : ""
+
+  return {
+    riskClass: "buyer_side_risk",
+    description: `${fieldHint} Aceasta este o eroare buyer-side${entityDesc} — problema nu este la structura XML, ci la datele specifice ale clientului din factură.`,
+    fix: "Verifică CUI-ul clientului la anaf.ro/verificare-cif. Dacă este persoană fizică, folosește CNP, nu CUI. Corectează în softul de facturare și retransmite.",
+    evidenceNote: "CUI-ul clientului verificat și confirmat valid + screenshot din SPV cu status ok după retransmitere.",
+    recheckSignal: `Verifică că factura${invoiceRef ? ` ${invoiceRef}` : ""} cu datele client corecte a fost confirmată în SPV.`,
+    invoiceRef,
+    entityRef,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. PUBLIC API
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -1534,12 +1997,41 @@ export function buildCockpitRecipe(
   const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType)
   const resolveFlowState = uiStateToFlowState(uiState, flow.initialFlowState)
   const vendorContext = inferVendorContext(record, findingTypeId)
+  const ef003Explainability =
+    findingTypeId === "EF-003" ? extractEF003Explainability(record) : null
+  const ef001SpvExplainability =
+    findingTypeId === "EF-001" ? extractEF001SpvState(record) : null
+  const fiscalOpExplainability =
+    findingTypeId === "EF-004" ? extractEF004State(record) :
+    findingTypeId === "EF-005" ? extractEF005State(record) :
+    findingTypeId === "EF-006" ? extractEF006State(record) : null
 
   // 6. CTA principal
   const primaryCTAAction = getPrimaryCTAAction(uiState, primaryMode)
 
   // 7. Monitoring signals
   const signals: string[] = [...flow.revalidationTriggers]
+  if (findingTypeId === "EF-001" && ef001SpvExplainability) {
+    signals.splice(0, signals.length)
+    signals.unshift(ef001SpvExplainability.recheckSignal)
+  }
+  if (fiscalOpExplainability) {
+    signals.splice(0, signals.length)
+    signals.unshift(fiscalOpExplainability.recheckSignal)
+  }
+  if (findingTypeId === "EF-003") {
+    const specificRecheckSignal =
+      ef003Explainability?.invoiceRef
+        ? `Verifică statusul facturii ${ef003Explainability.invoiceRef} în SPV ANAF la 7 zile după retransmitere.`
+        : "Verifică statusul facturii în SPV ANAF la 7 zile după retransmitere."
+
+    signals.splice(
+      0,
+      signals.length,
+      ...signals.filter((signal) => !signal.toLowerCase().includes("validare"))
+    )
+    signals.unshift(specificRecheckSignal)
+  }
   if (record.rescanHint) signals.push(record.rescanHint)
   if (record.resolution?.revalidation) signals.push(record.resolution.revalidation)
   const doc = artifacts?.linkedGeneratedDocument
@@ -1567,28 +2059,95 @@ export function buildCockpitRecipe(
 
   // 8. Hero content
   const heroTitle = record.title
-  const heroSummary =
+  let heroSummary =
     record.resolution?.problem ??
     flow.whatUserSees ??
     record.detail
-  const whatCompliDoes =
+  let whatCompliDoes =
     findingTypeId === "GDPR-010" && vendorContext?.dpaUrl
       ? `${flow.whatCompliDoes} Ți-am găsit și linkul public DPA pentru ${vendorContext.vendorName}.`
       : flow.whatCompliDoes
-  const whatUserMustDo =
+  let whatUserMustDo =
     findingTypeId === "GDPR-010" && vendorContext
       ? `${flow.whatUserMustDo} Confirmă relația cu ${vendorContext.vendorName} și atașează acordul semnat sau draftul aprobat.`
       : flow.whatUserMustDo
-  const acceptedEvidence = findingType.requiredEvidenceKinds.map(
+  let acceptedEvidence = findingType.requiredEvidenceKinds.map(
     (k) => EVIDENCE_KIND_LABELS[k] ?? k
   )
+  let closeCondition = flow.closeCondition
   if (findingTypeId === "GDPR-010" && vendorContext) {
     acceptedEvidence.unshift(`DPA semnat cu ${vendorContext.vendorName}`)
   }
+
+  // EF-001 SPV explainability override (Sprint 6B)
+  // Înlocuiește conținutul generic cu sub-starea SPV derivată la runtime.
+  if (findingTypeId === "EF-001" && ef001SpvExplainability) {
+    heroSummary = ef001SpvExplainability.description
+    whatCompliDoes = `Am detectat starea ${ef001SpvExplainability.stateLabel.toLowerCase()}. ${flow.whatCompliDoes}`
+    whatUserMustDo = ef001SpvExplainability.fix
+    acceptedEvidence = Array.from(
+      new Set([
+        ef001SpvExplainability.evidenceNote,
+        ...findingType.requiredEvidenceKinds.map((k) => EVIDENCE_KIND_LABELS[k] ?? k),
+      ])
+    )
+    closeCondition = ef001SpvExplainability.closeCondition
+  }
+
+  // EF-003 explainability override (Sprint 6A)
+  // Înlocuiește conținutul generic cu detalii exacte despre eroarea ANAF/CIUS-RO.
+  if (findingTypeId === "EF-003" && ef003Explainability) {
+    if (ef003Explainability.errorEntry && ef003Explainability.errorCode) {
+      heroSummary = `${ef003Explainability.errorEntry.description}${ef003Explainability.invoiceRef ? ` Referință factură: ${ef003Explainability.invoiceRef}.` : ""}`
+      whatCompliDoes =
+        `Am identificat eroarea ${ef003Explainability.errorCode} — ${ef003Explainability.errorEntry.title}` +
+        `${ef003Explainability.invoiceRef ? ` pentru factura ${ef003Explainability.invoiceRef}` : ""}. ${flow.whatCompliDoes}`
+      whatUserMustDo = ef003Explainability.errorEntry.fix
+      acceptedEvidence = Array.from(
+        new Set([
+          `Confirmare ANAF SPV cu status 'ok' după corecția ${ef003Explainability.errorCode}`,
+          ...findingType.requiredEvidenceKinds.map((k) => EVIDENCE_KIND_LABELS[k] ?? k),
+        ])
+      )
+      closeCondition =
+        `Factura este retransmisă și confirmată în SPV cu status 'ok'` +
+        `${ef003Explainability.errorCode ? ` după corecția ${ef003Explainability.errorCode}` : ""}.`
+    } else if (
+      ef003Explainability.rawReasonText &&
+      ef003Explainability.rawReasonText !== flow.whatUserSees &&
+      ef003Explainability.rawReasonText.length > 30
+    ) {
+      // Fallback: folosim textul brut din finding dacă e suficient de specific
+      heroSummary = ef003Explainability.rawReasonText
+    }
+  }
+  // EF-004 / EF-005 / EF-006 fiscal operational risk override (Sprint 6C)
+  // Distinge clar: prelucrare blocată ≠ respinsă ≠ netransmisă ≠ buyer-side
+  if (fiscalOpExplainability) {
+    heroSummary = fiscalOpExplainability.description
+    whatCompliDoes = `Am detectat riscul ${FISCAL_RISK_CLASS_LABELS[fiscalOpExplainability.riskClass]}. ${flow.whatCompliDoes}`
+    whatUserMustDo = fiscalOpExplainability.fix
+    acceptedEvidence = Array.from(
+      new Set([
+        fiscalOpExplainability.evidenceNote,
+        ...findingType.requiredEvidenceKinds.map((k) => EVIDENCE_KIND_LABELS[k] ?? k),
+      ])
+    )
+    closeCondition = flow.closeCondition
+  }
+
   const dossierOutcome =
-    findingTypeId === "GDPR-010" && vendorContext
-      ? `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
-      : getDossierOutcome(primaryMode)
+    findingTypeId === "EF-001"
+      ? "Dovada activării SPV intră în dosar. CompliScan reverifică statusul SPV la 30 de zile."
+      : findingTypeId === "EF-004"
+        ? "Dovada statusului final din SPV (ok sau respinsă) intră în dosar pentru urmărire."
+        : findingTypeId === "EF-005"
+          ? "Dovada transmiterii în SPV ANAF intră în dosar. Factura devine trasabilă fiscal."
+          : findingTypeId === "EF-006"
+            ? "Dovada CUI client verificat + confirmare SPV intră în dosar pentru audit fiscal."
+            : findingTypeId === "GDPR-010" && vendorContext
+              ? `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
+              : getDossierOutcome(primaryMode)
   const recipeMonitoringSignals =
     findingTypeId === "GDPR-010" && vendorContext
       ? Array.from(
@@ -1620,7 +2179,7 @@ export function buildCockpitRecipe(
     closureCTA: getClosureCTA(findingTypeId, primaryMode),
     acceptedEvidence,
     visibleBlocks,
-    closeCondition: flow.closeCondition,
+    closeCondition,
     dossierOutcome,
     monitoringSignals: recipeMonitoringSignals,
     vendorContext,
@@ -1628,7 +2187,7 @@ export function buildCockpitRecipe(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. EXPORTS SUPLIMENTARE (pentru read-only access la cataloage)
+// 10. EXPORTS SUPLIMENTARE (pentru read-only access la cataloage)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Returnează regulile de blocks per resolution mode */

@@ -408,6 +408,52 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.feedbackMessage).toContain("operațională")
   })
 
+  it("creează notificare fiscală umană când EF-003 intră în monitorizare", async () => {
+    const efacturaState = {
+      findings: [
+        {
+          id: "demo-efactura-1",
+          title: "Factură ANAF respinsă — FACT-2026-0021",
+          detail:
+            "Factura FACT-2026-0021 a fost respinsă de SPV ANAF. Codul de eroare V009 indică probleme cu câmpul TaxTotal.",
+          category: "E_FACTURA",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "FACT-2026-0021.xml",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/demo-efactura-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote: "Factura a fost corectată și retransmisă în SPV, în așteptarea statusului ok.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "demo-efactura-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(mocks.createNotificationMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.objectContaining({
+        type: "fiscal_alert",
+        title: "Reverificăm factura retransmisă",
+        linkTo: "/dashboard/resolve/demo-efactura-1",
+      })
+    )
+  })
+
   it("închide GDPR-017 cu dovadă de ștergere și intră în monitoring", async () => {
     const retentionState = {
       findings: [

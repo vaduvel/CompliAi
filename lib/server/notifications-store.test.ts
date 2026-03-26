@@ -56,4 +56,18 @@ describe("normalizeNotificationForDisplay", () => {
     expect(notification.title).toBe("Am verificat pentru tine")
     expect(notification.linkTo).toBe("/dashboard")
   })
+
+  it("ancorează notificările fiscale SPV în pagina fiscală când nu există link explicit", () => {
+    const notification = normalizeNotificationForDisplay(
+      makeNotification({
+        type: "fiscal_alert",
+        title: "Reverificăm SPV-ul firmei",
+        message: "Următorul control este programat pentru 26.04.2026.",
+        linkTo: undefined,
+      })
+    )
+
+    expect(notification.title).toBe("Reverificăm SPV-ul firmei")
+    expect(notification.linkTo).toBe("/dashboard/fiscal")
+  })
 })

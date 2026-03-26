@@ -16,6 +16,8 @@ import {
   classifyFinding,
   computeNextMonitoringDateISO,
   deriveCockpitUIState,
+  extractEF001SpvState,
+  extractEF003Explainability,
   getCloseGatingRequirements,
   getFindingTypeDefinition,
   getResolveFlowRecipe,
@@ -750,5 +752,470 @@ describe("computeNextMonitoringDateISO", () => {
   it("cade pe fallback-ul transversal pentru id necunoscut", () => {
     const nextISO = computeNextMonitoringDateISO("UNKNOWN-999", "2026-03-26T00:00:00.000Z")
     expect(nextISO).toBe("2026-06-24T00:00:00.000Z")
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sprint 6A — EF-003 Explainability
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("extractEF003Explainability", () => {
+  it("extrage codul V009 din detaliul finding-ului și returnează intrarea ANAF", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "Factura FACT-2026-042 a fost respinsă. Codul de eroare V009 indică probleme cu câmpul TaxTotal.",
+    })
+    const expl = extractEF003Explainability(finding)
+    expect(expl.errorCode).toBe("V009")
+    expect(expl.errorEntry).not.toBeNull()
+    expect(expl.errorEntry?.title).toBe("TaxTotal lipsă sau incorect")
+    expect(expl.errorEntry?.fix).toContain("TaxTotal")
+    expect(expl.invoiceRef).toBe("FACT-2026-042")
+  })
+
+  it("extrage codul V002 (CustomizationID) din reason-ul finding-ului", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v002",
+      category: "E_FACTURA",
+      title: "Factură Eroare XML — Microsoft Invoice",
+      detail: "Eroare la validare: V002 — CustomizationID lipsă sau incorect (CIUS-RO:1.0.1 necesar).",
+    })
+    const expl = extractEF003Explainability(finding)
+    expect(expl.errorCode).toBe("V002")
+    expect(expl.errorEntry).not.toBeNull()
+    expect(expl.errorEntry?.title).toContain("CustomizationID")
+  })
+
+  it("fallback — nu extrage cod când nu există pattern ANAF în text", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-generic",
+      category: "E_FACTURA",
+      title: "Factură respinsă — Amazon Web Services",
+      detail: "Factura a fost respinsă de ANAF din motive necunoscute.",
+    })
+    const expl = extractEF003Explainability(finding)
+    expect(expl.errorCode).toBeNull()
+    expect(expl.errorEntry).toBeNull()
+    expect(expl.rawReasonText).toBeTruthy()
+  })
+
+  it("extrage codul din resolution.problem dacă lipsește din detail", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-e001",
+      category: "E_FACTURA",
+      title: "Factură respinsă — SPV Auth",
+      detail: "Acces SPV respins.",
+      resolution: {
+        problem: "Certificat digital E001 invalid sau expirat.",
+        impact: "Factura nu poate fi transmisă.",
+        action: "Reînnoiește certificatul.",
+      },
+    })
+    const expl = extractEF003Explainability(finding)
+    expect(expl.errorCode).toBe("E001")
+    expect(expl.errorEntry?.title).toContain("Certificat")
+  })
+})
+
+describe("buildCockpitRecipe — EF-003 explainability (Sprint 6A)", () => {
+  it("cu cod V009 — heroSummary conține descrierea erorii, nu textul generic", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "Factura a fost respinsă. Codul de eroare V009 indică probleme cu câmpul TaxTotal.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-003")
+    expect(recipe.heroSummary).toContain("TaxTotal")
+    expect(recipe.heroSummary).not.toBe("O factură a fost respinsă de ANAF.")
+  })
+
+  it("cu cod V009 — whatUserMustDo conține fix-ul concret din ANAF_ERROR_MAP", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "Respinsă ANAF: V009 TaxTotal incorect.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.whatUserMustDo).toContain("TaxTotal")
+    // Nu mai e generic "Corectează în softul de facturare."
+    expect(recipe.whatUserMustDo).not.toBe("Corectează în softul de facturare.")
+  })
+
+  it("cu cod V009 — whatCompliDoes menționează codul erorii", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "V009: TaxTotal lipsă sau incorect.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.whatCompliDoes).toContain("V009")
+  })
+
+  it("cu cod V009 — acceptedEvidence include confirmarea specifică pentru V009", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "Eroare V009.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    const hasSpecificEvidence = recipe.acceptedEvidence.some((e) => e.includes("V009"))
+    expect(hasSpecificEvidence).toBe(true)
+  })
+
+  it("cu cod V009 — monitoringSignals include semnalul de 7 zile SPV", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF",
+      detail: "Eroare V009.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    const has7daySignal = recipe.monitoringSignals.some((s) => s.includes("7 zile"))
+    expect(has7daySignal).toBe(true)
+  })
+
+  it("cu cod V009 — closeCondition nu mai rămâne vag și nu mai păstrează triggerul generic", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-v009",
+      category: "E_FACTURA",
+      title: "Factură Respinsă ANAF — FACT-2026-042",
+      detail: "Factura a fost respinsă. Codul de eroare V009 indică probleme cu câmpul TaxTotal.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.closeCondition).toContain("status 'ok'")
+    expect(recipe.closeCondition).toContain("V009")
+    expect(recipe.monitoringSignals.some((s) => s.includes("până la validare"))).toBe(false)
+  })
+
+  it("fallback fără cod — recipe rămâne valid, uiState corect", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-nocode",
+      category: "E_FACTURA",
+      title: "Factură respinsă — Fan Courier Express SRL",
+      detail: "Factura a fost respinsă de SPV ANAF din motive nespecificate.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-003")
+    expect(recipe.uiState).toBe("external_action_required")
+    expect(recipe.resolutionMode).toBe("external_action")
+    expect(recipe.acceptedEvidence.length).toBeGreaterThan(0)
+  })
+
+  it("fallback fără cod — monitoringSignals include 7 zile SPV", () => {
+    const finding = makeFinding({
+      id: "demo-efactura-nocode",
+      category: "E_FACTURA",
+      title: "Factură respinsă — Telekom SRL",
+      detail: "Factura respinsă de SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    const has7daySignal = recipe.monitoringSignals.some((s) => s.includes("7 zile"))
+    expect(has7daySignal).toBe(true)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sprint 6B — EF-001 SPV State Model
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("classifyFinding — EF-001 SPV heuristics (Sprint 6B)", () => {
+  it("clasifică spv-missing-{cui} ca EF-001", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma cu CUI 12345678 nu este înregistrată în SPV ANAF.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-001")
+  })
+
+  it("clasifică saft-d406-registration ca EF-001 (existent)", () => {
+    const finding = makeFinding({
+      id: "saft-d406-registration",
+      category: "E_FACTURA",
+      title: "SAF-T D406 lipsă",
+      detail: "Firma nu a transmis SAF-T.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-001")
+  })
+
+  it("clasifică finding cu titlu 'SPV lipsă' ca EF-001", () => {
+    const finding = makeFinding({
+      id: "spv-check-001",
+      category: "E_FACTURA",
+      title: "SPV lipsă — verificare necesară",
+      detail: "Nu am putut verifica SPV-ul firmei.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-001")
+  })
+
+  it("nu clasifică un SPV deja activ ca EF-001 doar pentru că apare 'spv' în text", () => {
+    const finding = makeFinding({
+      id: "spv-ok-12345678",
+      category: "E_FACTURA",
+      title: "SPV activ",
+      detail: "Firma este înregistrată în SPV ANAF și verificarea a trecut.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).not.toBe("EF-001")
+  })
+})
+
+describe("extractEF001SpvState", () => {
+  it("derivează spv_not_registered pentru spv-missing-{cui}", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma cu CUI 12345678 nu este înregistrată în SPV ANAF.",
+    })
+    const state = extractEF001SpvState(finding)
+    expect(state.spvSubState).toBe("spv_not_registered")
+    expect(state.stateLabel).toBe("SPV neînregistrat")
+    expect(state.cuiRef).toBe("12345678")
+    expect(state.description).toContain("12345678")
+    expect(state.fix).toContain("anaf.ro")
+  })
+
+  it("derivează spv_token_expired când finding-ul menționează token expirat", () => {
+    const finding = makeFinding({
+      id: "spv-check-002",
+      category: "E_FACTURA",
+      title: "Token SPV expirat",
+      detail: "Token-ul de acces SPV ANAF a expirat. Verificarea automată nu este posibilă.",
+      operationalEvidenceNote: "TOKEN_EXPIRED",
+    })
+    const state = extractEF001SpvState(finding)
+    expect(state.spvSubState).toBe("spv_token_expired")
+    expect(state.recheckSignal).toContain("7 zile")
+  })
+
+  it("derivează spv_check_needed ca fallback când nu există semnal specific", () => {
+    const finding = makeFinding({
+      id: "spv-generic-001",
+      category: "E_FACTURA",
+      title: "SPV neverificat",
+      detail: "SPV-ul nu a fost verificat.",
+    })
+    const state = extractEF001SpvState(finding)
+    expect(state.spvSubState).toBe("spv_check_needed")
+    expect(state.recheckSignal).toContain("30 de zile")
+  })
+
+  it("returnează cuiRef null când nu e în id", () => {
+    const finding = makeFinding({
+      id: "saft-d406-registration",
+      category: "E_FACTURA",
+      title: "SAF-T lipsă",
+      detail: "SPV neverificat.",
+    })
+    const state = extractEF001SpvState(finding)
+    expect(state.cuiRef).toBeNull()
+  })
+})
+
+describe("buildCockpitRecipe — EF-001 SPV explainability (Sprint 6B)", () => {
+  it("cu spv-missing-{cui} — heroSummary conține descrierea concretă, nu textul generic", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma nu este înregistrată în SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-001")
+    expect(recipe.heroSummary).not.toBe("Nu avem dovada că SPV este activ și operațional.")
+    expect(recipe.heroSummary).toContain("SPV")
+  })
+
+  it("whatUserMustDo conține acțiunea concretă de remediere SPV", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma nu este înregistrată în SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.whatUserMustDo).not.toBe("Activează și confirmă.")
+    expect(recipe.whatUserMustDo).toContain("ANAF")
+  })
+
+  it("whatCompliDoes folosește eticheta umană a sub-stării, nu cheia internă", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma nu este înregistrată în SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.whatCompliDoes).toContain("spv neînregistrat")
+    expect(recipe.whatCompliDoes).not.toContain("spv_not_registered")
+  })
+
+  it("workflowLink duce la /dashboard/fiscal?tab=spv&findingId=...", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "Firma nu este înregistrată în SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.workflowLink).toBeDefined()
+    expect(recipe.workflowLink?.href).toContain("/dashboard/fiscal")
+    expect(recipe.workflowLink?.href).toContain("tab=spv")
+    expect(recipe.workflowLink?.href).toContain("findingId=spv-missing-12345678")
+  })
+
+  it("closureCTA este 'Confirmă activarea SPV'", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "SPV lipsă.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.closureCTA).toBe("Confirmă activarea SPV")
+  })
+
+  it("monitoringSignals include reverificarea la 30 de zile", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "SPV lipsă.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    const has30daySignal = recipe.monitoringSignals.some((s) => s.includes("30"))
+    expect(has30daySignal).toBe(true)
+  })
+
+  it("dossierOutcome specific EF-001", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "SPV lipsă.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.dossierOutcome).toContain("SPV")
+  })
+
+  it("closeCondition este regula de închidere, nu copia dovezii cerute", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "SPV lipsă.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.closeCondition).toContain("SPV este activat")
+    expect(recipe.closeCondition).not.toBe(recipe.acceptedEvidence[0])
+  })
+
+  it("NU afișează generator block pentru EF-001 (external_action)", () => {
+    const finding = makeFinding({
+      id: "spv-missing-12345678",
+      category: "E_FACTURA",
+      title: "Înregistrare SPV lipsă",
+      detail: "SPV lipsă.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.visibleBlocks.detailBlocks).not.toContain("generator")
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sprint 6C — Fiscal operational risk flows
+// EF-004 processing-delayed · EF-005 unsubmitted · EF-006 buyer-side risk
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("classifyFinding — Sprint 6C fiscal risk heuristics", () => {
+  it("clasifică finding de prelucrare blocată ca EF-004", () => {
+    const finding = makeFinding({
+      id: "ef-processing-delay-001",
+      category: "E_FACTURA",
+      title: "Factură în prelucrare blocată — INV-2026-001",
+      detail: "Factura este în prelucrare ANAF de peste 72 ore și pare blocată.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-004")
+  })
+
+  it("clasifică finding netransmis spre SPV ca EF-005", () => {
+    const finding = makeFinding({
+      id: "ef-unsubmitted-001",
+      category: "E_FACTURA",
+      title: "Factură netransmisă SPV — INV-2026-002",
+      detail: "Factura a fost generată local, dar a rămas netransmisă spre SPV ANAF.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-005")
+  })
+
+  it("clasifică buyer-side risk pe date client invalide ca EF-006", () => {
+    const finding = makeFinding({
+      id: "ef-buyer-risk-001",
+      category: "E_FACTURA",
+      title: "Date identificare client invalide",
+      detail: "AccountingCustomerParty invalid: CUI client neidentificat, eroare C002 la validare.",
+    })
+    const { findingTypeId } = classifyFinding(finding)
+    expect(findingTypeId).toBe("EF-006")
+  })
+})
+
+describe("buildCockpitRecipe — Sprint 6C fiscal operational explainability", () => {
+  it("EF-004 explică clar că nu este o respingere ANAF", () => {
+    const finding = makeFinding({
+      id: "ef-processing-delay-001",
+      category: "E_FACTURA",
+      title: "Factură în prelucrare blocată — INV-2026-001",
+      detail: "Factura INV-2026-001 este în prelucrare ANAF de peste 72 ore și pare blocată.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-004")
+    expect(recipe.heroSummary).toContain("NU este o respingere")
+    expect(recipe.whatCompliDoes).toContain("factură blocată în prelucrare")
+    expect(recipe.closeCondition).toContain("Status final confirmat din SPV")
+  })
+
+  it("EF-005 cere dovadă de transmitere și păstrează xml + screenshot", () => {
+    const finding = makeFinding({
+      id: "ef-unsubmitted-001",
+      category: "E_FACTURA",
+      title: "Factură netransmisă SPV — INV-2026-002",
+      detail: "Factura a fost generată local, dar a rămas netransmisă spre SPV ANAF.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-005")
+    expect(recipe.heroSummary).toContain("NU a fost transmisă")
+    expect(recipe.acceptedEvidence).toContain("Screenshot dovadă")
+    expect(recipe.acceptedEvidence).toContain("Fișier XML factură")
+    expect(recipe.closeCondition).toContain("Confirmare transmitere și acceptare")
+  })
+
+  it("EF-006 tratează problema ca buyer-side risk, nu ca eroare XML generică", () => {
+    const finding = makeFinding({
+      id: "ef-buyer-risk-001",
+      category: "E_FACTURA",
+      title: "Date identificare client invalide",
+      detail: "AccountingCustomerParty invalid: CUI client neidentificat, eroare C002 la validare.",
+    })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("EF-006")
+    expect(recipe.heroSummary).toContain("eroare buyer-side")
+    expect(recipe.whatUserMustDo).toContain("anaf.ro/verificare-cif")
+    expect(recipe.whatCompliDoes).toContain("date client invalide")
+    expect(recipe.closeCondition).toContain("date client corecte")
   })
 })

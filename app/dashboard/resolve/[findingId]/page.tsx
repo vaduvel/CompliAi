@@ -307,6 +307,41 @@ export default function FindingDetailPage() {
               placeholder: "Ex: Lead-urile expirate >12 luni au fost șterse din CRM la 26.03.2026. Export job #retention-2026-03-26 salvat, verificare făcută pe 124 înregistrări, fără excepții.",
               footer: "Cazul nu poate intra în monitorizare fără urma clară a execuției reale, nu doar politica de retenție.",
             }
+      : recipe.findingTypeId === "EF-001"
+        ? {
+            eyebrow: "Dovadă de activare SPV",
+            body: `${recipe.whatUserMustDo} Atașează dovada că SPV-ul este activ și configurat corect pentru firma ta.`,
+            placeholder: "Ex: SPV activat pe portal ANAF la 26.03.2026, screenshot din pagina SPV cu status activ. Sau: token ANAF reînnoit în Setări → Integrări, verificare rulată cu succes.",
+            footer: "Cazul nu poate intra în monitorizare fără dovada că SPV-ul este activ și facturile pot fi transmise/recepționate.",
+          }
+      : recipe.findingTypeId === "EF-004"
+        ? {
+            eyebrow: "Factura nu e respinsă — verifică statusul în SPV",
+            body: `${recipe.whatUserMustDo} Notează ce status ai găsit și dacă ai retransmis sau ai contactat ANAF.`,
+            placeholder: "Ex: Am verificat în SPV ANAF la 26.03.2026 — factura FC-00294811 are status 'în prelucrare' de 80 ore. Am retransmis la 26.03.2026. Sau: statusul s-a schimbat la 'ok' la 26.03.2026.",
+            footer: "Cazul nu poate intra în monitorizare fără dovada verificării statusului în SPV (screenshot sau referință ANAF).",
+          }
+      : recipe.findingTypeId === "EF-005"
+        ? {
+            eyebrow: "Dovadă de transmitere în SPV ANAF",
+            body: `${recipe.whatUserMustDo} Notează data transmiterii și confirmarea primită de la ANAF.`,
+            placeholder: "Ex: Factura INV-OAI-2026-03 transmisă în SPV ANAF la 26.03.2026. Confirmare ANAF primită cu numărul mesajului 2026-03-1234, status 'ok'.",
+            footer: "Cazul nu poate intra în monitorizare fără dovada că factura a fost transmisă și acceptată în SPV ANAF.",
+          }
+      : recipe.findingTypeId === "EF-006"
+        ? {
+            eyebrow: "Dovadă corectare date client (buyer-side)",
+            body: `${recipe.whatUserMustDo} Notează CUI-ul clientului verificat, ce ai corectat în factură și confirmarea după retransmitere.`,
+            placeholder: "Ex: CUI client verificat la anaf.ro/verificare-cif — CUI 12345678 activ. Datele corectate în ERP. Factura retransmisă în SPV la 26.03.2026, confirmare status 'ok' primită.",
+            footer: "Cazul nu poate intra în monitorizare fără dovada că datele clientului sunt corecte și factura a fost retransmisă cu succes.",
+          }
+      : recipe.findingTypeId === "EF-003"
+        ? {
+            eyebrow: "Dovadă de retransmitere e-Factura",
+            body: `${recipe.whatUserMustDo} Notează referința de confirmare primită din SPV ANAF.`,
+            placeholder: "Ex: Eroare corectată în ERP, factura retransmisă în SPV ANAF pe 26.03.2026, confirmare ANAF ref. 2026-XXXX primită cu status 'ok'.",
+            footer: "Cazul nu poate intra în monitorizare fără dovada statusului 'ok' în SPV ANAF sau a retransmiterii corecte.",
+          }
       : {
           eyebrow: "Dovadă operațională obligatorie",
           body: "Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.",

@@ -20,6 +20,16 @@ const TYPE_ICON: Record<string, string> = {
 
 const ANAF_TYPES = new Set(["anaf_signal", "anaf_deadline", "fiscal_alert"])
 
+function getNotificationEyebrow(notification: AppNotification) {
+  if (!ANAF_TYPES.has(notification.type)) return null
+
+  const text = `${notification.title} ${notification.message}`.toLowerCase()
+  if (text.includes("spv")) return "SPV ANAF"
+  if (notification.type === "anaf_deadline") return "Termen ANAF"
+  if (text.includes("factur")) return "Monitorizare fiscală"
+  return "ANAF"
+}
+
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>([])
@@ -161,6 +171,11 @@ export function NotificationBell() {
                   <div className="flex items-start gap-2">
                     <span className="mt-0.5 text-sm">{TYPE_ICON[n.type] ?? "🔔"}</span>
                     <div className="min-w-0 flex-1">
+                      {getNotificationEyebrow(n) ? (
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                          {getNotificationEyebrow(n)}
+                        </p>
+                      ) : null}
                       {n.linkTo ? (
                         <Link
                           href={n.linkTo}

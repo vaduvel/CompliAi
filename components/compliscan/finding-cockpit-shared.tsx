@@ -410,6 +410,14 @@ export function FindingExecutionCard({
   const steps = getRecipeProgressSteps(finding, cockpitRecipe, linkedGeneratedDocument)
   const activeStep = steps.find((step) => step.state === "active") ?? steps[steps.length - 1]
   const monitoringSignals = cockpitRecipe.monitoringSignals
+  const monitoringTitle =
+    finding.category === "E_FACTURA" && finding.findingStatus === "under_monitoring"
+      ? "Ce reverificăm fiscal"
+      : "Ce monitorizăm"
+  const monitoringEyebrow =
+    finding.category === "E_FACTURA" && finding.findingStatus === "under_monitoring"
+      ? "Fiscal"
+      : "Monitoring"
 
   return (
     <Card className="border-eos-border bg-eos-surface">
@@ -556,8 +564,8 @@ export function FindingExecutionCard({
             ]}
           />
           <RailCard
-            title="Ce monitorizăm"
-            eyebrow="Monitoring"
+            title={monitoringTitle}
+            eyebrow={monitoringEyebrow}
             items={
               monitoringSignals.length > 0
                 ? monitoringSignals
