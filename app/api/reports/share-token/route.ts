@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { getOrgContext } from "@/lib/server/org-context"
-import { generateShareToken } from "@/lib/compliance/response-pack"
+import { generateSignedShareToken } from "@/lib/server/share-token-store"
 
 export async function POST(request: Request) {
   try {
@@ -17,9 +17,10 @@ export async function POST(request: Request) {
       ? body.recipientType
       : "accountant" as const
 
-    const token = generateShareToken(ctx.orgId, recipientType, new Date().toISOString())
+    const token = generateSignedShareToken(ctx.orgId, recipientType, new Date().toISOString())
+    const expiresAtISO = new Date(Date.now() + 72 * 3_600_000).toISOString()
 
-    return NextResponse.json({ ok: true, token })
+    return NextResponse.json({ ok: true, token, expiresAtISO })
   } catch {
     return jsonError("Eroare la generarea tokenului.", 500, "SHARE_TOKEN_FAILED")
   }

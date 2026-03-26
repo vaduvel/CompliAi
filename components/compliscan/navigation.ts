@@ -24,6 +24,7 @@ export type DashboardNavId =
   | "resolve"
   | "calendar"
   | "reports"
+  | "trust"
   | "settings"
   | "portfolio-overview"
   | "portfolio-alerts"
@@ -97,6 +98,14 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     description: "dosar: dovezi, politici, export",
   },
   {
+    id: "trust",
+    label: "Trust Center",
+    href: dashboardRoutes.trustCenter,
+    icon: Shield,
+    matchers: [dashboardRoutes.trustCenter],
+    description: "profil public de conformitate",
+  },
+  {
     id: "settings",
     label: "Setări",
     href: dashboardRoutes.settings,
@@ -154,6 +163,14 @@ export const soloNavItems: DashboardNavItem[] = [
     icon: FileSearch,
     matchers: [...dashboardRouteGroups.reports],
     description: "dosar: dovezi și export",
+  },
+  {
+    id: "trust",
+    label: "Trust Center",
+    href: dashboardRoutes.trustCenter,
+    icon: Shield,
+    matchers: [dashboardRoutes.trustCenter],
+    description: "profil public de conformitate",
   },
   {
     id: "settings",
