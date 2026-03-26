@@ -139,4 +139,110 @@ describe("PATCH /api/findings/[id]", () => {
     expect(response.status).toBe(400)
     expect(payload.code).toBe("DOCUMENT_CONFIRMATION_INCOMPLETE")
   })
+
+  it("intoarce mesaj de dosar cand draftul este aprobat ca dovada", async () => {
+    mocks.readStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          generatedDocumentId: "doc-1",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.findingStatus).toBe("under_monitoring")
+    expect(payload.documentFlowState).toBe("attached_as_evidence")
+    expect(payload.feedbackMessage).toContain("dosar")
+    expect(payload.feedbackMessage).toContain("artefact")
+    expect(payload.feedbackMessage).toContain("monitorizare")
+  })
+
+  it("accepta aliasul legacy pentru checklist-ul de review", async () => {
+    mocks.readStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          generatedDocumentId: "doc-1",
+          confirmationChecklist: ["reviewed-content", "facts-confirmed", "approved-for-evidence"],
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.linkedGeneratedDocument.confirmationChecklist).toEqual([
+      "content-reviewed",
+      "facts-confirmed",
+      "approved-for-evidence",
+    ])
+  })
 })

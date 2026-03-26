@@ -95,7 +95,7 @@ const ONBOARDING_OVERVIEW_STEPS: OnboardingOverviewStep[] = [
 
 function getOverviewStep(mode: ModeOption["id"] | null, wizardStep: ApplicabilityWizardStep | null) {
   if (!mode) return "mode"
-  if (!wizardStep || wizardStep === "cui" || wizardStep === "sector" || wizardStep === "size") {
+  if (!wizardStep || wizardStep === "cui" || wizardStep === "checking" || wizardStep === "sector" || wizardStep === "size") {
     return "profile"
   }
   if (wizardStep === "done") return "report"

@@ -13,6 +13,7 @@ import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
 import type { DocumentType } from "@/lib/server/document-generator"
+import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 
 const VALID_DOC_TYPES: DocumentType[] = [
   "privacy-policy",
@@ -91,9 +92,9 @@ export async function PATCH(
     const body = (await request.json()) as FindingPatchBody
     const newStatus = body.status
 
-    if (!newStatus || !["confirmed", "dismissed", "resolved"].includes(newStatus)) {
+    if (!newStatus || !["confirmed", "dismissed", "resolved", "under_monitoring"].includes(newStatus)) {
       return jsonError(
-        "Status invalid. Opțiuni: confirmed, dismissed, resolved.",
+        "Status invalid. Opțiuni: confirmed, dismissed, resolved, under_monitoring.",
         400,
         "INVALID_STATUS"
       )
@@ -105,10 +106,15 @@ export async function PATCH(
         .filter((document) => document.sourceFindingId === findingId)
         .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
 
+    const storedStatus =
+      newStatus === "resolved"
+        ? "under_monitoring"
+        : (newStatus as "confirmed" | "dismissed" | "under_monitoring")
+
     // Update finding status (B2)
     const updatedFinding = {
       ...finding,
-      findingStatus: newStatus as "confirmed" | "dismissed" | "resolved",
+      findingStatus: storedStatus,
       findingStatusUpdatedAtISO: new Date().toISOString(),
     }
 
@@ -125,7 +131,7 @@ export async function PATCH(
     let feedbackMessage =
       newStatus === "dismissed"
         ? "Finding respins. A rămas disponibil pentru audit, dar nu mai intră în fluxul activ."
-        : "Finding marcat ca rezolvat."
+        : "Finding închis și trecut în monitorizare."
 
     // B2: On confirmation, generate task candidate + notify
     if (newStatus === "confirmed") {
@@ -157,7 +163,7 @@ export async function PATCH(
       }
     }
 
-    if (newStatus === "resolved" && finding.suggestedDocumentType) {
+    if (isFindingResolvedLike(storedStatus) && finding.suggestedDocumentType) {
       const confirmationChecklist = normalizeConfirmationChecklist(body.confirmationChecklist)
       const generatedDocumentId = body.generatedDocumentId?.trim()
 
@@ -229,10 +235,10 @@ export async function PATCH(
         resolution: nextResolution,
       }
       feedbackMessage =
-        "Draftul a fost verificat, aprobat și atașat ca dovadă. Finding-ul a fost închis cu confirmare explicită."
+        "Dovada a intrat la dosar. Draftul a fost verificat, aprobat și legat de finding ca artefact auditabil, iar cazul a intrat în monitorizare cu urmă clară pentru reverificare."
     }
 
-    if (newStatus !== "resolved" || !finding.suggestedDocumentType) {
+    if (!isFindingResolvedLike(storedStatus) || !finding.suggestedDocumentType) {
       updatedFindings[findingIdx] = updatedFinding
     }
 
@@ -248,10 +254,10 @@ export async function PATCH(
       ok: true,
       finding: updatedFindings[findingIdx],
       findingId,
-      status: newStatus,
+      status: storedStatus,
       taskCandidate: taskCandidateSummary,
       linkedGeneratedDocument:
-        newStatus === "resolved" && body.generatedDocumentId
+        isFindingResolvedLike(storedStatus) && body.generatedDocumentId
           ? generatedDocuments.find((document) => document.id === body.generatedDocumentId) ?? linkedGeneratedDocument
           : linkedGeneratedDocument,
       documentFlowState: getDocumentFlowState(
@@ -271,7 +277,18 @@ export async function PATCH(
 }
 
 function normalizeConfirmationChecklist(values: string[] | undefined) {
-  return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)))
+  const aliases: Record<string, string> = {
+    "reviewed-content": "content-reviewed",
+  }
+
+  return Array.from(
+    new Set(
+      (values ?? [])
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map((value) => aliases[value] ?? value)
+    )
+  )
 }
 
 function hasRequiredConfirmation(values: string[]) {

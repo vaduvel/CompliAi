@@ -197,31 +197,36 @@ export function ScanPageSurface() {
 
   return (
     <div className="space-y-8">
-      {latestDocumentFindings.length > 0 && viewMode === "flow" ? (
-        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft px-4 py-3">
-          <AlertTriangle className="size-4 shrink-0 text-eos-warning" strokeWidth={2} />
-          <p className="flex-1 text-sm text-eos-text">
-            <span className="font-semibold">{latestDocumentFindings.length} probleme identificate</span>
-            {criticalOrHighFindings.length > 0
-              ? ` — ${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată`
-              : " din ultima scanare"}
-          </p>
+      {viewMode === "flow" && latestDocumentFindings.length > 0 ? (
+        <div className="flex items-center gap-3 rounded-eos-lg border-2 border-eos-primary/25 bg-gradient-to-r from-eos-primary/[0.06] via-transparent to-transparent px-5 py-4">
+          <AlertTriangle className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-eos-text">
+              {latestDocumentFindings.length} findings din ultima scanare
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              {criticalOrHighFindings.length > 0
+                ? `${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată. `
+                : ""}
+              Rezolvarea se face prin cockpitul fiecărui finding.
+            </p>
+          </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-md bg-eos-warning px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-primary/90"
           >
-            Rezolvă acum
-            <ArrowRight className="size-3" strokeWidth={2.5} />
+            Mergi la De rezolvat
+            <ArrowRight className="size-3.5" strokeWidth={2.5} />
           </Link>
         </div>
       ) : null}
       <PageIntro
-        eyebrow="Scanare"
-        title={isSolo ? "Scanezi și revii în fluxul firmei" : "Pornesti analiza din sursa potrivita"}
+        eyebrow="Intake"
+        title={isSolo ? "Alimentezi Compli cu surse noi" : "Pornești analiza din sursa potrivită"}
         description={
           isSolo
-            ? "Încarci sursa, verifici rezultatul curent și continui în De rezolvat sau Documente, fără suprafețe secundare paralele."
-            : "Aici alegi sursa si rulezi analiza. Rezultatul curent ramane doar pentru citire, iar istoricul complet sta separat in Istoric. Dupa scanare continui in De rezolvat sau Rapoarte."
+            ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
+            : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."
         }
         badges={
           <>

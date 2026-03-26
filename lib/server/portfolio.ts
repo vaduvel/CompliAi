@@ -6,6 +6,7 @@ import type {
   RemediationAction,
   ScanFinding,
 } from "@/lib/compliance/types"
+import { isFindingActive } from "@/lib/compliscan/finding-cockpit"
 import type { VendorReview } from "@/lib/compliance/vendor-review-engine"
 import type {
   SessionPayload,
@@ -399,10 +400,6 @@ function getLastScanAtISO(state: ComplianceState) {
     })[0]
 
   return scan ? scan.analyzedAtISO ?? scan.createdAtISO : null
-}
-
-function isFindingActive(finding: ScanFinding) {
-  return finding.findingStatus !== "dismissed" && finding.findingStatus !== "resolved"
 }
 
 function frameworkFromAlert(alert: ComplianceAlert, findings: ScanFinding[]) {

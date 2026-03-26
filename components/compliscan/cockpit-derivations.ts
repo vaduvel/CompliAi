@@ -28,8 +28,8 @@ import {
 import {
   buildFindingTaskId,
   getTaskStateByTaskId,
-  resolveFindingIdFromTaskId,
 } from "@/lib/compliance/task-ids"
+import { getResolvedFindingIds } from "@/lib/compliance/task-resolution"
 import {
   inferValidationLevel,
   inferTaskValidationLevel,
@@ -65,26 +65,7 @@ export function buildCockpitTasks(data: CockpitTaskSourcePayload): CockpitTask[]
 }
 
 function getResolvedFindingIdsFromPayload(data: CockpitTaskSourcePayload) {
-  const resolved = new Set<string>()
-
-  for (const [taskId, taskState] of Object.entries(data.state.taskState ?? {})) {
-    if (taskState?.status !== "done") continue
-
-    if (taskId.startsWith("finding-")) {
-      const findingId = resolveFindingIdFromTaskId(taskId)
-      if (findingId) resolved.add(findingId)
-      continue
-    }
-
-    if (!taskId.startsWith("rem-")) continue
-
-    const remediation = data.remediationPlan.find((item) => `rem-${item.id}` === taskId)
-    for (const findingId of remediation?.relatedFindingIds ?? []) {
-      resolved.add(findingId)
-    }
-  }
-
-  return resolved
+  return getResolvedFindingIds(data.state)
 }
 
 function convertRemediationTask(item: RemediationAction, findings: ScanFinding[]): CockpitTask {

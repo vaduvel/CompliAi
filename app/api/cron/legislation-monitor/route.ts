@@ -56,7 +56,7 @@ export async function POST(request: Request) {
           if (change.framework === "GDPR" || (tag && tags.includes(tag as ApplicabilityTag))) {
             await createNotification(org.id, {
               type: "info",
-              title: `[Radar Legislativ] ${change.sursa}: schimbare detectată`,
+              title: `Schimbare legislativă: ${change.sursa}`,
               message: change.summary.slice(0, 300),
               linkTo: "/dashboard/scan",
             }).catch(() => {})

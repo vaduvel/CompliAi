@@ -1,6 +1,7 @@
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
 import type { ComplianceAlert, ComplianceState } from "@/lib/compliance/types"
+import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 
 type TaskResolutionTargets = {
   alertIds: string[]
@@ -64,7 +65,11 @@ export function getTaskResolutionTargets(
 }
 
 export function getResolvedFindingIds(state: ComplianceState) {
-  const resolved = new Set<string>()
+  const resolved = new Set<string>(
+    state.findings
+      .filter((finding) => isFindingResolvedLike(finding.findingStatus))
+      .map((finding) => finding.id)
+  )
 
   for (const [taskId, taskState] of Object.entries(state.taskState ?? {})) {
     if (taskState?.status !== "done") continue
@@ -79,6 +84,7 @@ export function getResolvedAlertIds(state: ComplianceState) {
   const resolved = new Set<string>(
     state.alerts.filter((alert) => !alert.open).map((alert) => alert.id)
   )
+  const resolvedFindingIds = getResolvedFindingIds(state)
 
   for (const [taskId, taskState] of Object.entries(state.taskState ?? {})) {
     if (taskState?.status !== "done") continue
@@ -90,6 +96,12 @@ export function getResolvedAlertIds(state: ComplianceState) {
       for (const alertId of findRelatedAlertIdsForFinding(state.alerts, state, findingId)) {
         resolved.add(alertId)
       }
+    }
+  }
+
+  for (const findingId of resolvedFindingIds) {
+    for (const alertId of findRelatedAlertIdsForFinding(state.alerts, state, findingId)) {
+      resolved.add(alertId)
     }
   }
 

@@ -2,9 +2,13 @@
 
 import Link from "next/link"
 import { useDeferredValue, useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, FileText, RefreshCw, ClipboardCheck, Search } from "lucide-react"
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, Search } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import {
+  FindingExecutionCard,
+  FindingNarrativeCard,
+} from "@/components/compliscan/finding-cockpit-shared"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
@@ -15,6 +19,13 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding } from "@/lib/compliance/types"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
+import {
+  getFindingDocumentFlowPresentation,
+  getFindingNarrative,
+  isFindingActive,
+  isFindingResolvedLike,
+  getFindingStatusPresentation,
+} from "@/lib/compliscan/finding-cockpit"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 type FrameworkFilter = "toate" | "gdpr" | "nis2" | "ai-act" | "furnizori"
@@ -38,10 +49,6 @@ function frameworkLabel(fw: FrameworkFilter): string {
     toate: "General", gdpr: "GDPR", nis2: "NIS2", "ai-act": "AI Act", furnizori: "Furnizori",
   }
   return labels[fw]
-}
-
-function isFindingActive(finding: ScanFinding): boolean {
-  return finding.findingStatus !== "resolved" && finding.findingStatus !== "dismissed"
 }
 
 function matchesFindingSearch(finding: ScanFinding, query: string): boolean {
@@ -72,15 +79,9 @@ function ageLabel(iso: string): string {
 
 function getFindingReviewBadge(
   finding: ScanFinding
-): { label: string; variant: "default" | "warning" | "secondary" | "success" } {
-  if (finding.findingStatus === "resolved") {
-    return { label: "Rezolvat", variant: "success" }
-  }
-  if (finding.findingStatus === "dismissed") {
-    return { label: "Respins", variant: "secondary" }
-  }
-  if (finding.findingStatus === "confirmed") {
-    return { label: "Confirmat", variant: "default" }
+): { label: string; variant: "default" | "warning" | "secondary" | "success" | "destructive" | "outline" } {
+  if (!isFindingActive(finding)) {
+    return getFindingStatusPresentation(finding.findingStatus)
   }
   if (finding.requiresHumanReview) {
     return { label: "De revizuit", variant: "warning" }
@@ -88,130 +89,36 @@ function getFindingReviewBadge(
   if (finding.resolution) {
     return { label: "În remediere", variant: "default" }
   }
-  return { label: "Detectat", variant: "warning" }
+  return getFindingStatusPresentation(finding.findingStatus)
 }
 
-// ── Resolution Layer (inline) ─────────────────────────────────────────────────
-
-const DOC_LABELS: Record<string, string> = {
-  "privacy-policy":        "Politică de confidențialitate",
-  "cookie-policy":         "Politică de cookies",
-  "dpa":                   "DPA (Acord de prelucrare date)",
-  "ai-governance":         "Politică de utilizare AI",
-  "nis2-incident-response":"Plan de răspuns NIS2",
-}
-
-function getAutoAction(finding: ScanFinding): { label: string; href: string; icon: React.ReactNode } | null {
-  const id = finding.id
-  const docType = finding.suggestedDocumentType
-
-  // Finding generat de NIS2 assessment → du-te să actualizezi evaluarea
-  if (id.startsWith("nis2-finding-")) {
-    return {
-      label: "Actualizează evaluarea NIS2",
-      href: "/dashboard/nis2",
-      icon: <ClipboardCheck className="size-3.5" strokeWidth={2} />,
-    }
+function compareFindingsByPriority(a: ScanFinding, b: ScanFinding) {
+  const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+  const statusBoost = (finding: ScanFinding) => {
+    if (finding.findingStatus === "confirmed") return 0
+    if (finding.findingStatus === "open") return 1
+    return 2
   }
-
-  // Finding de site scan → re-scanează
-  if (id.startsWith("site-") || finding.sourceDocument?.toLowerCase().includes("scan")) {
-    return {
-      label: "Re-scanează site-ul",
-      href: "/dashboard/scan",
-      icon: <RefreshCw className="size-3.5" strokeWidth={2} />,
-    }
-  }
-
-  // Finding cu document sugerat → generează documentul direct
-  if (docType && DOC_LABELS[docType]) {
-    return {
-      label: `Generează ${DOC_LABELS[docType]}`,
-      href: `/dashboard/generator?documentType=${docType}`,
-      icon: <FileText className="size-3.5" strokeWidth={2} />,
-    }
-  }
-
-  return null
-}
-
-function ResolutionLayer({ finding }: { finding: ScanFinding }) {
-  const res = finding.resolution
-  const [showMore, setShowMore] = useState(false)
-
-  const action = res?.humanStep || res?.action || finding.remediationHint || finding.detail
-  const evidence = res?.closureEvidence
-  const impact = res?.impact
-  const generated = res?.generatedAsset
-  const autoAction = getAutoAction(finding)
 
   return (
-    <div className="border-t border-eos-border-subtle px-5 py-4 space-y-3">
-
-      {/* Acțiune automată — dacă avem ceva de declanșat */}
-      {autoAction && (
-        <Link
-          href={autoAction.href}
-          className="flex items-center gap-2.5 rounded-eos-md bg-eos-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-eos-primary/90 transition-colors w-fit"
-        >
-          {autoAction.icon}
-          {autoAction.label}
-          <ArrowRight className="size-3.5 ml-auto" strokeWidth={2} />
-        </Link>
-      )}
-
-      {/* Ce faci tu — acțiunea manuală (dacă nu e totul automatizat) */}
-      {action && (
-        <div className={["rounded-eos-md border px-4 py-3", autoAction ? "bg-eos-bg-inset border-eos-border-subtle" : "bg-eos-primary/8 border-eos-primary/20"].join(" ")}>
-          <p className={["text-[11px] font-semibold uppercase tracking-[0.05em] mb-1", autoAction ? "text-eos-text-muted" : "text-eos-primary"].join(" ")}>
-            {autoAction ? "Sau faci manual" : "Ce faci acum"}
-          </p>
-          <p className="text-sm text-eos-text leading-relaxed">{action}</p>
-        </div>
-      )}
-
-      {/* Dovada necesară */}
-      {evidence && (
-        <div className="rounded-eos-md bg-eos-bg-inset border border-eos-border-subtle px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted mb-1">
-            Ce dovadă încarci
-          </p>
-          <p className="text-sm text-eos-text-secondary leading-relaxed">{evidence}</p>
-        </div>
-      )}
-
-      {/* Detalii suplimentare — colapsate */}
-      {(impact || generated || finding.legalReference) && (
-        <button
-          type="button"
-          onClick={() => setShowMore((v) => !v)}
-          className="flex items-center gap-1.5 text-[11px] text-eos-text-muted hover:text-eos-text transition-colors"
-        >
-          {showMore ? <ChevronDown className="size-3" strokeWidth={2} /> : <ChevronRight className="size-3" strokeWidth={2} />}
-          {showMore ? "Ascunde detalii" : "Impact · ce generează CompliAI"}
-        </button>
-      )}
-      {showMore && (
-        <div className="space-y-2 pl-1">
-          {impact && (
-            <div>
-              <p className="text-[11px] font-semibold text-eos-text-muted mb-0.5">Impact dacă nu rezolvi</p>
-              <p className="text-sm text-eos-text-muted leading-relaxed">{impact}</p>
-            </div>
-          )}
-          {generated && (
-            <div>
-              <p className="text-[11px] font-semibold text-eos-text-muted mb-0.5">Ce generează CompliAI</p>
-              <p className="text-sm text-eos-text-muted leading-relaxed">{generated}</p>
-            </div>
-          )}
-          {finding.legalReference && (
-            <p className="text-[11px] text-eos-text-tertiary">Ref. legală: {finding.legalReference}</p>
-          )}
-        </div>
-      )}
-    </div>
+    (SEVERITY_RANK[a.severity] ?? 4) - (SEVERITY_RANK[b.severity] ?? 4) ||
+    statusBoost(a) - statusBoost(b) ||
+    new Date(b.createdAtISO).getTime() - new Date(a.createdAtISO).getTime()
   )
+}
+
+function getResolveDocumentFlowState(
+  finding: ScanFinding
+): "not_required" | "draft_missing" | "attached_as_evidence" {
+  if (isFindingResolvedLike(finding.findingStatus)) {
+    return "attached_as_evidence"
+  }
+
+  if (finding.suggestedDocumentType) {
+    return "draft_missing"
+  }
+
+  return "not_required"
 }
 
 // ── Finding Row ───────────────────────────────────────────────────────────────
@@ -221,6 +128,9 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const fw = frameworkFromLegal(finding.legalReference)
   const age = ageLabel(finding.createdAtISO)
   const reviewBadge = getFindingReviewBadge(finding)
+  const narrative = getFindingNarrative(finding)
+  const documentFlowState = getResolveDocumentFlowState(finding)
+  const flowStatus = getFindingDocumentFlowPresentation(documentFlowState)
 
   return (
     <div className={["overflow-hidden rounded-eos-md border transition-colors duration-150", expanded ? "border-eos-border-default" : "border-eos-border-subtle", "bg-eos-surface"].join(" ")}>
@@ -234,11 +144,17 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
         <p className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
           {finding.title}
         </p>
+        <span className="hidden min-w-0 max-w-[18rem] truncate text-xs text-eos-text-muted xl:block">
+          {narrative.action}
+        </span>
         {fw !== "toate" && (
           <Badge variant="secondary" className="normal-case tracking-normal shrink-0">
             {frameworkLabel(fw)}
           </Badge>
         )}
+        <Badge variant={flowStatus.variant} className="hidden normal-case tracking-normal lg:inline-flex">
+          {flowStatus.label}
+        </Badge>
         <span className="shrink-0 text-[11px] text-eos-text-muted">{age}</span>
         <Badge variant={reviewBadge.variant} className="normal-case tracking-normal shrink-0">
           {reviewBadge.label}
@@ -250,15 +166,23 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
       </button>
       {expanded && (
         <>
-          <ResolutionLayer finding={finding} />
+          <div className="border-t border-eos-border-subtle px-4 py-4">
+            <FindingExecutionCard
+              finding={finding}
+              documentFlowState={documentFlowState}
+            />
+          </div>
           <div className="border-t border-eos-border-subtle px-5 py-3">
             <Link
               href={`/dashboard/resolve/${finding.id}`}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
             >
-              Deschide detalii complete
+              Vezi cockpitul complet
               <ArrowRight className="size-3" strokeWidth={2} />
             </Link>
+            <span className="ml-3 text-[11px] text-eos-text-muted">
+              Finding, dovadă, dosar și monitorizare în aceeași urmă.
+            </span>
           </div>
         </>
       )}
@@ -544,11 +468,13 @@ export function ResolvePageSurface() {
 
   const findings = cockpit.data.state.findings
   const activeFindings = findings.filter((finding) => isFindingActive(finding))
+  const featuredFinding = [...activeFindings].sort(compareFindingsByPriority)[0] ?? null
   const criticalCount = activeFindings.filter((f) => f.severity === "critical").length
   const highCount = activeFindings.filter((f) => f.severity === "high").length
   const mediumCount = activeFindings.filter((f) => f.severity === "medium").length
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const isSolo = runtime?.userMode === "solo"
+  const featuredFlowState = featuredFinding ? getResolveDocumentFlowState(featuredFinding) : "not_required"
 
   return (
     <div className="space-y-8">
@@ -589,14 +515,42 @@ export function ResolvePageSurface() {
       {/* Cross-module urgency: DSAR deadlines + NIS2 incidents + Vendor overdue */}
       <UrgentItemsSection items={urgencyItems} />
 
+      {featuredFinding && (
+        <section aria-label="Caz prioritar acum" className="space-y-3">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-eos-text">Cazul activ acum</p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                Intrarea principală în smart resolve cockpit. Aici vezi problema, pasul curent, dovada și ce rămâne sub watch după închidere.
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              Prioritizat automat din finding-urile deschise
+            </Badge>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+            <FindingNarrativeCard
+              finding={featuredFinding}
+              title={featuredFinding.title}
+              description="Rezumatul de lucru rămâne compact: ce e problema, de ce contează și ce dovadă trebuie să rămână la dosar."
+            />
+            <FindingExecutionCard
+              finding={featuredFinding}
+              documentFlowState={featuredFlowState}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Primary execution surface */}
       {cockpit.tasks.length > 0 && (
         <section aria-label="Plan de remediere">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-eos-text">Planul de lucru recomandat</p>
+              <p className="text-sm font-medium text-eos-text">Task-uri de suport pentru cazurile deschise</p>
               <p className="mt-1 text-xs text-eos-text-muted">
-                Lucrezi direct din board: atașezi dovada, validezi și revii la listă doar pentru context.
+                Board-ul rămâne util pentru execuția rapidă, dar finding-ul rămâne ancora principală pentru context, dovadă și monitoring.
               </p>
             </div>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -605,6 +559,7 @@ export function ResolvePageSurface() {
           </div>
           <RemediationBoard
             tasks={cockpit.tasks}
+            findings={findings}
             activeFilter={taskFilter}
             onFilterChange={setTaskFilter}
             onMarkDone={cockpitActions.handleMarkDone}

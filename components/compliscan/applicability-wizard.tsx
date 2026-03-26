@@ -47,6 +47,7 @@ import { useTrackEvent } from "@/lib/client/use-track-event"
 
 export type ApplicabilityWizardStep =
   | "cui"
+  | "checking"
   | "sector"
   | "size"
   | "ai"
@@ -99,6 +100,7 @@ const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
 
 const WIZARD_SEQUENCE: ApplicabilityWizardStep[] = [
   "cui",
+  "checking",
   "sector",
   "size",
   "ai",
@@ -109,6 +111,7 @@ const WIZARD_SEQUENCE: ApplicabilityWizardStep[] = [
 
 const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
   cui: "Profil firmă",
+  checking: "Compli verifică",
   sector: "Sector de activitate",
   size: "Dimensiunea firmei",
   ai: "Utilizare AI",
@@ -116,6 +119,14 @@ const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
   intake: "Confirmări finale",
   done: "Raport inițial pregătit",
 }
+
+const CHECKING_MESSAGES = [
+  "Verificăm datele firmei",
+  "Analizăm website-ul",
+  "Căutăm semnale relevante",
+  "Identificăm ce ți se aplică",
+  "Pregătim snapshot-ul",
+] as const
 
 export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSelection }: Props) {
   const { track, trackOnce } = useTrackEvent()
@@ -151,10 +162,47 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
   const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
   const [prefillInvoiceStatus, setPrefillInvoiceStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [checkingMessageIndex, setCheckingMessageIndex] = useState(0)
+  const checkingPrefillDone = useRef(false)
 
   useEffect(() => {
     onStepChange?.(step)
   }, [onStepChange, step])
+
+  // "Compli verifică" step: animate messages + run prefill in parallel
+  useEffect(() => {
+    if (step !== "checking") return
+    setCheckingMessageIndex(0)
+    checkingPrefillDone.current = false
+
+    // Start prefill API call
+    void runPrefillCheck().then(() => {
+      checkingPrefillDone.current = true
+    })
+
+    // Animate through messages (800ms each, last one waits for API)
+    let idx = 0
+    const interval = setInterval(() => {
+      idx++
+      if (idx >= CHECKING_MESSAGES.length - 1) {
+        // On last message, wait for prefill to complete
+        setCheckingMessageIndex(idx)
+        clearInterval(interval)
+        const waitForPrefill = setInterval(() => {
+          if (checkingPrefillDone.current) {
+            clearInterval(waitForPrefill)
+            // Short pause on last message, then advance
+            setTimeout(() => setStep("sector"), 600)
+          }
+        }, 100)
+        return
+      }
+      setCheckingMessageIndex(idx)
+    }, 800)
+
+    return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
 
   const profileSnapshot = buildProfileSnapshot(values)
   const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
@@ -170,8 +218,10 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   const visibleQuestionCount = INTAKE_QUESTIONS.length + visibleConditionalQuestions.length
   const answeredQuestionCount = Math.max(0, visibleQuestionCount - unansweredQuestions.length)
   const currentStepIndex = WIZARD_SEQUENCE.indexOf(step)
-  const progressSteps = WIZARD_SEQUENCE.length - 1
-  const progressPercent = step === "done" ? 100 : ((currentStepIndex + 1) / progressSteps) * 100
+  // "checking" is a visual transition, not a real step — use CUI index for progress
+  const effectiveStepIndex = step === "checking" ? WIZARD_SEQUENCE.indexOf("cui") : currentStepIndex
+  const progressSteps = WIZARD_SEQUENCE.length - 2 // exclude "checking" from count
+  const progressPercent = step === "done" ? 100 : ((effectiveStepIndex + 1) / progressSteps) * 100
 
   function goBack() {
     setError(null)
@@ -181,8 +231,18 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
       return
     }
 
-    if (step === "cui") {
+    if (step === "cui" || step === "checking") {
+      if (step === "checking") {
+        setStep("cui")
+        return
+      }
       onBackToModeSelection?.()
+      return
+    }
+
+    // Skip "checking" when going back from "sector"
+    if (step === "sector") {
+      setStep("cui")
       return
     }
 
@@ -201,6 +261,45 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
     setIntakeAnswers(nextAnswers)
     setError(null)
     setStep("intake")
+  }
+
+  async function runPrefillCheck() {
+    const trimmedCui = values.cui.trim()
+    const trimmedWebsite = values.website.trim()
+    const validCui = trimmedCui ? isValidCui(trimmedCui) : false
+    const validWebsite = trimmedWebsite ? isValidWebsiteInput(trimmedWebsite) : false
+
+    setPrefillLoading(true)
+    setPrefillError(null)
+    try {
+      const res = await fetch("/api/org/profile/prefill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cui: validCui ? trimmedCui : undefined,
+          website: validWebsite ? trimmedWebsite : undefined,
+        }),
+      })
+
+      if (!res.ok) {
+        setOrgPrefill(null)
+        setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
+        return
+      }
+
+      const data = (await res.json()) as ProfilePrefillResponse
+      setOrgPrefill(data.prefill)
+      if (!data.prefill && (trimmedCui || trimmedWebsite)) {
+        setPrefillError("Nu am găsit suficiente semnale utile din CUI, website sau datele deja existente. Continuăm manual.")
+      } else {
+        setPrefillError(null)
+      }
+    } catch {
+      setOrgPrefill(null)
+      setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
+    } finally {
+      setPrefillLoading(false)
+    }
   }
 
   async function handleCuiContinue() {
@@ -225,40 +324,8 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
       return
     }
 
-    setPrefillLoading(true)
-    setPrefillError(null)
-    try {
-      const res = await fetch("/api/org/profile/prefill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cui: validCui ? trimmedCui : undefined,
-          website: validWebsite ? trimmedWebsite : undefined,
-        }),
-      })
-
-      if (!res.ok) {
-        setOrgPrefill(null)
-        setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
-        setStep("sector")
-        return
-      }
-
-      const data = (await res.json()) as ProfilePrefillResponse
-      setOrgPrefill(data.prefill)
-      if (!data.prefill && (trimmedCui || trimmedWebsite)) {
-        setPrefillError("Nu am găsit suficiente semnale utile din CUI, website sau datele deja existente. Continuăm manual.")
-      } else {
-        setPrefillError(null)
-      }
-      setStep("sector")
-    } catch {
-      setOrgPrefill(null)
-      setPrefillError("Nu am putut pregăti prefill-ul automat acum. Continuăm fără el.")
-      setStep("sector")
-    } finally {
-      setPrefillLoading(false)
-    }
+    // Go to visual "Compli verifică" sequence
+    setStep("checking")
   }
 
   async function handleCuiBlur() {
@@ -341,7 +408,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               </p>
             </div>
           </div>
-          {(step !== "cui" || onBackToModeSelection) && step !== "done" ? (
+          {(step !== "cui" || onBackToModeSelection) && step !== "done" && step !== "checking" ? (
             <Button
               type="button"
               variant="outline"
@@ -477,6 +544,45 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                 {prefillLoading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
                 Continuă
               </Button>
+            </div>
+          )}
+
+          {step === "checking" && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="relative mb-8">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-eos-primary/20 bg-eos-primary/[0.06]">
+                  <Loader2 className="size-7 animate-spin text-eos-primary" strokeWidth={1.5} />
+                </div>
+                <Sparkles className="absolute -right-1 -top-1 size-5 text-eos-primary animate-pulse" strokeWidth={2} />
+              </div>
+              <p className="mb-2 text-lg font-semibold text-eos-text">Compli verifică</p>
+              <p className="mb-8 text-sm text-eos-text-muted">
+                Așteptăm doar câteva secunde
+              </p>
+              <div className="w-full max-w-xs space-y-3">
+                {CHECKING_MESSAGES.map((msg, i) => (
+                  <div
+                    key={msg}
+                    className={[
+                      "flex items-center gap-3 rounded-eos-md px-4 py-2.5 text-sm transition-all duration-500",
+                      i < checkingMessageIndex
+                        ? "text-eos-success"
+                        : i === checkingMessageIndex
+                          ? "text-eos-primary font-medium"
+                          : "text-eos-text-muted/40",
+                    ].join(" ")}
+                  >
+                    {i < checkingMessageIndex ? (
+                      <CheckCircle2 className="size-4 shrink-0" strokeWidth={2} />
+                    ) : i === checkingMessageIndex ? (
+                      <Loader2 className="size-4 shrink-0 animate-spin" strokeWidth={2} />
+                    ) : (
+                      <div className="size-4 shrink-0 rounded-full border border-current opacity-30" />
+                    )}
+                    {msg}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

@@ -62,7 +62,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.home,
     icon: Home,
     matchers: [...dashboardRouteGroups.home],
-    description: "stare, urgențe și pasul curent",
+    description: "snapshot: ce ai, ce am găsit, ce faci acum",
   },
   {
     id: "scan",
@@ -70,7 +70,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.scan,
     icon: Scan,
     matchers: [...dashboardRouteGroups.scan],
-    description: "surse, rezultate și istoric",
+    description: "intake: surse noi, analiză, findings",
   },
   {
     id: "resolve",
@@ -78,7 +78,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.resolve,
     icon: Flag,
     matchers: [...dashboardRouteGroups.resolve],
-    description: "findings, drift și acțiuni",
+    description: "execuție: cockpit, dovadă, dosar",
   },
   {
     id: "calendar",
@@ -86,7 +86,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.calendar,
     icon: CalendarClock,
     matchers: [dashboardRoutes.calendar],
-    description: "deadlines DSAR, NIS2, Vendor",
+    description: "deadlines și reverificări",
   },
   {
     id: "reports",
@@ -94,7 +94,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.reports,
     icon: FileSearch,
     matchers: [...dashboardRouteGroups.reports],
-    description: "dovezi, politici și export",
+    description: "dosar: dovezi, politici, export",
   },
   {
     id: "settings",
@@ -102,7 +102,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.settings,
     icon: Settings,
     matchers: [...dashboardRouteGroups.settings],
-    description: "workspace, acces și operațional",
+    description: "workspace și acces",
   },
 ] as const
 
@@ -113,7 +113,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.home,
     icon: Home,
     matchers: [...dashboardRouteGroups.home],
-    description: "stare simplificată și pasul curent",
+    description: "snapshot: starea firmei tale acum",
   },
   {
     id: "scan",
@@ -121,7 +121,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.scan,
     icon: Scan,
     matchers: [...dashboardRouteGroups.scan],
-    description: "upload și analiză",
+    description: "intake: încarcă surse noi",
   },
   {
     id: "resolve",
@@ -129,7 +129,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.resolve,
     icon: Flag,
     matchers: [...dashboardRouteGroups.resolve],
-    description: "finding-uri și task-uri",
+    description: "rezolvă findings pas cu pas",
   },
   {
     id: "calendar",
@@ -137,7 +137,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.calendar,
     icon: CalendarClock,
     matchers: [dashboardRoutes.calendar],
-    description: "deadlines DSAR, NIS2, Vendor",
+    description: "deadlines și reverificări",
   },
   {
     id: "documente",
@@ -153,7 +153,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.reports,
     icon: FileSearch,
     matchers: [...dashboardRouteGroups.reports],
-    description: "export simplificat",
+    description: "dosar: dovezi și export",
   },
   {
     id: "settings",
@@ -161,7 +161,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.settings,
     icon: Settings,
     matchers: [...dashboardRouteGroups.settings],
-    description: "org și plan",
+    description: "workspace și acces",
   },
 ] as const
 

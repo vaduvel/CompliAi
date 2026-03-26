@@ -20,6 +20,11 @@ import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { NextBestAction } from "@/components/compliscan/next-best-action"
 import { SiteScanCard } from "@/components/compliscan/site-scan-card"
+import type {
+  ComplianceDriftRecord,
+  ComplianceEvent,
+  GeneratedDocumentRecord,
+} from "@/lib/compliance/types"
 
 export default function DashboardPage() {
   const runtime = useDashboardRuntime()
@@ -120,6 +125,11 @@ export default function DashboardPage() {
     state.scans.length > 0 || state.scannedDocuments > 0 || state.validatedBaselineSnapshotId
   )
   const activeRiskCount = openAlerts.length + activeDrifts.length
+  const activityFeedItems = buildActivityFeedItems({
+    events: state.events,
+    activeDrifts,
+    generatedDocuments: state.generatedDocuments,
+  })
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"
@@ -135,12 +145,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5 sm:space-y-8 pb-20 sm:pb-0" role="main" aria-labelledby="dashboard-title">
       <PageIntro
-        eyebrow="Acasă"
-        title={isSolo ? "Starea actuală a firmei tale" : "Starea actuala a conformitatii tale"}
+        eyebrow="Snapshot"
+        title={isSolo ? "Starea firmei tale acum" : "Starea conformității acum"}
         description={
           isSolo
-            ? "Vezi pe scurt unde există risc și pornește următorul pas concret fără să navighezi prin suprafețe specializate."
-            : "Vezi rapid starea curenta si porneste urmatorul pas corect."
+            ? "Ce am găsit, ce faci acum și ce ai acumulat. Pornește rezolvarea din butonul de mai jos."
+            : "Ce ți se aplică, ce e deschis și unde e nevoie de acțiune. Rezolvarea pornește de aici."
         }
         badges={
           <>
@@ -218,7 +228,13 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Summary strip — compact health ─────────────────────────────────── */}
+      {state.orgProfile && (
+        <section aria-label="Activitate și monitorizare">
+          <ActivityMonitorCard items={activityFeedItems} />
+        </section>
+      )}
+
+      {/* ── Compact snapshot strip ─────────────────────────────────────────── */}
       <section aria-label="Sumar rapid de conformitate">
         <div className="grid grid-cols-2 divide-x divide-y divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-5 sm:divide-y-0">
           <SummaryMetric
@@ -240,121 +256,122 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Benchmark sector widget ─────────────────────────────────────────── */}
-      {benchmark && state.orgProfile && (
-        <section aria-label="Comparatie sector">
-          <div className="flex items-center gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-            <BarChart3 className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-eos-text">
-                Ești în top{" "}
-                <span className={benchmark.percentil <= 33 ? "text-eos-success" : benchmark.percentil <= 66 ? "text-eos-warning" : "text-eos-error"}>
-                  {benchmark.percentil}%
-                </span>{" "}
-                din firme din sectorul{" "}
-                <span className="font-semibold">{benchmark.sector}</span>
-              </p>
-              <p className="mt-0.5 text-xs text-eos-text-muted">
-                Media sectorului: {benchmark.medie}% · Scorul tău: {data.summary.score}% · Bazat pe {benchmark.nrFirme} firme similare
-              </p>
-            </div>
-            <Badge
-              className={`shrink-0 ${
-                data.summary.score >= benchmark.medie
-                  ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
-                  : "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
-              }`}
-            >
-              {data.summary.score >= benchmark.medie ? "Peste medie" : "Sub medie"}
-            </Badge>
-          </div>
-        </section>
-      )}
-
-      {/* ── R2 — Executive summary one-pager ─────────────────────────────────── */}
+      {/* ── Secondary cards — below the fold, collapsible ─────────────────── */}
       {state.orgProfile && (
-        <section aria-label="Rezumat executiv">
-          <Card className="border-eos-border bg-eos-surface">
-            <div className="px-5 py-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
-                  <p className="text-sm font-semibold text-eos-text">Rezumat executiv</p>
-                  <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Board / Investitor</Badge>
+        <details className="group">
+          <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-3.5 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
+            <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+            Semnale, benchmark și instrumente
+            <span className="ml-auto text-xs text-eos-text-muted">
+              {benchmark ? `Top ${benchmark.percentil}% sector · ` : ""}
+              {openAlerts.length > 0 ? `${openAlerts.length} alerte · ` : ""}
+              {state.efacturaConnected ? "e-Factura activ" : "e-Factura inactiv"}
+            </span>
+          </summary>
+
+          <div className="mt-4 space-y-5">
+            {/* Benchmark sector widget */}
+            {benchmark && (
+              <div className="flex items-center gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+                <BarChart3 className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-eos-text">
+                    Ești în top{" "}
+                    <span className={benchmark.percentil <= 33 ? "text-eos-success" : benchmark.percentil <= 66 ? "text-eos-warning" : "text-eos-error"}>
+                      {benchmark.percentil}%
+                    </span>{" "}
+                    din firme din sectorul{" "}
+                    <span className="font-semibold">{benchmark.sector}</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-eos-text-muted">
+                    Media sectorului: {benchmark.medie}% · Scorul tău: {data.summary.score}% · Bazat pe {benchmark.nrFirme} firme similare
+                  </p>
                 </div>
-                <Link
-                  href={dashboardRoutes.reports}
-                  className="flex items-center gap-1 text-xs text-eos-primary hover:underline"
+                <Badge
+                  className={`shrink-0 ${
+                    data.summary.score >= benchmark.medie
+                      ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+                      : "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
+                  }`}
                 >
-                  <Download className="size-3" />
-                  Descarcă PDF
-                </Link>
+                  {data.summary.score >= benchmark.medie ? "Peste medie" : "Sub medie"}
+                </Badge>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <ExecMetric label="Scor conformitate" value={`${data.summary.score}%`} good={data.summary.score >= 70} />
-                <ExecMetric label="Acțiuni deschise" value={String(openTasks.length)} good={openTasks.length === 0} />
-                <ExecMetric label="Riscuri active" value={String(activeRiskCount)} good={activeRiskCount === 0} />
-                <ExecMetric label="Documente auditate" value={String(state.scans.length)} good={state.scans.length > 0} />
-              </div>
-              {openTasks.slice(0, 3).length > 0 && (
-                <div className="mt-3 space-y-1">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-eos-text-muted">Priorități cheie</p>
-                  {openTasks.slice(0, 3).map((t) => (
-                    <div key={t.id} className="flex items-center gap-2 text-xs text-eos-text-muted">
-                      <span className={`size-1.5 rounded-full shrink-0 ${t.priority === "P1" ? "bg-eos-error" : t.priority === "P2" ? "bg-eos-warning" : "bg-eos-text-muted"}`} />
-                      {t.title}
-                    </div>
-                  ))}
+            )}
+
+            {/* Executive summary one-pager */}
+            <Card className="border-eos-border bg-eos-surface">
+              <div className="px-5 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
+                    <p className="text-sm font-semibold text-eos-text">Rezumat executiv</p>
+                    <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Board / Investitor</Badge>
+                  </div>
+                  <Link
+                    href={dashboardRoutes.reports}
+                    className="flex items-center gap-1 text-xs text-eos-primary hover:underline"
+                  >
+                    <Download className="size-3" />
+                    Descarcă PDF
+                  </Link>
                 </div>
-              )}
-            </div>
-          </Card>
-        </section>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <ExecMetric label="Scor conformitate" value={`${data.summary.score}%`} good={data.summary.score >= 70} />
+                  <ExecMetric label="Acțiuni deschise" value={String(openTasks.length)} good={openTasks.length === 0} />
+                  <ExecMetric label="Riscuri active" value={String(activeRiskCount)} good={activeRiskCount === 0} />
+                  <ExecMetric label="Documente auditate" value={String(state.scans.length)} good={state.scans.length > 0} />
+                </div>
+                {openTasks.slice(0, 3).length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-eos-text-muted">Priorități cheie</p>
+                    {openTasks.slice(0, 3).map((t) => (
+                      <div key={t.id} className="flex items-center gap-2 text-xs text-eos-text-muted">
+                        <span className={`size-1.5 rounded-full shrink-0 ${t.priority === "P1" ? "bg-eos-error" : t.priority === "P2" ? "bg-eos-warning" : "bg-eos-text-muted"}`} />
+                        {t.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Calendar widget */}
+            <CalendarWidget />
+
+            {/* Pay Transparency 2026 */}
+            <PayTransparencyWidget employeeCount={state.orgProfile.employeeCount} />
+
+            {/* e-Factura health card */}
+            <EFacturaHealthCard
+              connected={state.efacturaConnected}
+              signalsCount={state.efacturaSignalsCount}
+            />
+
+            {/* DSAR countdown card */}
+            <DsarCountdownCard />
+
+            {/* Site scan */}
+            <SiteScanCard
+              existingScan={state.siteScan ?? null}
+              defaultUrl={state.orgProfile?.website ?? undefined}
+            />
+
+            {/* NIS2 Applicability Gate */}
+            <Nis2ApplicabilityGate
+              assessmentDone={nis2AssessmentDone}
+              score={nis2Score}
+              entityType={nis2EntityType}
+              urgentIncident={nis2UrgentIncident}
+            />
+
+            {/* Agent status */}
+            <AgentStatusWidget />
+          </div>
+        </details>
       )}
 
-      {/* ── Calendar widget (MULT C) ─────────────────────────────────────────── */}
-      {state.orgProfile && <CalendarWidget />}
-
-      {/* ── Pay Transparency 2026 — RULE PACK ────────────────────────────────── */}
-      {state.orgProfile && (
-        <PayTransparencyWidget employeeCount={state.orgProfile.employeeCount} />
-      )}
-
-      {/* ── e-Factura health card ────────────────────────────────────────────── */}
-      {state.orgProfile && (
-        <EFacturaHealthCard
-          connected={state.efacturaConnected}
-          signalsCount={state.efacturaSignalsCount}
-        />
-      )}
-
-      {/* ── DSAR countdown card ───────────────────────────────────────────────── */}
-      {state.orgProfile && <DsarCountdownCard />}
-
-      {/* ── Site scan — Multiplicator A onboarding ───────────────────────────── */}
-      {state.orgProfile && (
-        <section aria-label="Scanare site">
-          <SiteScanCard
-            existingScan={state.siteScan ?? null}
-            defaultUrl={state.orgProfile?.website ?? undefined}
-          />
-        </section>
-      )}
-
-      {/* ── NIS2 Applicability Gate ───────────────────────────────────────────── */}
-      {state.orgProfile && (
-        <Nis2ApplicabilityGate
-          assessmentDone={nis2AssessmentDone}
-          score={nis2Score}
-          entityType={nis2EntityType}
-          urgentIncident={nis2UrgentIncident}
-        />
-      )}
-
-      {/* ── Agent status ─────────────────────────────────────────────────────── */}
-      {state.orgProfile && <AgentStatusWidget />}
-
-      {/* ── Detailed breakdown — under fold ──────────────────────────────────── */}
+      {/* ── Detailed breakdown — framework readiness ─────────────────────────── */}
       <details className="group">
         <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
           <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
@@ -767,6 +784,187 @@ function SummaryMetric({
         ) : null}
       </div>
     </div>
+  )
+}
+
+type ActivityFeedItem = {
+  id: string
+  eyebrow: string
+  title: string
+  detail: string
+  dateISO: string
+  tone: "default" | "success" | "warning"
+  href?: string
+}
+
+function buildActivityFeedItems({
+  events,
+  activeDrifts,
+  generatedDocuments,
+}: {
+  events: ComplianceEvent[]
+  activeDrifts: ComplianceDriftRecord[]
+  generatedDocuments: GeneratedDocumentRecord[]
+}) {
+  const items: ActivityFeedItem[] = []
+  const now = Date.now()
+
+  for (const doc of generatedDocuments) {
+    if (doc.approvalStatus !== "approved_as_evidence") continue
+    items.push({
+      id: `doc-saved-${doc.id}`,
+      eyebrow: "Ți-am salvat",
+      title: `${doc.title} este în dosar`,
+      detail:
+        doc.approvedByEmail
+          ? `Aprobat de ${doc.approvedByEmail} și păstrat în Vault pentru audit și handoff.`
+          : "Documentul aprobat rămâne în Vault pentru audit și handoff.",
+      dateISO: doc.approvedAtISO ?? doc.generatedAtISO,
+      tone: "success",
+      href: dashboardRoutes.auditorVault,
+    })
+
+    if (doc.nextReviewDateISO) {
+      const reviewAt = new Date(doc.nextReviewDateISO).getTime()
+      const withinWindow = Number.isFinite(reviewAt) && reviewAt - now <= 45 * 24 * 60 * 60 * 1000
+      if (withinWindow) {
+        items.push({
+          id: `doc-review-${doc.id}`,
+          eyebrow: "Urmează reverificare",
+          title: `${doc.title} cere review`,
+          detail: `Review recomandat la ${new Date(doc.nextReviewDateISO).toLocaleDateString("ro-RO")}. Dacă apare drift, finding-ul se poate redeschide pe aceeași urmă.`,
+          dateISO: doc.nextReviewDateISO,
+          tone: "warning",
+          href: dashboardRoutes.auditorVault,
+        })
+      }
+    }
+  }
+
+  for (const drift of activeDrifts.slice(0, 4)) {
+    items.push({
+      id: `drift-${drift.id}`,
+      eyebrow: "Am detectat",
+      title: drift.summary,
+      detail: drift.nextAction ?? drift.impactSummary ?? "Verifică schimbarea și decide dacă revine în execuție.",
+      dateISO: drift.detectedAtISO,
+      tone: drift.severity === "critical" || drift.severity === "high" ? "warning" : "default",
+      href: dashboardRoutes.drifts,
+    })
+  }
+
+  for (const event of events.slice(0, 8)) {
+    const eyebrow =
+      event.entityType === "drift"
+        ? "Am verificat"
+        : event.entityType === "task"
+          ? "Am validat"
+          : event.entityType === "finding"
+            ? "Am actualizat"
+            : "Activitate"
+    const href =
+      event.entityType === "drift"
+        ? dashboardRoutes.drifts
+        : event.entityType === "task" || event.entityType === "finding"
+          ? dashboardRoutes.resolve
+          : dashboardRoutes.reports
+
+    items.push({
+      id: `event-${event.id}`,
+      eyebrow,
+      title: event.message,
+      detail:
+        event.actorLabel
+          ? `${event.actorLabel}${event.actorRole ? ` · ${event.actorRole}` : ""}`
+          : "Activitate salvată în logul operațional.",
+      dateISO: event.createdAtISO,
+      tone:
+        event.entityType === "drift"
+          ? "warning"
+          : event.type.includes("validated") || event.type.includes("evidence")
+            ? "success"
+            : "default",
+      href,
+    })
+  }
+
+  return items
+    .sort((left, right) => right.dateISO.localeCompare(left.dateISO))
+    .slice(0, 6)
+}
+
+function ActivityMonitorCard({ items }: { items: ActivityFeedItem[] }) {
+  return (
+    <Card className="border-eos-border bg-eos-surface">
+      <div className="px-5 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">Compli lucrează pentru tine</p>
+            <p className="mt-1 text-xs text-eos-text-muted">
+              Aici vezi ce am detectat, ce a intrat la dosar și ce urmează să reverificăm.
+            </p>
+          </div>
+          <Link
+            href={dashboardRoutes.auditLog}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
+          >
+            Audit log
+            <ArrowRight className="size-3.5" strokeWidth={2} />
+          </Link>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="mt-4 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-4 text-sm text-eos-text-muted">
+            Monitorizarea este activă. Primele verificări, dovezi salvate și reverificări vor apărea aici.
+          </div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {items.map((item) => {
+              const toneClass =
+                item.tone === "success"
+                  ? "bg-eos-success"
+                  : item.tone === "warning"
+                    ? "bg-eos-warning"
+                    : "bg-eos-primary"
+
+              const body = (
+                <div className="flex items-start gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3 transition-colors hover:bg-eos-surface-variant">
+                  <span className={`mt-1.5 size-2 shrink-0 rounded-full ${toneClass}`} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                        {item.eyebrow}
+                      </p>
+                      <span className="text-[11px] text-eos-text-muted">
+                        {new Date(item.dateISO).toLocaleString("ro-RO", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-medium text-eos-text">{item.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-eos-text-muted">{item.detail}</p>
+                  </div>
+                  {item.href ? (
+                    <ArrowRight className="mt-1 size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                  ) : null}
+                </div>
+              )
+
+              return item.href ? (
+                <Link key={item.id} href={item.href} className="block">
+                  {body}
+                </Link>
+              ) : (
+                <div key={item.id}>{body}</div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </Card>
   )
 }
 

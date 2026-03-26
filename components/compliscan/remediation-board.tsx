@@ -1,18 +1,25 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { Badge } from "@/components/evidence-os/Badge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { TaskCard } from "@/components/compliscan/task-card"
 import type { CockpitTask, TaskPriority } from "@/components/compliscan/types"
-import type { TaskEvidenceKind } from "@/lib/compliance/types"
+import type { ScanFinding, TaskEvidenceKind } from "@/lib/compliance/types"
+import {
+  getFindingNarrative,
+  getFindingStatusPresentation,
+} from "@/lib/compliscan/finding-cockpit"
 
 type FilterValue = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 
 type RemediationBoardProps = {
   tasks: CockpitTask[]
+  findings?: ScanFinding[]
   activeFilter: FilterValue
   highlightedTaskId?: string | null
   onFilterChange: (value: FilterValue) => void
@@ -44,6 +51,7 @@ const filterGroups: Array<{ label: string; values: FilterValue[] }> = [
 
 export function RemediationBoard({
   tasks,
+  findings = [],
   activeFilter,
   highlightedTaskId,
   onFilterChange,
@@ -53,6 +61,7 @@ export function RemediationBoard({
   onExport,
 }: RemediationBoardProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const findingById = new Map(findings.map((finding) => [finding.id, finding]))
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -101,37 +110,28 @@ export function RemediationBoard({
 
   return (
     <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="gap-4 border-b border-eos-border pb-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-lg text-eos-text">Board de remediere</CardTitle>
+      <CardHeader className="gap-3 border-b border-eos-border pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-eos-text-muted uppercase tracking-[0.12em]">
+                Task-uri de suport
+              </CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
-                {visibleTasks.length} vizibile
+                {openCount} deschise
               </Badge>
             </div>
-            <p className="text-sm text-eos-text-muted">
-              Lucrezi task-ul, atașezi dovada și validezi. Filtrele rămân secundare.
+            <p className="text-xs text-eos-text-muted">
+              Sub-pași din findings. Rezolvarea merge prin cockpitul fiecărui caz.
             </p>
           </div>
 
           {openCount > 0 && (
-            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3 xl:min-w-[42rem]">
-              <summary className="cursor-pointer list-none">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                      Filtre și grupare
-                    </p>
-                    <p className="mt-1 text-sm text-eos-text">
-                      Filtru activ: {activeFilterLabel}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-xs text-eos-text-muted">Alege</span>
-                </div>
+            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
+              <summary className="cursor-pointer list-none text-xs text-eos-text-muted">
+                Filtru: {activeFilterLabel}
               </summary>
-
-              <div className="mt-3 space-y-3">
+              <div className="mt-2 space-y-2">
                 {filterGroups.map((group) => (
                   <FilterCluster
                     key={group.label}
@@ -205,6 +205,7 @@ export function RemediationBoard({
             description="Task-uri fara dovada atasata. Le rezolvi primele ca sa nu blocheze inchiderea si exportul."
             tone="danger"
             tasks={evidenceBlockedTasks}
+            findingById={findingById}
             highlightedTaskId={highlightedTaskId}
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
@@ -220,6 +221,7 @@ export function RemediationBoard({
             description="Task-uri cu prioritate maxima care au deja context suficient ca sa fie inchise imediat."
             tone="warning"
             tasks={urgentTasks}
+            findingById={findingById}
             highlightedTaskId={highlightedTaskId}
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
@@ -235,6 +237,7 @@ export function RemediationBoard({
             description="Task-uri pe care le poti inchide rapid daca dovada e pregatita."
             tone="info"
             tasks={rapidTasks}
+            findingById={findingById}
             highlightedTaskId={highlightedTaskId}
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
@@ -250,6 +253,7 @@ export function RemediationBoard({
             description="Task-uri care cer coordonare, schimbare persistenta sau dovada mai riguroasa."
             tone="warning"
             tasks={structuralTasks}
+            findingById={findingById}
             highlightedTaskId={highlightedTaskId}
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
@@ -271,6 +275,10 @@ export function RemediationBoard({
                 />
               )}
               <div className="min-w-0 flex-1">
+                <RelatedFindingAnchor
+                  task={task}
+                  finding={getPrimaryRelatedFinding(task, findingById)}
+                />
                 <TaskCard
                   task={task}
                   highlighted={highlightedTaskId === task.id}
@@ -331,6 +339,7 @@ function TaskGroup({
   description,
   tone,
   tasks,
+  findingById,
   highlightedTaskId,
   selectedIds,
   onToggleSelect,
@@ -342,6 +351,7 @@ function TaskGroup({
   description: string
   tone: "info" | "warning" | "danger"
   tasks: CockpitTask[]
+  findingById: Map<string, ScanFinding>
   highlightedTaskId?: string | null
   selectedIds?: Set<string>
   onToggleSelect?: (id: string) => void
@@ -381,6 +391,10 @@ function TaskGroup({
             />
           )}
           <div className="min-w-0 flex-1">
+            <RelatedFindingAnchor
+              task={task}
+              finding={getPrimaryRelatedFinding(task, findingById)}
+            />
             <TaskCard
               task={task}
               highlighted={highlightedTaskId === task.id}
@@ -391,6 +405,65 @@ function TaskGroup({
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function getPrimaryRelatedFinding(task: CockpitTask, findingById: Map<string, ScanFinding>) {
+  for (const findingId of task.relatedFindingIds) {
+    const finding = findingById.get(findingId)
+    if (finding) return finding
+  }
+
+  return null
+}
+
+function RelatedFindingAnchor({
+  task,
+  finding,
+}: {
+  task: CockpitTask
+  finding: ScanFinding | null
+}) {
+  if (!finding) return null
+
+  const status = getFindingStatusPresentation(finding.findingStatus)
+  const narrative = getFindingNarrative(finding)
+
+  return (
+    <div className="mb-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+              Caz asociat
+            </p>
+            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
+            <Badge variant={status.variant} className="normal-case tracking-normal">
+              {status.label}
+            </Badge>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-eos-text">{finding.title}</p>
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+              {narrative.action}
+            </p>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <Link
+            href={`/dashboard/resolve/${finding.id}`}
+            className="inline-flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
+          >
+            Deschide cockpitul
+          </Link>
+        </div>
+      </div>
+
+      <p className="mt-2 text-[11px] text-eos-text-muted">
+        Task-ul <span className="font-medium text-eos-text">{task.title}</span> rămâne sub acest finding și merge în aceeași urmă de dovadă, aprobare și monitorizare.
+      </p>
     </div>
   )
 }

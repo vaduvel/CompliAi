@@ -1,18 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
-  ArrowRight,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   FileText,
   Scale,
-  Eye,
-  Clock,
 } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -23,12 +19,25 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
-import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
+import type { ScanFinding } from "@/lib/compliance/types"
+import {
+  FindingDossierSuccessCard,
+  FindingExecutionCard,
+  FindingHeroAction,
+  FindingNarrativeCard,
+} from "@/components/compliscan/finding-cockpit-shared"
+import {
+  getFindingAgeLabel,
+  isFindingResolvedLike,
+  getFindingStatusPresentation,
+} from "@/lib/compliscan/finding-cockpit"
+import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
+import type { DocumentType } from "@/lib/server/document-generator"
 
 // Extended finding type — automation fields are optional so the page
 // compiles regardless of which branch supplies the data.
 type FindingDetail = ScanFinding & {
-  findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
+  findingStatus?: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   findingStatusUpdatedAtISO?: string
   confidenceScore?: number
   requiresHumanReview?: boolean
@@ -42,6 +51,10 @@ type LinkedGeneratedDocument = {
   title: string
   generatedAtISO: string
   approvalStatus?: "draft" | "approved_as_evidence"
+  approvedAtISO?: string
+  approvedByEmail?: string
+  expiresAtISO?: string
+  nextReviewDateISO?: string
 }
 
 type FindingDetailResponse = {
@@ -51,41 +64,11 @@ type FindingDetailResponse = {
   feedbackMessage?: string
 }
 
-// ── Resolution Steps ──────────────────────────────────────────────────────────
-
-const RESOLUTION_STEPS: Array<{ key: keyof FindingResolution; label: string; icon: React.ElementType }> = [
-  { key: "problem",         label: "Problemă detectată",      icon: AlertTriangle },
-  { key: "impact",          label: "Impact",                   icon: Scale },
-  { key: "action",          label: "Acțiune recomandată",      icon: FileText },
-  { key: "generatedAsset",  label: "Asset generat",            icon: FileText },
-  { key: "humanStep",       label: "Pas uman obligatoriu",     icon: Eye },
-  { key: "closureEvidence", label: "Dovadă de închidere",      icon: CheckCircle2 },
-  { key: "revalidation",    label: "Revalidare",               icon: Clock },
-]
-
-// ── Status helpers ────────────────────────────────────────────────────────────
-
-type FindingStatus = "open" | "confirmed" | "dismissed" | "resolved"
-
-const STATUS_CONFIG: Record<FindingStatus, { label: string; variant: "default" | "success" | "warning" | "destructive" | "secondary" }> = {
-  open:      { label: "Deschis",   variant: "warning" },
-  confirmed: { label: "Confirmat", variant: "default" },
-  dismissed: { label: "Respins",   variant: "secondary" },
-  resolved:  { label: "Rezolvat",  variant: "success" },
-}
-
-function ageLabel(iso: string): string {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
-  if (days === 0) return "azi"
-  if (days === 1) return "ieri"
-  if (days < 30) return `acum ${days} zile`
-  return `acum ${Math.floor(days / 30)} luni`
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function FindingDetailPage() {
   const params = useParams<{ findingId: string }>()
+  const searchParams = useSearchParams()
   const [finding, setFinding] = useState<FindingDetail | null>(null)
   const [linkedGeneratedDocument, setLinkedGeneratedDocument] = useState<LinkedGeneratedDocument | null>(null)
   const [documentFlowState, setDocumentFlowState] = useState<
@@ -95,7 +78,24 @@ export default function FindingDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
+  const [generatorOpen, setGeneratorOpen] = useState(false)
   const { reloadDashboard } = useCockpitMutations()
+
+  const refetchFinding = useCallback(() => {
+    if (!params.findingId) return
+    fetch(`/api/findings/${encodeURIComponent(params.findingId)}`, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error("Eroare server.")
+        return r.json()
+      })
+      .then((data: FindingDetailResponse) => {
+        setFinding(data.finding)
+        setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
+        setDocumentFlowState(data.documentFlowState ?? "not_required")
+      })
+      .catch(() => {})
+    void reloadDashboard()
+  }, [params.findingId, reloadDashboard])
 
   useEffect(() => {
     if (!params.findingId) return
@@ -126,7 +126,13 @@ export default function FindingDetailPage() {
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
       const payload = (await res.json()) as FindingDetailResponse
-      setFinding(payload.finding ?? { ...finding, findingStatus: status, findingStatusUpdatedAtISO: new Date().toISOString() })
+      setFinding(
+        payload.finding ?? {
+          ...finding,
+          findingStatus: status === "resolved" ? "under_monitoring" : status,
+          findingStatusUpdatedAtISO: new Date().toISOString(),
+        }
+      )
       setLinkedGeneratedDocument(payload.linkedGeneratedDocument ?? null)
       setDocumentFlowState(payload.documentFlowState ?? "not_required")
       setStatusFeedback(payload.feedbackMessage ?? null)
@@ -141,14 +147,21 @@ export default function FindingDetailPage() {
   if (loading) return <LoadingScreen variant="section" />
   if (error || !finding) return <ErrorScreen message={error ?? "Finding inexistent."} variant="section" />
 
-  const status = (finding.findingStatus ?? "open") as FindingStatus
-  const statusCfg = STATUS_CONFIG[status]
+  const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
+  const statusCfg = getFindingStatusPresentation(finding.findingStatus)
+  const dossierMomentVisible =
+    searchParams.get("success") === "dossier" &&
+    isFindingResolvedLike(status) &&
+    linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
-  const res = finding.resolution
-  const activeIdx = res ? RESOLUTION_STEPS.findIndex((s) => !res[s.key]) : 0
-  const currentStep = activeIdx === -1 ? RESOLUTION_STEPS.length : activeIdx
-  const completedSteps = status === "resolved" ? RESOLUTION_STEPS.length : currentStep
-  const totalSteps = RESOLUTION_STEPS.length
+  const detailHelperText =
+    status === "open"
+      ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
+      : status === "confirmed" && requiresDocumentFlow
+        ? "După review și aprobare, draftul merge la dosar și finding-ul se închide cu urmă clară."
+      : status === "confirmed"
+          ? "După măsura reală și dovada aferentă, poți închide finding-ul fără pași ocoliți."
+          : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
 
   return (
     <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
@@ -184,7 +197,7 @@ export default function FindingDetailPage() {
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
               Detectat
             </p>
-            <p className="text-sm text-eos-text-muted">{ageLabel(finding.createdAtISO)}</p>
+            <p className="text-sm text-eos-text-muted">{getFindingAgeLabel(finding.createdAtISO)}</p>
             {finding.sourceDocument && (
               <p className="text-xs text-eos-text-muted">
                 Sursă: {finding.sourceDocument}
@@ -194,91 +207,79 @@ export default function FindingDetailPage() {
         }
       />
 
-      {/* ── Action Buttons ─────────────────────────────────────────────── */}
+      {dossierMomentVisible && linkedGeneratedDocument ? (
+        <FindingDossierSuccessCard
+          findingTitle={finding.title}
+          linkedGeneratedDocument={linkedGeneratedDocument}
+          primaryHref={dashboardRoutes.auditorVault}
+          secondaryHref={dashboardRoutes.auditLog}
+          feedbackMessage="Dovada a intrat la dosar și rămâne disponibilă pentru audit, handoff și reverificare. De aici înainte intră în monitorizare, nu dispare."
+        />
+      ) : null}
+
+      {/* ── Hero Action — above the fold, dominant ────────────────────── */}
       {status === "open" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="flex flex-wrap items-center gap-3 px-5 py-4">
-            <div className="mr-auto space-y-1">
-              <p className="text-sm font-medium text-eos-text">
-                Acest finding necesită decizia ta:
-              </p>
-              <p className="text-xs text-eos-text-muted">
-                Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită; rămâne în istoric cu statusul aferent.
-              </p>
-            </div>
+        <FindingHeroAction
+          finding={finding}
+          helperText="Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită."
+        >
+          <Button
+            onClick={() => updateStatus("confirmed")}
+            disabled={actionLoading}
+            className="gap-1.5"
+          >
+            <CheckCircle2 className="size-3.5" strokeWidth={2} />
+            Confirmă finding-ul
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => updateStatus("dismissed")}
+            disabled={actionLoading}
+            className="gap-1.5"
+          >
+            <XCircle className="size-3.5" strokeWidth={2} />
+            Respinge
+          </Button>
+        </FindingHeroAction>
+      )}
+
+      {status === "confirmed" && (
+        <FindingHeroAction
+          finding={finding}
+          helperText={detailHelperText}
+        >
+          {requiresDocumentFlow ? (
+            <>
+              <Button
+                onClick={() => setGeneratorOpen(true)}
+                className="gap-1.5"
+              >
+                <FileText className="size-3.5" strokeWidth={2} />
+                {documentFlowState === "draft_ready" ? "Continuă flow-ul" : "Generează acum"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => updateStatus("resolved")}
+                disabled={actionLoading}
+                className="gap-1.5"
+              >
+                Am deja dovada
+              </Button>
+            </>
+          ) : (
             <Button
-              size="sm"
-              onClick={() => updateStatus("confirmed")}
+              onClick={() => updateStatus("resolved")}
               disabled={actionLoading}
               className="gap-1.5"
             >
               <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              Confirmă
+              Marchează rezolvat
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => updateStatus("dismissed")}
-              disabled={actionLoading}
-              className="gap-1.5"
-            >
-              <XCircle className="size-3.5" strokeWidth={2} />
-              Respinge
-            </Button>
-          </CardContent>
-        </Card>
+          )}
+        </FindingHeroAction>
       )}
 
-      {status === "confirmed" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="flex flex-wrap items-center gap-3 px-5 py-4">
-            {requiresDocumentFlow ? (
-              <>
-                <div className="mr-auto">
-                  <p className="text-sm font-medium text-eos-text">
-                    Finding confirmat. Închiderea se face doar după draft, preview și confirmare explicită.
-                  </p>
-                  <p className="mt-1 text-xs text-eos-text-muted">
-                    {documentFlowState === "draft_ready" && linkedGeneratedDocument
-                      ? `Există deja un draft pentru acest finding: ${linkedGeneratedDocument.title}. Revino în flow și aprobă-l ca dovadă.`
-                      : "Pornește flow-ul ghidat ca să generezi documentul recomandat și să-l atașezi ca dovadă."}
-                  </p>
-                </div>
-                <Button asChild size="sm" className="gap-1.5">
-                  <Link
-                    href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType ?? "")}`}
-                  >
-                    <FileText className="size-3.5" strokeWidth={2} />
-                    {documentFlowState === "draft_ready" ? "Continuă flow-ul documentului" : "Deschide flow-ul documentului"}
-                  </Link>
-                </Button>
-              </>
-            ) : (
-              <>
-                <div className="mr-auto space-y-1">
-                  <p className="text-sm font-medium text-eos-text">
-                    Finding confirmat. Marchează ca rezolvat când ai finalizat acțiunea.
-                  </p>
-                  <p className="text-xs text-eos-text-muted">
-                    Confirmat înseamnă că accepți problema și lucrezi la ea. Rezolvat îl folosești doar după ce ai aplicat măsura și ai dovada pregătită.
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => updateStatus("resolved")}
-                  disabled={actionLoading}
-                  className="gap-1.5"
-                >
-                  <CheckCircle2 className="size-3.5" strokeWidth={2} />
-                  Marchează rezolvat
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {statusFeedback && (
+      {statusFeedback && !dossierMomentVisible && (
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-eos-text">{statusFeedback}</p>
@@ -286,130 +287,19 @@ export default function FindingDetailPage() {
         </Card>
       )}
 
-      {requiresDocumentFlow && (
-        <Card className="border-eos-warning-border bg-eos-warning-soft/30">
-          <CardContent className="space-y-3 px-5 py-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-eos-text">Flow documentar obligatoriu</p>
-                <p className="mt-1 text-sm text-eos-text-muted">
-                  Pentru acest finding, documentul generat trebuie verificat și aprobat explicit înainte de închidere.
-                </p>
-              </div>
-              <Badge variant="warning" className="normal-case tracking-normal">
-                {documentFlowState === "attached_as_evidence"
-                  ? "dovadă atașată"
-                  : documentFlowState === "draft_ready"
-                    ? "draft gata de review"
-                    : "draft lipsă"}
-              </Badge>
-            </div>
-
-            {linkedGeneratedDocument ? (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
-                <p className="text-sm font-medium text-eos-text">{linkedGeneratedDocument.title}</p>
-                <p className="mt-1 text-xs text-eos-text-muted">
-                  Generat {new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
-                  {linkedGeneratedDocument.approvalStatus === "approved_as_evidence"
-                    ? " · aprobat ca dovadă"
-                    : " · în așteptare pentru confirmare"}
-                </p>
-              </div>
-            ) : null}
-
-            {status !== "resolved" ? (
-              <Button asChild variant="outline" className="gap-2">
-                <Link
-                  href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType ?? "")}`}
-                >
-                  <FileText className="size-4" strokeWidth={2} />
-                  {linkedGeneratedDocument ? "Revizuiește și aprobă draftul" : "Generează draftul recomandat"}
-                </Link>
-              </Button>
-            ) : null}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Resolution Layer (vertical stepper) ────────────────────────── */}
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Resolution Layer
-              {finding.legalReference ? ` · ${finding.legalReference}` : ""}
-            </p>
-            <span className="text-xs text-eos-text-muted">{completedSteps}/{totalSteps} pași</span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-6 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
-            <div
-              className="h-full bg-eos-primary transition-all duration-500"
-              style={{ width: `${(completedSteps / totalSteps) * 100}%` }}
-            />
-          </div>
-
-          <div className="space-y-5">
-            {RESOLUTION_STEPS.map((step, idx) => {
-              const isDone = idx < currentStep
-              const isActive = idx === currentStep
-              const StepIcon = step.icon
-              const text = (res?.[step.key] as string | undefined)
-                ?? (isActive ? (finding.remediationHint ?? finding.detail) : undefined)
-              return (
-                <div key={step.key} className="flex gap-3.5">
-                  <div className="flex w-7 flex-col items-center">
-                    <div
-                      className={[
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-                        isDone
-                          ? "border border-eos-success/40 bg-eos-success-soft text-eos-success"
-                          : isActive
-                            ? "border border-eos-border-strong bg-eos-bg-inset text-eos-text shadow-[0_0_0_3px_hsl(145_60%_48%/0.15)]"
-                            : "border border-eos-border-subtle bg-eos-bg-inset text-eos-text-muted",
-                      ].join(" ")}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 className="size-3.5" strokeWidth={2.5} />
-                      ) : (
-                        <StepIcon className="size-3.5" strokeWidth={2} />
-                      )}
-                    </div>
-                    {idx < RESOLUTION_STEPS.length - 1 && (
-                      <div className={`mt-1.5 w-px flex-1 ${isDone ? "bg-eos-success/30" : "bg-eos-border-subtle"}`} />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1 pb-2 pt-1">
-                    <p className={[
-                      "mb-1 text-xs font-semibold",
-                      isDone ? "text-eos-success" : isActive ? "text-eos-text" : "text-eos-text-muted",
-                    ].join(" ")}>
-                      {step.label}
-                    </p>
-                    <p className={[
-                      "text-sm leading-relaxed",
-                      isDone ? "text-eos-text-muted" : isActive ? "text-eos-text" : "text-eos-text-muted/60",
-                    ].join(" ")}>
-                      {text ?? "—"}
-                    </p>
-                    {step.key === "generatedAsset" && !isDone && finding.suggestedDocumentType && status !== "resolved" && (
-                      <Link
-                        href={`${dashboardRoutes.generator}?findingId=${encodeURIComponent(finding.id)}&documentType=${encodeURIComponent(finding.suggestedDocumentType)}`}
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-eos-primary/90 transition-colors"
-                      >
-                        <FileText className="size-3" strokeWidth={2} />
-                        Generează din CompliAI
-                        <ArrowRight className="size-3" strokeWidth={2} />
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── Details below the fold ────────────────────────────────────── */}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <FindingNarrativeCard
+          finding={finding}
+          title="Cockpit finding"
+          description="Problema, impactul și dovada rămân în același context, fără pași decorativi separați."
+        />
+        <FindingExecutionCard
+          finding={finding}
+          documentFlowState={documentFlowState}
+          linkedGeneratedDocument={linkedGeneratedDocument}
+        />
+      </div>
 
       {/* ── Legal Mappings ─────────────────────────────────────────────── */}
       {finding.legalMappings && finding.legalMappings.length > 0 && (
@@ -510,6 +400,18 @@ export default function FindingDetailPage() {
           <span>Actualizat: {new Date(finding.findingStatusUpdatedAtISO).toLocaleDateString("ro-RO")}</span>
         )}
       </div>
+
+      {/* ── Generator Drawer (in-context, no page navigation) ─────────── */}
+      {requiresDocumentFlow && (
+        <GeneratorDrawer
+          open={generatorOpen}
+          onOpenChange={setGeneratorOpen}
+          findingId={finding.id}
+          documentType={(finding.suggestedDocumentType ?? "") as DocumentType}
+          findingTitle={finding.title}
+          onComplete={refetchFinding}
+        />
+      )}
     </div>
   )
 }

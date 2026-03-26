@@ -3,6 +3,7 @@
 // Blacklist: critical severity, requires signature, affects legal submission, NIS2 high.
 
 import type { ScanFinding, RemediationAction } from "@/lib/compliance/types"
+import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 
 export type AutoApplyDecision = {
   allowed: boolean
@@ -24,7 +25,7 @@ export function canAutoApply(
     return { allowed: false, reason: "Severity critic — necesită aprobare umană" }
   }
 
-  if (finding.legalReference && finding.findingStatus !== "resolved") {
+  if (finding.legalReference && !isFindingResolvedLike(finding.findingStatus)) {
     // If it involves legal references and isn't already resolved, be more cautious
     // (but don't block — just note it in the reason if denied later)
   }

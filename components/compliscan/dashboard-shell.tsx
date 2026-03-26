@@ -31,6 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/evidence-os/DropdownMenu"
+import { isFindingActive } from "@/lib/compliscan/finding-cockpit"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { canSwitchToPortfolio, getMobileNavItems, getSidebarNavSections } from "@/lib/compliscan/nav-config"
 import type { WorkspaceMode } from "@/lib/server/auth"
@@ -67,10 +68,7 @@ export function DashboardShell({
       .catch(() => {})
   }, [])
   const activeFindingsCount = cockpit?.data
-    ? cockpit.data.state.findings.filter(
-        (finding) =>
-          finding.findingStatus !== "resolved" && finding.findingStatus !== "dismissed"
-      ).length
+    ? cockpit.data.state.findings.filter((finding) => isFindingActive(finding)).length
     : 0
   const resolveBadgeCount = activeFindingsCount + dsarActiveCount
   const navSections = currentUser

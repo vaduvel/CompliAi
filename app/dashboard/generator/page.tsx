@@ -18,6 +18,11 @@ import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
+import type { ScanFinding } from "@/lib/compliance/types"
+import {
+  FindingExecutionCard,
+  FindingNarrativeCard,
+} from "@/components/compliscan/finding-cockpit-shared"
 
 // ── Input field + textarea helpers ────────────────────────────────────────────
 
@@ -45,17 +50,7 @@ type GeneratedDocumentResponse = GeneratedDocument & {
 }
 
 type FindingGeneratorContext = {
-  finding: {
-    id: string
-    title: string
-    detail: string
-    findingStatus?: "open" | "confirmed" | "dismissed" | "resolved"
-    suggestedDocumentType?: string
-    readyTextLabel?: string
-    readyText?: string
-    remediationHint?: string
-    sourceDocument?: string
-  }
+  finding: ScanFinding
   linkedGeneratedDocument?: {
     id: string
     documentType: DocumentType
@@ -64,6 +59,8 @@ type FindingGeneratorContext = {
     generatedAtISO: string
     llmUsed: boolean
     approvalStatus?: "draft" | "approved_as_evidence"
+    approvedAtISO?: string
+    approvedByEmail?: string
     expiresAtISO?: string
     nextReviewDateISO?: string
   } | null
@@ -198,22 +195,6 @@ function DocumentPreview({ content }: { content: string }) {
           </p>
         )
       })}
-    </div>
-  )
-}
-
-function FlowStep({ label, hint, active = false }: { label: string; hint: string; active?: boolean }) {
-  return (
-    <div
-      className={[
-        "rounded-eos-md border px-3 py-3",
-        active
-          ? "border-eos-primary/30 bg-eos-primary/10"
-          : "border-eos-border bg-eos-surface",
-      ].join(" ")}
-    >
-      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-eos-text-muted">{label}</p>
-      <p className="mt-1 text-xs text-eos-text-muted">{hint}</p>
     </div>
   )
 }
@@ -462,11 +443,9 @@ export default function GeneratorPage() {
         throw new Error(payload.error ?? "Nu am putut atașa draftul ca dovadă.")
       }
 
-      toast.success("Draft aprobat și atașat ca dovadă.", {
-        description: payload.feedbackMessage,
-      })
-      router.replace(`${dashboardRoutes.resolve}/${encodeURIComponent(findingId)}`)
-      router.refresh()
+      router.replace(
+        `${dashboardRoutes.resolve}/${encodeURIComponent(findingId)}?success=dossier`
+      )
     } catch (err) {
       toast.error("Nu am putut închide flow-ul.", {
         description: err instanceof Error ? err.message : "Încearcă din nou.",
@@ -562,48 +541,29 @@ export default function GeneratorPage() {
       {!findingFlowActive ? <PillarTabs sectionId="politici" /> : null}
 
       {findingFlowActive ? (
-        <Card className="border-eos-primary/30 bg-eos-primary/5">
-          <CardContent className="space-y-3 pt-5">
-            {findingContextLoading ? (
+        findingContextLoading ? (
+          <Card className="border-eos-primary/30 bg-eos-primary/5">
+            <CardContent className="pt-5">
               <div className="flex items-center gap-2 text-sm text-eos-text-muted">
                 <Loader2 className="size-4 animate-spin" />
                 Încărcăm contextul finding-ului...
               </div>
-            ) : findingContext ? (
-              <>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-eos-text">{findingContext.finding.title}</p>
-                    <p className="mt-1 text-sm text-eos-text-muted">{findingContext.finding.detail}</p>
-                  </div>
-                  <Badge variant="outline" className="normal-case tracking-normal">
-                    {findingContext.documentFlowState === "draft_ready"
-                      ? "draft gata de review"
-                      : findingContext.documentFlowState === "attached_as_evidence"
-                        ? "dovadă atașată"
-                        : "draft necesar"}
-                  </Badge>
-                </div>
-                <div className="grid gap-2 md:grid-cols-4">
-                  <FlowStep label="1. Draft" hint="generezi documentul sugerat" active />
-                  <FlowStep label="2. Preview" hint="citești draftul cap-coadă" active={Boolean(result)} />
-                  <FlowStep label="3. Confirmare" hint="bifezi checklist-ul obligatoriu" active={isChecklistComplete} />
-                  <FlowStep
-                    label="4. Dovadă"
-                    hint="atașezi draftul și închizi finding-ul"
-                    active={findingContext.documentFlowState === "attached_as_evidence"}
-                  />
-                </div>
-                {findingContext.linkedGeneratedDocument ? (
-                  <p className="text-xs text-eos-text-muted">
-                    Ultimul draft legat de acest finding: <span className="font-medium text-eos-text">{findingContext.linkedGeneratedDocument.title}</span>{" "}
-                    · {new Date(findingContext.linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
-                  </p>
-                ) : null}
-              </>
-            ) : null}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : findingContext ? (
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+            <FindingNarrativeCard
+              finding={findingContext.finding}
+              title="Finding activ în flow-ul documentului"
+              description="Generatorul este parte din cockpit-ul finding-ului. Draftul, confirmarea și dovada rămân în același traseu."
+            />
+            <FindingExecutionCard
+              finding={findingContext.finding}
+              documentFlowState={findingContext.documentFlowState}
+              linkedGeneratedDocument={findingContext.linkedGeneratedDocument}
+            />
+          </div>
+        ) : null
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
