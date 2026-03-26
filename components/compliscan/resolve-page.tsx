@@ -26,6 +26,7 @@ import {
   isFindingResolvedLike,
   getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 type FrameworkFilter = "toate" | "gdpr" | "nis2" | "ai-act" | "furnizori"
@@ -471,8 +472,6 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
 export function ResolvePageSurface() {
   const runtime = useDashboardRuntime()
   const cockpit = useCockpitData()
-  const cockpitActions = useCockpitMutations()
-  const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
   const urgencyItems = useUrgencyItems()
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
@@ -560,36 +559,88 @@ export function ResolvePageSurface() {
         <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
 
-      {/* Support board kept secondary on purpose */}
       {cockpit.tasks.length > 0 && (
         <section aria-label="Task-uri de suport">
-          <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-            <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-eos-text">Task-uri de suport pentru cazurile deschise</p>
-                <p className="mt-1 text-xs text-eos-text-muted">
-                  Board-ul rămâne util pentru execuția rapidă, dar finding-ul și cockpitul rămân traseul principal.
+          <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-eos-text">Task-urile de suport stau separat de cockpit</p>
+                <p className="text-xs text-eos-text-muted">
+                  Cockpitul rămâne traseul principal pentru finding, generator, dovadă și monitorizare. Board-ul de suport
+                  rămâne disponibil separat doar când ai nevoie de execuție pe task-uri auxiliare.
                 </p>
               </div>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                {openTasks.length} task-uri deschise
-              </Badge>
-            </summary>
-
-            <div className="mt-4 border-t border-eos-border-subtle pt-4">
-              <RemediationBoard
-                tasks={cockpit.tasks}
-                findings={findings}
-                activeFilter={taskFilter}
-                onFilterChange={setTaskFilter}
-                onMarkDone={cockpitActions.handleMarkDone}
-                onAttachEvidence={cockpitActions.attachEvidence}
-                onExport={cockpitActions.handleTaskExport}
-              />
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="normal-case tracking-normal">
+                  {openTasks.length} task-uri deschise
+                </Badge>
+                <Link
+                  href={dashboardRoutes.resolveSupport}
+                  className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
+                >
+                  Vezi board-ul separat
+                  <ArrowRight className="size-3" strokeWidth={2} />
+                </Link>
+              </div>
             </div>
-          </details>
+          </div>
         </section>
       )}
+    </div>
+  )
+}
+
+export function ResolveSupportPageSurface() {
+  const cockpit = useCockpitData()
+  const cockpitActions = useCockpitMutations()
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>("ALL")
+
+  if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
+  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+
+  const findings = cockpit.data.state.findings
+  const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
+
+  return (
+    <div className="space-y-6">
+      <PageIntro
+        eyebrow="Task-uri de suport"
+        title={`Board separat · ${openTasks.length} deschise`}
+        description="Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare."
+        badges={
+          <Badge variant="outline" className="normal-case tracking-normal">
+            Board secundar
+          </Badge>
+        }
+      />
+
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-eos-text">Nu concurează cu cockpitul</p>
+            <p className="text-xs text-eos-text-muted">
+              Când un task are caz asociat, intri în cockpitul finding-ului ca să generezi, atașezi dovada și închizi cu urmă clară.
+            </p>
+          </div>
+          <Link
+            href={dashboardRoutes.resolve}
+            className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
+          >
+            Înapoi la Resolve
+            <ArrowRight className="size-3" strokeWidth={2} />
+          </Link>
+        </div>
+      </div>
+
+      <RemediationBoard
+        tasks={cockpit.tasks}
+        findings={findings}
+        activeFilter={taskFilter}
+        onFilterChange={setTaskFilter}
+        onMarkDone={cockpitActions.handleMarkDone}
+        onAttachEvidence={cockpitActions.attachEvidence}
+        onExport={cockpitActions.handleTaskExport}
+      />
     </div>
   )
 }

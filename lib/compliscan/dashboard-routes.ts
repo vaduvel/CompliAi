@@ -6,6 +6,7 @@ export const dashboardRoutes = {
   documents: "/dashboard/scan/history",
   documentsHub: "/dashboard/documente",
   resolve: "/dashboard/resolve",
+  resolveSupport: "/dashboard/resolve/support",
   calendar: "/dashboard/calendar",
   aiSystems: "/dashboard/sisteme",
   aiConformity: "/dashboard/conformitate",
