@@ -207,6 +207,7 @@ export default function GeneratorPage() {
   const searchParams = useSearchParams()
   const findingId = searchParams.get("findingId")
   const requestedDocumentType = searchParams.get("documentType")
+  const findingFlowRedirect = Boolean(findingId)
 
   const [selectedType, setSelectedType] = useState<DocumentType>("privacy-policy")
   const [orgName, setOrgName] = useState("")
@@ -259,68 +260,21 @@ export default function GeneratorPage() {
   }, [requestedDocumentType])
 
   useEffect(() => {
+    if (!findingId) return
+    router.replace(`${dashboardRoutes.resolve}/${encodeURIComponent(findingId)}?action=generate`)
+  }, [findingId, router])
+
+  useEffect(() => {
     if (!findingId) {
       setFindingContext(null)
       return
     }
 
-    let cancelled = false
-    setFindingContextLoading(true)
-
-    fetch(`/api/findings/${encodeURIComponent(findingId)}`, { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok) throw new Error("Nu am putut încărca finding-ul.")
-        return res.json()
-      })
-      .then((payload: FindingGeneratorContext) => {
-        if (cancelled) return
-        setFindingContext(payload)
-        if (
-          payload.finding.suggestedDocumentType &&
-          DOCUMENT_TYPES.some((document) => document.id === payload.finding.suggestedDocumentType)
-        ) {
-          setSelectedType(payload.finding.suggestedDocumentType as DocumentType)
-        }
-        setDataFlows((current) =>
-          current ||
-          payload.finding.readyText ||
-          payload.finding.remediationHint ||
-          payload.finding.detail
-        )
-        if (
-          payload.linkedGeneratedDocument?.content &&
-          payload.linkedGeneratedDocument.approvalStatus !== "approved_as_evidence"
-        ) {
-          setResult({
-            recordId: payload.linkedGeneratedDocument.id,
-            sourceFindingId: payload.finding.id,
-            documentType: payload.linkedGeneratedDocument.documentType,
-            title: payload.linkedGeneratedDocument.title,
-            content: payload.linkedGeneratedDocument.content,
-            generatedAtISO: payload.linkedGeneratedDocument.generatedAtISO,
-            llmUsed: payload.linkedGeneratedDocument.llmUsed,
-            expiresAtISO: payload.linkedGeneratedDocument.expiresAtISO ?? payload.linkedGeneratedDocument.generatedAtISO,
-            nextReviewDateISO:
-              payload.linkedGeneratedDocument.nextReviewDateISO ?? payload.linkedGeneratedDocument.generatedAtISO,
-          })
-        }
-      })
-      .catch((err: Error) => {
-        if (!cancelled) {
-          toast.error("Nu am putut porni flow-ul ghidat.", {
-            description: err.message,
-          })
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setFindingContextLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
+    setFindingContext(null)
+    setFindingContextLoading(false)
   }, [findingId])
 
+  if (findingFlowRedirect) return <LoadingScreen variant="section" />
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
   // R-5: copiază în clipboard
