@@ -166,20 +166,20 @@ function convertFindingTask(finding: ScanFinding, alert?: ComplianceAlert): Cock
 function buildClosureRecipe(finding: ScanFinding): string {
   if (finding.category === "NIS2") {
     if (finding.title.toLowerCase().includes("incident") || finding.title.toLowerCase().includes("raportare"))
-      return "Generează un Plan de Răspuns la Incidente din Generator și atașează-l ca dovadă."
+      return "Deschide cockpitul cazului, generează Planul de Răspuns la Incidente și atașează-l ca dovadă."
     if (finding.title.toLowerCase().includes("furnizor") || finding.title.toLowerCase().includes("dpa"))
-      return "Încarcă DPA-ul semnat cu furnizorul sau generează unul din Generator."
+      return "Încarcă DPA-ul semnat cu furnizorul sau generează-l direct din cockpitul finding-ului."
     return "Documentează măsura implementată și atașează dovada (politică, procedură, screenshot sistem)."
   }
   if (finding.category === "GDPR") {
     if (finding.title.toLowerCase().includes("dpa") || finding.title.toLowerCase().includes("prelucrare"))
-      return "Încarcă DPA-ul semnat cu procesatorul de date sau generează unul din Generator."
+      return "Încarcă DPA-ul semnat cu procesatorul de date sau generează-l direct din cockpitul finding-ului."
     if (finding.title.toLowerCase().includes("politică") || finding.title.toLowerCase().includes("policy"))
-      return "Generează politica relevantă din Generator și publică-o. Atașează link-ul sau PDF-ul."
-    return "Generează documentul GDPR relevant din Generator și atașează-l ca dovadă."
+      return "Generează politica relevantă din cockpit, public-o și atașează link-ul sau PDF-ul ca dovadă."
+    return "Generează documentul GDPR relevant direct din cockpit și atașează-l ca dovadă."
   }
   if (finding.category === "EU_AI_ACT") {
-    return "Generează Politica de Guvernanță AI din Generator. Atașează documentul semnat de management."
+    return "Generează Politica de Guvernanță AI din cockpit și atașează documentul semnat de management."
   }
   if (finding.remediationHint) return finding.remediationHint
   return "Adaugă o dovadă (document, screenshot, link extern) care demonstrează că problema a fost remediată."

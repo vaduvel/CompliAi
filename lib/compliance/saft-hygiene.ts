@@ -270,6 +270,53 @@ export function buildSAFTHygieneFindings(
   return findings
 }
 
+// ── SAF-T D406 Registration Finding (Faza 2 — TASK 7) ───────────────────────
+
+/**
+ * Generate a finding if the org has SAF-T applicability but no evidence of D406 filing.
+ * Obligație activă din 1 ianuarie 2025 pentru toate firmele din România.
+ */
+export function buildSAFTD406Finding(opts: {
+  hasSaftTag: boolean
+  d406EvidenceSubmitted?: boolean
+  nowISO: string
+}): ScanFinding[] {
+  if (!opts.hasSaftTag) return []
+  if (opts.d406EvidenceSubmitted) return []
+
+  return [
+    {
+      id: "saft-d406-registration",
+      title: "SAF-T (D406) — obligație activă din ianuarie 2025",
+      detail:
+        "Toate firmele din România sunt obligate să transmită electronic " +
+        "datele contabile către ANAF prin Declarația Informativă D406 (SAF-T). " +
+        "Nerespectarea atrage amenzi între 1.000 și 10.000 lei, " +
+        "în funcție de categoria contribuabilului.",
+      category: "E_FACTURA",
+      severity: "high",
+      risk: "high",
+      principles: ["accountability"],
+      createdAtISO: opts.nowISO,
+      sourceDocument: "SAF-T (D406)",
+      legalReference: "Ord. ANAF 1783/2021 · OUG 188/2022 · Cod Procedură Fiscală Art. 336",
+      remediationHint:
+        "Verifică dacă D406 a fost depus pentru toate perioadele aplicabile. " +
+        "Încarcă dovada de depunere (confirmare SPV) pentru a închide finding-ul.",
+      resolution: makeResolution(
+        "Nu există dovadă de depunere D406 (SAF-T) în dosarul organizației.",
+        "Nedepunerea SAF-T poate declanșa amenzi ANAF de 1.000-10.000 lei per declarație și semnalizează risc fiscal crescut.",
+        "Verifică statusul depunerii cu contabilul, depune dacă lipsește, și încarcă confirmarea SPV.",
+        {
+          humanStep: "Contabilul confirmă depunerea D406 și încarcă dovada din SPV ANAF.",
+          closureEvidence: "Confirmare SPV de depunere D406 pentru toate perioadele aplicabile.",
+          revalidation: "Verificare lunară/trimestrială, în funcție de categoria contribuabilului.",
+        },
+      ),
+    },
+  ]
+}
+
 // ── Cross-filing check (SAF-T vs D300/D394) ─────────────────────────────────
 
 /**

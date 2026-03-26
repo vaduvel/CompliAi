@@ -79,6 +79,8 @@ export default function FindingDetailPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
   const [generatorOpen, setGeneratorOpen] = useState(false)
+  const [showDossierMoment, setShowDossierMoment] = useState(false)
+  const [autoOpenConsumed, setAutoOpenConsumed] = useState(false)
   const { reloadDashboard } = useCockpitMutations()
 
   const refetchFinding = useCallback(() => {
@@ -100,6 +102,8 @@ export default function FindingDetailPage() {
   useEffect(() => {
     if (!params.findingId) return
     setLoading(true)
+    setShowDossierMoment(false)
+    setAutoOpenConsumed(false)
     fetch(`/api/findings/${encodeURIComponent(params.findingId)}`, { cache: "no-store" })
       .then((r) => {
         if (!r.ok) throw new Error(r.status === 404 ? "Finding inexistent." : "Eroare server.")
@@ -114,6 +118,22 @@ export default function FindingDetailPage() {
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
   }, [params.findingId])
+
+  useEffect(() => {
+    if (!finding) return
+
+    const status = finding.findingStatus ?? "open"
+    const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
+    const shouldAutoOpenGenerator =
+      searchParams.get("generator") === "1" || searchParams.get("action") === "generate"
+
+    if (!requiresDocumentFlow || status !== "confirmed" || !shouldAutoOpenGenerator || autoOpenConsumed) {
+      return
+    }
+
+    setGeneratorOpen(true)
+    setAutoOpenConsumed(true)
+  }, [autoOpenConsumed, finding, searchParams])
 
   async function updateStatus(status: "confirmed" | "dismissed" | "resolved") {
     if (!finding) return
@@ -150,7 +170,7 @@ export default function FindingDetailPage() {
   const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   const statusCfg = getFindingStatusPresentation(finding.findingStatus)
   const dossierMomentVisible =
-    searchParams.get("success") === "dossier" &&
+    (searchParams.get("success") === "dossier" || showDossierMoment) &&
     isFindingResolvedLike(status) &&
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
@@ -224,6 +244,7 @@ export default function FindingDetailPage() {
           helperText="Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită."
         >
           <Button
+            data-testid="confirm-finding"
             onClick={() => updateStatus("confirmed")}
             disabled={actionLoading}
             className="gap-1.5"
@@ -232,6 +253,7 @@ export default function FindingDetailPage() {
             Confirmă finding-ul
           </Button>
           <Button
+            data-testid="dismiss-finding"
             variant="outline"
             onClick={() => updateStatus("dismissed")}
             disabled={actionLoading}
@@ -251,6 +273,7 @@ export default function FindingDetailPage() {
           {requiresDocumentFlow ? (
             <>
               <Button
+                data-testid="open-generator-drawer"
                 onClick={() => setGeneratorOpen(true)}
                 className="gap-1.5"
               >
@@ -258,6 +281,7 @@ export default function FindingDetailPage() {
                 {documentFlowState === "draft_ready" ? "Continuă flow-ul" : "Generează acum"}
               </Button>
               <Button
+                data-testid="resolve-with-existing-evidence"
                 variant="outline"
                 onClick={() => updateStatus("resolved")}
                 disabled={actionLoading}
@@ -268,6 +292,7 @@ export default function FindingDetailPage() {
             </>
           ) : (
             <Button
+              data-testid="mark-finding-resolved"
               onClick={() => updateStatus("resolved")}
               disabled={actionLoading}
               className="gap-1.5"
@@ -301,95 +326,105 @@ export default function FindingDetailPage() {
         />
       </div>
 
-      {/* ── Legal Mappings ─────────────────────────────────────────────── */}
-      {finding.legalMappings && finding.legalMappings.length > 0 && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="px-5 py-5">
-            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Baza legală
-            </p>
-            <div className="space-y-3">
-              {finding.legalMappings.map((lm, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                  <Scale className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-eos-text">
-                      {lm.regulation} — {lm.article}
-                    </p>
-                    <p className="text-xs text-eos-text-muted">{lm.label}</p>
-                    <p className="mt-1 text-xs text-eos-text-muted">{lm.reason}</p>
+      {(finding.legalMappings?.length || finding.provenance || finding.reasoning) ? (
+        <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Context juridic și proveniență
+              </p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Baza legală, semnalul sursă și explicația AI rămân disponibile când ai nevoie de ele, fără să încarce primul ecran.
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              Detalii
+            </Badge>
+          </summary>
+          <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
+            {finding.legalMappings && finding.legalMappings.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Baza legală
+                </p>
+                {finding.legalMappings.map((lm, i) => (
+                  <div key={i} className="flex items-start gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                    <Scale className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-eos-text">
+                        {lm.regulation} — {lm.article}
+                      </p>
+                      <p className="text-xs text-eos-text-muted">{lm.label}</p>
+                      <p className="mt-1 text-xs text-eos-text-muted">{lm.reason}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Provenance / Signal Source ──────────────────────────────────── */}
-      {finding.provenance && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="px-5 py-5">
-            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Proveniență semnal
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Regulă</p>
-                <p className="mt-1 text-sm text-eos-text">{finding.provenance.ruleId}</p>
-              </div>
-              {finding.provenance.matchedKeyword && (
-                <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                  <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cuvânt cheie</p>
-                  <p className="mt-1 text-sm text-eos-text font-mono">{finding.provenance.matchedKeyword}</p>
-                </div>
-              )}
-              {finding.provenance.signalSource && (
-                <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                  <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Sursă semnal</p>
-                  <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalSource}</p>
-                </div>
-              )}
-              {finding.provenance.signalConfidence && (
-                <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                  <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Încredere semnal</p>
-                  <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalConfidence}</p>
-                </div>
-              )}
-            </div>
-            {finding.provenance.excerpt && (
-              <div className="mt-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Excerpt sursă</p>
-                <p className="mt-1 text-sm leading-relaxed text-eos-text italic">
-                  &ldquo;{finding.provenance.excerpt}&rdquo;
-                </p>
+                ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
 
-      {/* ── Gemini Reasoning (B1) ──────────────────────────────────────── */}
-      {finding.reasoning && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="px-5 py-5">
-            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Raționament AI
-            </p>
-            <p className="text-sm leading-relaxed text-eos-text">{finding.reasoning}</p>
-            {finding.sourceParagraph && (
-              <div className="mt-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  Paragraf sursă
+            {finding.provenance && (
+              <div className="space-y-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Proveniență semnal
                 </p>
-                <p className="mt-1 text-sm leading-relaxed text-eos-text-muted italic">
-                  &ldquo;{finding.sourceParagraph}&rdquo;
-                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Regulă</p>
+                    <p className="mt-1 text-sm text-eos-text">{finding.provenance.ruleId}</p>
+                  </div>
+                  {finding.provenance.matchedKeyword && (
+                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cuvânt cheie</p>
+                      <p className="mt-1 text-sm text-eos-text font-mono">{finding.provenance.matchedKeyword}</p>
+                    </div>
+                  )}
+                  {finding.provenance.signalSource && (
+                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Sursă semnal</p>
+                      <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalSource}</p>
+                    </div>
+                  )}
+                  {finding.provenance.signalConfidence && (
+                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Încredere semnal</p>
+                      <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalConfidence}</p>
+                    </div>
+                  )}
+                </div>
+                {finding.provenance.excerpt && (
+                  <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Excerpt sursă</p>
+                    <p className="mt-1 text-sm leading-relaxed text-eos-text italic">
+                      &ldquo;{finding.provenance.excerpt}&rdquo;
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
+
+            {finding.reasoning && (
+              <div className="space-y-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Raționament AI
+                </p>
+                <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+                  <p className="text-sm leading-relaxed text-eos-text">{finding.reasoning}</p>
+                  {finding.sourceParagraph && (
+                    <div className="mt-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                        Paragraf sursă
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-eos-text-muted italic">
+                        &ldquo;{finding.sourceParagraph}&rdquo;
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </details>
+      ) : null}
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 text-xs text-eos-text-muted">
@@ -409,7 +444,12 @@ export default function FindingDetailPage() {
           findingId={finding.id}
           documentType={(finding.suggestedDocumentType ?? "") as DocumentType}
           findingTitle={finding.title}
-          onComplete={refetchFinding}
+          onComplete={(result) => {
+            if (result?.dossierSaved) {
+              setShowDossierMoment(true)
+            }
+            refetchFinding()
+          }}
         />
       )}
     </div>

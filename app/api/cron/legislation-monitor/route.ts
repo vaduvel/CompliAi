@@ -12,14 +12,9 @@ import { readStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { createNotification } from "@/lib/server/notifications-store"
 import { checkLegislationChanges } from "@/lib/legislation-monitor"
+import { isLegislationRelevant } from "@/lib/compliscan/feed-sources"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
-
-const FRAMEWORK_MAP: Record<string, string> = {
-  GDPR: "gdpr",
-  NIS2: "nis2",
-  EFACTURA: "efactura",
-}
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -51,9 +46,8 @@ export async function POST(request: Request) {
         const tags = state.applicability?.tags ?? []
 
         for (const change of changes) {
-          const tag = FRAMEWORK_MAP[change.framework]
-          // Notify if org has this framework active, or for GDPR (applies to all)
-          if (change.framework === "GDPR" || (tag && tags.includes(tag as ApplicabilityTag))) {
+          // Notify if org has this framework active (using centralized relevance filter)
+          if (isLegislationRelevant(change.framework, tags as ApplicabilityTag[])) {
             await createNotification(org.id, {
               type: "info",
               title: `Schimbare legislativă: ${change.sursa}`,

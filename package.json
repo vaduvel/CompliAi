@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:canonical-audit": "vitest run tests/canonical-runtime-audit.test.ts",
     "test:flow-kit": "vitest run tests/flow-test-kit-user-nou.test.ts",
+    "smoke:smart-resolve-browser": "node scripts/smoke-smart-resolve-browser.mjs",
     "test:watch": "vitest",
     "verify:supabase:sprint5": "node scripts/verify-supabase-sprint5.mjs",
     "verify:supabase:strict": "node scripts/verify-supabase-strict.mjs",

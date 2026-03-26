@@ -429,6 +429,9 @@ function RelatedFindingAnchor({
 
   const status = getFindingStatusPresentation(finding.findingStatus)
   const narrative = getFindingNarrative(finding)
+  const cockpitHref = finding.suggestedDocumentType
+    ? `/dashboard/resolve/${finding.id}?generator=1`
+    : `/dashboard/resolve/${finding.id}`
 
   return (
     <div className="mb-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
@@ -453,10 +456,10 @@ function RelatedFindingAnchor({
 
         <div className="shrink-0">
           <Link
-            href={`/dashboard/resolve/${finding.id}`}
+            href={cockpitHref}
             className="inline-flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
           >
-            Deschide cockpitul
+            {finding.suggestedDocumentType ? "Intră și generează" : "Intră în cockpit"}
           </Link>
         </div>
       </div>

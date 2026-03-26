@@ -15,7 +15,10 @@ import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
+import { buildSAFTD406Finding } from "@/lib/compliance/saft-hygiene"
 import { readNis2State } from "@/lib/server/nis2-store"
+import { readDsarState } from "@/lib/server/dsar-store"
+import { createNotification } from "@/lib/server/notifications-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
@@ -102,6 +105,56 @@ function getPolicyExpiryDeadlines(state: ComplianceState): string[] {
     }
   }
   return deadlines.slice(0, 2)
+}
+
+// A5 — DSAR deadline notifications: alertează la 10 zile și 3 zile înainte de expirare
+const DSAR_WARN_10_DAYS_MS = 10 * 24 * 60 * 60 * 1000
+const DSAR_WARN_3_DAYS_MS = 3 * 24 * 60 * 60 * 1000
+
+async function checkDsarDeadlines(orgId: string): Promise<{ deadlines: string[]; notificationsSent: number }> {
+  try {
+    const dsarState = await readDsarState(orgId)
+    const now = Date.now()
+    const deadlines: string[] = []
+    let notificationsSent = 0
+
+    for (const req of dsarState.requests) {
+      if (req.status === "responded" || req.status === "refused") continue
+      const deadline = new Date(req.extendedDeadlineISO ?? req.deadlineISO).getTime()
+      const remaining = deadline - now
+      if (remaining < 0) {
+        deadlines.push(`DSAR DEPĂȘIT: cerere ${req.requestType} de la ${req.requesterName}`)
+        await createNotification(orgId, {
+          type: "finding_new",
+          title: `DSAR expirat: cerere ${req.requestType}`,
+          message: `Termenul de 30 zile pentru cererea de ${req.requestType} de la ${req.requesterName} a expirat. Risc de amendă ANSPDCP.`,
+          linkTo: "/dashboard/dsar",
+        }).catch(() => {})
+        notificationsSent++
+      } else if (remaining < DSAR_WARN_3_DAYS_MS) {
+        deadlines.push(`DSAR 3 zile: cerere ${req.requestType} de la ${req.requesterName}`)
+        await createNotification(orgId, {
+          type: "finding_new",
+          title: `URGENT: 3 zile pentru cererea DSAR de ${req.requestType}`,
+          message: `Mai ai ~${Math.ceil(remaining / 86_400_000)} zile pentru a răspunde la cererea de ${req.requestType} de la ${req.requesterName}.`,
+          linkTo: "/dashboard/dsar",
+        }).catch(() => {})
+        notificationsSent++
+      } else if (remaining < DSAR_WARN_10_DAYS_MS) {
+        deadlines.push(`DSAR 10 zile: cerere ${req.requestType} — ${Math.ceil(remaining / 86_400_000)} zile rămase`)
+        await createNotification(orgId, {
+          type: "info",
+          title: `Cerere DSAR — ${Math.ceil(remaining / 86_400_000)} zile rămase`,
+          message: `Cererea de ${req.requestType} de la ${req.requesterName} expiră în ${Math.ceil(remaining / 86_400_000)} zile.`,
+          linkTo: "/dashboard/dsar",
+        }).catch(() => {})
+        notificationsSent++
+      }
+    }
+    return { deadlines: deadlines.slice(0, 3), notificationsSent }
+  } catch {
+    return { deadlines: [], notificationsSent: 0 }
+  }
 }
 
 function buildDailyDigestHtml(payload: DailyDigestPayload): string {
@@ -226,16 +279,65 @@ export async function POST(request: Request) {
           await writeStateForOrg(org.id, state, org.name)
         }
 
+        // Faza 2 — TASK 7: SAF-T D406 finding injection
+        const tags = state.applicability?.tags ?? []
+        const d406Findings = buildSAFTD406Finding({
+          hasSaftTag: tags.includes("saft"),
+          d406EvidenceSubmitted: state.d406EvidenceSubmitted,
+          nowISO: new Date().toISOString(),
+        })
+        if (d406Findings.length > 0 && !state.findings.some((f) => f.id === "saft-d406-registration")) {
+          state.findings = [...state.findings, ...d406Findings]
+          await writeStateForOrg(org.id, state, org.name)
+        }
+
+        // Faza 2 — TASK 6: DSAR procedure finding
+        const dsarState = await readDsarState(org.id)
+        const hasDsarProcedure = state.generatedDocuments?.some(
+          (d) => d.title?.toLowerCase().includes("dsar") || d.title?.toLowerCase().includes("drepturi persoane")
+        ) || dsarState.requests.length > 0
+        const dsarFindingId = "dsar-no-procedure"
+        if (!hasDsarProcedure && !state.findings.some((f) => f.id === dsarFindingId)) {
+          state.findings = [...state.findings, {
+            id: dsarFindingId,
+            title: "Nu ai o procedură documentată pentru cererile DSAR",
+            detail:
+              "Nerespectarea drepturilor persoanelor vizate este sursa principală de amenzi ANSPDCP " +
+              "în România (Fan Courier 2.000 EUR, Vodafone 3.000 EUR, Dante International 10.000 EUR — " +
+              "toate amendate în 2024). Termenul legal de răspuns: 30 de zile de la primirea cererii.",
+            category: "GDPR",
+            severity: "high",
+            risk: "high",
+            principles: ["accountability"],
+            createdAtISO: new Date().toISOString(),
+            sourceDocument: "GDPR Art. 15-22",
+            legalReference: "GDPR Art. 12(3), Art. 15-22 · OUG 1/2024 · Practică ANSPDCP 2024",
+            remediationHint:
+              "Creează o procedură de răspuns la cereri DSAR sau înregistrează prima cerere " +
+              "în modulul DSAR pentru a demonstra că ai proces activ.",
+            resolution: {
+              problem: "Nu există procedură documentată pentru cererile de acces/ștergere date personale.",
+              impact: "Fără procedură, nu poți răspunde în termenul legal de 30 zile. Risc direct de amendă ANSPDCP.",
+              action: "Creează procedura din Generator sau înregistrează prima cerere în modulul DSAR.",
+              humanStep: "DPO-ul sau responsabilul GDPR revizuiește procedura și confirmă implementarea.",
+              closureEvidence: "Procedură documentată sau prima cerere DSAR procesată cu dovadă de răspuns.",
+              revalidation: "Verificare trimestrială a procedurii și a logului de cereri.",
+            },
+          }]
+          await writeStateForOrg(org.id, state, org.name)
+        }
+
         const summary = computeDashboardSummary(state)
         const { scoreToday, delta } = await getScoreDelta(org.id)
 
         const newFindings = getNewFindingsCount(state)
-        const [baseDeadlines, nis2Deadlines] = await Promise.all([
+        const [baseDeadlines, nis2Deadlines, dsarResult] = await Promise.all([
           Promise.resolve(getUrgentDeadlines(state)),
           getNis2SlaDeadlines(org.id),
+          checkDsarDeadlines(org.id),
         ])
         const policyDeadlines = getPolicyExpiryDeadlines(state)
-        const urgentDeadlines = [...baseDeadlines, ...nis2Deadlines, ...policyDeadlines].slice(0, 7)
+        const urgentDeadlines = [...baseDeadlines, ...nis2Deadlines, ...dsarResult.deadlines, ...policyDeadlines].slice(0, 7)
 
         // ANTI-SPAM: only send when something actionable happened
         const hasScoreDrop = delta !== null && delta <= SCORE_DROP_THRESHOLD

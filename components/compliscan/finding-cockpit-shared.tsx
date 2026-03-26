@@ -41,6 +41,9 @@ export function FindingNarrativeCard({
 }: FindingNarrativeCardProps) {
   const narrative = getFindingNarrative(finding)
   const status = getFindingStatusPresentation(finding.findingStatus)
+  const hasSecondaryContext = Boolean(
+    narrative.generatedAsset || narrative.humanStep || narrative.revalidation
+  )
 
   return (
     <Card className="border-eos-border bg-eos-surface">
@@ -59,54 +62,71 @@ export function FindingNarrativeCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-5">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <NarrativeBlock
             label="Problema"
             content={narrative.problem}
             tone="default"
           />
-          <NarrativeBlock
-            label="Impact"
-            content={narrative.impact}
-            tone="warning"
-          />
-          <NarrativeBlock
-            label="Ce faci acum"
-            content={narrative.action}
-            tone="primary"
-          />
-          <NarrativeBlock
-            label="Dovada acceptată"
-            content={narrative.evidence}
-            tone="default"
-          />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <NarrativeBlock
+              label="Impact"
+              content={narrative.impact}
+              tone="warning"
+            />
+            <NarrativeBlock
+              label="Dovada acceptată"
+              content={narrative.evidence}
+              tone="default"
+            />
+          </div>
         </div>
 
-        {(narrative.generatedAsset || narrative.humanStep || narrative.revalidation) && (
-          <div className="grid gap-3 md:grid-cols-3">
-            {narrative.generatedAsset ? (
-              <NarrativeBlock
-                label="Ce pregătește Compli"
-                content={narrative.generatedAsset}
-                tone="default"
-              />
-            ) : null}
-            {narrative.humanStep ? (
-              <NarrativeBlock
-                label="Confirmarea ta"
-                content={narrative.humanStep}
-                tone="default"
-              />
-            ) : null}
-            {narrative.revalidation ? (
-              <NarrativeBlock
-                label="Revalidare"
-                content={narrative.revalidation}
-                tone="default"
-              />
-            ) : null}
-          </div>
-        )}
+        <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
+            Cum arată închiderea
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-eos-text">{narrative.action}</p>
+        </div>
+
+        {hasSecondaryContext ? (
+          <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
+                  Pregătire, confirmare și revalidare
+                </p>
+                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                  Doar contextul care te ajută să închizi corect cazul, fără să aglomereze primul ecran.
+                </p>
+              </div>
+              <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+            </summary>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {narrative.generatedAsset ? (
+                <NarrativeBlock
+                  label="Ce pregătește Compli"
+                  content={narrative.generatedAsset}
+                  tone="default"
+                />
+              ) : null}
+              {narrative.humanStep ? (
+                <NarrativeBlock
+                  label="Confirmarea ta"
+                  content={narrative.humanStep}
+                  tone="default"
+                />
+              ) : null}
+              {narrative.revalidation ? (
+                <NarrativeBlock
+                  label="Revalidare"
+                  content={narrative.revalidation}
+                  tone="default"
+                />
+              ) : null}
+            </div>
+          </details>
+        ) : null}
 
         <div className="grid gap-3 border-t border-eos-border-subtle pt-4 sm:grid-cols-3">
           <FactLine label="Sursă" value={finding.sourceDocument || "finding generat intern"} />
@@ -137,7 +157,10 @@ export function FindingHeroAction({
   const narrative = getFindingNarrative(finding)
 
   return (
-    <div className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6">
+    <div
+      data-testid="finding-hero-action"
+      className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6"
+    >
       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
         Acum faci asta
       </p>
@@ -180,6 +203,7 @@ export function FindingExecutionCard({
   const narrative = getFindingNarrative(finding)
   const suggestedDocumentLabel = narrative.suggestedDocumentLabel
   const steps = getFindingProgressSteps(finding, documentFlowState, linkedGeneratedDocument)
+  const activeStep = steps.find((step) => step.state === "active") ?? steps[steps.length - 1]
   const monitoringSignals = getFindingMonitoringSignals(finding, linkedGeneratedDocument)
 
   return (
@@ -198,7 +222,10 @@ export function FindingExecutionCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-5">
-        <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+        <div
+          data-testid="finding-progress-stepper"
+          className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4"
+        >
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
               Harta de progres
@@ -207,16 +234,24 @@ export function FindingExecutionCard({
               {steps.findIndex((step) => step.state === "active") + 1}/{steps.length}
             </p>
           </div>
-          <div className="grid gap-2">
-            {steps.map((step, index) => (
-              <ProgressStepRow
-                key={step.id}
-                label={step.label}
-                hint={step.hint}
-                state={step.state}
-                showConnector={index < steps.length - 1}
-              />
-            ))}
+          <div className="overflow-x-auto pb-1">
+            <div className="flex min-w-max items-center gap-2">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-center gap-2">
+                  <ProgressStepPill
+                    label={step.label}
+                    state={step.state}
+                  />
+                  {index < steps.length - 1 ? (
+                    <div className="h-px w-5 shrink-0 bg-eos-border-subtle" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+            <p className="text-xs font-medium text-eos-text">Pas activ: {activeStep.label}</p>
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">{activeStep.hint}</p>
           </div>
         </div>
 
@@ -329,7 +364,7 @@ export function FindingDossierSuccessCard({
       : "monitorizare activă după închidere"
 
   return (
-    <Card className="border-eos-success/35 bg-eos-success-soft/60">
+    <Card data-testid="finding-dossier-success" className="border-eos-success/35 bg-eos-success-soft/60">
       <CardContent className="space-y-5 px-5 py-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
@@ -398,16 +433,12 @@ export function FindingDossierSuccessCard({
   )
 }
 
-function ProgressStepRow({
+function ProgressStepPill({
   label,
-  hint,
   state,
-  showConnector,
 }: {
   label: string
-  hint: string
   state: "done" | "active" | "upcoming"
-  showConnector: boolean
 }) {
   const toneClass =
     state === "done"
@@ -417,29 +448,21 @@ function ProgressStepRow({
         : "border-eos-border-subtle bg-eos-surface text-eos-text-muted"
 
   return (
-    <div className="flex gap-3">
-      <div className="flex w-5 flex-col items-center">
-        <div
-          className={`flex size-5 items-center justify-center rounded-full border text-[10px] font-semibold ${toneClass}`}
-        >
-          {state === "done" ? "✓" : state === "active" ? "•" : ""}
-        </div>
-        {showConnector ? (
-          <div
-            className={`mt-1 w-px flex-1 ${state === "done" ? "bg-eos-success/30" : "bg-eos-border-subtle"}`}
-          />
-        ) : null}
-      </div>
-      <div className="min-w-0 pb-2">
-        <p
-          className={`text-sm font-medium ${
-            state === "active" ? "text-eos-text" : state === "done" ? "text-eos-success" : "text-eos-text-muted"
-          }`}
-        >
-          {label}
-        </p>
-        <p className="mt-1 text-xs leading-5 text-eos-text-muted">{hint}</p>
-      </div>
+    <div
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass}`}
+    >
+      <span
+        className={`inline-flex size-4 items-center justify-center rounded-full border text-[10px] ${
+          state === "done"
+            ? "border-eos-success/40 bg-white text-eos-success"
+            : state === "active"
+              ? "border-eos-primary/30 bg-white text-eos-primary"
+              : "border-eos-border-subtle bg-eos-surface text-eos-text-muted"
+        }`}
+      >
+        {state === "done" ? "✓" : state === "active" ? "•" : ""}
+      </span>
+      <span>{label}</span>
     </div>
   )
 }

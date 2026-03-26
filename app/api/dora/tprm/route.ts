@@ -12,11 +12,16 @@ import type { TprmCriticality, TprmStatus } from "@/lib/server/dora-store"
 
 const VALID_CRITICALITIES: TprmCriticality[] = ["critical", "important", "standard"]
 
+async function readJsonBody<T>(request: Request): Promise<T> {
+  const rawBody = await request.text()
+  return rawBody ? (JSON.parse(rawBody) as T) : ({} as T)
+}
+
 export async function POST(request: Request) {
   try {
     requireRole(request, WRITE_ROLES, "adăugarea unui furnizor ICT")
     const { orgId } = await getOrgContext()
-    const body = await request.json() as {
+    const body = await readJsonBody<{
       providerName?: string
       serviceType?: string
       criticality?: TprmCriticality
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
       contractEndISO?: string
       riskLevel?: "low" | "medium" | "high"
       notes?: string
-    }
+    }>(request)
     if (!body.providerName?.trim()) return jsonError("Numele furnizorului este obligatoriu.", 400, "MISSING_NAME")
     if (!body.serviceType?.trim()) return jsonError("Tipul serviciului este obligatoriu.", 400, "MISSING_SERVICE")
     if (!body.criticality || !VALID_CRITICALITIES.includes(body.criticality)) {

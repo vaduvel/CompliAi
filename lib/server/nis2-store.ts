@@ -3,6 +3,11 @@
 // Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
 import type { Nis2Answers, Nis2AnswersMeta, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import type {
+  Nis2EmployeeRange,
+  Nis2RevenueRange,
+  Nis2EligibilityResult,
+} from "@/lib/compliscan/nis2-eligibility"
 import { detectTechVendor } from "@/lib/server/efactura-mock-data"
 import type { EfacturaSupplierImportRecord } from "@/lib/server/efactura-vendor-signals"
 import { validateCUI } from "@/lib/server/request-validation"
@@ -213,6 +218,16 @@ export type BoardMember = {
   updatedAtISO: string
 }
 
+// ── Faza 2 TASK 8: NIS2 Eligibility Gate ────────────────────────────────────
+
+export type Nis2EligibilityRecord = {
+  sectorId: string
+  employees: Nis2EmployeeRange
+  revenue: Nis2RevenueRange
+  result: Nis2EligibilityResult    // "nu_intri" | "posibil" | "intri"
+  savedAtISO: string
+}
+
 export type Nis2OrgState = {
   assessment: Nis2AssessmentRecord | null
   incidents: Nis2Incident[]
@@ -223,6 +238,7 @@ export type Nis2OrgState = {
   dnscRegistrationCorrespondence?: Nis2DnscCorrespondence[]  // GOLD 6 — corespondență înregistrare
   maturityAssessment?: MaturityAssessment           // Sprint 2.6
   boardMembers?: BoardMember[]                      // Sprint 2.7
+  eligibility?: Nis2EligibilityRecord | null        // Faza 2 TASK 8
 }
 
 function emptyState(): Nis2OrgState {
@@ -683,6 +699,21 @@ export async function deleteBoardMember(orgId: string, memberId: string): Promis
   if (filtered.length === members.length) return false
   await writeNis2State(orgId, { ...state, boardMembers: filtered })
   return true
+}
+
+// ── Faza 2 TASK 8: NIS2 Eligibility Gate ────────────────────────────────────
+
+export async function saveNis2Eligibility(
+  orgId: string,
+  record: Nis2EligibilityRecord
+): Promise<Nis2OrgState> {
+  const state = await readNis2State(orgId)
+  return writeNis2State(orgId, { ...state, eligibility: record })
+}
+
+export async function readNis2Eligibility(orgId: string): Promise<Nis2EligibilityRecord | null> {
+  const state = await readNis2State(orgId)
+  return state.eligibility ?? null
 }
 
 // ── Seed (demo) ──────────────────────────────────────────────────────────────

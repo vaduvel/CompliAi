@@ -131,6 +131,9 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const narrative = getFindingNarrative(finding)
   const documentFlowState = getResolveDocumentFlowState(finding)
   const flowStatus = getFindingDocumentFlowPresentation(documentFlowState)
+  const cockpitHref = finding.suggestedDocumentType
+    ? `/dashboard/resolve/${finding.id}?generator=1`
+    : `/dashboard/resolve/${finding.id}`
 
   return (
     <div className={["overflow-hidden rounded-eos-md border transition-colors duration-150", expanded ? "border-eos-border-default" : "border-eos-border-subtle", "bg-eos-surface"].join(" ")}>
@@ -173,16 +176,25 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
             />
           </div>
           <div className="border-t border-eos-border-subtle px-5 py-3">
-            <Link
-              href={`/dashboard/resolve/${finding.id}`}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
-            >
-              Vezi cockpitul complet
-              <ArrowRight className="size-3" strokeWidth={2} />
-            </Link>
-            <span className="ml-3 text-[11px] text-eos-text-muted">
-              Finding, dovadă, dosar și monitorizare în aceeași urmă.
-            </span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-eos-text">
+                  {finding.suggestedDocumentType
+                    ? "Generatorul trăiește în cockpitul cazului, nu într-o pagină separată."
+                    : "Intră în cockpit ca să închizi cazul fără să pierzi urma de dovadă și monitoring."}
+                </p>
+                <p className="text-[11px] text-eos-text-muted">
+                  Finding, dovadă, dosar și monitorizare rămân în aceeași urmă.
+                </p>
+              </div>
+              <Link
+                href={cockpitHref}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
+              >
+                {finding.suggestedDocumentType ? "Intră și generează" : "Vezi cockpitul complet"}
+                <ArrowRight className="size-3" strokeWidth={2} />
+              </Link>
+            </div>
           </div>
         </>
       )}
@@ -543,36 +555,41 @@ export function ResolvePageSurface() {
         </section>
       )}
 
-      {/* Primary execution surface */}
-      {cockpit.tasks.length > 0 && (
-        <section aria-label="Plan de remediere">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-eos-text">Task-uri de suport pentru cazurile deschise</p>
-              <p className="mt-1 text-xs text-eos-text-muted">
-                Board-ul rămâne util pentru execuția rapidă, dar finding-ul rămâne ancora principală pentru context, dovadă și monitoring.
-              </p>
-            </div>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {openTasks.length} task-uri deschise
-            </Badge>
-          </div>
-          <RemediationBoard
-            tasks={cockpit.tasks}
-            findings={findings}
-            activeFilter={taskFilter}
-            onFilterChange={setTaskFilter}
-            onMarkDone={cockpitActions.handleMarkDone}
-            onAttachEvidence={cockpitActions.attachEvidence}
-            onExport={cockpitActions.handleTaskExport}
-          />
-        </section>
-      )}
-
-      {/* Supporting context: finding queue */}
+      {/* Main execution queue */}
       <section aria-label="Finding-uri de rezolvat">
         <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
+
+      {/* Support board kept secondary on purpose */}
+      {cockpit.tasks.length > 0 && (
+        <section aria-label="Task-uri de suport">
+          <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+            <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-eos-text">Task-uri de suport pentru cazurile deschise</p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  Board-ul rămâne util pentru execuția rapidă, dar finding-ul și cockpitul rămân traseul principal.
+                </p>
+              </div>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                {openTasks.length} task-uri deschise
+              </Badge>
+            </summary>
+
+            <div className="mt-4 border-t border-eos-border-subtle pt-4">
+              <RemediationBoard
+                tasks={cockpit.tasks}
+                findings={findings}
+                activeFilter={taskFilter}
+                onFilterChange={setTaskFilter}
+                onMarkDone={cockpitActions.handleMarkDone}
+                onAttachEvidence={cockpitActions.attachEvidence}
+                onExport={cockpitActions.handleTaskExport}
+              />
+            </div>
+          </details>
+        </section>
+      )}
     </div>
   )
 }

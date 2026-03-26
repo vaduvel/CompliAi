@@ -137,6 +137,38 @@ export function getFindingAutoAction(finding: ScanFinding): {
   href: string
   type: "document" | "scan" | "assessment"
 } | null {
+  if (finding.id === "dsar-no-procedure") {
+    return {
+      label: "Creează procedura DSAR",
+      href: "/dashboard/dsar",
+      type: "assessment",
+    }
+  }
+
+  if (finding.id === "saft-d406-registration") {
+    return {
+      label: "Verifică statusul D406",
+      href: "/dashboard/fiscal",
+      type: "assessment",
+    }
+  }
+
+  if (finding.id.startsWith("saft-")) {
+    return {
+      label: "Vezi dashboard fiscal",
+      href: "/dashboard/fiscal",
+      type: "assessment",
+    }
+  }
+
+  if (finding.id === "nis2-finding-eligibility") {
+    return {
+      label: "Revizuiește eligibilitatea NIS2",
+      href: "/dashboard/nis2/eligibility",
+      type: "assessment",
+    }
+  }
+
   if (finding.id.startsWith("nis2-finding-")) {
     return {
       label: "Actualizează evaluarea NIS2",
@@ -159,7 +191,7 @@ export function getFindingAutoAction(finding: ScanFinding): {
   if (finding.suggestedDocumentType && getSuggestedDocumentLabel(finding.suggestedDocumentType)) {
     return {
       label: `Generează ${getSuggestedDocumentLabel(finding.suggestedDocumentType)}`,
-      href: `/dashboard/generator?documentType=${finding.suggestedDocumentType}`,
+      href: `/dashboard/resolve/${finding.id}?generator=1`,
       type: "document",
     }
   }

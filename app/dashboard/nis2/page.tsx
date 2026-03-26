@@ -2332,6 +2332,26 @@ export default function Nis2Page() {
         }
       />
 
+      {/* Eligibility CTA — link to wizard page */}
+      <Card className="border-eos-primary/30 bg-eos-primary/5">
+        <CardContent className="flex items-center justify-between gap-4 p-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">
+              Verifică dacă firma ta intră sub NIS2
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Wizard rapid — 3 întrebări bazate pe OUG 155/2024
+            </p>
+          </div>
+          <Link href="/dashboard/nis2/eligibility">
+            <Button size="sm" className="shrink-0 gap-1.5 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover">
+              <ShieldAlert className="size-4" strokeWidth={2} />
+              Verifică eligibilitatea
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
       <Nis2ProgressStepper />
       <Nis2RescueBanner />
       <MaturityCard />

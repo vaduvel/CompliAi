@@ -9,7 +9,7 @@ import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import { computeCountdown } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import { computeFilingDisciplineScore } from "@/lib/compliance/filing-discipline"
-import { computeSAFTHygiene } from "@/lib/compliance/saft-hygiene"
+import { computeSAFTHygiene, buildSAFTD406Finding } from "@/lib/compliance/saft-hygiene"
 
 export type HealthCheckStatus = "ok" | "warning" | "critical"
 
@@ -367,6 +367,33 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
         })
       }
     }
+  }
+
+  // 11. SAF-T D406 Registration (Faza 2 — TASK 7)
+  const applicabilityTags = state.applicability?.tags ?? []
+  const hasSaftTag = applicabilityTags.includes("saft")
+  const d406Findings = buildSAFTD406Finding({
+    hasSaftTag,
+    d406EvidenceSubmitted: state.d406EvidenceSubmitted,
+    nowISO,
+  })
+  if (d406Findings.length > 0) {
+    items.push({
+      id: "hc-saft-d406",
+      title: "SAF-T (D406) — nu există dovadă de depunere",
+      detail: "Obligație activă din ianuarie 2025. Amenda: 1.000–10.000 lei.",
+      status: "critical",
+      action: "Verifică și încarcă dovada",
+      actionHref: dashboardRoutes.fiscal ?? dashboardRoutes.scan,
+    })
+  } else if (hasSaftTag) {
+    items.push({
+      id: "hc-saft-d406",
+      title: "SAF-T (D406) — dovada de depunere confirmată",
+      detail: "Declarația D406 a fost marcată ca depusă.",
+      status: "ok",
+      action: "Menține ritmul de depunere",
+    })
   }
 
   // Calculate score

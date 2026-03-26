@@ -68,13 +68,14 @@ function buildImmState(): ComplianceState {
       createdAtISO: "2026-03-15T10:00:00.000Z",
       sourceDocument: "demo-scan",
       legalReference: "GDPR Art. 13",
+      suggestedDocumentType: "privacy-policy",
       impactSummary: "Amendă potențială: 2% din cifra de afaceri sau 10M EUR (Art. 83 GDPR).",
       remediationHint:
-        "Generați și publicați o politică de confidențialitate cu CompliAI Generator.",
+        "Generează politica de confidențialitate direct din cockpitul cazului și public-o.",
       resolution: {
         problem: "Lipsă politică de confidențialitate publicată",
         impact: "Amendă potențială GDPR Art. 83",
-        action: "Generați politica din CompliAI Generator, publicați pe website",
+        action: "Generează politica din cockpit, public-o pe website și salvează dovada la dosar",
         closureEvidence: "Link public la politica publicată sau PDF semnat și datat",
       },
     },

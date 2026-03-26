@@ -24,6 +24,8 @@ import type {
   ComplianceEvent,
   GeneratedDocumentRecord,
 } from "@/lib/compliance/types"
+import type { AppNotification } from "@/lib/server/notifications-store"
+import { buildExternalFeedItems } from "@/lib/compliscan/feed-sources"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -35,6 +37,7 @@ export default function DashboardPage() {
   const [nis2UrgentIncident, setNis2UrgentIncident] = useState(false)
   const [benchmark, setBenchmark] = useState<{ medie: number; percentil: number; nrFirme: number; sector: string } | null>(null)
   const [highlightAccumulation, setHighlightAccumulation] = useState(false)
+  const [externalNotifications, setExternalNotifications] = useState<AppNotification[]>([])
 
   useEffect(() => {
     fetch("/api/nis2/assessment", { cache: "no-store" })
@@ -65,6 +68,13 @@ export default function DashboardPage() {
       .then((r) => r.ok ? r.json() : null)
       .then((data: { benchmark?: { medie: number; percentil: number; nrFirme: number; sector: string } | null } | null) => {
         if (data?.benchmark) setBenchmark(data.benchmark)
+      })
+      .catch(() => {})
+
+    fetch("/api/notifications", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { notifications?: AppNotification[] } | null) => {
+        if (data?.notifications) setExternalNotifications(data.notifications)
       })
       .catch(() => {})
   }, [])
@@ -123,11 +133,26 @@ export default function DashboardPage() {
     state.scans.length > 0 || state.scannedDocuments > 0 || state.validatedBaselineSnapshotId
   )
   const activeRiskCount = openAlerts.length + activeDrifts.length
-  const activityFeedItems = buildActivityFeedItems({
+  const internalFeedItems = buildActivityFeedItems({
     events: state.events,
     activeDrifts,
     generatedDocuments: state.generatedDocuments,
   })
+  const externalFeedItems = buildExternalFeedItems(externalNotifications, state)
+  const activityFeedItems = [
+    ...internalFeedItems,
+    ...externalFeedItems.map((e) => ({
+      id: e.id,
+      eyebrow: e.eyebrow,
+      title: e.title,
+      detail: e.detail,
+      dateISO: e.dateISO,
+      tone: e.tone,
+      href: e.href,
+    })),
+  ]
+    .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+    .slice(0, 8)
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"

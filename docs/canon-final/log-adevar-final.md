@@ -609,3 +609,43 @@ Cand incepe implementarea reala:
 - acest log trebuie actualizat inainte sa se piarda contextul
 - nu trebuie mutat in arhiva
 - nu trebuie inlocuit cu mesaje din chat
+
+Update executie `2026-03-26` (polish peste canon + smoke browser real):
+- **Ierarhia cockpit-ului este mai compacta si mai clara**:
+  - [finding-cockpit-shared.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/finding-cockpit-shared.tsx)
+    - cardul narativ nu mai dubleaza `ce faci acum`; accentul ramane pe `Problema`, `Impact`, `Dovada acceptata`
+    - `Cum arata inchiderea` a devenit strip separat, mai usor de scanat
+    - contextul secundar (`Ce pregateste Compli`, `Confirmarea ta`, `Revalidare`) a fost mutat in expand controlat
+    - stepper-ul din execution card a devenit `compact progress map`, nu lista verticala grea
+- **Success moment-ul functioneaza si in drawer, nu doar in pagina separata de generator**:
+  - [page.tsx](/Users/vaduvageorge/Desktop/CompliAI/app/dashboard/resolve/[findingId]/page.tsx)
+    - dupa atasarea dovezii din drawer, cockpit-ul afiseaza local `FindingDossierSuccessCard`
+    - contextul juridic / provenance / reasoning a fost compactat intr-un bloc `details`, ca sa nu aglomereze primul ecran
+  - [generator-drawer.tsx](/Users/vaduvageorge/Desktop/CompliAI/components/compliscan/generator-drawer.tsx)
+    - transmite acum explicit inapoi `dossierSaved`
+    - are `data-testid` stabile pentru smoke pe preview, checklist si attach
+- **Smoke client-side real, nu doar API smoke**:
+  - [smoke-smart-resolve-browser.mjs](/Users/vaduvageorge/Desktop/CompliAI/scripts/smoke-smart-resolve-browser.mjs)
+    - parcurge `register -> set user mode -> complete onboarding -> scan fixture -> open finding -> confirm -> open drawer -> generate -> attach -> success card`
+    - foloseste Chrome local si un finding documentar real rezultat din fixture
+  - [package.json](/Users/vaduvageorge/Desktop/CompliAI/package.json)
+    - script nou: `npm run smoke:smart-resolve-browser`
+- **Build blockers aduse la lumina in timpul polish-ului au fost inchise**:
+  - [route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/dora/tprm/route.ts) si [route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/policies/acknowledge/route.ts) nu mai crapa la body JSON gol in build/prerender
+  - [route.ts](/Users/vaduvageorge/Desktop/CompliAI/app/api/nis2/eligibility/route.ts) a fost corectat pe `createdAtISO` si pe tipul `risk`
+
+Validare:
+- `npm test -- 'app/api/findings/[id]/route.test.ts' tests/flow-test-kit-user-nou.test.ts app/api/smoke-flow.test.ts` trece
+- `npm run build` trece
+- `npm run smoke:smart-resolve-browser` trece cu rezultat:
+  - finding documentar real deschis
+  - drawer generator deschis in-context
+  - draft generat
+  - checklist bifat
+  - dovada atasata
+  - success card `Dovada salvata la dosar` vizibil
+
+Parcare pentru faza 2 (nu mai este gap de canon, ci extensie controlata):
+- `Home by maturity`: dashboard care se schimba clar intre firma noua, operator activ si workspace matur
+- `Feed de activitate mai dens`: sumarizarea tuturor agentilor / cron-urilor intr-un singur flux uman, actionabil
+- `Cockpit inline mai puternic in lista din Resolve`: mai putin detur in detail page pentru cazurile simple

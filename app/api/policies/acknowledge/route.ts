@@ -8,6 +8,11 @@ import { writePolicyAcknowledgment } from "@/lib/server/policy-store"
 import { eventActorFromSession } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
 
+async function readJsonBody<T>(request: Request): Promise<T> {
+  const rawBody = await request.text()
+  return rawBody ? (JSON.parse(rawBody) as T) : ({} as T)
+}
+
 export async function POST(request: Request) {
   try {
     requireRole(request, ["owner", "partner_manager", "compliance"], "confirmarea politicilor")
@@ -16,7 +21,7 @@ export async function POST(request: Request) {
     const session = readSessionFromRequest(request)
     const userEmail = session?.email ?? "unknown"
 
-    const body = (await request.json()) as { policyId?: string }
+    const body = await readJsonBody<{ policyId?: string }>(request)
     const { policyId } = body
     if (!policyId || typeof policyId !== "string") {
       return jsonError("policyId lipsa.", 400, "POLICY_ID_REQUIRED")

@@ -421,6 +421,8 @@ export type ComplianceState = {
   // ── Smart Intake (Questionnaire Automation) ──────────────────────────────
   intakeAnswers?: FullIntakeAnswers
   intakeCompletedAtISO?: string
+  // ── Faza 2: SAF-T D406 ────────────────────────────────────────────────
+  d406EvidenceSubmitted?: boolean
   // ── Addon 1: Compliance Streak ─────────────────────────────────────────
   complianceStreak?: ComplianceStreak
   // ── Multiplicator A: Site Intelligence Layer ────────────────────────────

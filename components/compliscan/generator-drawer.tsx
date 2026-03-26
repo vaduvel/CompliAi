@@ -44,7 +44,7 @@ type GeneratorDrawerProps = {
   findingId: string
   documentType: DocumentType
   findingTitle: string
-  onComplete: () => void
+  onComplete: (result?: { dossierSaved?: boolean }) => void
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ export function GeneratorDrawer({
 
       toast.success("Dovada salvata la dosar")
       onOpenChange(false)
-      onComplete()
+      onComplete({ dossierSaved: true })
     } catch (err) {
       toast.error("Eroare", {
         description: err instanceof Error ? err.message : "Incearca din nou.",
@@ -185,6 +185,7 @@ export function GeneratorDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
+        data-testid="finding-generator-drawer"
         className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
       >
         <SheetHeader>
@@ -223,6 +224,7 @@ export function GeneratorDrawer({
               <Button
                 onClick={handleGenerate}
                 disabled={generating}
+                data-testid="generate-document-draft"
                 className="w-full gap-2"
               >
                 {generating ? (
@@ -238,7 +240,7 @@ export function GeneratorDrawer({
           {/* ── Preview ── */}
           {result && (
             <div ref={previewRef} className="space-y-4">
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+              <div data-testid="generated-document-preview" className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
                   Preview draft
                 </p>
@@ -261,6 +263,7 @@ export function GeneratorDrawer({
                       type="checkbox"
                       checked={checklist.includes(item.id)}
                       onChange={() => toggleItem(item.id)}
+                      data-testid={`drawer-checklist-${item.id}`}
                       className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
                     />
                     <span className="text-sm text-eos-text">{item.label}</span>
@@ -272,6 +275,7 @@ export function GeneratorDrawer({
                 <Button
                   onClick={handleAttach}
                   disabled={!allChecked || attaching}
+                  data-testid="attach-generated-document"
                   className="flex-1 gap-2"
                 >
                   {attaching ? (
