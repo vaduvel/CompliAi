@@ -14,6 +14,10 @@ import {
 } from "@/components/evidence-os/Sheet"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
+import {
+  buildSiteScanContextForDocument,
+  getLatestSuccessfulSiteScanResult,
+} from "@/lib/compliance/site-scan-context"
 import { FINDING_DOCUMENT_LABELS } from "@/lib/compliscan/finding-cockpit"
 import type { DocumentType, GeneratedDocument } from "@/lib/server/document-generator"
 
@@ -93,6 +97,13 @@ export function GeneratorDrawer({
   const previewRef = useRef<HTMLDivElement>(null)
 
   const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
+  const siteScanDrivenDocument =
+    documentType === "privacy-policy" || documentType === "cookie-policy"
+  const latestSiteScanResult = getLatestSuccessfulSiteScanResult(cockpit.data?.state.siteScanJobs)
+  const siteScanContext =
+    siteScanDrivenDocument && latestSiteScanResult
+      ? buildSiteScanContextForDocument(documentType, latestSiteScanResult)
+      : ""
 
   // Pre-fill from org state
   useEffect(() => {
@@ -102,6 +113,18 @@ export function GeneratorDrawer({
       setOrgWebsite(cockpit.data.state.orgProfile.website)
     }
   }, [cockpit.data, orgName, orgWebsite])
+
+  useEffect(() => {
+    if (!siteScanDrivenDocument || !latestSiteScanResult) return
+
+    if (!orgWebsite) {
+      setOrgWebsite(latestSiteScanResult.url)
+    }
+
+    if (!dataFlows && siteScanContext) {
+      setDataFlows(siteScanContext)
+    }
+  }, [dataFlows, latestSiteScanResult, orgWebsite, siteScanContext, siteScanDrivenDocument])
 
   useEffect(() => {
     if (documentType !== "dpa") return
@@ -218,6 +241,9 @@ export function GeneratorDrawer({
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
   const showDpoField = ["privacy-policy", "dpa"].includes(documentType)
   const showCounterpartyField = documentType === "dpa"
+  const contextFieldHint = siteScanContext
+    ? "Precompletat din ultimul site scan. Poți ajusta înainte de generare."
+    : "Detalii relevante pentru documentul generat."
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -309,7 +335,19 @@ export function GeneratorDrawer({
                 </div>
               ) : null}
 
-              <Field label="Context suplimentar">
+              {siteScanContext && latestSiteScanResult ? (
+                <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 px-4 py-3 text-sm text-eos-text">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                    Context din site scan
+                  </p>
+                  <p className="mt-1 text-eos-text-muted">
+                    Ultimul scan al site-ului a rulat la{" "}
+                    {new Date(latestSiteScanResult.scannedAtISO).toLocaleString("ro-RO")} și intră direct în draftul acestui document.
+                  </p>
+                </div>
+              ) : null}
+
+              <Field label="Context suplimentar" hint={contextFieldHint}>
                 <textarea
                   className={textareaClass}
                   rows={3}
