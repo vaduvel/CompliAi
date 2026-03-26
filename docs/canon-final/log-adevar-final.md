@@ -22,6 +22,31 @@ Regula de aur:
 - acest log spune ordinea exacta de executie
 - daca apare conflict, canonul castiga
 
+## 1.1 Finding-uri parcate din audit runtime
+
+### 2026-03-26 — Cockpit gap pe finding-uri operationale intake-driven
+
+Status: `PARKED FOR FOLLOW-UP`
+
+Simptom observat in runtime:
+- unele finding-uri operationale venite din intake, exemplu `REGES / evidenta contracte angajati`, intra in cockpit fara traseu clar de inchidere
+- userul vede mult context si stepper, dar nu vede imediat:
+  - unde genereaza daca finding-ul cere document
+  - unde adauga dovada daca finding-ul cere dovada operationala
+  - unde rescaneaza / reverifica
+  - care este butonul unic de inchidere care trimite cazul la dosar si il muta in monitoring
+
+Diagnostic curent:
+- finding-ul cade pe mapping generic (`GDPR-GENERIC`) si mosteneste un flow prea vag pentru tipul lui real
+- rezultatul este un cockpit care explica, dar nu conduce destul de agresiv la actiunea unica
+
+Decizie:
+- nu se taie acum din Sprint 3 / deploy
+- se trateaza explicit ca follow-up de UX + typing in sprinturile urmatoare
+- regula de rezolvare ramane:
+  - fiecare finding trebuie sa intre fie pe `generator flow`, fie pe `dovada operationala`, fie pe `revalidare`
+  - niciun finding nu trebuie sa ramana intr-un `completeaza acum / marcheaza rezolvat` vag
+
 ## 2. Decizia executiva
 
 Nu mai facem patch-uri separate pe pagini rupte.

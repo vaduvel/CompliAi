@@ -401,10 +401,10 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
             <Shield className="h-5 w-5 shrink-0 text-eos-primary" />
             <div>
               <p className="text-sm font-semibold text-eos-text">
-                Descoperă ce legi se aplică organizației tale
+                Îți pregătim primul snapshot de conformitate
               </p>
               <p className="text-xs text-eos-text-muted">
-                Prefill + confirmare asistată · primele findings apar imediat
+                Prefill + confirmare asistată · vezi ce se aplică, ce am găsit și ce faci acum
               </p>
             </div>
           </div>
@@ -557,7 +557,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               </div>
               <p className="mb-2 text-lg font-semibold text-eos-text">Compli verifică</p>
               <p className="mb-8 text-sm text-eos-text-muted">
-                Așteptăm doar câteva secunde
+                Pornim din CUI, website și semnalele deja găsite. Îți pregătim primul snapshot.
               </p>
               <div className="w-full max-w-xs space-y-3">
                 {CHECKING_MESSAGES.map((msg, i) => (
@@ -870,7 +870,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-eos-success" />
                 <p className="text-sm font-medium text-eos-text">
-                  Ai direcția inițială. Nu mai pornești din întuneric.
+                  Ai primul snapshot. Nu mai pornești de la zero.
                 </p>
               </div>
 
@@ -900,21 +900,21 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               <div className="grid gap-3 lg:grid-cols-3">
                 <SummaryCard
                   icon={<TriangleAlert className="h-4 w-4 text-eos-warning" />}
-                  title="Primele findings"
-                  subtitle="Constatări inițiale generate automat"
+                  title="Ce am găsit deja"
+                  subtitle="Primele constatări generate automat"
                   items={initialFindings.slice(0, 4).map((finding) => finding.title)}
                   emptyLabel="Nu au apărut findings inițiale."
                 />
                 <SummaryCard
                   icon={<FileText className="h-4 w-4 text-eos-primary" />}
-                  title="Documente recomandate"
-                  subtitle="Ce merită pregătit imediat"
+                  title="Ce merită pregătit"
+                  subtitle="Documente și artefacte recomandate acum"
                   items={documentRequests.slice(0, 4).map((document) => document.label)}
                   emptyLabel="Nu există documente noi recomandate."
                 />
                 <SummaryCard
                   icon={<ListChecks className="h-4 w-4 text-eos-success" />}
-                  title="Următorul pas"
+                  title="Ce faci acum"
                   subtitle={
                     nextBestAction
                       ? `${nextBestAction.estimatedMinutes} min până la prima acțiune`
@@ -984,7 +984,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               )}
 
               <Button onClick={handleDone} className="w-full">
-                Continuă la dashboard
+                Continuă spre ecranul de start
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>

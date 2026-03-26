@@ -87,8 +87,8 @@ const ONBOARDING_OVERVIEW_STEPS: OnboardingOverviewStep[] = [
   },
   {
     id: "report",
-    label: "Primul tau raport",
-    hint: "vezi findings, documente si urmatorul pas",
+    label: "Primul snapshot și primul pas",
+    hint: "ce se aplică, ce am găsit, ce faci acum",
     icon: FileSearch,
   },
 ]
@@ -179,11 +179,11 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               Onboarding ghidat
             </Badge>
             <h1 className="mt-4 text-3xl font-semibold text-eos-text">
-              Primele decizii, intr-un singur flow
+              Îți pregătim primul snapshot, nu te plimbăm prin pagini
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-eos-text-muted">
-              Nu te trimitem in dashboard pana cand alegi modul de lucru, confirmi datele firmei si
-              vezi primul raport initial.
+              Pornim din rol, CUI și website. Compli verifică, îți spune ce ți se aplică, ce a
+              găsit deja și care este prima acțiune cu impact real.
             </p>
           </div>
 
@@ -280,7 +280,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-eos-text-muted">
                     {currentMode
-                      ? `${orgName ?? "Organizația ta"} rămâne în același flow până când primești findings și următorul pas clar. Poți reveni cu Înapoi dacă vrei să corectezi răspunsurile.`
+                      ? `${orgName ?? "Organizația ta"} rămâne în același flow până când primești primul snapshot: ce se aplică, ce am găsit deja și ce faci acum. Poți reveni cu Înapoi dacă vrei să corectezi răspunsurile.`
                       : "Alege rolul care descrie cel mai bine modul in care vei lucra in produs."}
                   </p>
                 </div>

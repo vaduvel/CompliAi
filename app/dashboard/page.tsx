@@ -12,7 +12,11 @@ import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sectio
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { LegalSourceBadge } from "@/components/compliscan/legal-source-badge"
 import { getSuggestionExplanation, FRAMEWORK_LEGAL_STATUS } from "@/lib/compliance/legal-sources"
-import type { ApplicabilityCertainty, ApplicabilityTag } from "@/lib/compliance/applicability"
+import {
+  APPLICABILITY_TAG_LABELS,
+  type ApplicabilityCertainty,
+  type ApplicabilityTag,
+} from "@/lib/compliance/applicability"
 import { HealthCheckCard } from "@/components/compliscan/health-check-card"
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
 import { getVigilanceStrip } from "@/lib/compliance/sector-risk"
@@ -108,6 +112,9 @@ export default function DashboardPage() {
   const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
   const state = data.state
   const applicability = state.applicability ?? null
+  const applicableEntries = (applicability?.entries ?? [])
+    .filter((entry) => entry.certainty !== "unlikely")
+    .slice(0, 4)
 
   // ── Framework readiness ───────────────────────────────────────────────────
   const aiHighRisk = state.highRisk
@@ -128,11 +135,26 @@ export default function DashboardPage() {
       : "blocked"
 
   const openTasks = tasks.filter((t) => t.status !== "done")
+  const activeFindings = state.findings.filter((finding) => finding.findingStatus !== "dismissed")
   const missingEvidenceCount = openTasks.filter((t) => !t.attachedEvidence).length
   const hasBaselineEvidence = Boolean(
     state.scans.length > 0 || state.scannedDocuments > 0 || state.validatedBaselineSnapshotId
   )
   const activeRiskCount = openAlerts.length + activeDrifts.length
+  const firstSnapshotSignals = [
+    `${activeFindings.length} cazuri active sau confirmate`,
+    state.scans.length > 0
+      ? `${state.scans.length} surse deja analizate`
+      : "Încă nu ai surse scanate în workspace",
+    state.siteScan
+      ? `Website scanat: ${state.siteScan.findingCount} semnale detectate`
+      : state.orgProfile?.website
+        ? "Website adăugat, dar fără snapshot de scan încă"
+        : "Fără website în profilul firmei",
+    state.generatedDocuments.length > 0
+      ? `${state.generatedDocuments.length} documente sau artefacte deja în lucru`
+      : "Nicio dovadă sau document pregătit încă",
+  ]
   const internalFeedItems = buildActivityFeedItems({
     events: state.events,
     activeDrifts,
@@ -168,7 +190,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Snapshot"
         title="Starea firmei tale acum"
-        description="Ce ți se aplică, ce este deschis, ce faci acum și ce ai acumulat deja. Rezolvarea pornește de aici."
+        description="Asta ți se aplică, asta am găsit deja și asta faci acum. Rezolvarea pornește de aici."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -185,6 +207,35 @@ export default function DashboardPage() {
         }
 
       />
+
+      {state.orgProfile && (
+        <section aria-label="Primul snapshot">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <SnapshotFocusCard
+              title="Ce ți se aplică"
+              subtitle="Framework-urile care contează deja pentru firma ta"
+              items={
+                applicableEntries.length > 0
+                  ? applicableEntries.map((entry) => ({
+                      label: APPLICABILITY_TAG_LABELS[entry.tag],
+                      detail: entry.reason,
+                    }))
+                  : [
+                      {
+                        label: "Maparea este în curs",
+                        detail: "Compli completează obligațiile aplicabile imediat ce profilul și sursele sunt suficient de clare.",
+                      },
+                    ]
+              }
+            />
+            <SnapshotFocusCard
+              title="Ce am găsit deja"
+              subtitle="Semnale și constatări pregătite înainte să intri în cockpit"
+              items={firstSnapshotSignals.map((signal) => ({ label: signal }))}
+            />
+          </div>
+        </section>
+      )}
 
       {/* ── Onboarding fallback (the real flow now lives in /onboarding) ───── */}
       {!state.orgProfile && (
@@ -767,6 +818,38 @@ function ExecMetric({ label, value, good }: { label: string; value: string; good
       <p className="text-[10px] uppercase tracking-[0.15em] text-eos-text-tertiary">{label}</p>
       <p className={`mt-1 text-base font-semibold ${good ? "text-eos-success" : "text-eos-warning"}`}>{value}</p>
     </div>
+  )
+}
+
+function SnapshotFocusCard({
+  title,
+  subtitle,
+  items,
+}: {
+  title: string
+  subtitle: string
+  items: { label: string; detail?: string }[]
+}) {
+  return (
+    <Card className="border-eos-border bg-eos-surface">
+      <div className="border-b border-eos-border-subtle px-5 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+          Primul snapshot
+        </p>
+        <p className="mt-2 text-base font-semibold text-eos-text">{title}</p>
+        <p className="mt-1 text-sm text-eos-text-muted">{subtitle}</p>
+      </div>
+      <div className="space-y-3 px-5 py-4">
+        {items.map((item) => (
+          <div key={`${title}-${item.label}`} className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-3">
+            <p className="text-sm font-medium text-eos-text">{item.label}</p>
+            {item.detail ? (
+              <p className="mt-1 text-xs leading-relaxed text-eos-text-muted">{item.detail}</p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </Card>
   )
 }
 
