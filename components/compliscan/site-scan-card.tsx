@@ -1,7 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
-import { AlertTriangle, CheckCircle2, Globe, Loader2, ShieldAlert } from "lucide-react"
+import { AlertTriangle, ArrowRight, CheckCircle2, Globe, Loader2, ShieldAlert } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -18,10 +19,43 @@ type SiteScanCardProps = {
   } | null
   /** URL pre-completat din orgProfile.website dacă nu există un scan anterior */
   defaultUrl?: string
+  findingId?: string
+  findingTitle?: string
   onScanComplete?: (result: SiteScanResult) => void
 }
 
-export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteScanCardProps) {
+function buildSiteScanEvidenceNote(result: SiteScanResult) {
+  const consentFindings = result.findingSuggestions.filter(
+    (suggestion) =>
+      suggestion.type === "missing-consent" || suggestion.type === "cookie-banner-mismatch"
+  )
+  const trackerSummary =
+    result.trackers.length > 0
+      ? `${result.trackers.length} trackere detectate`
+      : "nu au mai fost detectate trackere"
+  const bannerSummary = result.hasCookieBanner
+    ? "bannerul cookie este detectat"
+    : "bannerul cookie nu este detectat"
+  const privacySummary = result.hasPrivacyPolicy
+    ? "politica de confidențialitate este detectată"
+    : "politica de confidențialitate nu este detectată"
+  const findingSummary =
+    consentFindings.length === 0
+      ? "Re-scanul nu a mai găsit probleme critice de consimțământ sau banner."
+      : `Re-scanul încă vede ${consentFindings.length} semnale: ${consentFindings
+          .map((suggestion) => suggestion.title)
+          .join("; ")}.`
+
+  return `Site scan rulat la ${new Date(result.scannedAtISO).toLocaleString("ro-RO")} pentru ${result.url}. ${bannerSummary}; ${trackerSummary}; ${privacySummary}. ${findingSummary}`
+}
+
+export function SiteScanCard({
+  existingScan,
+  defaultUrl,
+  findingId,
+  findingTitle,
+  onScanComplete,
+}: SiteScanCardProps) {
   const [url, setUrl] = useState(existingScan?.websiteUrl ?? defaultUrl ?? "")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<SiteScanResult | null>(null)
@@ -52,8 +86,12 @@ export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteS
     }
   }
 
-  const displayScan = result ?? (existingScan ? null : null)
   const hasPreviousScan = !!existingScan && !result
+  const evidenceNote = result && result.reachable ? buildSiteScanEvidenceNote(result) : null
+  const returnHref =
+    findingId && evidenceNote
+      ? `/dashboard/resolve/${encodeURIComponent(findingId)}?siteScan=done&evidenceNote=${encodeURIComponent(evidenceNote)}`
+      : null
 
   return (
     <Card className="border-eos-border bg-eos-surface">
@@ -65,10 +103,14 @@ export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteS
         <p className="text-sm text-eos-text-muted">
           Detectăm trackere, formulare și vendori în 20 de secunde — fără instalare.
         </p>
+        {findingTitle ? (
+          <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 px-3 py-2 text-xs text-eos-text-muted">
+            Revii din cazul <span className="font-medium text-eos-text">{findingTitle}</span>. După scanare, te întorci în cockpit cu rezultatul precompletat ca dovadă operațională.
+          </div>
+        ) : null}
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Previous scan summary */}
         {hasPreviousScan && (
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text-muted">
             Scan anterior: <span className="font-medium text-eos-text">{existingScan.websiteUrl}</span>
@@ -116,7 +158,6 @@ export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteS
               <p className="text-sm text-red-600">Site-ul nu a putut fi accesat: {result.errorMessage}</p>
             ) : (
               <>
-                {/* Summary stats */}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {[
                     { label: "Trackere", value: result.trackers.length, warn: result.trackers.length > 0 },
@@ -183,6 +224,22 @@ export function SiteScanCard({ existingScan, defaultUrl, onScanComplete }: SiteS
                     </div>
                   </details>
                 )}
+
+                {returnHref ? (
+                  <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 p-3">
+                    <p className="text-sm text-eos-text">
+                      Rezultatul scanării poate merge direct în cockpit ca dovadă de recheck. Revizuiești nota precompletată și decizi dacă poți închide cazul.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button asChild className="gap-1.5">
+                        <Link href={returnHref}>
+                          Înapoi în cockpit
+                          <ArrowRight className="size-3.5" strokeWidth={2} />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
               </>
             )}
           </div>

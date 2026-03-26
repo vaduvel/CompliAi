@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useParams, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -80,6 +80,7 @@ function getDefaultReviewDateInput() {
 
 export default function FindingDetailPage() {
   const params = useParams<{ findingId: string }>()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [finding, setFinding] = useState<FindingDetail | null>(null)
   const [linkedGeneratedDocument, setLinkedGeneratedDocument] = useState<LinkedGeneratedDocument | null>(null)
@@ -157,10 +158,26 @@ export default function FindingDetailPage() {
     setAutoOpenConsumed(true)
   }, [autoOpenConsumed, finding, searchParams])
 
+  useEffect(() => {
+    if (!finding) return
+
+    const evidenceFromScan = searchParams.get("evidenceNote")
+    if (evidenceFromScan) {
+      setOperationalEvidenceNote(evidenceFromScan)
+    }
+
+    if (searchParams.get("siteScan") === "done") {
+      setStatusFeedback(
+        "Ai revenit din re-scanul site-ului. Revizuiește nota precompletată și închide cazul doar dacă rezultatul confirmă remedierea."
+      )
+    }
+  }, [finding, searchParams])
+
   async function updateStatus(
     status: "open" | "confirmed" | "dismissed" | "resolved",
     options?: {
       openGeneratorAfter?: boolean
+      redirectTo?: string
       evidenceNote?: string
       revalidationConfirmed?: boolean
       newReviewDateISO?: string
@@ -196,6 +213,9 @@ export default function FindingDetailPage() {
       setRevalidationConfirmed(false)
       if (options?.openGeneratorAfter) {
         setGeneratorOpen(true)
+      }
+      if (options?.redirectTo) {
+        router.push(options.redirectTo)
       }
       if (status === "resolved") {
         setShowDossierMoment(true)
@@ -356,6 +376,22 @@ export default function FindingDetailPage() {
             >
               <FileText className="size-3.5" strokeWidth={2} />
               Confirmă și generează
+            </Button>
+          ) : recipe.workflowLink ? (
+            <Button
+              data-testid="confirm-and-open-workflow"
+              onClick={() =>
+                updateStatus("confirmed", {
+                  redirectTo: recipe.workflowLink?.href,
+                })
+              }
+              disabled={actionLoading}
+              className="gap-1.5"
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              {recipe.findingTypeId === "GDPR-005"
+                ? "Confirmă și scanează site-ul"
+                : "Confirmă și continuă"}
             </Button>
           ) : (
             <Button

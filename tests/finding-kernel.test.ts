@@ -249,6 +249,23 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.primaryCTA).toBe("Corectează bannerul")
   })
 
+  it("returnează handoff real pentru GDPR-005 către re-scanul site-ului", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "intake-site-cookies",
+        category: "GDPR",
+        title: "Banner cookie neconform",
+        detail: "Trackerele se încarcă înainte de consimțământ.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("GDPR-005")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/scan?action=site")
+    expect(recipe.workflowLink?.href).toContain("findingId=intake-site-cookies")
+    expect(recipe.workflowLink?.label).toBe("Scanează site-ul din nou")
+    expect(recipe.closureCTA).toBe("Trimite la dosar și monitorizare")
+  })
+
   it("returnează handoff real pentru GDPR-013 către DSAR", () => {
     const recipe = buildCockpitRecipe(
       makeFinding({

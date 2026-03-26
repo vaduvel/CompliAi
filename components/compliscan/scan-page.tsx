@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
 
@@ -19,6 +19,7 @@ import {
 } from "@/components/evidence-os/ScanSourceTypeSelector"
 import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
 import { LoadingScreen, ScanWorkspace } from "@/components/compliscan/route-sections"
+import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 import { buildScanInsights, useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
 import { dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
@@ -84,17 +85,27 @@ type ScanViewMode = "flow" | "verdicts" | "history"
 export function ScanPageSurface() {
   const runtime = useDashboardRuntime()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const cockpitActions = useCockpitMutations()
   const agentFlow = useAgentFlow()
   const [sourceType, setSourceType] = useState<ScanSourceType>("document")
   const [viewMode, setViewMode] = useState<ScanViewMode>("flow")
+  const siteScanIntent = searchParams.get("action") === "site"
+  const siteScanFindingId = searchParams.get("findingId")
+  const siteScanFindingTitle = searchParams.get("findingTitle")
 
   useEffect(() => {
     if (agentFlow.agentModeActive) {
       setViewMode("flow")
     }
   }, [agentFlow.agentModeActive])
+
+  useEffect(() => {
+    if (siteScanIntent) {
+      setViewMode("flow")
+    }
+  }, [siteScanIntent])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -338,7 +349,25 @@ export function ScanPageSurface() {
 
           {viewMode === "flow" && (
             <>
-              {sourceType === "manifest" || sourceType === "yaml" ? (
+              {siteScanIntent ? (
+                <div className="space-y-6">
+                  <SectionDividerCard
+                    eyebrow="Re-scan website"
+                    title="Reverifici bannerul, trackerele și politicile site-ului"
+                    description={
+                      siteScanFindingTitle
+                        ? `Ai venit aici din finding-ul „${siteScanFindingTitle}”. Rulezi site scan, apoi revii în cockpit cu rezultatul deja pregătit ca urmă de recheck.`
+                        : "Rulezi site scan, apoi revii în cockpit cu rezultatul pregătit ca urmă de recheck."
+                    }
+                  />
+                  <SiteScanCard
+                    existingScan={cockpit.data.state.siteScan ?? null}
+                    defaultUrl={cockpit.data.state.orgProfile?.website ?? undefined}
+                    findingId={siteScanFindingId ?? undefined}
+                    findingTitle={siteScanFindingTitle ?? undefined}
+                  />
+                </div>
+              ) : sourceType === "manifest" || sourceType === "yaml" ? (
                 <div className="space-y-6">
                   <SectionDividerCard
                     eyebrow="Flux activ"

@@ -1086,7 +1086,8 @@ function getDossierOutcome(primaryMode: ResolutionMode): string {
 }
 
 function getWorkflowLink(
-  findingTypeId: string
+  findingTypeId: string,
+  record: ScanFinding
 ): CockpitRecipe["workflowLink"] | undefined {
   switch (findingTypeId) {
     case "GDPR-013":
@@ -1094,6 +1095,17 @@ function getWorkflowLink(
         href: "/dashboard/dsar?action=new",
         label: "Deschide DSAR",
       }
+    case "GDPR-005": {
+      const search = new URLSearchParams({
+        action: "site",
+        findingId: record.id,
+        findingTitle: record.title,
+      })
+      return {
+        href: `/dashboard/scan?${search.toString()}`,
+        label: "Scanează site-ul din nou",
+      }
+    }
     default:
       return undefined
   }
@@ -1104,6 +1116,8 @@ function getClosureCTA(
   primaryMode: ResolutionMode
 ): string | undefined {
   switch (findingTypeId) {
+    case "GDPR-005":
+      return "Trimite la dosar și monitorizare"
     case "GDPR-013":
       return "Marchează răspunsul trimis"
     default:
@@ -1373,7 +1387,7 @@ export function buildCockpitRecipe(
       action: primaryCTAAction,
     },
     secondaryCTA: getSecondaryCTA(flow.secondaryCTA),
-    workflowLink: getWorkflowLink(findingTypeId),
+    workflowLink: getWorkflowLink(findingTypeId, record),
     closureCTA: getClosureCTA(findingTypeId, primaryMode),
     acceptedEvidence,
     visibleBlocks,
