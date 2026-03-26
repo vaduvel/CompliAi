@@ -70,6 +70,7 @@
 | F4 | Sprint 6C — EF-004/EF-005/EF-006 Fiscal Operational Risk Flows | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F5 | Sprint 7 — NIS2 maturity/governance handoff + evidence per control | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F6 | Sprint 8 — Activity Feed + Ce am verificat + Continuity Layer | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F7 | Sprint 9 — Share links + Trust Center + Partner Shareability | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -1238,4 +1239,32 @@ V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțion
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-26 | Claude | Sprint 8 (F6) — Activity Feed + Ce am verificat + Continuity Layer — local. Fișiere: lib/compliscan/feed-sources.ts, app/dashboard/page.tsx |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean. |
+
+---
+
+## F7 — Sprint 9: Share links + Trust Center + Partner Shareability
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 9 Partner, Trust, Shareability
+**Impact:** Înalt — share link-urile funcționează acum end-to-end (blocker critic rezolvat): token HMAC semnat self-contained + pagina publică `/shared/[token]`. Trust Center promovat direct în navigare principală (1 click, nu 2).
+**Efort estimat:** 2–3 ore
+
+### Scope tehnic
+- `lib/server/share-token-store.ts` — `generateSignedShareToken()` + `resolveSignedShareToken()`: token HMAC-SHA256 self-contained, fără storage, funcționează pe Vercel; secret din `SHARE_TOKEN_SECRET` / `CRON_SECRET` / fallback dev
+- `app/api/reports/share-token/route.ts` — folosește `generateSignedShareToken`, returnează și `expiresAtISO`
+- `app/shared/[token]/page.tsx` — Server Component public (fără auth, nu în middleware matcher): rezolvă token, citește org state, afișează scor, status framework-uri, riscuri critice, disclaimer, expiry
+- `components/compliscan/navigation.ts` — `"trust"` în `DashboardNavId`, Trust Center în `dashboardPrimaryNavItems` + `soloNavItems` cu icon Shield
+
+### Definition of Done
+- [x] `generateSignedShareToken()` produce token verificabil fără storage
+- [x] `resolveSignedShareToken()` validează HMAC + expiry cu constant-time comparison
+- [x] `/app/shared/[token]/page.tsx` afișează profil complet: scor, framework-uri, riscuri, disclaimer
+- [x] Pagina publică returnează 404-friendly pentru token invalid/expirat
+- [x] Trust Center vizibil direct în `dashboardPrimaryNavItems` și `soloNavItems`
+- [x] Build clean, 0 erori TypeScript
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint 9 (F7) — Share links + Trust Center + Partner Shareability — local. Fișiere: lib/server/share-token-store.ts, app/shared/[token]/page.tsx, app/api/reports/share-token/route.ts, components/compliscan/navigation.ts |
 | 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean. |
