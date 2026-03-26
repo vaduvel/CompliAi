@@ -243,14 +243,26 @@ export default function EUDatabaseWizardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Sprint 10: Boundary clarity — legal safety */}
+            <div className="rounded-eos-md border border-red-200 bg-red-50/50 px-4 py-3 space-y-1">
+              <p className="text-xs font-semibold text-red-700">Limitele acestui instrument</p>
+              <p className="text-xs text-red-600">
+                JSON-ul generat este un <strong>draft de pregătire</strong>, nu o înregistrare validată oficial.
+                CompliScan nu este certificat ca organism de evaluare a conformității EU AI Act.
+                Înainte de submit, documentația trebuie verificată de un expert legal sau consultant
+                certificat în AI Act.
+              </p>
+            </div>
+
             <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/5 px-4 py-3 space-y-2">
-              <p className="text-xs font-semibold text-eos-text">Trimite MANUAL pe platforma EU AI Database:</p>
+              <p className="text-xs font-semibold text-eos-text">Pași pentru submit MANUAL pe EU AI Database:</p>
               <ol className="list-decimal pl-4 space-y-1 text-xs text-eos-text-muted">
-                <li>Accesează platforma EU AI Database</li>
+                <li>Verifică documentația tehnică Annex IV (descarcă din inventar)</li>
+                <li>Consultă un expert legal pentru validarea clasificării de risc</li>
+                <li>Accesează platforma EU AI Database (euaidb.eu)</li>
                 <li>Autentifică-te cu credențialele organizației</li>
-                <li>Selectează &quot;Register a new AI system&quot;</li>
-                <li>Completează formularul folosind datele din JSON-ul generat</li>
-                <li>Verifică toate câmpurile și submitează</li>
+                <li>Selectează &quot;Register a new AI system&quot; și completează cu datele din JSON</li>
+                <li>Verifică toate câmpurile, atașează Annex IV și submitează</li>
               </ol>
             </div>
 

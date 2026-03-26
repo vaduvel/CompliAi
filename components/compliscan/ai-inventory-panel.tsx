@@ -6,14 +6,18 @@ import {
   BrainCircuit,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Loader2,
   ShieldAlert,
   ShieldCheck,
   ShieldMinus,
   Trash2,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { classifyAISystem, formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { AISystemDraft } from "@/lib/compliance/ai-inventory"
+import { classifyAISystem as classifyForExplain } from "@/lib/compliance/ai-act-classifier"
 import type { AISystemPurpose, AISystemRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -171,6 +175,33 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
       await onRemove(id)
     } finally {
       setRemovingId(null)
+    }
+  }
+
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+  async function handleDownloadAnnexIV(system: AISystemRecord) {
+    setDownloadingId(system.id)
+    try {
+      const res = await fetch("/api/ai-act/annex-iv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemId: system.id }),
+      })
+      if (!res.ok) throw new Error("Eroare server")
+      const { content, title } = await res.json() as { content: string; title: string }
+      const blob = new Blob([content], { type: "text/markdown" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `annex-iv-${system.name.toLowerCase().replace(/\s+/g, "-")}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`Anexa IV descărcată: ${title}`)
+    } catch {
+      toast.error("Eroare la generarea Anexei IV")
+    } finally {
+      setDownloadingId(null)
     }
   }
 
@@ -433,6 +464,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
             {systems.map((system) => {
               const tone = riskTone(system.riskLevel)
               const Icon = tone.icon
+              const explanation = classifyForExplain(system.purpose)
 
               return (
                 <div
@@ -449,12 +481,21 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                         <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {formatPurposeLabel(system.purpose)}
                         </Badge>
+                        {explanation.article !== "—" && (
+                          <span className="rounded border border-eos-border bg-eos-bg-inset px-1.5 py-0.5 font-mono text-[10px] text-eos-text-muted">
+                            {explanation.article}
+                          </span>
+                        )}
                       </div>
                       <p className="text-lg font-semibold text-eos-text">
                         {system.name}
                       </p>
                       <p className="text-sm text-eos-text-muted">
                         {system.vendor} · {system.modelType}
+                      </p>
+                      {/* Sprint 10: Classification explainability */}
+                      <p className="text-xs text-eos-text-muted leading-relaxed">
+                        {explanation.reason}
                       </p>
                       {system.annexIIIHint && (
                         <p className="text-sm text-eos-warning">{system.annexIIIHint}</p>
@@ -473,16 +514,34 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                           {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
                         </Badge>
                       </div>
-                      <Button
-                        onClick={() => void handleRemove(system.id)}
-                        disabled={removingId === system.id || busy}
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
-                      >
-                        <Trash2 className="size-3.5" strokeWidth={2} />
-                        Sterge
-                      </Button>
+                      <div className="flex gap-2">
+                        {system.riskLevel === "high" && (
+                          <Button
+                            onClick={() => void handleDownloadAnnexIV(system)}
+                            disabled={downloadingId === system.id || busy}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-eos-border bg-eos-surface text-eos-text"
+                          >
+                            {downloadingId === system.id ? (
+                              <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+                            ) : (
+                              <Download className="size-3.5" strokeWidth={2} />
+                            )}
+                            Anexa IV
+                          </Button>
+                        )}
+                        <Button
+                          onClick={() => void handleRemove(system.id)}
+                          disabled={removingId === system.id || busy}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
+                        >
+                          <Trash2 className="size-3.5" strokeWidth={2} />
+                          Sterge
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
