@@ -135,7 +135,10 @@ export default function FindingDetailPage() {
     setAutoOpenConsumed(true)
   }, [autoOpenConsumed, finding, searchParams])
 
-  async function updateStatus(status: "confirmed" | "dismissed" | "resolved") {
+  async function updateStatus(
+    status: "confirmed" | "dismissed" | "resolved",
+    options?: { openGeneratorAfter?: boolean }
+  ) {
     if (!finding) return
     setActionLoading(true)
     try {
@@ -156,6 +159,9 @@ export default function FindingDetailPage() {
       setLinkedGeneratedDocument(payload.linkedGeneratedDocument ?? null)
       setDocumentFlowState(payload.documentFlowState ?? "not_required")
       setStatusFeedback(payload.feedbackMessage ?? null)
+      if (options?.openGeneratorAfter) {
+        setGeneratorOpen(true)
+      }
       void reloadDashboard()
     } catch {
       setError("Nu s-a putut actualiza statusul.")
@@ -175,8 +181,10 @@ export default function FindingDetailPage() {
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
   const detailHelperText =
-    status === "open"
-      ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
+    status === "open" && requiresDocumentFlow
+      ? "Confirmi cazul și intri direct în draftul recomandat, fără o pagină separată între finding și generator."
+      : status === "open"
+        ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
       : status === "confirmed" && requiresDocumentFlow
         ? "După review și aprobare, draftul merge la dosar și finding-ul se închide cu urmă clară."
       : status === "confirmed"
@@ -243,15 +251,27 @@ export default function FindingDetailPage() {
           finding={finding}
           helperText="Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită."
         >
-          <Button
-            data-testid="confirm-finding"
-            onClick={() => updateStatus("confirmed")}
-            disabled={actionLoading}
-            className="gap-1.5"
-          >
-            <CheckCircle2 className="size-3.5" strokeWidth={2} />
-            Confirmă finding-ul
-          </Button>
+          {requiresDocumentFlow ? (
+            <Button
+              data-testid="confirm-and-generate"
+              onClick={() => updateStatus("confirmed", { openGeneratorAfter: true })}
+              disabled={actionLoading}
+              className="gap-1.5"
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              Confirmă și generează
+            </Button>
+          ) : (
+            <Button
+              data-testid="confirm-finding"
+              onClick={() => updateStatus("confirmed")}
+              disabled={actionLoading}
+              className="gap-1.5"
+            >
+              <CheckCircle2 className="size-3.5" strokeWidth={2} />
+              Confirmă finding-ul
+            </Button>
+          )}
           <Button
             data-testid="dismiss-finding"
             variant="outline"
