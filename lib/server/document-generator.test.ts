@@ -66,4 +66,13 @@ describe("getGeneratedDocumentTitle", () => {
 
     expect(title).toBe("Politică de Confidențialitate")
   })
+
+  it("returnează titlul standard pentru retention policy", () => {
+    const title = getGeneratedDocumentTitle({
+      documentType: "retention-policy",
+      orgName: "Demo Retail SRL",
+    })
+
+    expect(title).toBe("Politică și Matrice de Retenție a Datelor")
+  })
 })

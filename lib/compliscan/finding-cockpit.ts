@@ -12,6 +12,7 @@ export const FINDING_DOCUMENT_LABELS: Record<string, string> = {
   "privacy-policy": "Politică de confidențialitate",
   "cookie-policy": "Politică de cookies",
   "dpa": "DPA (Acord de prelucrare date)",
+  "retention-policy": "Politică și matrice de retenție",
   "ai-governance": "Politică de utilizare AI",
   "nis2-incident-response": "Plan de răspuns NIS2",
 }

@@ -239,11 +239,19 @@ export function GeneratorDrawer({
 
   const allChecked = CONFIRMATION_ITEMS.every((item) => checklist.includes(item.id))
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
-  const showDpoField = ["privacy-policy", "dpa"].includes(documentType)
+  const showDpoField = ["privacy-policy", "dpa", "retention-policy"].includes(documentType)
   const showCounterpartyField = documentType === "dpa"
   const contextFieldHint = siteScanContext
     ? "Precompletat din ultimul site scan. Poți ajusta înainte de generare."
-    : "Detalii relevante pentru documentul generat."
+    : documentType === "retention-policy"
+      ? "Listează categoriile de date, termenele și procesele de ștergere / anonimizare pe care vrei să le prinzi în matrice."
+      : "Detalii relevante pentru documentul generat."
+  const contextFieldLabel =
+    documentType === "retention-policy" ? "Categorii de date, termene și procese" : "Context suplimentar"
+  const contextFieldPlaceholder =
+    documentType === "retention-policy"
+      ? "Ex: clienți activi 3 ani după ultimul contract, lead-uri 12 luni, HR conform termenelor legale, loguri suport 90 zile, ștergere manuală lunară și verificare trimestrială."
+      : "Detalii relevante pentru documentul generat..."
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -347,13 +355,13 @@ export function GeneratorDrawer({
                 </div>
               ) : null}
 
-              <Field label="Context suplimentar" hint={contextFieldHint}>
+              <Field label={contextFieldLabel} hint={contextFieldHint}>
                 <textarea
                   className={textareaClass}
                   rows={3}
                   value={dataFlows}
                   onChange={(e) => setDataFlows(e.target.value)}
-                  placeholder="Detalii relevante pentru documentul generat..."
+                  placeholder={contextFieldPlaceholder}
                 />
               </Field>
 

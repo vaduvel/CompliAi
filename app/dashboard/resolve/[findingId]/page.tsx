@@ -245,6 +245,10 @@ export default function FindingDetailPage() {
     documentFlowState,
     linkedGeneratedDocument: linkedGeneratedDocument ?? undefined,
   })
+  const generatorDocumentType = (
+    finding.suggestedDocumentType ??
+    (recipe.findingTypeId === "GDPR-016" ? "retention-policy" : "")
+  ) as DocumentType | ""
   const successMomentVisible =
     (searchParams.get("success") === "dossier" || showDossierMoment) &&
     isFindingResolvedLike(status)
@@ -722,12 +726,12 @@ export default function FindingDetailPage() {
       ) : null}
 
       {/* ── Generator Drawer (in-context, no page navigation) ─────────── */}
-      {hasGenerator && finding.suggestedDocumentType && (
+      {hasGenerator && generatorDocumentType && (
         <GeneratorDrawer
           open={generatorOpen}
           onOpenChange={setGeneratorOpen}
           findingId={finding.id}
-          documentType={(finding.suggestedDocumentType ?? "") as DocumentType}
+          documentType={generatorDocumentType}
           findingTitle={finding.title}
           vendorName={recipe.vendorContext?.vendorName}
           vendorDpaUrl={recipe.vendorContext?.dpaUrl}

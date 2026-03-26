@@ -336,6 +336,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "no",
     closingRule: "dovada răspunsului și confirmarea execuției",
   },
+  "GDPR-016": {
+    findingTypeId: "GDPR-016",
+    framework: "GDPR",
+    title: "Retenție date neclară",
+    category: "Retention",
+    typicalSeverity: "medium",
+    signalTypes: ["inferred"],
+    resolutionModes: ["in_app_guided"],
+    primaryActors: ["user"],
+    compliCapabilities: ["generează matrice / policy de retenție", "leagă documentul de finding"],
+    userResponsibilities: ["confirmă duratele reale și procesul de ștergere"],
+    requiredEvidenceKinds: ["generated_document", "confirmation"],
+    autoRecheck: "no",
+    closingRule: "matricea de retenție este salvată și confirmată",
+  },
   "GDPR-019": {
     findingTypeId: "GDPR-019",
     framework: "GDPR",
@@ -609,6 +624,19 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Dovada răspunsului și confirmarea execuției.",
     revalidationTriggers: [],
   },
+  "GDPR-016": {
+    findingTypeId: "GDPR-016",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Definește retenția",
+    secondaryCTA: "Vezi categoriile afectate",
+    whatUserSees:
+      "Nu este clar cât păstrezi anumite categorii de date și cum dovedești ștergerea la expirare.",
+    whatCompliDoes:
+      "Generează o politică și matrice de retenție pe care o legăm direct de finding ca dovadă de bază.",
+    whatUserMustDo: "Confirmă duratele reale, excepțiile legale și procesul de ștergere sau anonimizare.",
+    closeCondition: "Matrice de retenție salvată și confirmată.",
+    revalidationTriggers: ["proces nou", "categorie nouă de date", "review periodic"],
+  },
   "GDPR-019": {
     findingTypeId: "GDPR-019",
     initialFlowState: "external_action_required",
@@ -869,6 +897,7 @@ const CATEGORY_TO_FRAMEWORK: Record<string, FindingFramework> = {
 function deriveTypeId(record: ScanFinding, framework: FindingFramework): string {
   const id = record.id
   const docType = record.suggestedDocumentType ?? ""
+  const ruleId = record.provenance?.ruleId ?? ""
   const title = record.title.toLowerCase()
   const detail = record.detail.toLowerCase()
   const evidence = (record.evidenceRequired ?? "").toLowerCase()
@@ -878,6 +907,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "dsar-no-procedure") return "GDPR-013"
   if (id === "dsar-erasure-active") return "GDPR-014"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
+  if (ruleId === "GDPR-RET-001") return "GDPR-016"
   if (
     id === "intake-b2c-privacy" ||
     id === "intake-gdpr-privacy-policy" ||
@@ -926,6 +956,19 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (
     framework === "GDPR" &&
     (
+      title.includes("reten") ||
+      detail.includes("reten") ||
+      remediation.includes("reten") ||
+      title.includes("retention") ||
+      detail.includes("retention")
+    )
+  ) {
+    return "GDPR-016"
+  }
+
+  if (
+    framework === "GDPR" &&
+    (
       title.includes("cookies consent") ||
       title.includes("cookie consent") ||
       title.includes("banner de cookies") ||
@@ -956,6 +999,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (docType === "privacy-policy") return "GDPR-001"
   if (docType === "cookie-policy") return "GDPR-003"
   if (docType === "dpa") return "GDPR-010"
+  if (docType === "retention-policy") return "GDPR-016"
   if (docType === "nis2-incident-response") return "NIS2-015"
   if (docType === "ai-governance") return "AI-005"
 
@@ -1239,6 +1283,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-010": 180,
   "GDPR-013": 30,
   "GDPR-014": 30,
+  "GDPR-016": 180,
   "GDPR-019": null,
   "NIS2-001": 365,
   "NIS2-005": 180,

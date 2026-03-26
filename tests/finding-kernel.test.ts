@@ -153,6 +153,20 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-014")
   })
 
+  it("mapează ruleId GDPR-RET-001 → GDPR-016", () => {
+    const result = classifyFinding(
+      makeFinding({
+        category: "GDPR",
+        title: "Clarifică retenția datelor personale",
+        detail: "Termenele de retenție și procesul de ștergere nu sunt suficient de clare.",
+        provenance: {
+          ruleId: "GDPR-RET-001",
+        },
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-016")
+  })
+
   it("mapează finding-ul rescue ANSPDCP → GDPR-019", () => {
     const result = classifyFinding(
       makeFinding({
@@ -271,6 +285,12 @@ describe("getResolveFlowRecipe", () => {
     const recipe = getResolveFlowRecipe("GDPR-005")
     expect(recipe.initialFlowState).toBe("external_action_required")
     expect(recipe.primaryCTA).toBe("Corectează bannerul")
+  })
+
+  it("returnează recipe corect pentru GDPR-016 — retention generator", () => {
+    const recipe = getResolveFlowRecipe("GDPR-016")
+    expect(recipe.initialFlowState).toBe("ready_to_generate")
+    expect(recipe.primaryCTA).toBe("Definește retenția")
   })
 
   it("returnează handoff real pentru GDPR-005 către re-scanul site-ului", () => {
@@ -503,6 +523,26 @@ describe("buildCockpitRecipe", () => {
       })
       expect(recipe.uiState).toBe("resolved")
       expect(recipe.statusLabel).toBe("Rezolvat")
+    })
+  })
+
+  describe("Archetype 1b — GDPR-016 (retention / in_app_guided)", () => {
+    it("returnează generator flow pentru finding de retenție", () => {
+      const finding = makeFinding({
+        category: "GDPR",
+        title: "Clarifică retenția datelor personale",
+        detail: "Nu este clar cât timp păstrăm datele și când se execută ștergerea.",
+        provenance: {
+          ruleId: "GDPR-RET-001",
+        },
+        findingStatus: "open",
+      })
+
+      const recipe = buildCockpitRecipe(finding)
+      expect(recipe.findingTypeId).toBe("GDPR-016")
+      expect(recipe.uiState).toBe("ready_to_generate")
+      expect(recipe.primaryCTA.action).toBe("open_generator")
+      expect(recipe.acceptedEvidence).toContain("Document generat și aprobat")
     })
   })
 

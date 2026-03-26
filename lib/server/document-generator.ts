@@ -9,6 +9,7 @@ export type DocumentType =
   | "privacy-policy"
   | "cookie-policy"
   | "dpa"
+  | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
 
@@ -44,6 +45,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "privacy-policy": 24,
   "cookie-policy": 24,
   "dpa": 12,
+  "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
 }
@@ -77,6 +79,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   dpa: {
     title: "Acord de Prelucrare a Datelor (DPA)",
     legalBasis: "GDPR Art. 28",
+  },
+  "retention-policy": {
+    title: "Politică și Matrice de Retenție a Datelor",
+    legalBasis: "GDPR Art. 5(1)(e)",
   },
   "nis2-incident-response": {
     title: "Plan de Răspuns la Incidente de Securitate (NIS2)",
@@ -113,6 +119,7 @@ function getPreferredDocumentDateLabel(documentType: DocumentType) {
   switch (documentType) {
     case "privacy-policy":
     case "cookie-policy":
+    case "retention-policy":
       return "Ultima actualizare"
     default:
       return "Data generării"
@@ -226,6 +233,25 @@ Cerințe:
 - Durata și rezilierea acordului
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "retention-policy": `
+Generează o Politică și Matrice de Retenție a Datelor completă în română conform GDPR Art. 5(1)(e).
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Separă clar politica generală de matricea practică de retenție
+- Include categorii tipice de date: clienți, lead-uri, HR, contracte, facturi, suport, marketing, loguri operaționale
+- Pentru fiecare categorie: scop, temei, termen orientativ de retenție, trigger de ștergere sau anonimizare
+- Explică cine aprobă termenele și cine execută ștergerea
+- Include pași de dovadă operațională: log de ștergere, export control, verificare periodică
+- Include secțiune despre excepții: litigii, obligații legale, investigații, arhivare contabilă
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare și o tabelare lizibilă pentru matrice
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
     "nis2-incident-response": `
@@ -412,6 +438,13 @@ export const DOCUMENT_TYPES: Array<{
     description: "Contract obligatoriu cu procesatorii de date conform GDPR Art. 28.",
     free: false,
     legalBasis: "GDPR Art. 28",
+  },
+  {
+    id: "retention-policy",
+    label: "Politică și Matrice de Retenție",
+    description: "Definește termenele de păstrare, regulile de ștergere și dovada operațională conform GDPR Art. 5(1)(e).",
+    free: false,
+    legalBasis: "GDPR Art. 5(1)(e)",
   },
   {
     id: "nis2-incident-response",
