@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   CalendarPlus,
@@ -76,6 +77,7 @@ function daysLeft(deadlineISO: string): { days: number; label: string; urgent: b
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DsarPage() {
+  const searchParams = useSearchParams()
   const [requests, setRequests] = useState<DsarRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -95,6 +97,12 @@ export default function DsarPage() {
       .catch(() => toast.error("Eroare la încărcare DSAR"))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setShowForm(true)
+    }
+  }, [searchParams])
 
   async function handleCreate() {
     if (!form.requesterName.trim() || !form.requesterEmail.trim()) {

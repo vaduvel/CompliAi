@@ -91,6 +91,22 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-010")
   })
 
+  it("mapează un vendor cunoscut din text pentru flow DPA", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "vendor-google-analytics-dpa",
+        category: "GDPR",
+        suggestedDocumentType: "dpa",
+        title: "DPA lipsă pentru Google Analytics",
+        detail: "Google Analytics procesează date personale și nu există DPA atașat în dosar.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("GDPR-010")
+    expect(recipe.vendorContext?.vendorName).toBe("Google Analytics")
+    expect(recipe.vendorContext?.dpaUrl).toContain("google")
+  })
+
   it("mapează finding-ul intake site cookies → GDPR-005", () => {
     const result = classifyFinding(
       makeFinding({
@@ -231,6 +247,22 @@ describe("getResolveFlowRecipe", () => {
     const recipe = getResolveFlowRecipe("GDPR-005")
     expect(recipe.initialFlowState).toBe("external_action_required")
     expect(recipe.primaryCTA).toBe("Corectează bannerul")
+  })
+
+  it("returnează handoff real pentru GDPR-013 către DSAR", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "dsar-no-procedure",
+        category: "GDPR",
+        title: "Nu ai o procedură documentată pentru cererile DSAR",
+        detail: "Creează procedura din Generator sau înregistrează prima cerere în modulul DSAR.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("GDPR-013")
+    expect(recipe.workflowLink?.href).toBe("/dashboard/dsar?action=new")
+    expect(recipe.workflowLink?.label).toBe("Deschide DSAR")
+    expect(recipe.closureCTA).toBe("Marchează răspunsul trimis")
   })
 
   it("returnează recipe corect pentru EF-003 — fără generator", () => {

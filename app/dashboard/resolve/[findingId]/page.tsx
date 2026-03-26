@@ -33,6 +33,7 @@ import {
   getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
+import { getCloseGatingRequirements } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import type { DocumentType } from "@/lib/server/document-generator"
 
@@ -227,7 +228,8 @@ export default function FindingDetailPage() {
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
-  const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && recipe.resolutionMode === "external_action"
+  const closeGating = getCloseGatingRequirements(recipe.findingTypeId)
+  const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && closeGating.requiresEvidenceNote
   const requiresRevalidation = status === "confirmed" && !hasGenerator && recipe.resolveFlowState === "needs_revalidation"
   const resolveDisabled =
     actionLoading ||
@@ -247,6 +249,20 @@ export default function FindingDetailPage() {
       : status === "confirmed"
           ? recipe.heroSummary
           : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
+  const evidenceCardCopy =
+    recipe.findingTypeId === "GDPR-013"
+      ? {
+          eyebrow: "Dovadă de răspuns obligatorie",
+          body: "Leagă cazul de workflow-ul DSAR, apoi notează cum ai verificat identitatea și când ai trimis răspunsul.",
+          placeholder: "Ex: Cerere DSAR creată în modulul dedicat, identitatea verificată, răspuns trimis pe email la 26.03.2026 și salvat la dosar.",
+          footer: "Cazul nu poate intra în monitorizare fără urma clară a răspunsului DSAR.",
+        }
+      : {
+          eyebrow: "Dovadă operațională obligatorie",
+          body: "Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.",
+          placeholder: "Ex: TaxTotal corectat în ERP, factura retransmisă în SPV, confirmare de primire primită la 26.03.2026.",
+          footer: "Cazul nu poate intra în monitorizare fără această dovadă operațională.",
+        }
 
   return (
     <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
@@ -381,21 +397,35 @@ export default function FindingDetailPage() {
               {documentFlowState === "draft_ready" ? "Continuă flow-ul" : recipe.primaryCTA.label}
             </Button>
           ) : (
-            <Button
-              data-testid="mark-finding-resolved"
-              onClick={() =>
-                updateStatus("resolved", {
-                  evidenceNote: operationalEvidenceNote.trim() || undefined,
-                  revalidationConfirmed,
-                  newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
-                })
-              }
-              disabled={resolveDisabled}
-              className="gap-1.5"
-            >
-              <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              {recipe.primaryCTA.label}
-            </Button>
+            <>
+              {recipe.workflowLink ? (
+                <Link href={recipe.workflowLink.href}>
+                  <Button
+                    data-testid="open-workflow-link"
+                    className="gap-1.5"
+                  >
+                    <FileText className="size-3.5" strokeWidth={2} />
+                    {recipe.workflowLink.label}
+                  </Button>
+                </Link>
+              ) : null}
+              <Button
+                data-testid="mark-finding-resolved"
+                onClick={() =>
+                  updateStatus("resolved", {
+                    evidenceNote: operationalEvidenceNote.trim() || undefined,
+                    revalidationConfirmed,
+                    newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
+                  })
+                }
+                disabled={resolveDisabled}
+                className="gap-1.5"
+                variant={recipe.workflowLink ? "outline" : "default"}
+              >
+                <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                {recipe.closureCTA ?? recipe.primaryCTA.label}
+              </Button>
+            </>
           )}
         </FindingHeroAction>
       )}
@@ -405,10 +435,10 @@ export default function FindingDetailPage() {
           <CardContent className="space-y-3 px-5 py-5">
             <div>
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Dovadă operațională obligatorie
+                {evidenceCardCopy.eyebrow}
               </p>
               <p className="mt-1 text-sm text-eos-text-muted">
-                Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.
+                {evidenceCardCopy.body}
               </p>
             </div>
             <textarea
@@ -417,10 +447,10 @@ export default function FindingDetailPage() {
               onChange={(event) => setOperationalEvidenceNote(event.target.value)}
               rows={4}
               className="ring-focus w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
-              placeholder="Ex: TaxTotal corectat în ERP, factura retransmisă în SPV, confirmare de primire primită la 26.03.2026."
+              placeholder={evidenceCardCopy.placeholder}
             />
             <p className="text-xs text-eos-text-muted">
-              Cazul nu poate intra în monitorizare fără această dovadă operațională.
+              {evidenceCardCopy.footer}
             </p>
           </CardContent>
         </Card>

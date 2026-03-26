@@ -152,6 +152,11 @@ export type CockpitRecipe = {
       | "skip_vendor"
       | "already_have_evidence"
   }
+  workflowLink?: {
+    href: string
+    label: string
+  }
+  closureCTA?: string
   acceptedEvidence: string[]
   visibleBlocks: CockpitVisibleBlocks
   closeCondition: string
@@ -1080,6 +1085,32 @@ function getDossierOutcome(primaryMode: ResolutionMode): string {
   }
 }
 
+function getWorkflowLink(
+  findingTypeId: string
+): CockpitRecipe["workflowLink"] | undefined {
+  switch (findingTypeId) {
+    case "GDPR-013":
+      return {
+        href: "/dashboard/dsar?action=new",
+        label: "Deschide DSAR",
+      }
+    default:
+      return undefined
+  }
+}
+
+function getClosureCTA(
+  findingTypeId: string,
+  primaryMode: ResolutionMode
+): string | undefined {
+  switch (findingTypeId) {
+    case "GDPR-013":
+      return "Marchează răspunsul trimis"
+    default:
+      return primaryMode === "external_action" ? "Marchează rezolvat" : undefined
+  }
+}
+
 const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-001": 180,
   "GDPR-002": 180,
@@ -1342,6 +1373,8 @@ export function buildCockpitRecipe(
       action: primaryCTAAction,
     },
     secondaryCTA: getSecondaryCTA(flow.secondaryCTA),
+    workflowLink: getWorkflowLink(findingTypeId),
+    closureCTA: getClosureCTA(findingTypeId, primaryMode),
     acceptedEvidence,
     visibleBlocks,
     closeCondition: flow.closeCondition,
