@@ -217,6 +217,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "partial",
     closingRule: "document + link / screenshot",
   },
+  "GDPR-005": {
+    findingTypeId: "GDPR-005",
+    framework: "GDPR",
+    title: "Banner de cookies neconform",
+    category: "Cookies",
+    typicalSeverity: "high",
+    signalTypes: ["direct"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "web dev"],
+    compliCapabilities: ["explică lipsa / problema", "cere rescan"],
+    userResponsibilities: ["corectează implementarea bannerului și a consentului"],
+    requiredEvidenceKinds: ["screenshot", "system_recheck"],
+    autoRecheck: "yes",
+    closingRule: "screenshot + rescan curat",
+  },
   "GDPR-010": {
     findingTypeId: "GDPR-010",
     framework: "GDPR",
@@ -502,6 +517,18 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Document publicat și salvat.",
     revalidationTriggers: ["trackere noi", "site schimbat"],
   },
+  "GDPR-005": {
+    findingTypeId: "GDPR-005",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Corectează bannerul",
+    secondaryCTA: "Vezi de ce contează",
+    whatUserSees:
+      "Bannerul de cookies nu pare să colecteze consimțământ valid.",
+    whatCompliDoes: "Explică ce lipsește în banner și cere reverificare.",
+    whatUserMustDo: "Corectează implementarea reală și revino cu dovada.",
+    closeCondition: "Screenshot + rescan curat.",
+    revalidationTriggers: ["modificări website", "trackere noi"],
+  },
   "GDPR-010": {
     findingTypeId: "GDPR-010",
     initialFlowState: "ready_to_generate",
@@ -779,6 +806,15 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
 
   // Specific id pattern mappings first
   if (id === "dsar-no-procedure") return "GDPR-013"
+  if (
+    id === "intake-b2c-privacy" ||
+    id === "intake-gdpr-privacy-policy" ||
+    id === "intake-site-privacy-policy"
+  ) {
+    return "GDPR-001"
+  }
+  if (id === "intake-vendor-no-dpa") return "GDPR-010"
+  if (id === "intake-site-cookies") return "GDPR-005"
   if (id === "saft-d406-registration") return "EF-001"
   if (id.startsWith("saft-")) return "EF-GENERIC"
   if (id === "nis2-finding-eligibility") return "NIS2-001"
@@ -797,6 +833,20 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     )
   ) {
     return "EF-003"
+  }
+
+  if (
+    framework === "GDPR" &&
+    (
+      title.includes("cookies consent") ||
+      title.includes("cookie consent") ||
+      title.includes("banner de cookies") ||
+      detail.includes("consimțământ explicit pentru cookies") ||
+      detail.includes("consimtamant explicit pentru cookies") ||
+      detail.includes("banner de consent")
+    )
+  ) {
+    return "GDPR-005"
   }
 
   if (
@@ -980,6 +1030,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-001": 180,
   "GDPR-002": 180,
   "GDPR-003": 90,
+  "GDPR-005": 60,
   "GDPR-010": 180,
   "GDPR-013": 30,
   "NIS2-001": 365,

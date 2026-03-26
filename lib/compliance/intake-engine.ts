@@ -549,6 +549,8 @@ function makeFinding(
   opts?: {
     remediationHint?: string
     resolution?: ScanFinding["resolution"]
+    suggestedDocumentType?: ScanFinding["suggestedDocumentType"]
+    evidenceRequired?: ScanFinding["evidenceRequired"]
   }
 ): ScanFinding {
   return {
@@ -562,6 +564,8 @@ function makeFinding(
     createdAtISO: new Date().toISOString(),
     sourceDocument: "intake-questionnaire",
     remediationHint: opts?.remediationHint,
+    suggestedDocumentType: opts?.suggestedDocumentType,
+    evidenceRequired: opts?.evidenceRequired,
     resolution: opts?.resolution,
   }
 }
@@ -584,6 +588,7 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
         "medium",
         {
           remediationHint: "Generează o politică de confidențialitate adaptată B2C.",
+          suggestedDocumentType: "privacy-policy",
           resolution: {
             problem: "Activitate B2C fără politică de confidențialitate dedicată consumatorilor.",
             impact: "Risc de amendă GDPR și pierderea încrederii clienților.",
@@ -672,12 +677,13 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "Politică de confidențialitate GDPR lipsă",
           "Prelucrarea datelor personale necesită o politică de confidențialitate conformă GDPR Art.13-14.",
           "GDPR",
-          "high",
-          {
-            remediationHint: "Generează politica GDPR din CompliAI.",
-            resolution: {
-              problem: "Lipsește politica de confidențialitate.",
-              impact: "Încălcarea obligației de informare GDPR — risc de amendă.",
+        "high",
+        {
+          remediationHint: "Generează politica GDPR din CompliAI.",
+          suggestedDocumentType: "privacy-policy",
+          resolution: {
+            problem: "Lipsește politica de confidențialitate.",
+            impact: "Încălcarea obligației de informare GDPR — risc de amendă.",
               action: "Generează politica de confidențialitate din CompliAI.",
               humanStep: "Verifică dacă acoperă toate categoriile de date procesate.",
               closureEvidence: "Politica publicată și accesibilă persoanelor vizate.",
@@ -785,12 +791,13 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "DPA lipsă pentru furnizori care procesează date personale",
           "GDPR Art.28 obligă la DPA (Data Processing Agreement) pentru orice furnizor care procesează date personale în numele tău.",
           "GDPR",
-          "high",
-          {
-            remediationHint: "Pregătește și trimite DPA-uri către furnizorii care procesează date.",
-            resolution: {
-              problem: "Furnizori procesează date personale fără DPA.",
-              impact: "Încălcarea directă a GDPR Art.28.",
+        "high",
+        {
+          remediationHint: "Pregătește și trimite DPA-uri către furnizorii care procesează date.",
+          suggestedDocumentType: "dpa",
+          resolution: {
+            problem: "Furnizori procesează date personale fără DPA.",
+            impact: "Încălcarea directă a GDPR Art.28.",
               action: "Generează DPA standard și trimite-l furnizorilor.",
               humanStep: "Obține semnăturile furnizorilor pe DPA.",
               closureEvidence: "DPA-uri semnate bilateral.",
@@ -810,12 +817,13 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "Privacy policy lipsă de pe site",
           "Orice site care colectează date (formulare, cookies, analytics) trebuie să afișeze o politică de confidențialitate conform GDPR.",
           "GDPR",
-          "high",
-          {
-            remediationHint: "Publică o privacy policy pe site.",
-            resolution: {
-              problem: "Site-ul nu are privacy policy publicată.",
-              impact: "Colectare date fără informare — risc amendă GDPR.",
+        "high",
+        {
+          remediationHint: "Publică o privacy policy pe site.",
+          suggestedDocumentType: "privacy-policy",
+          resolution: {
+            problem: "Site-ul nu are privacy policy publicată.",
+            impact: "Colectare date fără informare — risc amendă GDPR.",
               action: "Generează privacy policy din CompliAI și publică pe site.",
               humanStep: "Verifică să acopere: analytics, formulare, cookies, newsletter.",
               closureEvidence: "Privacy policy live pe site + link accesibil.",
@@ -918,15 +926,29 @@ export function buildDocumentRequests(answers: FullIntakeAnswers): DocumentReque
 
 export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   // Priority: GDPR privacy policy > AI policy > vendor review > HR > contracts
-  const hasPrivacyFinding = findings.some((f) => f.id === "intake-gdpr-privacy-policy" || f.id === "intake-site-privacy-policy")
+  const privacyFinding = findings.find(
+    (f) =>
+      f.id === "intake-gdpr-privacy-policy" ||
+      f.id === "intake-site-privacy-policy" ||
+      f.id === "intake-b2c-privacy"
+  )
   const hasAiFinding = findings.some((f) => f.id === "intake-ai-missing-policy")
+  const vendorDpaFinding = findings.find((f) => f.id === "intake-vendor-no-dpa")
   const hasVendorFinding = findings.some((f) => f.id === "intake-vendor-missing-docs")
 
-  if (hasPrivacyFinding) {
+  if (privacyFinding) {
     return {
       label: "Generează prima politică GDPR",
-      href: "/dashboard/scan",
+      href: `${dashboardRoutes.resolve}/${privacyFinding.id}?action=generate`,
       estimatedMinutes: 3,
+    }
+  }
+
+  if (vendorDpaFinding) {
+    return {
+      label: "Deschide primul DPA în cockpit",
+      href: `${dashboardRoutes.resolve}/${vendorDpaFinding.id}?action=generate`,
+      estimatedMinutes: 4,
     }
   }
 

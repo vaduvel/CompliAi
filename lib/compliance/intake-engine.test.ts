@@ -392,7 +392,7 @@ describe("intake-engine", () => {
 
     expect(nextBestAction).toEqual({
       label: "Generează prima politică GDPR",
-      href: "/dashboard/scan",
+      href: "/dashboard/resolve/intake-b2c-privacy?action=generate",
       estimatedMinutes: 3,
     })
   })

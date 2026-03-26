@@ -69,6 +69,41 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-010")
   })
 
+  it("mapează finding-ul intake privacy policy → GDPR-001", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-gdpr-privacy-policy",
+        category: "GDPR",
+        title: "Politică de confidențialitate GDPR lipsă",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-001")
+  })
+
+  it("mapează finding-ul intake vendor no dpa → GDPR-010", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-vendor-no-dpa",
+        category: "GDPR",
+        title: "DPA lipsă pentru furnizori care procesează date personale",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-010")
+  })
+
+  it("mapează finding-ul intake site cookies → GDPR-005", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-site-cookies",
+        category: "GDPR",
+        title: "Cookies consent / policy lipsă",
+        detail:
+          "Directiva ePrivacy și GDPR cer consimțământ explicit pentru cookies non-esențiale. Lipsa unui banner de consent e neconformitate.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-005")
+  })
+
   it("mapează NIS2 + nis2-incident-response → NIS2-015", () => {
     const result = classifyFinding(
       makeFinding({ category: "NIS2", suggestedDocumentType: "nis2-incident-response" })
@@ -190,6 +225,12 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.primaryCTA).toBe("Generează acum")
     expect(recipe.secondaryCTA).toBe("Am deja documentul")
     expect(recipe.revalidationTriggers.length).toBeGreaterThan(0)
+  })
+
+  it("returnează recipe corect pentru GDPR-005 — external action", () => {
+    const recipe = getResolveFlowRecipe("GDPR-005")
+    expect(recipe.initialFlowState).toBe("external_action_required")
+    expect(recipe.primaryCTA).toBe("Corectează bannerul")
   })
 
   it("returnează recipe corect pentru EF-003 — fără generator", () => {
@@ -467,6 +508,12 @@ describe("getCloseGatingRequirements", () => {
     expect(requirements.requiresGeneratedDocument).toBe(true)
     expect(requirements.requiresConfirmationChecklist).toBe(true)
     expect(requirements.requiresEvidenceNote).toBe(false)
+  })
+
+  it("cere dovadă operațională pentru GDPR-005", () => {
+    const requirements = getCloseGatingRequirements("GDPR-005")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
   })
 
   it("cere dovadă operațională pentru EF-003", () => {
