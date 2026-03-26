@@ -71,6 +71,7 @@
 | F5 | Sprint 7 — NIS2 maturity/governance handoff + evidence per control | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F6 | Sprint 8 — Activity Feed + Ce am verificat + Continuity Layer | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 | F7 | Sprint 9 — Share links + Trust Center + Partner Shareability | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F8 | Sprint 10 — AI Act + Legal Safety Layer | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -1268,3 +1269,45 @@ V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțion
 |---|---|---|
 | 2026-03-26 | Claude | Sprint 9 (F7) — Share links + Trust Center + Partner Shareability — local. Fișiere: lib/server/share-token-store.ts, app/shared/[token]/page.tsx, app/api/reports/share-token/route.ts, components/compliscan/navigation.ts |
 | 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean. |
+
+---
+
+## Sprint 10 (F8) — AI Act + Legal Safety Layer
+
+### Origine
+Canon Sprint Map — Sprint 10: închiderea maturității AI Act și granița sănătoasă software↔consultanță.
+
+### Impact
+AI Act trece de la inventar+direcție la acțiune concretă cu documente descărcabile și boundary clar față de certificare oficială.
+
+### Efort estimat
+M
+
+### Descriere
+Explainability clasificare, generator Annex IV cu download per sistem, banner false confidence prevention pentru sisteme high-risk, boundary clarity juridic pe wizard EU DB.
+
+### Scope tehnic
+- `POST /api/ai-act/annex-iv` — generează template Annex IV din inventar per systemId
+- `ai-inventory-panel.tsx` — article + reason per sistem (WHY high/limited risk), buton "Anexa IV" pentru high-risk
+- `eu-db-wizard/page.tsx` — banner roșu boundary clarity pe step 4 (draft, nu înregistrare certificată)
+- `sisteme/page.tsx` — banner false confidence prevention când aiHighRisk > 0
+
+### Fișiere afectate
+- `app/api/ai-act/annex-iv/route.ts` (nou)
+- `components/compliscan/ai-inventory-panel.tsx`
+- `app/dashboard/sisteme/eu-db-wizard/page.tsx`
+- `app/dashboard/sisteme/page.tsx`
+
+### Definition of Done
+- [x] `POST /api/ai-act/annex-iv` returnează markdown Annex IV pentru orice sistem din inventar
+- [x] Fiecare card de sistem AI afișează `article` + `reason` din classifier (explainability)
+- [x] Buton "Anexa IV" vizibil doar pentru sisteme high-risk, descarcă fișierul .md
+- [x] EU DB wizard step 4 conține banner roșu cu limitele instrumentului
+- [x] Banner false confidence prevention apare când există sisteme high-risk neconfirmate
+- [x] Build clean, 0 erori TypeScript în fișierele Sprint 10
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint 10 (F8) — AI Act + Legal Safety Layer — local. Fișiere: app/api/ai-act/annex-iv/route.ts, components/compliscan/ai-inventory-panel.tsx, app/dashboard/sisteme/eu-db-wizard/page.tsx, app/dashboard/sisteme/page.tsx |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean, 0 erori TS în fișierele sprint. |
