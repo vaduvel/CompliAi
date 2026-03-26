@@ -17,7 +17,7 @@ export type ExternalFeedItem = {
   dateISO: string
   tone: "default" | "success" | "warning"
   href?: string
-  sourceType: "legislation" | "anspdcp" | "spv" | "anaf"
+  sourceType: "legislation" | "anspdcp" | "spv" | "anaf" | "system"
 }
 
 // ── Legislation relevance filter ────────────────────────────────────────────
@@ -231,4 +231,97 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
     default:
       return null
   }
+}
+
+// ── Sprint 8 — Ce am verificat pentru tine ──────────────────────────────────
+
+/**
+ * Generează itemi proactivi de tip "Ce am verificat pentru tine".
+ * Apar în feed chiar dacă nu există probleme — oferă liniște utilizatorului
+ * că sistemul lucrează în fundal. Mereu 2-3 items bazate pe starea curentă.
+ */
+export function buildProactiveSystemChecks(
+  state: ComplianceState,
+  score: number,
+  redAlerts: number
+): ExternalFeedItem[] {
+  const items: ExternalFeedItem[] = []
+  const now = new Date().toISOString()
+  const tags = state.applicability?.tags ?? []
+
+  // 1. Scoring de conformitate
+  const scoreTone: ExternalFeedItem["tone"] =
+    score >= 70 ? "success" : score >= 50 ? "default" : "warning"
+  const scoreDetail =
+    redAlerts > 0
+      ? `Scorul tău este ${score}% cu ${redAlerts} alerte critice. Fiecare finding rezolvat adaugă puncte.`
+      : score >= 70
+        ? `Scorul tău este ${score}% — peste pragul recomandat. Continuăm monitorizarea automată.`
+        : `Scorul tău este ${score}% — sub 70%. Prioritizează finding-urile deschise pentru a avansa.`
+  items.push({
+    id: "sys-check-score",
+    eyebrow: "Ce am verificat",
+    title: `Am verificat scoring-ul de conformitate — ${score}%`,
+    detail: scoreDetail,
+    dateISO: now,
+    tone: scoreTone,
+    href: "/dashboard",
+    sourceType: "system",
+  })
+
+  // 2. Conformitate GDPR
+  const gdpr = state.gdprProgress ?? 0
+  const gdprTone: ExternalFeedItem["tone"] = gdpr >= 70 ? "success" : gdpr >= 40 ? "default" : "warning"
+  const gdprDetail =
+    gdpr >= 70
+      ? `GDPR la ${gdpr}% — acoperire satisfăcătoare. Documentele cheie sunt prezente în workspace.`
+      : gdpr >= 40
+        ? `GDPR la ${gdpr}% — există documente sau proceduri lipsă. Verifică finding-urile GDPR active.`
+        : `GDPR la ${gdpr}% — nivel de risc ridicat. Prioritizează politicile de bază (cookie, privacy).`
+  items.push({
+    id: "sys-check-gdpr",
+    eyebrow: "Ce am verificat",
+    title: `Am verificat conformitatea GDPR — ${gdpr}%`,
+    detail: gdprDetail,
+    dateISO: now,
+    tone: gdprTone,
+    href: "/dashboard/rapoarte",
+    sourceType: "system",
+  })
+
+  // 3. Drift-uri (dacă există drift-uri active)
+  const openDrifts = (state.driftRecords ?? []).filter((d) => d.open)
+  if (openDrifts.length > 0) {
+    const criticalDrifts = openDrifts.filter((d) => d.severity === "critical" || d.severity === "high")
+    items.push({
+      id: "sys-check-drift",
+      eyebrow: "Ce am verificat",
+      title:
+        criticalDrifts.length > 0
+          ? `Am detectat ${criticalDrifts.length} modificări critice față de baseline`
+          : `Am verificat drift-urile — ${openDrifts.length} modificări de urmărit`,
+      detail:
+        criticalDrifts.length > 0
+          ? "Modificările critice pot afecta conformitatea. Verifică și confirmă sau respinge fiecare drift."
+          : "Modificările detectate nu sunt critice, dar necesită confirmare pentru a menține baseline-ul.",
+      dateISO: now,
+      tone: criticalDrifts.length > 0 ? "warning" : "default",
+      href: "/dashboard/rapoarte",
+      sourceType: "system",
+    })
+  } else if (tags.includes("nis2" as ApplicabilityTag)) {
+    // NIS2 steady-state check when no drifts
+    items.push({
+      id: "sys-check-nis2-stable",
+      eyebrow: "Ce am verificat",
+      title: "Am verificat statutul NIS2 — niciun drift critic detectat",
+      detail: "Configurația NIS2 nu s-a modificat față de ultimul snapshot. Continui monitorizarea săptămânală.",
+      dateISO: now,
+      tone: "success",
+      href: "/dashboard/nis2",
+      sourceType: "system",
+    })
+  }
+
+  return items
 }

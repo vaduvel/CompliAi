@@ -29,7 +29,7 @@ import type {
   GeneratedDocumentRecord,
 } from "@/lib/compliance/types"
 import type { AppNotification } from "@/lib/server/notifications-store"
-import { buildExternalFeedItems } from "@/lib/compliscan/feed-sources"
+import { buildExternalFeedItems, buildProactiveSystemChecks } from "@/lib/compliscan/feed-sources"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -161,6 +161,7 @@ export default function DashboardPage() {
     generatedDocuments: state.generatedDocuments,
   })
   const externalFeedItems = buildExternalFeedItems(externalNotifications, state)
+  const systemCheckItems = buildProactiveSystemChecks(state, data.summary.score, data.summary.redAlerts)
   const activityFeedItems = [
     ...internalFeedItems,
     ...externalFeedItems.map((e) => ({
@@ -172,9 +173,18 @@ export default function DashboardPage() {
       tone: e.tone,
       href: e.href,
     })),
+    ...systemCheckItems.map((e) => ({
+      id: e.id,
+      eyebrow: e.eyebrow,
+      title: e.title,
+      detail: e.detail,
+      dateISO: e.dateISO,
+      tone: e.tone,
+      href: e.href,
+    })),
   ]
     .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
-    .slice(0, 8)
+    .slice(0, 10)
   const auditStatusLabel =
     data.summary.score >= 90
       ? "Pregătit"
@@ -1001,7 +1011,7 @@ function ActivityMonitorCard({ items }: { items: ActivityFeedItem[] }) {
           <div>
             <p className="text-sm font-semibold text-eos-text">Compli lucrează pentru tine</p>
             <p className="mt-1 text-xs text-eos-text-muted">
-              Aici vezi ce am detectat, ce a intrat la dosar și ce urmează să reverificăm.
+              Ce am verificat pentru tine, ce am detectat, ce a intrat la dosar și ce urmează să reverificăm.
             </p>
           </div>
           <Link
