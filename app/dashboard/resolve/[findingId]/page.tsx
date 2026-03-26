@@ -312,19 +312,35 @@ export default function FindingDetailPage() {
         </Card>
       )}
 
-      {/* ── Details below the fold ────────────────────────────────────── */}
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <FindingNarrativeCard
-          finding={finding}
-          title="Rezolvare în același loc"
-          description="Vezi problema, impactul și traseul de închidere fără să pleci din acest caz."
-        />
-        <FindingExecutionCard
-          finding={finding}
-          documentFlowState={documentFlowState}
-          linkedGeneratedDocument={linkedGeneratedDocument}
-        />
-      </div>
+      {/* ── Execution first, context second ───────────────────────────── */}
+      <FindingExecutionCard
+        finding={finding}
+        documentFlowState={documentFlowState}
+        linkedGeneratedDocument={linkedGeneratedDocument}
+      />
+
+      <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Contextul cazului
+            </p>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Vezi problema, impactul și dovada cerută doar când ai nevoie de context suplimentar, fără să încarci zona de execuție.
+            </p>
+          </div>
+          <Badge variant="outline" className="normal-case tracking-normal">
+            Deschide
+          </Badge>
+        </summary>
+        <div className="mt-4">
+          <FindingNarrativeCard
+            finding={finding}
+            title="Rezolvare în același loc"
+            description="Problema, impactul și condiția de închidere rămân în aceeași urmă, fără să concureze cu pasul activ."
+          />
+        </div>
+      </details>
 
       {(finding.legalMappings?.length || finding.provenance || finding.reasoning) ? (
         <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
