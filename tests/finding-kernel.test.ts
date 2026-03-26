@@ -167,6 +167,20 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-016")
   })
 
+  it("mapează dovada de ștergere / anonimizare → GDPR-017", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "retention-deletion-proof-1",
+        category: "GDPR",
+        title: "Ștergere / anonimizare neconfirmată",
+        detail: "Există politică de retenție, dar lipsește logul de ștergere sau anonimizare pentru datele expirate.",
+        evidenceRequired: "Log de ștergere sau export de control pentru sistemele afectate.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-017")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează finding-ul rescue ANSPDCP → GDPR-019", () => {
     const result = classifyFinding(
       makeFinding({
@@ -291,6 +305,13 @@ describe("getResolveFlowRecipe", () => {
     const recipe = getResolveFlowRecipe("GDPR-016")
     expect(recipe.initialFlowState).toBe("ready_to_generate")
     expect(recipe.primaryCTA).toBe("Definește retenția")
+  })
+
+  it("returnează recipe corect pentru GDPR-017 — deletion proof external action", () => {
+    const recipe = getResolveFlowRecipe("GDPR-017")
+    expect(recipe.initialFlowState).toBe("external_action_required")
+    expect(recipe.primaryCTA).toBe("Confirmă ștergerea")
+    expect(recipe.closeCondition).toContain("Log")
   })
 
   it("returnează handoff real pentru GDPR-005 către re-scanul site-ului", () => {
@@ -546,6 +567,27 @@ describe("buildCockpitRecipe", () => {
     })
   })
 
+  describe("Archetype 1c — GDPR-017 (deletion proof / external_action)", () => {
+    it("returnează external_action fără generator și cu CTA de control operațional", () => {
+      const finding = makeFinding({
+        id: "retention-deletion-proof-1",
+        category: "GDPR",
+        title: "Ștergere / anonimizare neconfirmată",
+        detail: "Lipsește logul de ștergere pentru datele care au depășit termenul de retenție.",
+        evidenceRequired: "Log de ștergere sau export de control.",
+        findingStatus: "open",
+      })
+
+      const recipe = buildCockpitRecipe(finding)
+      expect(recipe.findingTypeId).toBe("GDPR-017")
+      expect(recipe.uiState).toBe("external_action_required")
+      expect(recipe.primaryCTA.action).toBe("open_external_steps")
+      expect(recipe.visibleBlocks.detailBlocks).not.toContain("generator")
+      expect(recipe.closureCTA).toBe("Marchează ștergerea / anonimizarea")
+      expect(recipe.acceptedEvidence).toContain("Export log / jurnal operațional")
+    })
+  })
+
   describe("Archetype 2 — EF-003 (operational / external_action)", () => {
     it("returnează uiState external_action_required", () => {
       const finding = makeFinding({ category: "E_FACTURA", findingStatus: "open" })
@@ -668,6 +710,13 @@ describe("getCloseGatingRequirements", () => {
     expect(requirements.requiresEvidenceNote).toBe(true)
   })
 
+  it("cere dovadă operațională pentru GDPR-017", () => {
+    const requirements = getCloseGatingRequirements("GDPR-017")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Export log / jurnal operațional")
+  })
+
   it("cere dovadă operațională pentru EF-003", () => {
     const requirements = getCloseGatingRequirements("EF-003")
     expect(requirements.requiresGeneratedDocument).toBe(false)
@@ -691,6 +740,11 @@ describe("computeNextMonitoringDateISO", () => {
   it("calculează următorul control pentru GDPR-001 la 180 zile", () => {
     const nextISO = computeNextMonitoringDateISO("GDPR-001", "2026-03-26T00:00:00.000Z")
     expect(nextISO).toBe("2026-09-22T00:00:00.000Z")
+  })
+
+  it("calculează următorul control pentru GDPR-017 la 90 zile", () => {
+    const nextISO = computeNextMonitoringDateISO("GDPR-017", "2026-03-26T00:00:00.000Z")
+    expect(nextISO).toBe("2026-06-24T00:00:00.000Z")
   })
 
   it("cade pe fallback-ul transversal pentru id necunoscut", () => {

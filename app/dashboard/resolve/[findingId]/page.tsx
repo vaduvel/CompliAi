@@ -300,6 +300,13 @@ export default function FindingDetailPage() {
             placeholder: "Ex: Notificare ANSPDCP trimisă la 26.03.2026, ref. ANSPDCP-2026-114. Categorii afectate: date identitate și contact. Sau: incident analizat, risc scăzut pentru drepturile persoanelor, notificarea nu a fost necesară.",
             footer: "Cazul nu poate intra în monitorizare fără urma clară a deciziei și a trimiterii ANSPDCP.",
           }
+        : recipe.findingTypeId === "GDPR-017"
+          ? {
+              eyebrow: "Dovadă de ștergere / anonimizare",
+              body: "Spune ce date au fost șterse sau anonimizate, din ce sisteme, când a rulat controlul și ce log sau export poți arăta la audit.",
+              placeholder: "Ex: Lead-urile expirate >12 luni au fost șterse din CRM la 26.03.2026. Export job #retention-2026-03-26 salvat, verificare făcută pe 124 înregistrări, fără excepții.",
+              footer: "Cazul nu poate intra în monitorizare fără urma clară a execuției reale, nu doar politica de retenție.",
+            }
       : {
           eyebrow: "Dovadă operațională obligatorie",
           body: "Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.",

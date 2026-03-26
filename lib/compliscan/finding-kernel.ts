@@ -351,6 +351,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "no",
     closingRule: "matricea de retenție este salvată și confirmată",
   },
+  "GDPR-017": {
+    findingTypeId: "GDPR-017",
+    framework: "GDPR",
+    title: "Ștergere / anonimizare neconfirmată",
+    category: "Retention execution",
+    typicalSeverity: "medium",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "data owner"],
+    compliCapabilities: ["arată dovada operațională cerută", "păstrează urma de execuție în dosar"],
+    userResponsibilities: ["rulează ștergerea sau anonimizarea", "păstrează logul sau exportul de control"],
+    requiredEvidenceKinds: ["log_export", "uploaded_file", "screenshot"],
+    autoRecheck: "partial",
+    closingRule: "log de ștergere / anonimizare sau export de control salvat la dosar",
+  },
   "GDPR-019": {
     findingTypeId: "GDPR-019",
     framework: "GDPR",
@@ -637,6 +652,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Matrice de retenție salvată și confirmată.",
     revalidationTriggers: ["proces nou", "categorie nouă de date", "review periodic"],
   },
+  "GDPR-017": {
+    findingTypeId: "GDPR-017",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Confirmă ștergerea",
+    secondaryCTA: "Vezi dovada cerută",
+    whatUserSees:
+      "Ai regula de retenție, dar nu avem încă dovada că ștergerea sau anonimizarea se execută în practică.",
+    whatCompliDoes:
+      "Spune ce urmă operațională trebuie să rămână la dosar și păstrează cazul sub monitorizare după execuție.",
+    whatUserMustDo:
+      "Rulează ștergerea sau anonimizarea și lasă un log, export sau screenshot verificabil.",
+    closeCondition: "Log, export sau screenshot de control salvat la dosar.",
+    revalidationTriggers: ["proces nou", "sistem nou", "review periodic"],
+  },
   "GDPR-019": {
     findingTypeId: "GDPR-019",
     initialFlowState: "external_action_required",
@@ -873,6 +902,7 @@ const EVIDENCE_KIND_LABELS: Record<string, string> = {
   confirmation: "Confirmare explicită",
   vendor_document: "Document de la vendor (DPA, contract)",
   uploaded_file: "Fișier încărcat",
+  log_export: "Export log / jurnal operațional",
   screenshot: "Screenshot dovadă",
   xml: "Fișier XML factură",
   public_link: "Link public verificabil",
@@ -951,6 +981,49 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     )
   ) {
     return "GDPR-014"
+  }
+
+  if (
+    framework === "GDPR" &&
+    (
+      id.includes("deletion-proof") ||
+      id.includes("anonymization-proof") ||
+      (
+        (
+          title.includes("șterger") ||
+          title.includes("sterg") ||
+          title.includes("anonimiz") ||
+          detail.includes("șterger") ||
+          detail.includes("sterg") ||
+          detail.includes("anonimiz") ||
+          remediation.includes("șterger") ||
+          remediation.includes("sterg") ||
+          remediation.includes("anonimiz")
+        ) &&
+        (
+          title.includes("neconfirm") ||
+          detail.includes("log de ștergere") ||
+          detail.includes("log de stergere") ||
+          detail.includes("dovadă de rulare") ||
+          detail.includes("dovada de rulare") ||
+          detail.includes("control operațional") ||
+          detail.includes("control operational") ||
+          evidence.includes("log de ștergere") ||
+          evidence.includes("log de stergere") ||
+          evidence.includes("dovadă de rulare") ||
+          evidence.includes("dovada de rulare") ||
+          remediation.includes("log de ștergere") ||
+          remediation.includes("log de stergere") ||
+          remediation.includes("dovadă de rulare") ||
+          remediation.includes("dovada de rulare") ||
+          remediation.includes("execu") ||
+          remediation.includes("control operațional") ||
+          remediation.includes("control operational")
+        )
+      )
+    )
+  ) {
+    return "GDPR-017"
   }
 
   if (
@@ -1268,6 +1341,8 @@ function getClosureCTA(
       return "Marchează răspunsul trimis"
     case "GDPR-014":
       return "Marchează răspunsul și ștergerea"
+    case "GDPR-017":
+      return "Marchează ștergerea / anonimizarea"
     case "GDPR-019":
       return "Marchează notificarea ANSPDCP"
     default:
@@ -1284,6 +1359,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-013": 30,
   "GDPR-014": 30,
   "GDPR-016": 180,
+  "GDPR-017": 90,
   "GDPR-019": null,
   "NIS2-001": 365,
   "NIS2-005": 180,

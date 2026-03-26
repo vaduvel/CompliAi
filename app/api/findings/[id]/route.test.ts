@@ -408,6 +408,48 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.feedbackMessage).toContain("operațională")
   })
 
+  it("închide GDPR-017 cu dovadă de ștergere și intră în monitoring", async () => {
+    const retentionState = {
+      findings: [
+        {
+          id: "retention-deletion-proof-1",
+          title: "Ștergere / anonimizare neconfirmată",
+          detail: "Există politică de retenție, dar lipsește logul de ștergere pentru datele expirate.",
+          evidenceRequired: "Log de ștergere sau export de control.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "retention-review",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/retention-deletion-proof-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote:
+            "Lead-urile expirate >12 luni au fost șterse din CRM la 26.03.2026. Export job #retention-2026-03-26 salvat pentru audit.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "retention-deletion-proof-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.operationalEvidenceNote).toContain("Lead-urile expirate")
+    expect(payload.finding.nextMonitoringDateISO.startsWith("2026-06-24")).toBe(true)
+    expect(payload.feedbackMessage).toContain("operațională")
+  })
+
   it("blochează SYS-002 fără reconfirmare explicită", async () => {
     const sysState = {
       findings: [
