@@ -291,25 +291,14 @@ export default function FindingDetailPage() {
           helperText={detailHelperText}
         >
           {requiresDocumentFlow ? (
-            <>
-              <Button
-                data-testid="open-generator-drawer"
-                onClick={() => setGeneratorOpen(true)}
-                className="gap-1.5"
-              >
-                <FileText className="size-3.5" strokeWidth={2} />
-                {documentFlowState === "draft_ready" ? "Continuă flow-ul" : "Generează acum"}
-              </Button>
-              <Button
-                data-testid="resolve-with-existing-evidence"
-                variant="outline"
-                onClick={() => updateStatus("resolved")}
-                disabled={actionLoading}
-                className="gap-1.5"
-              >
-                Am deja dovada
-              </Button>
-            </>
+            <Button
+              data-testid="open-generator-drawer"
+              onClick={() => setGeneratorOpen(true)}
+              className="gap-1.5"
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              {documentFlowState === "draft_ready" ? "Continuă flow-ul" : "Generează acum"}
+            </Button>
           ) : (
             <Button
               data-testid="mark-finding-resolved"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { CheckCircle2, FileText, Loader2, Sparkles } from "lucide-react"
+import { CheckCircle2, Copy, FileText, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -14,6 +14,7 @@ import {
 } from "@/components/evidence-os/Sheet"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
+import { FINDING_DOCUMENT_LABELS } from "@/lib/compliscan/finding-cockpit"
 import type { DocumentType, GeneratedDocument } from "@/lib/server/document-generator"
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -49,10 +50,11 @@ type GeneratorDrawerProps = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <label className="block text-xs font-medium text-eos-text">{label}</label>
+      {hint && <p className="text-[11px] text-eos-text-muted">{hint}</p>}
       {children}
     </div>
   )
@@ -76,6 +78,8 @@ export function GeneratorDrawer({
 }: GeneratorDrawerProps) {
   const cockpit = useCockpitData()
   const [orgName, setOrgName] = useState("")
+  const [orgWebsite, setOrgWebsite] = useState("")
+  const [dpoEmail, setDpoEmail] = useState("")
   const [dataFlows, setDataFlows] = useState("")
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
@@ -83,11 +87,16 @@ export function GeneratorDrawer({
   const [checklist, setChecklist] = useState<string[]>([])
   const previewRef = useRef<HTMLDivElement>(null)
 
+  const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
+
   // Pre-fill from org state
   useEffect(() => {
-    if (!cockpit.data || orgName) return
-    setOrgName(cockpit.data.workspace.orgName)
-  }, [cockpit.data, orgName])
+    if (!cockpit.data) return
+    if (!orgName) setOrgName(cockpit.data.workspace.orgName)
+    if (!orgWebsite && cockpit.data.state.orgProfile?.website) {
+      setOrgWebsite(cockpit.data.state.orgProfile.website)
+    }
+  }, [cockpit.data, orgName, orgWebsite])
 
   // Reset state when drawer opens with new finding
   useEffect(() => {
@@ -116,8 +125,10 @@ export function GeneratorDrawer({
         body: JSON.stringify({
           documentType,
           orgName: name,
+          orgWebsite: orgWebsite.trim() || undefined,
           orgSector: profile ? ORG_SECTOR_LABELS[profile.sector] : undefined,
           orgCui: profile?.cui || undefined,
+          dpoEmail: dpoEmail.trim() || undefined,
           dataFlows: dataFlows || undefined,
           sourceFindingId: findingId,
         }),
@@ -175,11 +186,23 @@ export function GeneratorDrawer({
     }
   }
 
+  async function handleCopy() {
+    if (!result?.content) return
+    try {
+      await navigator.clipboard.writeText(result.content)
+      toast.success("Copiat în clipboard")
+    } catch {
+      toast.error("Nu am putut copia. Selectează textul manual.")
+    }
+  }
+
   function toggleItem(id: string) {
     setChecklist((c) => (c.includes(id) ? c.filter((v) => v !== id) : [...c, id]))
   }
 
   const allChecked = CONFIRMATION_ITEMS.every((item) => checklist.includes(item.id))
+  const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
+  const showDpoField = ["privacy-policy", "dpa"].includes(documentType)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -191,7 +214,7 @@ export function GeneratorDrawer({
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-base">
             <FileText className="size-4 text-eos-primary" strokeWidth={2} />
-            Genereaza document
+            {docTypeLabel}
           </SheetTitle>
           <SheetDescription>
             Finding: {findingTitle}
@@ -210,6 +233,30 @@ export function GeneratorDrawer({
                   placeholder="SRL-ul tau"
                 />
               </Field>
+
+              {showWebsiteField && (
+                <Field label="Website" hint="Opțional — apare în document ca sursă de identificare">
+                  <input
+                    className={inputClass}
+                    value={orgWebsite}
+                    onChange={(e) => setOrgWebsite(e.target.value)}
+                    placeholder="https://exemplu.ro"
+                    type="url"
+                  />
+                </Field>
+              )}
+
+              {showDpoField && (
+                <Field label="Email DPO / responsabil date" hint="Opțional — inclus în secțiunea de contact">
+                  <input
+                    className={inputClass}
+                    value={dpoEmail}
+                    onChange={(e) => setDpoEmail(e.target.value)}
+                    placeholder="dpo@firma.ro"
+                    type="email"
+                  />
+                </Field>
+              )}
 
               <Field label="Context suplimentar">
                 <textarea
@@ -241,9 +288,19 @@ export function GeneratorDrawer({
           {result && (
             <div ref={previewRef} className="space-y-4">
               <div data-testid="generated-document-preview" className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                  Preview draft
-                </p>
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                    Preview draft
+                  </p>
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 rounded-eos-sm px-2 py-1 text-[11px] text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
+                    title="Copiaza in clipboard"
+                  >
+                    <Copy className="size-3" strokeWidth={2} />
+                    Copiaza
+                  </button>
+                </div>
                 <div className="max-h-80 overflow-y-auto text-sm leading-relaxed text-eos-text whitespace-pre-wrap">
                   {result.content}
                 </div>

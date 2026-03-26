@@ -65,6 +65,20 @@ export async function readState(): Promise<ComplianceState> {
   return structuredClone(normalized)
 }
 
+/**
+ * Bypass the in-memory cache and force a fresh load from Supabase/disk.
+ * Use in mutation-critical paths where stale cache can cause data loss
+ * (e.g., concurrent agent writes racing with user actions).
+ */
+export async function readFreshState(): Promise<ComplianceState> {
+  const { orgId, orgName } = await getOrgContext()
+  initializedOrgs.delete(orgId)
+  const loaded = normalizeComplianceState(await loadState(orgId, orgName))
+  memoryStates.set(orgId, loaded)
+  initializedOrgs.add(orgId)
+  return structuredClone(loaded)
+}
+
 export async function writeState(nextState: ComplianceState): Promise<void> {
   const { orgId, orgName } = await getOrgContext()
   const normalized = normalizeComplianceState(structuredClone(nextState))

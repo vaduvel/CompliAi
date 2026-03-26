@@ -8,7 +8,7 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { readState, writeState } from "@/lib/server/mvp-store"
+import { readFreshState, readState, writeState } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
@@ -82,7 +82,8 @@ export async function PATCH(
     }
 
     const { orgId } = await getOrgContext()
-    const state = await readState()
+    // Always read fresh from Supabase to avoid stale cache overwriting concurrent agent writes
+    const state = await readFreshState()
 
     const findingIdx = state.findings.findIndex((f) => f.id === findingId)
     if (findingIdx === -1) {
