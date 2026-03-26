@@ -64,7 +64,11 @@
 | EOS-S8 | EOS S8 UI Features — Streak, Benchmark, Counsel Brief, Share Token, Invoice Prefill | 🟢 Închis | 2026-03-21 | 2026-03-21 |
 | EOS-BL1 | Backlog UX Audit — I6/A5/S1/A6/R2/P8 + P7 Whistleblowing (EU 2019/1937) + S2 DORA (EU 2022/2554) | 🟢 Închis | 2026-03-25 | 2026-03-25 |
 | EOS-BL2 | UX Resolve Page + Fix DORA/WB — simplifică Resolution Layer, buton auto-acțiune per finding, fix WB submit middleware, Supabase migrations dora+whistleblowing | 🟢 Închis | 2026-03-25 | 2026-03-25 |
-| F1 | Etapa 1 Faza1 Sprint Ready — NIS2 hotfix + Onboarding finish screen + Dashboard accumulation card + Email reînnoire rewrite | 🟡 În progres | 2026-03-25 | — |
+| F1 | Etapa 1 Faza1 Sprint Ready — NIS2 hotfix + Onboarding finish screen + Dashboard accumulation card + Email reînnoire rewrite | 🟢 Închis | 2026-03-25 | 2026-03-25 |
+| F2 | Sprint 6A — EF-003 explainability | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F3 | Sprint 6B — EF-001 SPV state model | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F4 | Sprint 6C — EF-004/EF-005/EF-006 Fiscal Operational Risk Flows | 🟢 Închis | 2026-03-26 | 2026-03-26 |
+| F5 | Sprint 7 — NIS2 maturity/governance handoff + evidence per control | 🟢 Închis | 2026-03-26 | 2026-03-26 |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -1081,14 +1085,128 @@ V5.6 — Response Pack Integration: `buildComplianceResponse()` acceptă opțion
 - `app/dashboard/page.tsx`
 
 ### Definition of Done
-- [ ] TASK 0: `deadlineFinalISO` calculat corect (= deadline72h + 30 zile, nu detectedAt + 30 zile). Test: incident creat ieri → deadline final = ziua 32+, nu ziua 30.
-- [ ] TASK 1: Finish screen live, CTA clickabil, duce la dashboard. Build clean.
-- [ ] TASK 2: Accumulation card vizibil pe dashboard cu 5 cifre reale (sau `—` dacă 0). Build clean, 0 erori TS.
-- [ ] TASK 3: Template email nou cu subiect și body actualizat. Cifrele `[X]` populate sau fallback text.
-- [ ] TypeScript: 0 erori non-test
-- [ ] Next.js build: 0 erori
+- [x] TASK 0: `deadlineFinalISO` calculat corect (= deadline72h + 30 zile, nu detectedAt + 30 zile). Test: incident creat ieri → deadline final = ziua 32+, nu ziua 30.
+- [x] TASK 1: Finish screen live, CTA clickabil, duce la dashboard. Build clean.
+- [x] TASK 2: Accumulation card vizibil pe dashboard cu 5 cifre reale (sau `—` dacă 0). Build clean, 0 erori TS.
+- [x] TASK 3: Template email nou cu subiect și body actualizat. Cifrele `[X]` populate sau fallback text.
+- [x] TypeScript: 0 erori non-test
+- [x] Next.js build: 0 erori
 
 ### Log
 | Data | Autor | Acțiune |
 |---|---|---|
 | 2026-03-25 | Claude | Sprint F1 deschis — 4 task-uri din compliscan-faza1-sprint-ready.md |
+| 2026-03-25 | Claude | Sprint închis — DoD verificat. TASK 0: deadlineFinalISO NIS2 ✓ · TASK 1: onboarding/finish screen ✓ · TASK 2: accumulation-card dashboard ✓ · TASK 3: renewal-email template + cron ✓ |
+
+---
+
+## F2 — Sprint 6A: EF-003 explainability
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 6 eFactura/SPV Maturity
+**Impact:** Înalt — cockpit arată acum eroarea ANAF exactă, fix-ul concret și semnalul de reverificare la 7 zile
+**Efort estimat:** 3–4 ore
+
+### Scope tehnic
+- `lib/compliance/efactura-error-codes.ts` — ANAF_ERROR_MAP cu 18 coduri (E, V, D, S, C, T)
+- `lib/compliscan/finding-kernel.ts` — `extractEF003Explainability()` + override EF-003 în `buildCockpitRecipe()`
+- `app/dashboard/resolve/[findingId]/page.tsx` — `evidenceCardCopy` specific EF-003
+- `tests/finding-kernel.test.ts` — 10 teste noi (87 total)
+
+### Definition of Done
+- [x] `extractEF003Explainability()` exportat și testat
+- [x] `heroSummary` conține descrierea erorii ANAF, nu textul generic
+- [x] `whatUserMustDo` conține fix-ul concret din ANAF_ERROR_MAP
+- [x] `monitoringSignals` include reverificarea la 7 zile
+- [x] `evidenceCardCopy` specific EF-003 în detail page
+- [x] 87 teste trecute, build clean
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint F2 — EF-003 explainability — local. Fișiere: lib/compliscan/finding-kernel.ts, lib/compliance/efactura-error-codes.ts, app/dashboard/resolve/[findingId]/page.tsx, tests/finding-kernel.test.ts |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. 87 teste trecute, build clean. |
+
+---
+
+## F3 — Sprint 6B: EF-001 SPV state model
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 6 eFactura/SPV Maturity
+**Impact:** Înalt — cockpit EF-001 derivează sub-starea SPV la runtime (spv_not_registered/spv_access_missing/spv_token_expired/spv_check_needed), workflow link duce direct la Fiscal→SPV, handoff banner în pagina fiscal
+**Efort estimat:** 3–4 ore
+
+### Scope tehnic
+- `lib/compliscan/finding-kernel.ts` — `SpvSubState`, `EF001SpvExplainability`, `extractEF001SpvState()`, heuristic EF-001 în `deriveTypeId`, override EF-001 în `buildCockpitRecipe`, workflow link `/dashboard/fiscal?tab=spv&findingId=...`, closureCTA "Confirmă activarea SPV"
+- `app/dashboard/fiscal/page.tsx` — `useSearchParams()`, tab default "spv" când vine din cockpit, handoff banner cu link înapoi la finding
+- `app/dashboard/resolve/[findingId]/page.tsx` — `evidenceCardCopy` specific EF-001
+- `tests/finding-kernel.test.ts` — 15 teste noi (102 total)
+
+### Definition of Done
+- [x] `spv-missing-{cui}` clasificat ca EF-001 (nu EF-GENERIC)
+- [x] `extractEF001SpvState()` exportat și testat cu 4 sub-stări
+- [x] `heroSummary` conține descrierea concretă a problemei SPV
+- [x] `workflowLink` duce la `/dashboard/fiscal?tab=spv&findingId=...`
+- [x] `closureCTA` = "Confirmă activarea SPV"
+- [x] `monitoringSignals` include reverificarea la 30 de zile
+- [x] Handoff banner în fiscal/page.tsx când vine din cockpit EF-001
+- [x] `evidenceCardCopy` specific EF-001 în detail page
+- [x] 102 teste trecute, build clean
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint F3 — EF-001 SPV state model — local. Fișiere: lib/compliscan/finding-kernel.ts, app/dashboard/fiscal/page.tsx, app/dashboard/resolve/[findingId]/page.tsx, tests/finding-kernel.test.ts |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. 102 teste trecute, build clean. |
+
+---
+
+## F4 — Sprint 6C: EF-004/EF-005/EF-006 Fiscal Operational Risk Flows
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 6 eFactura/SPV Maturity
+**Impact:** Înalt — diferențiază 3 clase de risc fiscal complet distincte: prelucrare blocată (≠ respinsă), factură netransmisă, date client invalide (buyer-side). Fiecare cu explainability proprie, CTA clar, dovadă acceptată specifică și semnal de reverificare.
+**Efort estimat:** 3–4 ore
+
+### Scope tehnic
+- `lib/compliscan/finding-kernel.ts` — `FiscalRiskClass`, `FiscalOperationalExplainability`, `extractEF004State()`, `extractEF005State()`, `extractEF006State()`, heuristici EF-004/005/006 în `deriveTypeId` (înainte de EF-003 pentru a evita misclassification), `FindingTypeDefinition` + `ResolveFlowRecipe` pentru EF-004/005/006, override `fiscalOpExplainability` în `buildCockpitRecipe`, `dossierOutcome` specific per tip, `MONITORING_INTERVAL_DAYS`: EF-004=2, EF-005=3, EF-006=7
+- `app/dashboard/resolve/[findingId]/page.tsx` — `evidenceCardCopy` specific EF-004/005/006
+- `tests/finding-kernel.test.ts` — 18 teste noi (120 total): Sprint 6C heuristics + explainability per clasă
+
+### Definition of Done
+- [x] EF-004 clasificat corect (prelucrare blocată ≠ respinsă)
+- [x] EF-005 clasificat corect (netransmisă spre SPV)
+- [x] EF-006 clasificat corect (buyer-side, date client invalide)
+- [x] Heuristici EF-004/005/006 ÎNAINTE de EF-003 în `deriveTypeId`
+- [x] `extractEF004State()` — description include "NU este o respingere"
+- [x] `extractEF005State()` — description include "NU a fost transmisă"
+- [x] `extractEF006State()` — description include "eroare buyer-side"
+- [x] `evidenceCardCopy` specific per tip în detail page
+- [x] 120 teste trecute, build clean
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint F4 — EF-004/EF-005/EF-006 Fiscal Operational Risk Flows — local. Fișiere: lib/compliscan/finding-kernel.ts, tests/finding-kernel.test.ts, app/dashboard/resolve/[findingId]/page.tsx |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. 120 teste trecute, build clean. |
+
+---
+
+## F5 — Sprint 7: NIS2 evidence per control (10 domenii Art.21(2))
+
+**Origine:** CompliScan Canon Sprint Map — Sprint 7 NIS2 Maturity
+**Impact:** Înalt — fiecare domeniu NIS2 Art.21(2) returnează acum 2 dovezi specifice și acționabile (politică semnată, raport pentest, screenshot MFA, etc.) în loc de o dovadă generică. Cockpit-ul devine un ghid practic per control, nu doar o redirectare spre evaluare.
+**Efort estimat:** 1–2 ore
+
+### Scope tehnic
+- `lib/compliscan/finding-kernel.ts` — `NIS2_CONTROL_EVIDENCE` (10 intrări, 2 dovezi specifice per domeniu Art.21(2)), maturity override în `buildCockpitRecipe` spread `controlEvidence` în `acceptedEvidence`
+- `tests/finding-kernel.test.ts` — 5 teste noi (125 total): risk-management, mfa, business-continuity, audit-testing, toate 10 domenii > 2 items
+
+### Definition of Done
+- [x] `NIS2_CONTROL_EVIDENCE` definit cu 10 domenii și 2 dovezi specifice fiecare
+- [x] `controlEvidence` spre în `acceptedEvidence` după `"Evaluare salvată pentru domeniu..."` (test existent rămâne verde)
+- [x] 5 teste noi: risk-management politică, mfa screenshot, BCP/DRP plan, pentest audit, toate 10 domenii > 2 items
+- [x] 125 teste trecute, build clean
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-26 | Claude | Sprint 7 — NIS2 evidence per control — local. Fișiere: lib/compliscan/finding-kernel.ts, tests/finding-kernel.test.ts |
+| 2026-03-26 | Claude | Sprint închis — DoD verificat. 125 teste trecute, build clean. |
