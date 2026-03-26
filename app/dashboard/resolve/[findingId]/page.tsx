@@ -171,6 +171,11 @@ export default function FindingDetailPage() {
         "Ai revenit din re-scanul site-ului. Revizuiește nota precompletată și închide cazul doar dacă rezultatul confirmă remedierea."
       )
     }
+    if (searchParams.get("anspdcp") === "done") {
+      setStatusFeedback(
+        "Ai revenit din flow-ul de breach. Revizuiește nota precompletată și închide cazul doar dacă trimiterea sau raționamentul ANSPDCP sunt documentate complet."
+      )
+    }
   }, [finding, searchParams])
 
   async function updateStatus(
@@ -277,6 +282,13 @@ export default function FindingDetailPage() {
           placeholder: "Ex: Cerere DSAR creată în modulul dedicat, identitatea verificată, răspuns trimis pe email la 26.03.2026 și salvat la dosar.",
           footer: "Cazul nu poate intra în monitorizare fără urma clară a răspunsului DSAR.",
         }
+      : recipe.findingTypeId === "GDPR-019"
+        ? {
+            eyebrow: "Dovadă breach obligatorie",
+            body: "Notează numărul de înregistrare ANSPDCP sau explică de ce notificarea nu a fost necesară, pe baza situației documentate în incident.",
+            placeholder: "Ex: Notificare ANSPDCP trimisă la 26.03.2026, ref. ANSPDCP-2026-114. Categorii afectate: date identitate și contact. Sau: incident analizat, risc scăzut pentru drepturile persoanelor, notificarea nu a fost necesară.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a deciziei și a trimiterii ANSPDCP.",
+          }
       : {
           eyebrow: "Dovadă operațională obligatorie",
           body: "Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.",
@@ -391,6 +403,8 @@ export default function FindingDetailPage() {
               <FileText className="size-3.5" strokeWidth={2} />
               {recipe.findingTypeId === "GDPR-005"
                 ? "Confirmă și scanează site-ul"
+                : recipe.findingTypeId === "GDPR-019"
+                  ? "Confirmă și deschide breach flow"
                 : "Confirmă și continuă"}
             </Button>
           ) : (

@@ -11,6 +11,12 @@ export function anspdcpFindingId(incidentId: string) {
   return `${ANSPDCP_FINDING_PREFIX}${incidentId}`
 }
 
+export function getIncidentIdFromAnspdcpFindingId(findingId: string) {
+  if (!findingId.startsWith(ANSPDCP_FINDING_PREFIX)) return null
+  const incidentId = findingId.slice(ANSPDCP_FINDING_PREFIX.length).trim()
+  return incidentId.length > 0 ? incidentId : null
+}
+
 /**
  * Construiește finding-ul de urgență ANSPDCP pentru un incident cu date personale.
  * Returnează null dacă notificarea ANSPDCP a fost deja confirmată (acknowledged).

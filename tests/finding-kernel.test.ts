@@ -141,6 +141,18 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-013")
   })
 
+  it("mapează finding-ul rescue ANSPDCP → GDPR-019", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "anspdcp-breach-inc-42",
+        category: "GDPR",
+        title: "Notificare ANSPDCP obligatorie — Incident ransomware",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-019")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează id prefix saft- → EF-GENERIC", () => {
     const result = classifyFinding(makeFinding({ id: "saft-e-invoice-error", category: "E_FACTURA" }))
     expect(result.findingTypeId).toBe("EF-GENERIC")
@@ -280,6 +292,25 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toBe("/dashboard/dsar?action=new")
     expect(recipe.workflowLink?.label).toBe("Deschide DSAR")
     expect(recipe.closureCTA).toBe("Marchează răspunsul trimis")
+  })
+
+  it("returnează handoff real pentru GDPR-019 către flow-ul ANSPDCP din NIS2", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "anspdcp-breach-inc-42",
+        category: "GDPR",
+        title: "Notificare ANSPDCP obligatorie — Incident ransomware",
+        detail: "Incidentul implică date cu caracter personal și trebuie evaluată notificarea ANSPDCP în 72h.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("GDPR-019")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=incidents")
+    expect(recipe.workflowLink?.href).toContain("incidentId=inc-42")
+    expect(recipe.workflowLink?.href).toContain("focus=anspdcp")
+    expect(recipe.workflowLink?.href).toContain("findingId=anspdcp-breach-inc-42")
+    expect(recipe.workflowLink?.label).toBe("Deschide flow-ul de breach")
+    expect(recipe.closureCTA).toBe("Marchează notificarea ANSPDCP")
   })
 
   it("returnează recipe corect pentru EF-003 — fără generator", () => {

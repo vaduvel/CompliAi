@@ -15,6 +15,7 @@
 import type { ScanFinding } from "@/lib/compliance/types"
 import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
 import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
+import { ANSPDCP_FINDING_PREFIX, getIncidentIdFromAnspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TYPES
@@ -320,6 +321,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "no",
     closingRule: "dovada trimiterii prezentă",
   },
+  "GDPR-019": {
+    findingTypeId: "GDPR-019",
+    framework: "GDPR",
+    title: "Bresă cu impact pe date personale",
+    category: "Breach",
+    typicalSeverity: "critical",
+    signalTypes: ["direct"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "dpo"],
+    compliCapabilities: ["deschide incidentul corect", "pregătește flow-ul ANSPDCP", "păstrează urma în dosar"],
+    userResponsibilities: ["decide notificarea", "trimite manual sau documentează raționamentul"],
+    requiredEvidenceKinds: ["official_reference", "email_sent", "uploaded_file"],
+    autoRecheck: "no",
+    closingRule: "dovada trimiterii sau raționament documentat",
+  },
   "AI-001": {
     findingTypeId: "AI-001",
     framework: "AI Act",
@@ -565,6 +581,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserMustDo: "Verifică identitatea și trimite răspunsul.",
     closeCondition: "Dovada trimiterii + status responded.",
     revalidationTriggers: [],
+  },
+  "GDPR-019": {
+    findingTypeId: "GDPR-019",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Deschide flow-ul de breach",
+    secondaryCTA: "Vezi ce înseamnă",
+    whatUserSees:
+      "Acest incident poate necesita notificare către ANSPDCP în 72h.",
+    whatCompliDoes:
+      "Deschide incidentul corect, scoate în față formularul ANSPDCP și te întoarce în cockpit cu dovada pregătită.",
+    whatUserMustDo:
+      "Completează conținutul obligatoriu, trimite manual notificarea sau documentează de ce nu este necesară.",
+    closeCondition: "Notificare trimisă sau raționament complet documentat.",
+    revalidationTriggers: ["doar dacă incidentul evoluează"],
   },
   "NIS2-001": {
     findingTypeId: "NIS2-001",
@@ -819,6 +849,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
 
   // Specific id pattern mappings first
   if (id === "dsar-no-procedure") return "GDPR-013"
+  if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (
     id === "intake-b2c-privacy" ||
     id === "intake-gdpr-privacy-policy" ||
@@ -1095,6 +1126,20 @@ function getWorkflowLink(
         href: "/dashboard/dsar?action=new",
         label: "Deschide DSAR",
       }
+    case "GDPR-019": {
+      const incidentId = getIncidentIdFromAnspdcpFindingId(record.id)
+      if (!incidentId) return undefined
+      const search = new URLSearchParams({
+        tab: "incidents",
+        incidentId,
+        focus: "anspdcp",
+        findingId: record.id,
+      })
+      return {
+        href: `/dashboard/nis2?${search.toString()}`,
+        label: "Deschide flow-ul de breach",
+      }
+    }
     case "GDPR-005": {
       const search = new URLSearchParams({
         action: "site",
@@ -1120,6 +1165,8 @@ function getClosureCTA(
       return "Trimite la dosar și monitorizare"
     case "GDPR-013":
       return "Marchează răspunsul trimis"
+    case "GDPR-019":
+      return "Marchează notificarea ANSPDCP"
     default:
       return primaryMode === "external_action" ? "Marchează rezolvat" : undefined
   }
@@ -1132,6 +1179,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-005": 60,
   "GDPR-010": 180,
   "GDPR-013": 30,
+  "GDPR-019": null,
   "NIS2-001": 365,
   "NIS2-005": 180,
   "NIS2-015": 7,

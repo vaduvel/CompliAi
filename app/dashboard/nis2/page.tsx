@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   Bell,
@@ -511,6 +512,12 @@ const INCIDENT_STATUS_LABELS: Record<Nis2IncidentStatus, string> = {
   "closed": "Închis",
 }
 
+type Nis2TabValue = "assessment" | "incidents" | "vendors"
+
+function normalizeNis2TabValue(value: string | null): Nis2TabValue {
+  return value === "incidents" || value === "vendors" ? value : "assessment"
+}
+
 function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
   const [checklist, setChecklist] = useState<IncidentChecklist | null>(null)
   const [loading, setLoading] = useState(false)
@@ -1009,9 +1016,13 @@ function PostIncidentPanel({
 function AnspdcpNotificationPanel({
   incident,
   onUpdate,
+  emphasized = false,
+  sourceFindingId,
 }: {
   incident: Nis2Incident
   onUpdate: (patch: Record<string, unknown>) => void
+  emphasized?: boolean
+  sourceFindingId?: string
 }) {
   const notif = incident.anspdcpNotification
   const [form, setForm] = useState({
@@ -1027,9 +1038,37 @@ function AnspdcpNotificationPanel({
 
   if (!incident.involvesPersonalData) return null
 
+  const buildAnspdcpEvidenceNote = (notification: AnspdcpBreachNotification) => {
+    const evidenceParts = [
+      `Flow ANSPDCP completat pentru incidentul "${incident.title}".`,
+      notification.status === "acknowledged"
+        ? "Notificarea este confirmată de ANSPDCP."
+        : notification.status === "submitted"
+          ? "Notificarea a fost trimisă către ANSPDCP."
+          : "Notificarea a fost pregătită în flow-ul dedicat.",
+      notification.anspdcpReference ? `Referință: ${notification.anspdcpReference}.` : null,
+      notification.dataCategories.length > 0
+        ? `Categorii afectate: ${notification.dataCategories.join(", ")}.`
+        : null,
+      notification.estimatedDataSubjects != null
+        ? `Persoane estimate: ${notification.estimatedDataSubjects}.`
+        : null,
+      notification.notifyDataSubjects ? "Este necesară și notificarea persoanelor vizate." : null,
+    ]
+
+    return evidenceParts.filter(Boolean).join(" ")
+  }
+
   const deadline72h = notif?.deadlineISO
     ? slaLabel(notif.deadlineISO, 72 * 3_600_000)
     : null
+  const backToCockpitHref =
+    sourceFindingId && notif && (notif.status === "submitted" || notif.status === "acknowledged")
+      ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
+          anspdcp: "done",
+          evidenceNote: buildAnspdcpEvidenceNote(notif),
+        }).toString()}`
+      : null
 
   async function handleSubmit(submitted: boolean) {
     setSaving(true)
@@ -1064,7 +1103,7 @@ function AnspdcpNotificationPanel({
   }
 
   return (
-    <div className={`rounded-eos-md border px-3 py-3 space-y-3 ${statusColors[notif?.status ?? "pending"]}`}>
+    <div className={`rounded-eos-md border px-3 py-3 space-y-3 ${statusColors[notif?.status ?? "pending"]} ${emphasized ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-eos-bg" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bell className="size-3.5 text-amber-600" strokeWidth={2} />
@@ -1171,7 +1210,7 @@ function AnspdcpNotificationPanel({
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -1192,6 +1231,18 @@ function AnspdcpNotificationPanel({
             Marchează ca trimisă la ANSPDCP
           </Button>
         )}
+        {backToCockpitHref ? (
+          <Link href={backToCockpitHref} className="flex-1 min-w-[220px]">
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full gap-1.5 border-amber-300 text-amber-800 hover:bg-amber-100"
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              Înapoi în cockpit cu dovada
+            </Button>
+          </Link>
+        ) : null}
       </div>
     </div>
   )
@@ -1204,11 +1255,17 @@ function IncidentRow({
   orgName,
   onUpdate,
   onDelete,
+  highlighted = false,
+  focusMode,
+  sourceFindingId,
 }: {
   incident: Nis2Incident
   orgName?: string
   onUpdate: (id: string, patch: Partial<Nis2Incident>) => void
   onDelete: (id: string) => void
+  highlighted?: boolean
+  focusMode?: "anspdcp"
+  sourceFindingId?: string
 }) {
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
@@ -1219,7 +1276,15 @@ function IncidentRow({
   const completedStages = [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
 
   return (
-    <div className="space-y-3 px-5 py-4">
+    <div
+      id={`incident-${incident.id}`}
+      className={`space-y-3 px-5 py-4 ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-amber-50/40 ring-1 ring-amber-300" : ""}`}
+    >
+      {highlighted && focusMode === "anspdcp" ? (
+        <div className="rounded-eos-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          Ai venit aici din cockpitul finding-ului GDPR de breach. Completează notificarea ANSPDCP și apoi întoarce-te cu dovada în același caz.
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -1339,6 +1404,8 @@ function IncidentRow({
       <AnspdcpNotificationPanel
         incident={incident}
         onUpdate={(patch) => onUpdate(incident.id, patch as Partial<Nis2Incident>)}
+        emphasized={highlighted && focusMode === "anspdcp"}
+        sourceFindingId={sourceFindingId}
       />
 
       {/* Checklist răspuns incident */}
@@ -1362,7 +1429,17 @@ function IncidentRow({
   )
 }
 
-function IncidentsTab({ orgName }: { orgName?: string }) {
+function IncidentsTab({
+  orgName,
+  highlightedIncidentId,
+  focusMode,
+  sourceFindingId,
+}: {
+  orgName?: string
+  highlightedIncidentId?: string
+  focusMode?: "anspdcp"
+  sourceFindingId?: string
+}) {
   const [incidents, setIncidents] = useState<Nis2Incident[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -1388,6 +1465,13 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
       .catch(() => null)
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (loading || !highlightedIncidentId) return
+    const row = document.getElementById(`incident-${highlightedIncidentId}`)
+    if (!row) return
+    row.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [highlightedIncidentId, incidents.length, loading])
 
   async function handleGenerateIR() {
     setGeneratingIR(true)
@@ -1484,9 +1568,28 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
   }
 
   const openCount = incidents.filter((i) => i.status !== "closed").length
+  const highlightedIncident = highlightedIncidentId
+    ? incidents.find((incident) => incident.id === highlightedIncidentId)
+    : null
 
   return (
     <div className="space-y-4">
+      {highlightedIncident && focusMode === "anspdcp" ? (
+        <Card className="border-amber-300 bg-amber-50">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-900">Flow ANSPDCP deschis din cockpit</p>
+              <p className="mt-1 text-xs text-amber-800/80">
+                Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează notificarea ANSPDCP și revino în cockpit cu dovada pregătită.
+              </p>
+            </div>
+            <Badge variant="warning" className="shrink-0 normal-case tracking-normal">
+              GDPR Art. 33
+            </Badge>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {openCount > 0 && (
@@ -1657,6 +1760,9 @@ function IncidentsTab({ orgName }: { orgName?: string }) {
               orgName={orgName}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
+              highlighted={inc.id === highlightedIncidentId}
+              focusMode={focusMode}
+              sourceFindingId={sourceFindingId}
             />
           ))}
         </Card>
@@ -2306,13 +2412,23 @@ function GovernanceCard() {
 
 export default function Nis2Page() {
   // orgName pentru rapoartele DNSC — citit din session header via fetch minimal
+  const searchParams = useSearchParams()
   const [orgName, setOrgName] = useState<string | undefined>()
+  const [activeTab, setActiveTab] = useState<Nis2TabValue>("assessment")
+  const requestedTab = normalizeNis2TabValue(searchParams.get("tab"))
+  const highlightedIncidentId = searchParams.get("incidentId") ?? undefined
+  const focusMode = searchParams.get("focus") === "anspdcp" ? "anspdcp" : undefined
+  const sourceFindingId = searchParams.get("findingId") ?? undefined
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => r.json())
       .then((d: { orgName?: string }) => { if (d.orgName) setOrgName(d.orgName) })
       .catch(() => null)
   }, [])
+
+  useEffect(() => {
+    setActiveTab(requestedTab)
+  }, [requestedTab])
 
   return (
     <div className="space-y-6">
@@ -2357,7 +2473,7 @@ export default function Nis2Page() {
       <MaturityCard />
       <GovernanceCard />
 
-      <Tabs defaultValue="assessment" className="space-y-5">
+      <Tabs value={activeTab} onValueChange={(next) => setActiveTab(normalizeNis2TabValue(next))} className="space-y-5">
         <TabsList className="border-b border-eos-border">
           <TabsTrigger value="assessment" className="min-h-12 flex-col items-start px-4 py-3 text-left">
             <span className="text-sm font-medium">Evaluare</span>
@@ -2377,7 +2493,12 @@ export default function Nis2Page() {
           <AssessmentTab orgName={orgName} />
         </TabsContent>
         <TabsContent value="incidents">
-          <IncidentsTab orgName={orgName} />
+          <IncidentsTab
+            orgName={orgName}
+            highlightedIncidentId={highlightedIncidentId}
+            focusMode={focusMode}
+            sourceFindingId={sourceFindingId}
+          />
         </TabsContent>
         <TabsContent value="vendors">
           <VendorsTab />
