@@ -52,7 +52,7 @@ Pentru fiecare problemă returnează JSON:
   "reasoning": "de ce ai identificat această problemă",
   "sourceParagraph": "fragmentul exact din text",
   "recommendation": "ce trebuie făcut concret",
-  "suggestedDocumentType": "incident-response-plan | risk-assessment | security-policy | null",
+  "suggestedDocumentType": "nis2-incident-response | null",
   "requiresHumanReview": true dacă confidence < 80 sau severity critical
 }
 
@@ -75,7 +75,7 @@ Pentru fiecare problemă returnează JSON:
   "reasoning": "de ce ai identificat această problemă",
   "sourceParagraph": "fragmentul exact din text",
   "recommendation": "ce trebuie făcut concret",
-  "suggestedDocumentType": "ai-risk-assessment | ai-transparency-notice | null",
+  "suggestedDocumentType": "ai-governance | null",
   "requiresHumanReview": true dacă confidence < 80 sau severity critical
 }
 
