@@ -519,6 +519,15 @@ export function ResolvePageSurface() {
                 {mediumCount} medii
               </Badge>
             )}
+            {openTasks.length > 0 && (
+              <Link
+                href={dashboardRoutes.resolveSupport}
+                className="inline-flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1 text-[12px] font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
+              >
+                Task-uri de suport · {openTasks.length}
+                <ArrowRight className="size-3" strokeWidth={2} />
+              </Link>
+            )}
           </>
         }
       />
@@ -558,34 +567,6 @@ export function ResolvePageSurface() {
       <section aria-label="Finding-uri de rezolvat">
         <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
-
-      {cockpit.tasks.length > 0 && (
-        <section aria-label="Task-uri de suport">
-          <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-eos-text">Task-urile de suport stau separat de cockpit</p>
-                <p className="text-xs text-eos-text-muted">
-                  Cockpitul rămâne traseul principal pentru finding, generator, dovadă și monitorizare. Board-ul de suport
-                  rămâne disponibil separat doar când ai nevoie de execuție pe task-uri auxiliare.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="normal-case tracking-normal">
-                  {openTasks.length} task-uri deschise
-                </Badge>
-                <Link
-                  href={dashboardRoutes.resolveSupport}
-                  className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
-                >
-                  Vezi board-ul separat
-                  <ArrowRight className="size-3" strokeWidth={2} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   )
 }
