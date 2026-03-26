@@ -14,6 +14,7 @@
 
 import type { ScanFinding } from "@/lib/compliance/types"
 import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
+import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TYPES
@@ -156,6 +157,13 @@ export type CockpitRecipe = {
   closeCondition: string
   dossierOutcome: string
   monitoringSignals: string[]
+  vendorContext?: {
+    vendorId: string
+    vendorName: string
+    dpaUrl?: string | null
+    matchConfidence: number
+    matchType: "exact" | "contains" | "fuzzy"
+  }
 }
 
 export type CloseGatingRequirements = {
@@ -881,6 +889,52 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   }
 }
 
+function inferVendorContext(
+  record: ScanFinding,
+  findingTypeId: string
+): CockpitRecipe["vendorContext"] | undefined {
+  if (findingTypeId !== "GDPR-010") return undefined
+
+  const candidates = [
+    record.title,
+    record.detail,
+    record.remediationHint,
+    [record.title, record.detail].filter(Boolean).join(" · "),
+  ].filter(Boolean) as string[]
+
+  for (const candidate of candidates) {
+    const candidateLower = candidate.toLowerCase()
+    for (const vendor of listLibraryVendors()) {
+      const matchedAlias = vendor.aliases.find((alias) => candidateLower.includes(alias.toLowerCase()))
+      if (!matchedAlias) continue
+
+      return {
+        vendorId: vendor.id,
+        vendorName: vendor.canonicalName,
+        dpaUrl: vendor.dpaUrl,
+        matchConfidence: 0.9,
+        matchType: "contains",
+      }
+    }
+  }
+
+  const match = candidates
+    .map((candidate) => fingerprintMatch(candidate))
+    .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
+    .sort((left, right) => right.confidence - left.confidence)[0]
+
+  if (!match) return undefined
+  if (match.matchType === "fuzzy" && match.confidence < 0.45) return undefined
+
+  return {
+    vendorId: match.vendor.id,
+    vendorName: match.vendor.canonicalName,
+    dpaUrl: match.vendor.dpaUrl,
+    matchConfidence: match.confidence,
+    matchType: match.matchType,
+  }
+}
+
 function resolveDocumentFlowState(
   record: ScanFinding,
   artifacts?: FindingArtifacts
@@ -1205,6 +1259,7 @@ export function buildCockpitRecipe(
   const primaryMode = findingType.resolutionModes[0]
   const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType)
   const resolveFlowState = uiStateToFlowState(uiState, flow.initialFlowState)
+  const vendorContext = inferVendorContext(record, findingTypeId)
 
   // 6. CTA principal
   const primaryCTAAction = getPrimaryCTAAction(uiState, primaryMode)
@@ -1242,6 +1297,33 @@ export function buildCockpitRecipe(
     record.resolution?.problem ??
     flow.whatUserSees ??
     record.detail
+  const whatCompliDoes =
+    findingTypeId === "GDPR-010" && vendorContext?.dpaUrl
+      ? `${flow.whatCompliDoes} Ți-am găsit și linkul public DPA pentru ${vendorContext.vendorName}.`
+      : flow.whatCompliDoes
+  const whatUserMustDo =
+    findingTypeId === "GDPR-010" && vendorContext
+      ? `${flow.whatUserMustDo} Confirmă relația cu ${vendorContext.vendorName} și atașează acordul semnat sau draftul aprobat.`
+      : flow.whatUserMustDo
+  const acceptedEvidence = findingType.requiredEvidenceKinds.map(
+    (k) => EVIDENCE_KIND_LABELS[k] ?? k
+  )
+  if (findingTypeId === "GDPR-010" && vendorContext) {
+    acceptedEvidence.unshift(`DPA semnat cu ${vendorContext.vendorName}`)
+  }
+  const dossierOutcome =
+    findingTypeId === "GDPR-010" && vendorContext
+      ? `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
+      : getDossierOutcome(primaryMode)
+  const recipeMonitoringSignals =
+    findingTypeId === "GDPR-010" && vendorContext
+      ? Array.from(
+          new Set([
+            ...monitoringSignals,
+            `Reverificăm schimbările contractuale și termenii DPA pentru ${vendorContext.vendorName}.`,
+          ])
+        ).slice(0, 5)
+      : monitoringSignals
 
   return {
     findingTypeId,
@@ -1253,20 +1335,19 @@ export function buildCockpitRecipe(
     resolveFlowState,
     heroTitle,
     heroSummary,
-    whatCompliDoes: flow.whatCompliDoes,
-    whatUserMustDo: flow.whatUserMustDo,
+    whatCompliDoes,
+    whatUserMustDo,
     primaryCTA: {
       label: flow.primaryCTA,
       action: primaryCTAAction,
     },
     secondaryCTA: getSecondaryCTA(flow.secondaryCTA),
-    acceptedEvidence: findingType.requiredEvidenceKinds.map(
-      (k) => EVIDENCE_KIND_LABELS[k] ?? k
-    ),
+    acceptedEvidence,
     visibleBlocks,
     closeCondition: flow.closeCondition,
-    dossierOutcome: getDossierOutcome(primaryMode),
-    monitoringSignals,
+    dossierOutcome,
+    monitoringSignals: recipeMonitoringSignals,
+    vendorContext,
   }
 }
 

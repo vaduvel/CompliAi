@@ -642,6 +642,8 @@ export default function FindingDetailPage() {
           findingId={finding.id}
           documentType={(finding.suggestedDocumentType ?? "") as DocumentType}
           findingTitle={finding.title}
+          vendorName={recipe.vendorContext?.vendorName}
+          vendorDpaUrl={recipe.vendorContext?.dpaUrl}
           onComplete={(result) => {
             if (result?.dossierSaved) {
               setShowDossierMoment(true)

@@ -48,6 +48,11 @@ export async function POST(request: Request) {
       orgCui: body.orgCui?.trim() || undefined,
       dpoEmail: body.dpoEmail?.trim() || undefined,
       dataFlows: body.dataFlows?.trim() || undefined,
+      counterpartyName: typeof body.counterpartyName === "string" ? body.counterpartyName.trim() || undefined : undefined,
+      counterpartyReferenceUrl:
+        typeof body.counterpartyReferenceUrl === "string"
+          ? body.counterpartyReferenceUrl.trim() || undefined
+          : undefined,
     }
 
     const result = await generateDocument(input)

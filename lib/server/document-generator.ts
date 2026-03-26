@@ -21,6 +21,8 @@ export type DocumentGenerationInput = {
   dpoEmail?: string
   /** Short description of main data flows / services */
   dataFlows?: string
+  counterpartyName?: string
+  counterpartyReferenceUrl?: string
 }
 
 export type GeneratedDocument = {
@@ -86,6 +88,16 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   },
 }
 
+export function getGeneratedDocumentTitle(input: DocumentGenerationInput) {
+  const meta = DOC_META[input.documentType]
+
+  if (input.documentType === "dpa" && input.counterpartyName?.trim()) {
+    return `${meta.title} — ${input.orgName} × ${input.counterpartyName.trim()}`
+  }
+
+  return meta.title
+}
+
 const DOCUMENT_DATE_TIMEZONE = "Europe/Bucharest"
 
 function formatDocumentDateRo(generatedAtISO: string) {
@@ -147,6 +159,8 @@ function buildPrompt(input: DocumentGenerationInput, generatedAtISO: string): st
     orgLine,
     dpoLine,
     flowsLine,
+    input.counterpartyName ? `Procesator / furnizor vizat: ${input.counterpartyName}.` : "",
+    input.counterpartyReferenceUrl ? `Referință publică utilă: ${input.counterpartyReferenceUrl}.` : "",
     `Data exactă a documentului (fus orar România): ${generatedDate}.`,
   ]
     .filter(Boolean)
@@ -200,7 +214,7 @@ Context (Operator de date):
 ${contextBlock}
 
 Cerințe:
-- Denumire contract, operator și procesator (folosim [PROCESATOR] ca placeholder)
+- Denumire contract, operator și procesator (${input.counterpartyName ? `folosește ${input.counterpartyName} ca procesator principal` : "folosim [PROCESATOR] ca placeholder"})
 - Include imediat sub titlu linia exactă: ${dateLine}
 - Obiectul prelucrării: categorii de date, scopul, durata
 - Obligațiile procesatorului (Art. 28.3 a-h GDPR): confidențialitate, securitate, subcontractare, audit, ștergere
@@ -268,11 +282,13 @@ Cerințe:
 function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocument {
   const meta = DOC_META[input.documentType]
   const now = new Date().toISOString()
+  const title = getGeneratedDocumentTitle(input)
 
   const content = [
-    `# ${meta.title}`,
+    `# ${title}`,
     ``,
     `**Organizație:** ${input.orgName}`,
+    ...(input.counterpartyName ? [`**Procesator / furnizor:** ${input.counterpartyName}`] : []),
     `**Data generării:** ${new Date(now).toLocaleDateString("ro-RO")}`,
     `**Baza legală:** ${meta.legalBasis}`,
     ``,
@@ -296,7 +312,7 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
 
   return {
     documentType: input.documentType,
-    title: meta.title,
+    title,
     content,
     generatedAtISO: now,
     llmUsed: false,
@@ -309,8 +325,8 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
 export async function generateDocument(
   input: DocumentGenerationInput
 ): Promise<GeneratedDocument> {
-  const meta = DOC_META[input.documentType]
   const now = new Date().toISOString()
+  const title = getGeneratedDocumentTitle(input)
 
   if (!GEMINI_API_KEY) {
     return buildFallbackDocument(input)
@@ -361,7 +377,7 @@ export async function generateDocument(
 
   return {
     documentType: input.documentType,
-    title: meta.title,
+    title,
     content: normalizedContent,
     generatedAtISO: now,
     llmUsed: true,

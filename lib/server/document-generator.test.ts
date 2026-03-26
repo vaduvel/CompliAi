@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { normalizeGeneratedDocumentContent } from "./document-generator"
+import { getGeneratedDocumentTitle, normalizeGeneratedDocumentContent } from "./document-generator"
 
 describe("normalizeGeneratedDocumentContent", () => {
   it("înlocuiește o dată stale din politica de confidențialitate cu data generării", () => {
@@ -44,5 +44,26 @@ describe("normalizeGeneratedDocumentContent", () => {
 
     expect(normalized).toContain("**Data generării:** 25 martie 2026")
     expect(normalized).not.toContain("1 ianuarie 2024")
+  })
+})
+
+describe("getGeneratedDocumentTitle", () => {
+  it("personalizează titlul DPA cu vendorul când counterpartyName este prezent", () => {
+    const title = getGeneratedDocumentTitle({
+      documentType: "dpa",
+      orgName: "Demo Retail SRL",
+      counterpartyName: "Mailchimp (Intuit)",
+    })
+
+    expect(title).toBe("Acord de Prelucrare a Datelor (DPA) — Demo Retail SRL × Mailchimp (Intuit)")
+  })
+
+  it("păstrează titlul standard pentru documentele fără counterparty", () => {
+    const title = getGeneratedDocumentTitle({
+      documentType: "privacy-policy",
+      orgName: "Demo Retail SRL",
+    })
+
+    expect(title).toBe("Politică de Confidențialitate")
   })
 })

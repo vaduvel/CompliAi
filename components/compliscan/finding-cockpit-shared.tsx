@@ -350,6 +350,27 @@ export function FindingHeroAction({
           {cockpitRecipe.whatCompliDoes}
         </p>
       )}
+      {cockpitRecipe.vendorContext ? (
+        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+            Vendor detectat
+          </p>
+          <p className="mt-1">{cockpitRecipe.vendorContext.vendorName}</p>
+          {cockpitRecipe.vendorContext.dpaUrl ? (
+            <p className="mt-1 text-eos-text-muted">
+              Referință publică DPA:{" "}
+              <a
+                href={cockpitRecipe.vendorContext.dpaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-eos-primary underline underline-offset-2"
+              >
+                deschide linkul
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {children}
       </div>
@@ -477,6 +498,32 @@ export function FindingExecutionCard({
                 <p className="mt-1 text-sm text-eos-text-muted">
                   {suggestedDocumentLabel} intră în flow-ul acestui finding și, după confirmare, merge la dosar pe aceeași urmă de dovadă și audit.
                 </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {cockpitRecipe.vendorContext ? (
+          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
+            <div className="flex items-start gap-2">
+              <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+              <div>
+                <p className="text-sm font-medium text-eos-text">
+                  Context vendor pentru DPA
+                </p>
+                <p className="mt-1 text-sm text-eos-text-muted">
+                  {cockpitRecipe.vendorContext.vendorName} este vendorul detectat în finding. Cockpitul păstrează aceeași urmă între draft, semnare și dovada salvată la dosar.
+                </p>
+                {cockpitRecipe.vendorContext.dpaUrl ? (
+                  <a
+                    href={cockpitRecipe.vendorContext.dpaUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex text-sm text-eos-primary underline underline-offset-2"
+                  >
+                    Deschide DPA-ul public al vendorului
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>

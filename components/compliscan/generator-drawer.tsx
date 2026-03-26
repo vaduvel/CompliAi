@@ -45,6 +45,8 @@ type GeneratorDrawerProps = {
   findingId: string
   documentType: DocumentType
   findingTitle: string
+  vendorName?: string
+  vendorDpaUrl?: string | null
   onComplete: (result?: { dossierSaved?: boolean }) => void
 }
 
@@ -74,6 +76,8 @@ export function GeneratorDrawer({
   findingId,
   documentType,
   findingTitle,
+  vendorName,
+  vendorDpaUrl,
   onComplete,
 }: GeneratorDrawerProps) {
   const cockpit = useCockpitData()
@@ -81,6 +85,7 @@ export function GeneratorDrawer({
   const [orgWebsite, setOrgWebsite] = useState("")
   const [dpoEmail, setDpoEmail] = useState("")
   const [dataFlows, setDataFlows] = useState("")
+  const [counterpartyName, setCounterpartyName] = useState("")
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
   const [attaching, setAttaching] = useState(false)
@@ -97,6 +102,13 @@ export function GeneratorDrawer({
       setOrgWebsite(cockpit.data.state.orgProfile.website)
     }
   }, [cockpit.data, orgName, orgWebsite])
+
+  useEffect(() => {
+    if (documentType !== "dpa") return
+    if (vendorName && !counterpartyName) {
+      setCounterpartyName(vendorName)
+    }
+  }, [counterpartyName, documentType, vendorName])
 
   // Reset state when drawer opens with new finding
   useEffect(() => {
@@ -130,6 +142,8 @@ export function GeneratorDrawer({
           orgCui: profile?.cui || undefined,
           dpoEmail: dpoEmail.trim() || undefined,
           dataFlows: dataFlows || undefined,
+          counterpartyName: documentType === "dpa" ? counterpartyName.trim() || undefined : undefined,
+          counterpartyReferenceUrl: documentType === "dpa" ? vendorDpaUrl || undefined : undefined,
           sourceFindingId: findingId,
         }),
       })
@@ -203,6 +217,7 @@ export function GeneratorDrawer({
   const allChecked = CONFIRMATION_ITEMS.every((item) => checklist.includes(item.id))
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
   const showDpoField = ["privacy-policy", "dpa"].includes(documentType)
+  const showCounterpartyField = documentType === "dpa"
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -257,6 +272,42 @@ export function GeneratorDrawer({
                   />
                 </Field>
               )}
+
+              {showCounterpartyField && (
+                <Field
+                  label="Procesator / furnizor"
+                  hint="Dacă finding-ul vine dintr-un vendor cunoscut, numele este precompletat și intră direct în draftul DPA."
+                >
+                  <input
+                    className={inputClass}
+                    value={counterpartyName}
+                    onChange={(e) => setCounterpartyName(e.target.value)}
+                    placeholder="Ex: Google Analytics, Mailchimp, Stripe"
+                  />
+                </Field>
+              )}
+
+              {showCounterpartyField && (vendorName || vendorDpaUrl) ? (
+                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3 text-sm text-eos-text">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                    Context vendor
+                  </p>
+                  {vendorName ? <p className="mt-1">Vendor detectat: {vendorName}</p> : null}
+                  {vendorDpaUrl ? (
+                    <p className="mt-1 text-eos-text-muted">
+                      Link public DPA:{" "}
+                      <a
+                        href={vendorDpaUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-eos-primary underline underline-offset-2"
+                      >
+                        deschide referința
+                      </a>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <Field label="Context suplimentar">
                 <textarea
