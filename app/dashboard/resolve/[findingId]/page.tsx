@@ -176,6 +176,11 @@ export default function FindingDetailPage() {
         "Ai revenit din flow-ul de breach. Revizuiește nota precompletată și închide cazul doar dacă trimiterea sau raționamentul ANSPDCP sunt documentate complet."
       )
     }
+    if (searchParams.get("incidentFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din timeline-ul NIS2. Revizuiește nota precompletată și închide cazul doar dacă early warning-ul DNSC este documentat clar în incident."
+      )
+    }
   }, [finding, searchParams])
 
   async function updateStatus(
@@ -300,7 +305,35 @@ export default function FindingDetailPage() {
             placeholder: "Ex: Notificare ANSPDCP trimisă la 26.03.2026, ref. ANSPDCP-2026-114. Categorii afectate: date identitate și contact. Sau: incident analizat, risc scăzut pentru drepturile persoanelor, notificarea nu a fost necesară.",
             footer: "Cazul nu poate intra în monitorizare fără urma clară a deciziei și a trimiterii ANSPDCP.",
           }
-        : recipe.findingTypeId === "GDPR-017"
+      : recipe.findingTypeId === "NIS2-015"
+        ? {
+            eyebrow: "Dovadă de raportare DNSC",
+            body: `${recipe.whatUserMustDo} Notează ce ai trimis în early warning, pe ce incident și care este referința sau confirmarea rămasă în timeline.`,
+            placeholder: "Ex: Early warning DNSC trimis la 26.03.2026 pentru incidentul Ransomware ERP. Referință internă: EW-2026-004. Raportul 72h rămâne deschis în tab-ul NIS2 incidents.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a early warning-ului DNSC și a incidentului la care se referă.",
+          }
+      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("tab=vendors")
+        ? {
+            eyebrow: "Dovadă de revizuire furnizor NIS2",
+            body: `${recipe.whatUserMustDo} Notează ce ai verificat în registrul furnizorilor și ce dovadă contractuală ai lăsat în dosar.`,
+            placeholder: "Ex: Microsoft Corporation revizuit în registrul NIS2 la 26.03.2026. DPA verificat, clauza de notificare incidente confirmată, data ultimei revizuiri actualizată și contractul salvat la dosar.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a revizuirii furnizorului și a dovezii contractuale.",
+          }
+      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/maturitate")
+        ? {
+            eyebrow: "Dovadă de evaluare maturitate NIS2",
+            body: `${recipe.whatUserMustDo} Notează ce domeniu ai completat, ce răspunsuri ai confirmat și ce plan de remediere ai lăsat în evaluarea DNSC.`,
+            placeholder: "Ex: Domeniul Business Continuity completat în evaluarea de maturitate la 26.03.2026. BCP și DRP confirmate ca lipsă, plan de remediere actualizat cu termen intern 30.04.2026 și assessment salvat.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a evaluării de maturitate și a planului salvat pentru domeniul afectat.",
+          }
+      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/governance")
+        ? {
+            eyebrow: "Dovadă de actualizare Board & CISO",
+            body: `${recipe.whatUserMustDo} Notează ce training sau ce certificare ai actualizat și cum ai salvat urma în registrul de guvernanță.`,
+            placeholder: "Ex: Training NIS2 documentat pentru directorul operațional la 26.03.2026, registrul Board & CISO actualizat cu data completării și nota sesiunii. Sau: certificarea CISO reînnoită și noua dată de expirare salvată în registru.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a actualizării făcute în registrul Board & CISO.",
+          }
+      : recipe.findingTypeId === "GDPR-017"
           ? {
               eyebrow: "Dovadă de ștergere / anonimizare",
               body: "Spune ce date au fost șterse sau anonimizate, din ce sisteme, când a rulat controlul și ce log sau export poți arăta la audit.",
@@ -458,7 +491,13 @@ export default function FindingDetailPage() {
                 ? "Confirmă și scanează site-ul"
                 : recipe.findingTypeId === "GDPR-019"
                   ? "Confirmă și deschide breach flow"
-                : "Confirmă și continuă"}
+                  : recipe.findingTypeId === "NIS2-015"
+                    ? "Confirmă și deschide timeline-ul"
+                  : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/maturitate")
+                    ? "Confirmă și deschide maturitatea"
+                  : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/governance")
+                    ? "Confirmă și deschide guvernanța"
+                  : "Confirmă și continuă"}
             </Button>
           ) : (
             <Button

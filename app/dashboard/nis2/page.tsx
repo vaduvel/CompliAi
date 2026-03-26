@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
+  ArrowLeft,
   Bell,
   CheckCircle2,
   ChevronDown,
@@ -1248,6 +1249,26 @@ function AnspdcpNotificationPanel({
   )
 }
 
+function buildIncidentCockpitEvidenceNote(incident: Nis2Incident) {
+  const evidenceParts = [
+    `Flow DNSC completat pentru incidentul "${incident.title}".`,
+    incident.earlyWarningReport
+      ? `Early warning trimis la ${new Date(incident.earlyWarningReport.submittedAtISO).toLocaleString("ro-RO")}.`
+      : null,
+    incident.fullReport72h
+      ? `Raportul 72h este deja salvat în timeline.`
+      : null,
+    incident.finalReport
+      ? `Raportul final este deja salvat în timeline.`
+      : null,
+    incident.postIncidentTracking?.dnscReference
+      ? `Referință DNSC: ${incident.postIncidentTracking.dnscReference}.`
+      : null,
+  ]
+
+  return evidenceParts.filter(Boolean).join(" ")
+}
+
 // ── IncidentRow (refactored cu 3-stage stepper + post-incident) ──────────────
 
 function IncidentRow({
@@ -1264,7 +1285,7 @@ function IncidentRow({
   onUpdate: (id: string, patch: Partial<Nis2Incident>) => void
   onDelete: (id: string) => void
   highlighted?: boolean
-  focusMode?: "anspdcp"
+  focusMode?: "anspdcp" | "incident"
   sourceFindingId?: string
 }) {
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
@@ -1283,6 +1304,10 @@ function IncidentRow({
       {highlighted && focusMode === "anspdcp" ? (
         <div className="rounded-eos-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           Ai venit aici din cockpitul finding-ului GDPR de breach. Completează notificarea ANSPDCP și apoi întoarce-te cu dovada în același caz.
+        </div>
+      ) : highlighted && focusMode === "incident" ? (
+        <div className="rounded-eos-md border border-sky-300 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+          Ai venit aici din cockpitul finding-ului NIS2. Parcurge timeline-ul 24h / 72h / 30 zile pentru incidentul selectat și întoarce-te cu dovada early warning-ului în același caz.
         </div>
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1437,7 +1462,7 @@ function IncidentsTab({
 }: {
   orgName?: string
   highlightedIncidentId?: string
-  focusMode?: "anspdcp"
+  focusMode?: "anspdcp" | "incident"
   sourceFindingId?: string
 }) {
   const [incidents, setIncidents] = useState<Nis2Incident[]>([])
@@ -1571,6 +1596,13 @@ function IncidentsTab({
   const highlightedIncident = highlightedIncidentId
     ? incidents.find((incident) => incident.id === highlightedIncidentId)
     : null
+  const backToCockpitHref =
+    sourceFindingId && highlightedIncident?.earlyWarningReport
+      ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
+          incidentFlow: "done",
+          evidenceNote: buildIncidentCockpitEvidenceNote(highlightedIncident),
+        }).toString()}`
+      : null
 
   return (
     <div className="space-y-4">
@@ -1586,6 +1618,47 @@ function IncidentsTab({
             <Badge variant="warning" className="shrink-0 normal-case tracking-normal">
               GDPR Art. 33
             </Badge>
+          </CardContent>
+        </Card>
+      ) : highlightedIncident && focusMode === "incident" ? (
+        <Card className="border-sky-300 bg-sky-50">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-sky-950">Flow de incident NIS2 deschis din cockpit</p>
+              <p className="mt-1 text-xs text-sky-900/80">
+                Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează early warning-ul în 24h, apoi continuă cu raportul 72h și raportul final.
+              </p>
+            </div>
+            {backToCockpitHref ? (
+              <Link href={backToCockpitHref} className="shrink-0">
+                <Button size="sm" variant="outline" className="gap-1.5 border-sky-300 bg-white text-sky-950 hover:bg-sky-100">
+                  <ArrowLeft className="size-3.5" strokeWidth={2} />
+                  Înapoi la finding
+                </Button>
+              </Link>
+            ) : (
+              <Badge variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
+                NIS2 Art. 23
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+      ) : sourceFindingId && focusMode === "incident" ? (
+        <Card className="border-sky-300 bg-sky-50">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-sky-950">Alege incidentul corect din cockpit</p>
+              <p className="mt-1 text-xs text-sky-900/80">
+                Nu am putut selecta automat incidentul potrivit. Alege un incident existent sau înregistrează unul nou, apoi revino în același finding cu dovada early warning-ului.
+              </p>
+            </div>
+            <Link
+              href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+              className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
+            >
+              <ArrowLeft className="size-3" strokeWidth={2} />
+              Înapoi la finding
+            </Link>
           </CardContent>
         </Card>
       ) : null}
@@ -1793,10 +1866,12 @@ function VendorRow({
   vendor,
   onDelete,
   onPatch,
+  highlighted = false,
 }: {
   vendor: Nis2Vendor
   onDelete: (id: string) => void
   onPatch: (id: string, patch: Partial<Nis2Vendor>) => Promise<void>
+  highlighted?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [patching, setPatching] = useState<string | null>(null)
@@ -1819,7 +1894,10 @@ function VendorRow({
   }
 
   return (
-    <div>
+    <div
+      id={`vendor-${vendor.id}`}
+      className={highlighted ? "scroll-mt-24 rounded-eos-lg bg-sky-50/40 ring-1 ring-sky-300" : ""}
+    >
       <div className="flex flex-wrap items-start gap-4 px-5 py-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -1961,7 +2039,15 @@ function VendorRow({
   )
 }
 
-function VendorsTab() {
+function VendorsTab({
+  highlightedVendorName,
+  focusMode,
+  sourceFindingId,
+}: {
+  highlightedVendorName?: string
+  focusMode?: "vendor"
+  sourceFindingId?: string
+}) {
   const [vendors, setVendors] = useState<Nis2Vendor[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -1984,6 +2070,24 @@ function VendorsTab() {
       .catch(() => null)
       .finally(() => setLoading(false))
   }, [])
+
+  const normalizeVendorName = (value: string) =>
+    value.toLowerCase().replace(/corporation|emea sarl|services|web|amazon/g, "").replace(/\s+/g, " ").trim()
+
+  const highlightedVendor = highlightedVendorName
+    ? vendors.find((vendor) => {
+        const current = normalizeVendorName(vendor.name)
+        const target = normalizeVendorName(highlightedVendorName)
+        return current.includes(target) || target.includes(current)
+      })
+    : null
+
+  useEffect(() => {
+    if (loading || !highlightedVendor) return
+    const row = document.getElementById(`vendor-${highlightedVendor.id}`)
+    if (!row) return
+    row.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [highlightedVendor, loading, vendors.length])
 
   async function handleCreate() {
     if (!form.name.trim()) return
@@ -2068,6 +2172,50 @@ function VendorsTab() {
 
   return (
     <div className="space-y-4">
+      {highlightedVendor && focusMode === "vendor" ? (
+        <Card className="border-sky-300 bg-sky-50">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-sky-950">Registrul furnizorilor este deschis din cockpit</p>
+              <p className="mt-1 text-xs text-sky-900/80">
+                Furnizorul „{highlightedVendor.name}” este deja selectat mai jos. Verifică DPA-ul, clauzele de securitate și marchează revizuirea contractuală înainte să revii în finding.
+              </p>
+            </div>
+            {sourceFindingId ? (
+              <Link
+                href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+                className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
+              >
+                <ArrowLeft className="size-3" strokeWidth={2} />
+                Înapoi la finding
+              </Link>
+            ) : (
+              <Badge variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
+                NIS2 Art. 21(2)(d)
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+      ) : sourceFindingId && focusMode === "vendor" ? (
+        <Card className="border-sky-300 bg-sky-50">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-sky-950">Alege furnizorul corect din cockpit</p>
+              <p className="mt-1 text-xs text-sky-900/80">
+                Nu am putut selecta automat furnizorul potrivit. Alege vendorul afectat din registru, marchează revizuirea și apoi revino în același finding.
+              </p>
+            </div>
+            <Link
+              href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+              className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
+            >
+              <ArrowLeft className="size-3" strokeWidth={2} />
+              Înapoi la finding
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-2">
           {highRiskCount > 0 && (
@@ -2195,7 +2343,13 @@ function VendorsTab() {
       ) : (
         <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {vendors.map((v) => (
-            <VendorRow key={v.id} vendor={v} onDelete={handleDelete} onPatch={handlePatch} />
+            <VendorRow
+              key={v.id}
+              vendor={v}
+              onDelete={handleDelete}
+              onPatch={handlePatch}
+              highlighted={v.id === highlightedVendor?.id}
+            />
           ))}
         </Card>
       )}
@@ -2417,7 +2571,13 @@ export default function Nis2Page() {
   const [activeTab, setActiveTab] = useState<Nis2TabValue>("assessment")
   const requestedTab = normalizeNis2TabValue(searchParams.get("tab"))
   const highlightedIncidentId = searchParams.get("incidentId") ?? undefined
-  const focusMode = searchParams.get("focus") === "anspdcp" ? "anspdcp" : undefined
+  const highlightedVendorName = searchParams.get("vendor") ?? undefined
+  const rawFocusMode = searchParams.get("focus")
+  const focusMode =
+    rawFocusMode === "anspdcp" || rawFocusMode === "incident" || rawFocusMode === "vendor"
+      ? rawFocusMode
+      : undefined
+  const assessmentFocus = searchParams.get("focus") === "assessment"
   const sourceFindingId = searchParams.get("findingId") ?? undefined
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
@@ -2447,6 +2607,26 @@ export default function Nis2Page() {
           </>
         }
       />
+
+      {sourceFindingId && activeTab === "assessment" && assessmentFocus ? (
+        <Card className="border-eos-warning/30 bg-eos-warning/5">
+          <CardContent className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-eos-text">Evaluarea NIS2 este deschisă din cockpit</p>
+              <p className="mt-1 text-xs text-eos-text-muted">
+                Completează assessment-ul NIS2 și întoarce-te în același finding după ce salvezi evaluarea.
+              </p>
+            </div>
+            <Link
+              href={`/dashboard/resolve/${sourceFindingId}`}
+              className="inline-flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
+            >
+              <ArrowLeft className="size-3" strokeWidth={2} />
+              Înapoi la finding
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Eligibility CTA — link to wizard page */}
       <Card className="border-eos-primary/30 bg-eos-primary/5">
@@ -2496,12 +2676,16 @@ export default function Nis2Page() {
           <IncidentsTab
             orgName={orgName}
             highlightedIncidentId={highlightedIncidentId}
-            focusMode={focusMode}
+            focusMode={focusMode === "anspdcp" || focusMode === "incident" ? focusMode : undefined}
             sourceFindingId={sourceFindingId}
           />
         </TabsContent>
         <TabsContent value="vendors">
-          <VendorsTab />
+          <VendorsTab
+            highlightedVendorName={highlightedVendorName}
+            focusMode={focusMode === "vendor" ? "vendor" : undefined}
+            sourceFindingId={sourceFindingId}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   CheckCircle2,
@@ -92,6 +94,16 @@ const emptyForm = (): FormState => ({
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function GovernancePage() {
+  const searchParams = useSearchParams()
+  const findingId = searchParams.get("findingId")?.trim()
+  const source = (searchParams.get("source") ?? searchParams.get("from") ?? "").toLowerCase()
+  const openedFromCockpit = Boolean(findingId) && (source.includes("cockpit") || source.includes("resolve"))
+  const focus = (searchParams.get("focus") ?? "").toLowerCase()
+  const focusCopy =
+    focus === "certification"
+      ? "Actualizează aici certificarea sau expirarea CISO, apoi întoarce-te în cockpit cu registrul salvat."
+      : "Actualizează aici training-ul sau contextul boardului, apoi întoarce-te în cockpit cu registrul salvat."
+
   const [members, setMembers] = useState<BoardMember[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -177,6 +189,23 @@ export default function GovernancePage() {
           </>
         }
       />
+
+      {openedFromCockpit && findingId && (
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
+          <p className="text-sm font-semibold text-eos-text">Deschis din cockpit</p>
+          <p className="mt-1 text-sm text-eos-text-muted">
+            {focusCopy}
+          </p>
+          <div className="mt-3">
+            <Link
+              href={`/dashboard/resolve/${findingId}`}
+              className="inline-flex h-9 items-center justify-center rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-hover"
+            >
+              Înapoi la finding
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Summary strip */}
       {members.length > 0 && (

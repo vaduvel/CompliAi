@@ -17,6 +17,7 @@ import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
 import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
 import { ANSPDCP_FINDING_PREFIX, getIncidentIdFromAnspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 import { lookupAnafError, type AnafErrorEntry } from "@/lib/compliance/efactura-error-codes"
+import { MATURITY_DOMAINS } from "@/lib/compliance/nis2-maturity"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TYPES
@@ -1061,7 +1062,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   }
   if (id.startsWith("saft-")) return "EF-GENERIC"
   if (id === "nis2-finding-eligibility") return "NIS2-001"
-  if (id.startsWith("nis2-finding-")) return "NIS2-005"
+  if (id.startsWith("nis2-finding-") && docType !== "nis2-incident-response") return "NIS2-005"
 
   // processing-delayed findings → EF-004 (check before EF-003 to avoid misclassification)
   if (
@@ -1251,7 +1252,14 @@ function inferVendorContext(
   record: ScanFinding,
   findingTypeId: string
 ): CockpitRecipe["vendorContext"] | undefined {
-  if (findingTypeId !== "GDPR-010") return undefined
+  const supportsVendorContext =
+    findingTypeId === "GDPR-010" ||
+    (findingTypeId === "NIS2-GENERIC" &&
+      isNis2SupplyChainFinding(record) &&
+      !deriveNis2GovernanceFocus(record) &&
+      !deriveNis2MaturityFocus(record))
+
+  if (!supportsVendorContext) return undefined
 
   const candidates = [
     record.title,
@@ -1260,21 +1268,33 @@ function inferVendorContext(
     [record.title, record.detail].filter(Boolean).join(" · "),
   ].filter(Boolean) as string[]
 
+  const directMatches = new Map<string, CockpitRecipe["vendorContext"]>()
+
   for (const candidate of candidates) {
     const candidateLower = candidate.toLowerCase()
     for (const vendor of listLibraryVendors()) {
-      const matchedAlias = vendor.aliases.find((alias) => candidateLower.includes(alias.toLowerCase()))
+      const vendorNeedles = Array.from(new Set([vendor.canonicalName, ...vendor.aliases]))
+      const matchedAlias = vendorNeedles.find((alias) => candidateLower.includes(alias.toLowerCase()))
       if (!matchedAlias) continue
 
-      return {
-        vendorId: vendor.id,
-        vendorName: vendor.canonicalName,
-        dpaUrl: vendor.dpaUrl,
-        matchConfidence: 0.9,
-        matchType: "contains",
+      if (!directMatches.has(vendor.id)) {
+        directMatches.set(vendor.id, {
+          vendorId: vendor.id,
+          vendorName: vendor.canonicalName,
+          dpaUrl: vendor.dpaUrl,
+          matchConfidence: 0.9,
+          matchType: "contains",
+        })
       }
     }
   }
+
+  if (findingTypeId === "NIS2-GENERIC" && directMatches.size > 1) {
+    return undefined
+  }
+
+  const firstDirectMatch = directMatches.values().next().value
+  if (firstDirectMatch) return firstDirectMatch
 
   const match = candidates
     .map((candidate) => fingerprintMatch(candidate))
@@ -1438,11 +1458,295 @@ function getDossierOutcome(primaryMode: ResolutionMode): string {
   }
 }
 
+function deriveNis2IncidentId(record: ScanFinding): string | null {
+  const candidates = [
+    record.id,
+    record.sourceDocument,
+    record.title,
+    record.detail,
+    record.remediationHint,
+    record.reasoning,
+    record.sourceParagraph,
+    record.provenance?.excerpt,
+    record.provenance?.matchedKeyword,
+    record.resolution?.problem,
+    record.resolution?.action,
+    record.resolution?.closureEvidence,
+    record.resolution?.humanStep,
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+
+    const searchParamMatch = candidate.match(/(?:^|[?&])incidentId=([A-Za-z0-9-]+)/)
+    if (searchParamMatch?.[1]) return searchParamMatch[1]
+
+    const demoMatch = candidate.match(/\bdemo-incident-\d+\b/i)
+    if (demoMatch?.[0]) return demoMatch[0]
+
+    const uidMatch = candidate.match(/\b(?:incident-[a-z0-9]+-\d+|inc-[a-z0-9]{6,}|inc-\d+)\b/i)
+    if (uidMatch?.[0] && uidMatch[0] !== "incident-response") return uidMatch[0]
+  }
+
+  return null
+}
+
+function isNis2SupplyChainFinding(record: ScanFinding): boolean {
+  if (record.category !== "NIS2") return false
+
+  const text = [
+    record.title,
+    record.detail,
+    record.remediationHint,
+    record.impactSummary,
+    record.evidenceRequired,
+    record.resolution?.problem,
+    record.resolution?.action,
+    record.resolution?.closureEvidence,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+    .toLowerCase()
+
+  return (
+    text.includes("supply chain") ||
+    text.includes("lanțul de aprovizionare") ||
+    text.includes("lantul de aprovizionare") ||
+    text.includes("furnizor") ||
+    text.includes("vendor") ||
+    text.includes("dpa") ||
+    text.includes("cloud") ||
+    text.includes("microsoft") ||
+    text.includes("aws")
+  )
+}
+
+type Nis2MaturityFocus =
+  | "risk-management"
+  | "incident-response"
+  | "business-continuity"
+  | "supply-chain"
+  | "secure-development"
+  | "audit-testing"
+  | "basic-hygiene"
+  | "cryptography"
+  | "access-control"
+  | "mfa"
+
+type Nis2GovernanceFocus = "training" | "certification"
+
+const NIS2_MATURITY_DOMAIN_MAP = new Map(
+  MATURITY_DOMAINS.map((domain) => [domain.id, domain])
+)
+
+// Sprint 7 — evidence per control: dovezi specifice per domeniu NIS2 Art.21(2)
+const NIS2_CONTROL_EVIDENCE: Record<string, readonly string[]> = {
+  "risk-management": [
+    "Politică de Management al Riscului Cibernetic semnată de management",
+    "Evaluare de risc cibernetic documentată (cel puțin anuală)",
+  ],
+  "incident-response": [
+    "Plan de Răspuns la Incidente semnat de management",
+    "Incident înregistrat și analizat în modulul NIS2",
+  ],
+  "business-continuity": [
+    "Plan BCP + DRP documentat și semnat",
+    "Dovada testului de recuperare din backup (raport sau screenshot)",
+  ],
+  "supply-chain": [
+    "Registru furnizori critici cu clauze de securitate NIS2 completat",
+    "Contract furnizor cu clauze NIS2 Art.21(2)(d) atașat",
+  ],
+  "secure-development": [
+    "Politică patch management și achiziții IT documentată",
+    "Dovada actualizărilor de securitate recente (log sau screenshot)",
+  ],
+  "audit-testing": [
+    "Raport pentest sau audit de securitate extern (cel puțin anual)",
+    "Plan de remediere a vulnerabilităților identificate atașat",
+  ],
+  "basic-hygiene": [
+    "Dovada training securitate pentru angajați (liste participanți sau certificate)",
+    "Politică de igienă cibernetică documentată",
+  ],
+  "cryptography": [
+    "Screenshot sau raport HTTPS/TLS activ pe serviciile expuse",
+    "Politică de criptare și protecție date sensibile documentată",
+  ],
+  "access-control": [
+    "Politică control acces (least-privilege) documentată și semnată",
+    "Procedura de offboarding documentată cu dovada revocării accesului",
+  ],
+  "mfa": [
+    "Screenshot MFA activat pe conturi critice (admin, email business, acces remote)",
+    "Politică de autentificare cu MFA documentată și atașată",
+  ],
+}
+
+function getNis2Text(record: ScanFinding) {
+  return [
+    record.id,
+    record.title,
+    record.detail,
+    record.remediationHint,
+    record.impactSummary,
+    record.evidenceRequired,
+    record.sourceDocument,
+    record.legalReference,
+    record.reasoning,
+    record.resolution?.problem,
+    record.resolution?.action,
+    record.resolution?.closureEvidence,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+    .toLowerCase()
+}
+
+function deriveNis2GovernanceFocus(record: ScanFinding): Nis2GovernanceFocus | null {
+  if (record.category !== "NIS2") return null
+
+  if (record.id.startsWith("nis2-gov-cert-expired-")) return "certification"
+  if (record.id.startsWith("nis2-gov-training-")) return "training"
+
+  const text = getNis2Text(record)
+
+  if (
+    text.includes("board training tracker") ||
+    text.includes("registru guvernanță") ||
+    text.includes("registru guvernanță") ||
+    text.includes("board & ciso")
+  ) {
+    return text.includes("certific") || text.includes("ciso") ? "certification" : "training"
+  }
+
+  if (
+    text.includes("conducer") ||
+    text.includes("board") ||
+    text.includes("ciso") ||
+    text.includes("certific") ||
+    text.includes("training")
+  ) {
+    return text.includes("certific") || text.includes("ciso") ? "certification" : "training"
+  }
+
+  return null
+}
+
+function deriveNis2MaturityFocus(record: ScanFinding): Nis2MaturityFocus | null {
+  if (record.category !== "NIS2") return null
+
+  if (record.id.startsWith("nis2-maturity-")) {
+    const domainId = record.id.slice("nis2-maturity-".length) as Nis2MaturityFocus
+    if (NIS2_MATURITY_DOMAIN_MAP.has(domainId)) return domainId
+  }
+
+  const text = getNis2Text(record)
+
+  const matchers: Array<[Nis2MaturityFocus, string[]]> = [
+    ["risk-management", ["managementul riscului", "risk management", "evaluări de risc", "evaluari de risc"]],
+    ["incident-response", ["gestionarea incidentelor", "incidentelor", "plan de răspuns", "plan de raspuns"]],
+    ["business-continuity", ["continuitatea activității", "continuitatea activitatii", "bcp", "drp", "backup"]],
+    ["supply-chain", ["supply chain", "lanțul de aprovizionare", "lantul de aprovizionare"]],
+    ["secure-development", ["achizi", "patch management", "actualizări de securitate", "actualizari de securitate"]],
+    ["audit-testing", ["test de penetrare", "audit de securitate", "evaluarea eficacității", "evaluarea eficacitatii"]],
+    ["basic-hygiene", ["igienă cibernetică", "igiena cibernetica", "inventar actualizat al activelor", "training de securitate"]],
+    ["cryptography", ["criptograf", "tls", "https", "protecția datelor", "protectia datelor"]],
+    ["access-control", ["controlul accesului", "least-privilege", "need-to-know", "offboarding"]],
+    ["mfa", ["mfa", "autentificare multi-factor", "autentificare multifactor"]],
+  ]
+
+  for (const [domainId, needles] of matchers) {
+    if (needles.some((needle) => text.includes(needle))) {
+      return domainId
+    }
+  }
+
+  return null
+}
+
 function getWorkflowLink(
   findingTypeId: string,
   record: ScanFinding
 ): CockpitRecipe["workflowLink"] | undefined {
   switch (findingTypeId) {
+    case "NIS2-001":
+      return {
+        href: `/dashboard/nis2/eligibility?${new URLSearchParams({
+          findingId: record.id,
+          source: "cockpit",
+        }).toString()}`,
+        label: "Deschide eligibilitatea NIS2",
+      }
+    case "NIS2-005":
+      return {
+        href: `/dashboard/nis2?${new URLSearchParams({
+          tab: "assessment",
+          focus: "assessment",
+          findingId: record.id,
+        }).toString()}`,
+        label: "Deschide evaluarea NIS2",
+      }
+    case "NIS2-015": {
+      const incidentId = deriveNis2IncidentId(record)
+      const search = new URLSearchParams({
+        tab: "incidents",
+        focus: "incident",
+        findingId: record.id,
+      })
+      if (incidentId) {
+        search.set("incidentId", incidentId)
+      }
+      return {
+        href: `/dashboard/nis2?${search.toString()}`,
+        label: incidentId ? "Deschide timeline-ul incidentului" : "Deschide flow-ul de incident",
+      }
+    }
+    case "NIS2-GENERIC": {
+      const governanceFocus = deriveNis2GovernanceFocus(record)
+      if (governanceFocus) {
+        return {
+          href: `/dashboard/nis2/governance?${new URLSearchParams({
+            findingId: record.id,
+            source: "cockpit",
+            focus: governanceFocus,
+          }).toString()}`,
+          label:
+            governanceFocus === "certification"
+              ? "Deschide registrul CISO"
+              : "Deschide registrul de guvernanță",
+        }
+      }
+
+      const maturityFocus = deriveNis2MaturityFocus(record)
+      if (maturityFocus) {
+        return {
+          href: `/dashboard/nis2/maturitate?${new URLSearchParams({
+            findingId: record.id,
+            source: "cockpit",
+            focus: maturityFocus,
+          }).toString()}`,
+          label: "Deschide evaluarea de maturitate",
+        }
+      }
+
+      if (!isNis2SupplyChainFinding(record)) return undefined
+      const vendorContext = inferVendorContext(record, findingTypeId)
+      const search = new URLSearchParams({
+        tab: "vendors",
+        focus: "vendor",
+        findingId: record.id,
+      })
+      if (vendorContext?.vendorName) {
+        search.set("vendor", vendorContext.vendorName)
+      }
+      return {
+        href: `/dashboard/nis2?${search.toString()}`,
+        label: vendorContext?.vendorName
+          ? `Deschide registrul pentru ${vendorContext.vendorName}`
+          : "Deschide registrul furnizorilor",
+      }
+    }
     case "GDPR-013":
       return {
         href: `/dashboard/dsar?${new URLSearchParams({
@@ -1506,6 +1810,12 @@ function getClosureCTA(
   primaryMode: ResolutionMode
 ): string | undefined {
   switch (findingTypeId) {
+    case "NIS2-001":
+      return "Salvează eligibilitatea"
+    case "NIS2-005":
+      return "Salvează evaluarea NIS2"
+    case "NIS2-015":
+      return "Marchează early warning trimis"
     case "GDPR-005":
       return "Trimite la dosar și monitorizare"
     case "GDPR-013":
@@ -2071,12 +2381,93 @@ export function buildCockpitRecipe(
     findingTypeId === "GDPR-010" && vendorContext
       ? `${flow.whatUserMustDo} Confirmă relația cu ${vendorContext.vendorName} și atașează acordul semnat sau draftul aprobat.`
       : flow.whatUserMustDo
+  let primaryCTALabel = flow.primaryCTA
   let acceptedEvidence = findingType.requiredEvidenceKinds.map(
     (k) => EVIDENCE_KIND_LABELS[k] ?? k
   )
   let closeCondition = flow.closeCondition
+  const nis2GovernanceFocus = findingTypeId === "NIS2-GENERIC" ? deriveNis2GovernanceFocus(record) : null
+  const nis2MaturityFocus = findingTypeId === "NIS2-GENERIC" ? deriveNis2MaturityFocus(record) : null
+  const nis2MaturityDomain = nis2MaturityFocus ? NIS2_MATURITY_DOMAIN_MAP.get(nis2MaturityFocus) : null
+  const nis2SupplyChainFinding =
+    findingTypeId === "NIS2-GENERIC" &&
+    !nis2GovernanceFocus &&
+    !nis2MaturityFocus &&
+    isNis2SupplyChainFinding(record)
+
   if (findingTypeId === "GDPR-010" && vendorContext) {
     acceptedEvidence.unshift(`DPA semnat cu ${vendorContext.vendorName}`)
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
+    primaryCTALabel =
+      nis2GovernanceFocus === "certification" ? "Actualizează certificarea CISO" : "Actualizează training-ul boardului"
+    heroSummary =
+      nis2GovernanceFocus === "certification"
+        ? "Registrul de guvernanță arată o certificare CISO expirată sau neactualizată. Finding-ul trebuie închis numai după ce actualizezi urma reală în registru."
+        : "Registrul de guvernanță arată un gap de training pentru conducere. Finding-ul trebuie închis numai după ce actualizezi urma reală în registru."
+    whatCompliDoes =
+      nis2GovernanceFocus === "certification"
+        ? "Am legat finding-ul de registrul Board & CISO și deschidem exact zona unde poți actualiza certificarea, expirarea și notele de guvernanță."
+        : "Am legat finding-ul de registrul Board & CISO și deschidem exact zona unde poți documenta training-ul de securitate pentru conducere."
+    whatUserMustDo =
+      record.remediationHint ??
+      (nis2GovernanceFocus === "certification"
+        ? "Actualizează certificarea sau data de expirare CISO și salvează urma în registrul de guvernanță."
+        : "Documentează training-ul de securitate pentru persoana afectată și salvează data completării în registrul de guvernanță.")
+    acceptedEvidence = Array.from(
+      new Set([
+        nis2GovernanceFocus === "certification"
+          ? "Certificare CISO sau dată nouă de expirare salvată în registru"
+          : "Training board/CISO salvat în registrul de guvernanță",
+        "Notă sau evidență de completare atașată în registru",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition =
+      nis2GovernanceFocus === "certification"
+        ? "Registrul Board & CISO este actualizat cu certificarea valabilă sau cu data de expirare corectă."
+        : "Registrul Board & CISO este actualizat cu training-ul completat pentru persoana afectată."
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2MaturityDomain) {
+    primaryCTALabel = "Deschide evaluarea de maturitate"
+    heroSummary = `Domeniul de maturitate "${nis2MaturityDomain.name}" este sub pragul sigur. Finding-ul se închide numai după ce salvezi evaluarea și clarifici planul pentru acest control.`
+    whatCompliDoes = `Am legat finding-ul de domeniul de maturitate "${nis2MaturityDomain.name}" și deschidem exact secțiunea corespunzătoare din auto-evaluarea DNSC.`
+    whatUserMustDo = nis2MaturityDomain.closureRecipe
+    const controlEvidence = NIS2_CONTROL_EVIDENCE[nis2MaturityDomain.id] ?? []
+    acceptedEvidence = Array.from(
+      new Set([
+        `Evaluare salvată pentru domeniul ${nis2MaturityDomain.name}`,
+        ...controlEvidence,
+        "Răspunsuri confirmate și plan de remediere actualizat",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition = `Evaluarea de maturitate pentru "${nis2MaturityDomain.name}" este salvată și planul domeniului este clarificat.`
+  } else if (nis2SupplyChainFinding) {
+    primaryCTALabel = vendorContext?.vendorName
+      ? `Revizuiește ${vendorContext.vendorName}`
+      : "Revizuiește furnizorii"
+    heroSummary =
+      vendorContext
+        ? `Risk de supply chain detectat pentru ${vendorContext.vendorName}. Registrul NIS2 arată că revizuirea contractuală sau dovada de securitate nu este completă.`
+        : "Risk de supply chain detectat. Registrul NIS2 de furnizori cere revizuire contractuală și dovezi de securitate."
+    whatCompliDoes =
+      vendorContext
+        ? `Am legat finding-ul de registrul NIS2 și am identificat vendorul ${vendorContext.vendorName}. Deschidem exact suprafața unde poți verifica DPA-ul, SLA-ul și revizuirea contractuală.`
+        : "Am legat finding-ul de registrul NIS2 al furnizorilor și deschidem exact suprafața de revizuire contractuală."
+    whatUserMustDo =
+      vendorContext
+        ? `Verifică DPA-ul, clauzele de securitate și notificarea incidentelor pentru ${vendorContext.vendorName}. Marchează revizuirea în registru și atașează urma contractuală reală.`
+        : "Verifică DPA-ul, clauzele de securitate și notificarea incidentelor pentru furnizorii afectați. Marchează revizuirea în registru și atașează urma contractuală reală."
+    acceptedEvidence = Array.from(
+      new Set([
+        vendorContext ? `Revizuire salvată în registru pentru ${vendorContext.vendorName}` : "Revizuire salvată în registrul furnizorilor ICT",
+        vendorContext ? `DPA sau anexă contractuală pentru ${vendorContext.vendorName}` : "DPA sau anexă contractuală actualizată",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition =
+      vendorContext
+        ? `Registrul NIS2 este actualizat pentru ${vendorContext.vendorName}, iar dovada contractuală sau de revizuire este salvată.`
+        : "Registrul NIS2 al furnizorilor este actualizat și dovada contractuală sau de revizuire este salvată."
   }
 
   // EF-001 SPV explainability override (Sprint 6B)
@@ -2136,27 +2527,70 @@ export function buildCockpitRecipe(
     closeCondition = flow.closeCondition
   }
 
-  const dossierOutcome =
-    findingTypeId === "EF-001"
-      ? "Dovada activării SPV intră în dosar. CompliScan reverifică statusul SPV la 30 de zile."
-      : findingTypeId === "EF-004"
-        ? "Dovada statusului final din SPV (ok sau respinsă) intră în dosar pentru urmărire."
-        : findingTypeId === "EF-005"
-          ? "Dovada transmiterii în SPV ANAF intră în dosar. Factura devine trasabilă fiscal."
-          : findingTypeId === "EF-006"
-            ? "Dovada CUI client verificat + confirmare SPV intră în dosar pentru audit fiscal."
-            : findingTypeId === "GDPR-010" && vendorContext
-              ? `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
-              : getDossierOutcome(primaryMode)
-  const recipeMonitoringSignals =
-    findingTypeId === "GDPR-010" && vendorContext
-      ? Array.from(
-          new Set([
-            ...monitoringSignals,
-            `Reverificăm schimbările contractuale și termenii DPA pentru ${vendorContext.vendorName}.`,
-          ])
-        ).slice(0, 5)
-      : monitoringSignals
+  let dossierOutcome = getDossierOutcome(primaryMode)
+  if (findingTypeId === "EF-001") {
+    dossierOutcome = "Dovada activării SPV intră în dosar. CompliScan reverifică statusul SPV la 30 de zile."
+  } else if (findingTypeId === "EF-004") {
+    dossierOutcome = "Dovada statusului final din SPV (ok sau respinsă) intră în dosar pentru urmărire."
+  } else if (findingTypeId === "EF-005") {
+    dossierOutcome = "Dovada transmiterii în SPV ANAF intră în dosar. Factura devine trasabilă fiscal."
+  } else if (findingTypeId === "EF-006") {
+    dossierOutcome = "Dovada CUI client verificat + confirmare SPV intră în dosar pentru audit fiscal."
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
+    dossierOutcome = "Actualizarea registrului Board & CISO intră în dosar și rămâne legată de finding pentru auditul NIS2."
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2MaturityDomain) {
+    dossierOutcome = `Evaluarea și planul pentru domeniul ${nis2MaturityDomain.name} intră în dosar și rămân legate de finding pentru auditul DNSC.`
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2SupplyChainFinding && vendorContext) {
+    dossierOutcome = `Revizuirea contractuală și dovezile pentru ${vendorContext.vendorName} intră în dosar și rămân legate de finding pentru audit NIS2 / supply-chain.`
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2SupplyChainFinding) {
+    dossierOutcome = "Revizuirea furnizorului și dovezile contractuale intră în dosar și rămân legate de finding pentru audit NIS2 / supply-chain."
+  } else if (findingTypeId === "GDPR-010" && vendorContext) {
+    dossierOutcome = `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
+  }
+
+  let recipeMonitoringSignals = monitoringSignals
+  if (findingTypeId === "GDPR-010" && vendorContext) {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        `Reverificăm schimbările contractuale și termenii DPA pentru ${vendorContext.vendorName}.`,
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        nis2GovernanceFocus === "certification"
+          ? "Reverificăm expirarea certificării CISO și actualizarea registrului Board & CISO."
+          : "Reverificăm training-ul de securitate al conducerii și registrul Board & CISO.",
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2MaturityDomain) {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        `Reverificăm domeniul de maturitate ${nis2MaturityDomain.name} la următorul assessment DNSC.`,
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2SupplyChainFinding && vendorContext) {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        `Reverificăm revizuirea contractuală și clauzele de securitate pentru ${vendorContext.vendorName}.`,
+      ])
+    ).slice(0, 5)
+  }
+
+  let closureCTA = getClosureCTA(findingTypeId, primaryMode)
+  if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus === "certification") {
+    closureCTA = "Marchează certificarea actualizată"
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus === "training") {
+    closureCTA = "Marchează training-ul documentat"
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2MaturityDomain) {
+    closureCTA = "Marchează evaluarea salvată"
+  } else if (findingTypeId === "NIS2-GENERIC" && nis2SupplyChainFinding) {
+    closureCTA = "Marchează furnizorul revizuit"
+  }
 
   return {
     findingTypeId,
@@ -2171,12 +2605,12 @@ export function buildCockpitRecipe(
     whatCompliDoes,
     whatUserMustDo,
     primaryCTA: {
-      label: flow.primaryCTA,
+      label: primaryCTALabel,
       action: primaryCTAAction,
     },
     secondaryCTA: getSecondaryCTA(flow.secondaryCTA),
     workflowLink: getWorkflowLink(findingTypeId, record),
-    closureCTA: getClosureCTA(findingTypeId, primaryMode),
+    closureCTA,
     acceptedEvidence,
     visibleBlocks,
     closeCondition,

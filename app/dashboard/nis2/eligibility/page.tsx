@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ShieldAlert } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -18,8 +19,11 @@ type SavedEligibility = {
 
 export default function Nis2EligibilityPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [saved, setSaved] = useState<SavedEligibility | null>(null)
   const [loading, setLoading] = useState(true)
+  const sourceFindingId = searchParams.get("findingId")
+  const fromCockpit = searchParams.get("source") === "cockpit" && Boolean(sourceFindingId)
 
   const fetchEligibility = useCallback(async () => {
     try {
@@ -43,6 +47,26 @@ export default function Nis2EligibilityPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6 py-6">
+      {fromCockpit ? (
+        <div className="flex items-start gap-3 rounded-lg border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
+          <ShieldAlert className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-eos-text">
+              Ai venit din cockpit pentru eligibilitatea NIS2
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Clarifică mai întâi dacă firma intră sub NIS2. Dacă rezultatul confirmă eligibilitatea, continuă imediat spre wizardul DNSC.
+            </p>
+          </div>
+          <Link
+            href={`/dashboard/resolve/${sourceFindingId}`}
+            className="shrink-0 text-xs text-eos-primary hover:underline"
+          >
+            Înapoi la finding
+          </Link>
+        </div>
+      ) : null}
+
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -67,7 +91,32 @@ export default function Nis2EligibilityPage() {
           <div className="size-6 animate-spin rounded-full border-2 border-eos-primary border-t-transparent" />
         </div>
       ) : (
-        <Nis2EligibilityWizard saved={saved} onComplete={handleComplete} />
+        <>
+          <Nis2EligibilityWizard saved={saved} onComplete={handleComplete} />
+          {fromCockpit && saved && saved.result !== "nu_intri" ? (
+            <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
+              <p className="text-sm font-medium text-eos-text">
+                Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Link
+                  href={`/dashboard/nis2/inregistrare-dnsc?${new URLSearchParams({
+                    findingId: sourceFindingId ?? "",
+                    source: "cockpit",
+                  }).toString()}`}
+                >
+                  <Button size="sm">Continuă spre DNSC</Button>
+                </Link>
+                <Link
+                  href={`/dashboard/resolve/${sourceFindingId}`}
+                  className="inline-flex items-center text-sm text-eos-primary hover:underline"
+                >
+                  Înapoi la cockpit
+                </Link>
+              </div>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   )

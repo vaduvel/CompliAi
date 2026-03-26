@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -49,6 +50,7 @@ function stepIndex(step: WizardStep) {
 }
 
 export default function DnscRegistrationPage() {
+  const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const [step, setStep] = useState<WizardStep>("eligibility")
   const [dnscStatus, setDnscStatus] = useState<DnscRegistrationStatus>("not-started")
@@ -62,6 +64,8 @@ export default function DnscRegistrationPage() {
   const [showAddCorrespondence, setShowAddCorrespondence] = useState(false)
   const [newEntry, setNewEntry] = useState({ date: new Date().toISOString().slice(0, 10), direction: "received" as "sent" | "received", summary: "" })
   const [savingEntry, setSavingEntry] = useState(false)
+  const sourceFindingId = searchParams.get("findingId") ?? undefined
+  const fromCockpit = searchParams.get("source") === "cockpit" && Boolean(sourceFindingId)
 
   useEffect(() => {
     fetch("/api/nis2/dnsc-status")
@@ -217,6 +221,26 @@ export default function DnscRegistrationPage() {
 
   return (
     <div className="space-y-8">
+      {fromCockpit ? (
+        <div className="flex items-start gap-3 rounded-lg border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
+          <Shield className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-eos-text">
+              Wizardul DNSC este deschis din cockpit
+            </p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">
+              Parcurge eligibilitatea, datele și confirmarea trimiterii către DNSC, apoi întoarce-te în același finding cu dovada pregătită.
+            </p>
+          </div>
+          <Link
+            href={`/dashboard/resolve/${sourceFindingId}`}
+            className="shrink-0 text-xs text-eos-primary hover:underline"
+          >
+            Înapoi la finding
+          </Link>
+        </div>
+      ) : null}
+
       <PageIntro
         eyebrow="NIS2 · Înregistrare DNSC"
         title="Wizard de înregistrare la DNSC"

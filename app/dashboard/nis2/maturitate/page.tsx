@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   ClipboardCheck,
   Loader2,
   RotateCcw,
-  Shield,
   ShieldAlert,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -241,6 +240,7 @@ function buildSuggestedAnswers(
 }
 
 export default function MaturitatePage() {
+  const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState<MaturityAssessment | null>(null)
@@ -270,6 +270,16 @@ export default function MaturitatePage() {
   const progress = domainProgress(answers, domain.id)
   const liveResult = scoreMaturity(answers)
   const currentDomainResult = liveResult.domains[step]
+  const findingId = searchParams.get("findingId") ?? searchParams.get("sourceFindingId") ?? ""
+  const source = (searchParams.get("source") ?? searchParams.get("from") ?? "").toLowerCase()
+  const focus = (searchParams.get("focus") ?? "").toLowerCase()
+  const fromCockpit = Boolean(findingId) && (source.includes("cockpit") || source.includes("finding") || searchParams.has("sourceFindingId"))
+  const focusCopy =
+    focus === "assessment"
+      ? "Folosește pagina asta ca să completezi evaluarea de maturitate și revino apoi în cockpit cu răspunsurile salvate."
+      : focus
+        ? `Focus curent: ${focus}. Completează maturitatea și păstrează contextul în cockpit.`
+        : "Completează evaluarea de maturitate aici, apoi revino în cockpit pentru a continua remedierea."
 
   function setAnswer(questionId: string, value: MaturityAnswer) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
@@ -324,6 +334,47 @@ export default function MaturitatePage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      {fromCockpit && (
+        <Card className="border-eos-primary/30 bg-eos-primary-soft">
+          <CardContent className="p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="normal-case tracking-normal">
+                    Deschis din cockpit
+                  </Badge>
+                  {findingId && (
+                    <span className="text-xs font-medium text-eos-text-muted">
+                      Finding: <span className="font-semibold text-eos-text">{findingId}</span>
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm font-medium text-eos-text">
+                  Ai ajuns aici din finding-ul selectat din cockpit.
+                </p>
+                <p className="text-sm text-eos-text-muted">{focusCopy}</p>
+              </div>
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm" className="gap-2">
+                  <Link href={`/dashboard/resolve/${findingId}`}>
+                    <ArrowLeft className="size-4" strokeWidth={2} />
+                    Înapoi la finding
+                  </Link>
+                </Button>
+                {!submitted && (
+                  <Button asChild size="sm" className="gap-2">
+                    <Link href="#maturity-assessment">
+                      Continuă aici
+                      <ArrowRight className="size-4" strokeWidth={2} />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <PageIntro
         eyebrow="NIS2 — Maturitate"
         title="Auto-evaluare maturitate DNSC"
@@ -345,7 +396,8 @@ export default function MaturitatePage() {
       ) : (
         <>
           {/* Saved assessment CTA */}
-          {saved && !submitted && (
+          <div id="maturity-assessment">
+            {saved && !submitted && (
             <div className="rounded-eos-lg border border-eos-primary/30 bg-eos-primary-soft px-4 py-3 text-sm text-eos-text">
               <span className="font-semibold">Evaluare anterioară: </span>
               {saved.overallScore}% · {formatDate(saved.completedAt)}.{" "}
@@ -360,157 +412,158 @@ export default function MaturitatePage() {
                 Vezi rezultatele
               </button>
             </div>
-          )}
+            )}
 
-          {/* Progress header */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs text-eos-text-muted">
-              <span>
-                Domeniu {step + 1} din {totalSteps}
-              </span>
-              <span>
-                {Object.keys(answers).length} din{" "}
-                {MATURITY_DOMAINS.reduce((s, d) => s + d.questions.length, 0)} întrebări
-              </span>
-            </div>
-            <div className="flex gap-1">
-              {MATURITY_DOMAINS.map((d, i) => {
-                const p = domainProgress(answers, d.id)
-                return (
-                  <button
-                    key={d.id}
-                    type="button"
-                    className={`h-1.5 flex-1 rounded-full transition-all ${
-                      i === step
-                        ? "bg-eos-primary"
-                        : p.complete
-                          ? "bg-emerald-400"
-                          : p.answered > 0
-                            ? "bg-amber-400"
-                            : "bg-eos-surface-variant"
-                    }`}
-                    onClick={() => setStep(i)}
-                    title={d.name}
-                  />
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Domain card */}
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader className="px-5 pt-4 pb-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
-                    {domain.legalRef}
-                  </p>
-                  <CardTitle className="mt-0.5 text-base font-semibold text-eos-text">
-                    {domain.name}
-                  </CardTitle>
-                </div>
-                {progress.complete && currentDomainResult && statusBadge(currentDomainResult.status)}
+            {/* Progress header */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-eos-text-muted">
+                <span>
+                  Domeniu {step + 1} din {totalSteps}
+                </span>
+                <span>
+                  {Object.keys(answers).length} din{" "}
+                  {MATURITY_DOMAINS.reduce((s, d) => s + d.questions.length, 0)} întrebări
+                </span>
               </div>
-            </CardHeader>
-
-            <CardContent className="divide-y divide-eos-border-subtle px-5 pb-4">
-              {domain.questions.map((q, qi) => {
-                const current = answers[q.id]
-                const suggestion = suggestedAnswers[q.id]
-                return (
-                  <div key={q.id} className="py-4">
-                    <p className="mb-2 text-sm text-eos-text">
-                      <span className="mr-1.5 text-eos-text-muted">{qi + 1}.</span>
-                      {q.text}
-                    </p>
-                    {suggestion && current === undefined && (
-                      <div className="mb-2 flex items-center gap-2 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 px-2.5 py-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-eos-primary">
-                          Propus automat
-                        </span>
-                        <span className="text-xs text-eos-text-muted">·</span>
-                        <span className="text-xs font-medium text-eos-text">
-                          {ANSWER_OPTIONS.find((o) => o.value === suggestion.answer)?.label}
-                        </span>
-                        <span className="text-xs text-eos-text-muted">din {suggestion.source}</span>
-                        <button
-                          type="button"
-                          onClick={() => setAnswer(q.id, suggestion.answer)}
-                          className="ml-auto shrink-0 rounded-eos-md border border-eos-primary/30 bg-eos-surface px-2 py-0.5 text-[11px] font-medium text-eos-primary hover:bg-eos-primary/10"
-                        >
-                          Confirmă
-                        </button>
-                      </div>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      {ANSWER_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setAnswer(q.id, opt.value)}
-                          className={`rounded-eos-md border px-3 py-1.5 text-xs font-medium transition-all ${
-                            current === opt.value
-                              ? `${opt.color} ring-2 ring-offset-1 ring-current`
-                              : "border-eos-border bg-eos-surface text-eos-text-muted hover:border-eos-border-subtle hover:text-eos-text"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2"
-              disabled={step === 0}
-              onClick={() => setStep((s) => s - 1)}
-            >
-              <ArrowLeft className="size-4" strokeWidth={2} />
-              Anterior
-            </Button>
-
-            <div className="flex items-center gap-3">
-              {step < totalSteps - 1 ? (
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  disabled={!canGoNext()}
-                  onClick={() => setStep((s) => s + 1)}
-                >
-                  Următor
-                  <ArrowRight className="size-4" strokeWidth={2} />
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="gap-2"
-                  disabled={submitting || !canGoNext()}
-                  onClick={() => void handleSubmit()}
-                >
-                  {submitting ? (
-                    <Loader2 className="size-4 animate-spin" strokeWidth={2} />
-                  ) : (
-                    <ClipboardCheck className="size-4" strokeWidth={2} />
-                  )}
-                  Finalizează evaluarea
-                </Button>
-              )}
+              <div className="flex gap-1">
+                {MATURITY_DOMAINS.map((d, i) => {
+                  const p = domainProgress(answers, d.id)
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      className={`h-1.5 flex-1 rounded-full transition-all ${
+                        i === step
+                          ? "bg-eos-primary"
+                          : p.complete
+                            ? "bg-emerald-400"
+                            : p.answered > 0
+                              ? "bg-amber-400"
+                              : "bg-eos-surface-variant"
+                      }`}
+                      onClick={() => setStep(i)}
+                      title={d.name}
+                    />
+                  )
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Legal notice */}
-          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
-            <span className="font-medium text-eos-text">Cum funcționează scorul:</span> Da = 100p · Parțial = 50p ·
-            Nu = 0p · Nu se aplică = exclus din calcul. Domeniile cu scor sub 50% generează automat probleme în
-            tabloul de remediere.
+            {/* Domain card */}
+            <Card className="border-eos-border bg-eos-surface">
+              <CardHeader className="px-5 pt-4 pb-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+                      {domain.legalRef}
+                    </p>
+                    <CardTitle className="mt-0.5 text-base font-semibold text-eos-text">
+                      {domain.name}
+                    </CardTitle>
+                  </div>
+                  {progress.complete && currentDomainResult && statusBadge(currentDomainResult.status)}
+                </div>
+              </CardHeader>
+
+              <CardContent className="divide-y divide-eos-border-subtle px-5 pb-4">
+                {domain.questions.map((q, qi) => {
+                  const current = answers[q.id]
+                  const suggestion = suggestedAnswers[q.id]
+                  return (
+                    <div key={q.id} className="py-4">
+                      <p className="mb-2 text-sm text-eos-text">
+                        <span className="mr-1.5 text-eos-text-muted">{qi + 1}.</span>
+                        {q.text}
+                      </p>
+                      {suggestion && current === undefined && (
+                        <div className="mb-2 flex items-center gap-2 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 px-2.5 py-1.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-eos-primary">
+                            Propus automat
+                          </span>
+                          <span className="text-xs text-eos-text-muted">·</span>
+                          <span className="text-xs font-medium text-eos-text">
+                            {ANSWER_OPTIONS.find((o) => o.value === suggestion.answer)?.label}
+                          </span>
+                          <span className="text-xs text-eos-text-muted">din {suggestion.source}</span>
+                          <button
+                            type="button"
+                            onClick={() => setAnswer(q.id, suggestion.answer)}
+                            className="ml-auto shrink-0 rounded-eos-md border border-eos-primary/30 bg-eos-surface px-2 py-0.5 text-[11px] font-medium text-eos-primary hover:bg-eos-primary/10"
+                          >
+                            Confirmă
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {ANSWER_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setAnswer(q.id, opt.value)}
+                            className={`rounded-eos-md border px-3 py-1.5 text-xs font-medium transition-all ${
+                              current === opt.value
+                                ? `${opt.color} ring-2 ring-offset-1 ring-current`
+                                : "border-eos-border bg-eos-surface text-eos-text-muted hover:border-eos-border-subtle hover:text-eos-text"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            </Card>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                disabled={step === 0}
+                onClick={() => setStep((s) => s - 1)}
+              >
+                <ArrowLeft className="size-4" strokeWidth={2} />
+                Anterior
+              </Button>
+
+              <div className="flex items-center gap-3">
+                {step < totalSteps - 1 ? (
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    disabled={!canGoNext()}
+                    onClick={() => setStep((s) => s + 1)}
+                  >
+                    Următor
+                    <ArrowRight className="size-4" strokeWidth={2} />
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    disabled={submitting || !canGoNext()}
+                    onClick={() => void handleSubmit()}
+                  >
+                    {submitting ? (
+                      <Loader2 className="size-4 animate-spin" strokeWidth={2} />
+                    ) : (
+                      <ClipboardCheck className="size-4" strokeWidth={2} />
+                    )}
+                    Finalizează evaluarea
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Legal notice */}
+            <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
+              <span className="font-medium text-eos-text">Cum funcționează scorul:</span> Da = 100p · Parțial = 50p ·
+              Nu = 0p · Nu se aplică = exclus din calcul. Domeniile cu scor sub 50% generează automat probleme în
+              tabloul de remediere.
+            </div>
           </div>
         </>
       )}

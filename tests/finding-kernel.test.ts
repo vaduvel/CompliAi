@@ -388,6 +388,172 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.closureCTA).toBe("Marchează notificarea ANSPDCP")
   })
 
+  it("returnează handoff real pentru NIS2-001 către wizardul de eligibilitate", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-finding-eligibility",
+        category: "NIS2",
+        title: "Eligibilitate NIS2 neclară",
+        detail: "Nu este clar dacă firma intră sub NIS2 și dacă trebuie continuat cu DNSC.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-001")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/eligibility")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-eligibility")
+    expect(recipe.workflowLink?.href).toContain("source=cockpit")
+    expect(recipe.workflowLink?.label).toBe("Deschide eligibilitatea NIS2")
+    expect(recipe.closureCTA).toBe("Salvează eligibilitatea")
+  })
+
+  it("returnează handoff real pentru NIS2-005 către assessment", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-finding-assessment",
+        category: "NIS2",
+        title: "Assessment NIS2 neînceput",
+        detail: "Nu avem încă o evaluare NIS2 pentru firma ta.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-005")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=assessment")
+    expect(recipe.workflowLink?.href).toContain("focus=assessment")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-assessment")
+    expect(recipe.workflowLink?.label).toBe("Deschide evaluarea NIS2")
+    expect(recipe.closureCTA).toBe("Salvează evaluarea NIS2")
+  })
+
+  it("returnează handoff real pentru NIS2-015 către timeline-ul incidentului selectat", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-finding-incident-timeline",
+        category: "NIS2",
+        suggestedDocumentType: "nis2-incident-response",
+        title: "Incident activ fără Early Warning",
+        detail: "Incidentul demo-incident-1 cere early warning în 24h.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-015")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=incidents")
+    expect(recipe.workflowLink?.href).toContain("focus=incident")
+    expect(recipe.workflowLink?.href).toContain("incidentId=demo-incident-1")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-incident-timeline")
+    expect(recipe.workflowLink?.label).toBe("Deschide timeline-ul incidentului")
+    expect(recipe.closureCTA).toBe("Marchează early warning trimis")
+  })
+
+  it("returnează fallback clar pentru NIS2-015 când nu poate deduce incidentul exact", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-finding-incident-generic",
+        category: "NIS2",
+        suggestedDocumentType: "nis2-incident-response",
+        title: "Incident activ fără Early Warning",
+        detail: "Incidentul cere deschiderea flow-ului DNSC, dar nu are încă un incident legat explicit.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-015")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=incidents")
+    expect(recipe.workflowLink?.href).toContain("focus=incident")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-incident-generic")
+    expect(recipe.workflowLink?.href).not.toContain("incidentId=")
+    expect(recipe.workflowLink?.label).toBe("Deschide flow-ul de incident")
+  })
+
+  it("deschide registrul furnizorilor pentru finding-ul NIS2 de supply-chain", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-supply-chain-gap",
+        category: "NIS2",
+        title: "2 furnizori tehnici fără DPA semnat",
+        detail: "Microsoft și AWS apar în registrul furnizorilor fără DPA actualizat.",
+        remediationHint: "Solicitați DPA actualizat de la Microsoft și AWS.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-GENERIC")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=vendors")
+    expect(recipe.workflowLink?.href).toContain("focus=vendor")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-supply-chain-gap")
+    expect(recipe.workflowLink?.label).toContain("Deschide registrul")
+    expect(recipe.closureCTA).toBe("Marchează furnizorul revizuit")
+    expect(recipe.monitoringSignals.length).toBeGreaterThan(0)
+  })
+
+  it("deschide evaluarea de maturitate pentru gap-ul NIS2 pe risk management", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-risk-management",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Managementul riscului cibernetic (33%)",
+        detail: "Domeniu NIS2 cu scor sub 50%. Documentează o Politică de Management al Riscului Cibernetic.",
+        remediationHint:
+          "Documentează o Politică de Management al Riscului Cibernetic. Generează din Generatorul de Documente și atașează documentul semnat de management.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-GENERIC")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/maturitate")
+    expect(recipe.workflowLink?.href).toContain("focus=risk-management")
+    expect(recipe.workflowLink?.href).toContain("findingId=nis2-maturity-risk-management")
+    expect(recipe.workflowLink?.label).toBe("Deschide evaluarea de maturitate")
+    expect(recipe.closureCTA).toBe("Marchează evaluarea salvată")
+    expect(recipe.acceptedEvidence[0]).toContain("Managementul riscului cibernetic")
+  })
+
+  it("nu trimite maturity supply-chain în vendor registry când finding-ul este gap de assessment", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-supply-chain",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Securitatea lanțului de aprovizionare (20%)",
+        detail: "Domeniu NIS2 cu scor sub 50%. Completează registrul de furnizori cu clauze de securitate.",
+      })
+    )
+
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/maturitate")
+    expect(recipe.workflowLink?.href).toContain("focus=supply-chain")
+    expect(recipe.workflowLink?.href).not.toContain("tab=vendors")
+  })
+
+  it("deschide registrul de guvernanță pentru gap de training board", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-gov-training-demo-board-1",
+        category: "NIS2",
+        title: "Ana Popescu nu a completat training-ul de securitate cibernetică",
+        detail: "Membrul conducerii nu are documentat training-ul de securitate cibernetică.",
+        sourceDocument: "Registru Guvernanță — Board Training Tracker",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-GENERIC")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/governance")
+    expect(recipe.workflowLink?.href).toContain("focus=training")
+    expect(recipe.closureCTA).toBe("Marchează training-ul documentat")
+    expect(recipe.primaryCTA.label).toBe("Actualizează training-ul boardului")
+  })
+
+  it("deschide registrul CISO pentru certificare expirată", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-gov-cert-expired-demo-ciso-1",
+        category: "NIS2",
+        title: "Certificarea CISSP a lui Ioan Ionescu a expirat",
+        detail: "Certificarea CISO a expirat și trebuie reînnoită în registrul de guvernanță.",
+        sourceDocument: "Registru Guvernanță — Board Training Tracker",
+      })
+    )
+
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/governance")
+    expect(recipe.workflowLink?.href).toContain("focus=certification")
+    expect(recipe.workflowLink?.label).toBe("Deschide registrul CISO")
+    expect(recipe.closureCTA).toBe("Marchează certificarea actualizată")
+  })
+
   it("returnează recipe corect pentru EF-003 — fără generator", () => {
     const recipe = getResolveFlowRecipe("EF-003")
     expect(recipe.initialFlowState).toBe("external_action_required")
@@ -1217,5 +1383,86 @@ describe("buildCockpitRecipe — Sprint 6C fiscal operational explainability", (
     expect(recipe.whatUserMustDo).toContain("anaf.ro/verificare-cif")
     expect(recipe.whatCompliDoes).toContain("date client invalide")
     expect(recipe.closeCondition).toContain("date client corecte")
+  })
+})
+
+describe("buildCockpitRecipe — Sprint 7 NIS2 evidence per control", () => {
+  it("risk-management — acceptedEvidence conține dovada specifică: politică de management al riscului", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-risk-management",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Managementul riscului cibernetic (33%)",
+        detail: "Domeniu NIS2 cu scor sub 50%.",
+      })
+    )
+    expect(recipe.acceptedEvidence.some((e) => e.includes("Politică de Management"))).toBe(true)
+    expect(recipe.acceptedEvidence.length).toBeGreaterThan(2)
+  })
+
+  it("mfa — acceptedEvidence conține dovada specifică: screenshot MFA activat", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-mfa",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Autentificare multi-factor (MFA) (0%)",
+        detail: "MFA nu este activat pe conturile critice.",
+      })
+    )
+    expect(recipe.acceptedEvidence.some((e) => e.includes("MFA activat"))).toBe(true)
+  })
+
+  it("business-continuity — acceptedEvidence conține dovada testului de recuperare", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-business-continuity",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Continuitatea activității (BCP / DRP) (25%)",
+        detail: "Lipsesc planuri BCP/DRP documentate.",
+      })
+    )
+    expect(
+      recipe.acceptedEvidence.some((e) => e.includes("BCP") || e.includes("DRP"))
+    ).toBe(true)
+  })
+
+  it("audit-testing — acceptedEvidence conține raport pentest sau audit extern", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-maturity-audit-testing",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Evaluarea eficacității măsurilor (20%)",
+        detail: "Nu există teste de penetrare sau audituri de securitate.",
+      })
+    )
+    expect(
+      recipe.acceptedEvidence.some((e) => e.includes("pentest") || e.includes("audit"))
+    ).toBe(true)
+  })
+
+  it("fiecare domeniu cu maturityFocus returnează mai mult de 2 acceptedEvidence items", () => {
+    const domains = [
+      "risk-management",
+      "incident-response",
+      "business-continuity",
+      "supply-chain",
+      "secure-development",
+      "audit-testing",
+      "basic-hygiene",
+      "cryptography",
+      "access-control",
+      "mfa",
+    ]
+    for (const domainId of domains) {
+      const recipe = buildCockpitRecipe(
+        makeFinding({
+          id: `nis2-maturity-${domainId}`,
+          category: "NIS2",
+          title: `Maturitate insuficientă: domeniu ${domainId} (20%)`,
+          detail: "Gap de maturitate NIS2.",
+        })
+      )
+      expect(recipe.acceptedEvidence.length).toBeGreaterThan(2)
+    }
   })
 })
