@@ -141,6 +141,18 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-013")
   })
 
+  it("mapează cererea de ștergere activă → GDPR-014", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "dsar-erasure-active",
+        category: "GDPR",
+        title: "Cerere de ștergere activă",
+        detail: "Există o cerere activă de ștergere pentru datele personale ale unui client.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-014")
+  })
+
   it("mapează finding-ul rescue ANSPDCP → GDPR-019", () => {
     const result = classifyFinding(
       makeFinding({
@@ -289,9 +301,29 @@ describe("getResolveFlowRecipe", () => {
     )
 
     expect(recipe.findingTypeId).toBe("GDPR-013")
-    expect(recipe.workflowLink?.href).toBe("/dashboard/dsar?action=new")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?action=new")
+    expect(recipe.workflowLink?.href).toContain("type=access")
+    expect(recipe.workflowLink?.href).toContain("findingId=dsar-no-procedure")
     expect(recipe.workflowLink?.label).toBe("Deschide DSAR")
     expect(recipe.closureCTA).toBe("Marchează răspunsul trimis")
+  })
+
+  it("returnează handoff real pentru GDPR-014 către DSAR pe erasure", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "dsar-erasure-active",
+        category: "GDPR",
+        title: "Cerere de ștergere activă",
+        detail: "Persoana vizată a solicitat ștergerea datelor și trebuie pregătit răspunsul plus execuția operațională.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("GDPR-014")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?action=new")
+    expect(recipe.workflowLink?.href).toContain("type=erasure")
+    expect(recipe.workflowLink?.href).toContain("findingId=dsar-erasure-active")
+    expect(recipe.workflowLink?.label).toBe("Deschide cererea de ștergere")
+    expect(recipe.closureCTA).toBe("Marchează răspunsul și ștergerea")
   })
 
   it("returnează handoff real pentru GDPR-019 către flow-ul ANSPDCP din NIS2", () => {

@@ -282,6 +282,13 @@ export default function FindingDetailPage() {
           placeholder: "Ex: Cerere DSAR creată în modulul dedicat, identitatea verificată, răspuns trimis pe email la 26.03.2026 și salvat la dosar.",
           footer: "Cazul nu poate intra în monitorizare fără urma clară a răspunsului DSAR.",
         }
+      : recipe.findingTypeId === "GDPR-014"
+        ? {
+            eyebrow: "Dovadă de ștergere obligatorie",
+            body: "Leagă cazul de workflow-ul DSAR pentru ștergere, apoi notează ce sisteme au fost afectate și când a fost trimis răspunsul final.",
+            placeholder: "Ex: Cerere de ștergere creată în modulul DSAR, date șterse din CRM și marketing la 26.03.2026, răspuns trimis pe email și salvat la dosar.",
+            footer: "Cazul nu poate intra în monitorizare fără urma clară a ștergerii executate și a răspunsului trimis.",
+          }
       : recipe.findingTypeId === "GDPR-019"
         ? {
             eyebrow: "Dovadă breach obligatorie",

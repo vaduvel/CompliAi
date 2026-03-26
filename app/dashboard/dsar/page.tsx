@@ -89,6 +89,8 @@ export default function DsarPage() {
     requestType: "access" as DsarRequestType,
     notes: "",
   })
+  const sourceFindingId = searchParams.get("findingId")
+  const requestedType = searchParams.get("type")
 
   useEffect(() => {
     fetch("/api/dsar", { cache: "no-store" })
@@ -102,7 +104,17 @@ export default function DsarPage() {
     if (searchParams.get("action") === "new") {
       setShowForm(true)
     }
-  }, [searchParams])
+    if (
+      requestedType === "access" ||
+      requestedType === "rectification" ||
+      requestedType === "erasure" ||
+      requestedType === "portability" ||
+      requestedType === "objection" ||
+      requestedType === "restriction"
+    ) {
+      setForm((prev) => ({ ...prev, requestType: requestedType }))
+    }
+  }, [requestedType, searchParams])
 
   async function handleCreate() {
     if (!form.requesterName.trim() || !form.requesterEmail.trim()) {
@@ -181,6 +193,16 @@ export default function DsarPage() {
           </Link>
         }
       />
+
+      {sourceFindingId ? (
+        <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
+          <CardContent className="px-5 py-4">
+            <p className="text-sm text-eos-text">
+              Ai venit aici din cockpitul unui finding GDPR. Deschide sau completează cazul DSAR, apoi întoarce-te înapoi în finding cu dovada răspunsului și a execuției.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Summary badges */}
       {active.length > 0 && (

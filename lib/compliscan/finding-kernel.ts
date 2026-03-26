@@ -321,6 +321,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "no",
     closingRule: "dovada trimiterii prezentă",
   },
+  "GDPR-014": {
+    findingTypeId: "GDPR-014",
+    framework: "GDPR",
+    title: "Cerere de ștergere activă",
+    category: "Data subject rights",
+    typicalSeverity: "high",
+    signalTypes: ["direct"],
+    resolutionModes: ["in_app_guided", "external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["structurează răspunsul", "loghează cazul", "pregătește handoff-ul DSAR"],
+    userResponsibilities: ["execută ștergerea reală", "trimite răspunsul"],
+    requiredEvidenceKinds: ["email_sent", "confirmation"],
+    autoRecheck: "no",
+    closingRule: "dovada răspunsului și confirmarea execuției",
+  },
   "GDPR-019": {
     findingTypeId: "GDPR-019",
     framework: "GDPR",
@@ -580,6 +595,18 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatCompliDoes: "Creează cazul, calculează deadline-ul, generează draft.",
     whatUserMustDo: "Verifică identitatea și trimite răspunsul.",
     closeCondition: "Dovada trimiterii + status responded.",
+    revalidationTriggers: [],
+  },
+  "GDPR-014": {
+    findingTypeId: "GDPR-014",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Gestionează cererea",
+    secondaryCTA: "Vezi ce trebuie să trimiți",
+    whatUserSees:
+      "Ai o cerere activă de ștergere care cere răspuns și acțiune operațională.",
+    whatCompliDoes: "Structurează cazul, pregătește handoff-ul DSAR și păstrează urma pentru dosar.",
+    whatUserMustDo: "Execută ștergerea reală și trimite răspunsul către persoana vizată.",
+    closeCondition: "Dovada răspunsului și confirmarea execuției.",
     revalidationTriggers: [],
   },
   "GDPR-019": {
@@ -849,6 +876,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
 
   // Specific id pattern mappings first
   if (id === "dsar-no-procedure") return "GDPR-013"
+  if (id === "dsar-erasure-active") return "GDPR-014"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (
     id === "intake-b2c-privacy" ||
@@ -877,6 +905,22 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     )
   ) {
     return "EF-003"
+  }
+
+  if (
+    framework === "GDPR" &&
+    (
+      id.includes("dsar-erasure") ||
+      ((title.includes("cerere") || detail.includes("cerere")) &&
+        (title.includes("ștergere") ||
+          title.includes("stergere") ||
+          title.includes("erasure") ||
+          detail.includes("ștergere") ||
+          detail.includes("stergere") ||
+          detail.includes("erasure")))
+    )
+  ) {
+    return "GDPR-014"
   }
 
   if (
@@ -1123,8 +1167,21 @@ function getWorkflowLink(
   switch (findingTypeId) {
     case "GDPR-013":
       return {
-        href: "/dashboard/dsar?action=new",
+        href: `/dashboard/dsar?${new URLSearchParams({
+          action: "new",
+          type: "access",
+          findingId: record.id,
+        }).toString()}`,
         label: "Deschide DSAR",
+      }
+    case "GDPR-014":
+      return {
+        href: `/dashboard/dsar?${new URLSearchParams({
+          action: "new",
+          type: "erasure",
+          findingId: record.id,
+        }).toString()}`,
+        label: "Deschide cererea de ștergere",
       }
     case "GDPR-019": {
       const incidentId = getIncidentIdFromAnspdcpFindingId(record.id)
@@ -1165,6 +1222,8 @@ function getClosureCTA(
       return "Trimite la dosar și monitorizare"
     case "GDPR-013":
       return "Marchează răspunsul trimis"
+    case "GDPR-014":
+      return "Marchează răspunsul și ștergerea"
     case "GDPR-019":
       return "Marchează notificarea ANSPDCP"
     default:
@@ -1179,6 +1238,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-005": 60,
   "GDPR-010": 180,
   "GDPR-013": 30,
+  "GDPR-014": 30,
   "GDPR-019": null,
   "NIS2-001": 365,
   "NIS2-005": 180,
