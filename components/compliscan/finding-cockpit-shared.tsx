@@ -9,13 +9,11 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding } from "@/lib/compliance/types"
 import {
   getFindingAgeLabel,
-  getFindingDocumentFlowPresentation,
-  getFindingMonitoringSignals,
-  getFindingNarrative,
-  getFindingProgressSteps,
+  getSuggestedDocumentLabel,
   getFindingStatusPresentation,
   type FindingDocumentFlowState,
 } from "@/lib/compliscan/finding-cockpit"
+import { buildCockpitRecipe, type CockpitRecipe } from "@/lib/compliscan/finding-kernel"
 
 type LinkedGeneratedDocumentMeta = {
   id?: string
@@ -28,21 +26,200 @@ type LinkedGeneratedDocumentMeta = {
   expiresAtISO?: string
 }
 
+type RecipeBackedProps = {
+  recipe?: CockpitRecipe
+}
+
+type ProgressStepState = "done" | "active" | "upcoming"
+
+type RecipeProgressStep = {
+  id: string
+  label: string
+  hint: string
+  state: ProgressStepState
+}
+
+function resolveRecipe(
+  finding: ScanFinding,
+  documentFlowState: FindingDocumentFlowState = "not_required",
+  linkedGeneratedDocument?: LinkedGeneratedDocumentMeta | null,
+  recipe?: CockpitRecipe
+) {
+  if (recipe) return recipe
+  return buildCockpitRecipe(finding, {
+    documentFlowState,
+    linkedGeneratedDocument,
+  })
+}
+
+function getRecipeBadgePresentation(
+  finding: ScanFinding,
+  recipe: CockpitRecipe
+): { label: string; variant: "default" | "success" | "warning" | "destructive" | "secondary" | "outline" } {
+  if (finding.findingStatus === "under_monitoring") {
+    return { label: "Monitorizat", variant: "success" }
+  }
+  if (finding.findingStatus === "resolved") {
+    return { label: "Rezolvat", variant: "success" }
+  }
+  if (finding.findingStatus === "dismissed") {
+    return { label: "Marcat nevalid", variant: "secondary" }
+  }
+
+  switch (recipe.uiState) {
+    case "ready_to_generate":
+      return { label: recipe.collapsedStatusLabel, variant: "default" }
+    case "evidence_uploaded":
+    case "rechecking":
+      return { label: recipe.collapsedStatusLabel, variant: "default" }
+    case "external_action_required":
+    case "needs_revalidation":
+    case "need_your_input":
+      return { label: recipe.collapsedStatusLabel, variant: "warning" }
+    case "false_positive":
+      return { label: recipe.collapsedStatusLabel, variant: "secondary" }
+    default:
+      return { label: recipe.collapsedStatusLabel, variant: "outline" }
+  }
+}
+
+function getRecipeMainStepLabel(recipe: CockpitRecipe) {
+  if (recipe.uiState === "needs_revalidation") {
+    return "Reconfirmi"
+  }
+
+  switch (recipe.resolutionMode) {
+    case "in_app_full":
+    case "in_app_guided":
+      return "Pregătești draftul"
+    case "external_action":
+      return "Aplici remedierea"
+    case "user_attestation":
+      return "Confirmi"
+  }
+}
+
+function getRecipeProgressSteps(
+  finding: ScanFinding,
+  recipe: CockpitRecipe,
+  linkedGeneratedDocument?: LinkedGeneratedDocumentMeta | null
+): RecipeProgressStep[] {
+  const mainStepLabel = getRecipeMainStepLabel(recipe)
+  const mainStepHint =
+    recipe.whatUserMustDo ||
+    "Execuți pasul principal al cockpitului și păstrezi urma clară a rezultatului."
+  const evidenceHint =
+    linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
+      ? "Artefactul este aprobat și legat de finding ca dovadă."
+      : linkedGeneratedDocument
+        ? "Există deja un draft; mai rămân review-ul explicit și legarea la dosar."
+        : recipe.acceptedEvidence.length > 0
+          ? `Dovada acceptată: ${recipe.acceptedEvidence.join(" · ")}`
+          : "Pregătești dovada operațională sau documentară cerută."
+  const verificationHint =
+    recipe.monitoringSignals[0] ??
+    "Confirmăm că rezultatul rămâne valid și auditabil înainte să intre sub watch."
+  const monitoringHint =
+    finding.findingStatus === "under_monitoring"
+      ? "Cazul este închis și rămâne sub watch pentru drift, expirări sau schimbări noi."
+      : recipe.monitoringSignals[0] ??
+        "După închidere, cazul rămâne sub watch pentru drift, review și schimbări noi."
+
+  const activeIndex =
+    finding.findingStatus === "dismissed"
+      ? 0
+      : finding.findingStatus === "under_monitoring" || finding.findingStatus === "resolved"
+        ? 4
+        : recipe.uiState === "rechecking"
+          ? 3
+          : recipe.uiState === "evidence_uploaded"
+            ? 2
+            : recipe.uiState === "ready_to_generate" ||
+                recipe.uiState === "need_your_input" ||
+                recipe.uiState === "external_action_required" ||
+                recipe.uiState === "needs_revalidation"
+              ? 1
+              : 0
+
+  return [
+    {
+      id: "detected",
+      label: "Detectat",
+      hint: "Problema este confirmată și gata de lucru în cockpit.",
+      state: activeIndex > 0 ? "done" : "active",
+    },
+    {
+      id: "main-action",
+      label: mainStepLabel,
+      hint: mainStepHint,
+      state: activeIndex > 1 ? "done" : activeIndex === 1 ? "active" : "upcoming",
+    },
+    {
+      id: "evidence",
+      label: "Dovadă la dosar",
+      hint: evidenceHint,
+      state: activeIndex > 2 ? "done" : activeIndex === 2 ? "active" : "upcoming",
+    },
+    {
+      id: "verification",
+      label: recipe.uiState === "needs_revalidation" ? "Revalidare" : "Verificare",
+      hint: verificationHint,
+      state: activeIndex > 3 ? "done" : activeIndex === 3 ? "active" : "upcoming",
+    },
+    {
+      id: "monitoring",
+      label: "Monitorizat",
+      hint: monitoringHint,
+      state: activeIndex === 4 ? "active" : "upcoming",
+    },
+  ]
+}
+
+function getNarrativeModel(finding: ScanFinding, recipe: CockpitRecipe) {
+  const suggestedDocumentLabel = getSuggestedDocumentLabel(finding.suggestedDocumentType)
+  const evidence = recipe.acceptedEvidence.length > 0
+    ? recipe.acceptedEvidence.join(" · ")
+    : finding.evidenceRequired ??
+      "Atașezi dovada operațională sau documentară cerută pentru audit."
+  const dossierContext = suggestedDocumentLabel
+    ? `${suggestedDocumentLabel} intră în același flow și, după confirmare, merge la dosar pe aceeași urmă.`
+    : recipe.dossierOutcome
+
+  return {
+    problem: finding.resolution?.problem ?? finding.detail,
+    impact:
+      finding.resolution?.impact ??
+      finding.impactSummary ??
+      "Riscul rămâne deschis până când măsura este aplicată și rezultatul este salvat la dosar.",
+    action: recipe.whatUserMustDo,
+    compliSupport: recipe.whatCompliDoes,
+    evidence,
+    dossierContext,
+    revalidation:
+      recipe.monitoringSignals[0] ??
+      finding.resolution?.revalidation ??
+      finding.rescanHint ??
+      null,
+  }
+}
+
 type FindingNarrativeCardProps = {
   finding: ScanFinding
   title?: string
   description?: string
-}
+} & RecipeBackedProps
 
 export function FindingNarrativeCard({
   finding,
   title = "Rezolvare în același loc",
   description = "Problema, impactul, pașii și dovada rămân în același context, fără să te plimbe între suprafețe.",
+  recipe,
 }: FindingNarrativeCardProps) {
-  const narrative = getFindingNarrative(finding)
+  const cockpitRecipe = resolveRecipe(finding, "not_required", null, recipe)
+  const narrative = getNarrativeModel(finding, cockpitRecipe)
   const status = getFindingStatusPresentation(finding.findingStatus)
   const hasSecondaryContext = Boolean(
-    narrative.generatedAsset || narrative.humanStep || narrative.revalidation
+    narrative.compliSupport || narrative.dossierContext || narrative.revalidation
   )
 
   return (
@@ -86,7 +263,7 @@ export function FindingNarrativeCard({
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             Cum arată închiderea
           </p>
-          <p className="mt-1.5 text-sm leading-relaxed text-eos-text">{narrative.action}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-eos-text">{cockpitRecipe.closeCondition}</p>
         </div>
 
         {hasSecondaryContext ? (
@@ -103,17 +280,17 @@ export function FindingNarrativeCard({
               <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
             </summary>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {narrative.generatedAsset ? (
+              {narrative.compliSupport ? (
                 <NarrativeBlock
-                  label="Ce pregătește Compli"
-                  content={narrative.generatedAsset}
+                  label="Ce face Compli"
+                  content={narrative.compliSupport}
                   tone="default"
                 />
               ) : null}
-              {narrative.humanStep ? (
+              {narrative.dossierContext ? (
                 <NarrativeBlock
-                  label="Confirmarea ta"
-                  content={narrative.humanStep}
+                  label="Ce intră în dosar"
+                  content={narrative.dossierContext}
                   tone="default"
                 />
               ) : null}
@@ -147,14 +324,15 @@ type FindingHeroActionProps = {
   finding: ScanFinding
   children: React.ReactNode
   helperText?: string
-}
+} & RecipeBackedProps
 
 export function FindingHeroAction({
   finding,
   children,
   helperText,
+  recipe,
 }: FindingHeroActionProps) {
-  const narrative = getFindingNarrative(finding)
+  const cockpitRecipe = resolveRecipe(finding, "not_required", null, recipe)
 
   return (
     <div
@@ -165,11 +343,11 @@ export function FindingHeroAction({
         Acum faci asta
       </p>
       <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
-        {narrative.action}
+        {cockpitRecipe.whatUserMustDo}
       </p>
-      {narrative.generatedAsset && (
+      {cockpitRecipe.whatCompliDoes && cockpitRecipe.whatCompliDoes !== cockpitRecipe.whatUserMustDo && (
         <p className="mt-1.5 text-sm text-eos-text-muted">
-          {narrative.generatedAsset}
+          {cockpitRecipe.whatCompliDoes}
         </p>
       )}
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -192,19 +370,25 @@ type FindingExecutionCardProps = {
   finding: ScanFinding
   documentFlowState?: FindingDocumentFlowState
   linkedGeneratedDocument?: LinkedGeneratedDocumentMeta | null
-}
+} & RecipeBackedProps
 
 export function FindingExecutionCard({
   finding,
   documentFlowState = "not_required",
   linkedGeneratedDocument,
+  recipe,
 }: FindingExecutionCardProps) {
-  const status = getFindingDocumentFlowPresentation(documentFlowState)
-  const narrative = getFindingNarrative(finding)
-  const suggestedDocumentLabel = narrative.suggestedDocumentLabel
-  const steps = getFindingProgressSteps(finding, documentFlowState, linkedGeneratedDocument)
+  const cockpitRecipe = resolveRecipe(
+    finding,
+    documentFlowState,
+    linkedGeneratedDocument,
+    recipe
+  )
+  const status = getRecipeBadgePresentation(finding, cockpitRecipe)
+  const suggestedDocumentLabel = getSuggestedDocumentLabel(finding.suggestedDocumentType)
+  const steps = getRecipeProgressSteps(finding, cockpitRecipe, linkedGeneratedDocument)
   const activeStep = steps.find((step) => step.state === "active") ?? steps[steps.length - 1]
-  const monitoringSignals = getFindingMonitoringSignals(finding, linkedGeneratedDocument)
+  const monitoringSignals = cockpitRecipe.monitoringSignals
 
   return (
     <Card className="border-eos-border bg-eos-surface">
@@ -259,12 +443,12 @@ export function FindingExecutionCard({
           <div className="flex items-start gap-2">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
             <div>
-              <p className="text-sm font-medium text-eos-text">Cum se închide corect</p>
-              <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                {status.summary}
-              </p>
-            </div>
+            <p className="text-sm font-medium text-eos-text">Cum se închide corect</p>
+            <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+                {cockpitRecipe.closeCondition}
+            </p>
           </div>
+        </div>
         </div>
 
         {linkedGeneratedDocument ? (
@@ -291,7 +475,7 @@ export function FindingExecutionCard({
               <div>
                 <p className="text-sm font-medium text-eos-text">Asset recomandat</p>
                 <p className="mt-1 text-sm text-eos-text-muted">
-                  {suggestedDocumentLabel} intră în flow-ul acestui finding și, după confirmare, merge la dosar ca dovadă.
+                  {suggestedDocumentLabel} intră în flow-ul acestui finding și, după confirmare, merge la dosar pe aceeași urmă de dovadă și audit.
                 </p>
               </div>
             </div>
@@ -308,6 +492,7 @@ export function FindingExecutionCard({
                 : suggestedDocumentLabel
                   ? `Artifact așteptat: ${suggestedDocumentLabel}`
                   : "Artifact / dovadă operațională asociată finding-ului",
+              cockpitRecipe.dossierOutcome,
               linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
                 ? `Status: aprobat ca dovadă`
                 : linkedGeneratedDocument
@@ -344,6 +529,16 @@ export function FindingExecutionCard({
 type FindingDossierSuccessCardProps = {
   findingTitle: string
   linkedGeneratedDocument: LinkedGeneratedDocumentMeta
+  feedbackMessage?: string | null
+  primaryHref?: string
+  secondaryHref?: string
+}
+
+type FindingCaseClosedCardProps = {
+  findingTitle: string
+  savedAtISO: string
+  nextReviewDateISO?: string
+  closureEvidence?: string | null
   feedbackMessage?: string | null
   primaryHref?: string
   secondaryHref?: string
@@ -402,6 +597,94 @@ export function FindingDossierSuccessCard({
             <p className="text-sm leading-relaxed text-eos-text-muted">
               {feedbackMessage ??
                 "Dovada rămâne în dosar pentru audit, handoff și reverificare. Dacă apare drift sau expirare, finding-ul poate fi redeschis pe aceeași urmă."}
+            </p>
+          </div>
+        </div>
+
+        {(primaryHref || secondaryHref) && (
+          <div className="flex flex-wrap gap-3">
+            {primaryHref ? (
+              <Link
+                href={primaryHref}
+                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-eos-success/90"
+              >
+                Deschide Vault
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            ) : null}
+            {secondaryHref ? (
+              <Link
+                href={secondaryHref}
+                className="inline-flex items-center gap-2 rounded-eos-md border border-eos-border bg-white/75 px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-white"
+              >
+                Vezi audit log
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            ) : null}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+export function FindingCaseClosedCard({
+  findingTitle,
+  savedAtISO,
+  nextReviewDateISO,
+  closureEvidence,
+  feedbackMessage,
+  primaryHref,
+  secondaryHref,
+}: FindingCaseClosedCardProps) {
+  const nextReviewLabel = nextReviewDateISO
+    ? new Date(nextReviewDateISO).toLocaleDateString("ro-RO")
+    : "monitorizare activă după închidere"
+
+  return (
+    <Card data-testid="finding-case-closed" className="border-eos-success/35 bg-eos-success-soft/60">
+      <CardContent className="space-y-5 px-5 py-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-success/25 bg-white/70 text-eos-success">
+              <ShieldCheck className="size-5" strokeWidth={2} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+                Caz închis și trecut în monitorizare
+              </p>
+              <p className="mt-1 text-lg font-semibold text-eos-text">
+                {findingTitle} are acum urmă clară în cockpit
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+                Dovada operațională sau reconfirmarea rămâne disponibilă pentru audit, iar cazul continuă sub watch pe aceeași urmă.
+              </p>
+            </div>
+          </div>
+          <Badge variant="success" className="normal-case tracking-normal">
+            monitorizat
+          </Badge>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-4">
+          <FactLine label="Finding" value={findingTitle} />
+          <FactLine label="Salvat" value={new Date(savedAtISO).toLocaleString("ro-RO")} />
+          <FactLine
+            label="Următor control"
+            value={nextReviewLabel}
+          />
+          <FactLine
+            label="Dovadă"
+            value={closureEvidence || "Confirmare și dovadă păstrate pe aceeași urmă."}
+          />
+        </div>
+
+        <div className="rounded-eos-md border border-eos-success/20 bg-white/55 px-4 py-3">
+          <div className="flex items-start gap-2">
+            <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
+            <p className="text-sm leading-relaxed text-eos-text-muted">
+              {feedbackMessage ??
+                "Cazul este închis, dovada rămâne disponibilă pentru audit și următorul control este deja programat în monitoring."}
             </p>
           </div>
         </div>

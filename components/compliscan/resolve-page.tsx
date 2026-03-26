@@ -20,12 +20,11 @@ import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding } from "@/lib/compliance/types"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
 import {
-  getFindingDocumentFlowPresentation,
-  getFindingNarrative,
   isFindingActive,
   isFindingResolvedLike,
   getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
@@ -45,11 +44,16 @@ function frameworkFromLegal(ref?: string): FrameworkFilter {
   return "toate"
 }
 
-function frameworkLabel(fw: FrameworkFilter): string {
-  const labels: Record<FrameworkFilter, string> = {
-    toate: "General", gdpr: "GDPR", nis2: "NIS2", "ai-act": "AI Act", furnizori: "Furnizori",
+function canonicalFrameworkLabel(framework: ReturnType<typeof buildCockpitRecipe>["framework"]) {
+  const labels: Record<ReturnType<typeof buildCockpitRecipe>["framework"], string> = {
+    GDPR: "GDPR",
+    NIS2: "NIS2",
+    eFactura: "eFactura",
+    "AI Act": "AI Act",
+    Cross: "Transversal",
   }
-  return labels[fw]
+
+  return labels[framework]
 }
 
 function matchesFindingSearch(finding: ScanFinding, query: string): boolean {
@@ -122,17 +126,47 @@ function getResolveDocumentFlowState(
   return "not_required"
 }
 
+function getRecipeRowBadge(
+  finding: ScanFinding,
+  recipe: ReturnType<typeof buildCockpitRecipe>
+): { label: string; variant: "default" | "warning" | "secondary" | "success" | "destructive" | "outline" } {
+  if (finding.findingStatus === "under_monitoring") {
+    return { label: "Monitorizat", variant: "success" }
+  }
+  if (finding.findingStatus === "dismissed") {
+    return { label: "Marcat nevalid", variant: "secondary" }
+  }
+
+  switch (recipe.uiState) {
+    case "ready_to_generate":
+      return { label: recipe.collapsedStatusLabel, variant: "default" }
+    case "evidence_uploaded":
+    case "rechecking":
+      return { label: recipe.collapsedStatusLabel, variant: "default" }
+    case "external_action_required":
+    case "needs_revalidation":
+    case "need_your_input":
+      return { label: recipe.collapsedStatusLabel, variant: "warning" }
+    case "resolved":
+      return { label: recipe.collapsedStatusLabel, variant: "success" }
+    case "false_positive":
+      return { label: recipe.collapsedStatusLabel, variant: "secondary" }
+    default:
+      return { label: recipe.collapsedStatusLabel, variant: "outline" }
+  }
+}
+
 // ── Finding Row ───────────────────────────────────────────────────────────────
 
 function FindingRow({ finding }: { finding: ScanFinding }) {
   const [expanded, setExpanded] = useState(false)
-  const fw = frameworkFromLegal(finding.legalReference)
   const age = ageLabel(finding.createdAtISO)
   const reviewBadge = getFindingReviewBadge(finding)
-  const narrative = getFindingNarrative(finding)
   const documentFlowState = getResolveDocumentFlowState(finding)
-  const flowStatus = getFindingDocumentFlowPresentation(documentFlowState)
-  const cockpitHref = finding.suggestedDocumentType
+  const recipe = buildCockpitRecipe(finding)
+  const flowStatus = getRecipeRowBadge(finding, recipe)
+  const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
+  const cockpitHref = hasGenerator
     ? `/dashboard/resolve/${finding.id}?generator=1`
     : `/dashboard/resolve/${finding.id}`
 
@@ -149,13 +183,11 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
           {finding.title}
         </p>
         <span className="hidden min-w-0 max-w-[18rem] truncate text-xs text-eos-text-muted xl:block">
-          {narrative.action}
+          {recipe.whatUserMustDo}
         </span>
-        {fw !== "toate" && (
-          <Badge variant="secondary" className="normal-case tracking-normal shrink-0">
-            {frameworkLabel(fw)}
-          </Badge>
-        )}
+        <Badge variant="secondary" className="normal-case tracking-normal shrink-0">
+          {canonicalFrameworkLabel(recipe.framework)}
+        </Badge>
         <Badge variant={flowStatus.variant} className="hidden normal-case tracking-normal lg:inline-flex">
           {flowStatus.label}
         </Badge>
@@ -174,13 +206,14 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
             <FindingExecutionCard
               finding={finding}
               documentFlowState={documentFlowState}
+              recipe={recipe}
             />
           </div>
           <div className="border-t border-eos-border-subtle px-5 py-3">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
                 <p className="text-xs font-medium text-eos-text">
-                  {finding.suggestedDocumentType
+                  {hasGenerator
                     ? "Generatorul trăiește în cockpitul cazului, nu într-o pagină separată."
                     : "Intră în cockpit ca să închizi cazul fără să pierzi urma de dovadă și monitoring."}
                 </p>
@@ -192,7 +225,7 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
                 href={cockpitHref}
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
               >
-                {finding.suggestedDocumentType ? "Intră și generează" : "Vezi cockpitul complet"}
+                {recipe.visibleBlocks.collapsedPrimaryCTA}
                 <ArrowRight className="size-3" strokeWidth={2} />
               </Link>
             </div>
@@ -486,6 +519,9 @@ export function ResolvePageSurface() {
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const isSolo = runtime?.userMode === "solo"
   const featuredFlowState = featuredFinding ? getResolveDocumentFlowState(featuredFinding) : "not_required"
+  const featuredRecipe = featuredFinding
+    ? buildCockpitRecipe(featuredFinding, { documentFlowState: featuredFlowState })
+    : null
 
   return (
     <div className="space-y-8">
@@ -554,10 +590,12 @@ export function ResolvePageSurface() {
               finding={featuredFinding}
               title={featuredFinding.title}
               description="Rezumatul de lucru rămâne compact: ce e problema, de ce contează și ce dovadă trebuie să rămână la dosar."
+              recipe={featuredRecipe ?? undefined}
             />
             <FindingExecutionCard
               finding={featuredFinding}
               documentFlowState={featuredFlowState}
+              recipe={featuredRecipe ?? undefined}
             />
           </div>
         </section>

@@ -19,6 +19,7 @@ import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 import type { ScanFinding } from "@/lib/compliance/types"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import {
   FindingExecutionCard,
   FindingNarrativeCard,
@@ -228,6 +229,12 @@ export default function GeneratorPage() {
   const { track } = useTrackEvent()
   const downloadedRef = useRef(false)
   const findingFlowActive = Boolean(findingId && findingContext?.finding)
+  const findingContextRecipe = findingContext
+    ? buildCockpitRecipe(findingContext.finding, {
+        documentFlowState: findingContext.documentFlowState,
+        linkedGeneratedDocument: findingContext.linkedGeneratedDocument,
+      })
+    : null
 
   // Stuck event: doc generated but never downloaded
   useEffect(() => {
@@ -510,6 +517,7 @@ export default function GeneratorPage() {
               finding={findingContext.finding}
               documentFlowState={findingContext.documentFlowState}
               linkedGeneratedDocument={findingContext.linkedGeneratedDocument}
+              recipe={findingContextRecipe ?? undefined}
             />
 
             <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
@@ -531,6 +539,7 @@ export default function GeneratorPage() {
                   finding={findingContext.finding}
                   title="Finding activ în flow-ul documentului"
                   description="Generatorul este parte din cockpit-ul finding-ului. Draftul, confirmarea și dovada rămân în același traseu."
+                  recipe={findingContextRecipe ?? undefined}
                 />
               </div>
             </details>

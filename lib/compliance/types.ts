@@ -83,6 +83,7 @@ export type FindingResolution = {
   humanStep?: string       // Pasul uman obligatoriu (ce trebuie să facă persoana)
   closureEvidence?: string // Dovada care confirmă că problema e rezolvată
   revalidation?: string    // Când și cum se reverificată conformitatea
+  reviewedAtISO?: string   // Momentul ultimei confirmări explicite din cockpit
 }
 
 export type ScanFinding = {
@@ -113,6 +114,9 @@ export type ScanFinding = {
   // B2 — Finding status tracking
   findingStatus?: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   findingStatusUpdatedAtISO?: string
+  nextMonitoringDateISO?: string
+  reopenedFromISO?: string
+  operationalEvidenceNote?: string
   // B1 — Gemini semantic engine fields
   confidenceScore?: number           // 0-100, from Gemini analysis
   requiresHumanReview?: boolean      // true if confidence < 80 or severity critical

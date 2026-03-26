@@ -21,6 +21,7 @@ import { useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding } from "@/lib/compliance/types"
 import {
+  FindingCaseClosedCard,
   FindingDossierSuccessCard,
   FindingExecutionCard,
   FindingHeroAction,
@@ -31,6 +32,7 @@ import {
   isFindingResolvedLike,
   getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import type { DocumentType } from "@/lib/server/document-generator"
 
@@ -44,6 +46,9 @@ type FindingDetail = ScanFinding & {
   reasoning?: string
   sourceParagraph?: string
   suggestedDocumentType?: string
+  nextMonitoringDateISO?: string
+  reopenedFromISO?: string
+  operationalEvidenceNote?: string
 }
 
 type LinkedGeneratedDocument = {
@@ -64,6 +69,12 @@ type FindingDetailResponse = {
   feedbackMessage?: string
 }
 
+function getDefaultReviewDateInput() {
+  const nextReviewDate = new Date()
+  nextReviewDate.setUTCDate(nextReviewDate.getUTCDate() + 90)
+  return nextReviewDate.toISOString().slice(0, 10)
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function FindingDetailPage() {
@@ -81,6 +92,9 @@ export default function FindingDetailPage() {
   const [generatorOpen, setGeneratorOpen] = useState(false)
   const [showDossierMoment, setShowDossierMoment] = useState(false)
   const [autoOpenConsumed, setAutoOpenConsumed] = useState(false)
+  const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
+  const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
+  const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
   const { reloadDashboard } = useCockpitMutations()
 
   const refetchFinding = useCallback(() => {
@@ -94,6 +108,9 @@ export default function FindingDetailPage() {
         setFinding(data.finding)
         setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
         setDocumentFlowState(data.documentFlowState ?? "not_required")
+        setOperationalEvidenceNote(data.finding.operationalEvidenceNote ?? "")
+        setRevalidationConfirmed(false)
+        setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
       })
       .catch(() => {})
     void reloadDashboard()
@@ -113,6 +130,9 @@ export default function FindingDetailPage() {
         setFinding(data.finding)
         setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
         setDocumentFlowState(data.documentFlowState ?? "not_required")
+        setOperationalEvidenceNote(data.finding.operationalEvidenceNote ?? "")
+        setRevalidationConfirmed(false)
+        setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
         setError(null)
       })
       .catch((err: Error) => setError(err.message))
@@ -123,11 +143,12 @@ export default function FindingDetailPage() {
     if (!finding) return
 
     const status = finding.findingStatus ?? "open"
-    const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
+    const r = buildCockpitRecipe(finding)
+    const hasGen = r.visibleBlocks.detailBlocks.includes("generator")
     const shouldAutoOpenGenerator =
       searchParams.get("generator") === "1" || searchParams.get("action") === "generate"
 
-    if (!requiresDocumentFlow || status !== "confirmed" || !shouldAutoOpenGenerator || autoOpenConsumed) {
+    if (!hasGen || status !== "confirmed" || !shouldAutoOpenGenerator || autoOpenConsumed) {
       return
     }
 
@@ -136,8 +157,13 @@ export default function FindingDetailPage() {
   }, [autoOpenConsumed, finding, searchParams])
 
   async function updateStatus(
-    status: "confirmed" | "dismissed" | "resolved",
-    options?: { openGeneratorAfter?: boolean }
+    status: "open" | "confirmed" | "dismissed" | "resolved",
+    options?: {
+      openGeneratorAfter?: boolean
+      evidenceNote?: string
+      revalidationConfirmed?: boolean
+      newReviewDateISO?: string
+    }
   ) {
     if (!finding) return
     setActionLoading(true)
@@ -145,7 +171,12 @@ export default function FindingDetailPage() {
       const res = await fetch(`/api/findings/${encodeURIComponent(finding.id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          status,
+          evidenceNote: options?.evidenceNote,
+          revalidationConfirmed: options?.revalidationConfirmed,
+          newReviewDateISO: options?.newReviewDateISO,
+        }),
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
       const payload = (await res.json()) as FindingDetailResponse
@@ -159,8 +190,17 @@ export default function FindingDetailPage() {
       setLinkedGeneratedDocument(payload.linkedGeneratedDocument ?? null)
       setDocumentFlowState(payload.documentFlowState ?? "not_required")
       setStatusFeedback(payload.feedbackMessage ?? null)
+      setOperationalEvidenceNote(payload.finding?.operationalEvidenceNote ?? "")
+      setNextReviewDateISO(payload.finding?.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+      setRevalidationConfirmed(false)
       if (options?.openGeneratorAfter) {
         setGeneratorOpen(true)
+      }
+      if (status === "resolved") {
+        setShowDossierMoment(true)
+      }
+      if (status === "open") {
+        setShowDossierMoment(false)
       }
       void reloadDashboard()
     } catch {
@@ -175,20 +215,37 @@ export default function FindingDetailPage() {
 
   const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   const statusCfg = getFindingStatusPresentation(finding.findingStatus)
-  const dossierMomentVisible =
+  const recipe = buildCockpitRecipe(finding, {
+    documentFlowState,
+    linkedGeneratedDocument: linkedGeneratedDocument ?? undefined,
+  })
+  const successMomentVisible =
     (searchParams.get("success") === "dossier" || showDossierMoment) &&
-    isFindingResolvedLike(status) &&
+    isFindingResolvedLike(status)
+  const dossierMomentVisible =
+    successMomentVisible &&
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
-  const requiresDocumentFlow = Boolean(finding.suggestedDocumentType)
+  const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
+  const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
+  const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && recipe.resolutionMode === "external_action"
+  const requiresRevalidation = status === "confirmed" && !hasGenerator && recipe.resolveFlowState === "needs_revalidation"
+  const resolveDisabled =
+    actionLoading ||
+    (requiresOperationalEvidence && !operationalEvidenceNote.trim()) ||
+    (requiresRevalidation && (!revalidationConfirmed || !nextReviewDateISO))
+  const previousEvidence =
+    finding.operationalEvidenceNote ||
+    finding.resolution?.closureEvidence ||
+    linkedGeneratedDocument?.title
   const detailHelperText =
-    status === "open" && requiresDocumentFlow
+    status === "open" && hasGenerator
       ? "Confirmi cazul și intri direct în draftul recomandat, fără o pagină separată între finding și generator."
       : status === "open"
         ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
-      : status === "confirmed" && requiresDocumentFlow
+      : status === "confirmed" && hasGenerator
         ? "După review și aprobare, draftul merge la dosar și finding-ul se închide cu urmă clară."
       : status === "confirmed"
-          ? "După măsura reală și dovada aferentă, poți închide finding-ul fără pași ocoliți."
+          ? recipe.heroSummary
           : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
 
   return (
@@ -235,6 +292,16 @@ export default function FindingDetailPage() {
         }
       />
 
+      {finding.reopenedFromISO && status === "open" ? (
+        <Card className="border-eos-warning-border bg-eos-warning-soft/30">
+          <CardContent className="px-5 py-4">
+            <p className="text-sm text-eos-text">
+              Cazul a mai fost închis pe {new Date(finding.reopenedFromISO).toLocaleDateString("ro-RO")}. Contextul și dovada anterioară rămân disponibile în cockpit pentru comparație și revalidare.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {dossierMomentVisible && linkedGeneratedDocument ? (
         <FindingDossierSuccessCard
           findingTitle={finding.title}
@@ -245,13 +312,26 @@ export default function FindingDetailPage() {
         />
       ) : null}
 
+      {caseClosedMomentVisible ? (
+        <FindingCaseClosedCard
+          findingTitle={finding.title}
+          savedAtISO={finding.findingStatusUpdatedAtISO ?? new Date().toISOString()}
+          nextReviewDateISO={finding.nextMonitoringDateISO}
+          closureEvidence={finding.operationalEvidenceNote ?? finding.resolution?.closureEvidence ?? null}
+          feedbackMessage={statusFeedback}
+          primaryHref={dashboardRoutes.auditorVault}
+          secondaryHref={dashboardRoutes.auditLog}
+        />
+      ) : null}
+
       {/* ── Hero Action — above the fold, dominant ────────────────────── */}
       {status === "open" && (
         <FindingHeroAction
           finding={finding}
+          recipe={recipe}
           helperText="Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită."
         >
-          {requiresDocumentFlow ? (
+          {hasGenerator ? (
             <Button
               data-testid="confirm-and-generate"
               onClick={() => updateStatus("confirmed", { openGeneratorAfter: true })}
@@ -288,32 +368,106 @@ export default function FindingDetailPage() {
       {status === "confirmed" && (
         <FindingHeroAction
           finding={finding}
+          recipe={recipe}
           helperText={detailHelperText}
         >
-          {requiresDocumentFlow ? (
+          {hasGenerator ? (
             <Button
               data-testid="open-generator-drawer"
               onClick={() => setGeneratorOpen(true)}
               className="gap-1.5"
             >
               <FileText className="size-3.5" strokeWidth={2} />
-              {documentFlowState === "draft_ready" ? "Continuă flow-ul" : "Generează acum"}
+              {documentFlowState === "draft_ready" ? "Continuă flow-ul" : recipe.primaryCTA.label}
             </Button>
           ) : (
             <Button
               data-testid="mark-finding-resolved"
-              onClick={() => updateStatus("resolved")}
-              disabled={actionLoading}
+              onClick={() =>
+                updateStatus("resolved", {
+                  evidenceNote: operationalEvidenceNote.trim() || undefined,
+                  revalidationConfirmed,
+                  newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
+                })
+              }
+              disabled={resolveDisabled}
               className="gap-1.5"
             >
               <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              Marchează rezolvat
+              {recipe.primaryCTA.label}
             </Button>
           )}
         </FindingHeroAction>
       )}
 
-      {statusFeedback && !dossierMomentVisible && (
+      {requiresOperationalEvidence ? (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="space-y-3 px-5 py-5">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Dovadă operațională obligatorie
+              </p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.
+              </p>
+            </div>
+            <textarea
+              data-testid="operational-evidence-note"
+              value={operationalEvidenceNote}
+              onChange={(event) => setOperationalEvidenceNote(event.target.value)}
+              rows={4}
+              className="ring-focus w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
+              placeholder="Ex: TaxTotal corectat în ERP, factura retransmisă în SPV, confirmare de primire primită la 26.03.2026."
+            />
+            <p className="text-xs text-eos-text-muted">
+              Cazul nu poate intra în monitorizare fără această dovadă operațională.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {requiresRevalidation ? (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="space-y-4 px-5 py-5">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Revalidare necesară
+              </p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Reconfirmi dovada existentă, stabilești următorul control și lași cazul sub watch pe aceeași urmă.
+              </p>
+            </div>
+            <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Dovada anterioară</p>
+              <p className="mt-1 text-sm text-eos-text">
+                {previousEvidence || "Nu există încă o dovadă anterioară explicită; completează nota de revalidare în contextul juridic al cazului."}
+              </p>
+            </div>
+            <label className="flex items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 text-sm text-eos-text">
+              <input
+                data-testid="revalidation-confirmation"
+                type="checkbox"
+                checked={revalidationConfirmed}
+                onChange={(event) => setRevalidationConfirmed(event.target.checked)}
+                className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+              />
+              <span>Confirm că am reverificat dovada și că rămâne valabilă pentru perioada următoare.</span>
+            </label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-eos-text">Următor review</label>
+              <input
+                data-testid="revalidation-next-review-date"
+                type="date"
+                value={nextReviewDateISO}
+                onChange={(event) => setNextReviewDateISO(event.target.value)}
+                className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {statusFeedback && !successMomentVisible && (
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-eos-text">{statusFeedback}</p>
@@ -326,6 +480,7 @@ export default function FindingDetailPage() {
         finding={finding}
         documentFlowState={documentFlowState}
         linkedGeneratedDocument={linkedGeneratedDocument}
+        recipe={recipe}
       />
 
       <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
@@ -347,6 +502,7 @@ export default function FindingDetailPage() {
             finding={finding}
             title="Rezolvare în același loc"
             description="Problema, impactul și condiția de închidere rămân în aceeași urmă, fără să concureze cu pasul activ."
+            recipe={recipe}
           />
         </div>
       </details>
@@ -456,13 +612,30 @@ export default function FindingDetailPage() {
         <span>ID: {finding.id}</span>
         {finding.scanId && <span>Scan: {finding.scanId}</span>}
         {finding.ownerSuggestion && <span>Owner sugerat: {finding.ownerSuggestion}</span>}
+        {finding.nextMonitoringDateISO && (
+          <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
+        )}
         {finding.findingStatusUpdatedAtISO && (
           <span>Actualizat: {new Date(finding.findingStatusUpdatedAtISO).toLocaleDateString("ro-RO")}</span>
         )}
       </div>
 
+      {isFindingResolvedLike(status) ? (
+        <div className="flex flex-wrap justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => updateStatus("open")}
+            disabled={actionLoading}
+            className="gap-1.5"
+          >
+            <ArrowLeft className="size-3.5" strokeWidth={2} />
+            Redeschide cazul
+          </Button>
+        </div>
+      ) : null}
+
       {/* ── Generator Drawer (in-context, no page navigation) ─────────── */}
-      {requiresDocumentFlow && (
+      {hasGenerator && finding.suggestedDocumentType && (
         <GeneratorDrawer
           open={generatorOpen}
           onOpenChange={setGeneratorOpen}

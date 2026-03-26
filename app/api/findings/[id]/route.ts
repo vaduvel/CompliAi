@@ -14,6 +14,11 @@ import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
 import type { DocumentType } from "@/lib/server/document-generator"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
+import {
+  classifyFinding,
+  computeNextMonitoringDateISO,
+  getCloseGatingRequirements,
+} from "@/lib/compliscan/finding-kernel"
 
 const VALID_DOC_TYPES: DocumentType[] = [
   "privacy-policy",
@@ -40,6 +45,8 @@ type FindingPatchBody = {
   generatedDocumentId?: string
   confirmationChecklist?: string[]
   evidenceNote?: string
+  revalidationConfirmed?: boolean
+  newReviewDateISO?: string
 }
 
 export async function GET(
@@ -93,9 +100,9 @@ export async function PATCH(
     const body = (await request.json()) as FindingPatchBody
     const newStatus = body.status
 
-    if (!newStatus || !["confirmed", "dismissed", "resolved", "under_monitoring"].includes(newStatus)) {
+    if (!newStatus || !["open", "confirmed", "dismissed", "resolved", "under_monitoring"].includes(newStatus)) {
       return jsonError(
-        "Status invalid. Opțiuni: confirmed, dismissed, resolved, under_monitoring.",
+        "Status invalid. Opțiuni: open, confirmed, dismissed, resolved, under_monitoring.",
         400,
         "INVALID_STATUS"
       )
@@ -106,17 +113,20 @@ export async function PATCH(
       [...(state.generatedDocuments ?? [])]
         .filter((document) => document.sourceFindingId === findingId)
         .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
+    const nowISO = new Date().toISOString()
+    const { findingTypeId } = classifyFinding(finding)
+    const closeGating = getCloseGatingRequirements(findingTypeId)
 
     const storedStatus =
       newStatus === "resolved"
         ? "under_monitoring"
-        : (newStatus as "confirmed" | "dismissed" | "under_monitoring")
+        : (newStatus as "open" | "confirmed" | "dismissed" | "under_monitoring")
 
     // Update finding status (B2)
     const updatedFinding = {
       ...finding,
       findingStatus: storedStatus,
-      findingStatusUpdatedAtISO: new Date().toISOString(),
+      findingStatusUpdatedAtISO: nowISO,
     }
 
     const updatedFindings = [...state.findings]
@@ -133,6 +143,40 @@ export async function PATCH(
       newStatus === "dismissed"
         ? "Finding respins. A rămas disponibil pentru audit, dar nu mai intră în fluxul activ."
         : "Finding închis și trecut în monitorizare."
+
+    if (newStatus === "open") {
+      updatedFindings[findingIdx] = {
+        ...finding,
+        findingStatus: "open",
+        findingStatusUpdatedAtISO: nowISO,
+        reopenedFromISO:
+          isFindingResolvedLike(finding.findingStatus)
+            ? finding.findingStatusUpdatedAtISO ?? nowISO
+            : finding.reopenedFromISO,
+        nextMonitoringDateISO: undefined,
+      }
+
+      await writeState({
+        ...state,
+        findings: updatedFindings,
+        generatedDocuments,
+      })
+
+      return NextResponse.json({
+        ok: true,
+        finding: updatedFindings[findingIdx],
+        findingId,
+        status: "open",
+        linkedGeneratedDocument,
+        documentFlowState: getDocumentFlowState(
+          finding.suggestedDocumentType,
+          linkedGeneratedDocument?.approvalStatus
+        ),
+        suggestedDocumentType: finding.suggestedDocumentType ?? null,
+        feedbackMessage:
+          "Caz redeschis. Contextul rezolvării anterioare rămâne disponibil, iar cockpitul pornește din nou pe aceeași urmă.",
+      })
+    }
 
     // B2: On confirmation, generate task candidate + notify
     if (newStatus === "confirmed") {
@@ -164,7 +208,7 @@ export async function PATCH(
       }
     }
 
-    if (isFindingResolvedLike(storedStatus) && finding.suggestedDocumentType) {
+    if (isFindingResolvedLike(storedStatus) && closeGating.requiresGeneratedDocument) {
       const confirmationChecklist = normalizeConfirmationChecklist(body.confirmationChecklist)
       const generatedDocumentId = body.generatedDocumentId?.trim()
 
@@ -199,12 +243,16 @@ export async function PATCH(
       const approvedDocument = {
         ...generatedDocuments[documentIndex],
         approvalStatus: "approved_as_evidence" as const,
-        approvedAtISO: new Date().toISOString(),
+        approvedAtISO: nowISO,
         approvedByUserId: session.userId,
         approvedByEmail: session.email,
         confirmationChecklist,
         evidenceNote: body.evidenceNote?.trim() || undefined,
       }
+      const nextMonitoringDateISO =
+        approvedDocument.nextReviewDateISO ??
+        computeNextMonitoringDateISO(findingTypeId, nowISO) ??
+        undefined
       const nextResolution: FindingResolution = {
         problem:
           finding.resolution?.problem ??
@@ -227,19 +275,102 @@ export async function PATCH(
         closureEvidence:
           body.evidenceNote?.trim() ||
           `Draft aprobat și atașat ca dovadă: ${approvedDocument.title}.`,
-        revalidation: finding.resolution?.revalidation,
+        revalidation:
+          nextMonitoringDateISO
+            ? `Următor control programat la ${formatRoDate(nextMonitoringDateISO)}.`
+            : finding.resolution?.revalidation,
+        reviewedAtISO: nowISO,
       }
 
       generatedDocuments[documentIndex] = approvedDocument
       updatedFindings[findingIdx] = {
         ...updatedFinding,
         resolution: nextResolution,
+        operationalEvidenceNote: body.evidenceNote?.trim() || finding.operationalEvidenceNote,
+        nextMonitoringDateISO,
       }
       feedbackMessage =
         "Dovada a intrat la dosar. Draftul a fost verificat, aprobat și legat de finding ca artefact auditabil, iar cazul a intrat în monitorizare cu urmă clară pentru reverificare."
     }
 
-    if (!isFindingResolvedLike(storedStatus) || !finding.suggestedDocumentType) {
+    if (isFindingResolvedLike(storedStatus) && !closeGating.requiresGeneratedDocument) {
+      const evidenceNote = body.evidenceNote?.trim()
+      const newReviewDateISO = normalizeReviewDateISO(body.newReviewDateISO)
+      const nextMonitoringDateISO =
+        newReviewDateISO ??
+        computeNextMonitoringDateISO(findingTypeId, nowISO) ??
+        undefined
+
+      if (closeGating.requiresEvidenceNote && !evidenceNote) {
+        return jsonError(
+          "Pentru acest finding trebuie să adaugi dovada operațională înainte de închidere.",
+          400,
+          "OPERATIONAL_EVIDENCE_REQUIRED"
+        )
+      }
+
+      if (closeGating.requiresRevalidationConfirmation && !body.revalidationConfirmed) {
+        return jsonError(
+          "Pentru revalidare trebuie să confirmi explicit că ai reverificat dovada anterioară.",
+          400,
+          "REVALIDATION_CONFIRMATION_REQUIRED"
+        )
+      }
+
+      if (closeGating.requiresNextReviewDate && !newReviewDateISO) {
+        return jsonError(
+          "Pentru acest finding trebuie să alegi următoarea dată de review înainte de închidere.",
+          400,
+          "NEXT_REVIEW_DATE_REQUIRED"
+        )
+      }
+
+      const previousEvidence =
+        finding.operationalEvidenceNote ||
+        finding.resolution?.closureEvidence ||
+        finding.evidenceRequired
+
+      const nextResolution: FindingResolution = {
+        problem:
+          finding.resolution?.problem ??
+          finding.detail,
+        impact:
+          finding.resolution?.impact ??
+          finding.impactSummary ??
+          "Riscul rămâne deschis până când măsura este aplicată și dovada este păstrată la dosar.",
+        action:
+          finding.resolution?.action ??
+          finding.remediationHint ??
+          "Aplici măsura, confirmi rezultatul și păstrezi dovada auditabilă în același cockpit.",
+        generatedAsset: finding.resolution?.generatedAsset,
+        humanStep:
+          evidenceNote ||
+          finding.resolution?.humanStep ||
+          "Ai confirmat manual că măsura a fost aplicată și reflectă realitatea firmei.",
+        closureEvidence:
+          evidenceNote ||
+          previousEvidence ||
+          "Dovadă operațională confirmată și păstrată în cockpit.",
+        revalidation:
+          nextMonitoringDateISO
+            ? `Următor control programat la ${formatRoDate(nextMonitoringDateISO)}.`
+            : finding.resolution?.revalidation,
+        reviewedAtISO: nowISO,
+      }
+
+      updatedFindings[findingIdx] = {
+        ...updatedFinding,
+        resolution: nextResolution,
+        operationalEvidenceNote: evidenceNote ?? finding.operationalEvidenceNote,
+        nextMonitoringDateISO,
+      }
+
+      feedbackMessage = closeGating.requiresRevalidationConfirmation
+        ? `Revalidarea a fost salvată la dosar. Dovada anterioară rămâne disponibilă, iar următorul control este programat pentru ${formatRoDate(nextMonitoringDateISO ?? nowISO)}.`
+        : `Dovada operațională a intrat la dosar, iar cazul a trecut în monitorizare${nextMonitoringDateISO ? ` până la ${formatRoDate(nextMonitoringDateISO)}` : ""}.`
+    }
+
+    if (!isFindingResolvedLike(storedStatus)) {
       updatedFindings[findingIdx] = updatedFinding
     }
 
@@ -304,4 +435,16 @@ function getDocumentFlowState(
   if (approvalStatus === "approved_as_evidence") return "attached_as_evidence"
   if (approvalStatus === "draft") return "draft_ready"
   return "draft_missing"
+}
+
+function normalizeReviewDateISO(value: string | undefined) {
+  const trimmed = value?.trim()
+  if (!trimmed) return undefined
+  const parsed = new Date(trimmed)
+  if (Number.isNaN(parsed.getTime())) return undefined
+  return parsed.toISOString()
+}
+
+function formatRoDate(iso: string) {
+  return new Date(iso).toLocaleDateString("ro-RO")
 }

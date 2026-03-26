@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   readStateMock: vi.fn(),
+  readFreshStateMock: vi.fn(),
   writeStateMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   createNotificationMock: vi.fn(),
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/mvp-store", () => ({
   readState: mocks.readStateMock,
+  readFreshState: mocks.readFreshStateMock,
   writeState: mocks.writeStateMock,
 }))
 
@@ -40,7 +42,7 @@ describe("PATCH /api/findings/[id]", () => {
       userId: "user-1",
       email: "owner@example.com",
     })
-    mocks.readStateMock.mockResolvedValue({
+    const baseState = {
       findings: [
         {
           id: "finding-1",
@@ -56,7 +58,9 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
       generatedDocuments: [],
-    })
+    }
+    mocks.readStateMock.mockResolvedValue(baseState)
+    mocks.readFreshStateMock.mockResolvedValue(baseState)
     mocks.mapFindingToTaskMock.mockReturnValue({
       id: "task-1",
       title: "Rezolvă: Lipsa DPA",
@@ -121,6 +125,34 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     })
+    mocks.readFreshStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -142,6 +174,34 @@ describe("PATCH /api/findings/[id]", () => {
 
   it("intoarce mesaj de dosar cand draftul este aprobat ca dovada", async () => {
     mocks.readStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
+    mocks.readFreshStateMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -222,6 +282,34 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     })
+    mocks.readFreshStateMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    })
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -244,5 +332,212 @@ describe("PATCH /api/findings/[id]", () => {
       "facts-confirmed",
       "approved-for-evidence",
     ])
+  })
+
+  it("blochează EF-003 fără dovadă operațională", async () => {
+    const efacturaState = {
+      findings: [
+        {
+          id: "demo-efactura-1",
+          title: "Factură ANAF respinsă — FACT-2026-0021",
+          detail: "Factura FACT-2026-0021 a fost respinsă de SPV ANAF. Codul de eroare E1 indică probleme cu câmpul TaxTotal.",
+          category: "E_FACTURA",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "FACT-2026-0021.xml",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/demo-efactura-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "resolved" }),
+      }),
+      { params: Promise.resolve({ id: "demo-efactura-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("OPERATIONAL_EVIDENCE_REQUIRED")
+  })
+
+  it("închide EF-003 cu dovadă operațională și dată de monitoring", async () => {
+    const efacturaState = {
+      findings: [
+        {
+          id: "demo-efactura-1",
+          title: "Factură ANAF respinsă — FACT-2026-0021",
+          detail: "Factura FACT-2026-0021 a fost respinsă de SPV ANAF. Codul de eroare E1 indică probleme cu câmpul TaxTotal.",
+          category: "E_FACTURA",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "FACT-2026-0021.xml",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/demo-efactura-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote: "TaxTotal corectat în ERP și factura retransmisă în SPV cu confirmare de primire.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "demo-efactura-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.operationalEvidenceNote).toContain("TaxTotal corectat")
+    expect(payload.finding.nextMonitoringDateISO).toBeTruthy()
+    expect(payload.feedbackMessage).toContain("operațională")
+  })
+
+  it("blochează SYS-002 fără reconfirmare explicită", async () => {
+    const sysState = {
+      findings: [
+        {
+          id: "review-1",
+          title: "Dovadă veche / necesită revalidare",
+          detail: "Această dovadă este veche și trebuie reconfirmată.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "vault",
+          findingStatus: "confirmed",
+          resolution: {
+            problem: "Dovadă veche",
+            impact: "Poți rămâne cu o dovadă expirată în dosar.",
+            action: "Reconfirmă acum",
+            closureEvidence: "Politică publicată și revizuită anterior",
+          },
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(sysState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/review-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          newReviewDateISO: "2026-06-26",
+        }),
+      }),
+      { params: Promise.resolve({ id: "review-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("REVALIDATION_CONFIRMATION_REQUIRED")
+  })
+
+  it("închide SYS-002 cu reconfirmare și dată nouă de review", async () => {
+    const sysState = {
+      findings: [
+        {
+          id: "review-1",
+          title: "Dovadă veche / necesită revalidare",
+          detail: "Această dovadă este veche și trebuie reconfirmată.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "vault",
+          findingStatus: "confirmed",
+          resolution: {
+            problem: "Dovadă veche",
+            impact: "Poți rămâne cu o dovadă expirată în dosar.",
+            action: "Reconfirmă acum",
+            closureEvidence: "Politică publicată și revizuită anterior",
+          },
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(sysState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/review-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          revalidationConfirmed: true,
+          newReviewDateISO: "2026-06-26",
+        }),
+      }),
+      { params: Promise.resolve({ id: "review-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.nextMonitoringDateISO).toBe("2026-06-26T00:00:00.000Z")
+    expect(payload.feedbackMessage).toContain("Revalidarea")
+  })
+
+  it("permite redeschiderea unui finding monitorizat și păstrează urma anterioară", async () => {
+    const reopenedState = {
+      findings: [
+        {
+          id: "review-1",
+          title: "Dovadă veche / necesită revalidare",
+          detail: "Această dovadă este veche și trebuie reconfirmată.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "vault",
+          findingStatus: "under_monitoring",
+          findingStatusUpdatedAtISO: "2026-03-24T10:00:00.000Z",
+          nextMonitoringDateISO: "2026-06-26T00:00:00.000Z",
+          resolution: {
+            problem: "Dovadă veche",
+            impact: "Poți rămâne cu o dovadă expirată în dosar.",
+            action: "Reconfirmă acum",
+            closureEvidence: "Politică publicată și revizuită anterior",
+          },
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(reopenedState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/review-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "open" }),
+      }),
+      { params: Promise.resolve({ id: "review-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("open")
+    expect(payload.finding.reopenedFromISO).toBe("2026-03-24T10:00:00.000Z")
+    expect(payload.finding.nextMonitoringDateISO).toBeUndefined()
   })
 })
