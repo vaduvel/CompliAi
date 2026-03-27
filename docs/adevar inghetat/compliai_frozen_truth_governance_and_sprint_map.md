@@ -113,7 +113,7 @@ Acesta este singurul document care are voie să spună:
 [compliai_risk_evidence_resolve_truth_matrix.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_risk_evidence_resolve_truth_matrix.md) fixează:
 - ce riscuri sunt cu adevărat documentare
 - ce riscuri sunt de fapt operaționale
-- ce riscuri sunt suport / handoff
+- ce riscuri sunt `specialist_handoff`
 - ce artefacte sunt doar recomandări, nu flow real de Smart Resolve
 
 Acesta este documentul principal pentru:
@@ -200,6 +200,23 @@ Putem îngheța ca non-negotiable:
 - finding-urile specialist trebuie să folosească handoff controlat
 - cazul închis trebuie să trimită dovada în Dosar și să activeze monitoring
 - drift/review/reopen trebuie să retrimită userul în același cockpit
+- există doar 3 clase de rezolvare:
+  - `documentary`
+  - `operational`
+  - `specialist_handoff`
+- `specialist_handoff` înseamnă:
+  - cockpitul explică cazul și pornește pasul
+  - produsul face handoff controlat în modulul specialist
+  - produsul readuce automat userul în același cockpit
+  - închiderea oficială rămâne în cockpit
+
+Contractul obligatoriu pe clase:
+- `documentary`:
+  - `confirmi -> generezi -> validezi -> aprobi -> folosești documentul -> Dosar -> monitorizare`
+- `operational`:
+  - `confirmi -> faci acțiunea reală -> pui dovada -> Dosar -> monitorizare`
+- `specialist_handoff`:
+  - `confirmi -> handoff controlat -> acțiune în modul specialist -> revenire automată în cockpit -> confirmare finală / dovadă -> Dosar -> monitorizare`
 - în snapshot, inbox și triage nu bombardăm userul cu explicații lungi per risk
 - pe fiecare risk afișăm doar:
   - numele regulii / cazului
@@ -271,6 +288,12 @@ Nu putem spune încă:
 Putem spune doar:
 - structura corectă este definită
 - runtime-ul actual este parțial
+- pentru `specialist_handoff`, targetul este `automatic return to cockpit`, iar current runtime truth este mixt:
+  - `automatic` pentru `GDPR-013`, `GDPR-014`, `NIS2-001`, `NIS2-005`, `NIS2-015`
+  - încă rămas pe moduri parțiale pentru restul:
+  - `manual_banner`
+  - `manual_link`
+  - `conditional_link`
 
 ---
 
@@ -284,7 +307,7 @@ Dacă documentele intră în conflict, ordinea este:
 2. Pentru `cockpit / generator / validate / success / handoff controlat`:
 [compliai_smart_resolve_cockpit_bible.md](/Users/vaduvageorge/Downloads/compliai_smart_resolve_cockpit_bible.md)
 
-3. Pentru `ce risc se poate rezolva documentar vs operațional vs suport`:
+3. Pentru `ce risc se poate rezolva documentar vs operațional vs specialist_handoff`:
 [compliai_risk_evidence_resolve_truth_matrix.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_risk_evidence_resolve_truth_matrix.md)
 
 4. Pentru `scheletul mare, IA, etape, spine`:
@@ -400,7 +423,7 @@ Taskuri:
 - arată din listă tipul real al fiecărui risc:
   - `document`
   - `operațional`
-  - `suport`
+  - `specialist_handoff`
 - comprimă explicația per risk în snapshot și Resolve:
   - o singură propoziție scurtă în română
   - numele cazului
@@ -426,7 +449,7 @@ Taskuri:
 - operational findings cu evidence gate real
 - specialist findings cu handoff controlat și return state
 - aftercare și close condition explicite
-- scoate generatorul de pe riscurile care sunt doar `operaționale` sau `suport`
+- scoate generatorul de pe riscurile care sunt doar `operaționale` sau `specialist_handoff`
 - repară orice flow documentar parțial rămas, în special unde generatorul există dar poarta de attach / Dosar nu este completă
 
 Definition of done:
@@ -499,7 +522,7 @@ Taskuri:
 - testare live click-by-click pentru Radu
 - toate riscurile din matricea `documentar real`
 - toate riscurile din matricea `operațional`
-- toate riscurile marcate `suport / handoff`
+- toate riscurile marcate `specialist_handoff`
 - specialist controlled handoffs
 - Dosar / export / monitoring / reopen / revalidation
 - completare finală a auditului 1:1

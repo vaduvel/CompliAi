@@ -2,7 +2,7 @@
 
 Data: `2026-03-27`  
 Status: `working truth matrix`  
-Scop: `separă riscurile care se pot închide real în Smart Resolve de cele care cer dovadă operațională sau suport / handoff`
+Scop: `separă riscurile care se pot închide real în Smart Resolve de cele care cer dovadă operațională sau specialist_handoff`
 
 ---
 
@@ -57,12 +57,13 @@ Un risc intră aici dacă:
   - link
   - export
 
-### 1.3 Clasa C — Suport / handoff controlat
+### 1.3 Clasa C — Specialist handoff controlat
 
 Un risc intră aici dacă:
 - Compli poate ajuta
 - dar nu poate închide cazul complet doar din cockpit cu document sau notă simplă
 - este nevoie de modul specialist, autoritate externă, timeline sau proces asistat
+- sistemul trebuie să ducă userul controlat în acel modul și să îl readucă automat în același cockpit
 
 ### 1.4 Clasa D — Fals / incomplet azi
 
@@ -114,7 +115,7 @@ Acesta este grupul principal pentru flow-ul:
 
 Regula de produs:
 - aceste artefacte nu trebuie afișate ca și cum ar avea `Generate and resolve`
-- pot exista ca recomandări, checklist-uri sau suport
+- pot exista ca recomandări, checklist-uri sau suport contextual
 - nu pot fi vândute ca Smart Resolve documentar până nu au motor real
 
 ---
@@ -136,6 +137,28 @@ Regula de produs:
 | `GDPR-016` | `retention-policy` | `PARȚIAL / BLOCAT` | resolve page îl poate cere, generatorul există, dar `app/api/findings/[id]/route.ts` nu include încă `retention-policy` în `VALID_DOC_TYPES`, deci poarta de attach nu este completă |
 | `GDPR-003` | `cookie-policy` | `PARȚIAL / NENATIV ÎN INTAKE` | generatorul există și kernelul știe mappingul, dar finding-ul principal din intake pentru cookies este `GDPR-005` operațional, nu `GDPR-003` documentar |
 | `NIS2-015` | `nis2-incident-response` | `SUPORT, NU REZOLVARE DIRECTĂ` | documentul poate ajuta ca artefact, dar cazul real cere trimitere / referință oficială și follow-up extern |
+
+### 3.3 Matrice canonică pentru `specialist_handoff`
+
+| Tip canonic | Suprafață specialist | Current runtime truth | Target truth | Dovadă care trebuie să revină în cockpit |
+|---|---|---|---|---|
+| `GDPR-013` | `DSAR access` | `manual_banner` | `automatic` | verificare identitate + răspuns DSAR trimis |
+| `GDPR-014` | `DSAR erasure` | `manual_banner` | `automatic` | execuție ștergere + răspuns trimis |
+| `GDPR-019` | `ANSPDCP breach flow` | `conditional_link` | `automatic` | număr înregistrare ANSPDCP sau raționament documentat |
+| `NIS2-001` | `NIS2 eligibility` | `automatic` | `automatic` | rezultat eligibilitate salvat |
+| `NIS2-005` | `NIS2 assessment` | `automatic` | `automatic` | assessment salvat |
+| `NIS2-015` | `NIS2 incident timeline` | `automatic` | `automatic` | referință early warning + incident legat |
+| `NIS2-GENERIC` guvernanță | `NIS2 governance` | `manual_link` | `automatic` | training / certificare salvată în registru |
+| `NIS2-GENERIC` maturitate | `NIS2 maturity` | `manual_link` | `automatic` | evaluare domeniu + plan salvat |
+| `NIS2-GENERIC` furnizori | `NIS2 vendor registry` | `manual_link` | `automatic` | revizuire furnizor + dovadă contractuală |
+
+Regula înghețată:
+- `specialist_handoff` nu înseamnă că userul ghicește drumul înapoi
+- `specialist_handoff` înseamnă:
+  - cockpitul pornește cazul
+  - modulul specialist face pasul greu
+  - sistemul readuce userul automat în același cockpit
+  - cockpitul face închiderea oficială
 
 ---
 
@@ -172,9 +195,10 @@ Nu:
 Ordinea obligatorie:
 1. confirmi riscul
 2. cockpitul explică ce se face și unde
-3. intri în modulul de suport / handoff
-4. revii în cockpit
-5. atașezi dovada și închizi cazul
+3. handoff-ul te duce controlat în modulul specialist
+4. sistemul te readuce automat în același cockpit
+5. cockpitul îți arată dovada / referința adusă înapoi
+6. atașezi confirmarea finală și închizi cazul
 
 ---
 
@@ -192,7 +216,7 @@ Este permis doar pentru:
 
 Document requests fără motor real:
 - rămân recomandări
-- pot intra în `Dosar / checklist / suport`
+- pot intra în `Dosar / checklist / suport contextual`
 - nu pot apărea ca flow documentar de rezolvare
 
 ### 5.3 Nu mai închidem riscuri operaționale prin confirmare goală
@@ -217,7 +241,7 @@ Introduce:
 - badge sau marker vizibil pentru tipul de flow:
   - `document`
   - `operațional`
-  - `suport`
+  - `specialist_handoff`
 
 Scop:
 - userul să înțeleagă din listă ce fel de rezolvare urmează
@@ -254,7 +278,7 @@ Adevărul înghețat de azi este:
 
 - Smart Resolve documentar real există, dar pe un set mic și clar de riscuri
 - multe riscuri din onboarding NU sunt documentare și nu trebuie forțate în generator
-- câteva artefacte sunt promise prea devreme și trebuie retrogradate la suport
+- câteva artefacte sunt promise prea devreme și trebuie retrogradate la suport contextual
 - până nu respectăm această matrice, produsul va continua să mintă despre „rezolvare”
 
 Formula corectă:

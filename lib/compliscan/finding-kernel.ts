@@ -126,11 +126,13 @@ export type FindingRuntimeContract = {
 export type CockpitRecipe = {
   findingTypeId: string
   framework: FindingFramework
+  executionClass: SmartResolveExecutionClass
   resolutionMode: ResolutionMode
   statusLabel: string
   collapsedStatusLabel: string
   uiState: CockpitUIState
   resolveFlowState: ResolveFlowState
+  whatUserSees: string
   heroTitle: string
   heroSummary: string
   whatCompliDoes: string
@@ -159,6 +161,7 @@ export type CockpitRecipe = {
     href: string
     label: string
   }
+  specialistHandoff?: SpecialistHandoffContract
   closureCTA?: string
   acceptedEvidence: string[]
   visibleBlocks: CockpitVisibleBlocks
@@ -183,7 +186,35 @@ export type CloseGatingRequirements = {
   acceptedEvidence: string[]
 }
 
-export type SmartResolveExecutionClass = "documentary" | "operational" | "support"
+export type SmartResolveExecutionClass = "documentary" | "operational" | "specialist_handoff"
+
+export type SpecialistHandoffSurface =
+  | "dsar_access"
+  | "dsar_erasure"
+  | "anspdcp_breach"
+  | "nis2_eligibility"
+  | "nis2_assessment"
+  | "nis2_incident"
+  | "nis2_governance"
+  | "nis2_maturity"
+  | "nis2_vendor_registry"
+
+export type SpecialistHandoffRuntimeReturnMode =
+  | "manual_banner"
+  | "manual_link"
+  | "conditional_link"
+  | "automatic"
+
+export type SpecialistHandoffContract = {
+  surface: SpecialistHandoffSurface
+  startHref: string
+  startLabel: string
+  targetReturnMode: "automatic"
+  runtimeReturnMode: SpecialistHandoffRuntimeReturnMode
+  runtimeStatusNote: string
+  returnEvidenceLabel: string
+  returnEvidenceInstruction: string
+}
 
 const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "GDPR-001",
@@ -194,7 +225,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "AI-005",
 ])
 
-const SUPPORT_FINDING_TYPE_IDS = new Set([
+const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
   "GDPR-013",
   "GDPR-014",
   "GDPR-019",
@@ -208,7 +239,7 @@ export function getSmartResolveExecutionClass(
   findingTypeId: string
 ): SmartResolveExecutionClass {
   if (DOCUMENTARY_FINDING_TYPE_IDS.has(findingTypeId)) return "documentary"
-  if (SUPPORT_FINDING_TYPE_IDS.has(findingTypeId)) return "support"
+  if (SPECIALIST_HANDOFF_FINDING_TYPE_IDS.has(findingTypeId)) return "specialist_handoff"
   return "operational"
 }
 
@@ -1833,6 +1864,7 @@ function getWorkflowLink(
         href: `/dashboard/nis2/eligibility?${new URLSearchParams({
           findingId: record.id,
           source: "cockpit",
+          returnTo: `/dashboard/resolve/${record.id}`,
         }).toString()}`,
         label: "Deschide eligibilitatea NIS2",
       }
@@ -1842,6 +1874,7 @@ function getWorkflowLink(
           tab: "assessment",
           focus: "assessment",
           findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
         }).toString()}`,
         label: "Deschide evaluarea NIS2",
       }
@@ -1851,6 +1884,7 @@ function getWorkflowLink(
         tab: "incidents",
         focus: "incident",
         findingId: record.id,
+        returnTo: `/dashboard/resolve/${record.id}`,
       })
       if (incidentId) {
         search.set("incidentId", incidentId)
@@ -1911,6 +1945,7 @@ function getWorkflowLink(
           action: "new",
           type: "access",
           findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
         }).toString()}`,
         label: "Deschide DSAR",
       }
@@ -1920,6 +1955,7 @@ function getWorkflowLink(
           action: "new",
           type: "erasure",
           findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
         }).toString()}`,
         label: "Deschide cererea de ștergere",
       }
@@ -1960,6 +1996,169 @@ function getWorkflowLink(
     }
     default:
       return undefined
+  }
+}
+
+function getSpecialistHandoffSurface(
+  findingTypeId: string,
+  record: ScanFinding
+): SpecialistHandoffSurface | null {
+  switch (findingTypeId) {
+    case "GDPR-013":
+      return "dsar_access"
+    case "GDPR-014":
+      return "dsar_erasure"
+    case "GDPR-019":
+      return "anspdcp_breach"
+    case "NIS2-001":
+      return "nis2_eligibility"
+    case "NIS2-005":
+      return "nis2_assessment"
+    case "NIS2-015":
+      return "nis2_incident"
+    case "NIS2-GENERIC": {
+      const governanceFocus = deriveNis2GovernanceFocus(record)
+      if (governanceFocus) return "nis2_governance"
+
+      const maturityFocus = deriveNis2MaturityFocus(record)
+      if (maturityFocus) return "nis2_maturity"
+
+      if (isNis2SupplyChainFinding(record)) return "nis2_vendor_registry"
+      return null
+    }
+    default:
+      return null
+  }
+}
+
+export function getSpecialistHandoffContract(
+  findingTypeId: string,
+  record: ScanFinding
+): SpecialistHandoffContract | undefined {
+  if (getSmartResolveExecutionClass(findingTypeId) !== "specialist_handoff") return undefined
+
+  const workflowLink = getWorkflowLink(findingTypeId, record)
+  const surface = getSpecialistHandoffSurface(findingTypeId, record)
+  if (!workflowLink || !surface) return undefined
+
+  switch (surface) {
+    case "dsar_access":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce răspunsul DSAR este trimis sau refuzul este documentat, modulul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Dovadă răspuns DSAR",
+        returnEvidenceInstruction:
+          "După finalizarea cazului în modulul DSAR, cockpitul primește automat dovada verificării identității și a răspunsului trimis.",
+      }
+    case "dsar_erasure":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce execuția ștergerii și răspunsul final sunt documentate, modulul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Dovadă ștergere și răspuns DSAR",
+        returnEvidenceInstruction:
+          "După finalizarea cazului de ștergere în modulul DSAR, cockpitul primește automat dovada sistemelor afectate și a răspunsului trimis persoanei vizate.",
+      }
+    case "anspdcp_breach":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "conditional_link",
+        runtimeStatusNote:
+          "Fluxul de breach poate construi un link de întoarcere doar dacă incidentul este selectat și există stare suficientă; nu există încă round-trip automat complet.",
+        returnEvidenceLabel: "Dovadă ANSPDCP sau raționament documentat",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească numărul de înregistrare ANSPDCP sau raționamentul complet documentat pentru ne-notificare.",
+      }
+    case "nis2_eligibility":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce eligibilitatea NIS2 este salvată, wizardul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Rezultat eligibilitate salvat",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească automat rezultatul eligibilității și justificarea salvată pentru sector, mărime și rol.",
+      }
+    case "nis2_assessment":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce evaluarea NIS2 este salvată, modulul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Assessment NIS2 salvat",
+        returnEvidenceInstruction:
+          "După salvarea evaluării, cockpitul primește automat scorul și dovada că assessment-ul a fost completat.",
+      }
+    case "nis2_incident":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce early warning-ul NIS2 este salvat, modulul de incidente te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Dovadă early warning DNSC",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească automat referința early warning-ului, incidentul legat și nota de progres pentru 72h / raport final.",
+      }
+    case "nis2_governance":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "manual_link",
+        runtimeStatusNote:
+          "Registrul de guvernanță afișează un traseu contextual, dar nu readuce încă automat userul în cockpit după actualizare.",
+        returnEvidenceLabel: "Actualizare registru Board & CISO",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească automat training-ul sau certificarea actualizată, împreună cu urma salvată în registru.",
+      }
+    case "nis2_maturity":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "manual_link",
+        runtimeStatusNote:
+          "Evaluarea de maturitate NIS2 oferă doar întoarcere prin link; round-trip-ul automat spre cockpit nu este încă implementat.",
+        returnEvidenceLabel: "Evaluare maturitate salvată",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească automat domeniul evaluat, răspunsurile salvate și planul de remediere aferent.",
+      }
+    case "nis2_vendor_registry":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "manual_link",
+        runtimeStatusNote:
+          "Registrul furnizorilor NIS2 afișează contextul și permite revenire prin link, dar nu te readuce încă automat în finding după revizuire.",
+        returnEvidenceLabel: "Revizuire furnizor salvată",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească automat revizuirea contractuală, vendorul afectat și dovada salvată în registru.",
+      }
   }
 }
 
@@ -2475,6 +2674,7 @@ export function buildCockpitRecipe(
   // 5. Prezentare
   const statusLabels = UI_STATE_STATUS_LABELS[uiState]
   const primaryMode = findingType.resolutionModes[0]
+  const executionClass = getSmartResolveExecutionClass(findingTypeId)
   const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType, documentFlowState)
   const resolveFlowState = uiStateToFlowState(uiState, flow.initialFlowState)
   const vendorContext = inferVendorContext(record, findingTypeId)
@@ -2784,11 +2984,13 @@ export function buildCockpitRecipe(
   return {
     findingTypeId,
     framework: findingType.framework,
+    executionClass,
     resolutionMode: primaryMode,
     statusLabel: statusLabels.full,
     collapsedStatusLabel: statusLabels.collapsed,
     uiState,
     resolveFlowState,
+    whatUserSees: flow.whatUserSees,
     heroTitle,
     heroSummary,
     whatCompliDoes,
@@ -2799,6 +3001,10 @@ export function buildCockpitRecipe(
     },
     secondaryCTA: getSecondaryCTA(flow.secondaryCTA),
     workflowLink: getWorkflowLink(findingTypeId, record),
+    specialistHandoff:
+      executionClass === "specialist_handoff"
+        ? getSpecialistHandoffContract(findingTypeId, record)
+        : undefined,
     closureCTA,
     acceptedEvidence,
     visibleBlocks,

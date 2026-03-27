@@ -69,6 +69,17 @@ type FindingDetailResponse = {
   feedbackMessage?: string
 }
 
+function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
+  switch (recipe.executionClass) {
+    case "documentary":
+      return "Document"
+    case "specialist_handoff":
+      return "Asistat"
+    default:
+      return "Acțiune"
+  }
+}
+
 function getDefaultReviewDateInput() {
   const nextReviewDate = new Date()
   nextReviewDate.setUTCDate(nextReviewDate.getUTCDate() + 90)
@@ -175,10 +186,41 @@ export default function FindingDetailPage() {
         "Ai revenit din flow-ul de breach. Revizuiește nota precompletată și închide cazul doar dacă trimiterea sau raționamentul ANSPDCP sunt documentate complet."
       )
     }
+    if (searchParams.get("dsarFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din flow-ul DSAR. Revizuiește dovada precompletată și închide cazul doar dacă identitatea și răspunsul sunt documentate clar."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
+    if (searchParams.get("assessmentFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din evaluarea NIS2. Revizuiește dovada precompletată și închide cazul doar dacă assessment-ul salvat reflectă situația reală."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
+    if (searchParams.get("eligibilityFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din eligibilitatea NIS2. Revizuiește dovada precompletată și închide cazul doar dacă rezultatul salvat reflectă sectorul și mărimea firmei."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
     if (searchParams.get("incidentFlow") === "done") {
       setStatusFeedback(
         "Ai revenit din timeline-ul NIS2. Revizuiește nota precompletată și închide cazul doar dacă early warning-ul DNSC este documentat clar în incident."
       )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
     }
   }, [finding, searchParams])
 
@@ -245,6 +287,7 @@ export default function FindingDetailPage() {
     documentFlowState,
     linkedGeneratedDocument: linkedGeneratedDocument ?? undefined,
   })
+  const introDescription = recipe.whatUserSees || finding.detail
   const generatorDocumentType = (
     finding.suggestedDocumentType ??
     (recipe.findingTypeId === "GDPR-016" ? "retention-policy" : "")
@@ -414,19 +457,16 @@ export default function FindingDetailPage() {
       <PageIntro
         eyebrow={`Caz · ${finding.category.replace("_", " ")}`}
         title={finding.title}
-        description={finding.detail}
+        description={introDescription}
         badges={
           <>
             <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {getExecutionClassLabel(recipe)}
+            </Badge>
             <Badge variant={statusCfg.variant} className="normal-case tracking-normal">
               {statusCfg.label}
             </Badge>
-            {finding.verdictConfidence && (
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Încredere: {finding.verdictConfidence}
-                {finding.confidenceScore != null && ` (${finding.confidenceScore}%)`}
-              </Badge>
-            )}
           </>
         }
         aside={

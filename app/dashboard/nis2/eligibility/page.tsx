@@ -6,7 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ShieldAlert } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
-import { Nis2EligibilityWizard } from "@/components/compliscan/nis2/eligibility-wizard"
+import {
+  Nis2EligibilityWizard,
+  type Nis2EligibilityCompletionPayload,
+} from "@/components/compliscan/nis2/eligibility-wizard"
 import type { Nis2EmployeeRange, Nis2RevenueRange, Nis2EligibilityResult } from "@/lib/compliscan/nis2-eligibility"
 
 type SavedEligibility = {
@@ -23,6 +26,7 @@ export default function Nis2EligibilityPage() {
   const [saved, setSaved] = useState<SavedEligibility | null>(null)
   const [loading, setLoading] = useState(true)
   const sourceFindingId = searchParams.get("findingId")
+  const returnTo = searchParams.get("returnTo")
   const fromCockpit = searchParams.get("source") === "cockpit" && Boolean(sourceFindingId)
 
   const fetchEligibility = useCallback(async () => {
@@ -41,7 +45,32 @@ export default function Nis2EligibilityPage() {
     void fetchEligibility()
   }, [fetchEligibility])
 
-  function handleComplete() {
+  function buildEligibilityReturnEvidence(payload: Nis2EligibilityCompletionPayload) {
+    const resultLabel =
+      payload.result === "intri"
+        ? "firma intră sub NIS2"
+        : payload.result === "posibil"
+          ? "eligibilitatea rămâne la limită și cere clarificare suplimentară"
+          : "firma nu intră sub NIS2"
+
+    return [
+      `Eligibilitatea NIS2 a fost salvată pentru sectorul "${payload.sectorLabel}".`,
+      `Mărime: ${payload.employees}.`,
+      `Cifră de afaceri: ${payload.revenue}.`,
+      `Rezultat: ${resultLabel}.`,
+    ].join(" ")
+  }
+
+  function handleComplete(payload: Nis2EligibilityCompletionPayload) {
+    if (fromCockpit && sourceFindingId && returnTo) {
+      const params = new URLSearchParams({
+        eligibilityFlow: "done",
+        evidenceNote: buildEligibilityReturnEvidence(payload),
+      })
+      router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+      return
+    }
+
     void fetchEligibility()
   }
 
@@ -55,11 +84,11 @@ export default function Nis2EligibilityPage() {
               Ai venit din cockpit pentru eligibilitatea NIS2
             </p>
             <p className="mt-0.5 text-xs text-eos-text-muted">
-              Clarifică mai întâi dacă firma intră sub NIS2. Dacă rezultatul confirmă eligibilitatea, continuă imediat spre wizardul DNSC.
+              Clarifică mai întâi dacă firma intră sub NIS2. După salvare, te întorci automat în același cockpit pentru pasul final.
             </p>
           </div>
           <Link
-            href={`/dashboard/resolve/${sourceFindingId}`}
+            href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
             className="shrink-0 text-xs text-eos-primary hover:underline"
           >
             Înapoi la finding
@@ -93,7 +122,7 @@ export default function Nis2EligibilityPage() {
       ) : (
         <>
           <Nis2EligibilityWizard saved={saved} onComplete={handleComplete} />
-          {fromCockpit && saved && saved.result !== "nu_intri" ? (
+          {fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
             <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
               <p className="text-sm font-medium text-eos-text">
                 Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.

@@ -20,6 +20,7 @@ import {
   extractEF003Explainability,
   getCloseGatingRequirements,
   getSmartResolveExecutionClass,
+  getSpecialistHandoffContract,
   getFindingTypeDefinition,
   getResolveFlowRecipe,
 } from "@/lib/compliscan/finding-kernel"
@@ -387,6 +388,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?action=new")
     expect(recipe.workflowLink?.href).toContain("type=access")
     expect(recipe.workflowLink?.href).toContain("findingId=dsar-no-procedure")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fdsar-no-procedure")
     expect(recipe.workflowLink?.label).toBe("Deschide DSAR")
     expect(recipe.closureCTA).toBe("Marchează răspunsul trimis")
   })
@@ -405,6 +407,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?action=new")
     expect(recipe.workflowLink?.href).toContain("type=erasure")
     expect(recipe.workflowLink?.href).toContain("findingId=dsar-erasure-active")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fdsar-erasure-active")
     expect(recipe.workflowLink?.label).toBe("Deschide cererea de ștergere")
     expect(recipe.closureCTA).toBe("Marchează răspunsul și ștergerea")
   })
@@ -442,6 +445,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/eligibility")
     expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-eligibility")
     expect(recipe.workflowLink?.href).toContain("source=cockpit")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-finding-eligibility")
     expect(recipe.workflowLink?.label).toBe("Deschide eligibilitatea NIS2")
     expect(recipe.closureCTA).toBe("Salvează eligibilitatea")
   })
@@ -480,6 +484,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("focus=incident")
     expect(recipe.workflowLink?.href).toContain("incidentId=demo-incident-1")
     expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-incident-timeline")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-finding-incident-timeline")
     expect(recipe.workflowLink?.label).toBe("Deschide timeline-ul incidentului")
     expect(recipe.closureCTA).toBe("Marchează early warning trimis")
   })
@@ -499,6 +504,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=incidents")
     expect(recipe.workflowLink?.href).toContain("focus=incident")
     expect(recipe.workflowLink?.href).toContain("findingId=nis2-finding-incident-generic")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-finding-incident-generic")
     expect(recipe.workflowLink?.href).not.toContain("incidentId=")
     expect(recipe.workflowLink?.label).toBe("Deschide flow-ul de incident")
   })
@@ -975,10 +981,89 @@ describe("getSmartResolveExecutionClass", () => {
     expect(getSmartResolveExecutionClass("EF-003")).toBe("operational")
   })
 
-  it("marchează DSAR și NIS2 asistat ca support", () => {
-    expect(getSmartResolveExecutionClass("GDPR-013")).toBe("support")
-    expect(getSmartResolveExecutionClass("GDPR-019")).toBe("support")
-    expect(getSmartResolveExecutionClass("NIS2-015")).toBe("support")
+  it("marchează DSAR și NIS2 asistat ca specialist_handoff", () => {
+    expect(getSmartResolveExecutionClass("GDPR-013")).toBe("specialist_handoff")
+    expect(getSmartResolveExecutionClass("GDPR-019")).toBe("specialist_handoff")
+    expect(getSmartResolveExecutionClass("NIS2-015")).toBe("specialist_handoff")
+  })
+})
+
+describe("getSpecialistHandoffContract", () => {
+  it("mapează DSAR access pe handoff contextual cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-013",
+      makeFinding({ id: "dsar-no-procedure", category: "GDPR" })
+    )
+    expect(contract?.surface).toBe("dsar_access")
+    expect(contract?.startHref).toContain("/dashboard/dsar?")
+    expect(contract?.startHref).toContain("type=access")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fdsar-no-procedure")
+    expect(contract?.targetReturnMode).toBe("automatic")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează DSAR erasure pe handoff contextual cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-014",
+      makeFinding({ id: "dsar-erasure-active", category: "GDPR" })
+    )
+    expect(contract?.surface).toBe("dsar_erasure")
+    expect(contract?.startHref).toContain("/dashboard/dsar?")
+    expect(contract?.startHref).toContain("type=erasure")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fdsar-erasure-active")
+    expect(contract?.targetReturnMode).toBe("automatic")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează assessment-ul NIS2 pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-005",
+      makeFinding({ id: "nis2-finding-ops-baseline", category: "NIS2" })
+    )
+    expect(contract?.surface).toBe("nis2_assessment")
+    expect(contract?.startHref).toContain("/dashboard/nis2?")
+    expect(contract?.startHref).toContain("tab=assessment")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-finding-ops-baseline")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează eligibilitatea NIS2 pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-001",
+      makeFinding({ id: "nis2-finding-eligibility", category: "NIS2" })
+    )
+    expect(contract?.surface).toBe("nis2_eligibility")
+    expect(contract?.startHref).toContain("/dashboard/nis2/eligibility?")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-finding-eligibility")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează early warning NIS2 pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-015",
+      makeFinding({
+        id: "incident-ops-2026",
+        category: "NIS2",
+        title: "Incident activ fără early warning",
+        detail: "incidentId=demo-incident-1",
+      })
+    )
+    expect(contract?.surface).toBe("nis2_incident")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fincident-ops-2026")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+    expect(contract?.returnEvidenceLabel).toContain("early warning")
+  })
+
+  it("include contractul specialist_handoff și în recipe", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "dsar-no-procedure",
+        category: "GDPR",
+        title: "Cerere de acces activă",
+      })
+    )
+    expect(recipe.specialistHandoff?.surface).toBe("dsar_access")
+    expect(recipe.specialistHandoff?.targetReturnMode).toBe("automatic")
   })
 })
 

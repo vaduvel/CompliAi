@@ -36,9 +36,17 @@ type SavedEligibility = {
   savedAtISO: string
 }
 
+export type Nis2EligibilityCompletionPayload = {
+  sectorId: string
+  sectorLabel: string
+  employees: Nis2EmployeeRange
+  revenue: Nis2RevenueRange
+  result: Nis2EligibilityResult
+}
+
 type Props = {
   saved: SavedEligibility | null
-  onComplete: () => void
+  onComplete: (payload: Nis2EligibilityCompletionPayload) => void
 }
 
 const EMPLOYEE_OPTIONS: Array<{ value: Nis2EmployeeRange; label: string; hint: string }> = [
@@ -102,7 +110,13 @@ export function Nis2EligibilityWizard({ saved, onComplete }: Props) {
         const data = await res.json()
         throw new Error(data.error ?? "Eroare la salvare")
       }
-      onComplete()
+      onComplete({
+        sectorId,
+        sectorLabel: selectedSector?.label ?? sectorId,
+        employees,
+        revenue,
+        result: output.result,
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Eroare la salvare")
     } finally {

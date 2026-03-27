@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -105,6 +105,10 @@ function slaLabel(
   return { label: `${d}z ${remH}h`, urgent: false, expired: false, progressPct }
 }
 
+function buildAssessmentReturnEvidence(result: Nis2Result) {
+  return `Assessment NIS2 salvat. Scor ${result.score}% (${result.maturityLabel}). Entitate ${result.entityType}.`
+}
+
 // ── Assessment tab ─────────────────────────────────────────────────────────────
 
 function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
@@ -118,7 +122,16 @@ function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
   return <Badge variant={variant}>{text}</Badge>
 }
 
-function AssessmentTab({ orgName }: { orgName?: string }) {
+function AssessmentTab({
+  orgName,
+  sourceFindingId,
+  returnTo,
+}: {
+  orgName?: string
+  sourceFindingId?: string
+  returnTo?: string
+}) {
+  const router = useRouter()
   const [sector, setSector] = useState<Nis2Sector>("general")
   const [answers, setAnswers] = useState<Nis2Answers>({})
   const [answersMeta, setAnswersMeta] = useState<Record<string, { source: string; confidence: string; userConfirmed: boolean }>>({})
@@ -211,6 +224,17 @@ function AssessmentTab({ orgName }: { orgName?: string }) {
         score: data.result!.score,
         maturityLabel: data.result!.maturityLabel,
       })
+
+      if (sourceFindingId && returnTo) {
+        toast.success("Evaluare NIS2 salvată. Revenim în cockpit.")
+        const params = new URLSearchParams({
+          assessmentFlow: "done",
+          evidenceNote: buildAssessmentReturnEvidence(data.result!),
+        })
+        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+        return
+      }
+
       toast.success("Evaluare NIS2 salvată", {
         description: `Scor: ${data.result!.score}% — ${data.result!.maturityLabel}`,
       })
@@ -1459,12 +1483,15 @@ function IncidentsTab({
   highlightedIncidentId,
   focusMode,
   sourceFindingId,
+  returnTo,
 }: {
   orgName?: string
   highlightedIncidentId?: string
   focusMode?: "anspdcp" | "incident"
   sourceFindingId?: string
+  returnTo?: string
 }) {
+  const router = useRouter()
   const [incidents, setIncidents] = useState<Nis2Incident[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -1575,6 +1602,16 @@ function IncidentsTab({
       const data = (await res.json()) as { incident?: Nis2Incident; error?: string }
       if (!res.ok) throw new Error(data.error ?? "Eroare la actualizare.")
       setIncidents((prev) => prev.map((i) => (i.id === id ? data.incident! : i)))
+
+      if (patch.earlyWarningReport && sourceFindingId && returnTo && data.incident) {
+        toast.success("Early warning salvat. Revenim în cockpit.")
+        const params = new URLSearchParams({
+          incidentFlow: "done",
+          evidenceNote: buildIncidentCockpitEvidenceNote(data.incident),
+        })
+        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+        return
+      }
     } catch (err) {
       toast.error("Eroare", { description: err instanceof Error ? err.message : "Încearcă din nou." })
     }
@@ -1597,7 +1634,7 @@ function IncidentsTab({
     ? incidents.find((incident) => incident.id === highlightedIncidentId)
     : null
   const backToCockpitHref =
-    sourceFindingId && highlightedIncident?.earlyWarningReport
+    !returnTo && sourceFindingId && highlightedIncident?.earlyWarningReport
       ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
           incidentFlow: "done",
           evidenceNote: buildIncidentCockpitEvidenceNote(highlightedIncident),
@@ -1626,7 +1663,7 @@ function IncidentsTab({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Flow de incident NIS2 deschis din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
-                Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează early warning-ul în 24h, apoi continuă cu raportul 72h și raportul final.
+                Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează early warning-ul în 24h, iar după salvare revii automat în același cockpit pentru închidere.
               </p>
             </div>
             {backToCockpitHref ? (
@@ -2579,6 +2616,7 @@ export default function Nis2Page() {
       : undefined
   const assessmentFocus = searchParams.get("focus") === "assessment"
   const sourceFindingId = searchParams.get("findingId") ?? undefined
+  const returnTo = searchParams.get("returnTo") ?? undefined
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => r.json())
@@ -2614,11 +2652,11 @@ export default function Nis2Page() {
             <div className="min-w-0">
               <p className="text-sm font-semibold text-eos-text">Evaluarea NIS2 este deschisă din cockpit</p>
               <p className="mt-1 text-xs text-eos-text-muted">
-                Completează assessment-ul NIS2 și întoarce-te în același finding după ce salvezi evaluarea.
+                Completează assessment-ul NIS2. După salvare, revii automat în același finding pentru închidere.
               </p>
             </div>
             <Link
-              href={`/dashboard/resolve/${sourceFindingId}`}
+              href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
               className="inline-flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
             >
               <ArrowLeft className="size-3" strokeWidth={2} />
@@ -2670,7 +2708,7 @@ export default function Nis2Page() {
         </TabsList>
 
         <TabsContent value="assessment">
-          <AssessmentTab orgName={orgName} />
+          <AssessmentTab orgName={orgName} sourceFindingId={sourceFindingId} returnTo={returnTo} />
         </TabsContent>
         <TabsContent value="incidents">
           <IncidentsTab
@@ -2678,6 +2716,7 @@ export default function Nis2Page() {
             highlightedIncidentId={highlightedIncidentId}
             focusMode={focusMode === "anspdcp" || focusMode === "incident" ? focusMode : undefined}
             sourceFindingId={sourceFindingId}
+            returnTo={returnTo}
           />
         </TabsContent>
         <TabsContent value="vendors">
