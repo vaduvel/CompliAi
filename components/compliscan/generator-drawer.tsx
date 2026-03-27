@@ -5,13 +5,7 @@ import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, RotateCw, Sparkle
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/evidence-os/Sheet"
+import { Card, CardContent } from "@/components/evidence-os/Card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import {
@@ -27,6 +21,34 @@ import type { DocumentType, GeneratedDocument } from "@/lib/server/document-gene
 type GeneratedDocumentResponse = GeneratedDocument & {
   recordId?: string
   sourceFindingId?: string | null
+}
+
+type GeneratorDrawerCompletionResult = {
+  evidenceAttached?: boolean
+  finding?: {
+    findingStatus?: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
+    findingStatusUpdatedAtISO?: string
+    nextMonitoringDateISO?: string
+    operationalEvidenceNote?: string
+    reopenedFromISO?: string
+    resolution?: {
+      closureEvidence?: string | null
+    } | null
+  }
+  linkedGeneratedDocument?: {
+    id: string
+    title: string
+    generatedAtISO: string
+    approvalStatus?: "draft" | "approved_as_evidence"
+    validationStatus?: "pending" | "passed"
+    validatedAtISO?: string
+    approvedAtISO?: string
+    approvedByEmail?: string
+    expiresAtISO?: string
+    nextReviewDateISO?: string
+  } | null
+  documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+  feedbackMessage?: string
 }
 
 const CONFIRMATION_ITEMS = [
@@ -47,11 +69,11 @@ const CONFIRMATION_ITEMS = [
 const VALIDATION_ITEMS = [
   {
     id: "validation-reviewed",
-    label: "Am rulat verificarea rapidă și am revizuit observațiile înainte de dosar",
+    label: "Am rulat verificarea rapidă și am revizuit observațiile înainte să rezolv riscul",
   },
   {
     id: "validation-ready",
-    label: "Confirm că versiunea validată este cea pe care o salvez ca dovadă",
+    label: "Confirm că versiunea validată este cea pe care o voi folosi pentru rezolvarea riscului",
   },
 ] as const
 
@@ -63,7 +85,7 @@ type GeneratorDrawerProps = {
   findingTitle: string
   vendorName?: string
   vendorDpaUrl?: string | null
-  onComplete: (result?: { dossierSaved?: boolean }) => void
+  onComplete: (result?: GeneratorDrawerCompletionResult) => void
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -218,21 +240,25 @@ export function GeneratorDrawer({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          status: "resolved",
+          status: "confirmed",
           generatedDocumentId: result.recordId,
           confirmationChecklist: checklist,
           validationChecklist,
         }),
       })
+      const payload = (await res.json()) as GeneratorDrawerCompletionResult & { error?: string }
 
       if (!res.ok) {
-        const payload = (await res.json()) as { error?: string }
         throw new Error(payload.error ?? "Nu am putut atasa draftul ca dovada.")
       }
 
-      toast.success("Dovada salvata la dosar")
-      onOpenChange(false)
-      onComplete({ dossierSaved: true })
+      toast.success("Documentul este confirmat", {
+        description: "Documentul este pregătit. Acum rezolvi riscul din același cockpit, apoi îl trimiți la Dosar.",
+      })
+      onComplete({
+        ...payload,
+        evidenceAttached: true,
+      })
     } catch (err) {
       toast.error("Eroare", {
         description: err instanceof Error ? err.message : "Încearcă din nou.",
@@ -281,7 +307,7 @@ export function GeneratorDrawer({
       return
     }
 
-    toast.error("Draftul are observații înainte de dosar", {
+    toast.error("Draftul are observații înainte de rezolvare", {
       description: "Corectează punctele picate, regenerează sau înlocuiește documentul.",
     })
   }
@@ -325,27 +351,37 @@ export function GeneratorDrawer({
       ? "Ex: clienți activi 3 ani după ultimul contract, lead-uri 12 luni, HR conform termenelor legale, loguri suport 90 zile, ștergere manuală lunară și verificare trimestrială."
       : "Detalii relevante pentru documentul generat..."
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        data-testid="finding-generator-drawer"
-        className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-      >
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <FileText className="size-4 text-eos-primary" strokeWidth={2} />
-            {docTypeLabel}
-          </SheetTitle>
-          <SheetDescription>
-            {findingTitle} · draft, validare și salvare în același loc
-          </SheetDescription>
-        </SheetHeader>
+  if (!open) return null
 
-        <div className="flex-1 space-y-4 px-4 pb-6">
+  return (
+    <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-bg-inset/30">
+      <CardContent className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+              Zonă de generare pentru rezolvare
+            </p>
+            <p className="flex items-center gap-2 text-base font-semibold text-eos-text">
+              <FileText className="size-4 text-eos-primary" strokeWidth={2} />
+              {docTypeLabel}
+            </p>
+            <p className="text-sm text-eos-text-muted">
+              {findingTitle} · generezi, validezi și confirmi documentul chiar în acest cockpit.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="gap-2"
+          >
+            Ascunde zona
+          </Button>
+        </div>
+
+        <div className="flex-1 space-y-4">
           <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
-              {["Completezi", "Generezi", "Validezi", "Salvezi"].map((step, index) => {
+              {["Completezi", "Generezi", "Validezi", "Confirmi"].map((step, index) => {
                 return (
                   <span
                     key={step}
@@ -363,7 +399,7 @@ export function GeneratorDrawer({
             </div>
           </div>
 
-          {/* ── Form ── */}
+      {/* ── Form ── */}
           {!result && (
             <div className="space-y-3">
               <Field label="Numele organizatiei">
@@ -502,7 +538,7 @@ export function GeneratorDrawer({
                       Scan / Validate evidence
                     </p>
                     <p className="mt-1 text-sm text-eos-text-muted">
-                      Verifici rapid dacă draftul poate deveni dovadă reală înainte să intre la dosar.
+                      Verifici rapid dacă draftul poate fi folosit pentru a rezolva riscul, înainte să ajungă la Dosar.
                     </p>
                   </div>
                   <span
@@ -529,7 +565,7 @@ export function GeneratorDrawer({
                   </p>
                 ) : (
                   <p className="text-xs text-eos-text-muted">
-                    Rulează mai întâi validarea explicită. Fără pasul ăsta, draftul nu poate fi salvat ca dovadă finală.
+                    Rulează mai întâi validarea explicită. Fără pasul ăsta, draftul nu poate fi confirmat pentru rezolvare.
                   </p>
                 )}
 
@@ -628,7 +664,7 @@ export function GeneratorDrawer({
                 <Button
                   onClick={handleAttach}
                   disabled={attachDisabled}
-                  data-testid="attach-generated-document"
+                    data-testid="confirm-generated-document"
                   className="w-full gap-2"
                 >
                   {attaching ? (
@@ -636,16 +672,16 @@ export function GeneratorDrawer({
                   ) : (
                     <CheckCircle2 className="size-4" strokeWidth={2} />
                   )}
-                  Confirmă și salvează dovada
+                  Confirmă documentul pentru rezolvare
                 </Button>
                 <p className="text-xs text-eos-text-muted">
-                  Draftul intră la dosar doar după verificarea rapidă, confirmarea validării și aprobarea explicită ca dovadă.
+                  Zona de generare doar produce, validează și confirmă documentul. Rezolvarea riscului și trimiterea la Dosar rămân pași separați în același cockpit.
                 </p>
               </div>
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </CardContent>
+    </Card>
   )
 }

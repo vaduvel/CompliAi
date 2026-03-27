@@ -6,9 +6,8 @@ import Link from "next/link"
 import {
   ArrowLeft,
   CheckCircle2,
-  XCircle,
   FileText,
-  Scale,
+  XCircle,
 } from "lucide-react"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -23,9 +22,7 @@ import type { ScanFinding } from "@/lib/compliance/types"
 import {
   FindingCaseClosedCard,
   FindingDossierSuccessCard,
-  FindingExecutionCard,
   FindingHeroAction,
-  FindingNarrativeCard,
 } from "@/components/compliscan/finding-cockpit-shared"
 import {
   getFindingAgeLabel,
@@ -94,12 +91,21 @@ export default function FindingDetailPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
   const [generatorOpen, setGeneratorOpen] = useState(false)
-  const [showDossierMoment, setShowDossierMoment] = useState(false)
   const [autoOpenConsumed, setAutoOpenConsumed] = useState(false)
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
   const { reloadDashboard } = useCockpitMutations()
+
+  const applyFindingResponse = useCallback((data: FindingDetailResponse) => {
+    setFinding(data.finding)
+    setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
+    setDocumentFlowState(data.documentFlowState ?? "not_required")
+    setOperationalEvidenceNote(data.finding.operationalEvidenceNote ?? "")
+    setStatusFeedback(data.feedbackMessage ?? null)
+    setRevalidationConfirmed(false)
+    setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+  }, [])
 
   const refetchFinding = useCallback(() => {
     if (!params.findingId) return
@@ -109,21 +115,15 @@ export default function FindingDetailPage() {
         return r.json()
       })
       .then((data: FindingDetailResponse) => {
-        setFinding(data.finding)
-        setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
-        setDocumentFlowState(data.documentFlowState ?? "not_required")
-        setOperationalEvidenceNote(data.finding.operationalEvidenceNote ?? "")
-        setRevalidationConfirmed(false)
-        setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        applyFindingResponse(data)
       })
       .catch(() => {})
     void reloadDashboard()
-  }, [params.findingId, reloadDashboard])
+  }, [applyFindingResponse, params.findingId, reloadDashboard])
 
   useEffect(() => {
     if (!params.findingId) return
     setLoading(true)
-    setShowDossierMoment(false)
     setAutoOpenConsumed(false)
     fetch(`/api/findings/${encodeURIComponent(params.findingId)}`, { cache: "no-store" })
       .then((r) => {
@@ -131,17 +131,12 @@ export default function FindingDetailPage() {
         return r.json()
       })
       .then((data: FindingDetailResponse) => {
-        setFinding(data.finding)
-        setLinkedGeneratedDocument(data.linkedGeneratedDocument ?? null)
-        setDocumentFlowState(data.documentFlowState ?? "not_required")
-        setOperationalEvidenceNote(data.finding.operationalEvidenceNote ?? "")
-        setRevalidationConfirmed(false)
-        setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        applyFindingResponse(data)
         setError(null)
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [params.findingId])
+  }, [applyFindingResponse, params.findingId])
 
   useEffect(() => {
     if (!finding) return
@@ -150,7 +145,9 @@ export default function FindingDetailPage() {
     const r = buildCockpitRecipe(finding)
     const hasGen = r.visibleBlocks.detailBlocks.includes("generator")
     const shouldAutoOpenGenerator =
-      searchParams.get("generator") === "1" || searchParams.get("action") === "generate"
+      searchParams.get("generator") === "1" ||
+      searchParams.get("action") === "generate" ||
+      status === "confirmed"
 
     if (!hasGen || status !== "confirmed" || !shouldAutoOpenGenerator || autoOpenConsumed) {
       return
@@ -186,13 +183,14 @@ export default function FindingDetailPage() {
   }, [finding, searchParams])
 
   async function updateStatus(
-    status: "open" | "confirmed" | "dismissed" | "resolved",
+    status: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring",
     options?: {
       openGeneratorAfter?: boolean
       redirectTo?: string
       evidenceNote?: string
       revalidationConfirmed?: boolean
       newReviewDateISO?: string
+      generatedDocumentId?: string
     }
   ) {
     if (!finding) return
@@ -203,6 +201,7 @@ export default function FindingDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status,
+          generatedDocumentId: options?.generatedDocumentId,
           evidenceNote: options?.evidenceNote,
           revalidationConfirmed: options?.revalidationConfirmed,
           newReviewDateISO: options?.newReviewDateISO,
@@ -213,7 +212,7 @@ export default function FindingDetailPage() {
       setFinding(
         payload.finding ?? {
           ...finding,
-          findingStatus: status === "resolved" ? "under_monitoring" : status,
+          findingStatus: status,
           findingStatusUpdatedAtISO: new Date().toISOString(),
         }
       )
@@ -228,12 +227,6 @@ export default function FindingDetailPage() {
       }
       if (options?.redirectTo) {
         router.push(options.redirectTo)
-      }
-      if (status === "resolved") {
-        setShowDossierMoment(true)
-      }
-      if (status === "open") {
-        setShowDossierMoment(false)
       }
       void reloadDashboard()
     } catch {
@@ -256,14 +249,26 @@ export default function FindingDetailPage() {
     finding.suggestedDocumentType ??
     (recipe.findingTypeId === "GDPR-016" ? "retention-policy" : "")
   ) as DocumentType | ""
-  const successMomentVisible =
-    (searchParams.get("success") === "dossier" || showDossierMoment) &&
-    isFindingResolvedLike(status)
+  const preparedDocumentReady =
+    linkedGeneratedDocument?.validationStatus === "passed" &&
+    linkedGeneratedDocument?.approvalStatus !== "approved_as_evidence"
+  const successMomentVisible = status === "under_monitoring"
   const dossierMomentVisible =
     successMomentVisible &&
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
+  const needsDocumentResolution = status === "confirmed" && hasGenerator && preparedDocumentReady
+  const resolvedMomentVisible =
+    status === "resolved" &&
+    hasGenerator &&
+    preparedDocumentReady &&
+    Boolean(linkedGeneratedDocument?.id)
+  const needsDossierHandoff =
+    status === "resolved" &&
+    hasGenerator &&
+    preparedDocumentReady &&
+    Boolean(linkedGeneratedDocument?.id)
   const closeGating = getCloseGatingRequirements(recipe.findingTypeId)
   const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && closeGating.requiresEvidenceNote
   const requiresRevalidation = status === "confirmed" && !hasGenerator && recipe.resolveFlowState === "needs_revalidation"
@@ -277,12 +282,16 @@ export default function FindingDetailPage() {
     linkedGeneratedDocument?.title
   const detailHelperText =
     status === "open" && hasGenerator
-      ? "Confirmi cazul și intri direct în draftul recomandat, fără o pagină separată între finding și generator."
+      ? "Confirmi cazul și deschizi imediat mai jos zona de generare, fără pagină separată și fără side panel."
       : status === "open"
         ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
       : status === "confirmed" && hasGenerator
-        ? "Generezi draftul, îl validezi explicit și abia apoi îl salvezi ca dovadă în dosar."
-      : status === "confirmed"
+        ? preparedDocumentReady
+          ? "Documentul este confirmat și validat. Acum rezolvi riscul cu el, din același cockpit."
+          : "Completezi, generezi, re-scannezi și confirmi documentul chiar mai jos. Închiderea riscului și Dosarul vin după aceea, separat."
+        : status === "resolved" && hasGenerator
+          ? "Riscul este deja rezolvat cu documentul confirmat. Ultimul pas este să trimiți documentul la Dosar; abia apoi pornește monitorizarea."
+        : status === "confirmed"
           ? recipe.heroSummary
           : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
   const evidenceCardCopy =
@@ -442,7 +451,7 @@ export default function FindingDetailPage() {
         <FindingDossierSuccessCard
           findingTitle={finding.title}
           linkedGeneratedDocument={linkedGeneratedDocument}
-          primaryHref={dashboardRoutes.auditorVault}
+          primaryHref={dashboardRoutes.dosar}
           secondaryHref={dashboardRoutes.auditLog}
           feedbackMessage="Dovada a intrat la dosar și rămâne disponibilă pentru audit, handoff și reverificare. De aici înainte intră în monitorizare, nu dispare."
         />
@@ -455,9 +464,38 @@ export default function FindingDetailPage() {
           nextReviewDateISO={finding.nextMonitoringDateISO}
           closureEvidence={finding.operationalEvidenceNote ?? finding.resolution?.closureEvidence ?? null}
           feedbackMessage={statusFeedback}
-          primaryHref={dashboardRoutes.auditorVault}
+          primaryHref={dashboardRoutes.dosar}
           secondaryHref={dashboardRoutes.auditLog}
         />
+      ) : null}
+
+      {resolvedMomentVisible ? (
+        <Card data-testid="finding-risk-resolved" className="border-eos-success/35 bg-eos-success-soft/60">
+          <CardContent className="space-y-3 px-5 py-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-success/25 bg-white/70 text-eos-success">
+                  <CheckCircle2 className="size-5" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+                    Risc rezolvat
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-eos-text">
+                    {finding.title} a fost rezolvat cu documentul confirmat
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+                    Documentul a trecut confirmarea și validarea din cockpit. Următorul pas este separat:
+                    îl adaugi la Dosar, iar abia după aceea cazul intră în monitorizare.
+                  </p>
+                </div>
+              </div>
+              <Badge variant="success" className="normal-case tracking-normal">
+                rezolvat
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       {/* ── Hero Action — above the fold, dominant ────────────────────── */}
@@ -475,7 +513,7 @@ export default function FindingDetailPage() {
               className="gap-1.5"
             >
               <FileText className="size-3.5" strokeWidth={2} />
-              Confirmă și generează
+              Confirmă și deschide generarea
             </Button>
           ) : recipe.workflowLink ? (
             <Button
@@ -532,14 +570,34 @@ export default function FindingDetailPage() {
           helperText={detailHelperText}
         >
           {hasGenerator ? (
-            <Button
-              data-testid="open-generator-drawer"
-              onClick={() => setGeneratorOpen(true)}
-              className="gap-1.5"
-            >
-              <FileText className="size-3.5" strokeWidth={2} />
-              {documentFlowState === "draft_ready" ? "Continuă validarea și salvarea" : recipe.primaryCTA.label}
-            </Button>
+            <>
+              <Button
+                data-testid="open-generator-drawer"
+                onClick={() => setGeneratorOpen((current) => !current)}
+                className="gap-1.5"
+                variant={generatorOpen || preparedDocumentReady ? "outline" : "default"}
+              >
+                <FileText className="size-3.5" strokeWidth={2} />
+                {generatorOpen
+                  ? "Ascunde zona de generare"
+                  : preparedDocumentReady
+                    ? "Revizuiește documentul confirmat"
+                  : documentFlowState === "draft_ready"
+                    ? "Continuă validarea documentului mai jos"
+                    : "Deschide zona de generare"}
+              </Button>
+              {needsDocumentResolution ? (
+                <Button
+                  data-testid="mark-finding-resolved"
+                  onClick={() => updateStatus("resolved")}
+                  disabled={actionLoading}
+                  className="gap-1.5"
+                >
+                  <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                  Rezolvă riscul cu acest document
+                </Button>
+              ) : null}
+            </>
           ) : (
             <>
               {recipe.workflowLink ? (
@@ -573,6 +631,47 @@ export default function FindingDetailPage() {
           )}
         </FindingHeroAction>
       )}
+
+      {needsDossierHandoff ? (
+        <div className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+            Acum faci asta
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
+            Riscul este deja rezolvat cu documentul confirmat. Ultimul pas este să trimiți documentul la Dosar; abia apoi pornește monitorizarea.
+          </p>
+          <p className="mt-1.5 text-sm text-eos-text-muted">
+            Dosarul primește rezultatul, nu procesul. Până nu faci pasul ăsta, cazul nu trebuie tratat ca monitorizat.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button
+              data-testid="send-document-to-dosar"
+              onClick={() =>
+                updateStatus("under_monitoring", {
+                  generatedDocumentId: linkedGeneratedDocument?.id,
+                })
+              }
+              disabled={actionLoading}
+              className="gap-1.5"
+            >
+              <CheckCircle2 className="size-3.5" strokeWidth={2} />
+              Adaugă documentul la Dosar
+            </Button>
+            <Button
+              data-testid="review-generated-document"
+              variant="outline"
+              onClick={() => setGeneratorOpen(true)}
+              className="gap-1.5"
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              Revizuiește documentul
+            </Button>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-eos-text-muted">
+            După ce documentul intră în Dosar, cockpitul marchează clar monitoring-ul pe aceeași urmă.
+          </p>
+        </div>
+      ) : null}
 
       {requiresOperationalEvidence ? (
         <Card className="border-eos-border bg-eos-surface">
@@ -649,165 +748,16 @@ export default function FindingDetailPage() {
         </Card>
       )}
 
-      {/* ── Execution first, context second ───────────────────────────── */}
-      <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Progres, dosar și monitorizare
-            </p>
-            <p className="mt-1 text-sm text-eos-text-muted">
-              Detaliile de progres, dosar și aftercare rămân aici, sub acțiunea principală.
-            </p>
-          </div>
-          <Badge variant="outline" className="normal-case tracking-normal">
-            Deschide
-          </Badge>
-        </summary>
-        <div className="mt-4">
-          <FindingExecutionCard
-            finding={finding}
-            documentFlowState={documentFlowState}
-            linkedGeneratedDocument={linkedGeneratedDocument}
-            recipe={recipe}
-          />
-        </div>
-      </details>
 
-      <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Contextul cazului
-            </p>
-            <p className="mt-1 text-sm text-eos-text-muted">
-              Vezi problema, impactul și dovada cerută doar când ai nevoie de context suplimentar, fără să încarci zona de execuție.
-            </p>
-          </div>
-          <Badge variant="outline" className="normal-case tracking-normal">
-            Deschide
-          </Badge>
-        </summary>
-        <div className="mt-4">
-          <FindingNarrativeCard
-            finding={finding}
-            title="Rezolvare în același loc"
-            description="Problema, impactul și condiția de închidere rămân în aceeași urmă, fără să concureze cu pasul activ."
-            recipe={recipe}
-          />
-        </div>
-      </details>
-
-      {(finding.legalMappings?.length || finding.provenance || finding.reasoning) ? (
-        <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Context juridic și proveniență
-              </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Baza legală, semnalul sursă și explicația AI rămân disponibile când ai nevoie de ele, fără să încarce primul ecran.
-              </p>
-            </div>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              Detalii
-            </Badge>
-          </summary>
-          <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
-            {finding.legalMappings && finding.legalMappings.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  Baza legală
-                </p>
-                {finding.legalMappings.map((lm, i) => (
-                  <div key={i} className="flex items-start gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                    <Scale className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-eos-text">
-                        {lm.regulation} — {lm.article}
-                      </p>
-                      <p className="text-xs text-eos-text-muted">{lm.label}</p>
-                      <p className="mt-1 text-xs text-eos-text-muted">{lm.reason}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {finding.provenance && (
-              <div className="space-y-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  Proveniență semnal
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Regulă</p>
-                    <p className="mt-1 text-sm text-eos-text">{finding.provenance.ruleId}</p>
-                  </div>
-                  {finding.provenance.matchedKeyword && (
-                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cuvânt cheie</p>
-                      <p className="mt-1 text-sm text-eos-text font-mono">{finding.provenance.matchedKeyword}</p>
-                    </div>
-                  )}
-                  {finding.provenance.signalSource && (
-                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Sursă semnal</p>
-                      <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalSource}</p>
-                    </div>
-                  )}
-                  {finding.provenance.signalConfidence && (
-                    <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Încredere semnal</p>
-                      <p className="mt-1 text-sm text-eos-text">{finding.provenance.signalConfidence}</p>
-                    </div>
-                  )}
-                </div>
-                {finding.provenance.excerpt && (
-                  <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Excerpt sursă</p>
-                    <p className="mt-1 text-sm leading-relaxed text-eos-text italic">
-                      &ldquo;{finding.provenance.excerpt}&rdquo;
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {finding.reasoning && (
-              <div className="space-y-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  Raționament AI
-                </p>
-                <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-                  <p className="text-sm leading-relaxed text-eos-text">{finding.reasoning}</p>
-                  {finding.sourceParagraph && (
-                    <div className="mt-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                        Paragraf sursă
-                      </p>
-                      <p className="mt-1 text-sm leading-relaxed text-eos-text-muted italic">
-                        &ldquo;{finding.sourceParagraph}&rdquo;
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </details>
-      ) : null}
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 text-xs text-eos-text-muted">
         <span>ID: {finding.id}</span>
-        {finding.scanId && <span>Scan: {finding.scanId}</span>}
-        {finding.ownerSuggestion && <span>Owner sugerat: {finding.ownerSuggestion}</span>}
-        {finding.nextMonitoringDateISO && (
-          <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
-        )}
         {finding.findingStatusUpdatedAtISO && (
           <span>Actualizat: {new Date(finding.findingStatusUpdatedAtISO).toLocaleDateString("ro-RO")}</span>
+        )}
+        {finding.nextMonitoringDateISO && (
+          <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
         )}
       </div>
 
@@ -825,8 +775,8 @@ export default function FindingDetailPage() {
         </div>
       ) : null}
 
-      {/* ── Generator Drawer (in-context, no page navigation) ─────────── */}
-      {hasGenerator && generatorDocumentType && (
+      {/* ── Inline generator flow (in-context, no page navigation) ─────── */}
+      {hasGenerator && generatorDocumentType && generatorOpen && status === "confirmed" && (
         <GeneratorDrawer
           open={generatorOpen}
           onOpenChange={setGeneratorOpen}
@@ -836,8 +786,13 @@ export default function FindingDetailPage() {
           vendorName={recipe.vendorContext?.vendorName}
           vendorDpaUrl={recipe.vendorContext?.dpaUrl}
           onComplete={(result) => {
-            if (result?.dossierSaved) {
-              setShowDossierMoment(true)
+            if (result?.finding) {
+              applyFindingResponse({
+                finding: result.finding as FindingDetail,
+                linkedGeneratedDocument: result.linkedGeneratedDocument ?? null,
+                documentFlowState: result.documentFlowState,
+                feedbackMessage: result.feedbackMessage,
+              })
             }
             refetchFinding()
           }}
