@@ -183,6 +183,39 @@ export type CloseGatingRequirements = {
   acceptedEvidence: string[]
 }
 
+export type SmartResolveExecutionClass = "documentary" | "operational" | "support"
+
+const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
+  "GDPR-001",
+  "GDPR-002",
+  "GDPR-003",
+  "GDPR-010",
+  "GDPR-016",
+  "AI-005",
+])
+
+const SUPPORT_FINDING_TYPE_IDS = new Set([
+  "GDPR-013",
+  "GDPR-014",
+  "GDPR-019",
+  "NIS2-001",
+  "NIS2-005",
+  "NIS2-015",
+  "NIS2-GENERIC",
+])
+
+export function getSmartResolveExecutionClass(
+  findingTypeId: string
+): SmartResolveExecutionClass {
+  if (DOCUMENTARY_FINDING_TYPE_IDS.has(findingTypeId)) return "documentary"
+  if (SUPPORT_FINDING_TYPE_IDS.has(findingTypeId)) return "support"
+  return "operational"
+}
+
+export function isSmartResolveDocumentaryFindingType(findingTypeId: string) {
+  return getSmartResolveExecutionClass(findingTypeId) === "documentary"
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. FINDING TYPE DEFINITIONS — Catalog canonic
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1439,6 +1472,7 @@ function buildVisibleBlocks(
 ): CockpitVisibleBlocks {
   const primaryMode = findingType.resolutionModes[0]
   const rules = RESOLUTION_MODE_BLOCK_RULES[primaryMode]
+  const executionClass = getSmartResolveExecutionClass(findingType.findingTypeId)
   const { collapsedPrimaryCTA, collapsedStatusLabel } = getCollapsedPresentation(
     uiState,
     flow.primaryCTA
@@ -1449,9 +1483,12 @@ function buildVisibleBlocks(
     documentFlowState !== "not_required" &&
     findingType.requiredEvidenceKinds.includes("generated_document")
   const shouldShowGenerator =
-    rules.generatorBlock ||
-    (primaryMode === "in_app_guided" &&
-      (uiState === "ready_to_generate" || uiState === "evidence_uploaded" || hasDocumentTrack))
+    executionClass === "documentary" &&
+    (
+      rules.generatorBlock ||
+      (primaryMode === "in_app_guided" &&
+        (uiState === "ready_to_generate" || uiState === "evidence_uploaded" || hasDocumentTrack))
+    )
 
   if (shouldShowGenerator) allBlocks.push("generator")
   if (rules.inputBlock) allBlocks.push("input")
@@ -2308,10 +2345,14 @@ export function getCloseGatingRequirements(findingTypeId: string): CloseGatingRe
   const findingType = getFindingTypeDefinition(findingTypeId)
   const flow = getResolveFlowRecipe(findingTypeId)
   const primaryMode = findingType.resolutionModes[0]
+  const isDocumentary = isSmartResolveDocumentaryFindingType(findingTypeId)
   const requiresGeneratedDocument =
-    findingType.requiredEvidenceKinds.includes("generated_document") ||
-    (flow.initialFlowState === "ready_to_generate" &&
-      (primaryMode === "in_app_guided" || primaryMode === "in_app_full"))
+    isDocumentary &&
+    (
+      findingType.requiredEvidenceKinds.includes("generated_document") ||
+      (flow.initialFlowState === "ready_to_generate" &&
+        (primaryMode === "in_app_guided" || primaryMode === "in_app_full"))
+    )
   const requiresRevalidationConfirmation = flow.initialFlowState === "needs_revalidation"
 
   return {

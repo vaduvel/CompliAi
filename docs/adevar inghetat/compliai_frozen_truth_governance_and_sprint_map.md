@@ -29,10 +29,11 @@ Acest document fixează:
 2. [compliai_market_runtime_truth_bible.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_market_runtime_truth_bible.md)
 3. [compliai_final_user_matrix_bible.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_final_user_matrix_bible.md)
 4. [compliai-user-flow-1to1-runtime-audit.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai-user-flow-1to1-runtime-audit.md)
+5. [compliai_risk_evidence_resolve_truth_matrix.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_risk_evidence_resolve_truth_matrix.md)
 
 ### 1.2 Document canonic suplimentar, în afara folderului
 
-5. [compliai_smart_resolve_cockpit_bible.md](/Users/vaduvageorge/Downloads/compliai_smart_resolve_cockpit_bible.md)
+6. [compliai_smart_resolve_cockpit_bible.md](/Users/vaduvageorge/Downloads/compliai_smart_resolve_cockpit_bible.md)
 
 Acesta nu stă în folder, dar rămâne obligatoriu pentru:
 - cockpit
@@ -107,7 +108,20 @@ Acesta este singurul document care are voie să spună:
 - `merge acum`
 - `pică acum`
 
-### 2.5 Cockpit execution truth
+### 2.5 Risk → evidence truth
+
+[compliai_risk_evidence_resolve_truth_matrix.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_risk_evidence_resolve_truth_matrix.md) fixează:
+- ce riscuri sunt cu adevărat documentare
+- ce riscuri sunt de fapt operaționale
+- ce riscuri sunt suport / handoff
+- ce artefacte sunt doar recomandări, nu flow real de Smart Resolve
+
+Acesta este documentul principal pentru:
+- `risk -> evidence -> motor`
+- delimitarea între document flow și operational flow
+- tăierea flow-urilor false din cockpit
+
+### 2.6 Cockpit execution truth
 
 [compliai_smart_resolve_cockpit_bible.md](/Users/vaduvageorge/Downloads/compliai_smart_resolve_cockpit_bible.md) fixează:
 - arhitectura cockpitului
@@ -270,13 +284,16 @@ Dacă documentele intră în conflict, ordinea este:
 2. Pentru `cockpit / generator / validate / success / handoff controlat`:
 [compliai_smart_resolve_cockpit_bible.md](/Users/vaduvageorge/Downloads/compliai_smart_resolve_cockpit_bible.md)
 
-3. Pentru `scheletul mare, IA, etape, spine`:
+3. Pentru `ce risc se poate rezolva documentar vs operațional vs suport`:
+[compliai_risk_evidence_resolve_truth_matrix.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_risk_evidence_resolve_truth_matrix.md)
+
+4. Pentru `scheletul mare, IA, etape, spine`:
 [compliai_3_user_app_skeleton_ia_bible.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_3_user_app_skeleton_ia_bible.md)
 
-4. Pentru `piață, prioritizare, current vs target vs migration`:
+5. Pentru `piață, prioritizare, current vs target vs migration`:
 [compliai_market_runtime_truth_bible.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_market_runtime_truth_bible.md)
 
-5. Pentru `ce trebuie să vadă și să facă userul pe fiecare ecran`:
+6. Pentru `ce trebuie să vadă și să facă userul pe fiecare ecran`:
 [compliai_final_user_matrix_bible.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai_final_user_matrix_bible.md)
 
 ---
@@ -380,6 +397,10 @@ Taskuri:
 - Resolve rămâne inbox, nu pseudo-cockpit
 - Scan rămâne intake, nu centru de execuție
 - clarifică first snapshot vs Home vs Resolve
+- arată din listă tipul real al fiecărui risc:
+  - `document`
+  - `operațional`
+  - `suport`
 - comprimă explicația per risk în snapshot și Resolve:
   - o singură propoziție scurtă în română
   - numele cazului
@@ -400,10 +421,13 @@ resetăm cockpitul ca singur loc de execuție.
 
 Taskuri:
 - stack vizibil corect: confirmare -> execuție -> validate -> Dosar -> monitoring
-- document findings cu validate evidence real
+- aliniază cockpitul la matricea `risk -> evidence -> motor`
+- document findings cu validate evidence real doar dacă sunt `documentare reale`
 - operational findings cu evidence gate real
 - specialist findings cu handoff controlat și return state
 - aftercare și close condition explicite
+- scoate generatorul de pe riscurile care sunt doar `operaționale` sau `suport`
+- repară orice flow documentar parțial rămas, în special unde generatorul există dar poarta de attach / Dosar nu este completă
 
 Definition of done:
 - niciun finding principal nu mai cere execuție arbitrară în afara cockpitului
@@ -473,8 +497,9 @@ Taskuri:
 - testare live click-by-click pentru Mihai
 - testare live click-by-click pentru Diana
 - testare live click-by-click pentru Radu
-- document findings
-- operational findings
+- toate riscurile din matricea `documentar real`
+- toate riscurile din matricea `operațional`
+- toate riscurile marcate `suport / handoff`
 - specialist controlled handoffs
 - Dosar / export / monitoring / reopen / revalidation
 - completare finală a auditului 1:1

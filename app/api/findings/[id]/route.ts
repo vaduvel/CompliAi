@@ -1,18 +1,18 @@
 // GET /api/findings/[id]  — Returns a single ScanFinding
 // PATCH /api/findings/[id] — Update finding status (confirm/dismiss/resolve)
 //   B2: Auto-generates task candidate on confirmation
-//   B3: Document flow must be explicitly reviewed and attached before resolve
+//   B3: Document flow must be explicitly reviewed before resolve, then sent to Dosar as a separate step
 
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { readFreshState, readState, writeState } from "@/lib/server/mvp-store"
+import { readFreshState, writeState } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
-import type { DocumentType } from "@/lib/server/document-generator"
+import { DOCUMENT_TYPES, type DocumentType } from "@/lib/server/document-generator"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 import {
   buildCockpitRecipe,
@@ -22,13 +22,7 @@ import {
 } from "@/lib/compliscan/finding-kernel"
 import type { ScanFinding } from "@/lib/compliance/types"
 
-const VALID_DOC_TYPES: DocumentType[] = [
-  "privacy-policy",
-  "cookie-policy",
-  "dpa",
-  "nis2-incident-response",
-  "ai-governance",
-]
+const VALID_DOC_TYPES: DocumentType[] = DOCUMENT_TYPES.map(({ id }) => id)
 
 const REQUIRED_CONFIRMATION_CHECKLIST = [
   "content-reviewed",
@@ -63,7 +57,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const state = await readState()
+    const state = await readFreshState()
     const finding = state.findings.find((f) => f.id === id)
 
     if (!finding) {
@@ -125,10 +119,16 @@ export async function PATCH(
     const { findingTypeId } = classifyFinding(finding)
     const closeGating = getCloseGatingRequirements(findingTypeId)
 
-    const storedStatus =
-      newStatus === "resolved"
+    const storedStatus = (
+      newStatus === "resolved" && !closeGating.requiresGeneratedDocument
         ? "under_monitoring"
-        : (newStatus as "open" | "confirmed" | "dismissed" | "under_monitoring")
+        : newStatus
+    ) as
+      | "open"
+      | "confirmed"
+      | "dismissed"
+      | "resolved"
+      | "under_monitoring"
 
     // Update finding status (B2)
     const updatedFinding = {
@@ -150,7 +150,9 @@ export async function PATCH(
     let feedbackMessage =
       newStatus === "dismissed"
         ? "Finding respins. A rămas disponibil pentru audit, dar nu mai intră în fluxul activ."
-        : "Finding închis și trecut în monitorizare."
+        : newStatus === "confirmed"
+          ? "Finding confirmat. Continuă execuția din cockpit."
+          : "Finding închis și trecut în monitorizare."
 
     if (newStatus === "open") {
       updatedFindings[findingIdx] = {
@@ -187,7 +189,16 @@ export async function PATCH(
     }
 
     // B2: On confirmation, generate task candidate + notify
-    if (newStatus === "confirmed") {
+    const shouldPrepareGeneratedDocument =
+      newStatus === "confirmed" && closeGating.requiresGeneratedDocument && Boolean(body.generatedDocumentId?.trim())
+    const latestValidatedGeneratedDocument =
+      generatedDocuments.find(
+        (document) =>
+          document.sourceFindingId === findingId &&
+          document.validationStatus === "passed"
+      ) ?? null
+
+    if (newStatus === "confirmed" && finding.findingStatus !== "confirmed") {
       const taskCandidate = mapFindingToTask(updatedFinding)
       taskCandidateSummary = {
         id: taskCandidate.id,
@@ -211,19 +222,19 @@ export async function PATCH(
       if (finding.suggestedDocumentType) {
         const docType = finding.suggestedDocumentType as DocumentType
         if (VALID_DOC_TYPES.includes(docType)) {
-          feedbackMessage += ` Deschide flow-ul ghidat pentru ${docType}, verifică draftul și atașează-l ca dovadă înainte de închidere.`
+          feedbackMessage += ` Deschide flow-ul ghidat pentru ${docType}, verifică draftul și confirmă-l aici înainte să rezolvi riscul.`
         }
       }
     }
 
-    if (isFindingResolvedLike(storedStatus) && closeGating.requiresGeneratedDocument) {
+    if (shouldPrepareGeneratedDocument) {
       const confirmationChecklist = normalizeConfirmationChecklist(body.confirmationChecklist)
       const validationChecklist = normalizeValidationChecklist(body.validationChecklist)
       const generatedDocumentId = body.generatedDocumentId?.trim()
 
       if (!generatedDocumentId) {
         return jsonError(
-          "Pentru acest finding trebuie să aprobi și să atașezi draftul generat înainte de închidere.",
+          "Pentru acest finding trebuie să confirmi explicit documentul generat înainte să poți rezolva riscul.",
           400,
           "DOCUMENT_APPROVAL_REQUIRED"
         )
@@ -239,7 +250,7 @@ export async function PATCH(
 
       if (!hasRequiredValidation(validationChecklist)) {
         return jsonError(
-          "Validarea dovezii este incompletă. Rulează verificarea draftului și confirmă că este gata pentru dosar.",
+          "Validarea dovezii este incompletă. Rulează verificarea draftului și confirmă că este gata pentru rezolvarea riscului.",
           400,
           "DOCUMENT_VALIDATION_INCOMPLETE"
         )
@@ -259,20 +270,16 @@ export async function PATCH(
 
       const approvedDocument = {
         ...generatedDocuments[documentIndex],
-        approvalStatus: "approved_as_evidence" as const,
-        approvedAtISO: nowISO,
-        approvedByUserId: session.userId,
-        approvedByEmail: session.email,
+        approvalStatus: "draft" as const,
+        approvedAtISO: undefined,
+        approvedByUserId: undefined,
+        approvedByEmail: undefined,
         confirmationChecklist,
         validationChecklist,
         validationStatus: "passed" as const,
         validatedAtISO: nowISO,
         evidenceNote: body.evidenceNote?.trim() || undefined,
       }
-      const nextMonitoringDateISO =
-        approvedDocument.nextReviewDateISO ??
-        computeNextMonitoringDateISO(findingTypeId, nowISO) ??
-        undefined
       const nextResolution: FindingResolution = {
         problem:
           finding.resolution?.problem ??
@@ -295,10 +302,7 @@ export async function PATCH(
         closureEvidence:
           body.evidenceNote?.trim() ||
           `Draft aprobat și atașat ca dovadă: ${approvedDocument.title}.`,
-        revalidation:
-          nextMonitoringDateISO
-            ? `Următor control programat la ${formatRoDate(nextMonitoringDateISO)}.`
-            : finding.resolution?.revalidation,
+        revalidation: finding.resolution?.revalidation,
         reviewedAtISO: nowISO,
       }
 
@@ -307,10 +311,154 @@ export async function PATCH(
         ...updatedFinding,
         resolution: nextResolution,
         operationalEvidenceNote: body.evidenceNote?.trim() || finding.operationalEvidenceNote,
+        nextMonitoringDateISO: finding.nextMonitoringDateISO,
+      }
+      feedbackMessage =
+        "Documentul este confirmat și validat. Acum poți rezolva riscul cu acest document."
+    }
+
+    if (newStatus === "resolved" && closeGating.requiresGeneratedDocument) {
+      const preparedDocument = latestValidatedGeneratedDocument
+
+      if (!preparedDocument) {
+        return jsonError(
+          "Pentru acest finding trebuie să confirmi și să validezi documentul înainte să rezolvi riscul.",
+          400,
+          "DOCUMENT_NOT_READY_FOR_RESOLUTION"
+        )
+      }
+      const nextResolution: FindingResolution = {
+        problem:
+          finding.resolution?.problem ??
+          finding.detail,
+        impact:
+          finding.resolution?.impact ??
+          finding.impactSummary ??
+          "Riscul rămâne deschis până când documentul și confirmarea sunt finalizate explicit.",
+        action:
+          finding.resolution?.action ??
+          finding.remediationHint ??
+          "Generează documentul recomandat, verifică-l cap-coadă, rezolvă riscul cu el și apoi trimite-l la dosar.",
+        generatedAsset:
+          finding.resolution?.generatedAsset ??
+          `${preparedDocument.title} pregătit ca document validat`,
+        humanStep:
+          body.evidenceNote?.trim() ||
+          finding.resolution?.humanStep ||
+          "Ai confirmat manual că documentul reflectă realitatea firmei înainte de a-l folosi ca dovadă.",
+        closureEvidence:
+          body.evidenceNote?.trim() ||
+          finding.operationalEvidenceNote ||
+          finding.resolution?.closureEvidence ||
+          `Risc rezolvat cu documentul validat: ${preparedDocument.title}.`,
+        revalidation: finding.resolution?.revalidation,
+        reviewedAtISO: nowISO,
+      }
+
+      updatedFindings[findingIdx] = {
+        ...updatedFinding,
+        resolution: nextResolution,
+        operationalEvidenceNote: body.evidenceNote?.trim() || finding.operationalEvidenceNote,
+        nextMonitoringDateISO: undefined,
+      }
+      feedbackMessage =
+        "Riscul este rezolvat. Acum adaugi documentul la Dosar ca să pornești monitorizarea."
+    }
+
+    if (newStatus === "under_monitoring" && closeGating.requiresGeneratedDocument) {
+      if (finding.findingStatus !== "resolved") {
+        return jsonError(
+          "Pentru acest finding trebuie să rezolvi întâi riscul cu documentul înainte să îl trimiți la dosar.",
+          400,
+          "FINDING_NOT_RESOLVED_FOR_DOSSIER"
+        )
+      }
+
+      const generatedDocumentId =
+        body.generatedDocumentId?.trim() ??
+        latestValidatedGeneratedDocument?.id
+
+      if (!generatedDocumentId) {
+        return jsonError(
+          "Pentru acest finding trebuie să existe un document validat înainte de trimiterea la dosar.",
+          400,
+          "DOCUMENT_NOT_READY_FOR_DOSSIER"
+        )
+      }
+
+      const documentIndex = generatedDocuments.findIndex(
+        (document) => document.id === generatedDocumentId && document.sourceFindingId === findingId
+      )
+
+      if (documentIndex === -1) {
+        return jsonError(
+          "Documentul selectat nu aparține acestui finding.",
+          400,
+          "DOCUMENT_NOT_LINKED_TO_FINDING"
+        )
+      }
+
+      const preparedDocument = generatedDocuments[documentIndex]
+      if (preparedDocument.validationStatus !== "passed") {
+        return jsonError(
+          "Documentul trebuie validat înainte să poată fi trimis la dosar.",
+          400,
+          "DOCUMENT_NOT_READY_FOR_DOSSIER"
+        )
+      }
+
+      const dossierDocument = {
+        ...preparedDocument,
+        approvalStatus: "approved_as_evidence" as const,
+        approvedAtISO: nowISO,
+        approvedByUserId: session.userId,
+        approvedByEmail: session.email,
+        evidenceNote: body.evidenceNote?.trim() || preparedDocument.evidenceNote,
+      }
+      const nextMonitoringDateISO =
+        dossierDocument.nextReviewDateISO ??
+        computeNextMonitoringDateISO(findingTypeId, nowISO) ??
+        undefined
+      const nextResolution: FindingResolution = {
+        problem:
+          finding.resolution?.problem ??
+          finding.detail,
+        impact:
+          finding.resolution?.impact ??
+          finding.impactSummary ??
+          "Riscul rămâne deschis până când documentul și confirmarea sunt finalizate explicit.",
+        action:
+          finding.resolution?.action ??
+          finding.remediationHint ??
+          "Generează documentul recomandat, verifică-l cap-coadă, rezolvă riscul cu el și salvează-l la dosar.",
+        generatedAsset:
+          finding.resolution?.generatedAsset ??
+          `${dossierDocument.title} salvat la dosar`,
+        humanStep:
+          body.evidenceNote?.trim() ||
+          finding.resolution?.humanStep ||
+          "Ai confirmat manual că documentul reflectă realitatea firmei înainte de a-l folosi ca dovadă.",
+        closureEvidence:
+          body.evidenceNote?.trim() ||
+          finding.operationalEvidenceNote ||
+          finding.resolution?.closureEvidence ||
+          `Document trimis la dosar: ${dossierDocument.title}.`,
+        revalidation:
+          nextMonitoringDateISO
+            ? `Următor control programat la ${formatRoDate(nextMonitoringDateISO)}.`
+            : finding.resolution?.revalidation,
+        reviewedAtISO: nowISO,
+      }
+
+      generatedDocuments[documentIndex] = dossierDocument
+      updatedFindings[findingIdx] = {
+        ...updatedFinding,
+        resolution: nextResolution,
+        operationalEvidenceNote: body.evidenceNote?.trim() || finding.operationalEvidenceNote,
         nextMonitoringDateISO,
       }
       feedbackMessage =
-        "Dovada a intrat la dosar. Draftul a fost verificat, aprobat și legat de finding ca artefact auditabil, iar cazul a intrat în monitorizare cu urmă clară pentru reverificare."
+        "Documentul a intrat în Dosar, iar cazul a intrat în monitorizare cu urmă clară pentru reverificare."
     }
 
     if (isFindingResolvedLike(storedStatus) && !closeGating.requiresGeneratedDocument) {
@@ -416,9 +564,11 @@ export async function PATCH(
       status: storedStatus,
       taskCandidate: taskCandidateSummary,
       linkedGeneratedDocument:
-        isFindingResolvedLike(storedStatus) && body.generatedDocumentId
+        body.generatedDocumentId
           ? generatedDocuments.find((document) => document.id === body.generatedDocumentId) ?? linkedGeneratedDocument
-          : linkedGeneratedDocument,
+          : generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus === "approved_as_evidence"
+            ? generatedDocuments.find((document) => document.sourceFindingId === findingId && document.approvalStatus === "approved_as_evidence") ?? linkedGeneratedDocument
+            : linkedGeneratedDocument,
       documentFlowState: getDocumentFlowState(
         finding.suggestedDocumentType,
         generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus

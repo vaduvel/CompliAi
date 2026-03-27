@@ -342,6 +342,60 @@ describe("PATCH /api/findings/[id]", () => {
     ])
   })
 
+  it("acceptă retention-policy ca document valid pentru flow-ul documentar", async () => {
+    const retentionState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Retenție date neclară",
+          detail: "Nu este clar cât timp păstrăm datele și când se execută ștergerea.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "low",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "retention-policy",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-retention-1",
+          documentType: "retention-policy",
+          title: "Politică și Matrice de Retenție",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    }
+    mocks.readStateMock.mockResolvedValueOnce(retentionState)
+    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "confirmed",
+          generatedDocumentId: "doc-retention-1",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("confirmed")
+    expect(payload.documentFlowState).toBe("draft_ready")
+    expect(payload.linkedGeneratedDocument.documentType).toBe("retention-policy")
+    expect(payload.feedbackMessage).toContain("Documentul este confirmat și validat")
+  })
+
   it("rezolvă finding-ul documentar doar după ce documentul este confirmat și validat", async () => {
     const attachedDocumentState = {
       findings: [

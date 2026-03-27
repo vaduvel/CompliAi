@@ -19,6 +19,7 @@ import {
   extractEF001SpvState,
   extractEF003Explainability,
   getCloseGatingRequirements,
+  getSmartResolveExecutionClass,
   getFindingTypeDefinition,
   getResolveFlowRecipe,
 } from "@/lib/compliscan/finding-kernel"
@@ -956,6 +957,28 @@ describe("getCloseGatingRequirements", () => {
     const requirements = getCloseGatingRequirements("SYS-002")
     expect(requirements.requiresRevalidationConfirmation).toBe(true)
     expect(requirements.requiresNextReviewDate).toBe(true)
+  })
+})
+
+describe("getSmartResolveExecutionClass", () => {
+  it("marchează policy-urile și documentele reale ca documentare", () => {
+    expect(getSmartResolveExecutionClass("GDPR-001")).toBe("documentary")
+    expect(getSmartResolveExecutionClass("GDPR-010")).toBe("documentary")
+    expect(getSmartResolveExecutionClass("GDPR-016")).toBe("documentary")
+    expect(getSmartResolveExecutionClass("AI-005")).toBe("documentary")
+  })
+
+  it("marchează riscurile operaționale din intake ca operaționale", () => {
+    expect(getSmartResolveExecutionClass("GDPR-OPS")).toBe("operational")
+    expect(getSmartResolveExecutionClass("GDPR-020")).toBe("operational")
+    expect(getSmartResolveExecutionClass("AI-OPS")).toBe("operational")
+    expect(getSmartResolveExecutionClass("EF-003")).toBe("operational")
+  })
+
+  it("marchează DSAR și NIS2 asistat ca support", () => {
+    expect(getSmartResolveExecutionClass("GDPR-013")).toBe("support")
+    expect(getSmartResolveExecutionClass("GDPR-019")).toBe("support")
+    expect(getSmartResolveExecutionClass("NIS2-015")).toBe("support")
   })
 })
 
