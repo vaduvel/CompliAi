@@ -793,6 +793,13 @@ export default function FindingDetailPage() {
           vendorName={recipe.vendorContext?.vendorName}
           vendorDpaUrl={recipe.vendorContext?.dpaUrl}
           onComplete={(result) => {
+            if (result?.evidenceAttached) {
+              setGeneratorOpen(false)
+              setTimeout(() => {
+                const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+                resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+              }, 50)
+            }
             if (result?.finding) {
               applyFindingResponse({
                 finding: result.finding as FindingDetail,
