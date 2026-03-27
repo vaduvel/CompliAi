@@ -1038,6 +1038,23 @@ describe("getSpecialistHandoffContract", () => {
     expect(contract?.runtimeReturnMode).toBe("automatic")
   })
 
+  it("mapează breach-ul ANSPDCP pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-019",
+      makeFinding({
+        id: "anspdcp-breach-demo-incident-1",
+        category: "GDPR",
+        title: "Breach cu date personale",
+        detail: "Incident demo-incident-1 cu notificare ANSPDCP necesară",
+      })
+    )
+    expect(contract?.surface).toBe("anspdcp_breach")
+    expect(contract?.startHref).toContain("/dashboard/nis2?")
+    expect(contract?.startHref).toContain("incidentId=demo-incident-1")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fanspdcp-breach-demo-incident-1")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
   it("mapează early warning NIS2 pe handoff cu întoarcere automată", () => {
     const contract = getSpecialistHandoffContract(
       "NIS2-015",

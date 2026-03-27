@@ -1967,6 +1967,7 @@ function getWorkflowLink(
         incidentId,
         focus: "anspdcp",
         findingId: record.id,
+        returnTo: `/dashboard/resolve/${record.id}`,
       })
       return {
         href: `/dashboard/nis2?${search.toString()}`,
@@ -2074,9 +2075,9 @@ export function getSpecialistHandoffContract(
         startHref: workflowLink.href,
         startLabel: workflowLink.label,
         targetReturnMode: "automatic",
-        runtimeReturnMode: "conditional_link",
+        runtimeReturnMode: "automatic",
         runtimeStatusNote:
-          "Fluxul de breach poate construi un link de întoarcere doar dacă incidentul este selectat și există stare suficientă; nu există încă round-trip automat complet.",
+          "După ce notificarea ANSPDCP este salvată sau marcată ca trimisă, modulul te readuce automat în același cockpit pentru închidere.",
         returnEvidenceLabel: "Dovadă ANSPDCP sau raționament documentat",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească numărul de înregistrare ANSPDCP sau raționamentul complet documentat pentru ne-notificare.",

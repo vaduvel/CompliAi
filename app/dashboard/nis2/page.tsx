@@ -1043,12 +1043,15 @@ function AnspdcpNotificationPanel({
   onUpdate,
   emphasized = false,
   sourceFindingId,
+  returnTo,
 }: {
   incident: Nis2Incident
-  onUpdate: (patch: Record<string, unknown>) => void
+  onUpdate: (patch: Record<string, unknown>) => void | Promise<void>
   emphasized?: boolean
   sourceFindingId?: string
+  returnTo?: string
 }) {
+  const router = useRouter()
   const notif = incident.anspdcpNotification
   const [form, setForm] = useState({
     dataCategories: notif?.dataCategories.join(", ") ?? "",
@@ -1088,7 +1091,7 @@ function AnspdcpNotificationPanel({
     ? slaLabel(notif.deadlineISO, 72 * 3_600_000)
     : null
   const backToCockpitHref =
-    sourceFindingId && notif && (notif.status === "submitted" || notif.status === "acknowledged")
+    !returnTo && sourceFindingId && notif && (notif.status === "submitted" || notif.status === "acknowledged")
       ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
           anspdcp: "done",
           evidenceNote: buildAnspdcpEvidenceNote(notif),
@@ -1111,8 +1114,17 @@ function AnspdcpNotificationPanel({
       notifyDataSubjects: form.notifyDataSubjects,
       dataSubjectsNotifiedAtISO: notif?.dataSubjectsNotifiedAtISO,
     }
-    onUpdate({ anspdcpNotification: updated })
+    await Promise.resolve(onUpdate({ anspdcpNotification: updated }))
     setSaving(false)
+    if (sourceFindingId && returnTo && (submitted || updated.status === "submitted" || updated.status === "acknowledged")) {
+      toast.success("Notificare ANSPDCP salvată. Revenim în cockpit.")
+      const params = new URLSearchParams({
+        anspdcp: "done",
+        evidenceNote: buildAnspdcpEvidenceNote(updated),
+      })
+      router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+      return
+    }
     if (submitted) toast.success("Notificare ANSPDCP marcată ca trimisă")
   }
 
@@ -1303,14 +1315,16 @@ function IncidentRow({
   highlighted = false,
   focusMode,
   sourceFindingId,
+  returnTo,
 }: {
   incident: Nis2Incident
   orgName?: string
-  onUpdate: (id: string, patch: Partial<Nis2Incident>) => void
+  onUpdate: (id: string, patch: Partial<Nis2Incident>) => void | Promise<void>
   onDelete: (id: string) => void
   highlighted?: boolean
   focusMode?: "anspdcp" | "incident"
   sourceFindingId?: string
+  returnTo?: string
 }) {
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
@@ -1455,6 +1469,7 @@ function IncidentRow({
         onUpdate={(patch) => onUpdate(incident.id, patch as Partial<Nis2Incident>)}
         emphasized={highlighted && focusMode === "anspdcp"}
         sourceFindingId={sourceFindingId}
+        returnTo={returnTo}
       />
 
       {/* Checklist răspuns incident */}
@@ -1873,6 +1888,7 @@ function IncidentsTab({
               highlighted={inc.id === highlightedIncidentId}
               focusMode={focusMode}
               sourceFindingId={sourceFindingId}
+              returnTo={returnTo}
             />
           ))}
         </Card>
