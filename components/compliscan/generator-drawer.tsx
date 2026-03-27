@@ -51,35 +51,19 @@ type GeneratorDrawerCompletionResult = {
   feedbackMessage?: string
 }
 
-const CONFIRMATION_ITEMS = [
-  {
-    id: "content-reviewed",
-    label: "Am citit draftul și confirm că reflectă realitatea firmei",
-  },
-  {
-    id: "facts-confirmed",
-    label: "Am verificat datele, procesele și specificul firmei față de ce scrie în draft",
-  },
-  {
-    id: "approved-for-evidence",
-    label: "Îl aprob ca dovadă de conformitate",
-  },
+const REQUIRED_CONFIRMATION_IDS = [
+  "content-reviewed",
+  "facts-confirmed",
+  "approved-for-evidence",
 ] as const
 
-const VALIDATION_ITEMS = [
-  {
-    id: "validation-reviewed",
-    label: "Am rulat verificarea rapidă și am revizuit observațiile înainte să rezolv riscul",
-  },
-  {
-    id: "validation-ready",
-    label: "Confirm că versiunea validată este cea pe care o voi folosi pentru rezolvarea riscului",
-  },
+const REQUIRED_VALIDATION_IDS = [
+  "validation-reviewed",
+  "validation-ready",
 ] as const
 
 type GeneratorDrawerProps = {
   open: boolean
-  onOpenChange: (open: boolean) => void
   findingId: string
   documentType: DocumentType
   findingTitle: string
@@ -110,7 +94,6 @@ const textareaClass =
 
 export function GeneratorDrawer({
   open,
-  onOpenChange,
   findingId,
   documentType,
   findingTitle,
@@ -127,8 +110,7 @@ export function GeneratorDrawer({
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
   const [attaching, setAttaching] = useState(false)
-  const [checklist, setChecklist] = useState<string[]>([])
-  const [validationChecklist, setValidationChecklist] = useState<string[]>([])
+  const [humanApprovalConfirmed, setHumanApprovalConfirmed] = useState(false)
   const [validationRunAtISO, setValidationRunAtISO] = useState<string | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
@@ -173,8 +155,7 @@ export function GeneratorDrawer({
   useEffect(() => {
     if (open) {
       setResult(null)
-      setChecklist([])
-      setValidationChecklist([])
+      setHumanApprovalConfirmed(false)
       setValidationRunAtISO(null)
     }
   }, [open, findingId])
@@ -188,8 +169,7 @@ export function GeneratorDrawer({
 
     setGenerating(true)
     setResult(null)
-    setChecklist([])
-    setValidationChecklist([])
+    setHumanApprovalConfirmed(false)
     setValidationRunAtISO(null)
 
     try {
@@ -242,8 +222,8 @@ export function GeneratorDrawer({
         body: JSON.stringify({
           status: "confirmed",
           generatedDocumentId: result.recordId,
-          confirmationChecklist: checklist,
-          validationChecklist,
+          confirmationChecklist: humanApprovalConfirmed ? [...REQUIRED_CONFIRMATION_IDS] : [],
+          validationChecklist: humanApprovalConfirmed ? [...REQUIRED_VALIDATION_IDS] : [],
         }),
       })
       const payload = (await res.json()) as GeneratorDrawerCompletionResult & { error?: string }
@@ -278,16 +258,6 @@ export function GeneratorDrawer({
     }
   }
 
-  function toggleItem(id: string) {
-    setChecklist((c) => (c.includes(id) ? c.filter((v) => v !== id) : [...c, id]))
-  }
-
-  function toggleValidationItem(id: string) {
-    setValidationChecklist((current) =>
-      current.includes(id) ? current.filter((value) => value !== id) : [...current, id]
-    )
-  }
-
   function runValidation() {
     if (!result) return
 
@@ -312,10 +282,6 @@ export function GeneratorDrawer({
     })
   }
 
-  const allChecked = CONFIRMATION_ITEMS.every((item) => checklist.includes(item.id))
-  const validationConfirmed = VALIDATION_ITEMS.every((item) =>
-    validationChecklist.includes(item.id)
-  )
   const validationResult = result
     ? validateGeneratedDocumentEvidence({
         documentType,
@@ -328,12 +294,12 @@ export function GeneratorDrawer({
     : null
   const validationPassed = validationRunAtISO !== null && validationResult?.status === "valid"
   const validationFailed = validationRunAtISO !== null && validationResult?.status === "invalid"
-  const attachDisabled = !allChecked || !validationConfirmed || !validationPassed || attaching
+  const attachDisabled = !humanApprovalConfirmed || !validationPassed || attaching
   const activeDrawerStepIndex = !result
     ? generating
       ? 1
       : 0
-    : validationPassed && validationConfirmed && allChecked
+    : validationPassed && humanApprovalConfirmed
       ? 3
       : 2
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
@@ -526,10 +492,10 @@ export function GeneratorDrawer({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                      Scan / Validate evidence
+                      Verificare rapidă
                     </p>
                     <p className="mt-1 text-sm text-eos-text-muted">
-                      Verifici rapid dacă draftul poate fi folosit pentru a rezolva riscul, înainte să ajungă la Dosar.
+                      Verifici dacă draftul poate fi folosit pentru rezolvarea riscului, înainte să ajungă la Dosar.
                     </p>
                   </div>
                   <span
@@ -556,7 +522,7 @@ export function GeneratorDrawer({
                   </p>
                 ) : (
                   <p className="text-xs text-eos-text-muted">
-                    Rulează mai întâi validarea explicită. Fără pasul ăsta, draftul nu poate fi confirmat pentru rezolvare.
+                    Rulează verificarea rapidă înainte să confirmi documentul pentru rezolvare.
                   </p>
                 )}
 
@@ -593,44 +559,18 @@ export function GeneratorDrawer({
                   </div>
                 ) : null}
 
-                <div className="space-y-2.5">
-                  {VALIDATION_ITEMS.map((item) => (
-                    <label
-                      key={item.id}
-                      className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={validationChecklist.includes(item.id)}
-                        onChange={() => toggleValidationItem(item.id)}
-                        data-testid={`drawer-validation-${item.id}`}
-                        className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
-                      />
-                      <span className="text-sm text-eos-text">{item.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                  Confirmă înainte de salvare
-                </p>
-                {CONFIRMATION_ITEMS.map((item) => (
-                  <label
-                    key={item.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checklist.includes(item.id)}
-                      onChange={() => toggleItem(item.id)}
-                      data-testid={`drawer-checklist-${item.id}`}
-                      className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
-                    />
-                    <span className="text-sm text-eos-text">{item.label}</span>
-                  </label>
-                ))}
+                <label className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant">
+                  <input
+                    type="checkbox"
+                    checked={humanApprovalConfirmed}
+                    onChange={(event) => setHumanApprovalConfirmed(event.target.checked)}
+                    data-testid="drawer-human-approval"
+                    className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+                  />
+                  <span className="text-sm text-eos-text">
+                    Confirm că am verificat datele generate și aprob documentul pentru rezolvarea riscului.
+                  </span>
+                </label>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -666,7 +606,7 @@ export function GeneratorDrawer({
                   Confirmă documentul pentru rezolvare
                 </Button>
                 <p className="text-xs text-eos-text-muted">
-                  Zona de generare doar produce, validează și confirmă documentul. Rezolvarea riscului și trimiterea la Dosar rămân pași separați în același cockpit.
+                  Aici doar generezi, verifici și aprobi documentul. Rezolvarea riscului și trimiterea la Dosar rămân pași separați în același cockpit.
                 </p>
               </div>
             </div>

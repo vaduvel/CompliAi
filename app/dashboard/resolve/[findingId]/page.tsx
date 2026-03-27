@@ -786,7 +786,6 @@ export default function FindingDetailPage() {
       {hasGenerator && generatorDocumentType && generatorOpen && status === "confirmed" && (
         <GeneratorDrawer
           open={generatorOpen}
-          onOpenChange={setGeneratorOpen}
           findingId={finding.id}
           documentType={generatorDocumentType}
           findingTitle={finding.title}
