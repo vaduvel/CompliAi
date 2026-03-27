@@ -10,7 +10,12 @@ import {
   Nis2EligibilityWizard,
   type Nis2EligibilityCompletionPayload,
 } from "@/components/compliscan/nis2/eligibility-wizard"
-import type { Nis2EmployeeRange, Nis2RevenueRange, Nis2EligibilityResult } from "@/lib/compliscan/nis2-eligibility"
+import {
+  NIS2_SECTORS,
+  type Nis2EmployeeRange,
+  type Nis2RevenueRange,
+  type Nis2EligibilityResult,
+} from "@/lib/compliscan/nis2-eligibility"
 
 type SavedEligibility = {
   sectorId: string
@@ -59,6 +64,18 @@ export default function Nis2EligibilityPage() {
       `Cifră de afaceri: ${payload.revenue}.`,
       `Rezultat: ${resultLabel}.`,
     ].join(" ")
+  }
+
+  function buildSavedEligibilityPayload(savedEligibility: SavedEligibility): Nis2EligibilityCompletionPayload {
+    const sectorLabel =
+      NIS2_SECTORS.find((sector) => sector.id === savedEligibility.sectorId)?.label ?? savedEligibility.sectorId
+    return {
+      sectorId: savedEligibility.sectorId,
+      sectorLabel,
+      employees: savedEligibility.employees,
+      revenue: savedEligibility.revenue,
+      result: savedEligibility.result,
+    }
   }
 
   function handleComplete(payload: Nis2EligibilityCompletionPayload) {
@@ -121,8 +138,26 @@ export default function Nis2EligibilityPage() {
         </div>
       ) : (
         <>
-          <Nis2EligibilityWizard saved={saved} onComplete={handleComplete} />
-          {fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
+          <Nis2EligibilityWizard
+            saved={saved}
+            onComplete={handleComplete}
+            onResetSaved={() => setSaved(null)}
+          />
+          {fromCockpit && saved && returnTo ? (
+            <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
+              <p className="text-sm font-medium text-eos-text">
+                Eligibilitatea este deja clarificată. Dacă ai verificat rezultatul, te întorci acum în cockpit pentru pasul final.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => handleComplete(buildSavedEligibilityPayload(saved))}
+                >
+                  Revino în cockpit
+                </Button>
+              </div>
+            </div>
+          ) : fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
             <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
               <p className="text-sm font-medium text-eos-text">
                 Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.

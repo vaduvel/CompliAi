@@ -47,6 +47,7 @@ export type Nis2EligibilityCompletionPayload = {
 type Props = {
   saved: SavedEligibility | null
   onComplete: (payload: Nis2EligibilityCompletionPayload) => void
+  onResetSaved?: () => void
 }
 
 const EMPLOYEE_OPTIONS: Array<{ value: Nis2EmployeeRange; label: string; hint: string }> = [
@@ -77,7 +78,7 @@ const RESULT_CONFIG: Record<
   nu_intri: { icon: ShieldCheck, label: "Nu intri sub NIS2", variant: "success" },
 }
 
-export function Nis2EligibilityWizard({ saved, onComplete }: Props) {
+export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props) {
   const [step, setStep] = useState<WizardStep>(saved ? 4 : 1)
   const [sectorId, setSectorId] = useState(saved?.sectorId ?? "")
   const [employees, setEmployees] = useState<Nis2EmployeeRange | "">(saved?.employees ?? "")
@@ -130,6 +131,7 @@ export function Nis2EligibilityWizard({ saved, onComplete }: Props) {
     setEmployees("")
     setRevenue("")
     setError(null)
+    onResetSaved?.()
   }
 
   const selectedSector = NIS2_SECTORS.find((s) => s.id === sectorId)
