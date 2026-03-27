@@ -32,7 +32,7 @@ vi.mock("@/lib/finding-to-task-mapper", () => ({
   mapFindingToTask: mocks.mapFindingToTaskMock,
 }))
 
-import { PATCH } from "./route"
+import { GET, PATCH } from "./route"
 
 describe("PATCH /api/findings/[id]", () => {
   beforeEach(() => {
@@ -71,6 +71,38 @@ describe("PATCH /api/findings/[id]", () => {
     })
     mocks.writeStateMock.mockResolvedValue(undefined)
     mocks.createNotificationMock.mockResolvedValue(undefined)
+  })
+
+  it("returnează suggestedDocumentType canonic pentru retenție chiar dacă state-ul brut este greșit", async () => {
+    const retentionState = {
+      findings: [
+        {
+          id: "finding-retention",
+          title: "Lipsa justificării perioadei de retenție",
+          detail: "Nu este clar cât timp păstrăm datele și când se execută ștergerea.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "low",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "scan.pdf",
+          provenance: { ruleId: "GDPR-RET-001" },
+          suggestedDocumentType: "privacy-policy",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+
+    const response = await GET(
+      new Request("http://localhost/api/findings/finding-retention"),
+      { params: Promise.resolve({ id: "finding-retention" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.finding.suggestedDocumentType).toBe("retention-policy")
+    expect(payload.documentFlowState).toBe("draft_missing")
   })
 
   it("returnează feedback util când finding-ul este confirmat fără auto-generare", async () => {

@@ -12,7 +12,7 @@
  *   buildCockpitRecipe(record, artifacts?) → CockpitRecipe
  */
 
-import type { ScanFinding } from "@/lib/compliance/types"
+import type { GeneratedDocumentKind, ScanFinding } from "@/lib/compliance/types"
 import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
 import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
 import { ANSPDCP_FINDING_PREFIX, getIncidentIdFromAnspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
@@ -214,6 +214,37 @@ export function getSmartResolveExecutionClass(
 
 export function isSmartResolveDocumentaryFindingType(findingTypeId: string) {
   return getSmartResolveExecutionClass(findingTypeId) === "documentary"
+}
+
+const CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, GeneratedDocumentKind>> = {
+  "GDPR-001": "privacy-policy",
+  "GDPR-002": "privacy-policy",
+  "GDPR-003": "cookie-policy",
+  "GDPR-010": "dpa",
+  "GDPR-016": "retention-policy",
+  "AI-005": "ai-governance",
+}
+
+export function getCanonicalSuggestedDocumentTypeForFindingType(findingTypeId: string): GeneratedDocumentKind | null {
+  return CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID[findingTypeId] ?? null
+}
+
+export function getRuntimeSuggestedDocumentType(record: ScanFinding): string | null {
+  const { findingTypeId } = classifyFinding(record)
+  return getCanonicalSuggestedDocumentTypeForFindingType(findingTypeId) ?? record.suggestedDocumentType ?? null
+}
+
+export function normalizeFindingSuggestedDocumentType<T extends ScanFinding>(record: T): T {
+  const runtimeSuggestedDocumentType = getRuntimeSuggestedDocumentType(record) ?? undefined
+
+  if ((record.suggestedDocumentType ?? undefined) === runtimeSuggestedDocumentType) {
+    return record
+  }
+
+  return {
+    ...record,
+    suggestedDocumentType: runtimeSuggestedDocumentType,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

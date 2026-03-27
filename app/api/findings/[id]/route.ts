@@ -19,6 +19,7 @@ import {
   classifyFinding,
   computeNextMonitoringDateISO,
   getCloseGatingRequirements,
+  normalizeFindingSuggestedDocumentType,
 } from "@/lib/compliscan/finding-kernel"
 import type { ScanFinding } from "@/lib/compliance/types"
 
@@ -63,6 +64,7 @@ export async function GET(
     if (!finding) {
       return jsonError("Finding inexistent.", 404, "NOT_FOUND")
     }
+    const runtimeFinding = normalizeFindingSuggestedDocumentType(finding)
 
     const linkedGeneratedDocument =
       [...(state.generatedDocuments ?? [])]
@@ -70,9 +72,9 @@ export async function GET(
         .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
 
     return NextResponse.json({
-      finding,
+      finding: runtimeFinding,
       linkedGeneratedDocument,
-      documentFlowState: getDocumentFlowState(finding.suggestedDocumentType, linkedGeneratedDocument?.approvalStatus),
+      documentFlowState: getDocumentFlowState(runtimeFinding.suggestedDocumentType, linkedGeneratedDocument?.approvalStatus),
     })
   } catch {
     return jsonError("Eroare la citirea finding-ului.", 500)
@@ -110,7 +112,7 @@ export async function PATCH(
       )
     }
 
-    const finding = state.findings[findingIdx]
+    const finding = normalizeFindingSuggestedDocumentType(state.findings[findingIdx])
     const linkedGeneratedDocument =
       [...(state.generatedDocuments ?? [])]
         .filter((document) => document.sourceFindingId === findingId)
@@ -179,10 +181,10 @@ export async function PATCH(
         status: "open",
         linkedGeneratedDocument,
         documentFlowState: getDocumentFlowState(
-          finding.suggestedDocumentType,
+          updatedFindings[findingIdx]?.suggestedDocumentType,
           linkedGeneratedDocument?.approvalStatus
         ),
-        suggestedDocumentType: finding.suggestedDocumentType ?? null,
+        suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,
         feedbackMessage:
           "Caz redeschis. Contextul rezolvării anterioare rămâne disponibil, iar cockpitul pornește din nou pe aceeași urmă.",
       })
@@ -570,10 +572,10 @@ export async function PATCH(
             ? generatedDocuments.find((document) => document.sourceFindingId === findingId && document.approvalStatus === "approved_as_evidence") ?? linkedGeneratedDocument
             : linkedGeneratedDocument,
       documentFlowState: getDocumentFlowState(
-        finding.suggestedDocumentType,
+        updatedFindings[findingIdx]?.suggestedDocumentType,
         generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus
       ),
-      suggestedDocumentType: finding.suggestedDocumentType ?? null,
+      suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,
       feedbackMessage,
     })
   } catch (error) {

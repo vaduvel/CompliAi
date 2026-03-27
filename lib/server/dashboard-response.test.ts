@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   hydrateEvidenceAttachmentsFromSupabaseMock: vi.fn(),
   loadEvidenceLedgerFromSupabaseMock: vi.fn(),
+  buildOrgKnowledgeStaleFindingMock: vi.fn(),
+  readDsarStateMock: vi.fn(),
 }))
 
 vi.mock("@/lib/compliance/engine", () => ({
@@ -42,11 +44,21 @@ vi.mock("@/lib/server/supabase-evidence-read", () => ({
   loadEvidenceLedgerFromSupabase: mocks.loadEvidenceLedgerFromSupabaseMock,
 }))
 
+vi.mock("@/lib/compliance/org-knowledge", () => ({
+  buildOrgKnowledgeStaleFinding: mocks.buildOrgKnowledgeStaleFindingMock,
+}))
+
+vi.mock("@/lib/server/dsar-store", () => ({
+  readDsarState: mocks.readDsarStateMock,
+}))
+
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 
 describe("lib/server/dashboard-response", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.buildOrgKnowledgeStaleFindingMock.mockReturnValue(null)
+    mocks.readDsarStateMock.mockResolvedValue({ requests: [] })
   })
 
   it("hidrateaza state-ul din registrul cloud inainte sa construiasca pachetul pentru dashboard si audit", async () => {
@@ -120,14 +132,14 @@ describe("lib/server/dashboard-response", () => {
     expect(mocks.loadEvidenceLedgerFromSupabaseMock).toHaveBeenCalledWith({ orgId: "org-1" })
     expect(mocks.buildAICompliancePackMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        state: hydratedState,
+        state: expect.objectContaining(hydratedState),
         workspace,
         snapshot,
       })
     )
     expect(mocks.buildComplianceTraceRecordsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        state: hydratedState,
+        state: expect.objectContaining(hydratedState),
         remediationPlan,
         snapshot,
       })
@@ -138,5 +150,44 @@ describe("lib/server/dashboard-response", () => {
     expect(payload.state.taskState["rem-task-1"]?.attachedEvidenceMeta?.accessPath).toBe(
       "/api/tasks/rem-task-1/evidence/evidence-1"
     )
+  })
+
+  it("normalizează suggestedDocumentType la adevărul canonic din finding payload", async () => {
+    const sourceState = {
+      findings: [
+        {
+          id: "finding-retention",
+          title: "Lipsa justificării perioadei de retenție",
+          detail: "Nu este clar cât timp păstrăm datele și când se execută ștergerea.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "low",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "scan.pdf",
+          provenance: { ruleId: "GDPR-RET-001" },
+          suggestedDocumentType: "privacy-policy",
+        },
+      ],
+      snapshotHistory: [],
+    }
+
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-1",
+      orgName: "Org Demo",
+      workspaceOwner: "Owner Demo",
+    })
+    mocks.hydrateEvidenceAttachmentsFromSupabaseMock.mockResolvedValue(sourceState)
+    mocks.loadEvidenceLedgerFromSupabaseMock.mockResolvedValue([])
+    mocks.normalizeComplianceStateMock.mockImplementation((state) => state)
+    mocks.computeDashboardSummaryMock.mockReturnValue({ score: 77, riskLabel: "medium" })
+    mocks.buildRemediationPlanMock.mockReturnValue([])
+    mocks.buildCompliScanSnapshotMock.mockReturnValue({ snapshotId: "snap-2", generatedAt: "2026-03-27T10:00:00.000Z" })
+    mocks.buildAICompliancePackMock.mockReturnValue({ entries: [], summary: { openFindings: 1, sourceCoverage: [] } })
+    mocks.buildComplianceTraceRecordsMock.mockReturnValue([])
+
+    const payload = await buildDashboardPayload(sourceState as never)
+
+    expect(payload.state.findings[0]?.suggestedDocumentType).toBe("retention-policy")
   })
 })

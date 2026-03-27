@@ -1,6 +1,7 @@
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { normalizeFindingSuggestedDocumentType } from "@/lib/compliscan/finding-kernel"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import type { ComplianceState, EvidenceRegistryEntry } from "@/lib/compliance/types"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
@@ -55,19 +56,23 @@ export async function buildDashboardCorePayload(state: ComplianceState): Promise
   }
 
   const normalizedState = normalizeComplianceState(stateWithStale)
-  const summary = computeDashboardSummary(normalizedState)
-  const remediationPlan = buildRemediationPlan(normalizedState)
+  const runtimeTruthState = {
+    ...normalizedState,
+    findings: (normalizedState.findings ?? []).map((finding) => normalizeFindingSuggestedDocumentType(finding)),
+  }
+  const summary = computeDashboardSummary(runtimeTruthState)
+  const remediationPlan = buildRemediationPlan(runtimeTruthState)
   const snapshot =
-    normalizedState.snapshotHistory[0] ??
+    runtimeTruthState.snapshotHistory[0] ??
     buildCompliScanSnapshot({
-      state: normalizedState,
+      state: runtimeTruthState,
       summary,
       remediationPlan,
       workspace,
     })
 
   return {
-    state: normalizedState,
+    state: runtimeTruthState,
     summary,
     remediationPlan,
     workspace,

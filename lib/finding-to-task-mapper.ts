@@ -9,6 +9,7 @@ import type {
   TaskEvidenceKind,
 } from "@/lib/compliance/types"
 import type { ComplianceSeverity } from "@/lib/compliance/constitution"
+import { getRuntimeSuggestedDocumentType } from "@/lib/compliscan/finding-kernel"
 import { severityToTaskPriority } from "@/lib/compliance/constitution"
 
 // ── Owner mapping per framework ─────────────────────────────────────────────
@@ -91,6 +92,7 @@ function uid(prefix: string) {
 export function mapFindingToTask(finding: ScanFinding): TaskCandidate {
   const severity = finding.severity
   const category = finding.category
+  const runtimeSuggestedDocumentType = getRuntimeSuggestedDocumentType(finding)
 
   return {
     // RemediationAction base fields
@@ -119,7 +121,7 @@ export function mapFindingToTask(finding: ScanFinding): TaskCandidate {
     effort: severity === "critical" ? "high" : severity === "high" ? "high" : "medium",
     deadline: calculateDeadline(severity),
     evidenceNeeded: finding.evidenceRequired ?? "Document justificativ",
-    documentTrigger: finding.suggestedDocumentType ?? null,
+    documentTrigger: runtimeSuggestedDocumentType,
     scoreDelta: estimateScoreDelta(severity),
     status: "candidate",
     source: "auto-generated",
