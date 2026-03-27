@@ -201,7 +201,7 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     userResponsibilities: ["completează datele reale", "confirmă", "salvează"],
     requiredEvidenceKinds: ["generated_document", "confirmation"],
     autoRecheck: "partial",
-    closingRule: "document generat, confirmat și salvat în Vault",
+    closingRule: "document generat, confirmat și salvat la dosar",
   },
   "GDPR-002": {
     findingTypeId: "GDPR-002",
@@ -382,6 +382,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["official_reference", "email_sent", "uploaded_file"],
     autoRecheck: "no",
     closingRule: "dovada trimiterii sau raționament documentat",
+  },
+  "GDPR-020": {
+    findingTypeId: "GDPR-020",
+    framework: "GDPR",
+    title: "Contracte standard lipsă sau incomplete",
+    category: "Contractual baseline",
+    typicalSeverity: "medium",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "owner"],
+    compliCapabilities: ["explică dovada contractuală cerută", "ține cazul deschis până la urmă clară"],
+    userResponsibilities: ["pregătește sau actualizează template-urile", "notează unde sunt salvate și cum sunt folosite"],
+    requiredEvidenceKinds: ["uploaded_file", "public_link", "note"],
+    autoRecheck: "partial",
+    closingRule: "template-uri contractuale revizuite și urmă clară salvată la dosar",
   },
   "AI-001": {
     findingTypeId: "AI-001",
@@ -611,7 +626,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatCompliDoes:
       "Deschide generatorul, precompleteată ce știe, leagă artefactul de finding.",
     whatUserMustDo: "Completează datele reale și confirmă.",
-    closeCondition: "Document generat, confirmat și salvat în Vault.",
+    closeCondition: "Document generat, confirmat și salvat la dosar.",
     revalidationTriggers: ["website schimbat", "date firmă schimbate", ">6-12 luni"],
   },
   "GDPR-002": {
@@ -726,6 +741,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
       "Completează conținutul obligatoriu, trimite manual notificarea sau documentează de ce nu este necesară.",
     closeCondition: "Notificare trimisă sau raționament complet documentat.",
     revalidationTriggers: ["doar dacă incidentul evoluează"],
+  },
+  "GDPR-020": {
+    findingTypeId: "GDPR-020",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Pregătește baseline-ul contractual",
+    secondaryCTA: "Vezi dovada cerută",
+    whatUserSees:
+      "Nu avem încă un baseline contractual clar pentru clienți și furnizori, iar cazul nu se poate închide doar prin confirmare.",
+    whatCompliDoes:
+      "Ține cazul în cockpit până când documentezi ce template-uri există, unde sunt salvate și ce urmă contractuală poți arăta la audit.",
+    whatUserMustDo:
+      "Pregătește sau actualizează template-urile contractuale, apoi notează explicit unde sunt salvate, pentru ce relații le folosești și ce ai verificat cu juristul sau responsabilul intern.",
+    closeCondition: "Template-uri contractuale pregătite și urmă clară salvată în cockpit.",
+    revalidationTriggers: ["model contractual schimbat", "jurisdicție nouă", "review contractual periodic"],
   },
   "NIS2-001": {
     findingTypeId: "NIS2-001",
@@ -1025,6 +1054,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   ) {
     return "GDPR-001"
   }
+  if (id === "contracts-baseline" || id === "intake-contracts-baseline") return "GDPR-020"
   if (id === "intake-vendor-no-dpa") return "GDPR-010"
   if (id === "intake-site-cookies") return "GDPR-005"
   if (id === "saft-d406-registration") return "EF-001"
@@ -1348,7 +1378,8 @@ function getCollapsedPresentation(
 function buildVisibleBlocks(
   uiState: CockpitUIState,
   flow: ResolveFlowRecipe,
-  findingType: FindingTypeDefinition
+  findingType: FindingTypeDefinition,
+  documentFlowState: FindingDocumentFlowState
 ): CockpitVisibleBlocks {
   const primaryMode = findingType.resolutionModes[0]
   const rules = RESOLUTION_MODE_BLOCK_RULES[primaryMode]
@@ -1358,10 +1389,13 @@ function buildVisibleBlocks(
   )
 
   const allBlocks: CockpitBlockKey[] = []
+  const hasDocumentTrack =
+    documentFlowState !== "not_required" &&
+    findingType.requiredEvidenceKinds.includes("generated_document")
   const shouldShowGenerator =
     rules.generatorBlock ||
     (primaryMode === "in_app_guided" &&
-      (uiState === "ready_to_generate" || uiState === "evidence_uploaded"))
+      (uiState === "ready_to_generate" || uiState === "evidence_uploaded" || hasDocumentTrack))
 
   if (shouldShowGenerator) allBlocks.push("generator")
   if (rules.inputBlock) allBlocks.push("input")
@@ -1450,7 +1484,7 @@ function getDossierOutcome(primaryMode: ResolutionMode): string {
   switch (primaryMode) {
     case "in_app_full":
     case "in_app_guided":
-      return "Documentul generat și aprobat intră în Vault ca dovadă verificabilă."
+      return "Documentul generat și aprobat intră în Dosar ca dovadă verificabilă."
     case "external_action":
       return "Dovada operațională (screenshot, referință oficială) se atașează la dosar."
     case "user_attestation":
@@ -1826,6 +1860,8 @@ function getClosureCTA(
       return "Marchează ștergerea / anonimizarea"
     case "GDPR-019":
       return "Marchează notificarea ANSPDCP"
+    case "GDPR-020":
+      return "Marchează baseline-ul contractual"
     case "EF-001":
       return "Confirmă activarea SPV"
     default:
@@ -1844,6 +1880,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-016": 180,
   "GDPR-017": 90,
   "GDPR-019": null,
+  "GDPR-020": 180,
   "NIS2-001": 365,
   "NIS2-005": 180,
   "NIS2-015": 7,
@@ -2304,7 +2341,7 @@ export function buildCockpitRecipe(
   // 5. Prezentare
   const statusLabels = UI_STATE_STATUS_LABELS[uiState]
   const primaryMode = findingType.resolutionModes[0]
-  const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType)
+  const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType, documentFlowState)
   const resolveFlowState = uiStateToFlowState(uiState, flow.initialFlowState)
   const vendorContext = inferVendorContext(record, findingTypeId)
   const ef003Explainability =
@@ -2397,6 +2434,15 @@ export function buildCockpitRecipe(
 
   if (findingTypeId === "GDPR-010" && vendorContext) {
     acceptedEvidence.unshift(`DPA semnat cu ${vendorContext.vendorName}`)
+  } else if (findingTypeId === "GDPR-020") {
+    acceptedEvidence = Array.from(
+      new Set([
+        "Template contractual salvat sau încărcat la dosar",
+        "Notă clară despre unde este salvat și pentru ce relații este folosit",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition = "Baseline-ul contractual este pregătit și documentat clar în cockpit."
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
     primaryCTALabel =
       nis2GovernanceFocus === "certification" ? "Actualizează certificarea CISO" : "Actualizează training-ul boardului"
@@ -2546,6 +2592,8 @@ export function buildCockpitRecipe(
     dossierOutcome = "Revizuirea furnizorului și dovezile contractuale intră în dosar și rămân legate de finding pentru audit NIS2 / supply-chain."
   } else if (findingTypeId === "GDPR-010" && vendorContext) {
     dossierOutcome = `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
+  } else if (findingTypeId === "GDPR-020") {
+    dossierOutcome = "Baseline-ul contractual și nota despre unde sunt salvate template-urile intră în dosar pentru audit și review juridic."
   }
 
   let recipeMonitoringSignals = monitoringSignals
@@ -2554,6 +2602,13 @@ export function buildCockpitRecipe(
       new Set([
         ...monitoringSignals,
         `Reverificăm schimbările contractuale și termenii DPA pentru ${vendorContext.vendorName}.`,
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "GDPR-020") {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        "Reverificăm baseline-ul contractual când se schimbă modelul de contract, furnizorii sau jurisdicția.",
       ])
     ).slice(0, 5)
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {

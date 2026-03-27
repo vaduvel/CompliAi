@@ -351,6 +351,13 @@ export default function FindingDetailPage() {
               placeholder: "Ex: Lead-urile expirate >12 luni au fost șterse din CRM la 26.03.2026. Export job #retention-2026-03-26 salvat, verificare făcută pe 124 înregistrări, fără excepții.",
               footer: "Cazul nu poate intra în monitorizare fără urma clară a execuției reale, nu doar politica de retenție.",
             }
+      : recipe.findingTypeId === "GDPR-020"
+        ? {
+            eyebrow: "Dovadă contractuală obligatorie",
+            body: "Notează ce template-uri contractuale ai pregătit sau actualizat, unde sunt salvate și pentru ce relații comerciale le vei folosi. Dacă ai fișierul sau linkul intern, menționează-l clar aici.",
+            placeholder: "Ex: Template contract client și template furnizor revizuite cu juristul la 27.03.2026. Salvate în Drive /Legal/Contracte-standard-v3 și folosite pentru onboarding clienți noi și furnizori recurenti.",
+            footer: "Cazul nu poate intra în monitorizare fără o urmă contractuală explicită. Confirmarea simplă nu este suficientă.",
+          }
       : recipe.findingTypeId === "EF-001"
         ? {
             eyebrow: "Dovadă de activare SPV",

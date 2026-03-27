@@ -93,6 +93,19 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-010")
   })
 
+  it("mapează baseline-ul contractual din intake → GDPR-020", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "contracts-baseline",
+        category: "GDPR",
+        title: "Contracte standard lipsă sau incomplete",
+        detail: "Lipsa contractelor standard cu clienții și furnizorii creează expunere juridică și face auditul dificil.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-020")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează un vendor cunoscut din text pentru flow DPA", () => {
     const recipe = buildCockpitRecipe(
       makeFinding({
@@ -883,6 +896,13 @@ describe("getCloseGatingRequirements", () => {
     expect(requirements.requiresGeneratedDocument).toBe(false)
     expect(requirements.requiresEvidenceNote).toBe(true)
     expect(requirements.acceptedEvidence).toContain("Export log / jurnal operațional")
+  })
+
+  it("cere dovadă operațională pentru GDPR-020", () => {
+    const requirements = getCloseGatingRequirements("GDPR-020")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
   })
 
   it("cere dovadă operațională pentru EF-003", () => {

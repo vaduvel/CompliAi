@@ -96,7 +96,7 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.feedbackMessage).toContain("flow-ul ghidat")
   })
 
-  it("blocheaza rezolvarea daca draftul nu este confirmat explicit", async () => {
+  it("blocheaza salvarea dovezii daca draftul nu este confirmat explicit", async () => {
     mocks.readStateMock.mockResolvedValueOnce({
       findings: [
         {
@@ -159,7 +159,7 @@ describe("PATCH /api/findings/[id]", () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          status: "resolved",
+          status: "confirmed",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["content-reviewed"],
           validationChecklist: ["validation-reviewed", "validation-ready"],
@@ -173,7 +173,7 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.code).toBe("DOCUMENT_CONFIRMATION_INCOMPLETE")
   })
 
-  it("intoarce mesaj de dosar cand draftul este aprobat ca dovada", async () => {
+  it("confirmă documentul fără să rezolve sau să trimită imediat cazul la dosar", async () => {
     mocks.readStateMock.mockResolvedValueOnce({
       findings: [
         {
@@ -236,7 +236,7 @@ describe("PATCH /api/findings/[id]", () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          status: "resolved",
+          status: "confirmed",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
           validationChecklist: ["validation-reviewed", "validation-ready"],
@@ -247,12 +247,13 @@ describe("PATCH /api/findings/[id]", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(payload.status).toBe("under_monitoring")
-    expect(payload.finding.findingStatus).toBe("under_monitoring")
-    expect(payload.documentFlowState).toBe("attached_as_evidence")
-    expect(payload.feedbackMessage).toContain("dosar")
-    expect(payload.feedbackMessage).toContain("artefact")
-    expect(payload.feedbackMessage).toContain("monitorizare")
+    expect(payload.status).toBe("confirmed")
+    expect(payload.finding.findingStatus).toBe("confirmed")
+    expect(payload.documentFlowState).toBe("draft_ready")
+    expect(payload.linkedGeneratedDocument.approvalStatus).toBe("draft")
+    expect(payload.linkedGeneratedDocument.validationStatus).toBe("passed")
+    expect(payload.feedbackMessage).toContain("Documentul este confirmat și validat")
+    expect(payload.feedbackMessage).toContain("Acum poți rezolva riscul")
   })
 
   it("accepta aliasul legacy pentru checklist-ul de review", async () => {
@@ -318,7 +319,7 @@ describe("PATCH /api/findings/[id]", () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          status: "resolved",
+          status: "confirmed",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["reviewed-content", "facts-confirmed", "approved-for-evidence"],
           validationChecklist: ["validation-reviewed", "validation-ready"],
@@ -329,7 +330,7 @@ describe("PATCH /api/findings/[id]", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(payload.status).toBe("under_monitoring")
+    expect(payload.status).toBe("confirmed")
     expect(payload.linkedGeneratedDocument.confirmationChecklist).toEqual([
       "content-reviewed",
       "facts-confirmed",
@@ -341,7 +342,62 @@ describe("PATCH /api/findings/[id]", () => {
     ])
   })
 
-  it("blochează rezolvarea dacă validarea dovezii nu este confirmată explicit", async () => {
+  it("rezolvă finding-ul documentar doar după ce documentul este confirmat și validat", async () => {
+    const attachedDocumentState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-22T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(attachedDocumentState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("resolved")
+    expect(payload.finding.findingStatus).toBe("resolved")
+    expect(payload.documentFlowState).toBe("draft_ready")
+    expect(payload.feedbackMessage).toContain("Riscul este rezolvat")
+    expect(payload.feedbackMessage).toContain("Acum adaugi documentul la Dosar")
+  })
+
+  it("blochează salvarea dovezii dacă validarea nu este confirmată explicit", async () => {
     const documentState = {
       findings: [
         {
@@ -377,7 +433,7 @@ describe("PATCH /api/findings/[id]", () => {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          status: "resolved",
+          status: "confirmed",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
         }),
@@ -388,6 +444,159 @@ describe("PATCH /api/findings/[id]", () => {
 
     expect(response.status).toBe(400)
     expect(payload.code).toBe("DOCUMENT_VALIDATION_INCOMPLETE")
+  })
+
+  it("blochează rezolvarea dacă documentul nu a fost încă validat și confirmat", async () => {
+    const documentState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(documentState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "resolved" }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("DOCUMENT_NOT_READY_FOR_RESOLUTION")
+  })
+
+  it("trimite documentul la dosar doar după ce riscul este deja rezolvat cu el", async () => {
+    const resolvedDocumentState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "resolved",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-22T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(resolvedDocumentState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "under_monitoring",
+          generatedDocumentId: "doc-1",
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.findingStatus).toBe("under_monitoring")
+    expect(payload.documentFlowState).toBe("attached_as_evidence")
+    expect(payload.linkedGeneratedDocument.approvalStatus).toBe("approved_as_evidence")
+    expect(payload.feedbackMessage).toContain("Documentul a intrat în Dosar")
+  })
+
+  it("blochează trimiterea la dosar dacă riscul nu a fost încă rezolvat", async () => {
+    const confirmedDocumentState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-22T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(confirmedDocumentState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "under_monitoring",
+          generatedDocumentId: "doc-1",
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("FINDING_NOT_RESOLVED_FOR_DOSSIER")
   })
 
   it("blochează EF-003 fără dovadă operațională", async () => {
@@ -461,6 +670,80 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.status).toBe("under_monitoring")
     expect(payload.finding.operationalEvidenceNote).toContain("TaxTotal corectat")
     expect(payload.finding.nextMonitoringDateISO).toBeTruthy()
+    expect(payload.feedbackMessage).toContain("operațională")
+  })
+
+  it("blochează contracts-baseline fără dovadă contractuală explicită", async () => {
+    const contractualState = {
+      findings: [
+        {
+          id: "contracts-baseline",
+          title: "Contracte standard lipsă sau incomplete",
+          detail: "Lipsa contractelor standard cu clienții și furnizorii creează expunere juridică și face auditul dificil.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "medium",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "intake-questionnaire",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(contractualState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/contracts-baseline", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "resolved" }),
+      }),
+      { params: Promise.resolve({ id: "contracts-baseline" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("OPERATIONAL_EVIDENCE_REQUIRED")
+  })
+
+  it("închide contracts-baseline doar cu urmă contractuală explicită", async () => {
+    const contractualState = {
+      findings: [
+        {
+          id: "contracts-baseline",
+          title: "Contracte standard lipsă sau incomplete",
+          detail: "Lipsa contractelor standard cu clienții și furnizorii creează expunere juridică și face auditul dificil.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "medium",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "intake-questionnaire",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(contractualState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/contracts-baseline", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote:
+            "Template contract client și template furnizor revizuite cu juristul. Salvate în /Legal/Contracte-standard-v3 și puse în uz pentru cazurile noi.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "contracts-baseline" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.operationalEvidenceNote).toContain("Contracte-standard-v3")
     expect(payload.feedbackMessage).toContain("operațională")
   })
 
