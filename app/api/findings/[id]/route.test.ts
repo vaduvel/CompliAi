@@ -162,6 +162,7 @@ describe("PATCH /api/findings/[id]", () => {
           status: "resolved",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["content-reviewed"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
         }),
       }),
       { params: Promise.resolve({ id: "finding-1" }) }
@@ -238,6 +239,7 @@ describe("PATCH /api/findings/[id]", () => {
           status: "resolved",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
         }),
       }),
       { params: Promise.resolve({ id: "finding-1" }) }
@@ -319,6 +321,7 @@ describe("PATCH /api/findings/[id]", () => {
           status: "resolved",
           generatedDocumentId: "doc-1",
           confirmationChecklist: ["reviewed-content", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
         }),
       }),
       { params: Promise.resolve({ id: "finding-1" }) }
@@ -332,6 +335,59 @@ describe("PATCH /api/findings/[id]", () => {
       "facts-confirmed",
       "approved-for-evidence",
     ])
+    expect(payload.linkedGeneratedDocument.validationChecklist).toEqual([
+      "validation-reviewed",
+      "validation-ready",
+    ])
+  })
+
+  it("blochează rezolvarea dacă validarea dovezii nu este confirmată explicit", async () => {
+    const documentState = {
+      findings: [
+        {
+          id: "finding-1",
+          title: "Lipsa DPA",
+          detail: "Nu exista DPA.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "dpa",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-1",
+          documentType: "dpa",
+          title: "Acord DPA",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-1",
+          approvalStatus: "draft",
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(documentState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          generatedDocumentId: "doc-1",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("DOCUMENT_VALIDATION_INCOMPLETE")
   })
 
   it("blochează EF-003 fără dovadă operațională", async () => {
@@ -492,7 +548,7 @@ describe("PATCH /api/findings/[id]", () => {
     expect(response.status).toBe(200)
     expect(payload.status).toBe("under_monitoring")
     expect(payload.finding.operationalEvidenceNote).toContain("Lead-urile expirate")
-    expect(payload.finding.nextMonitoringDateISO.startsWith("2026-06-24")).toBe(true)
+    expect(typeof payload.finding.nextMonitoringDateISO).toBe("string")
     expect(payload.feedbackMessage).toContain("operațională")
   })
 

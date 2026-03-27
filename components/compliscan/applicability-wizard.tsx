@@ -1,24 +1,18 @@
 "use client"
 
-import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 import {
   ArrowLeft,
   CheckCircle2,
-  ChevronRight,
-  FileText,
-  ListChecks,
   Loader2,
   Shield,
   Sparkles,
-  TriangleAlert,
 } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import {
-  APPLICABILITY_TAG_LABELS,
   ORG_EMPLOYEE_COUNT_LABELS,
   ORG_SECTOR_LABELS,
   type ApplicabilityResult,
@@ -36,13 +30,10 @@ import {
   DECISIVE_QUESTIONS,
   deriveSuggestedAnswers,
   getVisibleConditionalQuestions,
-  type DocumentRequest,
   type FullIntakeAnswers,
   type IntakeQuestion,
-  type NextBestAction,
   type SuggestedAnswer,
 } from "@/lib/compliance/intake-engine"
-import type { ScanFinding } from "@/lib/compliance/types"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 
 export type ApplicabilityWizardStep =
@@ -53,7 +44,6 @@ export type ApplicabilityWizardStep =
   | "ai"
   | "efactura"
   | "intake"
-  | "done"
 
 type WizardState = {
   cui: string
@@ -66,9 +56,6 @@ type WizardState = {
 
 type ProfileSaveResponse = {
   applicability: ApplicabilityResult
-  initialFindings?: ScanFinding[]
-  documentRequests?: DocumentRequest[]
-  nextBestAction?: NextBestAction | null
   intakeAnswers?: FullIntakeAnswers | null
 }
 
@@ -86,12 +73,6 @@ const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
 const SIZES = Object.entries(ORG_EMPLOYEE_COUNT_LABELS) as [OrgEmployeeCount, string][]
 const INTAKE_QUESTIONS = DECISIVE_QUESTIONS.filter((question) => question.id !== "usesAITools")
 
-const CERTAINTY_BADGE: Record<string, string> = {
-  certain: "border-eos-border bg-eos-success-soft text-eos-success",
-  probable: "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
-  unlikely: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
-}
-
 const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
   high: "border-eos-border bg-eos-success-soft text-eos-success",
   medium: "border-eos-warning-border bg-eos-warning-soft text-eos-warning",
@@ -106,7 +87,6 @@ const WIZARD_SEQUENCE: ApplicabilityWizardStep[] = [
   "ai",
   "efactura",
   "intake",
-  "done",
 ]
 
 const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
@@ -117,7 +97,6 @@ const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
   ai: "Utilizare AI",
   efactura: "e-Factura",
   intake: "Confirmări finale",
-  done: "Raport inițial pregătit",
 }
 
 const CHECKING_MESSAGES = [
@@ -157,11 +136,6 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   const [prefillError, setPrefillError] = useState<string | null>(null)
   const [prefillLoading, setPrefillLoading] = useState(false)
   const [orgPrefill, setOrgPrefill] = useState<OrgProfilePrefill | null>(null)
-  const [result, setResult] = useState<ApplicabilityResult | null>(null)
-  const [initialFindings, setInitialFindings] = useState<ScanFinding[]>([])
-  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([])
-  const [nextBestAction, setNextBestAction] = useState<NextBestAction | null>(null)
-  const [prefillInvoiceStatus, setPrefillInvoiceStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [checkingMessageIndex, setCheckingMessageIndex] = useState(0)
   const checkingPrefillDone = useRef(false)
 
@@ -217,19 +191,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
   const visibleQuestionCount = INTAKE_QUESTIONS.length + visibleConditionalQuestions.length
   const answeredQuestionCount = Math.max(0, visibleQuestionCount - unansweredQuestions.length)
-  const currentStepIndex = WIZARD_SEQUENCE.indexOf(step)
-  // "checking" is a visual transition, not a real step — use CUI index for progress
-  const effectiveStepIndex = step === "checking" ? WIZARD_SEQUENCE.indexOf("cui") : currentStepIndex
-  const progressSteps = WIZARD_SEQUENCE.length - 2 // exclude "checking" from count
-  const progressPercent = step === "done" ? 100 : ((effectiveStepIndex + 1) / progressSteps) * 100
+  const visibleProgressSteps: ApplicabilityWizardStep[] = ["cui", "sector", "size", "ai", "efactura", "intake"]
+  const progressStep = step === "checking" ? "cui" : step
+  const effectiveStepIndex = Math.max(0, visibleProgressSteps.indexOf(progressStep))
+  const progressSteps = visibleProgressSteps.length
+  const progressPercent = ((effectiveStepIndex + 1) / progressSteps) * 100
 
   function goBack() {
     setError(null)
-
-    if (step === "done") {
-      setStep("intake")
-      return
-    }
 
     if (step === "cui" || step === "checking") {
       if (step === "checking") {
@@ -246,6 +215,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
       return
     }
 
+    const currentStepIndex = WIZARD_SEQUENCE.indexOf(step)
     const previousStep = WIZARD_SEQUENCE[Math.max(0, currentStepIndex - 1)]
     if (previousStep) {
       setStep(previousStep)
@@ -376,21 +346,13 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
       })
       if (!res.ok) throw new Error("save failed")
       const data = (await res.json()) as ProfileSaveResponse
-      setResult(data.applicability)
-      setInitialFindings(data.initialFindings ?? [])
-      setDocumentRequests(data.documentRequests ?? [])
-      setNextBestAction(data.nextBestAction ?? null)
       completedRef.current = true
-      setStep("done")
+      onComplete(data.applicability)
     } catch {
       setError("Nu am putut salva onboarding-ul asistat. Mai încearcă o dată.")
     } finally {
       setSaving(false)
     }
-  }
-
-  function handleDone() {
-    if (result) onComplete(result)
   }
 
   return (
@@ -408,7 +370,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
               </p>
             </div>
           </div>
-          {(step !== "cui" || onBackToModeSelection) && step !== "done" && step !== "checking" ? (
+          {(step !== "cui" || onBackToModeSelection) && step !== "checking" ? (
             <Button
               type="button"
               variant="outline"
@@ -425,7 +387,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between gap-3 text-xs text-eos-text-muted">
             <span>{WIZARD_PROGRESS_LABELS[step]}</span>
-            <span>{step === "done" ? "gata" : "flow ghidat"}</span>
+            <span>{step === "checking" ? "Compli verifică" : "flow ghidat"}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
             <div
@@ -859,136 +821,12 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                 </div>
                 <Button onClick={() => void handleSubmit()} disabled={saving || unansweredQuestions.length > 0}>
                   {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
-                  Generează primul plan
+                  Salvează și intră în dashboard
                 </Button>
               </div>
             </div>
           )}
 
-          {step === "done" && result && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-eos-success" />
-                <p className="text-sm font-medium text-eos-text">
-                  Ai primul snapshot. Nu mai pornești de la zero.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                {result.entries.map((entry) => (
-                  <div
-                    key={entry.tag}
-                    className="flex items-start gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2.5"
-                  >
-                    <Badge className={`mt-0.5 shrink-0 ${CERTAINTY_BADGE[entry.certainty]}`}>
-                      {entry.certainty === "certain"
-                        ? "Se aplică"
-                        : entry.certainty === "probable"
-                          ? "Probabil"
-                          : "Neaplicabil"}
-                    </Badge>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-eos-text">
-                        {APPLICABILITY_TAG_LABELS[entry.tag]}
-                      </p>
-                      <p className="mt-0.5 text-xs text-eos-text-muted">{entry.reason}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid gap-3 lg:grid-cols-3">
-                <SummaryCard
-                  icon={<TriangleAlert className="h-4 w-4 text-eos-warning" />}
-                  title="Ce am găsit deja"
-                  subtitle="Primele constatări generate automat"
-                  items={initialFindings.slice(0, 4).map((finding) => finding.title)}
-                  emptyLabel="Nu au apărut findings inițiale."
-                />
-                <SummaryCard
-                  icon={<FileText className="h-4 w-4 text-eos-primary" />}
-                  title="Ce merită pregătit"
-                  subtitle="Documente și artefacte recomandate acum"
-                  items={documentRequests.slice(0, 4).map((document) => document.label)}
-                  emptyLabel="Nu există documente noi recomandate."
-                />
-                <SummaryCard
-                  icon={<ListChecks className="h-4 w-4 text-eos-success" />}
-                  title="Ce faci acum"
-                  subtitle={
-                    nextBestAction
-                      ? `${nextBestAction.estimatedMinutes} min până la prima acțiune`
-                      : "Poți intra direct în dashboard"
-                  }
-                  items={nextBestAction ? [nextBestAction.label] : []}
-                  emptyLabel="Continuă în dashboard."
-                />
-              </div>
-
-              {/* ── Addon 3: Invoice Smart Prefill trigger ─────────────────── */}
-              {values.requiresEfactura && prefillInvoiceStatus === "idle" && (
-                <div className="flex items-start gap-3 rounded-eos-md border border-dashed border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
-                  <Sparkles className="mt-0.5 size-4 shrink-0 text-eos-primary" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-eos-text">
-                      Smart Prefill din facturi
-                    </p>
-                    <p className="mt-0.5 text-xs text-eos-text-muted">
-                      Dacă ai facturile e-Factura conectate, putem deduce automat ce tool-uri și servicii cloud folosești. Toate valorile rămân sugestii — tu confirmi.
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="default"
-                      className="mt-3 gap-2"
-                      onClick={async () => {
-                        setPrefillInvoiceStatus("loading")
-                        try {
-                          const res = await fetch("/api/prefill/invoice", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ invoiceItems: [] }),
-                          })
-                          if (res.ok) {
-                            setPrefillInvoiceStatus("done")
-                          } else {
-                            setPrefillInvoiceStatus("error")
-                          }
-                        } catch {
-                          setPrefillInvoiceStatus("error")
-                        }
-                      }}
-                    >
-                      <Sparkles className="size-4" />
-                      Analizează facturile
-                    </Button>
-                  </div>
-                </div>
-              )}
-              {prefillInvoiceStatus === "loading" && (
-                <div className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
-                  <Loader2 className="size-4 animate-spin" />
-                  Se analizează facturile cu AI...
-                </div>
-              )}
-              {prefillInvoiceStatus === "done" && (
-                <div className="flex items-center gap-2 rounded-eos-md border border-eos-success-border bg-eos-success-soft px-4 py-3 text-sm text-eos-success">
-                  <CheckCircle2 className="size-4" />
-                  Prefill salvat — vei vedea sugestiile în dashboard.
-                </div>
-              )}
-              {prefillInvoiceStatus === "error" && (
-                <div className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
-                  <TriangleAlert className="size-4" />
-                  Nu am putut analiza facturile. Poți încerca mai târziu din setări.
-                </div>
-              )}
-
-              <Button onClick={handleDone} className="w-full">
-                Continuă spre ecranul de start
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
@@ -1290,41 +1128,6 @@ function QuestionCard({
           })}
         </div>
       </div>
-    </div>
-  )
-}
-
-function SummaryCard({
-  icon,
-  title,
-  subtitle,
-  items,
-  emptyLabel,
-}: {
-  icon: ReactNode
-  title: string
-  subtitle: string
-  items: string[]
-  emptyLabel: string
-}) {
-  return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-      <div className="flex items-center gap-2">
-        {icon}
-        <p className="text-sm font-medium text-eos-text">{title}</p>
-      </div>
-      <p className="mt-1 text-xs text-eos-text-muted">{subtitle}</p>
-      {items.length > 0 ? (
-        <ul className="mt-3 space-y-2 text-sm text-eos-text">
-          {items.map((item) => (
-            <li key={item} className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2">
-              {item}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-sm text-eos-text-muted">{emptyLabel}</p>
-      )}
     </div>
   )
 }

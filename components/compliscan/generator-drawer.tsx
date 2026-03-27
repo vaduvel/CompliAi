@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { CheckCircle2, Copy, FileText, Loader2, Sparkles } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, RotateCw, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -19,6 +19,7 @@ import {
   getLatestSuccessfulSiteScanResult,
 } from "@/lib/compliance/site-scan-context"
 import { FINDING_DOCUMENT_LABELS } from "@/lib/compliscan/finding-cockpit"
+import { validateGeneratedDocumentEvidence } from "@/lib/compliscan/generated-document-validation"
 import type { DocumentType, GeneratedDocument } from "@/lib/server/document-generator"
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -31,15 +32,26 @@ type GeneratedDocumentResponse = GeneratedDocument & {
 const CONFIRMATION_ITEMS = [
   {
     id: "content-reviewed",
-    label: "Am citit draftul si confirm ca reflecta realitatea firmei",
+    label: "Am citit draftul și confirm că reflectă realitatea firmei",
   },
   {
     id: "facts-confirmed",
-    label: "Am verificat datele, procesele si specificul firmei fata de ce scrie in draft",
+    label: "Am verificat datele, procesele și specificul firmei față de ce scrie în draft",
   },
   {
     id: "approved-for-evidence",
-    label: "Il aprob ca dovada de conformitate",
+    label: "Îl aprob ca dovadă de conformitate",
+  },
+] as const
+
+const VALIDATION_ITEMS = [
+  {
+    id: "validation-reviewed",
+    label: "Am rulat verificarea rapidă și am revizuit observațiile înainte de dosar",
+  },
+  {
+    id: "validation-ready",
+    label: "Confirm că versiunea validată este cea pe care o salvez ca dovadă",
   },
 ] as const
 
@@ -94,6 +106,8 @@ export function GeneratorDrawer({
   const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
   const [attaching, setAttaching] = useState(false)
   const [checklist, setChecklist] = useState<string[]>([])
+  const [validationChecklist, setValidationChecklist] = useState<string[]>([])
+  const [validationRunAtISO, setValidationRunAtISO] = useState<string | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
@@ -138,6 +152,8 @@ export function GeneratorDrawer({
     if (open) {
       setResult(null)
       setChecklist([])
+      setValidationChecklist([])
+      setValidationRunAtISO(null)
     }
   }, [open, findingId])
 
@@ -151,6 +167,8 @@ export function GeneratorDrawer({
     setGenerating(true)
     setResult(null)
     setChecklist([])
+    setValidationChecklist([])
+    setValidationRunAtISO(null)
 
     try {
       const profile = cockpit.data?.state.orgProfile
@@ -173,7 +191,7 @@ export function GeneratorDrawer({
 
       if (!res.ok) {
         const payload = (await res.json()) as { error?: string }
-        throw new Error(payload.error ?? "Generarea a esuat.")
+        throw new Error(payload.error ?? "Generarea a eșuat.")
       }
 
       const doc = (await res.json()) as GeneratedDocumentResponse
@@ -184,7 +202,7 @@ export function GeneratorDrawer({
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth" }), 100)
     } catch (err) {
       toast.error("Eroare la generare", {
-        description: err instanceof Error ? err.message : "Incearca din nou.",
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
       })
     } finally {
       setGenerating(false)
@@ -203,6 +221,7 @@ export function GeneratorDrawer({
           status: "resolved",
           generatedDocumentId: result.recordId,
           confirmationChecklist: checklist,
+          validationChecklist,
         }),
       })
 
@@ -216,7 +235,7 @@ export function GeneratorDrawer({
       onComplete({ dossierSaved: true })
     } catch (err) {
       toast.error("Eroare", {
-        description: err instanceof Error ? err.message : "Incearca din nou.",
+        description: err instanceof Error ? err.message : "Încearcă din nou.",
       })
     } finally {
       setAttaching(false)
@@ -237,7 +256,60 @@ export function GeneratorDrawer({
     setChecklist((c) => (c.includes(id) ? c.filter((v) => v !== id) : [...c, id]))
   }
 
+  function toggleValidationItem(id: string) {
+    setValidationChecklist((current) =>
+      current.includes(id) ? current.filter((value) => value !== id) : [...current, id]
+    )
+  }
+
+  function runValidation() {
+    if (!result) return
+
+    const validation = validateGeneratedDocumentEvidence({
+      documentType,
+      title: result.title,
+      content: result.content,
+      orgName: orgName.trim(),
+      orgWebsite: orgWebsite.trim() || undefined,
+      counterpartyName: counterpartyName.trim() || undefined,
+    })
+
+    setValidationRunAtISO(new Date().toISOString())
+
+    if (validation.status === "valid") {
+      toast.success("Draftul a trecut verificarea rapidă")
+      return
+    }
+
+    toast.error("Draftul are observații înainte de dosar", {
+      description: "Corectează punctele picate, regenerează sau înlocuiește documentul.",
+    })
+  }
+
   const allChecked = CONFIRMATION_ITEMS.every((item) => checklist.includes(item.id))
+  const validationConfirmed = VALIDATION_ITEMS.every((item) =>
+    validationChecklist.includes(item.id)
+  )
+  const validationResult = result
+    ? validateGeneratedDocumentEvidence({
+        documentType,
+        title: result.title,
+        content: result.content,
+        orgName: orgName.trim(),
+        orgWebsite: orgWebsite.trim() || undefined,
+        counterpartyName: counterpartyName.trim() || undefined,
+      })
+    : null
+  const validationPassed = validationRunAtISO !== null && validationResult?.status === "valid"
+  const validationFailed = validationRunAtISO !== null && validationResult?.status === "invalid"
+  const attachDisabled = !allChecked || !validationConfirmed || !validationPassed || attaching
+  const activeDrawerStepIndex = !result
+    ? generating
+      ? 1
+      : 0
+    : validationPassed && validationConfirmed && allChecked
+      ? 3
+      : 2
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
   const showDpoField = ["privacy-policy", "dpa", "retention-policy"].includes(documentType)
   const showCounterpartyField = documentType === "dpa"
@@ -266,14 +338,34 @@ export function GeneratorDrawer({
             {docTypeLabel}
           </SheetTitle>
           <SheetDescription>
-            Finding: {findingTitle}
+            {findingTitle} · draft, validare și salvare în același loc
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 space-y-5 px-4 pb-6">
+        <div className="flex-1 space-y-4 px-4 pb-6">
+          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {["Completezi", "Generezi", "Validezi", "Salvezi"].map((step, index) => {
+                return (
+                  <span
+                    key={step}
+                    className={[
+                      "inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium",
+                      index === activeDrawerStepIndex
+                        ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                        : "border-eos-border bg-eos-surface text-eos-text-muted",
+                    ].join(" ")}
+                  >
+                    {step}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+
           {/* ── Form ── */}
           {!result && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Field label="Numele organizatiei">
                 <input
                   className={inputClass}
@@ -376,7 +468,7 @@ export function GeneratorDrawer({
                 ) : (
                   <Sparkles className="size-4" strokeWidth={2} />
                 )}
-                {generating ? "Se genereaza..." : "Genereaza draftul"}
+                {generating ? "Se generează..." : "Generează draftul"}
               </Button>
             </div>
           )}
@@ -392,10 +484,10 @@ export function GeneratorDrawer({
                   <button
                     onClick={handleCopy}
                     className="flex items-center gap-1.5 rounded-eos-sm px-2 py-1 text-[11px] text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
-                    title="Copiaza in clipboard"
+                    title="Copiază în clipboard"
                   >
                     <Copy className="size-3" strokeWidth={2} />
-                    Copiaza
+                    Copiază
                   </button>
                 </div>
                 <div className="max-h-80 overflow-y-auto text-sm leading-relaxed text-eos-text whitespace-pre-wrap">
@@ -403,10 +495,99 @@ export function GeneratorDrawer({
                 </div>
               </div>
 
-              {/* ── Confirmation checklist ── */}
-              <div className="space-y-3">
+              <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                      Scan / Validate evidence
+                    </p>
+                    <p className="mt-1 text-sm text-eos-text-muted">
+                      Verifici rapid dacă draftul poate deveni dovadă reală înainte să intre la dosar.
+                    </p>
+                  </div>
+                  <span
+                    className={[
+                      "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+                      validationRunAtISO === null
+                        ? "border border-eos-border bg-eos-bg-inset text-eos-text-muted"
+                        : validationPassed
+                          ? "bg-eos-success-soft text-eos-success"
+                          : "bg-red-100 text-red-700",
+                    ].join(" ")}
+                  >
+                    {validationRunAtISO === null
+                      ? "Nevalidat încă"
+                      : validationPassed
+                        ? "Valid"
+                        : "Are observații"}
+                  </span>
+                </div>
+
+                {validationRunAtISO ? (
+                  <p className="text-xs text-eos-text-muted">
+                    Ultima verificare: {new Date(validationRunAtISO).toLocaleString("ro-RO")}
+                  </p>
+                ) : (
+                  <p className="text-xs text-eos-text-muted">
+                    Rulează mai întâi validarea explicită. Fără pasul ăsta, draftul nu poate fi salvat ca dovadă finală.
+                  </p>
+                )}
+
+                <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
+                  {validationResult?.checks.map((check) => (
+                    <div key={check.id} className="flex items-start gap-2 text-sm">
+                      {check.passed ? (
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                      ) : (
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" strokeWidth={2} />
+                      )}
+                      <div>
+                        <p className={check.passed ? "text-eos-text" : "text-red-700"}>
+                          {check.label}
+                        </p>
+                        <p className="mt-0.5 text-xs text-eos-text-muted">{check.help}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {validationFailed ? (
+                  <div className="rounded-eos-md border border-red-200 bg-red-50 px-4 py-3">
+                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-red-700">
+                      Ce trebuie corectat
+                    </p>
+                    <ul className="mt-2 space-y-1 text-sm text-eos-text-muted">
+                      {validationResult?.checks
+                        .filter((check) => !check.passed)
+                        .map((check) => (
+                          <li key={check.id}>• {check.help}</li>
+                        ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                <div className="space-y-2.5">
+                  {VALIDATION_ITEMS.map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={validationChecklist.includes(item.id)}
+                        onChange={() => toggleValidationItem(item.id)}
+                        data-testid={`drawer-validation-${item.id}`}
+                        className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+                      />
+                      <span className="text-sm text-eos-text">{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                  Confirma inainte de salvare
+                  Confirmă înainte de salvare
                 </p>
                 {CONFIRMATION_ITEMS.map((item) => (
                   <label
@@ -425,26 +606,41 @@ export function GeneratorDrawer({
                 ))}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={runValidation}
+                  data-testid="rerun-document-validation"
+                  className="gap-2"
+                >
+                  <RotateCw className="size-4" strokeWidth={2} />
+                  Re-scannează
+                </Button>
+                <Button variant="outline" onClick={handleGenerate} disabled={generating}>
+                  Regenerează
+                </Button>
+                <Button variant="outline" onClick={() => setResult(null)}>
+                  Înlocuiește documentul
+                </Button>
+              </div>
+
+              <div className="space-y-2">
                 <Button
                   onClick={handleAttach}
-                  disabled={!allChecked || attaching}
+                  disabled={attachDisabled}
                   data-testid="attach-generated-document"
-                  className="flex-1 gap-2"
+                  className="w-full gap-2"
                 >
                   {attaching ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <CheckCircle2 className="size-4" strokeWidth={2} />
                   )}
-                  Confirm si salvez dovada
+                  Confirmă și salvează dovada
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setResult(null)}
-                >
-                  Regenereaza
-                </Button>
+                <p className="text-xs text-eos-text-muted">
+                  Draftul intră la dosar doar după verificarea rapidă, confirmarea validării și aprobarea explicită ca dovadă.
+                </p>
               </div>
             </div>
           )}

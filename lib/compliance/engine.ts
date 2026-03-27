@@ -218,6 +218,21 @@ function normalizeGeneratedDocuments(
             )
           )
         : undefined
+      const validationChecklist = Array.isArray(item.validationChecklist)
+        ? Array.from(
+            new Set(
+              item.validationChecklist
+                .filter((entry): entry is string => typeof entry === "string")
+                .map((entry) => entry.trim())
+                .filter(Boolean)
+            )
+          )
+        : undefined
+      const validationStatus =
+        item.validationStatus === "pending" || item.validationStatus === "passed"
+          ? item.validationStatus
+          : undefined
+      const validatedAtISO = isValidIso(item.validatedAtISO) ? item.validatedAtISO : undefined
       const evidenceNote =
         typeof item.evidenceNote === "string" && item.evidenceNote.trim()
           ? item.evidenceNote.trim()
@@ -250,6 +265,9 @@ function normalizeGeneratedDocuments(
           approvedByUserId,
           approvedByEmail,
           confirmationChecklist,
+          validationChecklist,
+          validationStatus,
+          validatedAtISO,
           evidenceNote,
           expiresAtISO,
           nextReviewDateISO,

@@ -20,6 +20,8 @@ type LinkedGeneratedDocumentMeta = {
   title: string
   generatedAtISO: string
   approvalStatus?: "draft" | "approved_as_evidence"
+  validationStatus?: "pending" | "passed"
+  validatedAtISO?: string
   approvedAtISO?: string
   approvedByEmail?: string
   nextReviewDateISO?: string
@@ -104,6 +106,7 @@ function getRecipeProgressSteps(
   recipe: CockpitRecipe,
   linkedGeneratedDocument?: LinkedGeneratedDocumentMeta | null
 ): RecipeProgressStep[] {
+  const documentValidationFlow = recipe.visibleBlocks.detailBlocks.includes("generator")
   const mainStepLabel = getRecipeMainStepLabel(recipe)
   const mainStepHint =
     recipe.whatUserMustDo ||
@@ -156,13 +159,17 @@ function getRecipeProgressSteps(
     },
     {
       id: "evidence",
-      label: "Dovadă la dosar",
+      label: documentValidationFlow ? "Validezi dovada" : "Dovadă la dosar",
       hint: evidenceHint,
       state: activeIndex > 2 ? "done" : activeIndex === 2 ? "active" : "upcoming",
     },
     {
       id: "verification",
-      label: recipe.uiState === "needs_revalidation" ? "Revalidare" : "Verificare",
+      label: recipe.uiState === "needs_revalidation"
+        ? "Revalidare"
+        : documentValidationFlow
+          ? "Confirmi și salvezi"
+          : "Verificare",
       hint: verificationHint,
       state: activeIndex > 3 ? "done" : activeIndex === 3 ? "active" : "upcoming",
     },
@@ -424,9 +431,9 @@ export function FindingExecutionCard({
       <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Progres, dosar și monitorizare</CardTitle>
+            <CardTitle className="text-base">Execuție și aftercare</CardTitle>
             <p className="mt-2 text-sm text-eos-text-muted">
-              Harta de progres, regulile de închidere și ce rămâne sub watch după rezolvare.
+              Progresul rămâne vizibil aici, iar dosarul și monitoring-ul stau mai jos, ca aftercare.
             </p>
           </div>
           <Badge variant={status.variant} className="normal-case tracking-normal">
@@ -489,8 +496,11 @@ export function FindingExecutionCard({
                 <p className="mt-1 text-xs text-eos-text-muted">
                   Generat {new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
                   {linkedGeneratedDocument.approvalStatus === "approved_as_evidence"
-                    ? " · aprobat ca dovadă"
+                    ? " · validat și aprobat ca dovadă"
                     : " · în așteptare pentru confirmare"}
+                  {linkedGeneratedDocument.validatedAtISO
+                    ? ` · verificat ${new Date(linkedGeneratedDocument.validatedAtISO).toLocaleString("ro-RO")}`
+                    : ""}
                 </p>
               </div>
             </div>
@@ -537,45 +547,55 @@ export function FindingExecutionCard({
           </div>
         ) : null}
 
-        <div className="grid gap-3 border-t border-eos-border-subtle pt-4 md:grid-cols-2">
-          <RailCard
-            title="Ce intră în dosar"
-            eyebrow="Dossier"
-            items={[
-              linkedGeneratedDocument
-                ? `Artifact: ${linkedGeneratedDocument.title}`
-                : suggestedDocumentLabel
-                  ? `Artifact așteptat: ${suggestedDocumentLabel}`
-                  : "Artifact / dovadă operațională asociată finding-ului",
-              cockpitRecipe.dossierOutcome,
-              linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
-                ? `Status: aprobat ca dovadă`
-                : linkedGeneratedDocument
-                  ? "Status: draft pregătit pentru aprobare"
-                  : "Status: încă nu există dovadă salvată",
-              linkedGeneratedDocument?.approvedByEmail
-                ? `Aprobat de: ${linkedGeneratedDocument.approvedByEmail}`
-                : "Aprobarea explicită rămâne obligatorie înainte de închidere",
-              linkedGeneratedDocument?.approvedAtISO
-                ? `Salvat: ${new Date(linkedGeneratedDocument.approvedAtISO).toLocaleString("ro-RO")}`
-                : linkedGeneratedDocument
-                  ? `Ultimul draft: ${new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}`
-                  : "Dosarul se completează după confirmare și dovadă",
-            ]}
-          />
-          <RailCard
-            title={monitoringTitle}
-            eyebrow={monitoringEyebrow}
-            items={
-              monitoringSignals.length > 0
-                ? monitoringSignals
-                : [
-                    "Cazul rămâne sub watch pentru drift, schimbări sursă și reverificări.",
-                    "După închidere, cockpit-ul poate redeschide finding-ul dacă apare o schimbare nouă.",
-                  ]
-            }
-          />
-        </div>
+        <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                Aftercare
+              </p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Dosarul și monitoring-ul rămân aici după închidere, fără să concureze cu execuția.
+              </p>
+            </div>
+            <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+          </summary>
+          <div className="mt-4 grid gap-3 border-t border-eos-border-subtle pt-4 md:grid-cols-2">
+            <RailCard
+              title="Ce intră în dosar"
+              eyebrow="Dossier"
+              items={[
+                linkedGeneratedDocument
+                  ? `Artifact: ${linkedGeneratedDocument.title}`
+                  : suggestedDocumentLabel
+                    ? `Artifact așteptat: ${suggestedDocumentLabel}`
+                    : "Artifact / dovadă operațională asociată finding-ului",
+                cockpitRecipe.dossierOutcome,
+                linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
+                  ? "Status: aprobat ca dovadă"
+                  : linkedGeneratedDocument
+                    ? "Status: draft pregătit pentru aprobare"
+                    : "Status: încă nu există dovadă salvată",
+                linkedGeneratedDocument?.approvedAtISO
+                  ? `Salvat: ${new Date(linkedGeneratedDocument.approvedAtISO).toLocaleString("ro-RO")}`
+                  : linkedGeneratedDocument
+                    ? `Ultimul draft: ${new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}`
+                    : "Dosarul se completează după confirmare și dovadă",
+              ]}
+            />
+            <RailCard
+              title={monitoringTitle}
+              eyebrow={monitoringEyebrow}
+              items={
+                monitoringSignals.length > 0
+                  ? monitoringSignals
+                  : [
+                      "Cazul rămâne sub watch pentru drift, schimbări sursă și reverificări.",
+                      "După închidere, cockpit-ul poate redeschide finding-ul dacă apare o schimbare nouă.",
+                    ]
+              }
+            />
+          </div>
+        </details>
       </CardContent>
     </Card>
   )
@@ -626,7 +646,7 @@ export function FindingDossierSuccessCard({
                 Dovadă salvată la dosar
               </p>
               <p className="mt-1 text-lg font-semibold text-eos-text">
-                {linkedGeneratedDocument.title} a intrat în Vault
+                {linkedGeneratedDocument.title} a intrat în Dosar
               </p>
               <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
                 Finding-ul <span className="font-medium text-eos-text">{findingTitle}</span> este acum închis cu
@@ -639,8 +659,7 @@ export function FindingDossierSuccessCard({
           </Badge>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
-          <FactLine label="Artifact" value={linkedGeneratedDocument.title} />
+        <div className="grid gap-3 md:grid-cols-3">
           <FactLine label="Finding sursă" value={findingTitle} />
           <FactLine label="Salvat" value={new Date(savedAt).toLocaleString("ro-RO")} />
           <FactLine label="Următor control" value={nextReviewLabel} />
@@ -657,20 +676,20 @@ export function FindingDossierSuccessCard({
         </div>
 
         {(primaryHref || secondaryHref) && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {primaryHref ? (
               <Link
                 href={primaryHref}
                 className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-eos-success/90"
               >
-                Deschide Vault
+                Deschide Dosarul
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             ) : null}
             {secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md border border-eos-border bg-white/75 px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-white"
+                className="inline-flex items-center gap-2 text-sm font-medium text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
               >
                 Vezi audit log
                 <ArrowRight className="size-4" strokeWidth={2} />
@@ -721,16 +740,12 @@ export function FindingCaseClosedCard({
           </Badge>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-3">
           <FactLine label="Finding" value={findingTitle} />
           <FactLine label="Salvat" value={new Date(savedAtISO).toLocaleString("ro-RO")} />
           <FactLine
             label="Următor control"
             value={nextReviewLabel}
-          />
-          <FactLine
-            label="Dovadă"
-            value={closureEvidence || "Confirmare și dovadă păstrate pe aceeași urmă."}
           />
         </div>
 
@@ -739,26 +754,27 @@ export function FindingCaseClosedCard({
             <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
             <p className="text-sm leading-relaxed text-eos-text-muted">
               {feedbackMessage ??
+                closureEvidence ??
                 "Cazul este închis, dovada rămâne disponibilă pentru audit și următorul control este deja programat în monitoring."}
             </p>
           </div>
         </div>
 
         {(primaryHref || secondaryHref) && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {primaryHref ? (
               <Link
                 href={primaryHref}
                 className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-eos-success/90"
               >
-                Deschide Vault
+                Deschide Dosarul
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             ) : null}
             {secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md border border-eos-border bg-white/75 px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-white"
+                className="inline-flex items-center gap-2 text-sm font-medium text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
               >
                 Vezi audit log
                 <ArrowRight className="size-4" strokeWidth={2} />

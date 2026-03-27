@@ -206,7 +206,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               {soloMode ? "Prioritatea de azi" : "Queue de finding-uri"}
             </p>
             <p className="mt-1 text-xs text-eos-text-muted">
-              Vezi doar problemele active implicit. Poți căuta, filtra după severitate și afișa și finding-urile închise.
+              Vezi rapid ce e deschis acum și intră în caz. Filtrele secundare rămân dedesubt.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -248,60 +248,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
           />
         </label>
 
-        <div className="flex flex-wrap gap-2">
-          {severityTabs.map((tab) => {
-            const active = severityFilter === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSeverityFilter(tab.id)}
-                className={[
-                  "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                  active
-                    ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                    : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
-                ].join(" ")}
-              >
-                {tab.label}
-                <span className="ml-1.5 text-[11px] text-inherit">{severityCounts[tab.id]}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {!soloMode ? (
-          <div className="flex border-b border-eos-border-subtle">
-            {filterTabs.map((tab) => {
-              const active = activeFilter === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={[
-                    "border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150",
-                    active
-                      ? "border-eos-primary text-eos-text"
-                      : "border-transparent text-eos-text-muted hover:text-eos-text",
-                  ].join(" ")}
-                >
-                  {tab.label}
-                  {counts[tab.id] > 0 && (
-                    <span
-                      className={[
-                        "ml-1.5 rounded-full px-1.5 py-0.5 text-[11px]",
-                        active ? "bg-eos-primary-soft text-eos-primary" : "bg-eos-bg-inset text-eos-text-muted",
-                      ].join(" ")}
-                    >
-                      {counts[tab.id]}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        ) : (
+        {soloMode ? (
           <div className="flex items-center justify-between rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
             <div>
               <p className="text-sm font-medium text-eos-text">Lucrezi pe ce e activ acum</p>
@@ -313,6 +260,65 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               {filtered.length} vizibile
             </Badge>
           </div>
+        ) : (
+          <details className="group rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-eos-text">Filtre secundare</p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  Severitate și framework doar când ai nevoie să restrângi lista.
+                </p>
+              </div>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                Deschide
+              </Badge>
+            </summary>
+            <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
+              <div className="flex flex-wrap gap-2">
+                {severityTabs.map((tab) => {
+                  const active = severityFilter === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSeverityFilter(tab.id)}
+                      className={[
+                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        active
+                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                          : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                      ].join(" ")}
+                    >
+                      {tab.label}
+                      <span className="ml-1.5 text-[11px] text-inherit">{severityCounts[tab.id]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {filterTabs.map((tab) => {
+                  const active = activeFilter === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveFilter(tab.id)}
+                      className={[
+                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        active
+                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                          : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                      ].join(" ")}
+                    >
+                      {tab.label}
+                      <span className="ml-1.5 text-[11px] text-inherit">{counts[tab.id]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </details>
         )}
       </div>
 
@@ -434,14 +440,14 @@ export function ResolvePageSurface() {
         title={isSolo ? `De rezolvat · ${activeFindings.length} urgente` : `De rezolvat · ${activeFindings.length} deschise`}
         description={
           isSolo
-            ? "Aici vezi simplificat ce trebuie rezolvat acum: findings și task-uri într-un singur flux, fără filtre complexe."
-            : "Tot ce necesită acțiune umană — finding-uri, drift și remediere. Un singur loc, indiferent de framework."
+            ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz."
+            : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."
         }
         badges={
           <>
             {urgencyItems.length > 0 && (
               <Badge variant="destructive" className="normal-case tracking-normal">
-                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "s" : ""}
+                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
               </Badge>
             )}
             {criticalCount > 0 && (
@@ -472,13 +478,31 @@ export function ResolvePageSurface() {
         }
       />
 
-      {/* Cross-module urgency: DSAR deadlines + NIS2 incidents + Vendor overdue */}
-      <UrgentItemsSection items={urgencyItems} />
-
       {/* Main execution queue */}
       <section aria-label="Finding-uri de rezolvat">
         <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
+
+      {urgencyItems.length > 0 ? (
+        <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Deadline-uri și semnale conexe
+              </p>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Rămân dedesubt, ca să nu concureze cu inbox-ul principal de finding-uri.
+              </p>
+            </div>
+            <Badge variant="outline" className="normal-case tracking-normal">
+              {urgencyItems.length} active
+            </Badge>
+          </summary>
+          <div className="mt-4">
+            <UrgentItemsSection items={urgencyItems} />
+          </div>
+        </details>
+      ) : null}
     </div>
   )
 }
@@ -519,7 +543,7 @@ export function ResolveSupportPageSurface() {
             href={dashboardRoutes.resolve}
             className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
           >
-            Înapoi la Resolve
+            Înapoi la De rezolvat
             <ArrowRight className="size-3" strokeWidth={2} />
           </Link>
         </div>

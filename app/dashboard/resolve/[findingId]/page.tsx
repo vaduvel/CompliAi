@@ -57,6 +57,8 @@ type LinkedGeneratedDocument = {
   title: string
   generatedAtISO: string
   approvalStatus?: "draft" | "approved_as_evidence"
+  validationStatus?: "pending" | "passed"
+  validatedAtISO?: string
   approvedAtISO?: string
   approvedByEmail?: string
   expiresAtISO?: string
@@ -279,7 +281,7 @@ export default function FindingDetailPage() {
       : status === "open"
         ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
       : status === "confirmed" && hasGenerator
-        ? "După review și aprobare, draftul merge la dosar și finding-ul se închide cu urmă clară."
+        ? "Generezi draftul, îl validezi explicit și abia apoi îl salvezi ca dovadă în dosar."
       : status === "confirmed"
           ? recipe.heroSummary
           : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
@@ -536,7 +538,7 @@ export default function FindingDetailPage() {
               className="gap-1.5"
             >
               <FileText className="size-3.5" strokeWidth={2} />
-              {documentFlowState === "draft_ready" ? "Continuă flow-ul" : recipe.primaryCTA.label}
+              {documentFlowState === "draft_ready" ? "Continuă validarea și salvarea" : recipe.primaryCTA.label}
             </Button>
           ) : (
             <>
@@ -648,12 +650,29 @@ export default function FindingDetailPage() {
       )}
 
       {/* ── Execution first, context second ───────────────────────────── */}
-      <FindingExecutionCard
-        finding={finding}
-        documentFlowState={documentFlowState}
-        linkedGeneratedDocument={linkedGeneratedDocument}
-        recipe={recipe}
-      />
+      <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Progres, dosar și monitorizare
+            </p>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Detaliile de progres, dosar și aftercare rămân aici, sub acțiunea principală.
+            </p>
+          </div>
+          <Badge variant="outline" className="normal-case tracking-normal">
+            Deschide
+          </Badge>
+        </summary>
+        <div className="mt-4">
+          <FindingExecutionCard
+            finding={finding}
+            documentFlowState={documentFlowState}
+            linkedGeneratedDocument={linkedGeneratedDocument}
+            recipe={recipe}
+          />
+        </div>
+      </details>
 
       <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
         <summary className="flex cursor-pointer list-none items-start justify-between gap-3">

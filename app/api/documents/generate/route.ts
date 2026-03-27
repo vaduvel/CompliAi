@@ -72,6 +72,7 @@ export async function POST(request: Request) {
           llmUsed: result.llmUsed,
           sourceFindingId,
           approvalStatus,
+          validationStatus: sourceFindingId ? ("pending" as const) : undefined,
           expiresAtISO: result.expiresAtISO,
           nextReviewDateISO: result.nextReviewDateISO,
         },

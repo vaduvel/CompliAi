@@ -7,7 +7,6 @@ import {
   Briefcase,
   Building2,
   CheckCircle2,
-  FileSearch,
   ListChecks,
   Loader2,
   ShieldCheck,
@@ -35,7 +34,7 @@ const MODE_OPTIONS: ModeOption[] = [
     id: "solo",
     label: "Proprietar / Manager",
     description:
-      "Gestionezi conformitatea pentru propria ta firma. Vei vedea un dashboard simplificat, axat pe actiuni concrete.",
+      "Gestionezi conformitatea pentru propria ta firmă. Vei vedea un dashboard simplificat, axat pe acțiuni concrete.",
     icon: <Building2 className="size-6" />,
   },
   {
@@ -49,7 +48,7 @@ const MODE_OPTIONS: ModeOption[] = [
     id: "compliance",
     label: "Responsabil conformitate",
     description:
-      "Lucrezi intern pe o singura firma, cu drepturi operationale extinse. Vei vedea toate instrumentele de audit si raportare.",
+      "Lucrezi intern pe o singură firmă, cu drepturi operaționale extinse. Vei vedea toate instrumentele de audit și raportare.",
     icon: <ShieldCheck className="size-6" />,
   },
 ]
@@ -60,7 +59,7 @@ type OnboardingFormProps = {
 }
 
 type OnboardingOverviewStep = {
-  id: "mode" | "profile" | "laws" | "report"
+  id: "mode" | "profile" | "laws"
   label: string
   hint: string
   icon: typeof ShieldCheck
@@ -70,26 +69,20 @@ const ONBOARDING_OVERVIEW_STEPS: OnboardingOverviewStep[] = [
   {
     id: "mode",
     label: "Cum vei folosi CompliScan",
-    hint: "alegi rolul si modul de lucru",
+    hint: "alegi rolul și modul de lucru",
     icon: ShieldCheck,
   },
   {
     id: "profile",
-    label: "Date firma si semnale publice",
-    hint: "CUI, website, sector si marime",
+    label: "Date firmă și semnale publice",
+    hint: "CUI, ANAF, website, sector și mărime",
     icon: Building2,
   },
   {
     id: "laws",
-    label: "Legi aplicabile si confirmari",
-    hint: "ce reguli se aplica si unde trebuie confirmare",
+    label: "Legi aplicabile și confirmări",
+    hint: "ce reguli se aplică și unde trebuie confirmare",
     icon: ListChecks,
-  },
-  {
-    id: "report",
-    label: "Primul snapshot și primul pas",
-    hint: "ce se aplică, ce am găsit, ce faci acum",
-    icon: FileSearch,
   },
 ]
 
@@ -98,7 +91,6 @@ function getOverviewStep(mode: ModeOption["id"] | null, wizardStep: Applicabilit
   if (!wizardStep || wizardStep === "cui" || wizardStep === "checking" || wizardStep === "sector" || wizardStep === "size") {
     return "profile"
   }
-  if (wizardStep === "done") return "report"
   return "laws"
 }
 
@@ -141,16 +133,16 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
 
       setCurrentMode(selectedMode)
       setWizardStep("cui")
-      toast.success("Pasul 1 a fost salvat. Continuam cu profilul firmei.")
+      toast.success("Pasul 1 a fost salvat. Continuăm cu profilul firmei.")
     } catch {
-      setError("Eroare de retea. Incearca din nou.")
+      setError("Eroare de rețea. Încearcă din nou.")
     } finally {
       setLoading(false)
     }
   }
 
   function handleOnboardingComplete() {
-    router.replace("/onboarding/finish")
+    router.replace("/dashboard/resolve")
   }
 
   function handleBackToModeSelection() {
@@ -281,12 +273,12 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                   <p className="mt-2 text-sm leading-relaxed text-eos-text-muted">
                     {currentMode
                       ? `${orgName ?? "Organizația ta"} rămâne în același flow până când primești primul snapshot: ce se aplică, ce am găsit deja și ce faci acum. Poți reveni cu Înapoi dacă vrei să corectezi răspunsurile.`
-                      : "Alege rolul care descrie cel mai bine modul in care vei lucra in produs."}
+                      : "Alege rolul care descrie cel mai bine modul în care vei lucra în produs."}
                   </p>
                 </div>
                 {currentMode ? (
                   <Badge variant="outline" className="normal-case tracking-normal">
-                    Fara ping-pong intre ecrane
+                    Fără ping-pong între ecrane
                   </Badge>
                 ) : null}
               </div>
@@ -344,11 +336,11 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                   {loading ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      Se salveaza...
+                      Se salvează...
                     </>
                   ) : (
                     <>
-                      Continua cu profilul firmei
+                      Continuă cu profilul firmei
                       <ArrowRight className="size-4" strokeWidth={2} />
                     </>
                   )}

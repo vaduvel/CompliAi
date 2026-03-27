@@ -36,6 +36,11 @@ const REQUIRED_CONFIRMATION_CHECKLIST = [
   "approved-for-evidence",
 ] as const
 
+const REQUIRED_VALIDATION_CHECKLIST = [
+  "validation-reviewed",
+  "validation-ready",
+] as const
+
 type FindingFlowState =
   | "not_required"
   | "draft_missing"
@@ -46,6 +51,7 @@ type FindingPatchBody = {
   status?: string
   generatedDocumentId?: string
   confirmationChecklist?: string[]
+  validationChecklist?: string[]
   evidenceNote?: string
   revalidationConfirmed?: boolean
   newReviewDateISO?: string
@@ -212,6 +218,7 @@ export async function PATCH(
 
     if (isFindingResolvedLike(storedStatus) && closeGating.requiresGeneratedDocument) {
       const confirmationChecklist = normalizeConfirmationChecklist(body.confirmationChecklist)
+      const validationChecklist = normalizeValidationChecklist(body.validationChecklist)
       const generatedDocumentId = body.generatedDocumentId?.trim()
 
       if (!generatedDocumentId) {
@@ -227,6 +234,14 @@ export async function PATCH(
           "Confirmarea este incompletă. Bifează review-ul, verificarea faptelor și aprobarea ca dovadă.",
           400,
           "DOCUMENT_CONFIRMATION_INCOMPLETE"
+        )
+      }
+
+      if (!hasRequiredValidation(validationChecklist)) {
+        return jsonError(
+          "Validarea dovezii este incompletă. Rulează verificarea draftului și confirmă că este gata pentru dosar.",
+          400,
+          "DOCUMENT_VALIDATION_INCOMPLETE"
         )
       }
 
@@ -249,6 +264,9 @@ export async function PATCH(
         approvedByUserId: session.userId,
         approvedByEmail: session.email,
         confirmationChecklist,
+        validationChecklist,
+        validationStatus: "passed" as const,
+        validatedAtISO: nowISO,
         evidenceNote: body.evidenceNote?.trim() || undefined,
       }
       const nextMonitoringDateISO =
@@ -434,6 +452,20 @@ function normalizeConfirmationChecklist(values: string[] | undefined) {
 
 function hasRequiredConfirmation(values: string[]) {
   return REQUIRED_CONFIRMATION_CHECKLIST.every((value) => values.includes(value))
+}
+
+function normalizeValidationChecklist(values: string[] | undefined) {
+  return Array.from(
+    new Set(
+      (values ?? [])
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )
+  )
+}
+
+function hasRequiredValidation(values: string[]) {
+  return REQUIRED_VALIDATION_CHECKLIST.every((value) => values.includes(value))
 }
 
 function getDocumentFlowState(

@@ -25,7 +25,7 @@ const SOLUTIONS = [
     icon: Cpu,
     title: "Rămâi sub watch",
     description:
-      "După închidere, Compli continuă să monitorizeze drift, review dates și schimbările care îți redeschid cazul.",
+      "După ce închizi un caz, Compli rămâne activ: urmărește drift-ul, datele de review și semnalele noi care contează.",
   },
 ]
 
@@ -33,33 +33,24 @@ const JOURNEY_STEPS = [
   {
     step: "1",
     title: "Introduci CUI și website",
-    description: "Pornim din datele firmei și din semnalele publice sau operaționale pe care le avem deja.",
+    description: "Ne conectăm la ANAF, analizăm website-ul tău și pornim din semnalele pe care le avem deja.",
   },
   {
     step: "2",
-    title: "Vezi ce ți se aplică",
-    description: "Primești primul snapshot: ce reguli contează, ce am găsit deja și unde sunt golurile reale.",
+    title: "Primești primul snapshot",
+    description: "Vezi ce reguli contează pentru tine, ce am găsit deja și unde sunt golurile reale.",
   },
   {
     step: "3",
     title: "Rezolvi și păstrezi dovada",
-    description: "Închizi cazul în cockpit, trimiți rezultatul la dosar și intri apoi în monitorizare.",
+    description: "Închizi cazul în cockpit, generezi ce trebuie, atașezi dovada și o trimiți la dosar.",
   },
 ]
 
 const AUDIENCES = [
-  {
-    title: "Pentru IMM",
-    description: "Intri repede, afli ce contează, rezolvi ce lipsește și ai ce arăta la control fără să pornești de la zero.",
-  },
-  {
-    title: "Pentru consultant",
-    description: "Vezi rapid unde sunt riscurile, pregătești artefactele și păstrezi urme clare pentru handoff și audit.",
-  },
-  {
-    title: "Pentru compliance intern",
-    description: "Ai un workspace care leagă descoperirea, rezolvarea, dovada și monitorizarea într-un singur traseu.",
-  },
+  "IMM: vezi ce ți se aplică și închizi rapid ce lipsește",
+  "Consultant: păstrezi urme clare pentru handoff și audit",
+  "Compliance intern: legi descoperirea, dovada și monitoringul într-un singur traseu",
 ]
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -89,7 +80,7 @@ export default function HomePage() {
 
       <main>
         {/* Hero */}
-        <section className="mx-auto max-w-3xl px-6 pb-16 pt-20 text-center">
+        <section className="mx-auto max-w-3xl px-6 pb-14 pt-20 text-center">
           <Badge variant="warning" className="mb-6">
             <AlertTriangle className="size-3" strokeWidth={2} />
             NIS2 activ · GDPR amendează · AI Act intră în vigoare
@@ -99,11 +90,11 @@ export default function HomePage() {
             <br />
             rezolvi ce lipsește
             <br />
-            <span className="text-eos-primary">și păstrezi dovada.</span>
+            <span className="text-eos-primary">și rămâi acoperit.</span>
           </h1>
           <p className="mt-5 text-base text-eos-text-muted md:text-lg">
-            CompliScan pornește din CUI, website și semnalele tale operaționale, apoi te duce
-            prin același traseu: snapshot, rezolvare, dosar și monitorizare.
+            Pornești din CUI și website. Primești un snapshot clar, rezolvi fiecare risc
+            în cockpit, păstrezi dovada și intri în monitorizare continuă.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -111,17 +102,20 @@ export default function HomePage() {
                 Începe gratuit — 2 minute <ArrowRight className="ml-2 size-4" strokeWidth={2} />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/demo/imm">Vezi demo live</Link>
-            </Button>
+            <Link href="/demo/imm" className="text-sm font-medium text-eos-text-muted underline underline-offset-2 hover:text-eos-text">
+              Vezi demo live
+            </Link>
           </div>
           <p className="mt-3 text-xs text-eos-text-muted">
-            Pornim din CUI, website și semnalele tale operaționale. Nu e nevoie de card.
+            Fără card necesar.
           </p>
         </section>
 
-        <section className="mx-auto max-w-5xl px-6 pb-8">
-          <div className="grid gap-4 md:grid-cols-3">
+        <section className="mx-auto max-w-5xl px-6 pb-14">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+            Cum merge
+          </p>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
             {JOURNEY_STEPS.map((item) => (
               <Card
                 key={item.step}
@@ -136,25 +130,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </section>
-
-        {/* Problem */}
-        <section className="border-y border-eos-border-subtle bg-eos-surface-primary">
-          <div className="mx-auto max-w-3xl px-6 py-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
-              Problema
-            </p>
-            <h2 className="mt-3 text-xl font-semibold text-eos-text md:text-2xl">
-              NIS2 e activ. GDPR amendează. AI Act vine.
-              <br />
-              Tu nu ai ce arăta la control.
-            </h2>
-            <p className="mt-3 text-sm text-eos-text-muted md:text-base">
-              Firmele din România sunt la risc de amenzi și incidente — nu din lipsă de
-              bunăvoință, ci din lipsă de instrumente accesibile. Avocații sunt scumpi.
-              Consultanții sunt ocupați. Tabelele Excel nu țin evidența.
-            </p>
           </div>
         </section>
 
@@ -182,32 +157,27 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {AUDIENCES.map((item) => (
-              <Card
-                key={item.title}
-                className="border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]"
-              >
-                <CardContent className="pt-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
-                    {item.title}
-                  </p>
-                  <p className="mt-3 text-sm text-eos-text-muted">{item.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="mt-8 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary px-5 py-5 shadow-[var(--eos-shadow-sm)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+              Pentru cine
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {AUDIENCES.map((item) => (
+                <p key={item} className="text-sm text-eos-text-muted">
+                  {item}
+                </p>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Pricing preview */}
         <section className="border-t border-eos-border-subtle bg-eos-surface-primary">
           <div className="mx-auto max-w-3xl px-6 py-14 text-center">
             <h2 className="text-xl font-semibold text-eos-text md:text-2xl">
               Gratuit pentru diagnostic. Pro pentru operare.
             </h2>
             <p className="mt-3 text-sm text-eos-text-muted">
-              Planul gratuit îți arată ce legi ți se aplică și scorul de conformitate.
-              Pro deblochează tot: documente, Audit Pack, Inspector Mode, NIS2 complet.
+              Începi gratuit ca să vezi ce se aplică și ce ai de făcut acum. Când vrei cockpit complet, dovadă și dosar, treci pe Pro.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button asChild>
@@ -215,9 +185,9 @@ export default function HomePage() {
                   Încearcă gratuit <ArrowRight className="ml-2 size-4" strokeWidth={2} />
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href="/pricing">Compară planurile</Link>
-              </Button>
+              <Link href="/pricing" className="text-sm font-medium text-eos-text-muted underline underline-offset-2 hover:text-eos-text">
+                Vezi prețurile
+              </Link>
             </div>
           </div>
         </section>

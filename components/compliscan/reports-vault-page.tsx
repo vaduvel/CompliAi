@@ -13,7 +13,6 @@ import {
   ShieldAlert,
 } from "lucide-react"
 
-import { EvidenceReadinessBadge } from "@/components/evidence-os/EvidenceReadinessBadge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
@@ -21,11 +20,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { GuideCard } from "@/components/evidence-os/GuideCard"
-import { HandoffCard } from "@/components/evidence-os/HandoffCard"
-import { MetricTile } from "@/components/evidence-os/MetricTile"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { CockpitTask } from "@/components/compliscan/types"
@@ -143,55 +138,45 @@ export function ReportsVaultPageSurface() {
       : "review_required"
   const evidenceLedger = cockpit.data.evidenceLedger ?? []
   const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
-  const ledgerWeakCount = evidenceLedger.filter((entry) => entry.quality?.status === "weak").length
-  const ledgerUnratedCount = Math.max(
-    0,
-    evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
-  )
-  const ledgerHint =
-    evidenceLedger.length > 0
-      ? `${ledgerReadyCount} verificate · ${ledgerWeakCount} slabe · ${ledgerUnratedCount} neevaluate`
-      : "registrul se populeaza cand ai evidence storage activ"
+  const savedEvidenceCount = evidenceLedger.length > 0 ? evidenceLedger.length : evidenceReadyTasks.length
+  const blockers = [
+    !validatedBaseline
+      ? "Nu ai încă un baseline validat pentru comparația de audit."
+      : null,
+    evidenceMissingTasks.length > 0
+      ? `${evidenceMissingTasks.length} controale au încă gap-uri de dovadă sau validare.`
+      : null,
+    activeDrifts.length > 0
+      ? `${activeDrifts.length} drift-uri deschise pot bloca susținerea pachetului.`
+      : null,
+  ].filter(Boolean) as string[]
   const summaryItems: SummaryStripItem[] = [
     {
-      label: "Audit readiness",
-      value: (
-        <EvidenceReadinessBadge
-          readiness={auditReadiness === "audit_ready" ? "ready" : "partial"}
-        />
-      ),
+      label: "Dovezi valide",
+      value: `${savedEvidenceCount}`,
       hint:
-        auditReadiness === "audit_ready"
-          ? "poti sustine pachetul in audit"
-          : "mai sunt pasi de validare inainte de audit",
-      tone: auditReadiness === "audit_ready" ? "success" : "warning",
+        savedEvidenceCount > 0
+          ? `${ledgerReadyCount} confirmate în registru sau în task-uri`
+          : "încă nu ai dovadă validată în pachet",
+      tone: savedEvidenceCount > 0 ? "success" : "warning",
     },
     {
-      label: "Baseline",
-      value: validatedBaseline ? "validat" : "lipseste",
-      hint: validatedBaseline ? "comparatia are reper stabil" : "confirma un snapshot ca baseline",
-      tone: validatedBaseline ? "success" : "warning",
-    },
-    {
-      label: "Registru dovezi",
-      value: `${evidenceLedger.length}`,
-      hint: ledgerHint,
-      tone: ledgerWeakCount > 0 ? "warning" : "success",
-    },
-    {
-      label: "Drift activ",
-      value: `${activeDrifts.length}`,
-      hint: activeDrifts.length > 0 ? "schimbari care cer explicatie" : "nu exista drift deschis",
-      tone: activeDrifts.length > 0 ? "danger" : "success",
-    },
-    {
-      label: "Gap dovada",
+      label: "Gap-uri active",
       value: `${evidenceMissingTasks.length}`,
       hint:
         evidenceMissingTasks.length > 0
-          ? "controale fara dovada sau validare completa"
-          : "dovezile sunt acoperite",
+          ? "controale fără dovadă sau validare completă"
+          : "dovezile esențiale sunt acoperite",
       tone: evidenceMissingTasks.length > 0 ? "warning" : "success",
+    },
+    {
+      label: "Drift deschis",
+      value: `${activeDrifts.length}`,
+      hint:
+        activeDrifts.length > 0
+          ? "schimbări care cer explicație sau revenire în execuție"
+          : "nu există drift deschis",
+      tone: activeDrifts.length > 0 ? "danger" : "success",
     },
   ]
 
@@ -199,22 +184,22 @@ export function ReportsVaultPageSurface() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Vault"
-        title="Verifici daca auditul chiar se sustine"
-        description="Aici vezi daca dovada, trasabilitatea si drift-ul tin impreuna. Daca apare un gap, revii in executie sau finalizezi in Audit si export."
+        title="Verifici dacă pachetul chiar se susține"
+        description="Aici vezi doar dacă pachetul este gata, ce îl blochează și unde revii dacă încă lipsește ceva."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
-              trasabilitate
+              vault overview
             </Badge>
           </>
         }
         aside={
           <div className="space-y-2">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Stare vault
+              Stare pachet
             </p>
             <p className="text-2xl font-semibold text-eos-text">
-              {auditReadiness === "audit_ready" ? "ready" : "review"}
+              {auditReadiness === "audit_ready" ? "gata" : "în lucru"}
             </p>
             <p className="text-sm text-eos-text-muted">
               drift {activeDrifts.length} · gap dovezi {evidenceMissingTasks.length}
@@ -223,234 +208,164 @@ export function ReportsVaultPageSurface() {
         }
         actions={
           <>
-            <Button asChild variant="outline">
+            <Button asChild>
               <Link href={dashboardRoutes.resolve}>
-                De rezolvat
+                Rezolvă gap-urile
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link href={dashboardRoutes.reports}>
-                Rapoarte
+                Deschide Audit Pack
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
           </>
         }
       />
-        <Card className="border-eos-border bg-eos-surface">
+      <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Vault"
-            title="Ce sustii acum in audit"
-            description="Daca pachetul e sustenabil sau daca trebuie sa revii in executie."
+            title="Ce susții acum în audit"
+            description="Doar trei semnale: dovezi valide, gap-uri active și drift deschis."
             items={summaryItems}
           />
         </CardContent>
       </Card>
 
-      <SectionBoundary
-        eyebrow="Acum"
-        title="Vault-ul iti arata daca auditul tine"
-        description="Verifici legatura dintre control, dovada, articole si drift."
-      />
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <VaultQuickActionsCard />
-        <HandoffCard
-          title="Cand vezi gap-uri, iesi direct spre pagina corecta"
-          description="Vault-ul centralizeaza ledger-ul. Executia ramane in Remediere, iar livrabilul final ramane in Audit si export."
-          destinationLabel="remediere / livrabil"
-          checklist={[
-            "nu inchizi task-uri direct din vault",
-            "validezi uman inainte de orice pachet extern",
-          ]}
-          actions={
-            <>
-              <Button asChild variant="outline">
-                <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
-              </Button>
-              <Button asChild>
-                <Link href={dashboardRoutes.reports}>Deschide Rapoarte</Link>
-              </Button>
-            </>
-          }
-        />
-      </div>
-
-      <ActionCluster
-        eyebrow="Export"
-        title="Audit Pack pentru stakeholderi"
-        description="Client pack pentru stakeholderi. Exporturile tehnice sunt la cerere."
-        actions={
-          <>
-            <Button
-              asChild
-              size="default"
-              className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
-            >
-              <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
-                Audit Pack client
-                <Download className="size-4" strokeWidth={2} />
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="default" className="gap-2">
-              <a href="/api/exports/annex-lite/client" target="_blank" rel="noreferrer">
-                Anexa IV lite
-                <Download className="size-4" strokeWidth={2} />
-              </a>
-            </Button>
-            <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
-              <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-                Export tehnic
-              </summary>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button asChild variant="outline" size="sm" className="gap-2">
-                  <a href="/api/exports/audit-pack">
-                    JSON Audit Pack
-                    <Download className="size-3.5" strokeWidth={2} />
-                  </a>
-                </Button>
-                <Button asChild variant="outline" size="sm" className="gap-2">
-                  <a href="/api/exports/audit-pack/bundle">
-                    Pachet ZIP
-                    <Download className="size-3.5" strokeWidth={2} />
-                  </a>
-                </Button>
-              </div>
-            </details>
-          </>
-        }
-      />
-
-      {cockpit.data.compliancePack ? (
-        <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
-      ) : (
-        <SectionLoadingCard
-          title="Compliance Pack in incarcare"
-          detail="Pachetul complet de control este cerut in fundal si va aparea aici imediat ce este disponibil."
-        />
-      )}
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader className="border-b border-eos-border pb-4">
+          <CardTitle className="text-lg">Ce blochează pachetul acum</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-5">
+          {blockers.length === 0 ? (
+            <EmptyState
+              title="Pachetul stă în picioare"
+              label="Ai baseline validat, nu ai drift deschis și nu mai există gap-uri critice de dovadă pe overview."
+              className="border-eos-border bg-eos-surface-variant py-8"
+            />
+          ) : (
+            <div className="space-y-3">
+              {blockers.map((blocker) => (
+                <div
+                  key={blocker}
+                  className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-4 py-3 text-sm text-eos-text"
+                >
+                  {blocker}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
         <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-          Indicatori detaliati
+          Dovezi & gap-uri
         </summary>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
-            label="Dovezi atasate"
-            value={evidenceReadyTasks.length}
-            detail="Task-uri care au dovada atasata si au trecut verificarea prin rescan."
-            tone="text-eos-success"
-          />
-          <MetricTile
-            label="Gap-uri de dovada"
-            value={evidenceMissingTasks.length}
-            detail="Task-uri deschise care inca cer dovada la audit."
-            tone={evidenceMissingTasks.length > 0 ? "text-eos-warning" : "text-eos-success"}
-          />
-          <MetricTile
-            label="Mapari legale"
-            value={legalMappedTasks.length}
-            detail="Task-uri legate clar de articole si obligatii."
-            tone="text-eos-info"
-          />
-          <MetricTile
-            label="Drift activ"
-            value={activeDrifts.length}
-            detail="Schimbari noi care trebuie explicate sau remediate."
-            tone={activeDrifts.length > 0 ? "text-eos-error" : "text-eos-success"}
-          />
-        </div>
-      </details>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
-        <div className="space-y-6">
-          {cockpit.data.compliancePack ? (
-            <AICompliancePackEntriesCard
-              pack={cockpit.data.compliancePack}
-              title="Intrări din pack folosite la audit"
-              limit={6}
-            />
-          ) : (
-            <SectionLoadingCard
-              title="Intrari audit in incarcare"
-              detail="Intrarile pack-ului se incarca separat, fara sa blocheze registrul de dovezi si restul ledger-ului."
-            />
-          )}
+        <div className="mt-4">
           <EvidenceLedgerCard
             evidenceLedger={evidenceLedger}
             evidenceReadyTasks={evidenceReadyTasks}
             evidenceMissingTasks={evidenceMissingTasks}
             allTasks={cockpit.tasks}
           />
-          <LegalMatrixCard tasks={legalMappedTasks} />
-          {cockpit.data.traceabilityMatrix ? (
-            <TraceabilityMatrixCard
-              records={cockpit.data.traceabilityMatrix}
-              busy={cockpit.busy}
-              onReview={cockpitActions.updateTraceabilityReview}
-              onReuseFamilyEvidence={cockpitActions.reuseFamilyEvidence}
-            />
+        </div>
+      </details>
+
+      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+          Pachete & export
+        </summary>
+        <div className="mt-4 space-y-6">
+          <ActionCluster
+            eyebrow="Export"
+            title="Audit Pack pentru stakeholderi"
+            description="Overview-ul păstrează un singur loc pentru pack; exportul tehnic rămâne dedesubt."
+            actions={
+              <>
+                <Button
+                  asChild
+                  size="default"
+                  className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                >
+                  <a href="/api/exports/audit-pack/client" target="_blank" rel="noreferrer">
+                    Audit Pack client
+                    <Download className="size-4" strokeWidth={2} />
+                  </a>
+                </Button>
+                <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
+                  <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    Export tehnic
+                  </summary>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button asChild variant="outline" size="sm" className="gap-2">
+                      <a href="/api/exports/audit-pack">
+                        JSON Audit Pack
+                        <Download className="size-3.5" strokeWidth={2} />
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="gap-2">
+                      <a href="/api/exports/audit-pack/bundle">
+                        Pachet ZIP
+                        <Download className="size-3.5" strokeWidth={2} />
+                      </a>
+                    </Button>
+                  </div>
+                </details>
+              </>
+            }
+          />
+
+          {cockpit.data.compliancePack ? (
+            <>
+              <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
+              <AICompliancePackEntriesCard
+                pack={cockpit.data.compliancePack}
+                title="Intrări din pack folosite la audit"
+                limit={6}
+              />
+            </>
           ) : (
             <SectionLoadingCard
-              title="Traceability in incarcare"
-              detail="Matricea de trasabilitate se incarca separat, fara sa blocheze vault-ul."
+              title="Compliance Pack in incarcare"
+              detail="Pachetul complet de control este cerut in fundal si va aparea aici imediat ce este disponibil."
             />
           )}
         </div>
+      </details>
 
-        <div className="space-y-6">
-          <SnapshotAuditCard latestSnapshot={latestSnapshot} validatedBaseline={validatedBaseline} />
-          <DriftWatchCard drifts={activeDrifts} />
-          <ValidationLedgerCard entries={validationEntries} />
-          <AuditTimelineCard events={recentEvents} />
+      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+          Trasabilitate & audit
+        </summary>
+        <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
+          <div className="space-y-6">
+            <LegalMatrixCard tasks={legalMappedTasks} />
+            {cockpit.data.traceabilityMatrix ? (
+              <TraceabilityMatrixCard
+                records={cockpit.data.traceabilityMatrix}
+                busy={cockpit.busy}
+                onReview={cockpitActions.updateTraceabilityReview}
+                onReuseFamilyEvidence={cockpitActions.reuseFamilyEvidence}
+              />
+            ) : (
+              <SectionLoadingCard
+                title="Traceability in incarcare"
+                detail="Matricea de trasabilitate se incarca separat, fara sa blocheze vault-ul."
+              />
+            )}
+          </div>
+          <div className="space-y-6">
+            <SnapshotAuditCard latestSnapshot={latestSnapshot} validatedBaseline={validatedBaseline} />
+            <DriftWatchCard drifts={activeDrifts} />
+            <ValidationLedgerCard entries={validationEntries} />
+            <AuditTimelineCard events={recentEvents} />
+          </div>
         </div>
-      </div>
+      </details>
     </div>
-  )
-}
-
-function VaultQuickActionsCard() {
-  const items = [
-    {
-      title: "Ce verifici acum",
-      detail: "Mai intai vezi gap-urile de dovada, drift-ul deschis si controalele care cer confirmare.",
-    },
-    {
-      title: "Ce poti confirma aici",
-      detail: "Confirmi doar dupa ce ai dovada buna si un snapshot pe care il poti sustine.",
-    },
-    {
-      title: "Cand folosesti exportul extern",
-      detail: "Doar dupa ce dovezile sunt verzi si nu mai ai drift blocant pentru audit.",
-    },
-  ]
-
-  return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardContent className="space-y-4 p-5">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {items.map((item) => (
-            <GuideCard key={item.title} title={item.title} detail={item.detail} />
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href={dashboardRoutes.resolve}>
-              De rezolvat
-              <ArrowRight className="size-4" strokeWidth={2} />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="default" className="gap-2">
-            <Link href={dashboardRoutes.reports}>
-              Rapoarte
-              <ArrowRight className="size-4" strokeWidth={2} />
-            </Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   )
 }
 

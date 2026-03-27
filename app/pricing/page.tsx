@@ -110,9 +110,8 @@ export default function PricingPage() {
             Alege planul potrivit
           </h1>
           <p className="mt-3 text-sm text-eos-text-muted md:text-base">
-            Toate planurile includ trial gratuit de 14 zile pentru funcțiile Pro.
-            <br />
-            Prețurile sunt ipoteze de validare de piață — se pot ajusta.
+            Pornești gratuit ca să vezi ce ți se aplică și ce trebuie rezolvat acum.
+            Pro deblochează cockpitul complet, dovada, dosarul și monitorizarea continuă.
           </p>
         </div>
 
@@ -159,7 +158,7 @@ export default function PricingPage() {
                   const val = f[plan.id]
                   return val === true || typeof val === "string"
                 })
-                  .slice(0, 8)
+                  .slice(0, 6)
                   .map((feature) => (
                     <div key={feature.label} className="flex items-start gap-2.5">
                       <Check
@@ -192,12 +191,17 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Full comparison table */}
-        <div className="mt-16">
-          <h2 className="mb-6 text-center text-xl font-semibold text-eos-text">
-            Comparație completă
-          </h2>
-          <div className="overflow-x-auto rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
+        <details className="mt-16 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-5">
+            <div>
+              <h2 className="text-xl font-semibold text-eos-text">Comparație completă</h2>
+              <p className="mt-1 text-sm text-eos-text-muted">
+                Deschide doar dacă vrei diferențele pe toate funcționalitățile.
+              </p>
+            </div>
+            <span className="text-sm font-medium text-eos-text-muted">Deschide</span>
+          </summary>
+          <div className="overflow-x-auto border-t border-eos-border-subtle">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-eos-border-subtle">
@@ -250,12 +254,13 @@ export default function PricingPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </details>
 
-        {/* FAQ / note */}
-        <div className="mt-12 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary px-6 py-6 text-sm text-eos-text-muted">
-          <h3 className="mb-3 font-semibold text-eos-text">Întrebări frecvente</h3>
-          <div className="space-y-3">
+        <details className="mt-12 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-primary px-6 py-5 text-sm text-eos-text-muted">
+          <summary className="cursor-pointer list-none font-semibold text-eos-text">
+            Întrebări frecvente
+          </summary>
+          <div className="mt-4 space-y-3">
             <p>
               <span className="font-medium text-eos-text">Ce înseamnă trial 14 zile?</span>{" "}
               La înregistrare primești automat 14 zile de acces Pro gratuit. Nu este nevoie de card.
@@ -265,17 +270,11 @@ export default function PricingPage() {
               Da. Upgrade și downgrade sunt disponibile din Setări → Abonament.
             </p>
             <p>
-              <span className="font-medium text-eos-text">Prețurile sunt finale?</span>{" "}
-              Prețurile actuale sunt ipoteze de validare de piață. Primii utilizatori pilot pot
-              beneficia de condiții speciale — contactează-ne.
-            </p>
-            <p>
               <span className="font-medium text-eos-text">Partener / contabil?</span>{" "}
-              Planul Partner e pentru firme de contabilitate, consultanți și integratori care
-              gestionează conformitatea pentru mai mulți clienți.
+              Planul Partner e pentru firme de contabilitate, consultanți și integratori care gestionează conformitatea pentru mai mulți clienți.
             </p>
           </div>
-        </div>
+        </details>
       </main>
 
       <footer className="border-t border-eos-border-subtle bg-eos-surface-primary py-8">

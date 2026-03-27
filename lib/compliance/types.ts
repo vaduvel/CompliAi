@@ -158,6 +158,9 @@ export type GeneratedDocumentRecord = {
   approvedByUserId?: string
   approvedByEmail?: string
   confirmationChecklist?: string[]
+  validationChecklist?: string[]
+  validationStatus?: "pending" | "passed"
+  validatedAtISO?: string
   evidenceNote?: string
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
