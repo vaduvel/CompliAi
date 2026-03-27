@@ -4,7 +4,6 @@ import {
   Bell,
   BookOpen,
   Building2,
-  CalendarClock,
   FileSearch,
   Flag,
   FolderOpen,
@@ -22,10 +21,12 @@ export type DashboardNavId =
   | "home"
   | "scan"
   | "resolve"
+  | "dosar"
+  | "settings"
+  // păstrate pentru backward compat (portfolio, secondary sections)
   | "calendar"
   | "reports"
   | "trust"
-  | "settings"
   | "portfolio-overview"
   | "portfolio-alerts"
   | "portfolio-tasks"
@@ -56,6 +57,7 @@ export type DashboardNavSection = {
   items: DashboardNavItem[]
 }
 
+// Wave 1 cleanup — 5 intrări, fără zgomot
 export const dashboardPrimaryNavItems: DashboardNavItem[] = [
   {
     id: "home",
@@ -63,7 +65,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.home,
     icon: Home,
     matchers: [...dashboardRouteGroups.home],
-    description: "snapshot: ce ai, ce am găsit, ce faci acum",
+    description: "ce ai, ce s-a găsit, ce faci acum",
   },
   {
     id: "scan",
@@ -71,7 +73,7 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.scan,
     icon: Scan,
     matchers: [...dashboardRouteGroups.scan],
-    description: "intake: surse noi, analiză, findings",
+    description: "adaugă surse, analizează, trimite în rezolvare",
   },
   {
     id: "resolve",
@@ -79,31 +81,15 @@ export const dashboardPrimaryNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.resolve,
     icon: Flag,
     matchers: [...dashboardRouteGroups.resolve],
-    description: "execuție: cockpit, dovadă, dosar",
+    description: "rezolvă cazuri, dovedește, închide",
   },
   {
-    id: "calendar",
-    label: "Calendar",
-    href: dashboardRoutes.calendar,
-    icon: CalendarClock,
-    matchers: [dashboardRoutes.calendar],
-    description: "deadlines și reverificări",
-  },
-  {
-    id: "reports",
-    label: "Rapoarte",
-    href: dashboardRoutes.reports,
-    icon: FileSearch,
-    matchers: [...dashboardRouteGroups.reports],
-    description: "dosar: dovezi, politici, export",
-  },
-  {
-    id: "trust",
-    label: "Trust Center",
-    href: dashboardRoutes.trustCenter,
-    icon: Shield,
-    matchers: [dashboardRoutes.trustCenter],
-    description: "profil public de conformitate",
+    id: "dosar",
+    label: "Dosar",
+    href: dashboardRoutes.dosar,
+    icon: FolderOpen,
+    matchers: [...dashboardRouteGroups.dosar],
+    description: "dovezi, documente, exporturi",
   },
   {
     id: "settings",
@@ -122,7 +108,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.home,
     icon: Home,
     matchers: [...dashboardRouteGroups.home],
-    description: "snapshot: starea firmei tale acum",
+    description: "ce ai, ce s-a găsit, ce faci acum",
   },
   {
     id: "scan",
@@ -130,7 +116,7 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.scan,
     icon: Scan,
     matchers: [...dashboardRouteGroups.scan],
-    description: "intake: încarcă surse noi",
+    description: "adaugă surse, analizează, trimite în rezolvare",
   },
   {
     id: "resolve",
@@ -138,39 +124,15 @@ export const soloNavItems: DashboardNavItem[] = [
     href: dashboardRoutes.resolve,
     icon: Flag,
     matchers: [...dashboardRouteGroups.resolve],
-    description: "rezolvă findings pas cu pas",
+    description: "rezolvă cazuri, dovedește, închide",
   },
   {
-    id: "calendar",
-    label: "Calendar",
-    href: dashboardRoutes.calendar,
-    icon: CalendarClock,
-    matchers: [dashboardRoutes.calendar],
-    description: "deadlines și reverificări",
-  },
-  {
-    id: "documente",
-    label: "Documente",
-    href: dashboardRoutes.documentsHub,
+    id: "dosar",
+    label: "Dosar",
+    href: dashboardRoutes.dosar,
     icon: FolderOpen,
-    matchers: [dashboardRoutes.documentsHub],
-    description: "politici și documente scanate",
-  },
-  {
-    id: "reports",
-    label: "Rapoarte",
-    href: dashboardRoutes.reports,
-    icon: FileSearch,
-    matchers: [...dashboardRouteGroups.reports],
-    description: "dosar: dovezi și export",
-  },
-  {
-    id: "trust",
-    label: "Trust Center",
-    href: dashboardRoutes.trustCenter,
-    icon: Shield,
-    matchers: [dashboardRoutes.trustCenter],
-    description: "profil public de conformitate",
+    matchers: [...dashboardRouteGroups.dosar],
+    description: "dovezi, documente, exporturi",
   },
   {
     id: "settings",

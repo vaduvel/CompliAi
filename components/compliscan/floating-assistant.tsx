@@ -32,7 +32,7 @@ const SUGGESTION_GROUPS: Array<{ matchers: string[]; suggestions: string[] }> = 
     suggestions: ["Cum prioritizez ce am de rezolvat?", "Cum inchid un task cu dovada buna?"],
   },
   {
-    matchers: [...dashboardRouteGroups.reports],
+    matchers: [...dashboardRouteGroups.dosar],
     suggestions: ["Cum export dovada?", "Ce contine raportul PDF?"],
   },
   {

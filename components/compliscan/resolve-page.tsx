@@ -2,13 +2,9 @@
 
 import Link from "next/link"
 import { useDeferredValue, useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Clock, Search } from "lucide-react"
+import { AlertTriangle, ArrowRight, Clock, Search } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
-import {
-  FindingExecutionCard,
-  FindingNarrativeCard,
-} from "@/components/compliscan/finding-cockpit-shared"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
@@ -21,8 +17,6 @@ import type { ScanFinding } from "@/lib/compliance/types"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
 import {
   isFindingActive,
-  isFindingResolvedLike,
-  getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -82,49 +76,6 @@ function ageLabel(iso: string): string {
   return `${Math.floor(days / 30)}l`
 }
 
-function getFindingReviewBadge(
-  finding: ScanFinding
-): { label: string; variant: "default" | "warning" | "secondary" | "success" | "destructive" | "outline" } {
-  if (!isFindingActive(finding)) {
-    return getFindingStatusPresentation(finding.findingStatus)
-  }
-  if (finding.requiresHumanReview) {
-    return { label: "De revizuit", variant: "warning" }
-  }
-  if (finding.resolution) {
-    return { label: "În remediere", variant: "default" }
-  }
-  return getFindingStatusPresentation(finding.findingStatus)
-}
-
-function compareFindingsByPriority(a: ScanFinding, b: ScanFinding) {
-  const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
-  const statusBoost = (finding: ScanFinding) => {
-    if (finding.findingStatus === "confirmed") return 0
-    if (finding.findingStatus === "open") return 1
-    return 2
-  }
-
-  return (
-    (SEVERITY_RANK[a.severity] ?? 4) - (SEVERITY_RANK[b.severity] ?? 4) ||
-    statusBoost(a) - statusBoost(b) ||
-    new Date(b.createdAtISO).getTime() - new Date(a.createdAtISO).getTime()
-  )
-}
-
-function getResolveDocumentFlowState(
-  finding: ScanFinding
-): "not_required" | "draft_missing" | "attached_as_evidence" {
-  if (isFindingResolvedLike(finding.findingStatus)) {
-    return "attached_as_evidence"
-  }
-
-  if (finding.suggestedDocumentType) {
-    return "draft_missing"
-  }
-
-  return "not_required"
-}
 
 function getRecipeRowBadge(
   finding: ScanFinding,
@@ -159,10 +110,6 @@ function getRecipeRowBadge(
 // ── Finding Row ───────────────────────────────────────────────────────────────
 
 function FindingRow({ finding }: { finding: ScanFinding }) {
-  const [expanded, setExpanded] = useState(false)
-  const age = ageLabel(finding.createdAtISO)
-  const reviewBadge = getFindingReviewBadge(finding)
-  const documentFlowState = getResolveDocumentFlowState(finding)
   const recipe = buildCockpitRecipe(finding)
   const flowStatus = getRecipeRowBadge(finding, recipe)
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
@@ -171,68 +118,30 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
     : `/dashboard/resolve/${finding.id}`
 
   return (
-    <div className={["overflow-hidden rounded-eos-md border transition-colors duration-150", expanded ? "border-eos-border-default" : "border-eos-border-subtle", "bg-eos-surface"].join(" ")}>
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
-        aria-expanded={expanded}
-      >
-        <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
-        <p className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
+    <Link
+      href={cockpitHref}
+      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3.5 transition-colors hover:border-eos-border hover:bg-eos-surface-variant"
+    >
+      <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
+      <div className="min-w-0 flex-1">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
           {finding.title}
         </p>
-        <span className="hidden min-w-0 max-w-[18rem] truncate text-xs text-eos-text-muted xl:block">
-          {recipe.whatUserMustDo}
-        </span>
-        <Badge variant="secondary" className="normal-case tracking-normal shrink-0">
-          {canonicalFrameworkLabel(recipe.framework)}
-        </Badge>
-        <Badge variant={flowStatus.variant} className="hidden normal-case tracking-normal lg:inline-flex">
-          {flowStatus.label}
-        </Badge>
-        <span className="shrink-0 text-[11px] text-eos-text-muted">{age}</span>
-        <Badge variant={reviewBadge.variant} className="normal-case tracking-normal shrink-0">
-          {reviewBadge.label}
-        </Badge>
-        {expanded
-          ? <ChevronDown className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />
-          : <ChevronRight className="size-3 shrink-0 text-eos-text-muted" strokeWidth={2} />
-        }
-      </button>
-      {expanded && (
-        <>
-          <div className="border-t border-eos-border-subtle px-4 py-4">
-            <FindingExecutionCard
-              finding={finding}
-              documentFlowState={documentFlowState}
-              recipe={recipe}
-            />
-          </div>
-          <div className="border-t border-eos-border-subtle px-5 py-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-eos-text">
-                  {hasGenerator
-                    ? "Generatorul trăiește în cockpitul cazului, nu într-o pagină separată."
-                    : "Intră în cockpit ca să închizi cazul fără să pierzi urma de dovadă și monitoring."}
-                </p>
-                <p className="text-[11px] text-eos-text-muted">
-                  Finding, dovadă, dosar și monitorizare rămân în aceeași urmă.
-                </p>
-              </div>
-              <Link
-                href={cockpitHref}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline"
-              >
-                {recipe.visibleBlocks.collapsedPrimaryCTA}
-                <ArrowRight className="size-3" strokeWidth={2} />
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+        {recipe.whatUserMustDo && (
+          <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-eos-text-muted">
+            {recipe.whatUserMustDo}
+          </p>
+        )}
+      </div>
+      <Badge variant="secondary" className="hidden normal-case tracking-normal shrink-0 sm:inline-flex">
+        {canonicalFrameworkLabel(recipe.framework)}
+      </Badge>
+      <Badge variant={flowStatus.variant} className="hidden normal-case tracking-normal shrink-0 lg:inline-flex">
+        {flowStatus.label}
+      </Badge>
+      <span className="shrink-0 text-[11px] text-eos-text-muted">{ageLabel(finding.createdAtISO)}</span>
+      <ArrowRight className="size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
+    </Link>
   )
 }
 
@@ -512,16 +421,11 @@ export function ResolvePageSurface() {
 
   const findings = cockpit.data.state.findings
   const activeFindings = findings.filter((finding) => isFindingActive(finding))
-  const featuredFinding = [...activeFindings].sort(compareFindingsByPriority)[0] ?? null
   const criticalCount = activeFindings.filter((f) => f.severity === "critical").length
   const highCount = activeFindings.filter((f) => f.severity === "high").length
   const mediumCount = activeFindings.filter((f) => f.severity === "medium").length
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const isSolo = runtime?.userMode === "solo"
-  const featuredFlowState = featuredFinding ? getResolveDocumentFlowState(featuredFinding) : "not_required"
-  const featuredRecipe = featuredFinding
-    ? buildCockpitRecipe(featuredFinding, { documentFlowState: featuredFlowState })
-    : null
 
   return (
     <div className="space-y-8">
@@ -570,36 +474,6 @@ export function ResolvePageSurface() {
 
       {/* Cross-module urgency: DSAR deadlines + NIS2 incidents + Vendor overdue */}
       <UrgentItemsSection items={urgencyItems} />
-
-      {featuredFinding && (
-        <section aria-label="Caz prioritar acum" className="space-y-3">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm font-medium text-eos-text">Cazul activ acum</p>
-              <p className="mt-1 text-xs text-eos-text-muted">
-                Intrarea principală în smart resolve cockpit. Aici vezi problema, pasul curent, dovada și ce rămâne sub watch după închidere.
-              </p>
-            </div>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              Prioritizat automat din finding-urile deschise
-            </Badge>
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-            <FindingNarrativeCard
-              finding={featuredFinding}
-              title={featuredFinding.title}
-              description="Rezumatul de lucru rămâne compact: ce e problema, de ce contează și ce dovadă trebuie să rămână la dosar."
-              recipe={featuredRecipe ?? undefined}
-            />
-            <FindingExecutionCard
-              finding={featuredFinding}
-              documentFlowState={featuredFlowState}
-              recipe={featuredRecipe ?? undefined}
-            />
-          </div>
-        </section>
-      )}
 
       {/* Main execution queue */}
       <section aria-label="Finding-uri de rezolvat">

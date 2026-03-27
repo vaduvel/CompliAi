@@ -387,7 +387,7 @@ export default function DashboardPage() {
                     <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Board / Investitor</Badge>
                   </div>
                   <Link
-                    href={dashboardRoutes.reports}
+                    href={dashboardRoutes.dosar}
                     className="flex items-center gap-1 text-xs text-eos-primary hover:underline"
                   >
                     <Download className="size-3" />

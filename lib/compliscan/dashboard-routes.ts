@@ -18,6 +18,9 @@ export const dashboardRoutes = {
   dsar: "/dashboard/dsar",
   fiscal: "/dashboard/fiscal",
   vendorReview: "/dashboard/vendor-review",
+  // Dosar unificat — Wave 1 cleanup
+  dosar: "/dashboard/dosar",
+  // Păstrate pentru backward compat (accesibile din Dosar)
   reports: "/dashboard/reports",
   auditorVault: "/dashboard/reports/vault",
   auditLog: "/dashboard/reports/audit-log",
@@ -51,7 +54,9 @@ export const dashboardRouteGroups = {
     dashboardRoutes.whistleblowing,
     dashboardRoutes.dora,
   ],
-  reports: [
+  // Dosar unificat — absoarbe toate output-urile
+  dosar: [
+    dashboardRoutes.dosar,
     dashboardRoutes.reports,
     dashboardRoutes.auditorVault,
     dashboardRoutes.auditLog,
