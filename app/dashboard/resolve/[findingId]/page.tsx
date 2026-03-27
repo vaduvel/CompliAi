@@ -396,7 +396,7 @@ export default function FindingDetailPage() {
       : {
           eyebrow: "Dovadă operațională obligatorie",
           body: "Spune concret ce ai corectat, unde ai făcut remedierea și ce urmă poate fi verificată mai departe.",
-          placeholder: "Ex: TaxTotal corectat în ERP, factura retransmisă în SPV, confirmare de primire primită la 26.03.2026.",
+          placeholder: "Ex: Măsura aplicată la 27.03.2026 în sistemul real. Urma verificabilă: registru actualizat, export salvat, link intern sau confirmare operațională păstrată la dosar.",
           footer: "Cazul nu poate intra în monitorizare fără această dovadă operațională.",
         }
 

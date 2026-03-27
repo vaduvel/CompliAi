@@ -398,6 +398,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "partial",
     closingRule: "template-uri contractuale revizuite și urmă clară salvată la dosar",
   },
+  "GDPR-OPS": {
+    findingTypeId: "GDPR-OPS",
+    framework: "GDPR",
+    title: "Măsură operațională GDPR / HR",
+    category: "Operational follow-up",
+    typicalSeverity: "medium",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "owner"],
+    compliCapabilities: ["explică măsura și dovada cerută", "ține urma în cockpit"],
+    userResponsibilities: ["aplică măsura reală", "lasă dovada verificabilă"],
+    requiredEvidenceKinds: ["uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "măsura este aplicată și urmă clară este salvată la dosar",
+  },
   "AI-001": {
     findingTypeId: "AI-001",
     framework: "AI Act",
@@ -427,6 +442,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["confirmation", "generated_document"],
     autoRecheck: "no",
     closingRule: "oversight definit și salvat",
+  },
+  "AI-OPS": {
+    findingTypeId: "AI-OPS",
+    framework: "AI Act",
+    title: "Măsură operațională AI",
+    category: "Operational follow-up",
+    typicalSeverity: "high",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["external_action"],
+    primaryActors: ["user", "owner"],
+    compliCapabilities: ["explică măsura de control AI", "ține urma în cockpit"],
+    userResponsibilities: ["aplică regula reală", "lasă dovada verificabilă"],
+    requiredEvidenceKinds: ["uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "măsura AI este aplicată și urmă clară este salvată la dosar",
   },
   "EF-001": {
     findingTypeId: "EF-001",
@@ -756,6 +786,17 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Template-uri contractuale pregătite și urmă clară salvată în cockpit.",
     revalidationTriggers: ["model contractual schimbat", "jurisdicție nouă", "review contractual periodic"],
   },
+  "GDPR-OPS": {
+    findingTypeId: "GDPR-OPS",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Aplică măsura și lasă dovada",
+    secondaryCTA: "Vezi dovada cerută",
+    whatUserSees: "Riscul are nevoie de aplicare reală și urmă clară.",
+    whatCompliDoes: "Ține cazul în cockpit și cere dovada operațională potrivită.",
+    whatUserMustDo: "Aplică măsura în procesul real și notează clar ce ai făcut, unde și cu ce urmă verificabilă.",
+    closeCondition: "Dovada operațională este salvată în cockpit.",
+    revalidationTriggers: ["review periodic", "schimbare de proces"],
+  },
   "NIS2-001": {
     findingTypeId: "NIS2-001",
     initialFlowState: "need_your_input",
@@ -811,6 +852,17 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserMustDo: "Confirmă persoanele și regulile.",
     closeCondition: "Oversight definit și salvat.",
     revalidationTriggers: ["reorganizare", "sistem nou"],
+  },
+  "AI-OPS": {
+    findingTypeId: "AI-OPS",
+    initialFlowState: "external_action_required",
+    primaryCTA: "Aplică regula AI și lasă dovada",
+    secondaryCTA: "Vezi dovada cerută",
+    whatUserSees: "Riscul AI cere aplicare reală și urmă clară.",
+    whatCompliDoes: "Ține cazul în cockpit și cere dovada operațională a regulii AI aplicate.",
+    whatUserMustDo: "Aplică regula AI în procesul real și notează clar ce ai restricționat, instruit sau actualizat.",
+    closeCondition: "Dovada operațională este salvată în cockpit.",
+    revalidationTriggers: ["tool nou", "schimbare de proces", "review periodic"],
   },
   "EF-001": {
     findingTypeId: "EF-001",
@@ -1057,6 +1109,10 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "contracts-baseline" || id === "intake-contracts-baseline") return "GDPR-020"
   if (id === "intake-vendor-no-dpa") return "GDPR-010"
   if (id === "intake-site-cookies") return "GDPR-005"
+  if (id.startsWith("intake-") && !docType) {
+    if (framework === "GDPR") return "GDPR-OPS"
+    if (framework === "AI Act") return "AI-OPS"
+  }
   if (id === "saft-d406-registration") return "EF-001"
   // SPV-specific findings from /api/fiscal/spv-check → EF-001
   if (
@@ -1862,6 +1918,10 @@ function getClosureCTA(
       return "Marchează notificarea ANSPDCP"
     case "GDPR-020":
       return "Marchează baseline-ul contractual"
+    case "GDPR-OPS":
+      return "Marchează măsura aplicată"
+    case "AI-OPS":
+      return "Marchează regula AI aplicată"
     case "EF-001":
       return "Confirmă activarea SPV"
     default:
@@ -1881,11 +1941,13 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-017": 90,
   "GDPR-019": null,
   "GDPR-020": 180,
+  "GDPR-OPS": 180,
   "NIS2-001": 365,
   "NIS2-005": 180,
   "NIS2-015": 7,
   "AI-001": 180,
   "AI-005": 180,
+  "AI-OPS": 180,
   "EF-001": 30,
   "EF-003": 7,
   "EF-004": 2,

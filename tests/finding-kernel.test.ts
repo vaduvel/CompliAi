@@ -106,6 +106,19 @@ describe("classifyFinding", () => {
     expect(result.framework).toBe("GDPR")
   })
 
+  it("mapează intake HR fără generator → GDPR-OPS", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-hr-registry",
+        category: "GDPR",
+        title: "REGES / evidență contracte angajați",
+        detail: "Evidența contractelor trebuie ținută la zi.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-OPS")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează un vendor cunoscut din text pentru flow DPA", () => {
     const recipe = buildCockpitRecipe(
       makeFinding({
@@ -148,6 +161,19 @@ describe("classifyFinding", () => {
       makeFinding({ category: "EU_AI_ACT", suggestedDocumentType: "ai-governance" })
     )
     expect(result.findingTypeId).toBe("AI-005")
+    expect(result.framework).toBe("AI Act")
+  })
+
+  it("mapează intake AI operațional fără generator → AI-OPS", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-ai-confidential-data",
+        category: "EU_AI_ACT",
+        title: "Date confidențiale introduse în AI fără protecție",
+        detail: "Tool-uri AI externe primesc date sensibile fără reguli.",
+      })
+    )
+    expect(result.findingTypeId).toBe("AI-OPS")
     expect(result.framework).toBe("AI Act")
   })
 
@@ -900,6 +926,20 @@ describe("getCloseGatingRequirements", () => {
 
   it("cere dovadă operațională pentru GDPR-020", () => {
     const requirements = getCloseGatingRequirements("GDPR-020")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
+  })
+
+  it("cere dovadă operațională pentru GDPR-OPS", () => {
+    const requirements = getCloseGatingRequirements("GDPR-OPS")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Notă explicativă")
+  })
+
+  it("cere dovadă operațională pentru AI-OPS", () => {
+    const requirements = getCloseGatingRequirements("AI-OPS")
     expect(requirements.requiresGeneratedDocument).toBe(false)
     expect(requirements.requiresEvidenceNote).toBe(true)
     expect(requirements.acceptedEvidence).toContain("Fișier încărcat")

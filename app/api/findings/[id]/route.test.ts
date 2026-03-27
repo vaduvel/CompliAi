@@ -747,6 +747,80 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.feedbackMessage).toContain("operațională")
   })
 
+  it("blochează intake-hr-registry fără dovadă operațională explicită", async () => {
+    const hrRegistryState = {
+      findings: [
+        {
+          id: "intake-hr-registry",
+          title: "REGES / evidență contracte angajați",
+          detail: "Evidența contractelor de muncă trebuie menținută la zi în REGES.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "intake-questionnaire",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(hrRegistryState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/intake-hr-registry", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "resolved" }),
+      }),
+      { params: Promise.resolve({ id: "intake-hr-registry" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("OPERATIONAL_EVIDENCE_REQUIRED")
+  })
+
+  it("închide intake-hr-registry doar cu urmă operațională explicită", async () => {
+    const hrRegistryState = {
+      findings: [
+        {
+          id: "intake-hr-registry",
+          title: "REGES / evidență contracte angajați",
+          detail: "Evidența contractelor de muncă trebuie menținută la zi în REGES.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "intake-questionnaire",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(hrRegistryState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/intake-hr-registry", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote:
+            "REGES verificat și actualizat la 27.03.2026. Contractele lipsă au fost introduse, iar exportul de control a fost salvat în /HR/REGES/2026-03-27.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "intake-hr-registry" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.finding.operationalEvidenceNote).toContain("/HR/REGES/2026-03-27")
+    expect(payload.feedbackMessage).toContain("operațională")
+  })
+
   it("creează notificare fiscală umană când EF-003 intră în monitorizare", async () => {
     const efacturaState = {
       findings: [
