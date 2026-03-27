@@ -573,18 +573,18 @@ export default function FindingDetailPage() {
             <>
               <Button
                 data-testid="open-generator-drawer"
-                onClick={() => setGeneratorOpen((current) => !current)}
+                onClick={() => setGeneratorOpen(true)}
                 className="gap-1.5"
                 variant={generatorOpen || preparedDocumentReady ? "outline" : "default"}
               >
                 <FileText className="size-3.5" strokeWidth={2} />
-                {generatorOpen
-                  ? "Ascunde zona de generare"
-                  : preparedDocumentReady
-                    ? "Revizuiește documentul confirmat"
+                {preparedDocumentReady
+                  ? "Revizuiește documentul confirmat"
                   : documentFlowState === "draft_ready"
                     ? "Continuă validarea documentului mai jos"
-                    : "Deschide zona de generare"}
+                    : generatorOpen
+                      ? "Zona de generare este deschisă mai jos"
+                      : "Deschide zona de generare"}
               </Button>
               {needsDocumentResolution ? (
                 <Button

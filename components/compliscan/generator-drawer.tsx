@@ -356,8 +356,7 @@ export function GeneratorDrawer({
   return (
     <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-bg-inset/30">
       <CardContent className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
+        <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
               Zonă de generare pentru rezolvare
             </p>
@@ -368,14 +367,6 @@ export function GeneratorDrawer({
             <p className="text-sm text-eos-text-muted">
               {findingTitle} · generezi, validezi și confirmi documentul chiar în acest cockpit.
             </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="gap-2"
-          >
-            Ascunde zona
-          </Button>
         </div>
 
         <div className="flex-1 space-y-4">
