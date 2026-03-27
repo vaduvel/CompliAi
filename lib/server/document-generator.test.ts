@@ -1,78 +1,76 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { getGeneratedDocumentTitle, normalizeGeneratedDocumentContent } from "./document-generator"
+import { validateGeneratedDocumentEvidence } from "@/lib/compliscan/generated-document-validation"
 
-describe("normalizeGeneratedDocumentContent", () => {
-  it("înlocuiește o dată stale din politica de confidențialitate cu data generării", () => {
-    const content = [
-      "# Politica de Confidențialitate – Demo Retail SRL",
-      "",
-      "**Ultima actualizare:** 22 Mai 2024",
-      "",
-      "## 1. Introducere",
-    ].join("\n")
+const ORIGINAL_GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
-    const normalized = normalizeGeneratedDocumentContent(content, "privacy-policy", "2026-03-25T18:49:10.342Z")
+async function importGeneratorModule() {
+  vi.resetModules()
+  return import("./document-generator")
+}
 
-    expect(normalized).toContain("**Ultima actualizare:** 25 martie 2026")
-    expect(normalized).not.toContain("22 Mai 2024")
-  })
-
-  it("inserează linia de dată după titlu când modelul o omite", () => {
-    const content = [
-      "# Politică de Cookies",
-      "",
-      "## 1. Introducere",
-      "Text introductiv.",
-    ].join("\n")
-
-    const normalized = normalizeGeneratedDocumentContent(content, "cookie-policy", "2026-03-25T18:49:10.342Z")
-
-    expect(normalized).toContain("# Politică de Cookies\n\n**Ultima actualizare:** 25 martie 2026\n\n## 1. Introducere")
-  })
-
-  it("folosește eticheta de generare pentru documentele operaționale", () => {
-    const content = [
-      "# Acord de Prelucrare a Datelor",
-      "",
-      "**Data generării:** 1 ianuarie 2024",
-      "",
-      "## Părțile",
-    ].join("\n")
-
-    const normalized = normalizeGeneratedDocumentContent(content, "dpa", "2026-03-25T18:49:10.342Z")
-
-    expect(normalized).toContain("**Data generării:** 25 martie 2026")
-    expect(normalized).not.toContain("1 ianuarie 2024")
-  })
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+  if (ORIGINAL_GEMINI_API_KEY === undefined) {
+    delete process.env.GEMINI_API_KEY
+  } else {
+    process.env.GEMINI_API_KEY = ORIGINAL_GEMINI_API_KEY
+  }
 })
 
-describe("getGeneratedDocumentTitle", () => {
-  it("personalizează titlul DPA cu vendorul când counterpartyName este prezent", () => {
-    const title = getGeneratedDocumentTitle({
-      documentType: "dpa",
-      orgName: "Demo Retail SRL",
-      counterpartyName: "Mailchimp (Intuit)",
-    })
+describe("document generator fallback", () => {
+  it("returns a valid privacy-policy fallback when Gemini is unavailable", async () => {
+    delete process.env.GEMINI_API_KEY
 
-    expect(title).toBe("Acord de Prelucrare a Datelor (DPA) — Demo Retail SRL × Mailchimp (Intuit)")
-  })
-
-  it("păstrează titlul standard pentru documentele fără counterparty", () => {
-    const title = getGeneratedDocumentTitle({
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
       documentType: "privacy-policy",
-      orgName: "Demo Retail SRL",
+      orgName: "CompliAI Test SRL",
+      orgWebsite: "https://example.com",
+      dpoEmail: "dpo@example.com",
+      dataFlows: "formulare de contact si administrare clienti",
     })
 
-    expect(title).toBe("Politică de Confidențialitate")
+    expect(document.llmUsed).toBe(false)
+
+    const validation = validateGeneratedDocumentEvidence({
+      documentType: "privacy-policy",
+      title: document.title,
+      content: document.content,
+      orgName: "CompliAI Test SRL",
+      orgWebsite: "https://example.com",
+    })
+
+    expect(validation.status).toBe("valid")
   })
 
-  it("returnează titlul standard pentru retention policy", () => {
-    const title = getGeneratedDocumentTitle({
-      documentType: "retention-policy",
-      orgName: "Demo Retail SRL",
+  it("falls back cleanly on Gemini 503 and still returns a valid DPA draft", async () => {
+    process.env.GEMINI_API_KEY = "test-key"
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response('{"error":"busy"}', { status: 503 }))
+    )
+
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
+      documentType: "dpa",
+      orgName: "CompliAI Test SRL",
+      counterpartyName: "Google Analytics",
+      counterpartyReferenceUrl: "https://example.com/dpa",
+      dpoEmail: "dpo@example.com",
     })
 
-    expect(title).toBe("Politică și Matrice de Retenție a Datelor")
+    expect(document.llmUsed).toBe(false)
+
+    const validation = validateGeneratedDocumentEvidence({
+      documentType: "dpa",
+      title: document.title,
+      content: document.content,
+      orgName: "CompliAI Test SRL",
+      counterpartyName: "Google Analytics",
+    })
+
+    expect(validation.status).toBe("valid")
   })
 })

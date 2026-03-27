@@ -2,6 +2,8 @@
 // Generates: Privacy Policy, Cookie Policy, DPA, NIS2 Incident Response Plan, AI Governance Policy.
 // Uses Gemini API. Falls back to a static skeleton when GEMINI_API_KEY is absent.
 
+import { fetchWithOperationalGuard } from "@/lib/server/http-client"
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite"
 
@@ -113,6 +115,15 @@ function formatDocumentDateRo(generatedAtISO: string) {
     year: "numeric",
     timeZone: DOCUMENT_DATE_TIMEZONE,
   }).format(new Date(generatedAtISO))
+}
+
+function normalizeWebsiteForDocument(value?: string) {
+  if (!value) return null
+  return value
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/.*$/, "")
 }
 
 function getPreferredDocumentDateLabel(documentType: DocumentType) {
@@ -303,36 +314,176 @@ Cerințe:
   return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}`
 }
 
-// ── Static fallback skeleton ──────────────────────────────────────────────────
+// ── Static fallback templates ─────────────────────────────────────────────────
 
 function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocument {
   const meta = DOC_META[input.documentType]
   const now = new Date().toISOString()
   const title = getGeneratedDocumentTitle(input)
+  const preferredDateLabel = getPreferredDocumentDateLabel(input.documentType)
+  const formattedDate = formatDocumentDateRo(now)
+  const websiteHost = normalizeWebsiteForDocument(input.orgWebsite)
+  const reviewWarning =
+    "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+  const serviceFallbackNote =
+    "Serviciul AI a fost indisponibil temporar, așa că acest draft a fost construit din șablonul de siguranță CompliAI."
 
-  const content = [
-    `# ${title}`,
-    ``,
-    `**Organizație:** ${input.orgName}`,
-    ...(input.counterpartyName ? [`**Procesator / furnizor:** ${input.counterpartyName}`] : []),
-    `**Data generării:** ${new Date(now).toLocaleDateString("ro-RO")}`,
-    `**Baza legală:** ${meta.legalBasis}`,
-    ``,
-    `---`,
-    ``,
-    `> ⚠️ **Generare AI indisponibilă.** Configurează \`GEMINI_API_KEY\` pentru a genera documentul complet.`,
-    `> Aceasta este o schiță cu structura documentului care trebuie completată manual.`,
-    ``,
-    `## Structura documentului`,
-    ``,
-    `1. [ ] Completează secțiunea 1`,
-    `2. [ ] Completează secțiunea 2`,
-    `3. [ ] Verifică cu un specialist înainte de utilizare`,
-    ``,
-    `---`,
-    ``,
-    `⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială.`,
-  ].join("\n")
+  const contentMap: Record<DocumentType, string> = {
+    "privacy-policy": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      ...(websiteHost ? [`**Website:** ${websiteHost}`] : []),
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Cine suntem",
+      `${input.orgName} prelucrează date personale în legătură cu activitatea comercială și cu operațiunile derulate prin ${websiteHost ?? "canalele sale digitale și operaționale"}. Această politică explică ce date folosim, de ce le folosim și ce drepturi au persoanele vizate.`,
+      "",
+      "## Ce date prelucrăm",
+      "Date de identificare și contact, date despre clienți și potențiali clienți, date transmise prin formulare, date necesare pentru contractare, suport și obligații legale sau fiscale.",
+      "",
+      "## De ce le prelucrăm",
+      "Executarea contractelor, administrarea relației cu clienții, răspuns la solicitări, conformare legală, securitate operațională și îmbunătățirea serviciilor. Fiecare scop trebuie confirmat intern înainte de utilizare oficială.",
+      "",
+      "## Cât timp le păstrăm",
+      "Păstrăm datele doar atât cât este necesar pentru scopul declarat, pentru obligațiile legale și pentru apărarea drepturilor noastre. Termenele concrete trebuie corelate cu politica internă de retenție.",
+      "",
+      "## Drepturile persoanelor vizate",
+      "Persoanele vizate pot solicita acces, rectificare, ștergere, restricționare, portabilitate sau opoziție, în condițiile GDPR. Solicitările trebuie documentate și urmărite în workflow-ul DSAR.",
+      "",
+      "## Contact",
+      input.dpoEmail
+        ? `Pentru întrebări privind protecția datelor, ne poți contacta la ${input.dpoEmail}.`
+        : `Pentru întrebări privind protecția datelor, ${input.orgName} trebuie să desemneze și să publice un contact responsabil.`,
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "cookie-policy": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      ...(websiteHost ? [`**Website:** ${websiteHost}`] : []),
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Ce sunt cookies-urile",
+      `Pe ${websiteHost ?? "site-ul organizației"} folosim cookies și tehnologii similare pentru funcționarea serviciului, măsurarea performanței și gestionarea preferințelor utilizatorilor.`,
+      "",
+      "## Categorii de cookies",
+      "Cookies strict necesare, cookies funcționale, cookies analitice și, dacă sunt activate cu consimțământ valid, cookies de marketing. Fiecare categorie trebuie corelată cu bannerul și cu consimțământul real din site scan.",
+      "",
+      "## Durata și controlul consimțământului",
+      "Durata fiecărui cookie trebuie verificată în configurarea tehnică a site-ului. Utilizatorii trebuie să poată accepta, refuza sau retrage consimțământul fără fricțiune inutilă.",
+      "",
+      "## Parteneri terți și setări browser",
+      "Dacă folosim servicii terțe de analiză sau marketing, acestea trebuie enumerate explicit și corelate cu consimțământul colectat. Utilizatorii pot controla suplimentar cookies-urile din browser.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    dpa: [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Operator:** ${input.orgName}`,
+      `**Procesator / furnizor:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Obiectul acordului",
+      `${input.orgName} acționează ca operator de date și stabilește prin prezentul acord regulile minime pentru prelucrarea realizată de ${input.counterpartyName ?? "procesatorul desemnat"}, în numele și la instrucțiunile operatorului.`,
+      "",
+      "## Date, scop și durată",
+      "Acordul trebuie să descrie categoriile de date, persoanele vizate, scopul prelucrării și durata estimată. Aceste elemente trebuie verificate înainte de semnare și corelate cu serviciul furnizorului.",
+      "",
+      "## Obligațiile procesatorului",
+      "Procesatorul prelucrează datele doar la instrucțiunea operatorului, asigură confidențialitatea personalului, implementează măsuri de securitate, notifică incidentele fără întârziere nejustificată și sprijină operatorul la exercitarea drepturilor persoanelor vizate.",
+      "",
+      "## Sub-procesatori, audit și încetare",
+      "Sub-procesatorii trebuie autorizați și documentați, operatorul trebuie să poată obține informații de audit rezonabile, iar la încetarea relației datele trebuie returnate sau șterse conform instrucțiunilor operatorului și obligațiilor legale.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "retention-policy": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Principiu general",
+      `${input.orgName} păstrează datele doar atât cât este necesar pentru scopul declarat, pentru obligațiile legale și pentru apărarea drepturilor sale. Orice prelungire a retenției trebuie justificată și documentată.`,
+      "",
+      "## Matrice orientativă de retenție",
+      "| Categorie | Scop | Termen orientativ | Trigger de ștergere |",
+      "| --- | --- | --- | --- |",
+      "| Clienți activi | executarea contractului | pe durata relației + termen legal | încetare relație și expirare obligații |",
+      "| Lead-uri | ofertare și vânzări | 12 luni | lipsă conversie / retragere consimțământ |",
+      "| HR | raporturi de muncă | conform cerințelor legale | expirare obligații legale |",
+      "| Facturi și contabilitate | conformare fiscală | conform legii fiscale | expirare obligații de arhivare |",
+      "| Loguri operaționale | securitate și suport | termen intern limitat | expirare termen + verificare |",
+      "",
+      "## Execuție și dovadă operațională",
+      "Ștergerea sau anonimizarea trebuie să lase urmă: job executat, export de control, verificare periodică și persoană responsabilă. Excepțiile pentru litigii, investigații sau arhivare legală trebuie notate separat.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "nis2-incident-response": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Scop și domeniu",
+      `${input.orgName} trebuie să poată detecta, evalua, limita și raporta incidentele de securitate într-un mod documentat, cu responsabilități clare și cu aliniere la termenele NIS2 și GDPR.`,
+      "",
+      "## Pașii de răspuns",
+      "Detectare, evaluare inițială, conținere, eradicare, recuperare și lecții învățate. Fiecare etapă trebuie legată de un responsabil, o urmă de timp și o decizie documentată.",
+      "",
+      "## Timeline minim",
+      "Alertă timpurie în 24h, raport complet în 72h, raport final sau post-incident în 30 de zile, plus notificări GDPR dacă incidentul afectează date personale.",
+      "",
+      "## Comunicare și evidență",
+      "Canalele de escaladare, referințele DNSC și ANSPDCP, dovada notificărilor și deciziile critice trebuie păstrate în același dosar al incidentului.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "ai-governance": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Scop și aplicare",
+      `${input.orgName} stabilește prin această politică regulile minime pentru utilizarea sistemelor AI, inclusiv AI generativ, astfel încât utilizarea să rămână controlată, documentată și aliniată la EU AI Act.`,
+      "",
+      "## Clasificare și aprobări",
+      "Sistemele AI trebuie clasificate după nivelul de risc, iar înainte de utilizare trebuie documentate scopul, datele folosite, persoanele afectate și măsurile de supraveghere umană.",
+      "",
+      "## Reguli operaționale",
+      "Utilizatorii nu introduc date confidențiale fără aprobare, verifică ieșirile generate, păstrează trasabilitatea deciziilor și escaladează orice folosire cu impact ridicat sau sensibil.",
+      "",
+      "## Monitoring și registru",
+      "Organizația trebuie să mențină un registru al sistemelor AI, să urmărească incidentele și să revizuiască periodic politica, trainingul și controalele aplicate.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+  }
+
+  const content = contentMap[input.documentType]
 
   const expiry = calculateExpiryDates(input.documentType, now)
 
@@ -360,54 +511,78 @@ export async function generateDocument(
 
   const prompt = buildPrompt(input, now)
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          topP: 0.95,
-          maxOutputTokens: 4096,
-        },
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(55_000),
+  try {
+    const response = await fetchWithOperationalGuard(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            topP: 0.95,
+            maxOutputTokens: 4096,
+          },
+        }),
+        cache: "no-store",
+        timeoutMs: 55_000,
+        retries: 2,
+        retryDelayMs: 800,
+        label: `document-generator:${input.documentType}`,
+      }
+    )
+
+    if (!response.ok) {
+      const text = await response.text()
+
+      if ([408, 429, 500, 502, 503, 504].includes(response.status)) {
+        return buildFallbackDocument(input)
+      }
+
+      throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 200)}`)
     }
-  )
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 200)}`)
-  }
+    const json = (await response.json()) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
+    }
 
-  const json = (await response.json()) as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
-  }
+    const content =
+      json.candidates?.[0]?.content?.parts
+        ?.map((p) => p.text ?? "")
+        .join("")
+        .trim() ?? ""
 
-  const content =
-    json.candidates?.[0]?.content?.parts
-      ?.map((p) => p.text ?? "")
-      .join("")
-      .trim() ?? ""
+    if (!content) {
+      throw new Error("Gemini a returnat un document gol.")
+    }
 
-  if (!content) {
-    throw new Error("Gemini a returnat un document gol.")
-  }
+    const normalizedContent = normalizeGeneratedDocumentContent(content, input.documentType, now)
 
-  const normalizedContent = normalizeGeneratedDocumentContent(content, input.documentType, now)
+    const expiry = calculateExpiryDates(input.documentType, now)
 
-  const expiry = calculateExpiryDates(input.documentType, now)
-
-  return {
-    documentType: input.documentType,
-    title,
-    content: normalizedContent,
-    generatedAtISO: now,
-    llmUsed: true,
-    ...expiry,
+    return {
+      documentType: input.documentType,
+      title,
+      content: normalizedContent,
+      generatedAtISO: now,
+      llmUsed: true,
+      ...expiry,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (
+      message.includes("HTTP_TIMEOUT") ||
+      message.includes("Gemini API error 408") ||
+      message.includes("Gemini API error 429") ||
+      message.includes("Gemini API error 500") ||
+      message.includes("Gemini API error 502") ||
+      message.includes("Gemini API error 503") ||
+      message.includes("Gemini API error 504")
+    ) {
+      return buildFallbackDocument(input)
+    }
+    throw error
   }
 }
 
