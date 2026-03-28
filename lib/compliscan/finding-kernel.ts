@@ -750,7 +750,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
       "Nu ai o politică de confidențialitate potrivită. Putem genera una pe baza datelor firmei tale.",
     whatCompliDoes:
       "Deschide generatorul, precompleteată ce știe, leagă artefactul de finding.",
-    whatUserMustDo: "Completează datele reale și confirmă.",
+    whatUserMustDo: "Confirmă findingul, apoi completezi datele reale și generezi documentul.",
     closeCondition: "Document generat, confirmat și salvat la dosar.",
     revalidationTriggers: ["website schimbat", "date firmă schimbate", ">6-12 luni"],
   },
@@ -774,7 +774,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserSees:
       "Ai nevoie de o politică de cookies pentru trackerele detectate pe site.",
     whatCompliDoes: "Generează draft bazat pe site scan.",
-    whatUserMustDo: "Verifică și publică politica.",
+    whatUserMustDo: "Confirmă findingul, apoi verifici draftul și publici politica.",
     closeCondition: "Document publicat și salvat.",
     revalidationTriggers: ["trackere noi", "site schimbat"],
   },
@@ -798,7 +798,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserSees:
       "Furnizorul pare să proceseze date pentru tine și nu avem un DPA atașat.",
     whatCompliDoes: "Propune DPA / link / template și deschide upload.",
-    whatUserMustDo: "Confirmă relația și încarcă / semnează.",
+    whatUserMustDo: "Confirmă findingul, apoi completezi relația reală și generezi sau semnezi DPA-ul.",
     closeCondition: "DPA prezent și confirmat.",
     revalidationTriggers: ["expirare DPA", "vendor schimbat"],
   },
@@ -835,7 +835,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
       "Nu este clar cât păstrezi anumite categorii de date și cum dovedești ștergerea la expirare.",
     whatCompliDoes:
       "Generează o politică și matrice de retenție pe care o legăm direct de finding ca dovadă de bază.",
-    whatUserMustDo: "Confirmă duratele reale, excepțiile legale și procesul de ștergere sau anonimizare.",
+    whatUserMustDo: "Confirmă findingul, apoi completezi duratele reale și generezi matricea de retenție.",
     closeCondition: "Matrice de retenție salvată și confirmată.",
     revalidationTriggers: ["proces nou", "categorie nouă de date", "review periodic"],
   },
@@ -944,7 +944,7 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserSees:
       "Nu este clar cine aprobă sau supraveghează acest sistem AI.",
     whatCompliDoes: "Generează structura minimă de oversight.",
-    whatUserMustDo: "Confirmă persoanele și regulile.",
+    whatUserMustDo: "Confirmă findingul, apoi completezi persoanele și regulile de oversight.",
     closeCondition: "Oversight definit și salvat.",
     revalidationTriggers: ["reorganizare", "sistem nou"],
   },
