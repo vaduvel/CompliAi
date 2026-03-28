@@ -221,7 +221,7 @@ export default function PricingPage() {
                   >
                     <plan.Icon className={["h-5 w-5", plan.iconClass].join(" ")} strokeWidth={1.5} />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
                     {plan.label}
                   </p>
                 </div>

@@ -14,6 +14,15 @@ import {
 } from "lucide-react"
 
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableEmpty,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/evidence-os/Table"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -236,7 +245,7 @@ export function ReportsVaultPageSurface() {
 
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-4">
-          <CardTitle className="text-lg">Ce blochează pachetul acum</CardTitle>
+          <CardTitle className="text-base">Ce blochează pachetul acum</CardTitle>
         </CardHeader>
         <CardContent className="pt-5">
           {blockers.length === 0 ? (
@@ -387,7 +396,7 @@ function EvidenceLedgerCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Registru dovezi</CardTitle>
+        <CardTitle className="text-base">Registru dovezi</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
@@ -398,66 +407,76 @@ function EvidenceLedgerCard({
           <p className="mt-2 text-xs text-eos-text-muted">
             Registrul vine din storage cand este disponibil. Daca nu este conectat, vezi dovada validata din task-uri.
           </p>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4">
             {hasLedger ? (
-              ledgerEntries.map((entry) => {
-                const task = entry.taskId ? taskById.get(entry.taskId) : null
-                const evidenceHref = resolveEvidenceHref(entry)
-                const qualityStatus = entry.quality?.status
-                const qualityLabel =
-                  qualityStatus === "sufficient"
-                    ? "verificata"
-                    : qualityStatus === "weak"
-                      ? "slaba"
-                      : "neevaluata"
-                const qualityVariant =
-                  qualityStatus === "sufficient"
-                    ? "success"
-                    : qualityStatus === "weak"
-                      ? "warning"
-                      : "secondary"
+              <Table density="compact" stickyHeader={ledgerEntries.length > 6}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Dovadă</TableHead>
+                    <TableHead>Fișier</TableHead>
+                    <TableHead>Tip</TableHead>
+                    <TableHead>Calitate</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ledgerEntries.length === 0 ? (
+                    <TableEmpty colSpan={4}>Nicio dovadă în registru</TableEmpty>
+                  ) : (
+                    ledgerEntries.map((entry) => {
+                      const task = entry.taskId ? taskById.get(entry.taskId) : null
+                      const evidenceHref = resolveEvidenceHref(entry)
+                      const qualityStatus = entry.quality?.status
+                      const qualityLabel =
+                        qualityStatus === "sufficient"
+                          ? "verificata"
+                          : qualityStatus === "weak"
+                            ? "slaba"
+                            : "neevaluata"
+                      const qualityVariant =
+                        qualityStatus === "sufficient"
+                          ? "success"
+                          : qualityStatus === "weak"
+                            ? "warning"
+                            : "secondary"
 
-                return (
-                  <div
-                    key={entry.id}
-                    className="rounded-eos-md border border-eos-border bg-eos-surface p-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-eos-text">
-                          {task?.title ?? entry.fileName}
-                        </p>
-                        <p className="mt-1 text-xs text-eos-text-muted">
-                          {task
-                            ? `${task.source} · ${task.lawReference || "fara referinta legala"}`
-                            : "Dovada fara task asociat"}
-                        </p>
-                      </div>
-                      <Badge variant={qualityVariant}>{qualityLabel}</Badge>
-                    </div>
-                    <p className="mt-3 text-sm text-eos-text-muted">
-                      {evidenceHref ? (
-                        <a
-                          href={evidenceHref}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-eos-info underline decoration-eos-border underline-offset-4"
-                        >
-                          {entry.fileName}
-                        </a>
-                      ) : (
-                        entry.fileName
-                      )}
-                    </p>
-                    <p className="mt-2 text-xs text-eos-text-muted">
-                      Tip dovada: {formatEvidenceKind(entry.kind)}
-                    </p>
-                    {entry.quality?.summary && (
-                      <p className="mt-2 text-xs text-eos-text-muted">{entry.quality.summary}</p>
-                    )}
-                  </div>
-                )
-              })
+                      return (
+                        <TableRow key={entry.id}>
+                          <TableCell className="max-w-[220px]">
+                            <p className="truncate text-sm font-medium text-eos-text">
+                              {task?.title ?? entry.fileName}
+                            </p>
+                            {task && (
+                              <p className="truncate text-xs text-eos-text-tertiary">
+                                {task.source} · {task.lawReference || "fara referinta"}
+                              </p>
+                            )}
+                          </TableCell>
+                          <TableCell className="max-w-[180px]">
+                            {evidenceHref ? (
+                              <a
+                                href={evidenceHref}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="truncate text-xs text-eos-text-link underline-offset-4 hover:underline"
+                              >
+                                {entry.fileName}
+                              </a>
+                            ) : (
+                              <span className="truncate text-xs text-eos-text-muted">{entry.fileName}</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs text-eos-text-muted">{formatEvidenceKind(entry.kind)}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={qualityVariant}>{qualityLabel}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
             ) : (
               <>
                 {evidenceReadyTasks.length === 0 && (
@@ -579,7 +598,7 @@ function LegalMatrixCard({
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xl">Matrice de mapare legala</CardTitle>
+            <CardTitle className="text-base">Matrice de mapare legala</CardTitle>
             <p className="mt-1 text-sm text-eos-text-muted">
               Vezi articolul relevant, dovada ceruta si momentul in care revii in executie.
             </p>
@@ -657,7 +676,7 @@ function SnapshotAuditCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Snapshot si baseline</CardTitle>
+        <CardTitle className="text-base">Snapshot si baseline</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {!latestSnapshot && (
@@ -710,7 +729,7 @@ function DriftWatchCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Monitor drift</CardTitle>
+        <CardTitle className="text-base">Monitor drift</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (
@@ -851,7 +870,7 @@ function ValidationLedgerCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Registru validari</CardTitle>
+        <CardTitle className="text-base">Registru validari</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {entries.length === 0 && (
@@ -928,7 +947,7 @@ function AuditTimelineCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Cronologie audit</CardTitle>
+        <CardTitle className="text-base">Cronologie audit</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {events.length === 0 && (

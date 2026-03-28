@@ -28,6 +28,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SimpleTooltip } from "@/components/evidence-os"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import {
@@ -2678,7 +2679,7 @@ export default function Nis2Page() {
   return (
     <div className="space-y-6">
       <PageIntro
-        eyebrow="NIS2"
+        eyebrow={<SimpleTooltip content="Network and Information Security Directive 2 — Directiva UE 2022/2555"><span className="cursor-help border-b border-dotted border-current">NIS2</span></SimpleTooltip>}
         title="Directiva NIS2 — Securitate cibernetică"
         description="Instrument de evaluare și monitorizare pentru conformitatea cu Directiva NIS2 (2022/2555) și ghidul DNSC. Evaluare, incident log cu SLA tracking și registrul furnizorilor ICT."
         badges={

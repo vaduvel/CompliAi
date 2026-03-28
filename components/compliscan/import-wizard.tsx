@@ -99,7 +99,7 @@ function UploadStep({
           {loading ? (
             <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
           ) : (
-            <Upload className="size-3.5" strokeWidth={2} />
+            <Upload className="size-4" strokeWidth={2} />
           )}
           {loading ? "Se procesează..." : "Alege fișier"}
         </Button>
@@ -636,9 +636,9 @@ export function ImportWizard({
                 size="sm"
                 variant="ghost"
                 onClick={() => setStep("upload")}
-                className="gap-1.5"
+                className="gap-2"
               >
-                <ArrowLeft className="size-3.5" strokeWidth={2} />
+                <ArrowLeft className="size-4" strokeWidth={2} />
                 Înapoi
               </Button>
             )}
@@ -647,9 +647,9 @@ export function ImportWizard({
                 size="sm"
                 variant="ghost"
                 onClick={() => setStep("mapping")}
-                className="gap-1.5"
+                className="gap-2"
               >
-                <ArrowLeft className="size-3.5" strokeWidth={2} />
+                <ArrowLeft className="size-4" strokeWidth={2} />
                 Înapoi
               </Button>
             )}
@@ -667,10 +667,10 @@ export function ImportWizard({
                 size="sm"
                 onClick={() => setStep("review")}
                 disabled={mapping.orgName === null}
-                className="gap-1.5"
+                className="gap-2"
               >
                 Verifică rândurile
-                <ArrowRight className="size-3.5" strokeWidth={2} />
+                <ArrowRight className="size-4" strokeWidth={2} />
               </Button>
             )}
 
@@ -679,9 +679,9 @@ export function ImportWizard({
                 size="sm"
                 onClick={() => void handleExecuteImport()}
                 disabled={activeRowCount === 0}
-                className="gap-1.5"
+                className="gap-2"
               >
-                <Upload className="size-3.5" strokeWidth={2} />
+                <Upload className="size-4" strokeWidth={2} />
                 Importă {activeRowCount} firme
               </Button>
             )}
@@ -693,9 +693,9 @@ export function ImportWizard({
                   onSuccess()
                   onClose()
                 }}
-                className="gap-1.5"
+                className="gap-2"
               >
-                <Check className="size-3.5" strokeWidth={2} />
+                <Check className="size-4" strokeWidth={2} />
                 Închide
               </Button>
             )}

@@ -90,7 +90,7 @@ export function AICompliancePackSummaryCard({
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">AI Compliance Pack</CardTitle>
+            <CardTitle className="text-base">AI Compliance Pack</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-eos-text-muted">
               Unifica sursele, controalele si dovada intr-un obiect unic de review si audit.
             </p>
@@ -200,7 +200,7 @@ export function AICompliancePackEntriesCard({
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xl">{title}</CardTitle>
+            <CardTitle className="text-base">{title}</CardTitle>
             <p className="mt-2 text-sm text-eos-text-muted">
               Fiecare intrare leaga identitatea sistemului de starea curenta, controale si urmatorul pas.
             </p>

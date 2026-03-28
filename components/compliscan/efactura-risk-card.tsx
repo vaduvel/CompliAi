@@ -56,7 +56,7 @@ function SummaryTile({
         : "text-eos-text-muted"
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3 text-center">
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      <p className={`text-2xl font-semibold ${color}`}>{value}</p>
       <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-eos-text-muted">
         {label}
       </p>

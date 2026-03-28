@@ -88,8 +88,8 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Rapoarte</p>
-          <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Rapoarte</p>
+          <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
             {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
           </h1>
           <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -110,7 +110,12 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
 
       {!isSolo ? <ReportsTabs /> : null}
 
-      {/* Primary: Export Center */}
+      {/* Vault — Documentele tale, primul lucru vizibil */}
+      {cockpit.data.state.generatedDocuments.length > 0 && (
+        <GeneratedDocumentsVault docs={cockpit.data.state.generatedDocuments} />
+      )}
+
+      {/* Export Center — după ce ai văzut ce ai */}
       <ExportCenter
         onGeneratePdf={() => void cockpitActions.handleGenerateReport()}
         onDownloadExecutivePdf={() => void cockpitActions.handleDownloadExecutivePdf()}
@@ -123,11 +128,6 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
         onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
         onShare={() => void cockpitActions.handleShareWithAccountant()}
       />
-
-      {/* Vault — Documente generate automat */}
-      {cockpit.data.state.generatedDocuments.length > 0 && (
-        <GeneratedDocumentsVault docs={cockpit.data.state.generatedDocuments} />
-      )}
 
       {/* Share token — vizibil deasupra fold pentru non-solo */}
       {!isSolo ? <PartnerCounselPack /> : null}

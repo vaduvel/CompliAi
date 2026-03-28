@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
+import { Breadcrumb } from "@/components/evidence-os"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
@@ -248,13 +249,10 @@ export default function GovernancePage() {
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/dashboard/nis2"
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={2} />
-        Înapoi la NIS2
-      </Link>
+      <Breadcrumb items={[
+        { label: "NIS2", href: "/dashboard/nis2" },
+        { label: "Guvernanță" },
+      ]} />
 
       <PageIntro
         eyebrow="NIS2 — Guvernanță"
@@ -356,17 +354,17 @@ export default function GovernancePage() {
       {members.length > 0 && (
         <div className="flex flex-wrap gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
           <div className="text-center">
-            <p className="text-2xl font-bold text-eos-text">{members.length}</p>
+            <p className="text-2xl font-semibold text-eos-text">{members.length}</p>
             <p className="text-xs text-eos-text-muted">Membri conducere</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${missingTraining.length > 0 ? "text-eos-error" : "text-eos-success"}`}>
+            <p className={`text-2xl font-semibold ${missingTraining.length > 0 ? "text-eos-error" : "text-eos-success"}`}>
               {missingTraining.length}
             </p>
             <p className="text-xs text-eos-text-muted">Fără training</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${expiredIssues.length > 0 ? "text-eos-warning" : "text-eos-success"}`}>
+            <p className={`text-2xl font-semibold ${expiredIssues.length > 0 ? "text-eos-warning" : "text-eos-success"}`}>
               {expiredIssues.length}
             </p>
             <p className="text-xs text-eos-text-muted">Expirate</p>

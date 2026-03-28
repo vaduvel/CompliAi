@@ -268,7 +268,7 @@ export function AIDiscoveryPanel({
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,0.78fr)_minmax(0,1.22fr)]">
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-5">
-          <CardTitle className="text-xl">{modeContent.title}</CardTitle>
+          <CardTitle className="text-base">{modeContent.title}</CardTitle>
           <p className="text-sm text-eos-text-muted">
             {modeContent.description}
           </p>
@@ -368,7 +368,7 @@ export function AIDiscoveryPanel({
 
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-5">
-          <CardTitle className="text-xl">Sisteme detectate automat</CardTitle>
+          <CardTitle className="text-base">Sisteme detectate automat</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">

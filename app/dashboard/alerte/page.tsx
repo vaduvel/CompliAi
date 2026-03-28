@@ -180,7 +180,7 @@ export default function DriftPage() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link href={dashboardRoutes.reports}>
                 Rapoarte
                 <ArrowRight className="size-4" strokeWidth={2} />

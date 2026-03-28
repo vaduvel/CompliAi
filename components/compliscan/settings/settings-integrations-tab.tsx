@@ -51,7 +51,7 @@ export function SettingsIntegrationsTab({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-xl">Status operational Supabase</CardTitle>
+                <CardTitle className="text-base">Status operational Supabase</CardTitle>
                 <Badge
                   variant={
                     supabaseStatusLoading
@@ -282,7 +282,7 @@ export function SettingsIntegrationsTab({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-xl">Repo sync pentru engineering</CardTitle>
+                <CardTitle className="text-base">Repo sync pentru engineering</CardTitle>
                 <Badge variant={repoSyncBadgeVariant(repoSyncStatus)}>
                   {repoSyncBadgeLabel(repoSyncStatus)}
                 </Badge>

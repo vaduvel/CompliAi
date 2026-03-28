@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { CockpitProvider } from "@/components/compliscan/use-cockpit"
 import { DashboardShell } from "@/components/compliscan/dashboard-shell"
+import { TooltipProvider } from "@/components/evidence-os"
 import {
   SESSION_COOKIE,
   listUserMemberships,
@@ -64,10 +65,12 @@ export default async function DashboardLayout({
     : null
 
   return (
-    <CockpitProvider initialData={initialCockpitData}>
-      <DashboardShell initialUser={initialUser} initialMemberships={memberships}>
-        {children}
-      </DashboardShell>
-    </CockpitProvider>
+    <TooltipProvider delayDuration={150}>
+      <CockpitProvider initialData={initialCockpitData}>
+        <DashboardShell initialUser={initialUser} initialMemberships={memberships}>
+          {children}
+        </DashboardShell>
+      </CockpitProvider>
+    </TooltipProvider>
   )
 }

@@ -988,25 +988,25 @@ export default function VendorReviewPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-eos-text">{openReviews.length}</p>
+                <p className="text-2xl font-semibold text-eos-text">{openReviews.length}</p>
                 <p className="text-xs text-eos-text-muted">Deschise</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-eos-error">{criticalCount}</p>
+                <p className="text-2xl font-semibold text-eos-error">{criticalCount}</p>
                 <p className="text-xs text-eos-text-muted">Critice</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-eos-warning">{needsContextCount}</p>
+                <p className="text-2xl font-semibold text-eos-warning">{needsContextCount}</p>
                 <p className="text-xs text-eos-text-muted">Necesită context</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className={`text-2xl font-bold ${overdueCount > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
+                <p className={`text-2xl font-semibold ${overdueCount > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
                   {overdueCount}
                 </p>
                 <p className="text-xs text-eos-text-muted">Expirate</p>
@@ -1014,7 +1014,7 @@ export default function VendorReviewPage() {
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-eos-success">{closedReviews.length}</p>
+                <p className="text-2xl font-semibold text-eos-success">{closedReviews.length}</p>
                 <p className="text-xs text-eos-text-muted">Închise</p>
               </CardContent>
             </Card>

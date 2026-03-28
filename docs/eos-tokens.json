@@ -1,0 +1,110 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "EOS Design System tokens — generated from app/evidence-os.css",
+  "$version": "1.0.0",
+
+  "surface": {
+    "$description": "Background/surface color tokens",
+    "base":      { "$value": "#060810", "$type": "color", "$description": "Canvas — darkest bg" },
+    "primary":   { "$value": "#0a0b0f", "$type": "color", "$description": "Sidebar, panels" },
+    "secondary": { "$value": "rgba(255,255,255,0.02)", "$type": "color", "$description": "Card bg" },
+    "tertiary":  { "$value": "rgba(255,255,255,0.04)", "$type": "color", "$description": "Hover on card" },
+    "elevated":  { "$value": "rgba(255,255,255,0.06)", "$type": "color", "$description": "Active / selected" },
+    "hover":     { "$value": "rgba(255,255,255,0.10)", "$type": "color", "$description": "Interactive surface hover" }
+  },
+
+  "border": {
+    "$description": "Border color tokens",
+    "subtle":  { "$value": "rgba(255,255,255,0.04)", "$type": "color", "$description": "Fine separators" },
+    "default": { "$value": "rgba(255,255,255,0.07)", "$type": "color", "$description": "Card borders" },
+    "strong":  { "$value": "rgba(255,255,255,0.14)", "$type": "color", "$description": "Input focus, hover" }
+  },
+
+  "text": {
+    "$description": "Text color tokens",
+    "primary":   { "$value": "rgba(255,255,255,0.88)", "$type": "color", "$description": "Headings, labels" },
+    "secondary": { "$value": "rgba(255,255,255,0.55)", "$type": "color", "$description": "Body, descriptions" },
+    "tertiary":  { "$value": "rgba(255,255,255,0.35)", "$type": "color", "$description": "Captions, muted" },
+    "inverse":   { "$value": "#060810", "$type": "color", "$description": "Text on primary bg" }
+  },
+
+  "accent": {
+    "$description": "Primary accent color tokens",
+    "primary":        { "$value": "#3b82f6", "$type": "color", "$description": "Blue-500 CTA" },
+    "primary-hover":  { "$value": "#2563eb", "$type": "color", "$description": "Blue-600 hover" },
+    "primary-subtle": { "$value": "rgba(59,130,246,0.11)", "$type": "color", "$description": "Soft accent bg" },
+    "secondary":      { "$value": "rgba(147,197,253,0.80)", "$type": "color", "$description": "Link text" }
+  },
+
+  "severity": {
+    "$description": "Severity level colors",
+    "critical": { "$value": "hsl(0, 72%, 62%)", "$type": "color" },
+    "high":     { "$value": "hsl(25, 90%, 58%)", "$type": "color" },
+    "medium":   { "$value": "hsl(45, 90%, 55%)", "$type": "color" },
+    "low":      { "$value": "hsl(210, 70%, 62%)", "$type": "color" }
+  },
+
+  "status": {
+    "$description": "Semantic status colors",
+    "success":        { "$value": "hsl(145, 60%, 48%)", "$type": "color" },
+    "success-soft":   { "$value": "hsl(145, 60%, 48%, 0.12)", "$type": "color" },
+    "warning":        { "$value": "hsl(45, 90%, 55%)", "$type": "color" },
+    "warning-soft":   { "$value": "hsl(45, 90%, 55%, 0.12)", "$type": "color" },
+    "warning-border": { "$value": "hsl(45, 90%, 55%, 0.2)", "$type": "color" },
+    "danger":         { "$value": "hsl(0, 72%, 62%)", "$type": "color" },
+    "danger-soft":    { "$value": "hsl(0, 72%, 62%, 0.12)", "$type": "color" },
+    "danger-border":  { "$value": "hsl(0, 72%, 62%, 0.2)", "$type": "color" },
+    "neutral":        { "$value": "hsl(220, 14%, 63%)", "$type": "color" },
+    "muted":          { "$value": "hsl(220, 14%, 40%)", "$type": "color" }
+  },
+
+  "space": {
+    "$description": "Spacing scale (4pt grid)",
+    "0":  { "$value": "0px", "$type": "dimension" },
+    "1":  { "$value": "4px", "$type": "dimension" },
+    "2":  { "$value": "8px", "$type": "dimension" },
+    "3":  { "$value": "12px", "$type": "dimension" },
+    "4":  { "$value": "16px", "$type": "dimension" },
+    "5":  { "$value": "20px", "$type": "dimension" },
+    "6":  { "$value": "24px", "$type": "dimension" },
+    "7":  { "$value": "32px", "$type": "dimension" },
+    "8":  { "$value": "40px", "$type": "dimension" },
+    "9":  { "$value": "48px", "$type": "dimension" },
+    "10": { "$value": "64px", "$type": "dimension" }
+  },
+
+  "layout": {
+    "$description": "Page layout tokens",
+    "max-width":        { "$value": "1200px", "$type": "dimension" },
+    "rail-width":       { "$value": "360px", "$type": "dimension" },
+    "section-gap":      { "$value": "24px", "$type": "dimension" },
+    "cluster-gap":      { "$value": "16px", "$type": "dimension" },
+    "summary-item-min": { "$value": "220px", "$type": "dimension" }
+  },
+
+  "radius": {
+    "$description": "Border radius scale",
+    "sm":   { "$value": "8px", "$type": "dimension" },
+    "md":   { "$value": "12px", "$type": "dimension" },
+    "lg":   { "$value": "16px", "$type": "dimension" },
+    "xl":   { "$value": "20px", "$type": "dimension" },
+    "full": { "$value": "9999px", "$type": "dimension" }
+  },
+
+  "shadow": {
+    "$description": "Elevation shadow scale",
+    "sm":    { "$value": "0 1px 2px rgba(0,0,0,0.40)", "$type": "shadow" },
+    "md":    { "$value": "0 4px 16px rgba(0,0,0,0.50)", "$type": "shadow" },
+    "lg":    { "$value": "0 8px 32px rgba(0,0,0,0.60)", "$type": "shadow" },
+    "focus": { "$value": "0 0 0 2px rgba(59,130,246,0.40)", "$type": "shadow" }
+  },
+
+  "motion": {
+    "$description": "Animation duration scale",
+    "instant":    { "$value": "100ms", "$type": "duration" },
+    "fast":       { "$value": "150ms", "$type": "duration" },
+    "default":    { "$value": "200ms", "$type": "duration" },
+    "slow":       { "$value": "300ms", "$type": "duration" },
+    "deliberate": { "$value": "500ms", "$type": "duration" }
+  }
+}

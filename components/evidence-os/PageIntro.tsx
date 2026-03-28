@@ -4,7 +4,7 @@ import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { cn } from "@/lib/utils"
 
 interface PageIntroProps {
-  eyebrow?: string
+  eyebrow?: React.ReactNode
   title: string
   description?: string
   badges?: React.ReactNode

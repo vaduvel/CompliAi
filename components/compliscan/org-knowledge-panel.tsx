@@ -155,6 +155,7 @@ export function OrgKnowledgePanel({ compact = false, categories }: OrgKnowledgeP
                           <button
                             type="button"
                             onClick={() => markReviewed(item)}
+                            aria-label="Marchează ca revizuit"
                             title="Marchează ca revizuit"
                             className="rounded p-1 text-eos-warning hover:bg-eos-warning-soft"
                           >
@@ -164,6 +165,7 @@ export function OrgKnowledgePanel({ compact = false, categories }: OrgKnowledgeP
                         <button
                           type="button"
                           onClick={() => removeItem(item.id)}
+                          aria-label="Șterge elementul"
                           title="Șterge"
                           className="rounded p-1 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
                         >

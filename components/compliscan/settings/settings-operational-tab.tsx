@@ -67,7 +67,7 @@ export function SettingsOperationalTab({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-xl">Health check aplicatie</CardTitle>
+                <CardTitle className="text-base">Health check aplicatie</CardTitle>
                 <Badge variant={healthBadgeVariant(appHealth?.state, appHealthLoading)}>
                   {appHealthLoading
                     ? "Se verifica"
@@ -183,7 +183,7 @@ export function SettingsOperationalTab({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-xl">Pregatire release</CardTitle>
+                <CardTitle className="text-base">Pregatire release</CardTitle>
                 <Badge
                   variant={
                     currentUserResolved && !canViewReleaseReadiness

@@ -21,8 +21,10 @@ import { toast } from "sonner"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { Breadcrumb } from "@/components/evidence-os"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { DoraIncident, DoraTprmEntry, DoraState, DoraIncidentSeverity, DoraIncidentStatus, TprmCriticality } from "@/lib/server/dora-store"
 
@@ -142,16 +144,13 @@ export default function DoraPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <Link
-        href="/dashboard/resolve"
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={2} />
-        Înapoi la De rezolvat
-      </Link>
+      <Breadcrumb items={[
+        { label: "De rezolvat", href: "/dashboard/resolve" },
+        { label: "DORA" },
+      ]} />
 
       <PageIntro
-        eyebrow="DORA · Reziliență Operațională"
+        eyebrow={<><SimpleTooltip content="Digital Operational Resilience Act — Regulamentul UE 2022/2554"><span className="cursor-help border-b border-dotted border-current">DORA</span></SimpleTooltip>{" · Reziliență Operațională"}</>}
         title="Reziliență Digitală"
         description="Regulamentul EU 2022/2554 — obligatoriu pentru instituții financiare. Gestionează incidentele ICT, furnizorii terți critici și testele de reziliență."
       />
@@ -160,8 +159,8 @@ export default function DoraPage() {
       <div className="grid grid-cols-3 gap-3">
         <Card className={`border-eos-border ${majorOpen.length > 0 ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
           <CardContent className="px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Incidente majore</p>
-            <p className={`mt-1 text-2xl font-bold ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Incidente majore</p>
+            <p className={`mt-1 text-2xl font-semibold ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
               {majorOpen.length}
             </p>
             <p className="text-[10px] text-eos-text-muted">{openIncidents.length} deschise total</p>
@@ -169,15 +168,15 @@ export default function DoraPage() {
         </Card>
         <Card className="border-eos-border">
           <CardContent className="px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Furnizori critici</p>
-            <p className="mt-1 text-2xl font-bold text-eos-text">{criticalProviders.length}</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Furnizori critici</p>
+            <p className="mt-1 text-2xl font-semibold text-eos-text">{criticalProviders.length}</p>
             <p className="text-[10px] text-eos-text-muted">{tprm.length} furnizori total</p>
           </CardContent>
         </Card>
         <Card className="border-eos-border">
           <CardContent className="px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Teste reziliență</p>
-            <p className="mt-1 text-2xl font-bold text-eos-text">{state?.resilienceTests.length ?? 0}</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Teste reziliență</p>
+            <p className="mt-1 text-2xl font-semibold text-eos-text">{state?.resilienceTests.length ?? 0}</p>
             <p className="text-[10px] text-eos-text-muted">
               {(state?.resilienceTests ?? []).filter((t) => t.status === "completed").length} completate
             </p>
@@ -338,13 +337,13 @@ function IncidentRow({
         {expanded && (
           <div className="space-y-3 border-t border-eos-border-subtle pt-3">
             <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Descriere</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Descriere</p>
               <p className="mt-1 text-sm text-eos-text whitespace-pre-wrap">{i.description}</p>
             </div>
 
             {i.affectedSystems.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Sisteme afectate</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Sisteme afectate</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {i.affectedSystems.map((s) => (
                     <Badge key={s} variant="outline" className="text-[10px] normal-case">{s}</Badge>
@@ -359,7 +358,7 @@ function IncidentRow({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Cauza rădăcină</label>
+                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cauza rădăcină</label>
                 <textarea
                   className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
@@ -369,7 +368,7 @@ function IncidentRow({
                 />
               </div>
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Măsuri de remediere</label>
+                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Măsuri de remediere</label>
                 <textarea
                   className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
@@ -491,7 +490,7 @@ function TprmRow({
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Note</label>
+              <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Note</label>
               <textarea
                 className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                 rows={2}

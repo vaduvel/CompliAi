@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { Skeleton, SkeletonCard } from "@/components/evidence-os/Skeleton"
 import { buildScanInsights, useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -34,7 +35,14 @@ const RecentScansCard = dynamic(
 export function ScanHistoryPageSurface() {
   const cockpit = useCockpitData()
 
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+  if (cockpit.loading || !cockpit.data) return (
+    <div className="space-y-6">
+      <Skeleton className="h-20 w-full rounded-eos-xl" />
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>
+  )
 
   const latestDocumentScan =
     cockpit.data.state.scans.find((scan) => scan.sourceKind === "document") ?? null
