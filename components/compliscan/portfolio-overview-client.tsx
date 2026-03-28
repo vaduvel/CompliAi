@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
   AlertTriangle,
   Building2,
@@ -272,7 +271,6 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
 }
 
 export function PortfolioOverviewClient() {
-  const router = useRouter()
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
   const [planData, setPlanData] = useState<PortfolioPlanResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -326,8 +324,7 @@ export function PortfolioOverviewClient() {
       setError(payload.error ?? "Nu am putut intra în firma selectată.")
       return
     }
-    router.replace("/dashboard")
-    router.refresh()
+    window.location.assign("/dashboard")
   }
 
   function handleSort(key: SortKey) {

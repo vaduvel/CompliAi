@@ -1,7 +1,6 @@
 "use client"
 
-import { startTransition, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -22,7 +21,6 @@ export function PortfolioOrgActionButton({
   size = "sm",
   variant = "outline",
 }: PortfolioOrgActionButtonProps) {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   async function handleOpenOrg() {
@@ -39,10 +37,7 @@ export function PortfolioOrgActionButton({
         throw new Error(payload.error || "Nu am putut deschide firma selectată.")
       }
 
-      startTransition(() => {
-        router.push(destination)
-        router.refresh()
-      })
+      window.location.assign(destination)
     } catch (error) {
       toast.error("Schimbarea pe firmă a eșuat", {
         description: error instanceof Error ? error.message : "Încearcă din nou.",
@@ -66,4 +61,3 @@ export function PortfolioOrgActionButton({
     </Button>
   )
 }
-
