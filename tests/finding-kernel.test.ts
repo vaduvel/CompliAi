@@ -552,6 +552,31 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.acceptedEvidence[0]).toContain("Managementul riscului cibernetic")
   })
 
+  it("nu confundă gap-ul vechi de risk management cu registrul de guvernanță", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "nis2-risk-management-gap",
+        category: "NIS2",
+        title: "Politica de management al riscului cibernetic lipsă",
+        detail: "Organizația nu are o politică formală de management al riscului conform NIS2 Art. 21(2)(a).",
+        remediationHint: "Elaborați o politică de management al riscului validată de conducere.",
+        resolution: {
+          problem: "Lipsă politică formală de management risc cibernetic",
+          impact: "Neconformitate NIS2 Art. 21 — risc de sancțiune",
+          action: "Elaborați și aprobați politica cu conducerea + CISO",
+          closureEvidence: "Document aprobat de conducere + dată intrare în vigoare",
+        },
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("NIS2-GENERIC")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/maturitate")
+    expect(recipe.workflowLink?.href).toContain("focus=risk-management")
+    expect(recipe.workflowLink?.href).not.toContain("/dashboard/nis2/governance")
+    expect(recipe.primaryCTA.label).toBe("Deschide evaluarea de maturitate")
+    expect(recipe.closureCTA).toBe("Marchează evaluarea salvată")
+  })
+
   it("nu trimite maturity supply-chain în vendor registry când finding-ul este gap de assessment", () => {
     const recipe = buildCockpitRecipe(
       makeFinding({

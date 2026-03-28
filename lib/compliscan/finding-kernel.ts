@@ -1792,13 +1792,27 @@ function getNis2Text(record: ScanFinding) {
     .toLowerCase()
 }
 
+function getNis2GovernanceText(record: ScanFinding) {
+  return [
+    record.id,
+    record.title,
+    record.detail,
+    record.sourceDocument,
+    record.legalReference,
+    record.reasoning,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+    .toLowerCase()
+}
+
 function deriveNis2GovernanceFocus(record: ScanFinding): Nis2GovernanceFocus | null {
   if (record.category !== "NIS2") return null
 
   if (record.id.startsWith("nis2-gov-cert-expired-")) return "certification"
   if (record.id.startsWith("nis2-gov-training-")) return "training"
 
-  const text = getNis2Text(record)
+  const text = getNis2GovernanceText(record)
 
   if (
     text.includes("board training tracker") ||
@@ -1810,11 +1824,11 @@ function deriveNis2GovernanceFocus(record: ScanFinding): Nis2GovernanceFocus | n
   }
 
   if (
-    text.includes("conducer") ||
     text.includes("board") ||
-    text.includes("ciso") ||
-    text.includes("certific") ||
-    text.includes("training")
+    text.includes("membrul conducerii") ||
+    text.includes("board & ciso") ||
+    text.includes("training") ||
+    text.includes("certific")
   ) {
     return text.includes("certific") || text.includes("ciso") ? "certification" : "training"
   }
@@ -1833,7 +1847,7 @@ function deriveNis2MaturityFocus(record: ScanFinding): Nis2MaturityFocus | null 
   const text = getNis2Text(record)
 
   const matchers: Array<[Nis2MaturityFocus, string[]]> = [
-    ["risk-management", ["managementul riscului", "risk management", "evaluări de risc", "evaluari de risc"]],
+    ["risk-management", ["managementul riscului", "management al riscului", "risk management", "evaluări de risc", "evaluari de risc"]],
     ["incident-response", ["gestionarea incidentelor", "incidentelor", "plan de răspuns", "plan de raspuns"]],
     ["business-continuity", ["continuitatea activității", "continuitatea activitatii", "bcp", "drp", "backup"]],
     ["supply-chain", ["supply chain", "lanțul de aprovizionare", "lantul de aprovizionare"]],
