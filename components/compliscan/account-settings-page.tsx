@@ -39,7 +39,7 @@ type AccountPlanResponse = {
   maxOrgs: number | null
   currentOrgs: number
   canAddOrg: boolean
-  partnerPlanSource: "account" | "legacy_org_partner" | "none"
+  partnerPlanSource: "account" | "legacy_org_partner" | "trial"
   partnerHasStripeCustomer: boolean
   partnerHasActiveSubscription: boolean
   partnerUpdatedAtISO: string | null
@@ -207,7 +207,9 @@ export function AccountSettingsPageSurface() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold text-eos-text">
-                        {planData.planType
+                        {planData.partnerPlanSource === "trial"
+                          ? "Trial portofoliu activ"
+                          : planData.planType
                           ? PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]
                           : "Niciun plan partner activ"}
                       </p>
@@ -223,6 +225,10 @@ export function AccountSettingsPageSurface() {
                         className="normal-case tracking-normal"
                       >
                         {planData.canAddOrg ? "Mai poți adăuga firme" : "Limită atinsă"}
+                      </Badge>
+                    ) : planData.partnerPlanSource === "trial" ? (
+                      <Badge variant="secondary" className="normal-case tracking-normal">
+                        Trial
                       </Badge>
                     ) : (
                       <Badge variant="warning" className="normal-case tracking-normal">

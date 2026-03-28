@@ -64,17 +64,25 @@ export async function POST(request: Request) {
       legacyPartnerEnabled: await hasLegacyPartnerOrgPlan(activeOrgIds),
     })
 
-    if (!planStatus.planType || planStatus.maxOrgs === null) {
-      return jsonError(
-        "Import multiplu clienți necesită planul Partner. Upgradează-ți contul pentru a importa firme.",
-        403,
-        "PARTNER_PLAN_REQUIRED",
-        { upgradeUrl: "/pricing", hint: "Planul Partner permite import nelimitat de clienți." }
-      )
-    }
+    const remaining = Math.max((planStatus.maxOrgs ?? 0) - planStatus.currentOrgs, 0)
 
-    const remaining = Math.max(planStatus.maxOrgs - planStatus.currentOrgs, 0)
-    if (activeRows.length > remaining) {
+    if (planStatus.source === "trial") {
+      if (remaining <= 0) {
+        throw new AuthzError(
+          `Ai atins limita trial (${planStatus.maxOrgs} firme). Activează un plan Partner din Setări cont pentru a adăuga mai multe.`,
+          403,
+          "PARTNER_TRIAL_LIMIT_REACHED"
+        )
+      }
+
+      if (activeRows.length > remaining) {
+        throw new AuthzError(
+          `În modul trial poți adăuga cel mult ${remaining} firm${remaining === 1 ? "ă" : "e"} acum. Activează un plan Partner pentru mai multe.`,
+          403,
+          "PARTNER_TRIAL_LIMIT_REACHED"
+        )
+      }
+    } else if (activeRows.length > remaining) {
       throw new AuthzError(
         `Poți importa maxim ${remaining} firme. Ai selectat ${activeRows.length}.`,
         403,

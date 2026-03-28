@@ -81,13 +81,13 @@ describe("GET /api/plan", () => {
     mocks.resolveUserModeMock.mockResolvedValue("solo")
     mocks.getPartnerAccountPlanStatusMock.mockResolvedValue({
       planType: null,
-      maxOrgs: null,
+      maxOrgs: 3,
       currentOrgs: 1,
-      canAddOrg: false,
+      canAddOrg: true,
       hasStripeCustomer: false,
       hasActiveSubscription: false,
       updatedAtISO: null,
-      source: "none",
+      source: "trial",
     })
 
     const response = await GET(new Request("http://localhost/api/plan"))
@@ -98,5 +98,31 @@ describe("GET /api/plan", () => {
     expect(payload.planType).toBeNull()
     expect(payload.billingScope).toBe("org")
     expect(payload.canManagePartnerBilling).toBe(false)
+  })
+
+  it("expune trialul de portofoliu pentru user partner fără plan plătit", async () => {
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
+    mocks.getPartnerAccountPlanStatusMock.mockResolvedValue({
+      planType: null,
+      maxOrgs: 3,
+      currentOrgs: 1,
+      canAddOrg: true,
+      hasStripeCustomer: false,
+      hasActiveSubscription: false,
+      updatedAtISO: null,
+      source: "trial",
+    })
+
+    const response = await GET(new Request("http://localhost/api/plan"))
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.userMode).toBe("partner")
+    expect(payload.planType).toBeNull()
+    expect(payload.maxOrgs).toBe(3)
+    expect(payload.currentOrgs).toBe(1)
+    expect(payload.canAddOrg).toBe(true)
+    expect(payload.partnerPlanSource).toBe("trial")
+    expect(payload.billingScope).toBe("partner_account")
   })
 })

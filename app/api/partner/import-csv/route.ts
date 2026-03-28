@@ -18,6 +18,7 @@ import {
 import { evaluateApplicability } from "@/lib/compliance/applicability"
 import type { OrgProfile, OrgSector, OrgEmployeeCount } from "@/lib/compliance/applicability"
 import { getPartnerAccountPlanStatus, hasLegacyPartnerOrgPlan } from "@/lib/server/plan"
+import { PARTNER_TRIAL_LIMIT } from "@/lib/shared/plan-constants"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
@@ -110,19 +111,18 @@ export async function POST(request: Request) {
       legacyPartnerEnabled: await hasLegacyPartnerOrgPlan(activeOrgIds),
     })
 
-    const TRIAL_LIMIT = 3
-    const isTrialMode = !partnerPlanStatus.planType || partnerPlanStatus.maxOrgs === null
+    const isTrialMode = partnerPlanStatus.source === "trial"
 
     if (isTrialMode) {
       // Trial: maxim 3 firme total, fără plan
-      if (activeOrgIds.length >= TRIAL_LIMIT) {
+      if (activeOrgIds.length >= PARTNER_TRIAL_LIMIT) {
         throw new AuthzError(
-          `Ai atins limita trial (${TRIAL_LIMIT} firme). Activează un plan Partner din Setări cont pentru a adăuga mai multe.`,
+          `Ai atins limita trial (${PARTNER_TRIAL_LIMIT} firme). Activează un plan Partner din Setări cont pentru a adăuga mai multe.`,
           403,
           "PARTNER_TRIAL_LIMIT_REACHED"
         )
       }
-      const trialSlotsLeft = TRIAL_LIMIT - activeOrgIds.length
+      const trialSlotsLeft = PARTNER_TRIAL_LIMIT - activeOrgIds.length
       if (dataLines.length > trialSlotsLeft) {
         throw new AuthzError(
           `În modul trial poți adăuga cel mult ${trialSlotsLeft} firm${trialSlotsLeft === 1 ? "ă" : "e"} acum. Activează un plan Partner pentru mai multe.`,

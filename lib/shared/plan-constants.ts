@@ -29,6 +29,8 @@ export const PARTNER_ACCOUNT_PLAN_LIMITS: Record<PartnerAccountPlan, number> = {
   partner_50: 50,
 }
 
+export const PARTNER_TRIAL_LIMIT = 3
+
 export const LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN: PartnerAccountPlan = "partner_25"
 
 export function isPartnerAccountPlan(value: string): value is PartnerAccountPlan {

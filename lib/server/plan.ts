@@ -12,6 +12,7 @@ export {
   LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN,
   PARTNER_ACCOUNT_PLAN_LABELS,
   PARTNER_ACCOUNT_PLAN_LIMITS,
+  PARTNER_TRIAL_LIMIT,
   PLAN_LABELS,
   PLAN_PRICES,
   featureRequiresPlan,
@@ -22,6 +23,7 @@ import type { OrgPlan, PartnerAccountPlan } from "@/lib/shared/plan-constants"
 import {
   LEGACY_PARTNER_ACCOUNT_FALLBACK_PLAN,
   PARTNER_ACCOUNT_PLAN_LIMITS,
+  PARTNER_TRIAL_LIMIT,
   PLAN_LABELS,
 } from "@/lib/shared/plan-constants"
 
@@ -52,7 +54,7 @@ export type PartnerAccountPlanStatus = {
   hasStripeCustomer: boolean
   hasActiveSubscription: boolean
   updatedAtISO: string | null
-  source: "account" | "legacy_org_partner" | "none"
+  source: "account" | "legacy_org_partner" | "trial"
 }
 
 export type PlanHierarchy = Record<OrgPlan, number>
@@ -233,13 +235,13 @@ export async function getPartnerAccountPlanStatus({
 
   return {
     planType: null,
-    maxOrgs: null,
+    maxOrgs: PARTNER_TRIAL_LIMIT,
     currentOrgs,
-    canAddOrg: false,
+    canAddOrg: currentOrgs < PARTNER_TRIAL_LIMIT,
     hasStripeCustomer: false,
     hasActiveSubscription: false,
     updatedAtISO: null,
-    source: "none",
+    source: "trial",
   }
 }
 
