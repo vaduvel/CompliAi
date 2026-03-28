@@ -543,6 +543,21 @@ export default function FindingDetailPage() {
         />
       ) : null}
 
+      {isFindingResolvedLike(status) ? (
+        <div className="flex flex-wrap gap-3">
+          <Button
+            data-testid="reopen-finding"
+            variant="outline"
+            onClick={() => updateStatus("open")}
+            disabled={actionLoading}
+            className="gap-1.5"
+          >
+            <ArrowLeft className="size-3.5" strokeWidth={2} />
+            Redeschide cazul
+          </Button>
+        </div>
+      ) : null}
+
       {resolvedMomentVisible ? (
         <Card data-testid="finding-risk-resolved" className="border-eos-success/35 bg-eos-success-soft/60">
           <CardContent className="space-y-3 px-5 py-5">
@@ -834,20 +849,6 @@ export default function FindingDetailPage() {
           <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
         )}
       </div>
-
-      {isFindingResolvedLike(status) ? (
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={() => updateStatus("open")}
-            disabled={actionLoading}
-            className="gap-1.5"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={2} />
-            Redeschide cazul
-          </Button>
-        </div>
-      ) : null}
 
       {/* ── Inline generator flow (in-context, no page navigation) ─────── */}
       {hasGenerator && generatorDocumentType && generatorOpen && status === "confirmed" && (
