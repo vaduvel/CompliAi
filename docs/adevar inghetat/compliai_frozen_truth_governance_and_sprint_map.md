@@ -266,10 +266,8 @@ Acestea sunt adevăr de direcție, nu adevăr de runtime.
 
 Conform [compliai-user-flow-1to1-runtime-audit.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai-user-flow-1to1-runtime-audit.md), nu putem declara încă 100% înghețat:
 - operational close end-to-end pentru toate familiile
-- revalidation completă
-- reopen complet după închidere reușită
+- reopen complet după închidere reușită pe toate familiile, inclusiv `specialist_handoff`
 - full partner intake pe cont fresh fără blocaje de plan
-- specialist round-trip complet pentru toate familiile
 - toate colțurile monitoring/alerts/drift
 
 ### 4.3 Cockpitul live ca adevăr final
@@ -288,12 +286,16 @@ Nu putem spune încă:
 Putem spune doar:
 - structura corectă este definită
 - runtime-ul actual este parțial
-- pentru `specialist_handoff`, targetul este `automatic return to cockpit`, iar current runtime truth este mixt:
-  - `automatic` pentru `GDPR-013`, `GDPR-014`, `NIS2-001`, `NIS2-005`, `NIS2-015`
-  - încă rămas pe moduri parțiale pentru restul:
-  - `manual_banner`
-  - `manual_link`
-  - `conditional_link`
+- pentru `specialist_handoff`, current runtime truth este acum `automatic return to cockpit` pe familia canonică înghețată:
+  - `GDPR-013`
+  - `GDPR-014`
+  - `GDPR-019`
+  - `NIS2-001`
+  - `NIS2-005`
+  - `NIS2-015`
+  - `NIS2-GENERIC` guvernanță
+  - `NIS2-GENERIC` maturitate
+  - `NIS2-GENERIC` furnizori
 
 ---
 
@@ -401,13 +403,26 @@ Taskuri:
 - problem framing clar
 - auth cu fricțiune minimă
 - onboarding observabil
-- scenă explicită de applicability
+- ieșire clară din onboarding în `snapshot / findings`, fără pas separat de `legi aplicabile`
 - exit persona-aware din onboarding
 
 Definition of done:
 - Mihai, Diana și Radu intră pe flow-ul potrivit
 - onboarding-ul nu mai ascunde pași
 - primul snapshot este clar și credibil
+
+Status adevăr live (`2026-03-28`):
+- `landing -> register -> onboarding -> destination persona-aware` este confirmat live cap-coadă pentru:
+  - `solo -> /dashboard/resolve`
+  - `partner -> /portfolio`
+  - `compliance -> /dashboard`
+- destinațiile principale exprimă acum compact:
+  - `Se aplică`
+  - `Am găsit`
+  - `Acum faci asta`
+- diferențele rămase pentru acest sprint nu mai sunt blockere de flow, ci doar de adâncime față de blueprint:
+  - problem framing mai puternic pe landing
+  - fricțiune mai mică în register dacă vrem un pas și mai scurt
 
 ### Sprint 2 — Snapshot / Home / Resolve truth
 
@@ -436,6 +451,19 @@ Definition of done:
 - Home nu mai este mall
 - Resolve este clar primul centru de triage
 - fiecare risk poate fi înțeles dintr-o privire, fără blocuri lungi de copy
+
+Status adevăr live (`2026-03-28`):
+- `Resolve` exprimă acum tipul de flow pe risc:
+  - `Document`
+  - `Acțiune`
+  - `Asistat`
+- destinațiile principale post-onboarding arată compact:
+  - `Se aplică`
+  - `Am găsit`
+  - `Acum faci asta`
+- diferența rămasă în acest sprint nu mai este lipsa unui snapshot clar, ci menținerea disciplinei:
+  - să nu reumflăm `Home`
+  - să nu reintroducem explicații lungi în inbox
 
 ### Sprint 3 — Cockpit truth
 
