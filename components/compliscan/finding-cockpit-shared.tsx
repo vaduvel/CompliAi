@@ -604,6 +604,8 @@ export function FindingExecutionCard({
 type FindingDossierSuccessCardProps = {
   findingTitle: string
   linkedGeneratedDocument: LinkedGeneratedDocumentMeta
+  savedAtISO?: string | null
+  nextReviewDateISO?: string | null
   feedbackMessage?: string | null
   primaryHref?: string
   secondaryHref?: string
@@ -622,13 +624,17 @@ type FindingCaseClosedCardProps = {
 export function FindingDossierSuccessCard({
   findingTitle,
   linkedGeneratedDocument,
+  savedAtISO,
+  nextReviewDateISO,
   feedbackMessage,
   primaryHref,
   secondaryHref,
 }: FindingDossierSuccessCardProps) {
-  const savedAt = linkedGeneratedDocument.approvedAtISO ?? linkedGeneratedDocument.generatedAtISO
-  const nextReviewLabel = linkedGeneratedDocument.nextReviewDateISO
-    ? new Date(linkedGeneratedDocument.nextReviewDateISO).toLocaleDateString("ro-RO")
+  const savedAt = savedAtISO ?? linkedGeneratedDocument.approvedAtISO ?? linkedGeneratedDocument.generatedAtISO
+  const nextReviewLabel = nextReviewDateISO
+    ? new Date(nextReviewDateISO).toLocaleDateString("ro-RO")
+    : linkedGeneratedDocument.nextReviewDateISO
+      ? new Date(linkedGeneratedDocument.nextReviewDateISO).toLocaleDateString("ro-RO")
     : linkedGeneratedDocument.expiresAtISO
       ? `expiră ${new Date(linkedGeneratedDocument.expiresAtISO).toLocaleDateString("ro-RO")}`
       : "monitorizare activă după închidere"
@@ -679,7 +685,7 @@ export function FindingDossierSuccessCard({
             {primaryHref ? (
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-eos-success/90"
+                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-success/90"
               >
                 Deschide Dosarul
                 <ArrowRight className="size-4" strokeWidth={2} />
@@ -764,7 +770,7 @@ export function FindingCaseClosedCard({
             {primaryHref ? (
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-eos-success/90"
+                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-success/90"
               >
                 Deschide Dosarul
                 <ArrowRight className="size-4" strokeWidth={2} />

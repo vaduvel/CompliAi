@@ -525,6 +525,8 @@ export default function FindingDetailPage() {
         <FindingDossierSuccessCard
           findingTitle={finding.title}
           linkedGeneratedDocument={linkedGeneratedDocument}
+          savedAtISO={finding.findingStatusUpdatedAtISO}
+          nextReviewDateISO={finding.nextMonitoringDateISO}
           primaryHref={dashboardRoutes.dosar}
           secondaryHref={dashboardRoutes.auditLog}
           feedbackMessage="Dovada a intrat la dosar și rămâne disponibilă pentru audit, handoff și reverificare. De aici înainte intră în monitorizare, nu dispare."
