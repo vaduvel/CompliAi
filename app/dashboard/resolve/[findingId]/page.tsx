@@ -548,7 +548,7 @@ export default function FindingDetailPage() {
         </div>
       ) : null}
 
-      {resolvedMomentVisible ? (
+      {resolvedMomentVisible && !needsDossierHandoff ? (
         <Card data-testid="finding-risk-resolved" className="border-eos-success/35 bg-eos-success-soft/60">
           <CardContent className="space-y-3 px-5 py-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -817,7 +817,10 @@ export default function FindingDetailPage() {
         </Card>
       ) : null}
 
-      {statusFeedback && !successMomentVisible && !(status === "confirmed" && hasGenerator) && (
+      {statusFeedback &&
+        !successMomentVisible &&
+        !(status === "confirmed" && hasGenerator) &&
+        !needsDossierHandoff && (
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-eos-text">{statusFeedback}</p>
