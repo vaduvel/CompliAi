@@ -66,6 +66,7 @@ const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
 
 type GeneratorDrawerProps = {
   open: boolean
+  findingStatus: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   findingId: string
   documentType: DocumentType
   findingTitle: string
@@ -96,6 +97,7 @@ const textareaClass =
 
 export function GeneratorDrawer({
   open,
+  findingStatus,
   findingId,
   documentType,
   findingTitle,
@@ -114,6 +116,7 @@ export function GeneratorDrawer({
   const [attaching, setAttaching] = useState(false)
   const [humanApprovalConfirmed, setHumanApprovalConfirmed] = useState(false)
   const [validationRunAtISO, setValidationRunAtISO] = useState<string | null>(null)
+  const [documentConfirmed, setDocumentConfirmed] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
@@ -159,6 +162,7 @@ export function GeneratorDrawer({
       setResult(null)
       setHumanApprovalConfirmed(false)
       setValidationRunAtISO(null)
+      setDocumentConfirmed(false)
     }
   }, [open, findingId])
 
@@ -242,6 +246,7 @@ export function GeneratorDrawer({
         duration: 2800,
         description: "Documentul este pregătit. Acum rezolvi riscul din același cockpit, apoi îl trimiți la Dosar.",
       })
+      setDocumentConfirmed(true)
       onComplete({
         ...payload,
         evidenceAttached: true,
@@ -305,13 +310,45 @@ export function GeneratorDrawer({
   const validationPassed = validationRunAtISO !== null && validationResult?.status === "valid"
   const validationFailed = validationRunAtISO !== null && validationResult?.status === "invalid"
   const attachDisabled = !humanApprovalConfirmed || !validationPassed || attaching
-  const activeDrawerStepIndex = !result
-    ? generating
-      ? 1
-      : 0
-    : validationPassed && humanApprovalConfirmed
-      ? 3
-      : 2
+  const lockedUntilConfirmed = findingStatus === "open"
+  const hasDraft = Boolean(result)
+  const drawerSteps = [
+    {
+      id: "confirm-finding",
+      label: "Confirmi findingul",
+      hint: "Confirmarea rămâne sus, în cockpit.",
+      done: !lockedUntilConfirmed,
+      active: lockedUntilConfirmed,
+    },
+    {
+      id: "complete-details",
+      label: "Completezi datele",
+      hint: "Introduci doar datele reale ale firmei.",
+      done: !lockedUntilConfirmed && (hasDraft || generating || documentConfirmed),
+      active: !lockedUntilConfirmed && !hasDraft && !generating && !documentConfirmed,
+    },
+    {
+      id: "generate-draft",
+      label: "Generezi draftul",
+      hint: "Gemini sau fallbackul nostru produce draftul.",
+      done: hasDraft || documentConfirmed,
+      active: generating,
+    },
+    {
+      id: "rescan-draft",
+      label: "Re-scanezi draftul",
+      hint: "Asta este următoarea acțiune primară după generare.",
+      done: validationPassed || documentConfirmed,
+      active: hasDraft && !documentConfirmed && !validationPassed,
+    },
+    {
+      id: "confirm-document",
+      label: "Confirmi documentul",
+      hint: "Aprobarea umană îl pregătește pentru rezolvare.",
+      done: documentConfirmed,
+      active: hasDraft && validationPassed && !documentConfirmed,
+    },
+  ]
   const showWebsiteField = ["privacy-policy", "cookie-policy", "dpa"].includes(documentType)
   const showDpoField = ["privacy-policy", "dpa", "retention-policy"].includes(documentType)
   const showCounterpartyField = documentType === "dpa"
@@ -346,25 +383,62 @@ export function GeneratorDrawer({
         </div>
 
         <div className="flex-1 space-y-4">
-          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {["Completezi", "Generezi", "Validezi", "Confirmi"].map((step, index) => {
+          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-4">
+            <ol className="grid gap-3 lg:grid-cols-5">
+              {drawerSteps.map((step, index) => {
+                const stepDone = step.done
+                const stepActive = step.active
                 return (
-                  <span
-                    key={step}
-                    className={[
-                      "inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium",
-                      index === activeDrawerStepIndex
-                        ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                        : "border-eos-border bg-eos-surface text-eos-text-muted",
-                    ].join(" ")}
-                  >
-                    {step}
-                  </span>
+                  <li key={step.id} className="flex items-start gap-3 lg:flex-col lg:gap-2">
+                    <div className="flex w-full items-center gap-3">
+                      <span
+                        className={[
+                          "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                          stepDone
+                            ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
+                            : stepActive
+                              ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                              : "border-eos-border bg-eos-surface text-eos-text-muted",
+                        ].join(" ")}
+                      >
+                        {stepDone ? <CheckCircle2 className="size-4" strokeWidth={2} /> : index + 1}
+                      </span>
+                      {index < drawerSteps.length - 1 ? (
+                        <span
+                          className={[
+                            "hidden h-px flex-1 lg:block",
+                            stepDone ? "bg-eos-success/35" : "bg-eos-border",
+                          ].join(" ")}
+                        />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0">
+                      <p
+                        className={[
+                          "text-sm font-medium",
+                          stepDone || stepActive ? "text-eos-text" : "text-eos-text-muted",
+                        ].join(" ")}
+                      >
+                        {step.label}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-eos-text-muted">{step.hint}</p>
+                    </div>
+                  </li>
                 )
               })}
-            </div>
+            </ol>
           </div>
+
+          {lockedUntilConfirmed ? (
+            <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+                Pasul 1
+              </p>
+              <p className="mt-1 text-sm text-eos-text">
+                Confirmă findingul din blocul de sus. Imediat după confirmare poți completa datele și genera documentul aici, în același cockpit.
+              </p>
+            </div>
+          ) : null}
 
       {/* ── Form ── */}
           {!result && (
@@ -373,6 +447,7 @@ export function GeneratorDrawer({
                 <input
                   className={inputClass}
                   value={orgName}
+                  disabled={lockedUntilConfirmed}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="SRL-ul tau"
                 />
@@ -383,6 +458,7 @@ export function GeneratorDrawer({
                   <input
                     className={inputClass}
                     value={orgWebsite}
+                    disabled={lockedUntilConfirmed}
                     onChange={(e) => setOrgWebsite(e.target.value)}
                     placeholder="https://exemplu.ro"
                     type="url"
@@ -395,6 +471,7 @@ export function GeneratorDrawer({
                   <input
                     className={inputClass}
                     value={dpoEmail}
+                    disabled={lockedUntilConfirmed}
                     onChange={(e) => setDpoEmail(e.target.value)}
                     placeholder="dpo@firma.ro"
                     type="email"
@@ -410,6 +487,7 @@ export function GeneratorDrawer({
                   <input
                     className={inputClass}
                     value={counterpartyName}
+                    disabled={lockedUntilConfirmed}
                     onChange={(e) => setCounterpartyName(e.target.value)}
                     placeholder="Ex: Google Analytics, Mailchimp, Stripe"
                   />
@@ -455,6 +533,7 @@ export function GeneratorDrawer({
                   className={textareaClass}
                   rows={3}
                   value={dataFlows}
+                  disabled={lockedUntilConfirmed}
                   onChange={(e) => setDataFlows(e.target.value)}
                   placeholder={contextFieldPlaceholder}
                 />
@@ -462,7 +541,7 @@ export function GeneratorDrawer({
 
               <Button
                 onClick={handleGenerate}
-                disabled={generating}
+                disabled={generating || lockedUntilConfirmed}
                 data-testid="generate-document-draft"
                 className="w-full gap-2"
               >
@@ -502,10 +581,10 @@ export function GeneratorDrawer({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                      Verificare rapidă
+                      Re-scan / validare
                     </p>
                     <p className="mt-1 text-sm text-eos-text-muted">
-                      Verifici dacă draftul poate fi folosit pentru rezolvarea riscului.
+                      După generare, re-scannezi draftul. Asta este următoarea acțiune primară înainte de confirmare.
                     </p>
                   </div>
                   <span
@@ -579,22 +658,23 @@ export function GeneratorDrawer({
                 </label>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
                 <Button
-                  variant="outline"
                   onClick={runValidation}
                   data-testid="rerun-document-validation"
-                  className="gap-2"
+                  className="w-full gap-2"
                 >
                   <RotateCw className="size-4" strokeWidth={2} />
-                  Re-scannează
+                  Re-scanează draftul
                 </Button>
-                <Button variant="outline" onClick={handleGenerate} disabled={generating}>
-                  Regenerează
-                </Button>
-                <Button variant="outline" onClick={() => setResult(null)}>
-                  Înlocuiește documentul
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={handleGenerate} disabled={generating}>
+                    Regenerează
+                  </Button>
+                  <Button variant="outline" onClick={() => setResult(null)}>
+                    Înlocuiește documentul
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2">

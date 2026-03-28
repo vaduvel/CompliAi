@@ -104,8 +104,6 @@ export default function FindingDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
-  const [generatorOpen, setGeneratorOpen] = useState(false)
-  const [autoOpenConsumed, setAutoOpenConsumed] = useState(false)
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
@@ -138,7 +136,6 @@ export default function FindingDetailPage() {
   useEffect(() => {
     if (!params.findingId) return
     setLoading(true)
-    setAutoOpenConsumed(false)
     fetch(`/api/findings/${encodeURIComponent(params.findingId)}`, { cache: "no-store" })
       .then((r) => {
         if (!r.ok) throw new Error(r.status === 404 ? "Finding inexistent." : "Eroare server.")
@@ -151,25 +148,6 @@ export default function FindingDetailPage() {
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
   }, [applyFindingResponse, params.findingId])
-
-  useEffect(() => {
-    if (!finding) return
-
-    const status = finding.findingStatus ?? "open"
-    const r = buildCockpitRecipe(finding)
-    const hasGen = r.visibleBlocks.detailBlocks.includes("generator")
-    const shouldAutoOpenGenerator =
-      searchParams.get("generator") === "1" ||
-      searchParams.get("action") === "generate" ||
-      status === "confirmed"
-
-    if (!hasGen || status !== "confirmed" || !shouldAutoOpenGenerator || autoOpenConsumed) {
-      return
-    }
-
-    setGeneratorOpen(true)
-    setAutoOpenConsumed(true)
-  }, [autoOpenConsumed, finding, searchParams])
 
   useEffect(() => {
     if (!finding) return
@@ -257,7 +235,6 @@ export default function FindingDetailPage() {
   async function updateStatus(
     status: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring",
     options?: {
-      openGeneratorAfter?: boolean
       redirectTo?: string
       evidenceNote?: string
       revalidationConfirmed?: boolean
@@ -297,9 +274,6 @@ export default function FindingDetailPage() {
       setOperationalEvidenceNote(payload.finding?.operationalEvidenceNote ?? "")
       setNextReviewDateISO(payload.finding?.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
       setRevalidationConfirmed(false)
-      if (options?.openGeneratorAfter) {
-        setGeneratorOpen(true)
-      }
       if (options?.redirectTo) {
         router.push(options.redirectTo)
       }
@@ -334,9 +308,9 @@ export default function FindingDetailPage() {
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
+  const documentaryGeneratorVisible = hasGenerator && (status === "open" || status === "confirmed")
   const needsDocumentResolution = status === "confirmed" && hasGenerator && preparedDocumentReady
-  const showConfirmedHeroAction =
-    status === "confirmed" && (!hasGenerator || !generatorOpen || needsDocumentResolution)
+  const showConfirmedHeroAction = status === "confirmed" && !hasGenerator
   const resolvedMomentVisible =
     status === "resolved" &&
     hasGenerator &&
@@ -597,12 +571,12 @@ export default function FindingDetailPage() {
           {hasGenerator ? (
             <Button
               data-testid="confirm-and-generate"
-              onClick={() => updateStatus("confirmed", { openGeneratorAfter: true })}
+              onClick={() => updateStatus("confirmed")}
               disabled={actionLoading}
               className="gap-1.5"
             >
               <FileText className="size-3.5" strokeWidth={2} />
-              Confirmă și deschide generarea
+              Confirmă findingul
             </Button>
           ) : recipe.workflowLink ? (
             <Button
@@ -657,36 +631,7 @@ export default function FindingDetailPage() {
           finding={finding}
           recipe={recipe}
         >
-          {hasGenerator ? (
-            <>
-              <Button
-                data-testid="open-generator-drawer"
-                onClick={() => setGeneratorOpen(true)}
-                className="gap-1.5"
-                variant={generatorOpen || preparedDocumentReady ? "outline" : "default"}
-              >
-                <FileText className="size-3.5" strokeWidth={2} />
-                {preparedDocumentReady
-                  ? "Revizuiește documentul confirmat"
-                  : documentFlowState === "draft_ready"
-                    ? "Continuă validarea documentului mai jos"
-                    : generatorOpen
-                      ? "Zona de generare este deschisă mai jos"
-                      : "Deschide zona de generare"}
-              </Button>
-              {needsDocumentResolution ? (
-                <Button
-                  data-testid="mark-finding-resolved"
-                  onClick={() => updateStatus("resolved")}
-                  disabled={actionLoading}
-                  className="gap-1.5"
-                >
-                  <CheckCircle2 className="size-3.5" strokeWidth={2} />
-                  Rezolvă riscul cu acest document
-                </Button>
-              ) : null}
-            </>
-          ) : (
+          {!hasGenerator ? (
             <>
               {recipe.workflowLink ? (
                 <Link href={recipe.workflowLink.href}>
@@ -716,7 +661,7 @@ export default function FindingDetailPage() {
                 {recipe.closureCTA ?? recipe.primaryCTA.label}
               </Button>
             </>
-          )}
+          ) : null}
         </FindingHeroAction>
       )}
 
@@ -744,15 +689,6 @@ export default function FindingDetailPage() {
             >
               <CheckCircle2 className="size-3.5" strokeWidth={2} />
               Adaugă documentul la Dosar
-            </Button>
-            <Button
-              data-testid="review-generated-document"
-              variant="outline"
-              onClick={() => setGeneratorOpen(true)}
-              className="gap-1.5"
-            >
-              <FileText className="size-3.5" strokeWidth={2} />
-              Revizuiește documentul
             </Button>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-eos-text-muted">
@@ -874,6 +810,55 @@ export default function FindingDetailPage() {
         </Card>
       )}
 
+      {documentaryGeneratorVisible && generatorDocumentType ? (
+        <GeneratorDrawer
+          open
+          findingStatus={status}
+          findingId={finding.id}
+          documentType={generatorDocumentType}
+          findingTitle={finding.title}
+          vendorName={recipe.vendorContext?.vendorName}
+          vendorDpaUrl={recipe.vendorContext?.dpaUrl}
+          onComplete={(result) => {
+            if (result?.finding) {
+              applyFindingResponse({
+                finding: result.finding as FindingDetail,
+                linkedGeneratedDocument: result.linkedGeneratedDocument ?? null,
+                documentFlowState: result.documentFlowState,
+                feedbackMessage: result.feedbackMessage,
+              })
+            }
+            refetchFinding()
+          }}
+        />
+      ) : null}
+
+      {needsDocumentResolution ? (
+        <Card
+          data-testid="documentary-resolve-next-step"
+          className="border-eos-success/25 bg-eos-success-soft/40"
+        >
+          <CardContent className="space-y-3 px-5 py-5">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+                Pasul următor
+              </p>
+              <p className="mt-1 text-sm text-eos-text">
+                Documentul este confirmat. Acum folosești exact documentul validat pentru a rezolva riscul.
+              </p>
+            </div>
+            <Button
+              data-testid="mark-finding-resolved"
+              onClick={() => updateStatus("resolved")}
+              disabled={actionLoading}
+              className="w-full gap-1.5"
+            >
+              <CheckCircle2 className="size-3.5" strokeWidth={2} />
+              Rezolvă riscul cu acest document
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
@@ -886,36 +871,6 @@ export default function FindingDetailPage() {
           <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
         )}
       </div>
-
-      {/* ── Inline generator flow (in-context, no page navigation) ─────── */}
-      {hasGenerator && generatorDocumentType && generatorOpen && status === "confirmed" && (
-        <GeneratorDrawer
-          open={generatorOpen}
-          findingId={finding.id}
-          documentType={generatorDocumentType}
-          findingTitle={finding.title}
-          vendorName={recipe.vendorContext?.vendorName}
-          vendorDpaUrl={recipe.vendorContext?.dpaUrl}
-          onComplete={(result) => {
-            if (result?.evidenceAttached) {
-              setGeneratorOpen(false)
-              setTimeout(() => {
-                const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
-                resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
-              }, 50)
-            }
-            if (result?.finding) {
-              applyFindingResponse({
-                finding: result.finding as FindingDetail,
-                linkedGeneratedDocument: result.linkedGeneratedDocument ?? null,
-                documentFlowState: result.documentFlowState,
-                feedbackMessage: result.feedbackMessage,
-              })
-            }
-            refetchFinding()
-          }}
-        />
-      )}
     </div>
   )
 }
