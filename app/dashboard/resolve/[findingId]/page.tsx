@@ -815,7 +815,7 @@ export default function FindingDetailPage() {
         </Card>
       ) : null}
 
-      {statusFeedback && !successMomentVisible && (
+      {statusFeedback && !successMomentVisible && !(status === "confirmed" && hasGenerator) && (
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-eos-text">{statusFeedback}</p>
