@@ -7,6 +7,15 @@ import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 
+const FEED_TIME_ZONE = "Europe/Bucharest"
+
+const FEED_MONITORING_DATE_FORMATTER = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: FEED_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+})
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export type ExternalFeedItem = {
@@ -18,6 +27,31 @@ export type ExternalFeedItem = {
   tone: "default" | "success" | "warning"
   href?: string
   sourceType: "legislation" | "anspdcp" | "spv" | "anaf" | "system"
+}
+
+function formatFeedMonitoringDate(iso: string) {
+  return FEED_MONITORING_DATE_FORMATTER.format(new Date(iso))
+}
+
+function resolveStableFeedNowISO(
+  state: ComplianceState,
+  explicitNowISO?: string
+) : string {
+  if (explicitNowISO) return explicitNowISO
+
+  return (
+    state.snapshotHistory?.[0]?.generatedAt ||
+    state.events?.[0]?.createdAtISO ||
+    state.scans?.[0]?.createdAtISO ||
+    state.generatedDocuments?.[0]?.generatedAtISO ||
+    state.findings?.[0]?.findingStatusUpdatedAtISO ||
+    state.findings?.[0]?.createdAtISO ||
+    state.siteScan?.scannedAtISO ||
+    state.intakeCompletedAtISO ||
+    state.shadowAiCompletedAtISO ||
+    state.efacturaSyncedAtISO ||
+    "2026-01-01T00:00:00.000Z"
+  )
 }
 
 // ── Legislation relevance filter ────────────────────────────────────────────
@@ -44,10 +78,12 @@ export function isLegislationRelevant(
 
 export function buildExternalFeedItems(
   notifications: AppNotification[],
-  state: ComplianceState
+  state: ComplianceState,
+  nowISO?: string
 ): ExternalFeedItem[] {
   const items: ExternalFeedItem[] = []
   const tags = state.applicability?.tags ?? []
+  const stableNowISO = resolveStableFeedNowISO(state, nowISO)
   const monitoredFiscalItems = buildFiscalMonitoringFeedItems(state)
 
   items.push(...monitoredFiscalItems)
@@ -108,7 +144,7 @@ export function buildExternalFeedItems(
         detail: hasOpenEfacturaFindings
           ? `Există ${findingsWithSpv.length} finding-uri deschise legate de facturare electronică. Verifică înainte de termenul de 5 zile.`
           : "Verifică factura respinsă sau cu status neclar pe SPV.",
-        dateISO: new Date().toISOString(),
+        dateISO: stableNowISO,
         tone: "warning",
         href: "/dashboard/fiscal",
         sourceType: "spv",
@@ -119,7 +155,7 @@ export function buildExternalFeedItems(
         eyebrow: "SPV ANAF",
         title: "Am verificat SPV-ul — nicio factură respinsă",
         detail: "Toate facturile sunt preluate corect. Continuăm monitorizarea automată.",
-        dateISO: new Date().toISOString(),
+        dateISO: stableNowISO,
         tone: "success",
         href: "/dashboard/fiscal",
         sourceType: "spv",
@@ -138,7 +174,7 @@ export function buildExternalFeedItems(
         eyebrow: "NIS2",
         title: `${nis2Findings.length} obligații NIS2 deschise`,
         detail: "Termenul de înregistrare la DNSC era septembrie 2025. Verifică statusul evaluării.",
-        dateISO: new Date().toISOString(),
+        dateISO: stableNowISO,
         tone: "warning",
         href: "/dashboard/nis2",
         sourceType: "legislation",
@@ -165,7 +201,7 @@ function buildFiscalMonitoringFeedItems(state: ComplianceState): ExternalFeedIte
 function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem | null {
   const recipe = buildCockpitRecipe(finding)
   const nextControlLabel = finding.nextMonitoringDateISO
-    ? ` Următorul control este programat pentru ${new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}.`
+    ? ` Următorul control este programat pentru ${formatFeedMonitoringDate(finding.nextMonitoringDateISO)}.`
     : ""
   const mainSignal =
     recipe.monitoringSignals.find((signal) => !signal.startsWith("Următor control la")) ??
@@ -243,10 +279,11 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
 export function buildProactiveSystemChecks(
   state: ComplianceState,
   score: number,
-  redAlerts: number
+  redAlerts: number,
+  nowISO?: string
 ): ExternalFeedItem[] {
   const items: ExternalFeedItem[] = []
-  const now = new Date().toISOString()
+  const now = resolveStableFeedNowISO(state, nowISO)
   const tags = state.applicability?.tags ?? []
 
   // 1. Scoring de conformitate

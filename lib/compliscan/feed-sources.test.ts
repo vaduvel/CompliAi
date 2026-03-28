@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { buildExternalFeedItems } from "./feed-sources"
+import { buildExternalFeedItems, buildProactiveSystemChecks } from "./feed-sources"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 
 function makeFinding(overrides: Partial<ScanFinding> = {}): ScanFinding {
@@ -25,8 +25,13 @@ function makeState(overrides: Partial<ComplianceState> = {}): ComplianceState {
   return {
     applicability: { tags: [], entries: [] },
     efacturaConnected: true,
+    efacturaSyncedAtISO: "2026-03-26T12:00:00.000Z",
     efacturaSignalsCount: 0,
     findings: [],
+    snapshotHistory: [],
+    events: [],
+    scans: [],
+    generatedDocuments: [],
     ...overrides,
   } as unknown as ComplianceState
 }
@@ -50,6 +55,7 @@ describe("buildExternalFeedItems", () => {
       })
     )
     expect(items[0]?.detail).toContain("Următorul control este programat")
+    expect(items[0]?.detail).toContain("02.04.2026")
   })
 
   it("arată reverificare SPV clară pentru EF-001 în monitorizare", () => {
@@ -74,5 +80,37 @@ describe("buildExternalFeedItems", () => {
         href: "/dashboard/fiscal?tab=spv&findingId=spv-missing-12345678",
       })
     )
+  })
+
+  it("folosește un nowISO stabil din snapshot pentru itemii proactivi", () => {
+    const state = makeState({
+      snapshotHistory: [
+        {
+          version: "1.0",
+          snapshotId: "snap-1",
+          comparedToSnapshotId: null,
+          generatedAt: "2026-03-28T10:15:00.000Z",
+          workspace: { id: "org-1", name: "Org", label: "Workspace", owner: "owner" },
+          sources: [],
+          systems: [],
+          findings: [],
+          drift: [],
+          summary: {
+            complianceScore: 72,
+            riskLabel: "medium",
+            openFindings: 0,
+            openAlerts: 0,
+            systemsDetected: 0,
+            highRiskSystems: 0,
+          },
+        },
+      ],
+    })
+
+    const externalItems = buildExternalFeedItems([], state)
+    const systemItems = buildProactiveSystemChecks(state, 72, 0)
+
+    expect(externalItems.find((item) => item.id === "ext-spv-ok")?.dateISO).toBe("2026-03-28T10:15:00.000Z")
+    expect(systemItems[0]?.dateISO).toBe("2026-03-28T10:15:00.000Z")
   })
 })
