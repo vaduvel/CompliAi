@@ -48,7 +48,7 @@ function formatDate(value: string | null | undefined) {
 
 function ScoreBar({ score }: { score: number }) {
   const color =
-    score >= 70 ? "bg-emerald-500" : score >= 40 ? "bg-amber-400" : "bg-red-500"
+    score >= 70 ? "bg-eos-success" : score >= 40 ? "bg-eos-warning" : "bg-eos-error"
   return (
     <div className="h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
       <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${score}%` }} />

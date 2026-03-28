@@ -67,7 +67,7 @@ begin
     select 1 from pg_type
     where typname = 'compliscan_role' and typnamespace = 'public'::regnamespace
   ) then
-    create type public.compliscan_role as enum ('owner', 'compliance', 'reviewer', 'viewer');
+    create type public.compliscan_role as enum ('owner', 'partner_manager', 'compliance', 'reviewer', 'viewer');
   end if;
 end $$;
 
@@ -220,8 +220,8 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 
 drop policy if exists org_state_operator_write on public.org_state;
 create policy org_state_operator_write on public.org_state for all to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]))
-with check (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]))
+with check (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]));
 
 drop policy if exists evidence_objects_member_select on public.evidence_objects;
 create policy evidence_objects_member_select on public.evidence_objects for select to authenticated
@@ -230,21 +230,21 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 drop policy if exists evidence_objects_operator_insert on public.evidence_objects;
 create policy evidence_objects_operator_insert on public.evidence_objects for insert to authenticated
 with check (
-  public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
   and (uploaded_by is null or uploaded_by = auth.uid())
 );
 
 drop policy if exists evidence_objects_operator_update on public.evidence_objects;
 create policy evidence_objects_operator_update on public.evidence_objects for update to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]))
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]))
 with check (
-  public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
   and (uploaded_by is null or uploaded_by = auth.uid())
 );
 
 drop policy if exists evidence_objects_operator_delete on public.evidence_objects;
 create policy evidence_objects_operator_delete on public.evidence_objects for delete to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]));
 
 -- Service role full access
 
@@ -280,25 +280,25 @@ drop policy if exists evidence_bucket_operator_insert on storage.objects;
 create policy evidence_bucket_operator_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'compliscan-evidence-private'
-  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
 );
 
 drop policy if exists evidence_bucket_operator_update on storage.objects;
 create policy evidence_bucket_operator_update on storage.objects for update to authenticated
 using (
   bucket_id = 'compliscan-evidence-private'
-  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
 )
 with check (
   bucket_id = 'compliscan-evidence-private'
-  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
 );
 
 drop policy if exists evidence_bucket_operator_delete on storage.objects;
 create policy evidence_bucket_operator_delete on storage.objects for delete to authenticated
 using (
   bucket_id = 'compliscan-evidence-private'
-  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'compliance', 'reviewer']::public.compliscan_role[])
+  and public.current_user_has_org_role(public.storage_object_org_id(name), array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[])
 );
 
 drop policy if exists evidence_bucket_service_role_all on storage.objects;
@@ -369,8 +369,8 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 
 drop policy if exists nis2_state_operator_write on public.nis2_state;
 create policy nis2_state_operator_write on public.nis2_state for all to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]))
-with check (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]))
+with check (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]));
 
 drop policy if exists notifications_state_member_select on public.notifications_state;
 create policy notifications_state_member_select on public.notifications_state for select to authenticated
@@ -378,8 +378,8 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 
 drop policy if exists notifications_state_operator_write on public.notifications_state;
 create policy notifications_state_operator_write on public.notifications_state for all to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]))
-with check (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]))
+with check (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]));
 
 drop policy if exists agent_runs_member_select on public.agent_runs;
 create policy agent_runs_member_select on public.agent_runs for select to authenticated
@@ -387,8 +387,8 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 
 drop policy if exists agent_runs_operator_write on public.agent_runs;
 create policy agent_runs_operator_write on public.agent_runs for all to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance']::public.compliscan_role[]))
-with check (public.current_user_has_org_role(org_id, array['owner', 'compliance']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance']::public.compliscan_role[]))
+with check (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance']::public.compliscan_role[]));
 
 drop policy if exists vendor_reviews_member_select on public.vendor_reviews;
 create policy vendor_reviews_member_select on public.vendor_reviews for select to authenticated
@@ -396,8 +396,8 @@ using (org_id in (select org_id from public.current_user_org_ids()));
 
 drop policy if exists vendor_reviews_operator_write on public.vendor_reviews;
 create policy vendor_reviews_operator_write on public.vendor_reviews for all to authenticated
-using (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]))
-with check (public.current_user_has_org_role(org_id, array['owner', 'compliance', 'reviewer']::public.compliscan_role[]));
+using (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]))
+with check (public.current_user_has_org_role(org_id, array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]));
 
 drop policy if exists service_role_full_access_plans on public.plans;
 create policy service_role_full_access_plans on public.plans as permissive for all to service_role using (true) with check (true);

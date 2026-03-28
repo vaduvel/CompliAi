@@ -96,13 +96,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -123,13 +123,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -150,13 +150,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance']::public.compliscan_role[]
   )
 );
 
@@ -177,13 +177,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 

@@ -318,7 +318,7 @@ function AssessmentTab({
                 </p>
                 <div className="mt-1 flex items-end gap-3">
                   <span className={`text-4xl font-bold ${
-                    liveResult.score >= 75 ? "text-emerald-600" : liveResult.score >= 50 ? "text-amber-600" : "text-red-600"
+                    liveResult.score >= 75 ? "text-eos-success" : liveResult.score >= 50 ? "text-eos-warning" : "text-eos-error"
                   }`}>
                     {liveResult.score}%
                   </span>
@@ -334,7 +334,7 @@ function AssessmentTab({
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-eos-bg-inset">
               <div
                 className={`h-full rounded-full transition-all ${
-                  liveResult.score >= 75 ? "bg-emerald-500" : liveResult.score >= 50 ? "bg-amber-400" : "bg-red-500"
+                  liveResult.score >= 75 ? "bg-eos-success" : liveResult.score >= 50 ? "bg-eos-warning" : "bg-eos-error"
                 }`}
                 style={{ width: `${liveResult.score}%` }}
               />
@@ -391,7 +391,7 @@ function AssessmentTab({
                           </div>
                           {answersMeta[q.id] && !answersMeta[q.id].userConfirmed && (
                             <div className="mb-1 flex items-center gap-2">
-                              <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${answersMeta[q.id].confidence === "high" ? "bg-green-100 text-green-700" : answersMeta[q.id].confidence === "medium" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                              <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${answersMeta[q.id].confidence === "high" ? "bg-eos-success-soft text-eos-success" : answersMeta[q.id].confidence === "medium" ? "bg-eos-warning-soft text-eos-warning" : "bg-eos-error-soft text-eos-error"}`}>
                                 {answersMeta[q.id].source === "vendor_data" ? "Vendor" : answersMeta[q.id].source === "org_profile" ? "Profil org" : "Prefill"} · {answersMeta[q.id].confidence}
                               </span>
                               <button
@@ -417,12 +417,12 @@ function AssessmentTab({
                                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                                     selected
                                       ? opt.value === "yes"
-                                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                                        ? "border-eos-success/40 bg-eos-success-soft text-eos-success"
                                         : opt.value === "partial"
-                                        ? "border-amber-400 bg-amber-50 text-amber-700"
+                                        ? "border-eos-warning/40 bg-eos-warning-soft text-eos-warning"
                                         : opt.value === "no"
-                                        ? "border-red-400 bg-red-50 text-red-700"
-                                        : "border-gray-400 bg-gray-100 text-gray-700"
+                                        ? "border-eos-error/40 bg-eos-error-soft text-eos-error"
+                                        : "border-eos-border bg-eos-surface-variant text-eos-text-muted"
                                       : "border-eos-border text-eos-text-muted hover:bg-eos-surface"
                                   }`}
                                 >
@@ -433,7 +433,7 @@ function AssessmentTab({
                           </div>
                           {ans && ans !== "yes" && ans !== "na" && (
                             <div className="flex items-start gap-1.5">
-                              <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" strokeWidth={2} />
+                              <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-eos-warning" strokeWidth={2} />
                               <p className="text-xs text-eos-text-muted">{q.hint}</p>
                             </div>
                           )}
@@ -480,7 +480,7 @@ function AssessmentTab({
             <CardContent className="space-y-2 pt-0">
               {liveResult.gaps.map((gap) => {
                 const Icon = gap.severity === "critical" ? XCircle : AlertTriangle
-                const color = gap.severity === "critical" ? "text-red-500" : gap.severity === "high" ? "text-orange-500" : "text-amber-500"
+                const color = gap.severity === "critical" ? "text-eos-error" : gap.severity === "high" ? "text-eos-error" : "text-eos-warning"
                 return (
                   <div key={gap.questionId} className="flex gap-3 rounded-eos-md border border-eos-border bg-eos-surface p-3">
                     <Icon className={`mt-0.5 size-4 shrink-0 ${color}`} strokeWidth={2} />
@@ -579,11 +579,11 @@ function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
   }
 
   const CATEGORY_COLORS: Record<ChecklistStep["category"], string> = {
-    immediate: "text-red-700 bg-red-50 border-red-200",
-    investigation: "text-orange-700 bg-orange-50 border-orange-200",
-    notification: "text-blue-700 bg-blue-50 border-blue-200",
-    recovery: "text-green-700 bg-green-50 border-green-200",
-    evidence: "text-purple-700 bg-purple-50 border-purple-200",
+    immediate: "text-eos-error bg-eos-error-soft border-eos-error/30",
+    investigation: "text-eos-warning bg-eos-warning-soft border-eos-warning/30",
+    notification: "text-eos-primary bg-eos-primary-soft border-eos-primary/30",
+    recovery: "text-eos-success bg-eos-success-soft border-eos-success/30",
+    evidence: "text-eos-text-muted bg-eos-surface-variant border-eos-border",
   }
 
   const progress = checklist.steps.length > 0
@@ -604,7 +604,7 @@ function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
 
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
         <div
-          className={`h-full rounded-full transition-all ${progress === 100 ? "bg-green-500" : "bg-eos-primary"}`}
+          className={`h-full rounded-full transition-all ${progress === 100 ? "bg-eos-success" : "bg-eos-primary"}`}
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -616,15 +616,15 @@ function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackType }) {
             <button
               key={step.id}
               type="button"
-              className={`flex w-full items-start gap-2.5 rounded-eos-md border px-3 py-2 text-left transition-colors ${done ? "border-green-200 bg-green-50/50" : "border-eos-border bg-eos-surface-variant hover:bg-eos-surface"}`}
+              className={`flex w-full items-start gap-2.5 rounded-eos-md border px-3 py-2 text-left transition-colors ${done ? "border-eos-success/20 bg-eos-success-soft" : "border-eos-border bg-eos-surface-variant hover:bg-eos-surface"}`}
               onClick={() => toggleStep(step.id)}
             >
-              <div className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border ${done ? "border-green-500 bg-green-500 text-white" : "border-eos-border"}`}>
+              <div className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border ${done ? "border-eos-success bg-eos-success text-white" : "border-eos-border"}`}>
                 {done && <CheckCircle2 className="size-3" />}
               </div>
               <div className="min-w-0 flex-1">
                 <p className={`text-xs ${done ? "text-eos-text-muted line-through" : "text-eos-text"}`}>
-                  {step.critical && <span className="mr-1 text-red-600">●</span>}
+                  {step.critical && <span className="mr-1 text-eos-error">●</span>}
                   {step.text}
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -724,7 +724,7 @@ function IncidentStageStepper({
             <div
               key={stage.key}
               className={`h-1.5 flex-1 rounded-full ${
-                status === "done" ? "bg-green-500" : status === "active" ? "bg-eos-primary" : "bg-eos-surface-variant"
+                status === "done" ? "bg-eos-success" : status === "active" ? "bg-eos-primary" : "bg-eos-surface-variant"
               }`}
             />
           )
@@ -734,7 +734,7 @@ function IncidentStageStepper({
         const status = getStageStatus(incident, stage.key)
         const isExpanded = expandedStage === stage.key
         return (
-          <div key={stage.key} className={`rounded-eos-md border ${status === "done" ? "border-green-200 bg-green-50/50" : status === "active" ? "border-eos-primary/30 bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant opacity-60"}`}>
+          <div key={stage.key} className={`rounded-eos-md border ${status === "done" ? "border-eos-success/20 bg-eos-success-soft" : status === "active" ? "border-eos-primary/30 bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant opacity-60"}`}>
             <button
               type="button"
               className="flex w-full items-center justify-between px-3 py-2"
@@ -742,7 +742,7 @@ function IncidentStageStepper({
               disabled={status === "locked"}
             >
               <div className="flex items-center gap-2">
-                <div className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold ${status === "done" ? "bg-green-500 text-white" : status === "active" ? "bg-eos-primary text-white" : "bg-eos-surface text-eos-text-muted"}`}>
+                <div className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold ${status === "done" ? "bg-eos-success text-white" : status === "active" ? "bg-eos-primary text-white" : "bg-eos-surface text-eos-text-muted"}`}>
                   {status === "done" ? <CheckCircle2 className="size-3" /> : STAGE_META.indexOf(stage) + 1}
                 </div>
                 <span className={`text-xs font-medium ${status === "locked" ? "text-eos-text-muted" : "text-eos-text"}`}>
@@ -915,16 +915,16 @@ function PostIncidentPanel({
   }
 
   return (
-    <div className="rounded-eos-md border border-blue-200 bg-blue-50/50 px-3 py-3 space-y-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-blue-700">
+    <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/5 px-3 py-3 space-y-3">
+      <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-primary">
         Post-incident tracking
       </p>
       {/* DNSC Reference */}
       <div>
-        <label className="text-[10px] font-medium text-blue-700">Nr. înregistrare DNSC</label>
+        <label className="text-[10px] font-medium text-eos-primary">Nr. înregistrare DNSC</label>
         <div className="mt-1 flex gap-2">
           <input
-            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             placeholder="DNSC-2026-..."
             value={dnscRef}
             onChange={(e) => setDnscRef(e.target.value)}
@@ -943,7 +943,7 @@ function PostIncidentPanel({
           const value = tracking?.[key as keyof typeof tracking] as string | undefined
           return (
             <div key={key}>
-              <label className="text-[10px] font-medium text-blue-700">{label}</label>
+              <label className="text-[10px] font-medium text-eos-primary">{label}</label>
               {value ? (
                 <p className="mt-0.5 text-xs text-eos-text">{new Date(value).toLocaleDateString("ro-RO")}</p>
               ) : (
@@ -969,12 +969,12 @@ function PostIncidentPanel({
       </div>
       {/* DNSC Correspondence */}
       <div>
-        <label className="text-[10px] font-medium text-blue-700">Corespondență DNSC</label>
+        <label className="text-[10px] font-medium text-eos-primary">Corespondență DNSC</label>
         {(tracking?.dnscCorrespondence ?? []).length > 0 && (
           <div className="mt-1 space-y-1">
             {(tracking?.dnscCorrespondence ?? []).map((c) => (
               <div key={c.id} className="flex items-start gap-2 text-xs text-eos-text">
-                <span className={`shrink-0 text-[10px] font-medium ${c.direction === "sent" ? "text-blue-600" : "text-amber-600"}`}>
+                <span className={`shrink-0 text-[10px] font-medium ${c.direction === "sent" ? "text-eos-primary" : "text-eos-warning"}`}>
                   {c.direction === "sent" ? "Trimis" : "Primit"}
                 </span>
                 <span className="text-eos-text-muted">{new Date(c.date).toLocaleDateString("ro-RO")}</span>
@@ -985,7 +985,7 @@ function PostIncidentPanel({
         )}
         <div className="mt-1.5 flex gap-2">
           <select
-            className="rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+            className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text"
             value={newCorr.direction}
             onChange={(e) => setNewCorr((p) => ({ ...p, direction: e.target.value as "sent" | "received" }))}
           >
@@ -993,7 +993,7 @@ function PostIncidentPanel({
             <option value="sent">Trimis către DNSC</option>
           </select>
           <input
-            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             placeholder="Rezumat corespondență..."
             value={newCorr.summary}
             onChange={(e) => setNewCorr((p) => ({ ...p, summary: e.target.value }))}
@@ -1004,10 +1004,10 @@ function PostIncidentPanel({
         </div>
       </div>
       <div>
-        <label className="text-[10px] font-medium text-blue-700">Note post-incident</label>
+        <label className="text-[10px] font-medium text-eos-primary">Note post-incident</label>
         <div className="mt-1 flex gap-2">
           <input
-            className="flex-1 rounded-eos-md border border-blue-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             placeholder="Observații, acțiuni rămase..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -1129,9 +1129,9 @@ function AnspdcpNotificationPanel({
   }
 
   const statusColors: Record<string, string> = {
-    pending: "border-amber-200 bg-amber-50",
-    submitted: "border-blue-200 bg-blue-50",
-    acknowledged: "border-emerald-200 bg-emerald-50",
+    pending: "border-eos-warning/30 bg-eos-warning-soft",
+    submitted: "border-eos-primary/30 bg-eos-primary-soft",
+    acknowledged: "border-eos-success/30 bg-eos-success-soft",
   }
   const statusLabels: Record<string, string> = {
     pending: "De trimis",
@@ -1140,17 +1140,17 @@ function AnspdcpNotificationPanel({
   }
 
   return (
-    <div className={`rounded-eos-md border px-3 py-3 space-y-3 ${statusColors[notif?.status ?? "pending"]} ${emphasized ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-eos-bg" : ""}`}>
+    <div className={`rounded-eos-md border px-3 py-3 space-y-3 ${statusColors[notif?.status ?? "pending"]} ${emphasized ? "ring-2 ring-eos-warning/50 ring-offset-2 ring-offset-eos-bg" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bell className="size-3.5 text-amber-600" strokeWidth={2} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-amber-700">
+          <Bell className="size-3.5 text-eos-warning" strokeWidth={2} />
+          <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-warning">
             Notificare ANSPDCP — GDPR Art. 33
           </p>
         </div>
         <div className="flex items-center gap-2">
           {deadline72h && notif?.status === "pending" && (
-            <span className={`text-[10px] font-bold ${deadline72h.expired ? "text-red-700" : deadline72h.urgent ? "text-orange-700" : "text-amber-700"}`}>
+            <span className={`text-[10px] font-bold ${deadline72h.expired ? "text-eos-error" : deadline72h.urgent ? "text-eos-warning" : "text-eos-warning"}`}>
               {deadline72h.expired ? "DEPĂȘIT" : `${deadline72h.label} rămas`}
             </span>
           )}
@@ -1163,15 +1163,15 @@ function AnspdcpNotificationPanel({
         </div>
       </div>
 
-      <p className="text-[10px] text-amber-700/80">
+      <p className="text-[10px] text-eos-warning/80">
         Incidentul implică date cu caracter personal. Notificarea ANSPDCP este obligatorie în 72h de la descoperire (GDPR Art. 33). Aceasta este <strong>separată</strong> de raportarea DNSC.
       </p>
 
       <div className="space-y-2">
         <div>
-          <label className="text-[10px] font-medium text-amber-800">Categorii date afectate (virgulă)</label>
+          <label className="text-[10px] font-medium text-eos-warning">Categorii date afectate (virgulă)</label>
           <input
-            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             placeholder="ex: date identitate, date financiare, date medicale..."
             value={form.dataCategories}
             onChange={(e) => setForm((p) => ({ ...p, dataCategories: e.target.value }))}
@@ -1179,20 +1179,20 @@ function AnspdcpNotificationPanel({
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-[10px] font-medium text-amber-800">Nr. persoane vizate (estimat)</label>
+            <label className="text-[10px] font-medium text-eos-warning">Nr. persoane vizate (estimat)</label>
             <input
               type="number"
               min={0}
-              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text"
               placeholder="0"
               value={form.estimatedDataSubjects}
               onChange={(e) => setForm((p) => ({ ...p, estimatedDataSubjects: e.target.value }))}
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-amber-800">DPO / Responsabil conformitate</label>
+            <label className="text-[10px] font-medium text-eos-warning">DPO / Responsabil conformitate</label>
             <input
-              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text"
               placeholder="email@exemplu.ro"
               value={form.dpoContact}
               onChange={(e) => setForm((p) => ({ ...p, dpoContact: e.target.value }))}
@@ -1200,9 +1200,9 @@ function AnspdcpNotificationPanel({
           </div>
         </div>
         <div>
-          <label className="text-[10px] font-medium text-amber-800">Consecințe probabile (Art. 33(3)(c))</label>
+          <label className="text-[10px] font-medium text-eos-warning">Consecințe probabile (Art. 33(3)(c))</label>
           <textarea
-            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             rows={2}
             placeholder="Consecințe probabile pentru persoanele vizate..."
             value={form.consequencesDescription}
@@ -1210,9 +1210,9 @@ function AnspdcpNotificationPanel({
           />
         </div>
         <div>
-          <label className="text-[10px] font-medium text-amber-800">Măsuri luate / propuse (Art. 33(3)(d))</label>
+          <label className="text-[10px] font-medium text-eos-warning">Măsuri luate / propuse (Art. 33(3)(d))</label>
           <textarea
-            className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+            className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
             rows={2}
             placeholder="Măsuri de remediere adoptate sau propuse..."
             value={form.measuresTaken}
@@ -1221,7 +1221,7 @@ function AnspdcpNotificationPanel({
         </div>
 
         {/* Art. 34 — notificare persoane vizate */}
-        <label className="flex items-start gap-2 text-xs text-amber-800 cursor-pointer">
+        <label className="flex items-start gap-2 text-xs text-eos-warning cursor-pointer">
           <input
             type="checkbox"
             className="mt-0.5 rounded"
@@ -1230,15 +1230,15 @@ function AnspdcpNotificationPanel({
           />
           <span>
             <span className="font-medium">Art. 34 — Notifică persoanele vizate individual</span>
-            <span className="block text-[10px] text-amber-700/70">Dacă breach-ul prezintă risc ridicat pentru drepturile și libertățile persoanelor.</span>
+            <span className="block text-[10px] text-eos-warning/70">Dacă breach-ul prezintă risc ridicat pentru drepturile și libertățile persoanelor.</span>
           </span>
         </label>
 
         {notif?.status !== "pending" && (
           <div>
-            <label className="text-[10px] font-medium text-amber-800">Nr. înregistrare ANSPDCP</label>
+            <label className="text-[10px] font-medium text-eos-warning">Nr. înregistrare ANSPDCP</label>
             <input
-              className="mt-1 w-full rounded-eos-md border border-amber-200 bg-white px-2 py-1.5 text-xs text-eos-text"
+              className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text"
               placeholder="ANSPDCP-2026-..."
               value={form.anspdcpReference}
               onChange={(e) => setForm((p) => ({ ...p, anspdcpReference: e.target.value }))}
@@ -1251,7 +1251,7 @@ function AnspdcpNotificationPanel({
         <Button
           size="sm"
           variant="outline"
-          className="flex-1 gap-1.5 border-amber-300 text-amber-800 hover:bg-amber-100"
+          className="flex-1 gap-1.5 border-eos-warning/30 text-eos-warning hover:bg-eos-warning-soft"
           disabled={saving}
           onClick={() => void handleSubmit(false)}
         >
@@ -1260,7 +1260,7 @@ function AnspdcpNotificationPanel({
         {notif?.status === "pending" && (
           <Button
             size="sm"
-            className="flex-1 gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+            className="flex-1 gap-1.5 bg-eos-warning hover:bg-eos-warning/90 text-white"
             disabled={saving || !form.dataCategories.trim()}
             onClick={() => void handleSubmit(true)}
           >
@@ -1273,7 +1273,7 @@ function AnspdcpNotificationPanel({
             <Button
               size="sm"
               variant="outline"
-              className="w-full gap-1.5 border-amber-300 text-amber-800 hover:bg-amber-100"
+              className="w-full gap-1.5 border-eos-warning/30 text-eos-warning hover:bg-eos-warning-soft"
             >
               <FileText className="size-3.5" strokeWidth={2} />
               Înapoi în cockpit cu dovada
@@ -1337,10 +1337,10 @@ function IncidentRow({
   return (
     <div
       id={`incident-${incident.id}`}
-      className={`space-y-3 px-5 py-4 ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-amber-50/40 ring-1 ring-amber-300" : ""}`}
+      className={`space-y-3 px-5 py-4 ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-eos-warning-soft ring-1 ring-eos-warning/30" : ""}`}
     >
       {highlighted && focusMode === "anspdcp" ? (
-        <div className="rounded-eos-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <div className="rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
           Ai venit aici din cockpitul finding-ului GDPR de breach. Completează notificarea ANSPDCP și apoi întoarce-te cu dovada în același caz.
         </div>
       ) : highlighted && focusMode === "incident" ? (
@@ -1383,7 +1383,7 @@ function IncidentRow({
             type="button"
             onClick={() => downloadDNSCReport(incident, orgName)}
             title="Generează raport DNSC"
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs font-medium text-eos-text-muted hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs font-medium text-eos-text-muted hover:border-eos-primary/30 hover:bg-eos-primary-soft hover:text-eos-primary"
             aria-label="Export raport DNSC"
           >
             <Download className="size-3.5" strokeWidth={2} />
@@ -1392,7 +1392,7 @@ function IncidentRow({
           <button
             type="button"
             onClick={() => onDelete(incident.id)}
-            className="rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
+            className="rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
             aria-label="Șterge incident"
           >
             <Trash2 className="size-3.5" strokeWidth={2} />
@@ -1403,26 +1403,26 @@ function IncidentRow({
       {/* SLA timers */}
       {isOpen && (
         <div className="grid grid-cols-2 gap-2">
-          <div className={`rounded-eos-md border px-3 py-2 ${sla24.expired ? "border-red-300 bg-red-50" : sla24.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
+          <div className={`rounded-eos-md border px-3 py-2 ${sla24.expired ? "border-eos-error/30 bg-eos-error-soft" : sla24.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-red-700" : "text-eos-text-muted"}`}>24h Early Warning</span>
-              <span className={`text-xs font-bold ${sla24.expired ? "text-red-700" : sla24.urgent ? "text-orange-700" : "text-eos-text"}`}>
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-eos-error" : "text-eos-text-muted"}`}>24h Early Warning</span>
+              <span className={`text-xs font-bold ${sla24.expired ? "text-eos-error" : sla24.urgent ? "text-eos-warning" : "text-eos-text"}`}>
                 {sla24.expired ? "DEPASIT" : sla24.label}
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
-              <div className={`h-full rounded-full transition-all ${sla24.expired ? "bg-red-500" : sla24.urgent ? "bg-orange-500" : "bg-eos-primary"}`} style={{ width: `${sla24.progressPct}%` }} />
+              <div className={`h-full rounded-full transition-all ${sla24.expired ? "bg-eos-error" : sla24.urgent ? "bg-eos-warning" : "bg-eos-primary"}`} style={{ width: `${sla24.progressPct}%` }} />
             </div>
           </div>
-          <div className={`rounded-eos-md border px-3 py-2 ${sla72.expired ? "border-red-300 bg-red-50" : sla72.urgent ? "border-orange-300 bg-orange-50" : "border-eos-border bg-eos-surface-variant"}`}>
+          <div className={`rounded-eos-md border px-3 py-2 ${sla72.expired ? "border-eos-error/30 bg-eos-error-soft" : sla72.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-red-700" : "text-eos-text-muted"}`}>72h Raport Complet</span>
-              <span className={`text-xs font-bold ${sla72.expired ? "text-red-700" : sla72.urgent ? "text-orange-700" : "text-eos-text"}`}>
+              <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-eos-error" : "text-eos-text-muted"}`}>72h Raport Complet</span>
+              <span className={`text-xs font-bold ${sla72.expired ? "text-eos-error" : sla72.urgent ? "text-eos-warning" : "text-eos-text"}`}>
                 {sla72.expired ? "DEPASIT" : sla72.label}
               </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
-              <div className={`h-full rounded-full transition-all ${sla72.expired ? "bg-red-500" : sla72.urgent ? "bg-orange-500" : "bg-eos-primary"}`} style={{ width: `${sla72.progressPct}%` }} />
+              <div className={`h-full rounded-full transition-all ${sla72.expired ? "bg-eos-error" : sla72.urgent ? "bg-eos-warning" : "bg-eos-primary"}`} style={{ width: `${sla72.progressPct}%` }} />
             </div>
           </div>
         </div>
@@ -1659,11 +1659,11 @@ function IncidentsTab({
   return (
     <div className="space-y-4">
       {highlightedIncident && focusMode === "anspdcp" ? (
-        <Card className="border-amber-300 bg-amber-50">
+        <Card className="border-eos-warning/30 bg-eos-warning-soft">
           <CardContent className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-amber-900">Flow ANSPDCP deschis din cockpit</p>
-              <p className="mt-1 text-xs text-amber-800/80">
+              <p className="text-sm font-semibold text-eos-text">Flow ANSPDCP deschis din cockpit</p>
+              <p className="mt-1 text-xs text-eos-warning/80">
                 Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează notificarea ANSPDCP și revino în cockpit cu dovada pregătită.
               </p>
             </div>
@@ -1821,7 +1821,7 @@ function IncidentsTab({
             {/* ANSPDCP: personal data flag */}
             <label className={`flex items-start gap-2 cursor-pointer rounded-eos-md border px-3 py-2.5 text-xs transition-colors ${
               form.involvesPersonalData || form.attackType === "data-breach"
-                ? "border-amber-300 bg-amber-50 text-amber-800"
+                ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
                 : "border-eos-border bg-eos-surface-variant text-eos-text"
             }`}>
               <input
@@ -1898,8 +1898,8 @@ function IncidentsTab({
       <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">Obligații raportare NIS2 (Art. 23)</p>
         <p className="mt-1">
-          <span className="font-semibold text-amber-600">24h</span> — Alertă inițială la DNSC (confirmare incident semnificativ).{" "}
-          <span className="font-semibold text-red-600">72h</span> — Raport complet (impact, cauze, măsuri luate).{" "}
+          <span className="font-semibold text-eos-warning">24h</span> — Alertă inițială la DNSC (confirmare incident semnificativ).{" "}
+          <span className="font-semibold text-eos-error">72h</span> — Raport complet (impact, cauze, măsuri luate).{" "}
           1 lună — Raport final cu lecțiile învățate.
         </p>
       </div>
@@ -1910,9 +1910,9 @@ function IncidentsTab({
 // ── Vendors tab ────────────────────────────────────────────────────────────────
 
 const RISK_SCORE_COLORS: Record<string, string> = {
-  high: "text-red-600 bg-red-50 border-red-200",
-  medium: "text-amber-600 bg-amber-50 border-amber-200",
-  low: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  high: "text-eos-error bg-eos-error-soft border-eos-error/30",
+  medium: "text-eos-warning bg-eos-warning-soft border-eos-warning/30",
+  low: "text-eos-success bg-eos-success-soft border-eos-success/30",
 }
 
 function VendorRow({
@@ -1960,12 +1960,12 @@ function VendorRow({
               risc {riskLevel} ({riskScore}/100)
             </span>
             {vendor.techConfidence === "high" && (
-              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+              <span className="rounded bg-eos-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-eos-primary">
                 tech ✓ certitudine ridicată
               </span>
             )}
             {vendor.techConfidence === "low" && (
-              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title={vendor.techDetectionReason}>
+              <span className="rounded bg-eos-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-eos-warning" title={vendor.techDetectionReason}>
                 posibil tech — verifică manual
               </span>
             )}
@@ -1976,7 +1976,7 @@ function VendorRow({
           {clauses.map((c) => (
             <span
               key={c.label}
-              className={`flex items-center gap-1 text-xs ${c.ok ? "text-emerald-600" : "text-eos-text-muted line-through"}`}
+              className={`flex items-center gap-1 text-xs ${c.ok ? "text-eos-success" : "text-eos-text-muted line-through"}`}
             >
               {c.ok ? (
                 <CheckCircle2 className="size-3" strokeWidth={2} />
@@ -1998,7 +1998,7 @@ function VendorRow({
         <button
           type="button"
           onClick={() => onDelete(vendor.id)}
-          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
+          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
           aria-label="Șterge vendor"
         >
           <Trash2 className="size-3.5" strokeWidth={2} />
@@ -2011,19 +2011,19 @@ function VendorRow({
             Factori de risc NIS2 Art. 21(2)(d)
           </p>
           <div className="mb-4 grid gap-2 sm:grid-cols-2">
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.isTechVendor ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
-              {factors.isTechVendor ? <ShieldAlert className="size-3.5 shrink-0" strokeWidth={2} /> : <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} />}
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.isTechVendor ? <ShieldAlert className="size-3.5 shrink-0" strokeWidth={2} /> : <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} />}
               Furnizor tech/cloud {factors.isTechVendor ? "(+30 pct risc)" : "— nedetectat"}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasDPA && factors.isTechVendor ? "border-red-200 bg-red-50 text-red-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
-              {factors.hasDPA ? <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasDPA && factors.isTechVendor ? "border-eos-error/30 bg-eos-error-soft text-eos-error" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.hasDPA ? <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
               DPA (Acord procesare date) {!factors.hasDPA && factors.isTechVendor ? "(+25 pct risc)" : factors.hasDPA ? "— bifat" : ""}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasSecuritySLA && factors.isTechVendor ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
-              {factors.hasSecuritySLA ? <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasSecuritySLA && factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+              {factors.hasSecuritySLA ? <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
               SLA securitate {!factors.hasSecuritySLA && factors.isTechVendor ? "(+15 pct risc)" : factors.hasSecuritySLA ? "— bifat" : ""}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.dataProcessingVolume === "high" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.dataProcessingVolume === "high" ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
               <Shield className="size-3.5 shrink-0" strokeWidth={2} />
               Date procesate: {factors.dataProcessingVolume === "high" ? "volum ridicat (+20 pct)" : factors.dataProcessingVolume === "low" ? "volum scăzut" : "necunoscut"}
             </div>
@@ -2037,7 +2037,7 @@ function VendorRow({
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-eos-border">
               <div
-                className={`h-full rounded-full transition-all ${riskLevel === "high" ? "bg-red-500" : riskLevel === "medium" ? "bg-amber-500" : "bg-emerald-500"}`}
+                className={`h-full rounded-full transition-all ${riskLevel === "high" ? "bg-eos-error" : riskLevel === "medium" ? "bg-eos-warning" : "bg-eos-success"}`}
                 style={{ width: `${riskScore}%` }}
               />
             </div>
@@ -2508,8 +2508,8 @@ function Nis2ProgressStepper() {
     pending: "—",
   }
   const statusColor: Record<StepStatus, string> = {
-    done: "border-green-200 bg-green-50 text-green-700",
-    in_progress: "border-amber-200 bg-amber-50 text-amber-700",
+    done: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+    in_progress: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
     pending: "border-eos-border bg-eos-surface text-eos-text-muted",
   }
 
@@ -2621,11 +2621,11 @@ function GovernanceCard() {
         members.length === 0
           ? "border-dashed border-eos-border bg-eos-surface"
           : issues > 0
-            ? "border-amber-200 bg-amber-50"
+            ? "border-eos-warning/30 bg-eos-warning-soft"
             : "border-eos-border bg-eos-surface"
       }`}>
         <div className="flex items-center gap-3">
-          <Users className={`size-5 shrink-0 ${issues > 0 ? "text-amber-600" : "text-eos-primary"}`} strokeWidth={1.5} />
+          <Users className={`size-5 shrink-0 ${issues > 0 ? "text-eos-warning" : "text-eos-primary"}`} strokeWidth={1.5} />
           <div>
             <p className="text-sm font-semibold text-eos-text">Training Board & CISO</p>
             <p className="text-xs text-eos-text-muted">

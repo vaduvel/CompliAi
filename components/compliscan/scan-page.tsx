@@ -235,7 +235,7 @@ export function ScanPageSurface() {
               className={[
                 "inline-flex items-center gap-1.5 rounded-eos-lg border px-4 py-2 text-sm font-medium transition",
                 agentFlow.agentModeActive
-                  ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning hover:bg-amber-500/20"
+                  ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning hover:bg-eos-warning/20"
                   : "border-eos-border bg-eos-surface-active text-eos-text-muted hover:text-eos-text-muted",
               ].join(" ")}
             >
@@ -249,7 +249,7 @@ export function ScanPageSurface() {
       {/* Active findings nudge */}
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
         <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
-          <AlertTriangle className="size-5 shrink-0 text-amber-400/70" strokeWidth={2} />
+          <AlertTriangle className="size-5 shrink-0 text-eos-warning/70" strokeWidth={2} />
           <div className="flex-1">
             <p className="text-sm font-semibold text-eos-text-muted">
               Scanarea alimentează cockpitul, nu îl dublează

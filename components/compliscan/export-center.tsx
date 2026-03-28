@@ -207,23 +207,22 @@ export function ExportCenter({
               Daca nu ai nevoie de artefacte speciale, acesta este exportul corect.
             </p>
           </div>
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 space-y-2">
             {primaryActions.map((action) => (
-              <Button
-                key={action.key}
-                onClick={action.onClick}
-                variant={action.variant}
-                size="lg"
-                className={`${action.className ?? ""} items-start gap-3 text-left shadow-none`}
-              >
-                <action.icon className="mt-0.5 size-5 shrink-0" strokeWidth={2} />
-                <span className="min-w-0 text-left">
-                  <span className="block whitespace-normal leading-5">{action.label}</span>
-                  <span className="mt-0.5 block whitespace-normal text-xs font-medium normal-case tracking-normal opacity-80">
-                    {action.hint}
-                  </span>
-                </span>
-              </Button>
+              <div key={action.key} className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-3 py-2.5">
+                <action.icon className="size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-eos-text">{action.label}</p>
+                  <p className="text-xs text-eos-text-muted">{action.hint}</p>
+                </div>
+                <Button
+                  onClick={action.onClick}
+                  size="sm"
+                  className="shrink-0"
+                >
+                  Exportă
+                </Button>
+              </div>
             ))}
           </div>
         </section>

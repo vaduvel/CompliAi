@@ -109,7 +109,7 @@ Adevărul corect este:
 | NIS2 | `FUNCȚIONAL, DAR SUITĂ SEPARATĂ` |
 | Fiscal | `PARȚIAL, DOAR SPV E APROAPE` |
 | Sisteme / DORA / Whistleblowing | `PRODUSE PARALELE` |
-| Partner / portfolio | `PARȚIAL` |
+| Partner / portfolio | `BUN PE FLOW PRINCIPAL, PARȚIAL PE SECUNDARE` |
 | Viewer / compliance IA | `PARȚIAL` |
 
 ---
@@ -720,7 +720,7 @@ Acestea sunt deviațiile mari, nu cosmetice:
 4. `workflowLink` mută execuția reală a prea multor cazuri în afara cockpitului.
 5. Dosarul este fragmentat în prea multe suprafețe.
 6. Monitoring-ul există în date, dar nu este vizibil și autoritar în UX.
-7. Partner flow nu este încă portofoliu-first cap-coadă.
+7. Partner flow principal este acum portofoliu-first cap-coadă, dar suprafețele secundare încă au drift.
 8. Prea multe module specialist se comportă ca produse separate, nu ca unelte secundare.
 
 ---
@@ -965,7 +965,12 @@ este `CONFIRMAT LIVE`.
 - `landing -> register -> onboarding -> destination` este acum confirmat live click-by-click pe `solo`, `partner` și `compliance`
 - rezultatul onboardingului este acum exprimat live compact ca `Se aplică / Am găsit / Acum faci asta` pe destinațiile principale
 - `finding-ul operațional` confirmat live nu ajunge într-un flow complet de dovadă inline; rămâne pe handoff / ghidaj contextual, nu pe închidere cap-coadă confirmată live
-- `partner` intră în portfolio shell, dar nu este încă confirmat live cap-coadă pe un client real importat și pe drilldown în workspace client
+- `partner` este acum confirmat live pe flow-ul principal:
+  - onboarding partner -> portfolio
+  - import client real
+  - drilldown în workspace client
+  - workspace schimbat corect pe client
+- `portfolio/tasks` și `portfolio/reports` rămân suprafețe secundare neînchise complet ca adevăr final
 - `SPV` se încarcă live, dar fără token ANAF activ auditul rămâne doar parțial pe semnale reale
 - `partner import execute` este blocat live pe cont fresh de `PARTNER_PLAN_REQUIRED`, deci nu poți valida client intake-ul complet fără planul corect
 

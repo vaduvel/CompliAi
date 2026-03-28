@@ -108,6 +108,7 @@ export async function loadTenancyGraphFromSupabase() {
 function isCloudMembershipRole(value: string): value is CloudMembershipRole {
   return (
     value === "owner" ||
+    value === "partner_manager" ||
     value === "compliance" ||
     value === "reviewer" ||
     value === "viewer"

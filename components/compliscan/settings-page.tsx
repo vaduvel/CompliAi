@@ -1062,7 +1062,7 @@ export function SettingsPageSurface() {
                   <button
                     type="button"
                     disabled={cockpit.busy}
-                    className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-error/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-error disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => {
                       if (
                         !window.confirm(
@@ -1136,7 +1136,7 @@ export function SettingsPageSurface() {
                   <button
                     type="button"
                     disabled={gdprDeleting || currentUser?.role !== "owner"}
-                    className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-error/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-error disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => void handleGdprDeleteData()}
                   >
                     {gdprDeleting ? <Loader2 className="size-4 animate-spin" /> : <ShieldX className="size-4" />}
@@ -1169,7 +1169,7 @@ export function SettingsPageSurface() {
                     <button
                       type="button"
                       disabled={currentUser?.role !== "owner"}
-                      className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-error/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-error disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => setGdprShowDeletionForm(true)}
                     >
                       <MailWarning className="size-4" />
@@ -1201,7 +1201,7 @@ export function SettingsPageSurface() {
                       <button
                         type="button"
                         disabled={gdprRequestingDeletion}
-                        className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-error/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-error disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => void handleGdprRequestDeletion()}
                       >
                         {gdprRequestingDeletion ? <Loader2 className="size-4 animate-spin" /> : <MailWarning className="size-4" />}

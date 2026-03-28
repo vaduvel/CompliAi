@@ -206,7 +206,7 @@ export default function DashboardPage() {
         </p>
         <Link
           href="/onboarding"
-          className="mt-6 flex items-center gap-2 rounded-eos-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
+          className="mt-6 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary/90"
         >
           Începe analiza gratuită <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
         </Link>
@@ -309,9 +309,9 @@ export default function DashboardPage() {
 
           <div className={`flex flex-col justify-between rounded-eos-xl border px-4 py-4 ${
             auditStatusLabel === "Pregătit"
-              ? "border-emerald-500/20 bg-eos-surface-variant"
+              ? "border-eos-success/20 bg-eos-surface-variant"
               : auditStatusLabel === "Blocat"
-                ? "border-red-500/20 bg-eos-surface-variant"
+                ? "border-eos-error/20 bg-eos-surface-variant"
                 : "border-eos-border bg-eos-surface-variant"
           }`}>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Audit</p>
@@ -395,8 +395,8 @@ export default function DashboardPage() {
             <div className="divide-y divide-eos-border-subtle">
               {topFindings.map((f) => {
                 const sevColor =
-                  f.severity === "critical" || f.severity === "high" ? "bg-red-500" :
-                  f.severity === "medium" ? "bg-amber-500" : "bg-eos-surface-elevated"
+                  f.severity === "critical" || f.severity === "high" ? "bg-eos-error" :
+                  f.severity === "medium" ? "bg-eos-warning" : "bg-eos-surface-elevated"
                 const sevLabel =
                   f.severity === "critical" ? "Critic" :
                   f.severity === "high" ? "Ridicat" :
@@ -463,8 +463,8 @@ export default function DashboardPage() {
           <div className="divide-y divide-eos-border-subtle">
             {activityFeedItems.map((item) => {
               const dot =
-                item.tone === "success" ? "bg-emerald-500" :
-                item.tone === "warning" ? "bg-amber-500" : "bg-blue-500"
+                item.tone === "success" ? "bg-eos-success" :
+                item.tone === "warning" ? "bg-eos-warning" : "bg-eos-primary"
               const body = (
                 <div className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-eos-surface-variant">
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />

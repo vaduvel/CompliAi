@@ -280,12 +280,17 @@ Nu putem îngheța cockpitul actual drept final, pentru că auditul live a confi
 ### 4.4 Partner și compliance ca adevăr final
 
 Nu putem spune încă:
-- partner flow este definitiv
 - compliance flow este definitiv
 
-Putem spune doar:
+Putem spune:
+- partner flow principal este confirmat live:
+  - onboarding partner
+  - portofoliu
+  - import client
+  - drilldown în workspace client
+- compliance flow încă nu este definitiv
 - structura corectă este definită
-- runtime-ul actual este parțial
+- runtime-ul actual rămâne parțial pe suprafețele secundare
 - pentru `specialist_handoff`, current runtime truth este acum `automatic return to cockpit` pe familia canonică înghețată:
   - `GDPR-013`
   - `GDPR-014`

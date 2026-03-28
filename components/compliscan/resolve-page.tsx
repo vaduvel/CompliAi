@@ -247,7 +247,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               className={[
                 "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "active"
-                  ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
                   : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
               ].join(" ")}
             >
@@ -259,7 +259,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               className={[
                 "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "all"
-                  ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
                   : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
               ].join(" ")}
             >
@@ -304,7 +304,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       className={[
                         "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
                           : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
                       ].join(" ")}
                     >
@@ -325,7 +325,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       className={[
                         "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
                           : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
                       ].join(" ")}
                     >

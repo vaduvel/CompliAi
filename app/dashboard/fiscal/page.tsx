@@ -438,7 +438,7 @@ function SpvCheckTab() {
       </div>
 
       {error && (
-        <Card className="border-red-500/30 bg-red-950/20">
+        <Card className="border-eos-error/30 bg-eos-error-soft">
           <CardContent className="py-3">
             <p className="text-sm text-eos-error">{error}</p>
           </CardContent>
@@ -459,7 +459,7 @@ function SpvCheckTab() {
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-eos-text-muted">SPV:</span>
                 {result.spvRegistered === true && (
-                  <Badge variant="default" className="gap-1 bg-emerald-600/20 text-eos-success">
+                  <Badge variant="default" className="gap-1 bg-eos-success-soft text-eos-success">
                     <CheckCircle2 className="size-3" /> Inregistrat
                   </Badge>
                 )}

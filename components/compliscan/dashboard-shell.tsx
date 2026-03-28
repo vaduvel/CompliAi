@@ -304,8 +304,8 @@ export function DashboardShell({
 
           {/* Dev banner */}
           {process.env.NODE_ENV !== "production" && (
-            <div className="mb-4 flex items-center gap-2 rounded-eos-lg border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-xs text-amber-400/80">
-              <span className="shrink-0 rounded-eos-md bg-amber-500/20 px-1.5 py-0.5 font-bold uppercase tracking-wide text-amber-400">
+            <div className="mb-4 flex items-center gap-2 rounded-eos-lg border border-eos-warning/20 bg-eos-warning/[0.06] px-3 py-2 text-xs text-eos-warning/80">
+              <span className="shrink-0 rounded-eos-md bg-eos-warning/20 px-1.5 py-0.5 font-bold uppercase tracking-wide text-eos-warning">
                 {process.env.NEXT_PUBLIC_APP_ENV ?? "dev"}
               </span>
               <span>Mediu de dezvoltare — datele nu sunt reale.</span>

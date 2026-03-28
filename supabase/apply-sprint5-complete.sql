@@ -65,7 +65,7 @@ begin
     where typname = 'compliscan_role'
       and typnamespace = 'public'::regnamespace
   ) then
-    create type public.compliscan_role as enum ('owner', 'compliance', 'reviewer', 'viewer');
+    create type public.compliscan_role as enum ('owner', 'partner_manager', 'compliance', 'reviewer', 'viewer');
   end if;
 end $$;
 
@@ -283,13 +283,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -310,7 +310,7 @@ to authenticated
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
   and (
     uploaded_by is null
@@ -326,13 +326,13 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
   and (
     uploaded_by is null
@@ -348,7 +348,7 @@ to authenticated
 using (
   public.current_user_has_org_role(
     org_id,
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -420,7 +420,7 @@ with check (
   bucket_id = 'compliscan-evidence-private'
   and public.current_user_has_org_role(
     public.storage_object_org_id(name),
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -433,14 +433,14 @@ using (
   bucket_id = 'compliscan-evidence-private'
   and public.current_user_has_org_role(
     public.storage_object_org_id(name),
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 )
 with check (
   bucket_id = 'compliscan-evidence-private'
   and public.current_user_has_org_role(
     public.storage_object_org_id(name),
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
@@ -453,7 +453,7 @@ using (
   bucket_id = 'compliscan-evidence-private'
   and public.current_user_has_org_role(
     public.storage_object_org_id(name),
-    array['owner', 'compliance', 'reviewer']::public.compliscan_role[]
+    array['owner', 'partner_manager', 'compliance', 'reviewer']::public.compliscan_role[]
   )
 );
 
