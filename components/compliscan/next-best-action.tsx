@@ -60,7 +60,7 @@ function hasDistinctNextStepCopy(primary: string, secondary: string) {
 }
 
 function remediationModeLabel(mode: CockpitTask["remediationMode"]) {
-  return mode === "rapid" ? "remediere rapida" : "remediere structurala"
+  return mode === "rapid" ? "remediere rapidă" : "remediere structurală"
 }
 
 export function NextBestAction({
@@ -73,10 +73,10 @@ export function NextBestAction({
 }: NextBestActionProps) {
   if (!task) {
     const emptyLabel = !hasEvidence
-      ? "Scaneaza primul document ca sa construim evaluarea initiala si sa putem recomanda urmatorul pas."
+      ? "Scanează primul document ca să construim evaluarea inițială și să recomandăm primul pas concret."
       : activeRiskCount === 0
-        ? "Nu exista probleme active. Rulezi un scan nou doar cand se schimba documentele, politicile sau fluxurile."
-        : "Mai exista semnale active. Revizuieste alertele si inchide urmatorul risc cu impact real."
+        ? "Nu există probleme active. Rulează un scan nou doar când apar schimbări în documente, politici sau fluxuri."
+        : "Mai există semnale active. Revizuiește alertele și închide riscul cu cel mai mare impact."
 
     const ctaHref = !hasEvidence
       ? dashboardRoutes.scan
@@ -90,20 +90,20 @@ export function NextBestAction({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <CardTitle className="text-lg text-eos-text">Ce faci acum</CardTitle>
             <Badge className="border-eos-border bg-eos-surface-variant text-eos-text-muted">
-              {!hasEvidence ? "fara baseline" : activeRiskCount === 0 ? "fara risc activ" : "in asteptare"}
+              {!hasEvidence ? "fără baseline" : activeRiskCount === 0 ? "fără risc activ" : "în așteptare"}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="pt-4">
           <EmptyState
-            title={!hasEvidence ? "Incepi din Scanari" : activeRiskCount === 0 ? "Nu exista lucru urgent" : "Nu exista pas recomandat unic"}
+            title={!hasEvidence ? "Pornești din Scanare" : activeRiskCount === 0 ? "Nicio problemă urgentă" : "Niciun pas unic recomandat"}
             label={emptyLabel}
             className="border-eos-border bg-eos-surface-variant py-8"
           />
           {ctaHref && (
             <Button asChild variant="outline" size="sm" className="mt-3 w-full gap-2">
               <Link href={ctaHref}>
-                {!hasEvidence ? "Deschide Scanare" : "Revizuieste alertele"}
+                {!hasEvidence ? "Mergi la Scanare" : "Revizuiește alertele"}
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -120,7 +120,7 @@ export function NextBestAction({
           <div>
             <CardTitle className="text-lg text-eos-text">Ce faci acum</CardTitle>
             <p className="mt-2 text-sm text-eos-text-muted">
-              Urmatorul pas recomandat pentru progresul cu impact real.
+              Următorul pas recomandat pentru progresul cu impact real.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -181,7 +181,7 @@ export function NextBestAction({
         {additionalTasks.length > 0 ? (
           <div className="mt-5 border-t border-eos-border-subtle pt-4 space-y-2">
             <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted mb-3">
-              Urmează în coadă
+              Urmează
             </p>
             {additionalTasks.map((t) => (
               <div

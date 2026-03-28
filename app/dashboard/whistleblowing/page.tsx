@@ -83,8 +83,9 @@ export default function WhistleblowingPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <PageIntro
-        title="Canal sesizări (Whistleblowing)"
-        description="Directiva EU 2019/1937 — obligatorie pentru organizații cu >50 angajați. Gestionează sesizările interne anonim sau nominativ cu termen de răspuns de 3 luni."
+        eyebrow="Sesizări · Directiva UE 2019/1937"
+        title="Canal sesizări"
+        description="Obligatoriu pentru organizații cu peste 50 de angajați. Gestionează sesizările interne anonim sau nominativ — termen de răspuns: 3 luni."
       />
 
       {/* Public link */}

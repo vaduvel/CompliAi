@@ -21,14 +21,7 @@ import {
   SupabaseOperationalStatus,
   ApplicationHealthStatus,
 } from "@/components/compliscan/settings/settings-shared"
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const DRIFT_OVERRIDE_OPTIONS = [
@@ -209,6 +202,7 @@ export function SettingsPageSurface() {
   )
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<string>("workspace")
   const [gdprExporting, setGdprExporting] = useState(false)
   const [gdprDeleting, setGdprDeleting] = useState(false)
   const [gdprRequestingDeletion, setGdprRequestingDeletion] = useState(false)
@@ -382,820 +376,848 @@ export function SettingsPageSurface() {
   )
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow="Setari"
-        title={isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
-        description={
-          isSolo
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Setări</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-white">
+          {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
+        </h1>
+        <p className="mt-1 text-sm text-white/40">
+          {isSolo
             ? "Aici rămân doar organizația, membrii, notificările și drumul către planul de facturare."
-            : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."
-        }
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {isSolo ? "admin firmă" : "operational admin"}
-            </Badge>
-          </>
-        }
-        actions={undefined}
-      />
+            : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."}
+        </p>
+        <div className="mt-3">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+            {isSolo ? "admin firmă" : "operational admin"}
+          </span>
+        </div>
+      </div>
 
-      <Tabs defaultValue="workspace" className="space-y-6">
+      <div className="space-y-6">
+        {/* Tab navigation */}
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
-            Zone Setari
-          </p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/20">Zone Setari</p>
           <div className="overflow-x-auto pb-1">
-            <TabsList className="min-w-max gap-0 border-b border-eos-border text-eos-text-muted">
+            <div className="flex min-w-max gap-0 border-b border-white/[0.06]">
               {visibleTabs.map((tab) => (
-                <TabsTrigger
+                <button
                   key={tab.value}
-                  value={tab.value}
-                  className="min-h-14 min-w-[152px] flex-col items-start whitespace-normal px-4 py-3 text-left data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+                  type="button"
+                  onClick={() => setActiveTab(tab.value)}
+                  className={[
+                    "inline-flex min-h-[56px] min-w-[152px] flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
+                    activeTab === tab.value
+                      ? "border-blue-500 text-white"
+                      : "border-transparent text-white/30 hover:text-white/55",
+                  ].join(" ")}
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
-                  <span className="mt-1 whitespace-normal text-xs font-normal leading-5 text-eos-text-muted">
+                  <span className={`mt-1 whitespace-normal text-xs font-normal leading-5 ${activeTab === tab.value ? "text-white/40" : "text-white/20"}`}>
                     {tab.description}
                   </span>
-                </TabsTrigger>
+                </button>
               ))}
-            </TabsList>
+            </div>
           </div>
         </div>
 
-        <TabsContent value="workspace" className="space-y-6">
-          <SettingsTabIntro
-            title="Workspace"
-            description="Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază."
-          />
+        {/* Tab: Workspace */}
+        {activeTab === "workspace" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white/75">Workspace</h2>
+              <p className="mt-1 text-sm text-white/40">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
+            </div>
 
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader>
-              <CardTitle className="text-xl">Setari workspace</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-sm text-eos-text-muted">Workspace activ</p>
-                <p className="mt-2 text-lg font-semibold">
-                  {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
-                </p>
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <h2 className="text-lg font-semibold text-white/75">Setari workspace</h2>
               </div>
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-sm text-eos-text-muted">Motor OCR</p>
-                <p className="mt-2 text-lg font-semibold">Google Vision API</p>
-              </div>
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-sm text-eos-text-muted">Scor de risc curent</p>
-                <p className="mt-2 text-lg font-semibold">{cockpit.data.summary.score}%</p>
-              </div>
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                <p className="text-sm text-eos-text-muted">Ultimul scan</p>
-                <p className="mt-2 text-lg font-semibold">{cockpit.lastScanLabel}</p>
-              </div>
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 md:col-span-2">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-sm text-eos-text-muted">Baseline validat pentru drift</p>
-                    <p className="mt-2 text-lg font-semibold">
-                      {validatedBaseline
-                        ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
-                        : "Inca nu exista baseline validat"}
-                    </p>
-                    <div className="mt-3">
-                      <Badge variant={validatedBaseline ? "success" : "warning"}>
-                        {validatedBaseline ? "Baseline activ" : "Cere baseline"}
-                      </Badge>
-                    </div>
-                    {!validatedBaseline && (
-                      <p className="mt-1 text-sm text-eos-text-muted">
-                        {activeSnapshot
-                          ? "Poti valida snapshot-ul curent ca reper stabil pentru drift."
-                          : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
-                      </p>
-                    )}
-                  </div>
-                  <ActionCluster
-                    eyebrow="Actiuni"
-                    title="Baseline"
-                    actions={
-                      <>
-                        <Button
-                          variant="secondary"
-                          disabled={cockpit.busy || !activeSnapshot}
-                          size="default"
-                          onClick={() => void cockpitActions.setValidatedBaseline()}
-                        >
-                          Valideaza snapshot-ul curent
-                        </Button>
-                        <Button
-                          variant="outline"
-                          disabled={cockpit.busy || !validatedBaseline}
-                          size="default"
-                          onClick={() => void cockpitActions.clearValidatedBaseline()}
-                        >
-                          Elimina baseline-ul
-                        </Button>
-                      </>
-                    }
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="integrari" className="space-y-6">
-          <SettingsIntegrationsTab
-            repoSyncStatus={repoSyncStatus}
-            supabaseStatus={supabaseStatus}
-            supabaseStatusLoading={supabaseStatusLoading}
-            supabaseStatusError={supabaseStatusError}
-          />
-        </TabsContent>
-
-        <TabsContent value="acces" className="space-y-6">
-          <SettingsTabIntro
-            title="Acces"
-            description="Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare."
-          />
-
-          {canViewClaimStatus ? (
-            <Card className="border-eos-border bg-eos-surface">
-              <CardHeader>
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <CardTitle className="text-xl">Ownership și claim</CardTitle>
-                    <p className="mt-2 text-sm text-eos-text-muted">
-                      Consultantul poate opera firma ca <strong>partner_manager</strong>, dar ownership-ul final
-                      rămâne la client. Aici vezi dacă organizația este deja revendicată și poți pregăti transferul.
+              <div className="px-5 py-5 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-sm text-white/40">Workspace activ</p>
+                    <p className="mt-2 text-lg font-semibold text-white/75">
+                      {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
                     </p>
                   </div>
-                  {claimStatus?.ownership.ownerState === "claimed" ? (
-                    <Badge variant="success">owner revendicat</Badge>
-                  ) : (
-                    <Badge variant="warning">owner placeholder system</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {claimStatusLoading ? (
-                  <OperationalLoadingCard>Incarcam statusul de ownership...</OperationalLoadingCard>
-                ) : claimStatusError ? (
-                  <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
-                    {claimStatusError}
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-sm text-white/40">Motor OCR</p>
+                    <p className="mt-2 text-lg font-semibold text-white/75">Google Vision API</p>
                   </div>
-                ) : claimStatus ? (
-                  <>
-                    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-eos-text">Status curent</p>
-                          {claimStatus.ownership.ownerState === "claimed" ? (
-                            <p className="mt-1 text-sm leading-6 text-eos-text-muted">
-                              Owner-ul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
-                              poate controla membrii, billing-ul și poate elimina consultantul din organizație.
-                            </p>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-sm text-white/40">Scor de risc curent</p>
+                    <p className="mt-2 text-lg font-semibold text-white/75">{cockpit.data.summary.score}%</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-sm text-white/40">Ultimul scan</p>
+                    <p className="mt-2 text-lg font-semibold text-white/75">{cockpit.lastScanLabel}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-2">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="text-sm text-white/40">Baseline validat pentru drift</p>
+                        <p className="mt-2 text-lg font-semibold text-white/75">
+                          {validatedBaseline
+                            ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
+                            : "Inca nu exista baseline validat"}
+                        </p>
+                        <div className="mt-3">
+                          {validatedBaseline ? (
+                            <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">Baseline activ</span>
                           ) : (
-                            <p className="mt-1 text-sm leading-6 text-eos-text-muted">
-                              Organizația nu are încă un owner real. Consultantul operează firma ca{" "}
-                              <strong>partner_manager</strong> până când clientul acceptă claim-ul.
-                            </p>
+                            <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400">Cere baseline</span>
                           )}
                         </div>
-                        {claimStatus.pendingInvite ? (
-                          <Badge variant="outline">claim activ</Badge>
-                        ) : (
-                          <Badge variant="secondary">fără claim activ</Badge>
+                        {!validatedBaseline && (
+                          <p className="mt-1 text-sm text-white/40">
+                            {activeSnapshot
+                              ? "Poti valida snapshot-ul curent ca reper stabil pentru drift."
+                              : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
+                          </p>
                         )}
                       </div>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          disabled={cockpit.busy || !activeSnapshot}
+                          onClick={() => void cockpitActions.setValidatedBaseline()}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Valideaza snapshot-ul curent
+                        </button>
+                        <button
+                          type="button"
+                          disabled={cockpit.busy || !validatedBaseline}
+                          onClick={() => void cockpitActions.clearValidatedBaseline()}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Elimina baseline-ul
+                        </button>
+                      </div>
                     </div>
-
-                    {claimStatus.pendingInvite ? (
-                      <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                        <p className="text-sm font-semibold text-eos-text">
-                          Claim pregătit pentru {claimStatus.pendingInvite.invitedEmail}
-                        </p>
-                        <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                          Expiră la {new Date(claimStatus.pendingInvite.expiresAtISO).toLocaleString("ro-RO")}. Linkul
-                          de mai jos poate fi trimis manual clientului.
-                        </p>
-                        <input
-                          readOnly
-                          value={claimStatus.pendingInvite.claimUrl}
-                          className="mt-3 h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 text-xs text-eos-text outline-none"
-                          aria-label="Link claim ownership"
-                        />
-                      </div>
-                    ) : null}
-
-                    {currentUser?.role === "partner_manager" && claimStatus.ownership.ownerState === "system" ? (
-                      <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-eos-text">Trimite claim ownership</p>
-                            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                              Introdu emailul clientului care trebuie să devină owner. Dacă persoana nu are cont,
-                              își va seta parola direct din linkul de claim.
-                            </p>
-                          </div>
-                          <Badge variant="outline">partner-only</Badge>
-                        </div>
-                        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-                          <input
-                            type="email"
-                            value={claimInviteEmail}
-                            onChange={(event) => setClaimInviteEmail(event.target.value)}
-                            placeholder="owner@client.ro"
-                            aria-label="Email pentru claim ownership"
-                            className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
-                          />
-                          <Button
-                            disabled={creatingClaimInvite || !claimInviteEmail.trim()}
-                            onClick={() => void handleCreateClaimInvite()}
-                          >
-                            Trimite claim
-                          </Button>
-                        </div>
-                      </div>
-                    ) : null}
-                  </>
-                ) : null}
-              </CardContent>
-            </Card>
-          ) : null}
-
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader>
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <CardTitle className="text-xl">Membri si roluri</CardTitle>
-                  <p className="mt-2 text-sm text-eos-text-muted">
-                    Owner-ul poate ajusta rolurile si poate elimina consultantul. Compliance si partner manager vad lista
-                    pentru audit si separarea responsabilitatilor.
-                  </p>
+                  </div>
                 </div>
-                {currentUser?.role && (
-                  <Badge variant="outline">
-                    Rolul tau: {formatMemberRole(currentUser.role)}
-                  </Badge>
-                )}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {currentUser?.role === "owner" ? (
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Integrari */}
+        {activeTab === "integrari" && (
+          <div className="space-y-6">
+            <SettingsIntegrationsTab
+              repoSyncStatus={repoSyncStatus}
+              supabaseStatus={supabaseStatus}
+              supabaseStatusLoading={supabaseStatusLoading}
+              supabaseStatusError={supabaseStatusError}
+            />
+          </div>
+        )}
+
+        {/* Tab: Acces */}
+        {activeTab === "acces" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white/75">Acces</h2>
+              <p className="mt-1 text-sm text-white/40">Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare.</p>
+            </div>
+
+            {canViewClaimStatus ? (
+              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+                <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-eos-text">
-                        Adauga utilizator existent din workspace
-                      </p>
-                      <p className="mt-1 text-xs leading-6 text-eos-text-muted">
-                        Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
+                      <h2 className="text-lg font-semibold text-white/75">Ownership și claim</h2>
+                      <p className="mt-2 text-sm text-white/40">
+                        Consultantul poate opera firma ca <strong>partner_manager</strong>, dar ownership-ul final
+                        rămâne la client. Aici vezi dacă organizația este deja revendicată și poți pregăti transferul.
                       </p>
                     </div>
-                    <Badge variant="outline">owner-only</Badge>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
-                    <input
-                      type="email"
-                      value={newMemberEmail}
-                      onChange={(event) => setNewMemberEmail(event.target.value)}
-                      placeholder="coleg@companie.ro"
-                      aria-label="Email utilizator nou"
-                      className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
-                    />
-                    <select
-                      className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
-                      value={newMemberRole}
-                      aria-label="Rol utilizator nou"
-                      onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
-                    >
-                      {MEMBER_ROLE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <Button
-                      size="default"
-                      disabled={creatingMember || !newMemberEmail.trim()}
-                      onClick={() => void handleAddMember()}
-                    >
-                      Adauga membru
-                    </Button>
+                    {claimStatus?.ownership.ownerState === "claimed" ? (
+                      <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">owner revendicat</span>
+                    ) : (
+                      <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400">owner placeholder system</span>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
-                  Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
-                </div>
-              )}
-
-              {membersLoading ? (
-                <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
-              ) : membersError ? (
-                <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
-                  {membersError}
-                </div>
-              ) : membersData?.members.length ? (
-                <div className="space-y-3">
-                  {membersData.members.map((member) => {
-                    const isSelf = member.membershipId === currentUser?.membershipId
-                    const canManageRoles = currentUser?.role === "owner"
-                    const canRemoveConsultant =
-                      currentUser?.role === "owner" &&
-                      !isSelf &&
-                      member.role === "partner_manager"
-
-                    return (
-                      <div
-                        key={member.membershipId}
-                        className="grid gap-4 rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-eos-text">
-                            {member.email}
-                          </p>
-                          <p className="mt-1 text-xs text-eos-text-muted">
-                            Adaugat pe {new Date(member.createdAtISO).toLocaleString("ro-RO")}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">
-                            {formatMemberRole(member.role)}
-                          </Badge>
-                          {isSelf && (
-                            <Badge variant="secondary">
-                              Tu
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-start gap-2 lg:justify-end">
-                          {canManageRoles ? (
-                            <>
-                              <select
-                                className="h-9 min-w-[180px] rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                                value={member.role}
-                                aria-label={`Rol pentru ${member.email}`}
-                                disabled={isSelf || updatingMembershipId === member.membershipId}
-                                onChange={(event) =>
-                                  void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
-                                }
-                              >
-                                {MEMBER_ROLE_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                              {canRemoveConsultant ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled={removingMembershipId === member.membershipId}
-                                  onClick={() => void handleRemoveMember(member.membershipId, member.email)}
-                                  className="gap-1.5"
-                                >
-                                  <Trash2 className="size-3.5" strokeWidth={2} />
-                                  Elimină
-                                </Button>
-                              ) : null}
-                            </>
+                <div className="px-5 py-5 space-y-4">
+                  {claimStatusLoading ? (
+                    <OperationalLoadingCard>Incarcam statusul de ownership...</OperationalLoadingCard>
+                  ) : claimStatusError ? (
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-400">
+                      {claimStatusError}
+                    </div>
+                  ) : claimStatus ? (
+                    <>
+                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-white/75">Status curent</p>
+                            {claimStatus.ownership.ownerState === "claimed" ? (
+                              <p className="mt-1 text-sm leading-6 text-white/40">
+                                Owner-ul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
+                                poate controla membrii, billing-ul și poate elimina consultantul din organizație.
+                              </p>
+                            ) : (
+                              <p className="mt-1 text-sm leading-6 text-white/40">
+                                Organizația nu are încă un owner real. Consultantul operează firma ca{" "}
+                                <strong>partner_manager</strong> până când clientul acceptă claim-ul.
+                              </p>
+                            )}
+                          </div>
+                          {claimStatus.pendingInvite ? (
+                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">claim activ</span>
                           ) : (
-                            <p className="text-xs text-eos-text-muted">
-                              Doar owner-ul poate schimba rolurile.
-                            </p>
+                            <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-xs font-medium text-white/35">fără claim activ</span>
                           )}
                         </div>
                       </div>
-                    )
-                  })}
+
+                      {claimStatus.pendingInvite ? (
+                        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                          <p className="text-sm font-semibold text-white/75">
+                            Claim pregătit pentru {claimStatus.pendingInvite.invitedEmail}
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-white/40">
+                            Expiră la {new Date(claimStatus.pendingInvite.expiresAtISO).toLocaleString("ro-RO")}. Linkul
+                            de mai jos poate fi trimis manual clientului.
+                          </p>
+                          <input
+                            readOnly
+                            value={claimStatus.pendingInvite.claimUrl}
+                            className="mt-3 h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-xs text-white outline-none"
+                            aria-label="Link claim ownership"
+                          />
+                        </div>
+                      ) : null}
+
+                      {currentUser?.role === "partner_manager" && claimStatus.ownership.ownerState === "system" ? (
+                        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                          <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-white/75">Trimite claim ownership</p>
+                              <p className="mt-1 text-xs leading-5 text-white/40">
+                                Introdu emailul clientului care trebuie să devină owner. Dacă persoana nu are cont,
+                                își va seta parola direct din linkul de claim.
+                              </p>
+                            </div>
+                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">partner-only</span>
+                          </div>
+                          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                            <input
+                              type="email"
+                              value={claimInviteEmail}
+                              onChange={(event) => setClaimInviteEmail(event.target.value)}
+                              placeholder="owner@client.ro"
+                              aria-label="Email pentru claim ownership"
+                              className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                            />
+                            <button
+                              type="button"
+                              disabled={creatingClaimInvite || !claimInviteEmail.trim()}
+                              onClick={() => void handleCreateClaimInvite()}
+                              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Trimite claim
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
                 </div>
-              ) : (
-                <EmptyState
-                  title="Nu exista membri suplimentari"
-                  label="Organizatia curenta are doar utilizatorii deja inregistrati in workspace."
-                  className="rounded-eos-md"
-                />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </div>
+            ) : null}
 
-        <TabsContent value="operational" className="space-y-6">
-          <OrgKnowledgePanelLazy />
-          <SettingsOperationalTab
-            currentUserResolved={currentUserResolved}
-            canViewReleaseReadiness={canViewReleaseReadiness}
-            appHealth={appHealth}
-            appHealthLoading={appHealthLoading}
-            appHealthError={appHealthError}
-            releaseReadiness={releaseReadiness}
-            releaseReadinessLoading={releaseReadinessLoading}
-            releaseReadinessError={releaseReadinessError}
-          />
-        </TabsContent>
-
-        <TabsContent value="notificari" className="space-y-6">
-          <SettingsTabIntro
-            title="Notificari"
-            description="Configurezi canalele de alertare proactiva: email si webhook la evenimente de drift, task expirat sau alerta critica."
-          />
-
-          {alertPrefsLoading ? (
-            <OperationalLoadingCard>Incarcam preferintele de notificare...</OperationalLoadingCard>
-          ) : (
-            <div className="space-y-4">
-              {/* ── Email ─────────────────────────────────────────────────── */}
-              <Card className="border-eos-border bg-eos-surface">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Bell className="size-4 text-eos-text-muted" strokeWidth={1.8} />
-                    <CardTitle className="text-base">Email</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="size-4 rounded border-eos-border accent-eos-primary"
-                      checked={alertPrefs?.emailEnabled ?? false}
-                      onChange={(e) =>
-                        setAlertPrefs((p) => p ? { ...p, emailEnabled: e.target.checked } : p)
-                      }
-                    />
-                    <span className="text-sm text-eos-text">Activează notificari email</span>
-                  </label>
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-eos-text-muted">
-                      Adresa email destinatar
-                    </label>
-                    <input
-                      type="email"
-                      className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:opacity-50"
-                      placeholder="alerte@companie.ro"
-                      value={alertPrefs?.emailAddress ?? ""}
-                      disabled={!alertPrefs?.emailEnabled}
-                      onChange={(e) =>
-                        setAlertPrefs((p) => p ? { ...p, emailAddress: e.target.value } : p)
-                      }
-                    />
-                  </div>
-                  {/* ── Digest săptămânal (Sprint 13) ──────────────────── */}
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="size-4 rounded border-eos-border accent-eos-primary"
-                      checked={alertPrefs?.weeklyDigestEnabled ?? true}
-                      disabled={!alertPrefs?.emailEnabled}
-                      onChange={(e) =>
-                        setAlertPrefs((p) => p ? { ...p, weeklyDigestEnabled: e.target.checked } : p)
-                      }
-                    />
-                    <div>
-                      <span className="text-sm text-eos-text">Primesc digest săptămânal</span>
-                      <p className="text-xs text-eos-text-muted">
-                        Email automat luni 08:00 — scor, alerte, deadline-uri iminente.
-                      </p>
-                    </div>
-                  </label>
-                </CardContent>
-              </Card>
-
-              {/* ── Webhook ───────────────────────────────────────────────── */}
-              <Card className="border-eos-border bg-eos-surface">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Webhook className="size-4 text-eos-text-muted" strokeWidth={1.8} />
-                    <CardTitle className="text-base">Webhook</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="size-4 rounded border-eos-border accent-eos-primary"
-                      checked={alertPrefs?.webhookEnabled ?? false}
-                      onChange={(e) =>
-                        setAlertPrefs((p) => p ? { ...p, webhookEnabled: e.target.checked } : p)
-                      }
-                    />
-                    <span className="text-sm text-eos-text">Activează webhook la evenimente</span>
-                  </label>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-eos-text-muted">
-                      URL webhook (POST JSON)
-                    </label>
-                    <input
-                      type="url"
-                      className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none disabled:opacity-50"
-                      placeholder="https://hooks.slack.com/..."
-                      value={alertPrefs?.webhookUrl ?? ""}
-                      disabled={!alertPrefs?.webhookEnabled}
-                      onChange={(e) =>
-                        setAlertPrefs((p) => p ? { ...p, webhookUrl: e.target.value } : p)
-                      }
-                    />
-                    <p className="mt-1 text-xs text-eos-text-tertiary">
-                      Compatibil cu Slack, Teams, Make, Zapier sau orice endpoint HTTP.
+                    <h2 className="text-lg font-semibold text-white/75">Membri si roluri</h2>
+                    <p className="mt-2 text-sm text-white/40">
+                      Owner-ul poate ajusta rolurile si poate elimina consultantul. Compliance si partner manager vad lista
+                      pentru audit si separarea responsabilitatilor.
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                  {currentUser?.role && (
+                    <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+                      Rolul tau: {formatMemberRole(currentUser.role)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                {currentUser?.role === "owner" ? (
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-white/75">
+                          Adauga utilizator existent din workspace
+                        </p>
+                        <p className="mt-1 text-xs leading-6 text-white/40">
+                          Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">owner-only</span>
+                    </div>
 
-              {/* ── Events ────────────────────────────────────────────────── */}
-              <Card className="border-eos-border bg-eos-surface">
-                <CardHeader>
-                  <CardTitle className="text-base">Evenimente monitorizate</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {(
-                    [
-                      { id: "drift.detected" as AlertEventType, label: "Drift detectat", hint: "Schimbare fata de baseline validat" },
-                      { id: "task.overdue" as AlertEventType, label: "Task expirat", hint: "Task de remediere cu termen depasit" },
-                      { id: "alert.critical" as AlertEventType, label: "Alerta critica", hint: "Finding de severitate ridicata sau critica" },
-                      { id: "score.dropped" as AlertEventType, label: "Scor scăzut", hint: "Scorul de conformitate a scăzut față de ziua anterioară" },
-                    ] as const
-                  ).map((ev) => (
-                    <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+                    <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
+                      <input
+                        type="email"
+                        value={newMemberEmail}
+                        onChange={(event) => setNewMemberEmail(event.target.value)}
+                        placeholder="coleg@companie.ro"
+                        aria-label="Email utilizator nou"
+                        className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                      />
+                      <select
+                        className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+                        value={newMemberRole}
+                        aria-label="Rol utilizator nou"
+                        onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
+                      >
+                        {MEMBER_ROLE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={creatingMember || !newMemberEmail.trim()}
+                        onClick={() => void handleAddMember()}
+                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Adauga membru
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/40">
+                    Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
+                  </div>
+                )}
+
+                {membersLoading ? (
+                  <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
+                ) : membersError ? (
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-400">
+                    {membersError}
+                  </div>
+                ) : membersData?.members.length ? (
+                  <div className="space-y-3">
+                    {membersData.members.map((member) => {
+                      const isSelf = member.membershipId === currentUser?.membershipId
+                      const canManageRoles = currentUser?.role === "owner"
+                      const canRemoveConsultant =
+                        currentUser?.role === "owner" &&
+                        !isSelf &&
+                        member.role === "partner_manager"
+
+                      return (
+                        <div
+                          key={member.membershipId}
+                          className="grid gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-white/75">
+                              {member.email}
+                            </p>
+                            <p className="mt-1 text-xs text-white/40">
+                              Adaugat pe {new Date(member.createdAtISO).toLocaleString("ro-RO")}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+                              {formatMemberRole(member.role)}
+                            </span>
+                            {isSelf && (
+                              <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-xs font-medium text-white/35">
+                                Tu
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-start gap-2 lg:justify-end">
+                            {canManageRoles ? (
+                              <>
+                                <select
+                                  className="h-9 min-w-[180px] rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-60 focus:border-blue-500/50 transition-all"
+                                  value={member.role}
+                                  aria-label={`Rol pentru ${member.email}`}
+                                  disabled={isSelf || updatingMembershipId === member.membershipId}
+                                  onChange={(event) =>
+                                    void handleRoleChange(member.membershipId, event.target.value as OrganizationMember["role"])
+                                  }
+                                >
+                                  {MEMBER_ROLE_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                {canRemoveConsultant ? (
+                                  <button
+                                    type="button"
+                                    disabled={removingMembershipId === member.membershipId}
+                                    onClick={() => void handleRemoveMember(member.membershipId, member.email)}
+                                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white/40 transition hover:text-white/60 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="size-3.5" strokeWidth={2} />
+                                    Elimină
+                                  </button>
+                                ) : null}
+                              </>
+                            ) : (
+                              <p className="text-xs text-white/40">
+                                Doar owner-ul poate schimba rolurile.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-10 text-center">
+                    <p className="text-sm font-medium text-white/35">Nu exista membri suplimentari</p>
+                    <p className="mt-1 text-xs text-white/20">Organizatia curenta are doar utilizatorii deja inregistrati in workspace.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Operational */}
+        {activeTab === "operational" && (
+          <div className="space-y-6">
+            <OrgKnowledgePanelLazy />
+            <SettingsOperationalTab
+              currentUserResolved={currentUserResolved}
+              canViewReleaseReadiness={canViewReleaseReadiness}
+              appHealth={appHealth}
+              appHealthLoading={appHealthLoading}
+              appHealthError={appHealthError}
+              releaseReadiness={releaseReadiness}
+              releaseReadinessLoading={releaseReadinessLoading}
+              releaseReadinessError={releaseReadinessError}
+            />
+          </div>
+        )}
+
+        {/* Tab: Notificari */}
+        {activeTab === "notificari" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white/75">Notificari</h2>
+              <p className="mt-1 text-sm text-white/40">Configurezi canalele de alertare proactiva: email si webhook la evenimente de drift, task expirat sau alerta critica.</p>
+            </div>
+
+            {alertPrefsLoading ? (
+              <OperationalLoadingCard>Incarcam preferintele de notificare...</OperationalLoadingCard>
+            ) : (
+              <div className="space-y-4">
+                {/* ── Email ─────────────────────────────────────────────────── */}
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                    <div className="flex items-center gap-2">
+                      <Bell className="size-4 text-white/30" strokeWidth={1.8} />
+                      <h2 className="text-lg font-semibold text-white/75">Email</h2>
+                    </div>
+                  </div>
+                  <div className="px-5 py-5 space-y-4">
+                    <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="checkbox"
-                        className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
-                        checked={alertPrefs?.events[ev.id] ?? true}
+                        className="size-4 accent-blue-500"
+                        checked={alertPrefs?.emailEnabled ?? false}
                         onChange={(e) =>
-                          setAlertPrefs((p) =>
-                            p ? { ...p, events: { ...p.events, [ev.id]: e.target.checked } } : p
-                          )
+                          setAlertPrefs((p) => p ? { ...p, emailEnabled: e.target.checked } : p)
+                        }
+                      />
+                      <span className="text-sm text-white/75">Activează notificari email</span>
+                    </label>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-white/40">
+                        Adresa email destinatar
+                      </label>
+                      <input
+                        type="email"
+                        className="h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                        placeholder="alerte@companie.ro"
+                        value={alertPrefs?.emailAddress ?? ""}
+                        disabled={!alertPrefs?.emailEnabled}
+                        onChange={(e) =>
+                          setAlertPrefs((p) => p ? { ...p, emailAddress: e.target.value } : p)
+                        }
+                      />
+                    </div>
+                    {/* ── Digest săptămânal (Sprint 13) ──────────────────── */}
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-blue-500"
+                        checked={alertPrefs?.weeklyDigestEnabled ?? true}
+                        disabled={!alertPrefs?.emailEnabled}
+                        onChange={(e) =>
+                          setAlertPrefs((p) => p ? { ...p, weeklyDigestEnabled: e.target.checked } : p)
                         }
                       />
                       <div>
-                        <p className="text-sm font-medium text-eos-text">{ev.label}</p>
-                        <p className="text-xs text-eos-text-muted">{ev.hint}</p>
+                        <span className="text-sm text-white/75">Primesc digest săptămânal</span>
+                        <p className="text-xs text-white/40">
+                          Email automat luni 08:00 — scor, alerte, deadline-uri iminente.
+                        </p>
                       </div>
                     </label>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Button
-                disabled={alertPrefsSaving || !alertPrefs}
-                onClick={() => void handleSaveAlertPrefs()}
-                className="gap-2"
-              >
-                {alertPrefsSaving ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Se salvează…
-                  </>
-                ) : (
-                  "Salvează preferintele de notificare"
-                )}
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="facturare" className="space-y-6">
-          <SettingsBillingEmbed />
-        </TabsContent>
-
-        <TabsContent value="avansat" className="space-y-6">
-          <SettingsTabIntro
-            title="Avansat"
-            description="Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces."
-          />
-
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader>
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <CardTitle className="text-xl">Drift severity policy</CardTitle>
-                  <p className="mt-2 text-sm text-eos-text-muted">
-                    Schimbi doar severitatea per tip de schimbare. Impactul, dovada ceruta si actiunea recomandata raman in politica de drift. Politica implicita ramane activa pentru tot ce nu configurezi.
-                  </p>
-                </div>
-                <Button
-                  variant="secondary"
-                  disabled={cockpit.busy}
-                  size="default"
-                  onClick={() => void cockpitActions.updateDriftSeverityOverrides(driftOverrides)}
-                >
-                  Salvează severitatea drift
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              {DRIFT_OVERRIDE_FIELDS.map((item) => (
-                <label
-                  key={item.change}
-                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
-                >
-                  <span className="text-sm font-medium text-eos-text">{item.label}</span>
-                  <select
-                    className="mt-3 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
-                    value={driftOverrides[item.change] ?? "default"}
-                    onChange={(event) =>
-                      setDriftOverrides((current) => ({
-                        ...current,
-                        [item.change]: event.target.value as (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"],
-                      }))
-                    }
-                  >
-                    {DRIFT_OVERRIDE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="border-eos-error-border bg-eos-surface">
-            <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-xl text-eos-error">Reset workspace local</CardTitle>
-                <Badge variant="destructive">Actiune destructiva</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
-                Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
-                task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
-              </div>
-
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-medium text-eos-text">
-                    Vrei sa vezi exact experienta unui utilizator nou?
-                  </p>
-                  <p className="mt-1 text-sm text-eos-text-muted">
-                    Dupa reset, dashboard-ul revine la starea initiala de onboarding.
-                  </p>
-                </div>
-
-                <Button
-                  variant="destructive"
-                  disabled={cockpit.busy}
-                  size="lg"
-                  className="gap-2"
-                  onClick={() => {
-                    if (
-                      !window.confirm(
-                        "Resetezi complet workspace-ul curent? Toate scanarile si task-urile salvate vor fi sterse."
-                      )
-                    ) {
-                      return
-                    }
-
-                    void cockpitActions.resetWorkspaceState()
-                  }}
-                >
-                  <Trash2 className="size-5" strokeWidth={2} />
-                  Sterge scanarile si reseteaza workspace-ul
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ── GDPR Rights ──────────────────────────────────────────────── */}
-          <div className="border-t border-eos-border-subtle pt-6">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">GDPR · Drepturile tale</p>
-            <p className="mt-1 text-sm text-eos-text-muted">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
-          </div>
-
-          {/* Art. 20 — Export date */}
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader>
-              <CardTitle className="text-xl">Exportă datele personale</CardTitle>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                GDPR Art. 20 — Dreptul la portabilitatea datelor. Descarcă toate datele tale într-un fișier JSON structurat.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <p className="text-sm text-eos-text-muted">
-                  Include: profil, findings, scanări, documente generate, furnizori, incidente, alerte și activitate.
-                </p>
-                <Button
-                  variant="outline"
-                  disabled={gdprExporting}
-                  className="gap-2"
-                  onClick={() => void handleGdprExport()}
-                >
-                  {gdprExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                  Descarcă datele mele
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Art. 17 — Ștergere date conformitate */}
-          <Card className="border-eos-error-border bg-eos-surface">
-            <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-xl text-eos-error">Șterge datele de conformitate</CardTitle>
-                <Badge variant="destructive">GDPR Art. 17</Badge>
-              </div>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Dreptul la ștergere — resetează complet toate datele de conformitate din workspace. Contul rămâne activ.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-muted">
-                Această acțiune șterge permanent: scanări, findings, documente generate, alerte, sisteme AI înregistrate și toată activitatea. Nu poate fi anulată.
-              </div>
-              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <p className="text-sm font-medium text-eos-text">
-                  Sesiunea și contul rămân active după ștergere.
-                </p>
-                <Button
-                  variant="destructive"
-                  disabled={gdprDeleting || currentUser?.role !== "owner"}
-                  className="gap-2"
-                  onClick={() => void handleGdprDeleteData()}
-                >
-                  {gdprDeleting ? <Loader2 className="size-4 animate-spin" /> : <ShieldX className="size-4" />}
-                  Șterge toate datele
-                </Button>
-              </div>
-              {currentUser?.role !== "owner" && (
-                <p className="mt-2 text-xs text-eos-text-muted">Doar administratorul poate șterge datele.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Art. 17 — Solicită ștergere cont */}
-          <Card className="border-eos-error-border bg-eos-surface">
-            <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <CardTitle className="text-xl text-eos-error">Solicită ștergerea contului</CardTitle>
-                <Badge variant="destructive">GDPR Art. 17</Badge>
-              </div>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!gdprShowDeletionForm ? (
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <p className="text-sm text-eos-text-muted">
-                    Vei primi un email de confirmare când cererea este procesată.
-                  </p>
-                  <Button
-                    variant="destructive"
-                    disabled={currentUser?.role !== "owner"}
-                    className="gap-2"
-                    onClick={() => setGdprShowDeletionForm(true)}
-                  >
-                    <MailWarning className="size-4" />
-                    Solicită ștergerea contului
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-eos-text">
-                    Motivul ștergerii (opțional)
-                  </label>
-                  <textarea
-                    className="h-20 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
-                    placeholder="Spune-ne de ce dorești ștergerea contului..."
-                    value={gdprDeletionReason}
-                    onChange={(e) => setGdprDeletionReason(e.target.value)}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setGdprShowDeletionForm(false)
-                        setGdprDeletionReason("")
-                      }}
-                    >
-                      Anulează
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      disabled={gdprRequestingDeletion}
-                      className="gap-2"
-                      onClick={() => void handleGdprRequestDeletion()}
-                    >
-                      {gdprRequestingDeletion ? <Loader2 className="size-4 animate-spin" /> : <MailWarning className="size-4" />}
-                      Confirmă solicitarea
-                    </Button>
                   </div>
                 </div>
-              )}
-              {currentUser?.role !== "owner" && (
-                <p className="text-xs text-eos-text-muted">Doar administratorul poate solicita ștergerea contului.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+                {/* ── Webhook ───────────────────────────────────────────────── */}
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                    <div className="flex items-center gap-2">
+                      <Webhook className="size-4 text-white/30" strokeWidth={1.8} />
+                      <h2 className="text-lg font-semibold text-white/75">Webhook</h2>
+                    </div>
+                  </div>
+                  <div className="px-5 py-5 space-y-4">
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-blue-500"
+                        checked={alertPrefs?.webhookEnabled ?? false}
+                        onChange={(e) =>
+                          setAlertPrefs((p) => p ? { ...p, webhookEnabled: e.target.checked } : p)
+                        }
+                      />
+                      <span className="text-sm text-white/75">Activează webhook la evenimente</span>
+                    </label>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-white/40">
+                        URL webhook (POST JSON)
+                      </label>
+                      <input
+                        type="url"
+                        className="h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                        placeholder="https://hooks.slack.com/..."
+                        value={alertPrefs?.webhookUrl ?? ""}
+                        disabled={!alertPrefs?.webhookEnabled}
+                        onChange={(e) =>
+                          setAlertPrefs((p) => p ? { ...p, webhookUrl: e.target.value } : p)
+                        }
+                      />
+                      <p className="mt-1 text-xs text-white/25">
+                        Compatibil cu Slack, Teams, Make, Zapier sau orice endpoint HTTP.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Events ────────────────────────────────────────────────── */}
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                    <h2 className="text-lg font-semibold text-white/75">Evenimente monitorizate</h2>
+                  </div>
+                  <div className="px-5 py-5 space-y-3">
+                    {(
+                      [
+                        { id: "drift.detected" as AlertEventType, label: "Drift detectat", hint: "Schimbare fata de baseline validat" },
+                        { id: "task.overdue" as AlertEventType, label: "Task expirat", hint: "Task de remediere cu termen depasit" },
+                        { id: "alert.critical" as AlertEventType, label: "Alerta critica", hint: "Finding de severitate ridicata sau critica" },
+                        { id: "score.dropped" as AlertEventType, label: "Scor scăzut", hint: "Scorul de conformitate a scăzut față de ziua anterioară" },
+                      ] as const
+                    ).map((ev) => (
+                      <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 size-4 accent-blue-500"
+                          checked={alertPrefs?.events[ev.id] ?? true}
+                          onChange={(e) =>
+                            setAlertPrefs((p) =>
+                              p ? { ...p, events: { ...p.events, [ev.id]: e.target.checked } } : p
+                            )
+                          }
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-white/75">{ev.label}</p>
+                          <p className="text-xs text-white/40">{ev.hint}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={alertPrefsSaving || !alertPrefs}
+                  onClick={() => void handleSaveAlertPrefs()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {alertPrefsSaving ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Se salvează…
+                    </>
+                  ) : (
+                    "Salvează preferintele de notificare"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Facturare */}
+        {activeTab === "facturare" && (
+          <div className="space-y-6">
+            <SettingsBillingEmbed />
+          </div>
+        )}
+
+        {/* Tab: Avansat */}
+        {activeTab === "avansat" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white/75">Avansat</h2>
+              <p className="mt-1 text-sm text-white/40">Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces.</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white/75">Drift severity policy</h2>
+                    <p className="mt-2 text-sm text-white/40">
+                      Schimbi doar severitatea per tip de schimbare. Impactul, dovada ceruta si actiunea recomandata raman in politica de drift. Politica implicita ramane activa pentru tot ce nu configurezi.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={cockpit.busy}
+                    onClick={() => void cockpitActions.updateDriftSeverityOverrides(driftOverrides)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Salvează severitatea drift
+                  </button>
+                </div>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {DRIFT_OVERRIDE_FIELDS.map((item) => (
+                    <label
+                      key={item.change}
+                      className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4"
+                    >
+                      <span className="text-sm font-medium text-white/75">{item.label}</span>
+                      <select
+                        className="mt-3 h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+                        value={driftOverrides[item.change] ?? "default"}
+                        onChange={(event) =>
+                          setDriftOverrides((current) => ({
+                            ...current,
+                            [item.change]: event.target.value as (typeof DRIFT_OVERRIDE_OPTIONS)[number]["value"],
+                          }))
+                        }
+                      >
+                        {DRIFT_OVERRIDE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold text-red-400">Reset workspace local</h2>
+                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">Actiune destructiva</span>
+                </div>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-white/40">
+                  Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
+                  task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
+                </div>
+
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/75">
+                      Vrei sa vezi exact experienta unui utilizator nou?
+                    </p>
+                    <p className="mt-1 text-sm text-white/40">
+                      Dupa reset, dashboard-ul revine la starea initiala de onboarding.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={cockpit.busy}
+                    className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          "Resetezi complet workspace-ul curent? Toate scanarile si task-urile salvate vor fi sterse."
+                        )
+                      ) {
+                        return
+                      }
+
+                      void cockpitActions.resetWorkspaceState()
+                    }}
+                  >
+                    <Trash2 className="size-5" strokeWidth={2} />
+                    Sterge scanarile si reseteaza workspace-ul
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── GDPR Rights ──────────────────────────────────────────────── */}
+            <div className="border-t border-white/[0.05] pt-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/40">GDPR · Drepturile tale</p>
+              <p className="mt-1 text-sm text-white/40">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
+            </div>
+
+            {/* Art. 20 — Export date */}
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <h2 className="text-lg font-semibold text-white/75">Exportă datele personale</h2>
+                <p className="mt-1 text-sm text-white/40">
+                  GDPR Art. 20 — Dreptul la portabilitatea datelor. Descarcă toate datele tale într-un fișier JSON structurat.
+                </p>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm text-white/40">
+                    Include: profil, findings, scanări, documente generate, furnizori, incidente, alerte și activitate.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={gdprExporting}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => void handleGdprExport()}
+                  >
+                    {gdprExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                    Descarcă datele mele
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Art. 17 — Ștergere date conformitate */}
+            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold text-red-400">Șterge datele de conformitate</h2>
+                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">GDPR Art. 17</span>
+                </div>
+                <p className="mt-1 text-sm text-white/40">
+                  Dreptul la ștergere — resetează complet toate datele de conformitate din workspace. Contul rămâne activ.
+                </p>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-white/40">
+                  Această acțiune șterge permanent: scanări, findings, documente generate, alerte, sisteme AI înregistrate și toată activitatea. Nu poate fi anulată.
+                </div>
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm font-medium text-white/75">
+                    Sesiunea și contul rămân active după ștergere.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={gdprDeleting || currentUser?.role !== "owner"}
+                    className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => void handleGdprDeleteData()}
+                  >
+                    {gdprDeleting ? <Loader2 className="size-4 animate-spin" /> : <ShieldX className="size-4" />}
+                    Șterge toate datele
+                  </button>
+                </div>
+                {currentUser?.role !== "owner" && (
+                  <p className="mt-2 text-xs text-white/40">Doar administratorul poate șterge datele.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Art. 17 — Solicită ștergere cont */}
+            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
+              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-lg font-semibold text-red-400">Solicită ștergerea contului</h2>
+                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">GDPR Art. 17</span>
+                </div>
+                <p className="mt-1 text-sm text-white/40">
+                  Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
+                </p>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                {!gdprShowDeletionForm ? (
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <p className="text-sm text-white/40">
+                      Vei primi un email de confirmare când cererea este procesată.
+                    </p>
+                    <button
+                      type="button"
+                      disabled={currentUser?.role !== "owner"}
+                      className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setGdprShowDeletionForm(true)}
+                    >
+                      <MailWarning className="size-4" />
+                      Solicită ștergerea contului
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-white/75">
+                      Motivul ștergerii (opțional)
+                    </label>
+                    <textarea
+                      className="h-20 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                      placeholder="Spune-ne de ce dorești ștergerea contului..."
+                      value={gdprDeletionReason}
+                      onChange={(e) => setGdprDeletionReason(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white/40 transition hover:text-white/60 disabled:opacity-50"
+                        onClick={() => {
+                          setGdprShowDeletionForm(false)
+                          setGdprDeletionReason("")
+                        }}
+                      >
+                        Anulează
+                      </button>
+                      <button
+                        type="button"
+                        disabled={gdprRequestingDeletion}
+                        className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => void handleGdprRequestDeletion()}
+                      >
+                        {gdprRequestingDeletion ? <Loader2 className="size-4 animate-spin" /> : <MailWarning className="size-4" />}
+                        Confirmă solicitarea
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {currentUser?.role !== "owner" && (
+                  <p className="text-xs text-white/40">Doar administratorul poate solicita ștergerea contului.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 

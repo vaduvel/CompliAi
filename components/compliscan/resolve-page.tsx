@@ -9,11 +9,9 @@ import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { Badge } from "@/components/evidence-os/Badge"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding } from "@/lib/compliance/types"
+import { describeFindingRiskForTriage, sortFindingsForTriage } from "@/lib/compliscan/finding-triage"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
 import {
   isFindingActive,
@@ -76,6 +74,31 @@ function ageLabel(iso: string): string {
   return `${Math.floor(days / 30)}l`
 }
 
+function compactRiskSummary(text: string) {
+  if (text.length <= 108) return text
+  const shortened = text.slice(0, 108).trimEnd()
+  const lastSpace = shortened.lastIndexOf(" ")
+  return `${(lastSpace > 52 ? shortened.slice(0, lastSpace) : shortened).trimEnd()}…`
+}
+
+function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
+  switch (recipe.executionClass) {
+    case "documentary":
+      return "Document"
+    case "specialist_handoff":
+      return "Asistat"
+    default:
+      return "Acțiune"
+  }
+}
+
+function getFindingRiskLine(
+  finding: ScanFinding,
+  recipe: ReturnType<typeof buildCockpitRecipe>
+) {
+  return compactRiskSummary(recipe.whatUserSees || describeFindingRiskForTriage(finding))
+}
+
 
 function getRecipeRowBadge(
   finding: ScanFinding,
@@ -88,23 +111,7 @@ function getRecipeRowBadge(
     return { label: "Marcat nevalid", variant: "secondary" }
   }
 
-  switch (recipe.uiState) {
-    case "ready_to_generate":
-      return { label: recipe.collapsedStatusLabel, variant: "default" }
-    case "evidence_uploaded":
-    case "rechecking":
-      return { label: recipe.collapsedStatusLabel, variant: "default" }
-    case "external_action_required":
-    case "needs_revalidation":
-    case "need_your_input":
-      return { label: recipe.collapsedStatusLabel, variant: "warning" }
-    case "resolved":
-      return { label: recipe.collapsedStatusLabel, variant: "success" }
-    case "false_positive":
-      return { label: recipe.collapsedStatusLabel, variant: "secondary" }
-    default:
-      return { label: recipe.collapsedStatusLabel, variant: "outline" }
-  }
+  return { label: getExecutionClassLabel(recipe), variant: "outline" }
 }
 
 // ── Finding Row ───────────────────────────────────────────────────────────────
@@ -120,27 +127,30 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   return (
     <Link
       href={cockpitHref}
-      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3.5 transition-colors hover:border-eos-border hover:bg-eos-surface-variant"
+      className="flex w-full items-center gap-3 overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 transition-all hover:border-white/[0.11] hover:bg-white/[0.04]"
     >
       <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
       <div className="min-w-0 flex-1">
-        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-white/80">
           {finding.title}
         </p>
-        {recipe.whatUserMustDo && (
-          <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-eos-text-muted">
-            {recipe.whatUserMustDo}
-          </p>
-        )}
+        <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-white/35">
+          {getFindingRiskLine(finding, recipe)}
+        </p>
       </div>
-      <Badge variant="secondary" className="hidden normal-case tracking-normal shrink-0 sm:inline-flex">
+      <span className="hidden shrink-0 rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-white/35 sm:inline-flex">
         {canonicalFrameworkLabel(recipe.framework)}
-      </Badge>
-      <Badge variant={flowStatus.variant} className="hidden normal-case tracking-normal shrink-0 lg:inline-flex">
+      </span>
+      <span className={`hidden shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold lg:inline-flex ${
+        flowStatus.variant === "success" ? "bg-emerald-500/15 text-emerald-400" :
+        flowStatus.variant === "warning" ? "bg-amber-500/15 text-amber-400" :
+        flowStatus.variant === "destructive" ? "bg-red-500/15 text-red-400" :
+        "bg-white/[0.05] text-white/30"
+      }`}>
         {flowStatus.label}
-      </Badge>
-      <span className="shrink-0 text-[11px] text-eos-text-muted">{ageLabel(finding.createdAtISO)}</span>
-      <ArrowRight className="size-3.5 shrink-0 text-eos-text-muted" strokeWidth={2} />
+      </span>
+      <span className="shrink-0 text-[11px] text-white/25">{ageLabel(finding.createdAtISO)}</span>
+      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/20" strokeWidth={2} />
     </Link>
   )
 }
@@ -190,23 +200,20 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
     low: findingsForStatus.filter((f) => f.severity === "low").length,
   }
 
-  const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
-  const filtered = findingsForStatus
+  const filtered = sortFindingsForTriage(
+    findingsForStatus
     .filter((f) => activeFilter === "toate" || frameworkFromLegal(f.legalReference) === activeFilter)
     .filter((f) => severityFilter === "toate" || f.severity === severityFilter)
     .filter((f) => matchesFindingSearch(f, deferredQuery))
-    .sort((a, b) => (SEVERITY_RANK[a.severity] ?? 4) - (SEVERITY_RANK[b.severity] ?? 4))
+  )
 
   return (
     <div>
-      <div className="mb-4 space-y-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-4">
+      <div className="mb-4 space-y-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-sm font-medium text-eos-text">
+            <p className="text-sm font-semibold text-white/70">
               {soloMode ? "Prioritatea de azi" : "Queue de finding-uri"}
-            </p>
-            <p className="mt-1 text-xs text-eos-text-muted">
-              Vezi rapid ce e deschis acum și intră în caz. Filtrele secundare rămân dedesubt.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -214,22 +221,22 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               type="button"
               onClick={() => setStatusFilter("active")}
               className={[
-                "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "active"
-                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                  : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
               ].join(" ")}
             >
-              Deschise · {findings.filter((finding) => isFindingActive(finding)).length}
+              Deschise · {findings.filter(isFindingActive).length}
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
               className={[
-                "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "all"
-                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                  : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
               ].join(" ")}
             >
               Toate · {findings.length}
@@ -237,43 +244,31 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
           </div>
         </div>
 
-        <label className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2">
-          <Search className="size-4 text-eos-text-muted" strokeWidth={2} />
+        <label className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2.5">
+          <Search className="h-4 w-4 text-white/25" strokeWidth={2} />
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Caută după titlu, sursă sau referință legală"
-            className="w-full bg-transparent text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+            className="w-full bg-transparent text-sm text-white/70 outline-none placeholder:text-white/20"
           />
         </label>
 
         {soloMode ? (
-          <div className="flex items-center justify-between rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-eos-text">Lucrezi pe ce e activ acum</p>
-              <p className="mt-1 text-xs text-eos-text-muted">
-                Lista rămâne simplă, dar poți restrânge severitatea sau căuta direct problema.
-              </p>
-            </div>
-            <Badge variant="outline" className="normal-case tracking-normal">
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
+            <p className="text-sm text-white/45">Lucrezi pe ce e activ acum</p>
+            <span className="rounded-full border border-white/[0.08] px-2.5 py-0.5 text-[11px] text-white/30">
               {filtered.length} vizibile
-            </Badge>
+            </span>
           </div>
         ) : (
-          <details className="group rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
+          <details className="group rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-eos-text">Filtre secundare</p>
-                <p className="mt-1 text-xs text-eos-text-muted">
-                  Severitate și framework doar când ai nevoie să restrângi lista.
-                </p>
-              </div>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Deschide
-              </Badge>
+              <p className="text-sm font-medium text-white/50">Filtre secundare</p>
+              <span className="rounded-full border border-white/[0.08] px-2.5 py-0.5 text-[11px] text-white/25">Deschide</span>
             </summary>
-            <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
+            <div className="mt-4 space-y-4 border-t border-white/[0.05] pt-4">
               <div className="flex flex-wrap gap-2">
                 {severityTabs.map((tab) => {
                   const active = severityFilter === tab.id
@@ -283,19 +278,18 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       type="button"
                       onClick={() => setSeverityFilter(tab.id)}
                       className={[
-                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                          : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                          : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
                       ].join(" ")}
                     >
                       {tab.label}
-                      <span className="ml-1.5 text-[11px] text-inherit">{severityCounts[tab.id]}</span>
+                      <span className="ml-1.5">{severityCounts[tab.id]}</span>
                     </button>
                   )
                 })}
               </div>
-
               <div className="flex flex-wrap gap-2">
                 {filterTabs.map((tab) => {
                   const active = activeFilter === tab.id
@@ -305,14 +299,14 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       type="button"
                       onClick={() => setActiveFilter(tab.id)}
                       className={[
-                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                          : "border-eos-border bg-eos-surface text-eos-text-muted hover:text-eos-text",
+                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                          : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
                       ].join(" ")}
                     >
                       {tab.label}
-                      <span className="ml-1.5 text-[11px] text-inherit">{counts[tab.id]}</span>
+                      <span className="ml-1.5">{counts[tab.id]}</span>
                     </button>
                   )
                 })}
@@ -323,14 +317,15 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState
-          label={findings.length === 0
-            ? "Nu există finding-uri. Rulează o scanare pentru a detecta probleme."
-            : statusFilter === "active"
-              ? "Nu există finding-uri active pentru filtrul curent. Poți afișa și pe cele închise."
-              : "Nu există finding-uri care să se potrivească filtrelor curente."}
-          className="border-eos-border bg-eos-surface-variant"
-        />
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-10 text-center">
+          <p className="text-sm text-white/30">
+            {findings.length === 0
+              ? "Nu există finding-uri. Rulează o scanare pentru a detecta probleme."
+              : statusFilter === "active"
+                ? "Nu există finding-uri active pentru filtrul curent."
+                : "Nu există finding-uri care să se potrivească filtrelor."}
+          </p>
+        </div>
       ) : (
         <div className="space-y-2" aria-live="polite">
           {filtered.map((f) => <FindingRow key={f.id} finding={f} />)}
@@ -374,32 +369,32 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
   return (
     <section aria-label="Urgențe cu deadline" className="space-y-2">
       <div className="flex items-center gap-2">
-        <AlertTriangle className="size-4 text-red-500" strokeWidth={2} />
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-muted">
+        <AlertTriangle className="size-4 text-red-400" strokeWidth={2} />
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/30">
           Urgențe cu deadline — {items.length} active
         </p>
       </div>
-      <div className="divide-y divide-eos-border rounded-eos-md border border-eos-border bg-eos-surface">
+      <div className="divide-y divide-white/[0.04] rounded-xl border border-white/[0.07] bg-white/[0.02]">
         {[...critical, ...rest].map((item) => (
           <Link
             key={item.id}
             href={item.href}
-            className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-eos-surface-variant"
+            className="flex items-start justify-between gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
           >
             <div className="min-w-0 space-y-0.5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                  item.severity === "critical" ? "bg-red-100 text-red-700"
-                  : item.severity === "high" ? "bg-amber-100 text-amber-700"
-                  : "bg-blue-100 text-blue-700"
+                  item.severity === "critical" ? "bg-red-500/15 text-red-400"
+                  : item.severity === "high" ? "bg-amber-500/15 text-amber-400"
+                  : "bg-blue-500/15 text-blue-400"
                 }`}>
                   {SOURCE_LABELS[item.source]}
                 </span>
-                <p className="truncate text-sm font-medium text-eos-text">{item.title}</p>
+                <p className="truncate text-sm font-medium text-white/75">{item.title}</p>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-eos-text-muted">
+              <div className="flex items-center gap-1.5 text-xs text-white/35">
                 {item.daysLeft !== undefined && (
-                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-red-600 font-medium" : item.daysLeft <= 3 ? "text-red-500" : ""}`}>
+                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-red-400 font-medium" : item.daysLeft <= 3 ? "text-red-400" : ""}`}>
                     <Clock className="size-3" strokeWidth={2} />
                     {item.daysLeft < 0 ? `Depășit cu ${Math.abs(item.daysLeft)}z` : `${item.daysLeft}z rămase`}
                   </span>
@@ -407,7 +402,7 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
                 <span>{item.detail}</span>
               </div>
             </div>
-            <ArrowRight className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
+            <ArrowRight className="mt-0.5 size-4 shrink-0 text-white/25" strokeWidth={2} />
           </Link>
         ))}
       </div>
@@ -434,75 +429,76 @@ export function ResolvePageSurface() {
   const isSolo = runtime?.userMode === "solo"
 
   return (
-    <div className="space-y-8">
-      <PageIntro
-        eyebrow="De rezolvat"
-        title={isSolo ? `De rezolvat · ${activeFindings.length} urgente` : `De rezolvat · ${activeFindings.length} deschise`}
-        description={
-          isSolo
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">De rezolvat</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-white">
+          {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
+        </h1>
+        <p className="mt-1 text-sm text-white/40">
+          {isSolo
             ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz."
-            : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."
-        }
-        badges={
-          <>
-            {urgencyItems.length > 0 && (
-              <Badge variant="destructive" className="normal-case tracking-normal">
-                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
-              </Badge>
-            )}
-            {criticalCount > 0 && (
-              <Badge variant="destructive" className="normal-case tracking-normal">
-                {criticalCount} critice
-              </Badge>
-            )}
-            {highCount > 0 && (
-              <Badge variant="destructive" className="normal-case tracking-normal">
-                {highCount} ridicate
-              </Badge>
-            )}
-            {mediumCount > 0 && (
-              <Badge variant="warning" className="normal-case tracking-normal">
-                {mediumCount} medii
-              </Badge>
-            )}
-            {openTasks.length > 0 && (
-              <Link
-                href={dashboardRoutes.resolveSupport}
-                className="inline-flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1 text-[12px] font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
-              >
-                Task-uri de suport · {openTasks.length}
-                <ArrowRight className="size-3" strokeWidth={2} />
-              </Link>
-            )}
-          </>
-        }
-      />
+            : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {urgencyItems.length > 0 && (
+            <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-400">
+              {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
+            </span>
+          )}
+          {criticalCount > 0 && (
+            <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-400">
+              {criticalCount} critice
+            </span>
+          )}
+          {highCount > 0 && (
+            <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">
+              {highCount} ridicate
+            </span>
+          )}
+          {mediumCount > 0 && (
+            <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-400/70">
+              {mediumCount} medii
+            </span>
+          )}
+          {openTasks.length > 0 && (
+            <Link
+              href={dashboardRoutes.resolveSupport}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/45 transition-colors hover:text-white/70"
+            >
+              Task-uri de suport · {openTasks.length}
+              <ArrowRight className="h-3 w-3" strokeWidth={2} />
+            </Link>
+          )}
+        </div>
+      </div>
 
       {/* Main execution queue */}
       <section aria-label="Finding-uri de rezolvat">
         <FindingQueue findings={findings} soloMode={isSolo} />
       </section>
 
-      {urgencyItems.length > 0 ? (
-        <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+      {urgencyItems.length > 0 && (
+        <details className="group rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/30">
                 Deadline-uri și semnale conexe
               </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
+              <p className="mt-1 text-sm text-white/40">
                 Rămân dedesubt, ca să nu concureze cu inbox-ul principal de finding-uri.
               </p>
             </div>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
               {urgencyItems.length} active
-            </Badge>
+            </span>
           </summary>
           <div className="mt-4">
             <UrgentItemsSection items={urgencyItems} />
           </div>
         </details>
-      ) : null}
+      )}
     </div>
   )
 }
@@ -520,28 +516,33 @@ export function ResolveSupportPageSurface() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Task-uri de suport"
-        title={`Board separat · ${openTasks.length} deschise`}
-        description="Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare."
-        badges={
-          <Badge variant="outline" className="normal-case tracking-normal">
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Task-uri de suport</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-white">
+          Board separat · {openTasks.length} deschise
+        </h1>
+        <p className="mt-1 text-sm text-white/40">
+          Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare.
+        </p>
+        <div className="mt-3">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
             Board secundar
-          </Badge>
-        }
-      />
+          </span>
+        </div>
+      </div>
 
-      <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-eos-text">Nu concurează cu cockpitul</p>
-            <p className="text-xs text-eos-text-muted">
+            <p className="text-sm font-medium text-white/70">Nu concurează cu cockpitul</p>
+            <p className="text-xs text-white/35">
               Când un task are caz asociat, intri în cockpitul finding-ului ca să generezi, atașezi dovada și închizi cu urmă clară.
             </p>
           </div>
           <Link
             href={dashboardRoutes.resolve}
-            className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text transition-colors hover:bg-eos-bg-inset"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/45 transition-colors hover:text-white/70"
           >
             Înapoi la De rezolvat
             <ArrowRight className="size-3" strokeWidth={2} />

@@ -44,7 +44,7 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
               Rezumat scan
             </div>
             <p className="mt-3 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
-              {scan?.contentPreview || "Nu exista preview pentru acest document."}
+              {scan?.contentPreview || "Nu există preview pentru acest document."}
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export function ScanDrawer({ open, onOpenChange, scan, tasks }: ScanDrawerProps)
             <div className="space-y-3">
               {tasks.length === 0 && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
-                  Nu exista task-uri generate pentru acest scan.
+                  Nu există task-uri generate pentru acest scan.
                 </div>
               )}
               {tasks.map((task) => (

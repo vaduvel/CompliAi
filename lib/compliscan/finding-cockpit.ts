@@ -29,8 +29,12 @@ export function isFindingResolvedLike(status?: ScanFinding["findingStatus"]) {
 export function isFindingActive(
   findingOrStatus?: ScanFinding | ScanFinding["findingStatus"]
 ) {
-  const status =
-    typeof findingOrStatus === "object" ? findingOrStatus?.findingStatus : findingOrStatus
+  const isFindingObject = typeof findingOrStatus === "object"
+  const status = isFindingObject ? findingOrStatus?.findingStatus : findingOrStatus
+
+  if (status === "resolved") {
+    return isFindingObject ? Boolean(findingOrStatus?.suggestedDocumentType) : false
+  }
 
   return status !== "dismissed" && !isFindingResolvedLike(status)
 }

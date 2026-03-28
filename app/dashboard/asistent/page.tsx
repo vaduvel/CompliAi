@@ -204,8 +204,8 @@ export default function AsistentPage() {
           }
         />
         <HandoffCard
-          title="Dupa clarificare revii in flow-ul real"
-          description="Asistentul nu inchide task-uri, nu valideaza controlul si nu livreaza audit pack-ul in locul tau. Il folosesti pentru orientare, apoi continui in pagina potrivita."
+          title="După clarificare revii în flow-ul real"
+          description="Asistentul nu închide task-uri, nu validează controlul și nu livrează audit pack-ul în locul tău. Îl folosești pentru orientare, apoi continui în pagina potrivită."
           destinationLabel="dashboard / scaneaza / de rezolvat"
           checklist={[
             "nu tratezi raspunsul ca verdict definitiv",

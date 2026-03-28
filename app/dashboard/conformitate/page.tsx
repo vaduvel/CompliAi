@@ -148,12 +148,12 @@ export default function ConformitatePage() {
     setError(null)
     try {
       const res = await fetch(`/api/ai-conformity?systemId=${systemId}`, { cache: "no-store" })
-      if (!res.ok) throw new Error("Nu am putut incarca evaluarea.")
+      if (!res.ok) throw new Error("Nu am putut încărca evaluarea.")
       const data = (await res.json()) as { answers: AssessmentAnswers; result: AssessmentResult }
       setAnswers(data.answers)
       setSavedResult(data.result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Eroare la incarcare.")
+      setError(err instanceof Error ? err.message : "Eroare la încărcare.")
     } finally {
       setLoading(false)
     }

@@ -643,14 +643,13 @@ export function FindingDossierSuccessCard({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
-                Dovadă salvată la dosar
+                Risc rezolvat și dovadă salvată la dosar
               </p>
               <p className="mt-1 text-lg font-semibold text-eos-text">
-                {linkedGeneratedDocument.title} a intrat în Dosar
+                {findingTitle} este rezolvat, iar {linkedGeneratedDocument.title} a intrat în Dosar
               </p>
               <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                Finding-ul <span className="font-medium text-eos-text">{findingTitle}</span> este acum închis cu
-                artefact, urmă de aprobare și ancoră de monitorizare.
+                Riscul rămâne închis cu documentul salvat la dosar, urmă de aprobare clară și ancoră de monitorizare pe aceeași urmă.
               </p>
             </div>
           </div>

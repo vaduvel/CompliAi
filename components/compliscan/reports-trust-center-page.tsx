@@ -70,7 +70,7 @@ export function ReportsTrustCenterPageSurface() {
       <PageIntro
         eyebrow="Trust Center"
         title="Profil public de conformitate"
-        description="Configurezi ce vad clientii si auditorii externi cand primesc linkul Trust Center. Preview-ul de mai jos reflecta exact ce apare public."
+        description="Configurezi ce văd clienții și auditorii externi când primesc linkul Trust Center. Preview-ul de mai jos reflectă exact ce apare public."
         badges={
           <Badge variant="outline" className="normal-case tracking-normal">
             vizualizare externa
@@ -101,15 +101,15 @@ export function ReportsTrustCenterPageSurface() {
                 </p>
               </div>
               <CardTitle className="mt-2 text-xl">
-                Asa ar arata pentru un auditor extern
+                Cum arată pentru un auditor extern
               </CardTitle>
               <p className="mt-1 text-sm text-eos-text-muted">
-                Linkul Trust Center este public. Auditorii si clientii vad exact ce este activat in panoul de configurare.
+                Linkul Trust Center este public. Auditorii și clienții văd exact ce este activat în panoul de configurare.
               </p>
             </div>
             <Button variant="outline" onClick={copyLink} className="gap-2 shrink-0">
               <ExternalLink className="size-4" strokeWidth={2} />
-              Copiaza link
+              Copiază link
             </Button>
           </div>
         </CardHeader>
@@ -234,9 +234,9 @@ export function ReportsTrustCenterPageSurface() {
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-5">
           <div>
-            <CardTitle className="text-xl">Ce se arata public</CardTitle>
+            <CardTitle className="text-xl">Ce se arată public</CardTitle>
             <p className="mt-1 text-sm text-eos-text-muted">
-              Activeaza sau dezactiveaza ce vad auditorii externi in profilul tau public.
+              Activează sau dezactivează ce văd auditorii externi în profilul tău public.
             </p>
           </div>
         </CardHeader>
@@ -262,7 +262,7 @@ export function ReportsTrustCenterPageSurface() {
                   onClick={() => toggleVisibility(item.key)}
                   className="shrink-0"
                 >
-                  {visibility[item.key] ? "Ascunde" : "Arata"}
+                  {visibility[item.key] ? "Ascunde" : "Arată"}
                 </Button>
               </div>
             </DenseListItem>
@@ -274,16 +274,16 @@ export function ReportsTrustCenterPageSurface() {
       <ActionCluster
         eyebrow="Distribuie"
         title="Trimite linkul Trust Center"
-        description="Clientii si auditorii externi pot vizualiza statusul conformitatii tale fara sa aiba acces la dashboard."
+        description="Clienții și auditorii externi pot vizualiza statusul conformității tale fără să aibă acces la dashboard."
         actions={
           <>
             <Button onClick={copyLink} className="gap-2">
               <ExternalLink className="size-4" strokeWidth={2} />
-              Copiaza linkul
+              Copiază linkul
             </Button>
             <Button asChild variant="outline">
-              <Link href={dashboardRoutes.reports}>
-                Mergi la Rapoarte
+              <Link href={dashboardRoutes.dosar}>
+                Mergi la Dosar
               </Link>
             </Button>
           </>

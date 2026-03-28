@@ -124,18 +124,18 @@ export default function SistemePage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Control"
-        title="Confirmi ce intra in inventarul oficial si ce devine drift real"
-        description="Aici validezi candidatele, reperul si drift-ul real. Executia ramane in Dovada."
+        title="Confirmi ce intră în inventarul oficial și ce devine drift real"
+        description="Aici validezi candidatele, reperul și drift-ul real. Execuția rămâne în Dovadă."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {confirmedCount} sisteme confirmate
             </Badge>
             <Badge variant={recentDrifts.length > 0 ? "warning" : "success"} className="normal-case tracking-normal">
-              {recentDrifts.length > 0 ? `${recentDrifts.length} drift activ` : "fara drift activ"}
+              {recentDrifts.length > 0 ? `${recentDrifts.length} drift activ` : "fără drift activ"}
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              {validatedBaseline ? "baseline validat" : "baseline in curs"}
+              {validatedBaseline ? "baseline validat" : "baseline în curs"}
             </Badge>
           </>
         }
@@ -222,7 +222,7 @@ export default function SistemePage() {
           validatedBaselineLabel={
             validatedBaseline
               ? `validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
-              : "inca nevalidat"
+              : "încă nevalidat"
           }
           evidenceLedgerTotal={evidenceLedger.length}
           evidenceLedgerReady={ledgerReadyCount}
@@ -359,31 +359,31 @@ function ControlOverview({
     {
       label: "Inventar confirmat",
       value: `${confirmedCount}`,
-      hint: confirmedCount > 0 ? "sisteme asumate operational" : "inca lipsesc sisteme confirmate",
+      hint: confirmedCount > 0 ? "sisteme asumate operațional" : "încă lipsesc sisteme confirmate",
       tone: confirmedCount > 0 ? "success" : "neutral",
     },
     {
-      label: "Detectii active",
+      label: "Detecții active",
       value: `${detectedActiveCount}`,
-      hint: "candidate care cer validare umana inainte de intrare in inventar",
+      hint: "candidate care cer validare umană înainte de intrare în inventar",
       tone: detectedActiveCount > 0 ? "warning" : "neutral",
     },
     {
-      label: "Calitate dovada",
+      label: "Calitate dovadă",
       value: hasEvidenceLedger
         ? evidenceLedgerWeak > 0
           ? `${evidenceLedgerWeak} slabe`
           : evidenceLedgerUnrated > 0
             ? `${evidenceLedgerUnrated} neevaluate`
             : `${evidenceLedgerReady} verificate`
-        : "fara registru",
+        : "fără registru",
       hint: hasEvidenceLedger
         ? evidenceLedgerWeak > 0
-          ? "inlocuiesti dovezile slabe in Dovada"
+          ? "înlocuiești dovezile slabe în Dovadă"
           : evidenceLedgerUnrated > 0
-            ? "complementezi review-ul de dovada"
+            ? "complementezi review-ul de dovadă"
             : "registru curat"
-        : "apare dupa primul upload de dovada",
+        : "apare după primul upload de dovadă",
       tone: hasEvidenceLedger
         ? evidenceLedgerWeak > 0
           ? "warning"
@@ -395,13 +395,13 @@ function ControlOverview({
     {
       label: "Baseline",
       value: validatedBaselineLabel,
-      hint: "reperul fata de care masuram drift-ul real",
+      hint: "reperul față de care măsurăm drift-ul real",
       tone: validatedBaselineLabel.startsWith("validat") ? "success" : "warning",
     },
     {
       label: "Drift activ",
       value: `${recentDriftsCount}`,
-      hint: recentDriftsCount > 0 ? "semnale care cer investigatie" : "nu exista semnale deschise acum",
+      hint: recentDriftsCount > 0 ? "semnale care cer investigație" : "nu există semnale deschise acum",
       tone: recentDriftsCount > 0 ? "danger" : "success",
       meta: `${summary.score} · ${summary.riskLabel}`,
     },
@@ -412,9 +412,9 @@ function ControlOverview({
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
-            eyebrow="Stare curenta"
-            title="Ce ceri sa confirmi acum"
-            description="Alegi zona unde continui confirmarea reala."
+            eyebrow="Stare curentă"
+            title="Ce cere confirmare acum"
+            description="Alegi zona unde continui confirmarea reală."
             items={items}
           />
         </CardContent>
@@ -425,14 +425,14 @@ function ControlOverview({
           <div>
             <p className="text-sm font-semibold text-eos-text">Continui confirmarea</p>
             <p className="text-xs text-eos-text-muted">
-              Control ramane doar pentru confirmare. Executia ramane in Dovada.
+              Control rămâne doar pentru confirmare. Execuția rămâne în Dovadă.
             </p>
           </div>
           <div className="min-w-[240px] space-y-2">
             <ActionCluster
-              eyebrow="Actiuni"
+              eyebrow="Acțiuni"
               title="Unde continui"
-              description="Alegi zona de confirmare reala."
+              description="Alegi zona de confirmare reală."
               actions={
                 <>
                   <Button variant="outline" onClick={onOpenDiscovery}>
@@ -450,7 +450,7 @@ function ControlOverview({
               onClick={() => setShowGuidance((current) => !current)}
               className="text-xs text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline"
             >
-              {showGuidance ? "Ascunde ghidajul" : "Arata ghidajul"}
+              {showGuidance ? "Ascunde ghidajul" : "Arată ghidajul"}
             </button>
           </div>
         </CardContent>
@@ -460,14 +460,14 @@ function ControlOverview({
         <>
           <SectionBoundary
             eyebrow="Control"
-            title="Confirmare umana, fara executie aici"
-            description="Aici validezi inventarul, baseline-ul si drift-ul. Executia ramane in Dovada, iar integrarile raman in Setari."
+            title="Confirmare umană, fără execuție aici"
+            description="Aici validezi inventarul, baseline-ul și drift-ul. Execuția rămâne în Dovadă, iar integrările rămân în Setări."
             badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
             support={
               <ActionCluster
-                eyebrow="Actiuni"
+                eyebrow="Acțiuni"
                 title="Handoff rapid"
-                description="Continui in zona potrivita."
+                description="Continui în zona potrivită."
                 actions={
                   <>
                     <Button variant="outline" onClick={onOpenDiscovery}>
@@ -478,7 +478,7 @@ function ControlOverview({
                     </Button>
                     <Button asChild>
                       <Link href={dashboardRoutes.settings}>
-                        Setari
+                        Setări
                         <ArrowRight className="size-4" strokeWidth={2} />
                       </Link>
                     </Button>
@@ -490,24 +490,24 @@ function ControlOverview({
 
           <div className="grid gap-4 xl:grid-cols-2">
             <HandoffCard
-              title="Continui in Sisteme"
-              description="Aici lucrezi pe candidate, inventar, compliance pack si baseline."
+              title="Continui în Sisteme"
+              description="Aici lucrezi pe candidate, inventar, compliance pack și baseline."
               destinationLabel="workspace principal"
               checklist={[
-                "incepi cu Discovery daca ai candidate noi",
-                "confirmi doar ce este real si asumat",
-                "salvezi baseline-ul dupa review uman",
+                "începi cu Discovery dacă ai candidate noi",
+                "confirmi doar ce este real și asumat",
+                "salvezi baseline-ul după review uman",
               ]}
               actions={<Button onClick={onOpenSystems}>Deschide Sisteme</Button>}
             />
             <HandoffCard
-              title="Drift-ul sta separat"
-              description="Cand ai schimbari fata de baseline, le investighezi separat si trimiti doar ce merita in remediere."
-              destinationLabel="investigatie"
+              title="Drift-ul stă separat"
+              description="Când ai schimbări față de baseline, le investighezi separat și trimiți doar ce merită în remediere."
+              destinationLabel="investigație"
               checklist={[
-                "vezi ce s-a schimbat fata de baseline",
-                "decizi daca merge spre remediere",
-                "nu inchizi auditul direct din Control",
+                "vezi ce s-a schimbat față de baseline",
+                "decizi dacă merge spre remediere",
+                "nu închizi auditul direct din Control",
               ]}
               actions={
                 <>
@@ -574,15 +574,15 @@ function ControlSystemsWorkspace({
     <div className="space-y-6">
       <SectionBoundary
         eyebrow="Sisteme"
-        title="Candidatele, inventarul, compliance pack si baseline-ul stau pe acelasi fir de confirmare"
-        description="Parcurgi pasii in ordine: mai intai descoperi, confirmi, fixezi reperul si revizuiesti pack-ul."
+        title="Candidatele, inventarul, compliance pack și baseline-ul stau pe același fir de confirmare"
+        description="Parcurgi pașii în ordine: mai întâi descoperi, confirmi, fixezi reperul și revizuiești pack-ul."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {confirmedCount} confirmate
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              {detectedActiveCount} detectii active
+              {detectedActiveCount} detecții active
             </Badge>
           </>
         }
@@ -605,12 +605,12 @@ function ControlSystemsWorkspace({
               <SummaryStrip
                 eyebrow="Discovery"
                 title="Candidate detectate automat"
-                description="Aici lucrezi pe work queue-ul de detectie. Corectezi si validezi doar ce merita sa devina sistem oficial."
+                description="Aici lucrezi pe work queue-ul de detecție. Corectezi și validezi doar ce merită să devină sistem oficial."
                 items={[
                   {
-                    label: "Detectii active",
+                    label: "Detecții active",
                     value: `${detectedActiveCount}`,
-                    hint: "candidate care inca nu au fost confirmate sau respinse",
+                    hint: "candidate care încă nu au fost confirmate sau respinse",
                     tone: detectedActiveCount > 0 ? "warning" : "neutral",
                   },
                   {
@@ -632,13 +632,13 @@ function ControlSystemsWorkspace({
           {discoveryPanel}
 
           <HandoffCard
-            title="Dupa Discovery continui in Inventar"
-            description="Ce a fost confirmat uman trebuie sa intre in inventarul oficial, nu sa ramana blocat in candidate."
+            title="După Discovery continui în Inventar"
+            description="Ce a fost confirmat uman trebuie să intre în inventarul oficial, nu să rămână blocat în candidate."
             destinationLabel="inventar oficial"
             checklist={[
-              "confirmi scopul si modelul",
-              "verifici nivelul de risc si review uman",
-              "misti doar sistemele curate in inventar",
+              "confirmi scopul și modelul",
+              "verifici nivelul de risc și review uman",
+              "muți doar sistemele curate în inventar",
             ]}
             actions={
               <>
@@ -658,25 +658,25 @@ function ControlSystemsWorkspace({
             <CardContent className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Inventar oficial"
-                title="Sisteme asumate operational"
-                description="De aici incolo nu mai lucrezi cu candidate, ci cu inventarul confirmat care sustine baseline-ul si drift-ul."
+                title="Sisteme asumate operațional"
+                description="De aici încolo nu mai lucrezi cu candidate, ci cu inventarul confirmat care susține baseline-ul și drift-ul."
                 items={[
                   {
                     label: "Confirmate",
                     value: `${confirmedCount}`,
-                    hint: "sisteme deja intrate in inventarul oficial",
+                    hint: "sisteme deja intrate în inventarul oficial",
                     tone: confirmedCount > 0 ? "success" : "neutral",
                   },
                   {
                     label: "High-risk",
                     value: `${aiHighRisk}`,
-                    hint: "cer control si urmarire prioritara",
+                    hint: "cer control și urmărire prioritară",
                     tone: aiHighRisk > 0 ? "danger" : "success",
                   },
                   {
                     label: "Limited / minimal",
                     value: `${aiLowRisk}`,
-                    hint: "raman in inventar, dar cu presiune de control mai mica",
+                    hint: "rămân în inventar, dar cu presiune de control mai mică",
                   },
                 ]}
               />
@@ -690,8 +690,8 @@ function ControlSystemsWorkspace({
             <CardContent className="space-y-4 pt-6">
               {recentInventory.length === 0 && (
                 <EmptyState
-                  title="Inca nu exista sisteme confirmate"
-                  label="Confirmi mai intai o detectie din Discovery sau adaugi manual un sistem nou daca sursa tehnica lipseste."
+                  title="Niciun sistem confirmat încă"
+                  label="Confirmă mai întâi o detecție din Discovery sau adaugă manual un sistem nou dacă sursa tehnică lipsește."
                   className="border-eos-border bg-eos-surface-variant py-8"
                 />
               )}
@@ -722,7 +722,7 @@ function ControlSystemsWorkspace({
                         </Badge>
                       </div>
                       <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
-                        {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fara review uman"}
+                        {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fără review uman"}
                       </p>
                       {/* GOLD 8 — AI Act classification (propusa, nu verdict final) */}
                       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -765,28 +765,28 @@ function ControlSystemsWorkspace({
             <CardContent className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Baseline"
-                title="Reperul fata de care comparam schimbarea reala"
-                description="Baseline-ul validat separa drift-ul real de zgomotul operational si da incredere inventarului."
+                title="Reperul față de care comparăm schimbarea reală"
+                description="Baseline-ul validat separă drift-ul real de zgomotul operațional și dă încredere inventarului."
                 items={[
                   {
                     label: "Status",
                     value: validatedBaseline
                       ? `validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
-                      : "nu exista baseline validat",
+                      : "nu există baseline validat",
                     hint: validatedBaseline
-                      ? "comparatiile actuale folosesc snapshot-ul validat uman"
-                      : "fara baseline validat, drift-ul ramane mai greu de interpretat",
+                      ? "comparațiile actuale folosesc snapshot-ul validat uman"
+                      : "fără baseline validat, drift-ul rămâne mai greu de interpretat",
                     tone: validatedBaseline ? "success" : "warning",
                   },
                   {
                     label: "Inventar confirmat",
                     value: `${confirmedCount}`,
-                    hint: "numarul de sisteme care intra in snapshot",
+                    hint: "numărul de sisteme care intră în snapshot",
                   },
                   {
                     label: "Drift deschis",
                     value: `${recentDriftsCount}`,
-                    hint: "semnale deschise fata de snapshot-ul curent",
+                    hint: "semnale deschise față de snapshot-ul curent",
                     tone: recentDriftsCount > 0 ? "danger" : "success",
                   },
                 ]}
@@ -795,24 +795,24 @@ function ControlSystemsWorkspace({
           </Card>
 
           <HandoffCard
-            title={validatedBaseline ? "Baseline-ul este gata pentru Drift" : "Mai intai validezi baseline-ul"}
+            title={validatedBaseline ? "Baseline-ul este gata pentru Drift" : "Mai întâi validezi baseline-ul"}
             description={
               validatedBaseline
-                ? "Dupa ce ai reperul validat, schimbarile merg in Drift si nu mai polueaza Discovery sau inventarul."
-                : "Momentan baseline-ul se gestioneaza din Setari. Dupa validare, revii aici doar pentru comparatii curate si explicabile."
+                ? "După ce ai reperul validat, schimbările merg în Drift și nu mai poluează Discovery sau inventarul."
+                : "Momentan baseline-ul se gestionează din Setări. După validare, revii aici doar pentru comparații curate și explicabile."
             }
             destinationLabel={validatedBaseline ? "drift" : "setari / operational"}
             checklist={
               validatedBaseline
                 ? [
-                    "urmaresti schimbarile fata de snapshot",
+                    "urmărești schimbările față de snapshot",
                     "nu refaci inventarul de la zero",
-                    "trimiti doar abaterile reale spre remediere",
+                    "trimiți doar abaterile reale spre remediere",
                   ]
                 : [
                     "validezi snapshot-ul cu review uman",
-                    "fixezi baseline-ul operational",
-                    "revii apoi in Control pentru comparatii curate",
+                    "fixezi baseline-ul operațional",
+                    "revii apoi în Control pentru comparații curate",
                   ]
             }
             actions={
@@ -824,7 +824,7 @@ function ControlSystemsWorkspace({
                 ) : null}
                 <Button asChild>
                   <Link href={dashboardRoutes.settings}>
-                    Gestioneaza Baseline
+                    Gestionează Baseline
                     <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
@@ -838,8 +838,8 @@ function ControlSystemsWorkspace({
         <div className="space-y-6">
           <SectionBoundary
             eyebrow="Compliance Pack"
-            title="Review pe campuri si pachete de control"
-            description="Confirmi campurile si controalele per sistem. Starea de audit si exportul raman in Audit si export."
+            title="Review pe câmpuri și pachete de control"
+            description="Confirmi câmpurile și controalele per sistem. Starea de audit și exportul rămân în Audit și export."
           />
 
           {compliancePack ? (
@@ -855,18 +855,18 @@ function ControlSystemsWorkspace({
                 onUpdateField={onUpdateCompliancePackField}
               />
               <HandoffCard
-                title="Dupa review continui in Dovada"
-                description="Compliance Pack ramane review de control. Livrabilul final si exporturile raman in Dovada, nu in aceeasi suprafata."
-                destinationLabel="dovada / audit pack"
+                title="După review continui în Dovadă"
+                description="Compliance Pack rămâne review de control. Livrabilul final și exporturile rămân în Dovadă, nu în aceeași suprafață."
+                destinationLabel="dovadă / audit pack"
                 checklist={[
-                  "confirmi campurile importante",
+                  "confirmi câmpurile importante",
                   "separi review-ul de exportul final",
-                  "impingi mai departe doar un pack curat si inteligibil",
+                  "împingi mai departe doar un pack curat și inteligibil",
                 ]}
                 actions={
                   <Button asChild>
-                    <Link href={dashboardRoutes.reports}>
-                      Mergi la Rapoarte
+                    <Link href={dashboardRoutes.dosar}>
+                      Mergi la Dosar
                       <ArrowRight className="size-4" strokeWidth={2} />
                     </Link>
                   </Button>
@@ -876,7 +876,7 @@ function ControlSystemsWorkspace({
           ) : (
             <EmptyState
               title="Compliance Pack indisponibil"
-              label="Solicita payload-ul complet sau confirma mai intai suficiente sisteme pentru review de control."
+              label="Solicită payload-ul complet sau confirmă mai întâi suficiente sisteme pentru review de control."
               className="border-eos-border bg-eos-surface py-10"
             />
           )}
@@ -910,24 +910,24 @@ function ControlDriftWorkspace({
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Drift"
-            title="Schimbarile fata de baseline stau separat de restul Controlului"
-            description="Aici investighezi abaterile fata de snapshot-ul validat, fara sa amesteci inventarul si candidatele cu semnalele de schimbare."
+            title="Schimbările față de baseline stau separat de restul Controlului"
+            description="Aici investighezi abaterile față de snapshot-ul validat, fără să amesteci inventarul și candidatele cu semnalele de schimbare."
             items={[
               {
                 label: "Drift activ",
                 value: `${recentDrifts.length}`,
-                hint: recentDrifts.length > 0 ? "semnale deschise acum" : "nu exista drift deschis",
+                hint: recentDrifts.length > 0 ? "semnale deschise acum" : "nu există drift deschis",
                 tone: recentDrifts.length > 0 ? "danger" : "success",
               },
               {
                 label: "Inventar confirmat",
                 value: `${confirmedCount}`,
-                hint: "sisteme urmarite fata de baseline",
+                hint: "sisteme urmărite față de baseline",
               },
               {
                 label: "Baseline",
-                value: validatedBaseline ? "validat" : "inca nevalidat",
-                hint: validatedBaseline ? "comparatia este curata" : "fara baseline, drift-ul e mai greu de interpretat",
+                value: validatedBaseline ? "validat" : "încă nevalidat",
+                hint: validatedBaseline ? "comparația este curată" : "fără baseline, drift-ul e mai greu de interpretat",
                 tone: validatedBaseline ? "success" : "warning",
               },
             ]}
@@ -936,24 +936,24 @@ function ControlDriftWorkspace({
       </Card>
 
       <SectionBoundary
-        eyebrow="Investigatie"
+        eyebrow="Investigație"
         title="Drift-ul este un workspace de semnale, nu un board de remediere"
-        description="Aici intelegi ce s-a schimbat si decizi daca merge spre remediere. Execuția reala ramane in Dovada."
+        description="Aici înțelegi ce s-a schimbat și decizi dacă merge spre remediere. Execuția reală rămâne în Dovadă."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               progressive disclosure
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              fara export aici
+              fără export aici
             </Badge>
           </>
         }
         support={
           <ActionCluster
-            eyebrow="Actiuni"
+            eyebrow="Acțiuni"
             title="Handoff rapid"
-            description="Vezi driftul complet sau continua in Dovada."
+            description="Vezi driftul complet sau continuă în Dovadă."
             actions={
               <>
                 <Button asChild>
@@ -963,7 +963,7 @@ function ControlDriftWorkspace({
                   </Link>
                 </Button>
                 <Button variant="outline" onClick={onOpenBaseline}>
-                  Verifica Baseline
+                  Verifică Baseline
                 </Button>
                 <Button asChild variant="outline">
                   <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
@@ -981,8 +981,8 @@ function ControlDriftWorkspace({
         <CardContent className="space-y-4 pt-6">
           {recentDrifts.length === 0 && (
             <EmptyState
-              title="Nu exista drift deschis"
-              label="Inventarul confirmat este stabil fata de baseline-ul curent."
+              title="Niciun drift deschis"
+              label="Inventarul confirmat este stabil față de baseline-ul curent."
               className="border-eos-border bg-eos-surface-variant py-8"
             />
           )}
@@ -1038,9 +1038,9 @@ function ControlReviewWorkspace({
 }) {
   const reviewItems: SummaryStripItem[] = [
     {
-      label: "Detectii active",
+      label: "Detecții active",
       value: `${detectedActiveCount}`,
-      hint: "cer confirmare sau respingere umana",
+      hint: "cer confirmare sau respingere umană",
       tone: detectedActiveCount > 0 ? "warning" : "success",
     },
     {
@@ -1050,14 +1050,14 @@ function ControlReviewWorkspace({
     },
     {
       label: "Baseline",
-      value: validatedBaseline ? "validat" : "in curs",
-      hint: validatedBaseline ? "reperul este stabil" : "lipseste confirmarea finala",
+      value: validatedBaseline ? "validat" : "în curs",
+      hint: validatedBaseline ? "reperul este stabil" : "lipsește confirmarea finală",
       tone: validatedBaseline ? "success" : "warning",
     },
     {
       label: "Drift deschis",
       value: `${recentDriftsCount}`,
-      hint: recentDriftsCount > 0 ? "semnale ce cer investigatie" : "nu exista drift deschis",
+      hint: recentDriftsCount > 0 ? "semnale ce cer investigație" : "nu există drift deschis",
       tone: recentDriftsCount > 0 ? "danger" : "success",
     },
   ]
@@ -1068,8 +1068,8 @@ function ControlReviewWorkspace({
         <CardContent className="px-5 py-5">
           <SummaryStrip
             eyebrow="Review"
-            title="Queue-ul de validare umana"
-            description="Aici vezi ce mai cere confirmare inainte sa impingi mai departe."
+            title="Queue-ul de validare umană"
+            description="Aici vezi ce mai cere confirmare înainte să împingi mai departe."
             items={reviewItems}
           />
         </CardContent>
@@ -1081,31 +1081,31 @@ function ControlReviewWorkspace({
           description="Candidatele detectate automat trebuie validate sau respinse explicit."
           destinationLabel="systems / discovery"
           checklist={[
-            "verifici providerul, scopul si modelul",
-            "corectezi increderea si review-ul uman",
+            "verifici providerul, scopul și modelul",
+            "corectezi încrederea și review-ul uman",
             "confirmi doar ce este real",
           ]}
           actions={<Button onClick={onOpenDiscovery}>Deschide Discovery</Button>}
         />
         <HandoffCard
           title="Review pentru Compliance Pack"
-          description="Campurile precompletate cer validare umana inainte sa mearga spre dovada si export."
-          destinationLabel="systems / compliance pack"
+          description="Câmpurile precompletate cer validare umană înainte să meargă spre dovadă și export."
+          destinationLabel="sisteme / compliance pack"
           checklist={[
-            "verifici campurile sensibile",
+            "verifici câmpurile sensibile",
             "nu confunzi review-ul cu livrabilul final",
-            "impingi mai departe doar un pack curat",
+            "împingi mai departe doar un pack curat",
           ]}
           actions={<Button onClick={onOpenPack}>Deschide Compliance Pack</Button>}
         />
         <HandoffCard
-          title="Review pentru baseline si drift"
-          description="Daca baseline-ul si drift-ul nu sunt curate, restul controlului devine zgomotos."
+          title="Review pentru baseline și drift"
+          description="Dacă baseline-ul și drift-ul nu sunt curate, restul controlului devine zgomotos."
           destinationLabel="baseline / drift"
           checklist={[
             "validezi snapshot-ul corect",
             "separi drift-ul real de zgomot",
-            "trimiti spre remediere doar ce e justificat",
+            "trimiți spre remediere doar ce e justificat",
           ]}
           actions={
             <>
@@ -1145,25 +1145,25 @@ function ControlPrimaryTabs({
     {
       id: "overview",
       title: "Prezentare",
-      description: "Snapshot control si handoff clar spre zona unde continui lucrul real.",
+      description: "Snapshot control și handoff clar spre zona unde continui lucrul real.",
       badge: `${counts.reviewQueueCount} de validat`,
     },
     {
       id: "systems",
       title: "Sisteme",
-      description: "Candidate, inventar, compliance pack si baseline pe acelasi fir de confirmare.",
+      description: "Candidate, inventar, compliance pack și baseline pe același fir de confirmare.",
       badge: `${counts.confirmedCount} confirmate`,
     },
     {
       id: "drift",
       title: "Drift",
-      description: "Schimbarile fata de baseline si investigatia lor, separat de inventar.",
+      description: "Schimbările față de baseline și investigația lor, separat de inventar.",
       badge: `${counts.recentDrifts} active`,
     },
     {
       id: "review",
       title: "Validare",
-      description: "Tot ce cere validare umana inainte sa poata deveni sursa de adevar.",
+      description: "Tot ce cere validare umană înainte să poată deveni sursă de adevăr.",
       badge: `${counts.detectedActiveCount} detectii`,
     },
   ]
@@ -1227,7 +1227,7 @@ function SystemsLinearStepper({
       id: "discovery",
       step: 1,
       title: "Discovery",
-      description: "Detectezi si revizuiesti candidatele automate.",
+      description: "Detectezi și revizuiești candidatele automate.",
       done: detectedActiveCount === 0 && confirmedCount > 0,
     },
     {
@@ -1248,7 +1248,7 @@ function SystemsLinearStepper({
       id: "pack",
       step: 4,
       title: "Compliance Pack",
-      description: "Revizuiesti pachetul pre-completat.",
+      description: "Revizuiești pachetul pre-completat.",
       done: compliancePack !== null,
     },
   ]
@@ -1372,8 +1372,8 @@ function ControlPackageHighlightsCard({
       <CardContent className="space-y-4 pt-6">
         {highlights.length === 0 && (
           <EmptyState
-            title="Inca nu exista suficiente semnale pentru grupuri dominante"
-            label="Confirmi mai intai suficiente sisteme sau completezi campurile lipsa din pack, apoi aici vei vedea ce bundle domina pe fiecare categorie."
+            title="Insuficiente semnale pentru grupuri dominante"
+            label="Confirmă mai întâi suficiente sisteme sau completează câmpurile lipsă din pack — vei vedea ce bundle domină pe fiecare categorie."
             className="border-eos-border bg-eos-surface-variant py-8"
           />
         )}

@@ -141,8 +141,9 @@ export default function DoraPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <PageIntro
-        title="DORA — Reziliență Operațională Digitală"
-        description="Regulamentul EU 2022/2554 (DORA) — obligatoriu pentru instituții financiare. Gestionează incidentele ICT, furnizorii terți critici și testele de reziliență."
+        eyebrow="DORA · Reziliență Operațională"
+        title="Reziliență Digitală"
+        description="Regulamentul EU 2022/2554 — obligatoriu pentru instituții financiare. Gestionează incidentele ICT, furnizorii terți critici și testele de reziliență."
       />
 
       {/* KPI strip */}

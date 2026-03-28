@@ -78,7 +78,7 @@ export function EvidenceReadinessCard({ evidence, className }: EvidenceReadiness
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-eos-text-muted">Nu exista dovezi lipsa critice.</p>
+              <p className="text-sm text-eos-text-muted">Nu există dovezi lipsă critice.</p>
             )}
           </div>
         </CardContent>

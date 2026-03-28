@@ -64,7 +64,7 @@ function DiscrepanciesTab() {
     fetch("/api/fiscal/etva-discrepancies", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: { discrepancies?: ETVADiscrepancy[] }) => setItems(data.discrepancies ?? []))
-      .catch(() => toast.error("Nu am putut incarca discrepantele."))
+      .catch(() => toast.error("Nu am putut încărca discrepanțele."))
       .finally(() => setLoading(false))
   }, [])
 
@@ -87,7 +87,7 @@ function DiscrepanciesTab() {
       if (data.discrepancy) setItems((prev) => [data.discrepancy!, ...prev])
       setForm({ type: "sum_mismatch", period: "", description: "", amountDifference: "" })
       setShowForm(false)
-      toast.success("Discrepanta creata.")
+      toast.success("Discrepanță creată.")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare la creare.")
     } finally {
@@ -112,7 +112,7 @@ function DiscrepanciesTab() {
     }
   }
 
-  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se incarca...</div>
+  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
 
   const open = items.filter((d) => d.status !== "resolved")
 
@@ -254,7 +254,7 @@ function FilingRecordsTab() {
         setRecords(data.records ?? [])
         setScore(data.disciplineScore ?? null)
       })
-      .catch(() => toast.error("Nu am putut incarca depunerile."))
+      .catch(() => toast.error("Nu am putut încărca depunerile."))
       .finally(() => setLoading(false))
   }, [])
 
@@ -272,7 +272,7 @@ function FilingRecordsTab() {
       if (data.record) setRecords((prev) => [data.record!, ...prev])
       setForm({ type: "d300_tva", period: "", status: "on_time", dueISO: "" })
       setShowForm(false)
-      toast.success("Depunere adaugata.")
+      toast.success("Depunere adăugată.")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare la creare.")
     } finally {
@@ -280,7 +280,7 @@ function FilingRecordsTab() {
     }
   }
 
-  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se incarca...</div>
+  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
 
   const FILING_STATUS_VARIANT: Record<FilingStatus, "default" | "destructive" | "secondary" | "outline"> = {
     on_time: "default",
@@ -515,8 +515,8 @@ function SpvCheckTab() {
           {result.signals.length === 0 && result.spvRegistered && (
             <EmptyState
               icon={CheckCircle2}
-              title="Fara semnale de eroare"
-              label="Nu au fost detectate facturi respinse sau erori XML in ultimele 30 de zile."
+              title="Fără semnale de eroare"
+              label="Nu au fost detectate facturi respinse sau erori XML în ultimele 30 de zile."
             />
           )}
         </div>
@@ -609,7 +609,7 @@ function EFacturaSignalsTab() {
     unsubmitted: signals.filter((s) => s.status === "unsubmitted").length,
   }
 
-  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se incarca...</div>
+  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
 
   return (
     <div className="space-y-4">
@@ -651,7 +651,7 @@ function EFacturaSignalsTab() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
-          title="Fara semnale"
+          title="Fără semnale"
           label={filter === "all" ? "Nu sunt semnale e-Factura active." : `Niciun semnal de tip ${SIGNAL_FILTER_LABELS[filter]}.`}
         />
       ) : (

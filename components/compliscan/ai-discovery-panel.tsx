@@ -372,15 +372,15 @@ export function AIDiscoveryPanel({
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
-            Aici ramane doar lista de lucru activa: detectii care mai cer review sau confirmare.
+            Aici rămâne doar lista de lucru activă: detecții care mai cer review sau confirmare.
           </div>
           {systems.length === 0 && (
             <EmptyState
-              title={mode === "yaml" ? "Fara rezultate din YAML" : "Fara detectii automate"}
+              title={mode === "yaml" ? "Fără rezultate din YAML" : "Fără detecții automate"}
               label={
                 mode === "yaml"
-                  ? "Inca nu avem rezultate din compliscan.yaml. Incarca fisierul, valideaza-l si apoi revino aici pentru review si confirmare."
-                  : "Inca nu avem detectii automate. Ruleaza autodiscovery pe un manifest si apoi confirma doar sistemele utile in inventar."
+                  ? "Încă nu avem rezultate din compliscan.yaml. Încarcă fișierul, validează-l și apoi revino pentru review și confirmare."
+                  : "Încă nu avem detecții automate. Rulează autodiscovery pe un manifest și apoi confirmă doar sistemele utile în inventar."
               }
               className="rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-6"
             />

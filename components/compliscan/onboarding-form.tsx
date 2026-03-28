@@ -7,7 +7,6 @@ import {
   Briefcase,
   Building2,
   CheckCircle2,
-  ListChecks,
   Loader2,
   ShieldCheck,
 } from "lucide-react"
@@ -18,99 +17,104 @@ import {
   type ApplicabilityWizardStep,
 } from "@/components/compliscan/applicability-wizard"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
+import { resolveOnboardingDestination } from "@/lib/compliscan/onboarding-destination"
 
-type ModeOption = {
-  id: "solo" | "partner" | "compliance"
-  label: string
-  description: string
-  icon: React.ReactNode
-}
+// ── Types ────────────────────────────────────────────────────────────────────
 
-const MODE_OPTIONS: ModeOption[] = [
-  {
-    id: "solo",
-    label: "Proprietar / Manager",
-    description:
-      "Gestionezi conformitatea pentru propria ta firmă. Vei vedea un dashboard simplificat, axat pe acțiuni concrete.",
-    icon: <Building2 className="size-6" />,
-  },
-  {
-    id: "partner",
-    label: "Consultant / Contabil / Auditor",
-    description:
-      "Gestionezi mai multe firme simultan. Vei avea acces la un portofoliu agregat cu vedere cross-client.",
-    icon: <Briefcase className="size-6" />,
-  },
-  {
-    id: "compliance",
-    label: "Responsabil conformitate",
-    description:
-      "Lucrezi intern pe o singură firmă, cu drepturi operaționale extinse. Vei vedea toate instrumentele de audit și raportare.",
-    icon: <ShieldCheck className="size-6" />,
-  },
-]
+type ModeId = "solo" | "partner" | "compliance"
 
 type OnboardingFormProps = {
-  initialUserMode: ModeOption["id"] | null
+  initialUserMode: ModeId | null
   orgName?: string | null
 }
 
-type OnboardingOverviewStep = {
-  id: "mode" | "profile" | "laws"
-  label: string
-  hint: string
-  icon: typeof ShieldCheck
-}
+// ── Data ─────────────────────────────────────────────────────────────────────
 
-const ONBOARDING_OVERVIEW_STEPS: OnboardingOverviewStep[] = [
+const MODE_OPTIONS = [
   {
-    id: "mode",
-    label: "Cum vei folosi CompliScan",
-    hint: "alegi rolul și modul de lucru",
-    icon: ShieldCheck,
-  },
-  {
-    id: "profile",
-    label: "Date firmă și semnale publice",
-    hint: "CUI, ANAF, website, sector și mărime",
+    id: "solo" as ModeId,
+    label: "Proprietar / Manager",
+    description:
+      "Gestionezi conformitatea firmei tale. Dashboard simplificat, axat pe acțiuni concrete și primul risc rezolvat.",
     icon: Building2,
+    badge: "Solo",
+    iconClass: "text-blue-400",
+    iconBg: "bg-blue-500/10 border-blue-500/20",
+    activeBorder: "border-blue-500/40",
+    activeBg: "bg-blue-500/[0.06]",
+    activeShadow: "shadow-[0_0_28px_rgba(59,130,246,0.10)]",
+    badgeClass: "bg-blue-500/20 text-blue-400",
+    checkClass: "text-blue-400",
   },
   {
-    id: "laws",
-    label: "Legi aplicabile și confirmări",
-    hint: "ce reguli se aplică și unde trebuie confirmare",
-    icon: ListChecks,
+    id: "partner" as ModeId,
+    label: "Consultant / Contabil / Auditor",
+    description:
+      "Gestionezi mai multe firme simultan. Portofoliu agregat cu vedere cross-client și livrabile pentru clienți.",
+    icon: Briefcase,
+    badge: "Partner",
+    iconClass: "text-violet-400",
+    iconBg: "bg-violet-500/10 border-violet-500/20",
+    activeBorder: "border-violet-500/40",
+    activeBg: "bg-violet-500/[0.06]",
+    activeShadow: "shadow-[0_0_28px_rgba(139,92,246,0.10)]",
+    badgeClass: "bg-violet-500/20 text-violet-400",
+    checkClass: "text-violet-400",
+  },
+  {
+    id: "compliance" as ModeId,
+    label: "Responsabil conformitate",
+    description:
+      "Lucrezi intern pe o singură firmă, cu drepturi extinse de audit, raportare și instrumente de control.",
+    icon: ShieldCheck,
+    badge: "Compliance",
+    iconClass: "text-emerald-400",
+    iconBg: "bg-emerald-500/10 border-emerald-500/20",
+    activeBorder: "border-emerald-500/40",
+    activeBg: "bg-emerald-500/[0.06]",
+    activeShadow: "shadow-[0_0_28px_rgba(16,185,129,0.10)]",
+    badgeClass: "bg-emerald-500/20 text-emerald-400",
+    checkClass: "text-emerald-400",
   },
 ]
 
-function getOverviewStep(mode: ModeOption["id"] | null, wizardStep: ApplicabilityWizardStep | null) {
-  if (!mode) return "mode"
-  if (!wizardStep || wizardStep === "cui" || wizardStep === "checking" || wizardStep === "sector" || wizardStep === "size") {
-    return "profile"
+const PHASES = [
+  { label: "Rolul tău" },
+  { label: "Date firmă" },
+  { label: "Legi aplicabile" },
+]
+
+function getPhaseIndex(mode: ModeId | null, wizardStep: ApplicabilityWizardStep | null): number {
+  if (!mode) return 0
+  if (
+    !wizardStep ||
+    wizardStep === "cui" ||
+    wizardStep === "checking" ||
+    wizardStep === "sector" ||
+    wizardStep === "size" ||
+    wizardStep === "ai" ||
+    wizardStep === "efactura"
+  ) {
+    return 1
   }
-  return "laws"
+  return 2
 }
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps) {
   const router = useRouter()
-  const [currentMode, setCurrentMode] = useState<ModeOption["id"] | null>(initialUserMode)
-  const [selectedMode, setSelectedMode] = useState<ModeOption["id"] | null>(initialUserMode)
+  const [currentMode, setCurrentMode] = useState<ModeId | null>(initialUserMode)
+  const [selectedMode, setSelectedMode] = useState<ModeId | null>(initialUserMode)
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
     initialUserMode ? "cui" : null
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const activeOverviewStep = getOverviewStep(currentMode, wizardStep)
-  const activeOverviewStepIndex = Math.max(
-    0,
-    ONBOARDING_OVERVIEW_STEPS.findIndex((step) => step.id === activeOverviewStep)
-  )
-  const selectedModeMeta = currentMode
-    ? MODE_OPTIONS.find((option) => option.id === currentMode) ?? null
-    : null
+
+  const phaseIndex = getPhaseIndex(currentMode, wizardStep)
+  const destination = resolveOnboardingDestination(currentMode)
+  const currentMeta = currentMode ? MODE_OPTIONS.find((o) => o.id === currentMode) ?? null : null
 
   async function handleConfirm() {
     if (!selectedMode) return
@@ -133,7 +137,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
 
       setCurrentMode(selectedMode)
       setWizardStep("cui")
-      toast.success("Pasul 1 a fost salvat. Continuăm cu profilul firmei.")
+      toast.success("Pasul 1 salvat. Continuăm cu profilul firmei.")
     } catch {
       setError("Eroare de rețea. Încearcă din nou.")
     } finally {
@@ -141,8 +145,31 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
     }
   }
 
-  function handleOnboardingComplete() {
-    router.replace("/dashboard/resolve")
+  async function handleOnboardingComplete() {
+    if (destination.requiresPortfolioWorkspace) {
+      try {
+        const response = await fetch("/api/auth/select-workspace", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceMode: "portfolio" }),
+        })
+        const payload = (await response.json().catch(() => ({}))) as { error?: string }
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Nu am putut muta sesiunea în portofoliu.")
+        }
+      } catch (nextError) {
+        setError(
+          nextError instanceof Error
+            ? nextError.message
+            : "Nu am putut muta sesiunea în portofoliu."
+        )
+        return
+      }
+    }
+
+    router.replace(destination.clientHref)
+    router.refresh()
   }
 
   function handleBackToModeSelection() {
@@ -154,208 +181,202 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-3 py-6 sm:px-4 sm:py-10">
-      <div className="mx-auto grid w-full max-w-6xl gap-4 sm:gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <div className="space-y-4">
-          <div>
-            <CompliScanLogoLockup
-              className="mb-5"
-              variant="gradient"
-              size="md"
-              subtitle=""
-              titleClassName="text-eos-text"
-              subtitleClassName="text-eos-text-muted"
-            />
+    <div className="min-h-screen bg-[#060810] text-white">
+      {/* Header */}
+      <header className="border-b border-white/[0.06] px-6 py-4">
+        <div className="mx-auto flex max-w-xl items-center justify-between">
+          <CompliScanLogoLockup variant="flat" size="sm" />
+          <span className="text-xs text-white/30">
+            Pasul {phaseIndex + 1} din {PHASES.length}
+            {" · "}
+            {PHASES[phaseIndex]?.label}
+          </span>
+        </div>
+      </header>
 
-            <Badge variant="outline" className="normal-case tracking-normal">
-              Onboarding ghidat
-            </Badge>
-            <h1 className="mt-4 text-3xl font-semibold text-eos-text">
-              Îți pregătim primul snapshot, nu te plimbăm prin pagini
-            </h1>
-            <p className="mt-3 text-sm leading-relaxed text-eos-text-muted">
-              Pornim din rol, CUI și website. Compli verifică, îți spune ce ți se aplică, ce a
-              găsit deja și care este prima acțiune cu impact real.
-            </p>
-          </div>
+      {/* Progress bar */}
+      <div className="h-0.5 bg-white/[0.05]">
+        <div
+          className="h-full bg-blue-500 transition-all duration-500"
+          style={{ width: `${((phaseIndex + 1) / PHASES.length) * 100}%` }}
+        />
+      </div>
 
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="space-y-4 pt-4">
-              {ONBOARDING_OVERVIEW_STEPS.map((step, index) => {
-                const stepIndex = ONBOARDING_OVERVIEW_STEPS.findIndex((item) => item.id === activeOverviewStep)
-                const isDone = index < stepIndex
-                const isCurrent = index === stepIndex
-                const StepIcon = step.icon
-
-                return (
-                  <div key={step.id} className="flex items-start gap-3">
-                    <div
-                      className={[
-                        "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
-                        isDone
-                          ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
-                          : isCurrent
-                            ? "border-eos-primary/40 bg-eos-primary/10 text-eos-primary"
-                            : "border-eos-border bg-eos-bg-inset text-eos-text-muted",
-                      ].join(" ")}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 className="size-4" strokeWidth={2} />
-                      ) : (
-                        <StepIcon className="size-4" strokeWidth={2} />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium text-eos-text">
-                          {index + 1}. {step.label}
-                        </p>
-                        {isCurrent ? (
-                          <Badge className="border-eos-primary/20 bg-eos-primary/10 text-eos-primary">
-                            Acum
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-xs text-eos-text-muted">{step.hint}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
-
-          {selectedModeMeta ? (
-            <Card className="border-eos-border bg-eos-surface">
-              <CardContent className="pt-4">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-eos-md bg-eos-primary/10 p-2 text-eos-primary">
-                    {selectedModeMeta.icon}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-eos-text">
-                      Mod selectat: {selectedModeMeta.label}
-                    </p>
-                    <p className="mt-1 text-xs leading-relaxed text-eos-text-muted">
-                      {selectedModeMeta.description}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs text-eos-text-muted">
-                    Îl poți schimba ulterior din Setări cont.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleBackToModeSelection}
-                    className="text-xs font-medium text-eos-primary hover:underline"
-                  >
-                    Schimbă modul
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : null}
+      <main className="mx-auto max-w-xl px-6 pb-16 pt-10">
+        {/* Phase dots */}
+        <div className="mb-8 flex items-center gap-2">
+          {PHASES.map((phase, i) => (
+            <div key={phase.label} className="flex items-center gap-2">
+              <div
+                className={[
+                  "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-all",
+                  i < phaseIndex
+                    ? "bg-blue-500 text-white"
+                    : i === phaseIndex
+                      ? "border border-blue-500/50 bg-blue-500/15 text-blue-400"
+                      : "border border-white/10 text-white/20",
+                ].join(" ")}
+              >
+                {i < phaseIndex ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+              </div>
+              <span
+                className={[
+                  "text-xs",
+                  i === phaseIndex ? "font-medium text-white/80" : "text-white/25",
+                ].join(" ")}
+              >
+                {phase.label}
+              </span>
+              {i < PHASES.length - 1 && <div className="mx-1 h-px w-6 bg-white/10" />}
+            </div>
+          ))}
         </div>
 
-        <div className="space-y-4">
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="pt-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
-                    Pasul {activeOverviewStepIndex + 1} din {ONBOARDING_OVERVIEW_STEPS.length}
-                  </p>
-                  <h2 className="mt-2 text-xl font-semibold text-eos-text">
-                    {currentMode
-                      ? ONBOARDING_OVERVIEW_STEPS[activeOverviewStepIndex]?.label ?? "Configurăm profilul inițial al firmei"
-                      : "Cum vei folosi CompliScan?"}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-eos-text-muted">
-                    {currentMode
-                      ? `${orgName ?? "Organizația ta"} rămâne în același flow până când primești primul snapshot: ce se aplică, ce am găsit deja și ce faci acum. Poți reveni cu Înapoi dacă vrei să corectezi răspunsurile.`
-                      : "Alege rolul care descrie cel mai bine modul în care vei lucra în produs."}
-                  </p>
-                </div>
-                {currentMode ? (
-                  <Badge variant="outline" className="normal-case tracking-normal">
-                    Fără ping-pong între ecrane
-                  </Badge>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
+        {/* ── Phase 1: Selectare mod ── */}
+        {!currentMode && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Cum vei folosi CompliScan?</h1>
+              <p className="mt-2 text-sm leading-6 text-white/45">
+                Alege rolul care descrie cel mai bine modul în care lucrezi. Poți schimba
+                ulterior din Setări.
+              </p>
+            </div>
 
-          {!currentMode ? (
-            <Card className="border-eos-border bg-eos-surface">
-              <CardContent className="pt-5">
-                <div className="space-y-3">
-                  {MODE_OPTIONS.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setSelectedMode(option.id)}
-                      className={`w-full rounded-eos-lg bg-eos-surface p-4 text-left transition-colors ${
-                        selectedMode === option.id
-                          ? "ring-2 ring-eos-primary"
-                          : "ring-1 ring-eos-border hover:ring-eos-border-hover"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`mt-0.5 shrink-0 rounded-eos-md p-2 ${
-                            selectedMode === option.id
-                              ? "bg-eos-primary/10 text-eos-primary"
-                              : "bg-eos-surface-variant text-eos-text-muted"
-                          }`}
-                        >
-                          {option.icon}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-eos-text">{option.label}</p>
-                          <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                            {option.description}
-                          </p>
-                        </div>
+            <div className="space-y-3">
+              {MODE_OPTIONS.map((option) => {
+                const isSelected = selectedMode === option.id
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setSelectedMode(option.id)}
+                    className={[
+                      "w-full rounded-2xl border p-5 text-left transition-all duration-200",
+                      isSelected
+                        ? [option.activeBorder, option.activeBg, option.activeShadow].join(" ")
+                        : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14] hover:bg-white/[0.04]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={[
+                          "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all",
+                          isSelected
+                            ? [option.iconBg, option.iconClass].join(" ")
+                            : "border-white/10 bg-white/5 text-white/30",
+                        ].join(" ")}
+                      >
+                        <option.icon className="h-5 w-5" strokeWidth={1.5} />
                       </div>
-                    </button>
-                  ))}
-                </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2.5">
+                          <p
+                            className={[
+                              "font-semibold transition-colors",
+                              isSelected ? "text-white" : "text-white/65",
+                            ].join(" ")}
+                          >
+                            {option.label}
+                          </p>
+                          <span
+                            className={[
+                              "rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all",
+                              isSelected ? option.badgeClass : "bg-white/5 text-white/20",
+                            ].join(" ")}
+                          >
+                            {option.badge}
+                          </span>
+                        </div>
+                        <p
+                          className={[
+                            "mt-1 text-sm leading-relaxed transition-colors",
+                            isSelected ? "text-white/55" : "text-white/30",
+                          ].join(" ")}
+                        >
+                          {option.description}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle2
+                          className={["mt-0.5 h-5 w-5 shrink-0", option.checkClass].join(" ")}
+                        />
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
 
-                {error ? (
-                  <div className="mt-4 rounded-eos-md border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
-                    {error}
-                  </div>
-                ) : null}
+            {error && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                {error}
+              </div>
+            )}
 
-                <Button
-                  size="lg"
-                  className="mt-6 w-full gap-2"
-                  disabled={!selectedMode || loading}
-                  onClick={() => void handleConfirm()}
+            <button
+              type="button"
+              disabled={!selectedMode || loading}
+              onClick={() => void handleConfirm()}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Se salvează...
+                </>
+              ) : (
+                <>
+                  Continuă cu profilul firmei
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* ── Phase 2 + 3: Wizard ── */}
+        {currentMode && (
+          <div className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-white">
+                  {phaseIndex === 1 ? "Date firmă și semnale publice" : "Legi aplicabile și confirmări"}
+                </h1>
+                <p className="mt-1.5 text-sm text-white/45">
+                  {orgName ?? "Organizația ta"} · intri direct în{" "}
+                  <span className="text-white/70">{destination.summaryLabel}</span> la final
+                </p>
+              </div>
+              {currentMeta && (
+                <div
+                  className={[
+                    "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5",
+                    currentMeta.activeBorder,
+                    "bg-white/[0.03]",
+                  ].join(" ")}
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Se salvează...
-                    </>
-                  ) : (
-                    <>
-                      Continuă cu profilul firmei
-                      <ArrowRight className="size-4" strokeWidth={2} />
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
+                  <currentMeta.icon
+                    className={["h-3.5 w-3.5", currentMeta.iconClass].join(" ")}
+                    strokeWidth={1.5}
+                  />
+                  <span className={["text-[11px] font-semibold", currentMeta.iconClass].join(" ")}>
+                    {currentMeta.badge}
+                  </span>
+                </div>
+              )}
+            </div>
+
             <ApplicabilityWizard
               onComplete={handleOnboardingComplete}
               onStepChange={setWizardStep}
               onBackToModeSelection={handleBackToModeSelection}
+              completionLabel={destination.submitLabel}
+              completionHint={`La final intri direct în ${destination.summaryLabel}.`}
             />
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

@@ -956,9 +956,9 @@ export default function VendorReviewPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <PageIntro
-        eyebrow="V5 — Vendor Review Workbench"
+        eyebrow="Furnizori · Review"
         title="Vendor Review"
-        description="Review semi-automat pentru vendorii externi detectați. Completează contextul, generează review-ul corect, confirmă și închide cu dovadă."
+        description="Review semi-automat pentru furnizorii externi detectați. Completează contextul, generează review-ul, confirmă și închide cu dovadă."
         actions={
           <Button onClick={() => setShowPicker(!showPicker)}>
             <Plus className="size-4" strokeWidth={2} />

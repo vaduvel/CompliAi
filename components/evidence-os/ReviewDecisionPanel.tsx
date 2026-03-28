@@ -41,10 +41,10 @@ export function ReviewDecisionPanel({
   const remainingTotal = systemsCount + findingsCount + driftsCount
   const reviewDescription =
     remainingTotal === 0
-      ? "Nu a ramas nimic de confirmat. Revizuieste lotul sau inchide workspace-ul fara commit."
+      ? "Nu a rămas nimic de confirmat. Revizuiește lotul sau închide workspace-ul fără commit."
       : rejectedCount > 0
-        ? "Confirmi doar propunerile ramase dupa excluderile facute in review."
-        : "Confirmi propunerile agentilor? Acestea intra in starea oficiala a sistemului."
+        ? "Confirmi doar propunerile rămase după excluderile făcute în review."
+        : "Confirmi propunerile agenților? Acestea intră în starea oficială a sistemului."
 
   return (
     <section
@@ -62,7 +62,7 @@ export function ReviewDecisionPanel({
           {rejectedCount > 0 ? <Badge variant="warning">{rejectedCount} excluse</Badge> : null}
         </div>
         <h3 id={titleId} className="text-lg font-semibold text-eos-text">
-          Decizie finala
+          Decizie finală
         </h3>
         <p id={descriptionId} className="mt-1 text-xs text-eos-text-muted">
           {reviewDescription}
@@ -71,15 +71,15 @@ export function ReviewDecisionPanel({
 
       <div className="flex-1 space-y-4 overflow-auto" aria-label="Sumar impact si politica de review">
         <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset p-3">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Lot ramas pentru commit</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Lot rămas pentru commit</p>
           <p className="mt-1 text-sm text-eos-text">
             {remainingTotal === 0
-              ? "Nu exista propuneri ramase pentru aplicare."
-              : `${remainingTotal} propuneri raman in lotul final.`}
+              ? "Nu există propuneri rămase pentru aplicare."
+              : `${remainingTotal} propuneri rămân în lotul final.`}
           </p>
           {rejectedCount > 0 ? (
             <p className="mt-2 text-xs text-eos-text-muted">
-              Propunerile respinse raman in afara starii oficiale si nu intra in commit.
+              Propunerile respinse rămân în afara stării oficiale și nu intră în commit.
             </p>
           ) : null}
         </div>

@@ -103,7 +103,7 @@ export function EFacturaValidatorCard({
         <div className="space-y-4">
           {!latestValidation && (
             <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
-              Inca nu exista validari rulate. Primul pas util este sa verifici daca XML-ul are blocurile minime pentru un flux e-Factura coerent.
+              Nicio validare rulată încă. Primul pas util este să verifici dacă XML-ul are blocurile minime pentru un flux e-Factura coerent.
             </div>
           )}
 
@@ -118,7 +118,7 @@ export function EFacturaValidatorCard({
                         : "border-eos-error-border bg-eos-error-soft text-eos-error"
                     }
                   >
-                    {latestValidation.valid ? "Structura valida" : "Structura invalida"}
+                    {latestValidation.valid ? "Structură validă" : "Structură invalidă"}
                   </Badge>
                   <Badge className="border-eos-border bg-transparent text-eos-text-muted [overflow-wrap:anywhere]">
                     {latestValidation.documentName}
@@ -137,13 +137,13 @@ export function EFacturaValidatorCard({
                 <IssueList
                   title="Erori"
                   items={latestValidation.errors}
-                  emptyText="Nu exista erori structurale detectate."
+                  emptyText="Nu există erori structurale detectate."
                   tone="error"
                 />
                 <IssueList
                   title="Avertismente"
                   items={latestValidation.warnings}
-                  emptyText="Nu exista avertismente."
+                  emptyText="Nu există avertismente."
                   tone="warning"
                 />
               </div>

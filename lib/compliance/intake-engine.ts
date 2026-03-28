@@ -726,6 +726,7 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "EU_AI_ACT",
           "high",
           {
+            suggestedDocumentType: "ai-governance",
             remediationHint: "Generează politica de utilizare AI din CompliAI.",
             resolution: {
               problem: "Lipsește politica internă de utilizare AI.",
@@ -865,13 +866,13 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
         "GDPR",
         "medium",
         {
-          remediationHint: "Pregătește template-uri de contracte standard.",
+          remediationHint: "Pregătește sau actualizează template-urile contractuale și lasă dovada clară în cockpit.",
           resolution: {
             problem: "Contracte standard lipsă sau incomplete.",
             impact: "Expunere juridică în relații comerciale + audit dificil.",
-            action: "Generează template-uri contracte din CompliAI.",
-            humanStep: "Adaptează la specificul activității și verifică cu un jurist.",
-            closureEvidence: "Template-uri contracte finalizate și în uz.",
+            action: "Pregătește template-uri contractuale standard și pune-le în uz pentru relațiile comerciale repetitive.",
+            humanStep: "Adaptează template-urile la specificul activității, verifică-le cu un jurist și notează unde sunt salvate sau folosite.",
+            closureEvidence: "Template-uri contractuale revizuite și urmă clară despre unde sunt salvate sau folosite.",
           },
         }
       )
@@ -908,7 +909,12 @@ export function buildDocumentRequests(answers: FullIntakeAnswers): DocumentReque
   }
 
   if (isPositive(answers.usesAITools)) {
-    docs.push({ id: "ai-policy", label: "Politică utilizare AI", priority: "required", category: "AI Act" })
+    docs.push({
+      id: "ai-governance",
+      label: "Politică guvernanță AI",
+      priority: "required",
+      category: "AI Act",
+    })
   }
 
   if (isPositive(answers.processesPersonalData)) {
@@ -932,7 +938,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
       f.id === "intake-site-privacy-policy" ||
       f.id === "intake-b2c-privacy"
   )
-  const hasAiFinding = findings.some((f) => f.id === "intake-ai-missing-policy")
+  const aiFinding = findings.find((f) => f.id === "intake-ai-missing-policy")
   const vendorDpaFinding = findings.find((f) => f.id === "intake-vendor-no-dpa")
   const hasVendorFinding = findings.some((f) => f.id === "intake-vendor-missing-docs")
 
@@ -952,10 +958,10 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
     }
   }
 
-  if (hasAiFinding) {
+  if (aiFinding) {
     return {
-      label: "Adaugă sistemele AI și generează politica AI",
-      href: "/dashboard/sisteme",
+      label: "Deschide politica AI în cockpit",
+      href: `${dashboardRoutes.resolve}/${aiFinding.id}?action=generate`,
       estimatedMinutes: 4,
     }
   }

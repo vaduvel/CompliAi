@@ -11,7 +11,7 @@ import {
   verifySessionToken,
 } from "@/lib/server/auth"
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
-import { readState } from "@/lib/server/mvp-store"
+import { loadOnboardingGateState } from "@/lib/server/onboarding-gate"
 
 function isDemoSession(session: { userId: string; orgId: string }) {
   return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
@@ -24,17 +24,20 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [state, cookieStore] = await Promise.all([readState(), cookies()])
+  const [{ state, hasCompletedOnboarding }, cookieStore] = await Promise.all([
+    loadOnboardingGateState(),
+    cookies(),
+  ])
   const corePayload = await buildDashboardCorePayload(state)
   const sessionToken = cookieStore.get(SESSION_COOKIE)?.value
   const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
 
   const userMode = session && !isDemoSession(session) ? await resolveUserMode(session) : null
-  const hasCompletedOnboarding = Boolean(userMode && state.orgProfile && state.applicability)
+  const onboardingDone = Boolean(userMode && hasCompletedOnboarding)
 
   if (session && !isDemoSession(session)) {
-    if (!hasCompletedOnboarding) {
+    if (!onboardingDone) {
       redirect("/onboarding")
     }
     if (session.workspaceMode === "portfolio" && userMode === "partner") {

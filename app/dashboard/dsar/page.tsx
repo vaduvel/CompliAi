@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   CalendarPlus,
@@ -74,9 +74,27 @@ function daysLeft(deadlineISO: string): { days: number; label: string; urgent: b
   return { days, label: `${days} zile rămase`, urgent: false, expired: false }
 }
 
+function buildDsarReturnEvidence(request: DsarRequest) {
+  const requestType = REQUEST_TYPE_LABELS[request.requestType].toLowerCase()
+  const referenceDate = request.responseSentAtISO
+    ? new Date(request.responseSentAtISO).toLocaleDateString("ro-RO")
+    : new Date(request.updatedAtISO).toLocaleDateString("ro-RO")
+
+  if (request.status === "refused") {
+    return `Cerere DSAR ${requestType} pentru ${request.requesterEmail}. Identitate verificată, refuz documentat la ${referenceDate}. Referință caz: ${request.id}.`
+  }
+
+  return `Cerere DSAR ${requestType} pentru ${request.requesterEmail}. Identitate verificată, răspuns trimis la ${referenceDate}. Referință caz: ${request.id}.`
+}
+
+function appendReturnParams(baseHref: string, params: URLSearchParams) {
+  return `${baseHref}${baseHref.includes("?") ? "&" : "?"}${params.toString()}`
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DsarPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [requests, setRequests] = useState<DsarRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -91,6 +109,9 @@ export default function DsarPage() {
   })
   const sourceFindingId = searchParams.get("findingId")
   const requestedType = searchParams.get("type")
+  const returnTo =
+    searchParams.get("returnTo") ??
+    (sourceFindingId ? `/dashboard/resolve/${sourceFindingId}` : null)
 
   useEffect(() => {
     fetch("/api/dsar", { cache: "no-store" })
@@ -159,6 +180,22 @@ export default function DsarPage() {
       if (!res.ok) throw new Error("Update eșuat")
       const { request } = await res.json()
       setRequests((prev) => prev.map((r) => (r.id === id ? request : r)))
+
+      if (
+        returnTo &&
+        sourceFindingId &&
+        (request.status === "responded" || request.status === "refused")
+      ) {
+        toast.success("Caz DSAR finalizat. Revenim în cockpit.")
+        const params = new URLSearchParams({
+          dsarFlow: "done",
+          dsarRequestId: request.id,
+          evidenceNote: buildDsarReturnEvidence(request),
+        })
+        router.push(appendReturnParams(returnTo, params))
+        return
+      }
+
       toast.success("Cerere actualizată")
     } catch {
       toast.error("Eroare la actualizare")
@@ -184,8 +221,9 @@ export default function DsarPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <PageIntro
-        title="Cereri acces date (DSAR)"
-        description="Gestionează cererile de acces, rectificare și ștergere GDPR Art. 15-22. Deadline legal: 30 zile de la primire."
+        eyebrow="GDPR · DSAR"
+        title="Cereri acces date"
+        description="Gestionează cererile de acces, rectificare și ștergere GDPR Art. 15-22. Deadline legal: 30 de zile de la primire."
         badges={
           <Link href="/dashboard/calendar" className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline">
             <CalendarPlus className="size-3.5" strokeWidth={2} />

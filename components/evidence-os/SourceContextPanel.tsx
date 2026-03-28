@@ -58,7 +58,7 @@ export function SourceContextPanel({ envelope, className }: SourceContextPanelPr
               signals={envelope.sourceSignals}
               title="Semnale detectate"
               showEmpty
-              emptyLabel="Fara semnale brute"
+              emptyLabel="Fără semnale brute"
             />
           </section>
 

@@ -40,7 +40,7 @@ export default function RemediationPage() {
   )
   const dominantExecutionSignal =
     tasksMissingEvidence.length > 0
-      ? `${tasksMissingEvidence.length} task-uri fara dovada`
+      ? `${tasksMissingEvidence.length} task-uri fără dovadă`
       : ledgerWeakCount > 0
         ? `${ledgerWeakCount} dovezi slabe`
         : openPriorityOneTasks.length > 0
@@ -50,22 +50,22 @@ export default function RemediationPage() {
     {
       label: "Task-uri deschise",
       value: `${openTasks.length}`,
-      hint: "executie activa in board",
+      hint: "execuție activă în board",
       tone: openTasks.length > 0 ? "warning" : "success",
     },
     {
       label: "P1 deschise",
       value: `${openPriorityOneTasks.length}`,
-      hint: openPriorityOneTasks.length > 0 ? "intri mai intai in urgente" : "nu ai urgente acum",
+      hint: openPriorityOneTasks.length > 0 ? "intri mai întâi în urgențe" : "nu ai urgențe acum",
       tone: openPriorityOneTasks.length > 0 ? "danger" : "success",
     },
     {
-      label: "Fara dovada",
+      label: "Fără dovadă",
       value: `${tasksMissingEvidence.length}`,
       hint:
         tasksMissingEvidence.length > 0
-          ? "task-uri care tin auditul blocat"
-          : `${evidenceAttached.length} au dovada atasata`,
+          ? "task-uri care țin auditul blocat"
+          : `${evidenceAttached.length} au dovadă atașată`,
       tone: tasksMissingEvidence.length > 0 ? "warning" : "accent",
     },
   ]
@@ -76,9 +76,9 @@ export default function RemediationPage() {
       value: ledgerWeakCount > 0 ? `${ledgerWeakCount} slabe` : `${ledgerReadyCount} verificate`,
       hint:
         ledgerWeakCount > 0
-          ? "inlocuiesti dovezile slabe inainte de audit"
+          ? "înlocuiești dovezile slabe înainte de audit"
           : ledgerUnratedCount > 0
-            ? `${ledgerUnratedCount} neevaluate inca`
+            ? `${ledgerUnratedCount} neevaluate încă`
             : "registru curat",
       tone: ledgerWeakCount > 0 ? "warning" : ledgerUnratedCount > 0 ? "accent" : "success",
     })
@@ -91,8 +91,8 @@ export default function RemediationPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Dovada / Remediere"
-        title="Executi, atasezi dovada si validezi"
-        description="Aici inchizi taskul corect. Vault si Audit si export raman pasi de verificare separati, nu executie."
+        title="Execuți, atașezi dovada și validezi"
+        description="Aici închizi task-ul corect. Vault, Audit și export rămân pași de verificare separați, nu execuție."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -108,12 +108,12 @@ export default function RemediationPage() {
             <p className="text-2xl font-semibold text-eos-text">{dominantExecutionSignal}</p>
             <p className="text-sm text-eos-text-muted">
               {tasksMissingEvidence.length > 0
-                ? "Atasezi dovada inainte sa inchizi task-ul."
+                ? "Atașezi dovada înainte să închizi task-ul."
                 : ledgerWeakCount > 0
-                  ? "Inlocuiesti dovezile slabe ca sa nu blocheze auditul."
+                  ? "Înlocuiești dovezile slabe ca să nu blocheze auditul."
                   : openPriorityOneTasks.length > 0
-                    ? "Intri in urgentele P1 inaintea restului."
-                    : "Poti lucra direct din board fara blocaje majore."}
+                    ? "Intri în urgențele P1 înaintea restului."
+                    : "Poți lucra direct din board fără blocaje majore."}
             </p>
           </div>
         }
@@ -124,8 +124,8 @@ export default function RemediationPage() {
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
           <SummaryStrip
-            eyebrow="Snapshot de executie"
-            title="Ce inchizi acum"
+            eyebrow="Snapshot de execuție"
+            title="Ce închizi acum"
             items={items}
           />
         </CardContent>
@@ -180,12 +180,12 @@ export default function RemediationPage() {
         {shouldShowHandoff ? (
           <HandoffCard
             title="Ai terminat board-ul — mergi in paginile read-only"
-            description="Remedierea ramane pagina de actiune. Vault si Audit si export te ajuta sa verifici ce este audit-ready, fara sa concureze cu executia."
+            description="Remedierea rămâne pagina de acțiune. Vault și Audit și export te ajută să verifici ce este audit-ready, fără să concureze cu execuția."
             destinationLabel="vault / audit pack"
             checklist={[
-              "inchizi task-ul si atasezi dovada aici",
-              "verifici ledger-ul separat in Auditor Vault",
-              "pregatesti livrabilul final in Audit si export",
+              "închizi task-ul și atașezi dovada aici",
+              "verifici ledger-ul separat în Auditor Vault",
+              "pregătești livrabilul final în Audit și export",
             ]}
             actions={
               <>

@@ -3,12 +3,10 @@
 import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react"
+import { CheckCircle2, Loader2, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 type Mode = "login" | "register"
 
@@ -33,10 +31,10 @@ function LoginContent() {
   const nextPath = resolveSafeNextPath(searchParams.get("next"))
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login"
   const [mode, setMode] = useState<Mode>(initialMode)
+  const [orgName, setOrgName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [orgName, setOrgName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
@@ -49,8 +47,13 @@ function LoginContent() {
     setError(null)
     setRegisterDuplicateEmail(false)
 
+    if (mode === "register" && !orgName.trim()) {
+      setError("Denumirea firmei este obligatorie.")
+      return
+    }
+
     if (mode === "register" && password !== confirmPassword) {
-      setError("Parolele nu coincid. Verifica parola si confirmarea ei.")
+      setError("Parolele nu coincid. Verifică parola și confirmarea ei.")
       return
     }
 
@@ -76,7 +79,7 @@ function LoginContent() {
           )
           return
         }
-        setError(data.error || "A aparut o eroare.")
+        setError(data.error || "A apărut o eroare.")
         return
       }
 
@@ -91,78 +94,133 @@ function LoginContent() {
       })
       router.push(destination)
     } catch {
-      setError("Eroare de retea. Incearca din nou.")
+      setError("Eroare de rețea. Încearcă din nou.")
     } finally {
       setLoading(false)
     }
   }
 
+  function switchToLogin() {
+    setMode("login")
+    setOrgName("")
+    setError(null)
+    setConfirmPassword("")
+    setRegisterDuplicateEmail(false)
+  }
+
+  function switchToRegister() {
+    setMode("register")
+    setOrgName("")
+    setError(null)
+    setRegisterDuplicateEmail(false)
+  }
+
   const VALUE_PROPS = [
     "NIS2, GDPR, AI Act, e-Factura — totul într-un loc",
     "Import automat din SPV / e-Factura ANAF",
-    "Dosar de control gata de descărcat pentru orice inspecție",
+    "Dosar de control gata de descărcat oricând",
   ]
 
+  const submitDisabled =
+    loading ||
+    (mode === "register" &&
+      (!acceptedTerms || !confirmPassword || password !== confirmPassword))
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_right,var(--eos-accent-primary-subtle),transparent_32%),linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-base))] px-4 py-12">
-      <div className="w-full max-w-md">
-        <CompliScanLogoLockup
-          className="mb-5"
-          variant="gradient"
-          size="md"
-          subtitle=""
-          titleClassName="text-eos-text"
-          subtitleClassName="text-eos-text-muted"
-        />
+    <div className="min-h-screen bg-[#060810] px-4 py-12 text-white">
+
+      {/* Background glow */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-blue-600/[0.06] blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-md">
+
+        {/* Logo */}
+        <div className="mb-8 flex justify-center">
+          <Link href="/">
+            <CompliScanLogoLockup variant="flat" size="md" />
+          </Link>
+        </div>
 
         {/* Tagline */}
-        <p className="mb-3 text-lg font-semibold leading-snug text-eos-text">
-          Află ce ți se aplică. Pregătește dovezile.{" "}
-          <span className="text-eos-primary">Fii gata de control.</span>
-        </p>
+        <div className="mb-7 text-center">
+          <h1 className="text-2xl font-bold text-white">
+            Află ce ți se aplică.{" "}
+            <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
+              Fii gata de control.
+            </span>
+          </h1>
+          <ul className="mt-4 space-y-2">
+            {VALUE_PROPS.map((prop) => (
+              <li key={prop} className="flex items-center justify-center gap-2 text-sm text-white/45">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500/70" strokeWidth={2.5} />
+                {prop}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* Value props */}
-        <ul className="mb-8 space-y-2">
-          {VALUE_PROPS.map((prop) => (
-            <li key={prop} className="flex items-center gap-2 text-sm text-eos-text-muted">
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-500" strokeWidth={2} />
-              {prop}
-            </li>
-          ))}
-        </ul>
+        {/* Card */}
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
 
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-xl">
-              {mode === "login" ? "Autentificare" : "Creeaza cont"}
-            </CardTitle>
-            <p className="text-sm text-eos-text-muted">
-              {mode === "login"
-                ? "Introdu credentialele tale pentru a accesa dashboard-ul."
-                : "Creeaza un cont nou pentru organizatia ta."}
-            </p>
-          </CardHeader>
+          {/* Mode toggle */}
+          <div className="flex border-b border-white/[0.06] p-1.5">
+            <button
+              type="button"
+              onClick={switchToLogin}
+              className={[
+                "flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all",
+                mode === "login"
+                  ? "bg-white/[0.08] text-white shadow-sm"
+                  : "text-white/35 hover:text-white/55",
+              ].join(" ")}
+            >
+              Autentificare
+            </button>
+            <button
+              type="button"
+              onClick={switchToRegister}
+              className={[
+                "flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all",
+                mode === "register"
+                  ? "bg-white/[0.08] text-white shadow-sm"
+                  : "text-white/35 hover:text-white/55",
+              ].join(" ")}
+            >
+              Cont nou
+              {mode === "register" && (
+                <span className="ml-2 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-400">
+                  14 zile Pro
+                </span>
+              )}
+            </button>
+          </div>
 
-          <CardContent className="pt-6">
+          {/* Form */}
+          <div className="px-6 py-7">
             <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label className="text-sm text-eos-text-muted">
-                    Nume organizatie
+                  <label className="text-xs font-semibold uppercase tracking-wider text-white/35">
+                    Denumirea firmei
                   </label>
                   <input
                     type="text"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Ex: Magazin Online S.R.L."
-                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    placeholder="Ex: BRRR SRL"
+                    required
+                    autoComplete="organization"
+                    className="h-12 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
                   />
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-sm text-eos-text-muted">
-                  Adresa de email
+                <label className="text-xs font-semibold uppercase tracking-wider text-white/35">
+                  Email
                 </label>
                 <input
                   type="email"
@@ -171,12 +229,14 @@ function LoginContent() {
                   placeholder="email@firma.ro"
                   required
                   autoComplete="email"
-                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="h-12 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm text-eos-text-muted">Parola</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-white/35">
+                  Parolă
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -185,17 +245,18 @@ function LoginContent() {
                     placeholder={mode === "register" ? "Minim 8 caractere" : "Parola ta"}
                     required
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
-                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    className="h-12 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-4 pr-12 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-muted hover:text-eos-text"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25 transition-colors hover:text-white/50"
+                    aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
                   >
                     {showPassword ? (
-                      <EyeOff className="size-4" strokeWidth={2} />
+                      <EyeOff className="h-4 w-4" strokeWidth={2} />
                     ) : (
-                      <Eye className="size-4" strokeWidth={2} />
+                      <Eye className="h-4 w-4" strokeWidth={2} />
                     )}
                   </button>
                 </div>
@@ -203,7 +264,9 @@ function LoginContent() {
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label className="text-sm text-eos-text-muted">Confirmă parola</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-white/35">
+                    Confirmă parola
+                  </label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -212,39 +275,54 @@ function LoginContent() {
                       placeholder="Tastează parola încă o dată"
                       required
                       autoComplete="new-password"
-                      className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                      className={[
+                        "h-12 w-full rounded-xl border bg-white/[0.05] px-4 pr-12 text-sm text-white outline-none placeholder:text-white/25 transition-all",
+                        confirmPassword && password !== confirmPassword
+                          ? "border-red-500/40 focus:border-red-500/60"
+                          : confirmPassword && password === confirmPassword
+                            ? "border-emerald-500/40 focus:border-emerald-500/50"
+                            : "border-white/[0.09] focus:border-blue-500/50 focus:bg-white/[0.07]",
+                      ].join(" ")}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword((value) => !value)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-muted hover:text-eos-text"
-                      aria-label={showConfirmPassword ? "Ascunde confirmarea parolei" : "Arată confirmarea parolei"}
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25 transition-colors hover:text-white/50"
+                      aria-label={showConfirmPassword ? "Ascunde confirmarea" : "Arată confirmarea"}
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="size-4" strokeWidth={2} />
+                        <EyeOff className="h-4 w-4" strokeWidth={2} />
                       ) : (
-                        <Eye className="size-4" strokeWidth={2} />
+                        <Eye className="h-4 w-4" strokeWidth={2} />
                       )}
                     </button>
                   </div>
+                  {confirmPassword && password !== confirmPassword && (
+                    <p className="text-xs text-red-400/80">Parolele nu coincid.</p>
+                  )}
+                  {confirmPassword && password === confirmPassword && password.length >= 8 && (
+                    <p className="flex items-center gap-1.5 text-xs text-emerald-400/80">
+                      <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} /> Parolele coincid
+                    </p>
+                  )}
                 </div>
               )}
 
               {mode === "register" && (
-                <label className="flex items-start gap-2.5 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3.5">
                   <input
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-0.5 size-4 shrink-0 rounded border-eos-border accent-eos-primary"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-blue-500"
                   />
-                  <span className="text-xs leading-relaxed text-eos-text-muted">
+                  <span className="text-xs leading-relaxed text-white/40">
                     Am citit și accept{" "}
-                    <Link href="/terms" target="_blank" className="text-eos-primary hover:underline">
+                    <Link href="/terms" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">
                       Termenii și Condițiile
                     </Link>{" "}
                     și{" "}
-                    <Link href="/privacy" target="_blank" className="text-eos-primary hover:underline">
+                    <Link href="/privacy" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">
                       Politica de Confidențialitate
                     </Link>
                     .
@@ -253,128 +331,94 @@ function LoginContent() {
               )}
 
               {error && (
-                <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                   {error}
                 </div>
               )}
 
               {mode === "register" && registerDuplicateEmail && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setMode("login")
-                      setPassword("")
-                      setConfirmPassword("")
-                      setError(null)
-                      setRegisterDuplicateEmail(false)
-                    }}
-                    className="text-sm text-eos-primary hover:underline"
+                    onClick={switchToLogin}
+                    className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
                   >
                     Mergi la autentificare
                   </button>
-                  <Link href="/reset-password" className="text-sm text-eos-primary hover:underline">
+                  <Link href="/reset-password" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">
                     Resetează parola
                   </Link>
                 </div>
               )}
 
-              <Button
+              <button
                 type="submit"
-                disabled={
-                  loading ||
-                  (mode === "register" && (!acceptedTerms || !confirmPassword || password !== confirmPassword))
-                }
-                size="lg"
-                className="w-full gap-2"
+                disabled={submitDisabled}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" />
-                    {mode === "login" ? "Se autentifica..." : "Se creeaza contul..."}
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {mode === "login" ? "Se autentifică..." : "Se creează contul..."}
                   </>
                 ) : mode === "login" ? (
-                  "Autentificare"
+                  <>
+                    Autentificare
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </>
                 ) : (
-                  "Creeaza cont"
+                  <>
+                    Creează cont gratuit
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </>
                 )}
-              </Button>
+              </button>
+
             </form>
 
             {mode === "login" && (
               <div className="mt-4 text-center">
                 <Link
                   href="/reset-password"
-                  className="text-sm text-eos-text-muted hover:text-eos-primary hover:underline"
+                  className="text-xs text-white/25 transition-colors hover:text-white/50"
                 >
                   Am uitat parola
                 </Link>
               </div>
             )}
+          </div>
+        </div>
 
-            <div className="mt-4 text-center text-sm text-eos-text-muted">
-              {mode === "login" ? (
-                <>
-                  Nu ai cont?{" "}
-                  <button
-                    onClick={() => {
-                      setMode("register")
-                      setError(null)
-                      setRegisterDuplicateEmail(false)
-                    }}
-                    className="text-eos-primary hover:underline"
-                  >
-                    Inregistreaza-te
-                  </button>
-                </>
-              ) : (
-                <>
-                  Ai deja cont?{" "}
-                  <button
-                    onClick={() => {
-                      setMode("login")
-                      setError(null)
-                      setConfirmPassword("")
-                      setRegisterDuplicateEmail(false)
-                    }}
-                    className="text-eos-primary hover:underline"
-                  >
-                    Autentifica-te
-                  </button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <p className="mt-6 text-center text-xs text-eos-text-muted">
+        {/* Footer note */}
+        <p className="mt-6 text-center text-xs leading-relaxed text-white/20">
           Nu oferim consiliere juridică. Oferim instrumente de pregătire.
           <br />
           Verificați cu un specialist înainte de orice raport oficial.
         </p>
       </div>
 
-      {loading ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:rgb(11_18_32/0.68)] px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-eos-xl border border-eos-border bg-eos-surface px-5 py-5 shadow-2xl">
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#060810]/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-5 shadow-2xl backdrop-blur-md">
             <div className="flex items-start gap-3">
-              <div className="rounded-full bg-eos-primary/10 p-2 text-eos-primary">
-                <Loader2 className="size-5 animate-spin" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-400" strokeWidth={2} />
               </div>
-              <div className="space-y-1.5">
-                <p className="text-sm font-semibold text-eos-text">
-                  {mode === "login" ? "Te autentificăm acum" : "Creăm contul și pregătim onboarding-ul"}
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-white">
+                  {mode === "login" ? "Te autentificăm acum" : "Creăm contul tău"}
                 </p>
-                <p className="text-sm text-eos-text-muted">
+                <p className="text-sm text-white/40">
                   {mode === "login"
                     ? "Îți păstrăm contextul și te trimitem direct în workspace."
-                    : "Creăm organizația, activăm sesiunea și te ducem direct în configurarea inițială."}
+                    : "Creăm organizația, activăm sesiunea și te ducem în onboarding."}
                 </p>
               </div>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

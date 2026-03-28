@@ -35,15 +35,16 @@ import {
   type SuggestedAnswer,
 } from "@/lib/compliance/intake-engine"
 import { useTrackEvent } from "@/lib/client/use-track-event"
+import {
+  INTAKE_FLOW_STEP_LABELS,
+  getQuestionIdsForIntakeFlowStep,
+  getVisibleConditionalIntakeSteps,
+  type IntakeFlowStep,
+} from "@/lib/compliscan/onboarding-steps"
 
-export type ApplicabilityWizardStep =
-  | "cui"
-  | "checking"
-  | "sector"
-  | "size"
-  | "ai"
-  | "efactura"
-  | "intake"
+type ProfileWizardStep = "cui" | "checking" | "sector" | "size" | "ai" | "efactura"
+
+export type ApplicabilityWizardStep = ProfileWizardStep | IntakeFlowStep
 
 type WizardState = {
   cui: string
@@ -67,6 +68,8 @@ type Props = {
   onComplete: (result: ApplicabilityResult) => void
   onStepChange?: (step: ApplicabilityWizardStep) => void
   onBackToModeSelection?: () => void
+  completionLabel?: string
+  completionHint?: string
 }
 
 const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
@@ -79,14 +82,13 @@ const CONFIDENCE_BADGE: Record<SuggestedAnswer["confidence"], string> = {
   low: "border-eos-border bg-eos-surface-variant text-eos-text-muted",
 }
 
-const WIZARD_SEQUENCE: ApplicabilityWizardStep[] = [
+const PROFILE_WIZARD_SEQUENCE: ProfileWizardStep[] = [
   "cui",
   "checking",
   "sector",
   "size",
   "ai",
   "efactura",
-  "intake",
 ]
 
 const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
@@ -96,7 +98,53 @@ const WIZARD_PROGRESS_LABELS: Record<ApplicabilityWizardStep, string> = {
   size: "Dimensiunea firmei",
   ai: "Utilizare AI",
   efactura: "e-Factura",
-  intake: "Confirmări finale",
+  ...INTAKE_FLOW_STEP_LABELS,
+}
+
+const INTAKE_FLOW_STEPS = Object.keys(INTAKE_FLOW_STEP_LABELS) as IntakeFlowStep[]
+const BASE_INTAKE_FLOW: IntakeFlowStep[] = ["intake-core-data", "intake-core-ops"]
+
+const INTAKE_STEP_COPY: Record<
+  IntakeFlowStep,
+  {
+    title: string
+    description: string
+  }
+> = {
+  "intake-core-data": {
+    title: "Datele care schimbă findings-urile",
+    description:
+      "Confirmăm doar prelucrările de bază care schimbă primul set de riscuri și documente recomandate.",
+  },
+  "intake-core-ops": {
+    title: "Site, contracte și furnizori",
+    description:
+      "Strângem câteva confirmări operaționale scurte, fără să deschidem încă zone laterale.",
+  },
+  "intake-hr": {
+    title: "Confirmări HR",
+    description: "Apare doar dacă răspunsurile tale duc spre obligații HR suplimentare.",
+  },
+  "intake-gdpr": {
+    title: "Confirmări GDPR",
+    description: "Apare doar unde răspunsurile schimbă obligațiile și documentele GDPR.",
+  },
+  "intake-ai": {
+    title: "Confirmări AI",
+    description: "Apare doar dacă folosești AI și schimbă obligațiile AI Act sau documentele cerute.",
+  },
+  "intake-vendors": {
+    title: "Confirmări furnizori",
+    description: "Apare doar dacă vendorii externi schimbă următorul pas operațional.",
+  },
+  "intake-site": {
+    title: "Confirmări website",
+    description: "Apare doar pentru semnalele din site care schimbă findings-urile publice.",
+  },
+  review: {
+    title: "Revizuire finală",
+    description: "Verifici ce am înțeles și intri în runtime doar după ce tot ce contează este confirmat.",
+  },
 }
 
 const CHECKING_MESSAGES = [
@@ -107,7 +155,13 @@ const CHECKING_MESSAGES = [
   "Pregătim snapshot-ul",
 ] as const
 
-export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSelection }: Props) {
+export function ApplicabilityWizard({
+  onComplete,
+  onStepChange,
+  onBackToModeSelection,
+  completionLabel = "Salvează și intră în dashboard",
+  completionHint = "La final intri direct în suprafața principală potrivită rolului tău.",
+}: Props) {
   const { track, trackOnce } = useTrackEvent()
   const completedRef = useRef(false)
 
@@ -181,21 +235,46 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   const profileSnapshot = buildProfileSnapshot(values)
   const suggestedAnswers = profileSnapshot ? deriveSuggestedAnswers(profileSnapshot, orgPrefill) : []
   const visibleConditionalQuestions = getVisibleConditionalQuestions(intakeAnswers)
+  const visibleConditionalSteps = getVisibleConditionalIntakeSteps(visibleConditionalQuestions)
+  const intakeFlowSteps: IntakeFlowStep[] = [...BASE_INTAKE_FLOW, ...visibleConditionalSteps, "review"]
+  const wizardSequence: ApplicabilityWizardStep[] = [...PROFILE_WIZARD_SEQUENCE, ...intakeFlowSteps]
   const visibleQuestionIds = new Set<string>([
     ...INTAKE_QUESTIONS.map((question) => question.id),
     ...visibleConditionalQuestions.map((question) => question.id),
   ])
+  const visibleQuestionsById = new Map<string, IntakeQuestion>(
+    [...INTAKE_QUESTIONS, ...visibleConditionalQuestions].map((question) => [question.id, question])
+  )
   const visibleSuggestedAnswers = suggestedAnswers.filter((suggestion) =>
     visibleQuestionIds.has(suggestion.questionId)
   )
   const unansweredQuestions = getUnansweredQuestions(intakeAnswers, visibleConditionalQuestions)
   const visibleQuestionCount = INTAKE_QUESTIONS.length + visibleConditionalQuestions.length
   const answeredQuestionCount = Math.max(0, visibleQuestionCount - unansweredQuestions.length)
-  const visibleProgressSteps: ApplicabilityWizardStep[] = ["cui", "sector", "size", "ai", "efactura", "intake"]
+  const visibleProgressSteps: ApplicabilityWizardStep[] = [
+    "cui",
+    "sector",
+    "size",
+    "ai",
+    "efactura",
+    ...intakeFlowSteps,
+  ]
   const progressStep = step === "checking" ? "cui" : step
   const effectiveStepIndex = Math.max(0, visibleProgressSteps.indexOf(progressStep))
   const progressSteps = visibleProgressSteps.length
   const progressPercent = ((effectiveStepIndex + 1) / progressSteps) * 100
+  const currentStepQuestionIds = isIntakeQuestionStep(step)
+    ? getQuestionIdsForIntakeFlowStep(step)
+    : []
+  const currentStepQuestions = currentStepQuestionIds
+    .map((questionId) => visibleQuestionsById.get(questionId))
+    .filter((question): question is IntakeQuestion => Boolean(question))
+  const unansweredCurrentStepQuestions = currentStepQuestions.filter(
+    (question) => !intakeAnswers[question.id as keyof FullIntakeAnswers]
+  )
+  const currentStepSuggestedAnswers = visibleSuggestedAnswers.filter((suggestion) =>
+    currentStepQuestionIds.includes(suggestion.questionId)
+  )
 
   function goBack() {
     setError(null)
@@ -215,8 +294,8 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
       return
     }
 
-    const currentStepIndex = WIZARD_SEQUENCE.indexOf(step)
-    const previousStep = WIZARD_SEQUENCE[Math.max(0, currentStepIndex - 1)]
+    const currentStepIndex = wizardSequence.indexOf(step)
+    const previousStep = wizardSequence[Math.max(0, currentStepIndex - 1)]
     if (previousStep) {
       setStep(previousStep)
     }
@@ -230,7 +309,26 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
     const nextAnswers = buildInitialIntakeAnswers(snapshot, orgPrefill)
     setIntakeAnswers(nextAnswers)
     setError(null)
-    setStep("intake")
+    setStep("intake-core-data")
+  }
+
+  function goToNextIntakeStep() {
+    const currentStepIndex = wizardSequence.indexOf(step)
+    const nextStep = wizardSequence[currentStepIndex + 1]
+    if (nextStep) {
+      setError(null)
+      setStep(nextStep)
+    }
+  }
+
+  function handleIntakeStepContinue() {
+    if (isIntakeQuestionStep(step)) {
+      if (unansweredCurrentStepQuestions.length > 0) {
+        setError("Mai confirmă răspunsurile din pasul curent înainte să continui.")
+        return
+      }
+      goToNextIntakeStep()
+    }
   }
 
   async function runPrefillCheck() {
@@ -356,96 +454,90 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
   }
 
   return (
-    <Card className="border-eos-border bg-eos-surface shadow-sm">
-      <CardContent className="border-l-4 border-l-eos-primary px-5 py-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 shrink-0 text-eos-primary" />
-            <div>
-              <p className="text-sm font-semibold text-eos-text">
-                Îți pregătim primul snapshot de conformitate
-              </p>
-              <p className="text-xs text-eos-text-muted">
-                Prefill + confirmare asistată · vezi ce se aplică, ce am găsit și ce faci acum
-              </p>
-            </div>
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div className="px-5 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <Shield className="h-4 w-4 shrink-0 text-blue-400" strokeWidth={1.5} />
+            <p className="text-sm font-medium text-white/60">
+              {WIZARD_PROGRESS_LABELS[step]}
+            </p>
           </div>
           {(step !== "cui" || onBackToModeSelection) && step !== "checking" ? (
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
-              className="shrink-0 gap-2"
               onClick={goBack}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/50 transition hover:border-white/20 hover:text-white/80"
             >
-              <ArrowLeft className="size-3.5" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               Înapoi
-            </Button>
+            </button>
           ) : null}
         </div>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between gap-3 text-xs text-eos-text-muted">
-            <span>{WIZARD_PROGRESS_LABELS[step]}</span>
-            <span>{step === "checking" ? "Compli verifică" : "flow ghidat"}</span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
+        <div className="mt-4 space-y-1.5">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full bg-eos-primary transition-all duration-300"
+              className="h-full bg-blue-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+          <p className="text-right text-[10px] text-white/25">
+            {step === "checking" ? "Compli verifică…" : `${Math.round(progressPercent)}% completat`}
+          </p>
         </div>
 
         <div className="mt-5">
           {step === "cui" && (
-            <div className="space-y-3">
-              <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/10 px-4 py-3">
-                <p className="text-sm font-medium text-eos-text">
-                  Dacă adaugi CUI-ul sau website-ul, pregătim automat profilul firmei și reducem întrebările manuale.
+            <div className="space-y-4">
+              <div className="rounded-xl border border-blue-500/15 bg-blue-500/[0.06] px-4 py-3">
+                <p className="text-sm font-medium text-white/80">
+                  CUI-ul sau website-ul precompletează automat profilul și reduc întrebările manuale.
                 </p>
-                <p className="mt-1 text-xs text-eos-text-muted">
+                <p className="mt-1 text-xs text-white/40">
                   Nu sunt obligatorii, dar scurtează flow-ul și cresc precizia primelor findings.
                 </p>
               </div>
 
-              <div>
-                <p className="text-sm font-medium text-eos-text">
-                  CUI-ul organizației tale <span className="font-normal text-eos-text-muted">(opțional, recomandat)</span>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-white/70">
+                  CUI-ul organizației{" "}
+                  <span className="font-normal text-white/30">(opțional, recomandat)</span>
                 </p>
-                <p className="mt-0.5 text-xs text-eos-text-muted">
-                  Codul de identificare fiscală (8–10 cifre, ex: RO12345678).{" "}
-                  <span className="text-eos-text-muted">Îl găsești pe orice factură emisă de firmă sau pe{" "}
-                    <a
-                      href="https://www.anaf.ro/anaf/internet/RO/cautare-persoane-juridice"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2 hover:text-eos-text"
-                    >
-                      anaf.ro
-                    </a>.
-                  </span>
+                <p className="text-xs text-white/30">
+                  Codul de identificare fiscală (ex: RO12345678). Îl găsești pe orice factură sau pe{" "}
+                  <a
+                    href="https://www.anaf.ro/anaf/internet/RO/cautare-persoane-juridice"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400/70 underline underline-offset-2 hover:text-blue-400"
+                  >
+                    anaf.ro
+                  </a>
+                  .
                 </p>
+                <input
+                  type="text"
+                  value={values.cui}
+                  onChange={(e) => {
+                    const nextValue = e.target.value
+                    setValues((current) => ({ ...current, cui: nextValue }))
+                    setOrgPrefill(null)
+                    setPrefillError(null)
+                  }}
+                  placeholder="Ex: RO12345678 sau 12345678"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.05] px-3.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07]"
+                  onBlur={() => void handleCuiBlur()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleCuiContinue()
+                  }}
+                />
               </div>
-              <input
-                type="text"
-                value={values.cui}
-                onChange={(e) => {
-                  const nextValue = e.target.value
-                  setValues((current) => ({ ...current, cui: nextValue }))
-                  setOrgPrefill(null)
-                  setPrefillError(null)
-                }}
-                placeholder="Ex: RO12345678 sau 12345678"
-                className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
-                onBlur={() => void handleCuiBlur()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleCuiContinue()
-                }}
-              />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-eos-text">
-                  Website-ul public <span className="font-normal text-eos-text-muted">(opțional)</span>
+
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-white/70">
+                  Website-ul public{" "}
+                  <span className="font-normal text-white/30">(opțional)</span>
                 </p>
                 <input
                   type="url"
@@ -457,28 +549,28 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                     setPrefillError(null)
                   }}
                   placeholder="Ex: https://firmatamea.ro"
-                  className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted focus:border-eos-primary"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.05] px-3.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07]"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
                   }}
                 />
-                <p className="text-xs text-eos-text-muted">
-                  Analizăm semnalele publice: formulare de contact, cookie banner, newsletter, politica de confidențialitate.
+                <p className="text-xs text-white/30">
+                  Analizăm cookie banner, formulare, newsletter, politica de confidențialitate.
                 </p>
               </div>
+
               {prefillError ? (
-                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {prefillError}
                 </div>
               ) : null}
+
               {orgPrefill ? (
-                <div className="rounded-eos-md border border-eos-success/30 bg-eos-success-soft px-4 py-3">
+                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-medium text-eos-text">
-                        {orgPrefill.companyName}
-                      </p>
-                      <p className="mt-1 text-xs text-eos-text-muted">
+                      <p className="text-sm font-semibold text-white">{orgPrefill.companyName}</p>
+                      <p className="mt-1 text-xs text-white/40">
                         {[
                           orgPrefill.normalizedCui,
                           orgPrefill.mainCaen ? `CAEN ${orgPrefill.mainCaen}` : null,
@@ -488,9 +580,9 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                           .join(" · ")}
                       </p>
                     </div>
-                    <Badge className="shrink-0 border-eos-border bg-eos-success-soft text-eos-success">
-                      ✓ Sugerat din ANAF
-                    </Badge>
+                    <span className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+                      ✓ ANAF
+                    </span>
                   </div>
                   {(() => {
                     const nis2 = classifyNis2FromSector(orgPrefill.suggestions.sector?.value)
@@ -502,44 +594,54 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                   })()}
                 </div>
               ) : null}
-              <Button onClick={() => void handleCuiContinue()} className="w-full" disabled={prefillLoading}>
-                {prefillLoading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+
+              <button
+                type="button"
+                onClick={() => void handleCuiContinue()}
+                disabled={prefillLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+              >
+                {prefillLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Continuă
-              </Button>
+              </button>
             </div>
           )}
 
           {step === "checking" && (
-            <div className="flex flex-col items-center justify-center py-12">
+            <div className="flex flex-col items-center justify-center py-14">
               <div className="relative mb-8">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-eos-primary/20 bg-eos-primary/[0.06]">
-                  <Loader2 className="size-7 animate-spin text-eos-primary" strokeWidth={1.5} />
+                <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-xl" />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10">
+                  <Loader2 className="h-7 w-7 animate-spin text-blue-400" strokeWidth={1.5} />
                 </div>
-                <Sparkles className="absolute -right-1 -top-1 size-5 text-eos-primary animate-pulse" strokeWidth={2} />
+                <Sparkles
+                  className="absolute -right-1 -top-1 h-5 w-5 animate-pulse text-blue-400"
+                  strokeWidth={2}
+                />
               </div>
-              <p className="mb-2 text-lg font-semibold text-eos-text">Compli verifică</p>
-              <p className="mb-8 text-sm text-eos-text-muted">
-                Pornim din CUI, website și semnalele deja găsite. Îți pregătim primul snapshot.
+              <p className="mb-2 text-lg font-semibold text-white">Compli verifică</p>
+              <p className="mb-8 text-sm text-white/40">
+                Pornim din CUI, website și semnalele deja găsite.
               </p>
-              <div className="w-full max-w-xs space-y-3">
+              <div className="w-full max-w-xs space-y-2">
                 {CHECKING_MESSAGES.map((msg, i) => (
                   <div
                     key={msg}
                     className={[
-                      "flex items-center gap-3 rounded-eos-md px-4 py-2.5 text-sm transition-all duration-500",
+                      "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-all duration-500",
                       i < checkingMessageIndex
-                        ? "text-eos-success"
+                        ? "text-emerald-400"
                         : i === checkingMessageIndex
-                          ? "text-eos-primary font-medium"
-                          : "text-eos-text-muted/40",
+                          ? "bg-blue-500/10 font-medium text-blue-400"
+                          : "text-white/20",
                     ].join(" ")}
                   >
                     {i < checkingMessageIndex ? (
-                      <CheckCircle2 className="size-4 shrink-0" strokeWidth={2} />
+                      <CheckCircle2 className="h-4 w-4 shrink-0" strokeWidth={2} />
                     ) : i === checkingMessageIndex ? (
-                      <Loader2 className="size-4 shrink-0 animate-spin" strokeWidth={2} />
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" strokeWidth={2} />
                     ) : (
-                      <div className="size-4 shrink-0 rounded-full border border-current opacity-30" />
+                      <div className="h-4 w-4 shrink-0 rounded-full border border-current opacity-30" />
                     )}
                     {msg}
                   </div>
@@ -549,12 +651,12 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
           )}
 
           {step === "sector" && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-eos-text">
+            <div className="space-y-4">
+              <p className="text-sm font-medium text-white/70">
                 Care este sectorul principal de activitate?
               </p>
               {prefillError ? (
-                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {prefillError}
                 </div>
               ) : null}
@@ -576,7 +678,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                       setValues((current) => ({ ...current, sector: value }))
                       setStep("size")
                     }}
-                    className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2.5 text-left text-sm text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left text-sm text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                   >
                     {label}
                   </button>
@@ -586,8 +688,8 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
           )}
 
           {step === "size" && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-eos-text">
+            <div className="space-y-4">
+              <p className="text-sm font-medium text-white/70">
                 Câți oameni sunt în firmă acum?
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -598,7 +700,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                       setValues((current) => ({ ...current, employeeCount: value }))
                       setStep("ai")
                     }}
-                    className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2.5 text-left text-sm text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left text-sm text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                   >
                     {label}
                   </button>
@@ -608,13 +710,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
           )}
 
           {step === "ai" && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-eos-text">
+                <p className="text-sm font-medium text-white/70">
                   Folosiți unelte AI în activitatea firmei?
                 </p>
-                <p className="mt-0.5 text-xs text-eos-text-muted">
-                  Exemple: ChatGPT, Copilot, Gemini, Google Translate, un chatbot pe site, un tool de recrutare automatizat sau orice alt asistent automat. Dacă nu ești sigur, alege <strong className="font-medium">Da</strong> — poți corecta mai târziu.
+                <p className="mt-1 text-xs text-white/35">
+                  Exemple: ChatGPT, Copilot, Gemini, Google Translate, chatbot pe site, tool de recrutare automatizat. Dacă nu ești sigur, alege{" "}
+                  <strong className="font-medium text-white/60">Da</strong> — poți corecta mai târziu.
                 </p>
               </div>
               {orgPrefill?.aiSignals ? (
@@ -650,13 +753,13 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                   suggestion={orgPrefill.suggestions.usesAITools}
                 />
               ) : null}
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
                     setValues((current) => ({ ...current, usesAITools: true }))
                     setStep("efactura")
                   }}
-                  className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-white"
                 >
                   Da
                 </button>
@@ -665,7 +768,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                     setValues((current) => ({ ...current, usesAITools: false }))
                     setStep("efactura")
                   }}
-                  className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                 >
                   Nu
                 </button>
@@ -674,13 +777,14 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
           )}
 
           {step === "efactura" && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-eos-text">
+                <p className="text-sm font-medium text-white/70">
                   Trimiți facturi electronice prin SPV ANAF (e-Factura)?
                 </p>
-                <p className="mt-0.5 text-xs text-eos-text-muted">
-                  E-Factura este obligatorie pentru firmele care emit facturi B2B în România. Dacă facturezi alte companii (nu doar persoane fizice), probabil da. Dacă nu ești sigur, alege <strong className="font-medium">Da</strong>.
+                <p className="mt-1 text-xs text-white/35">
+                  Obligatorie pentru firmele care emit facturi B2B în România. Dacă facturezi alte companii (nu doar persoane fizice), probabil da. Dacă nu ești sigur, alege{" "}
+                  <strong className="font-medium text-white/60">Da</strong>.
                 </p>
               </div>
               {orgPrefill?.suggestions.requiresEfactura ? (
@@ -690,13 +794,13 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                   suggestion={orgPrefill.suggestions.requiresEfactura}
                 />
               ) : null}
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
                     setValues((current) => ({ ...current, requiresEfactura: true }))
                     hydrateIntakeStep(true)
                   }}
-                  className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-white"
                 >
                   Da
                 </button>
@@ -705,7 +809,7 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                     setValues((current) => ({ ...current, requiresEfactura: false }))
                     hydrateIntakeStep(false)
                   }}
-                  className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm font-medium text-eos-text transition hover:border-eos-border-strong hover:bg-eos-surface-variant"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                 >
                   Nu / Nu știu
                 </button>
@@ -713,68 +817,28 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
             </div>
           )}
 
-          {step === "intake" && (
-            <div className="space-y-5">
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-eos-text">
-                      Confirmările finale sunt toate pe aceeași pagină
-                    </p>
-                    <p className="mt-1 text-xs text-eos-text-muted">
-                      Ai răspuns la {answeredQuestionCount} din {visibleQuestionCount} întrebări relevante.
-                      {unansweredQuestions.length === 0
-                        ? " Poți genera primul plan."
-                        : ` Mai sunt ${unansweredQuestions.length} pentru precizie maximă.`}
-                    </p>
+          {isIntakeQuestionStep(step) && (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white/80">{INTAKE_STEP_COPY[step].title}</p>
+                    <p className="mt-1 text-xs text-white/40">{INTAKE_STEP_COPY[step].description}</p>
                   </div>
-                  <Badge className="border-eos-border bg-eos-surface text-eos-text-muted">
-                    {answeredQuestionCount}/{visibleQuestionCount}
-                  </Badge>
+                  <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/30">
+                    {currentStepQuestions.length - unansweredCurrentStepQuestions.length}/{currentStepQuestions.length}
+                  </span>
                 </div>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
-                  <div
-                    className="h-full bg-eos-primary transition-all duration-300"
-                    style={{
-                      width: `${visibleQuestionCount === 0 ? 100 : (answeredQuestionCount / visibleQuestionCount) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
-                  <div>
-                    <p className="text-sm font-medium text-eos-text">
-                      Ce am înțeles deja despre firmă
-                    </p>
-                    <p className="mt-1 text-xs text-eos-text-muted">
-                      Semnalele cu încredere mare sunt precompletate. Restul rămân de confirmat doar unde schimbă findings, documentele recomandate sau următorul pas.
-                    </p>
-                  </div>
-                </div>
-                {visibleSuggestedAnswers.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {visibleSuggestedAnswers.map((suggestion) => (
-                      <Badge
-                        key={suggestion.questionId}
-                        className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}
-                      >
-                        {questionLabelForSuggestion(suggestion.questionId)} · {answerLabel(suggestion.value)}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="space-y-3">
-                {INTAKE_QUESTIONS.map((question) => (
+                {currentStepQuestions.map((question) => (
                   <QuestionCard
                     key={question.id}
                     question={question}
                     value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
-                    suggestion={visibleSuggestedAnswers.find((item) => item.questionId === question.id)}
+                    suggestion={currentStepSuggestedAnswers.find((item) => item.questionId === question.id)}
                     onChange={(value) =>
                       setIntakeAnswers((current) => ({
                         ...current,
@@ -785,51 +849,105 @@ export function ApplicabilityWizard({ onComplete, onStepChange, onBackToModeSele
                 ))}
               </div>
 
-              {visibleConditionalQuestions.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
-                    Confirmări suplimentare doar unde se schimbă obligațiile
-                  </p>
-                  {visibleConditionalQuestions.map((question) => (
-                    <QuestionCard
-                      key={question.id}
-                      question={question}
-                      value={intakeAnswers[question.id as keyof FullIntakeAnswers]}
-                      suggestion={visibleSuggestedAnswers.find((item) => item.questionId === question.id)}
-                      onChange={(value) =>
-                        setIntakeAnswers((current) => ({
-                          ...current,
-                          [question.id]: value,
-                        }))
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-
               {error && (
-                <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-3 py-2 text-sm text-eos-warning">
+                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {error}
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-                <div className="text-xs text-eos-text-muted">
-                  {unansweredQuestions.length === 0
-                    ? "Toate răspunsurile care contează pentru prima rundă de findings sunt confirmate."
-                    : `Mai sunt ${unansweredQuestions.length} răspunsuri care schimbă findings sau documentele recomandate.`}
-                </div>
-                <Button onClick={() => void handleSubmit()} disabled={saving || unansweredQuestions.length > 0}>
-                  {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
-                  Salvează și intră în dashboard
-                </Button>
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
+                <p className="text-xs text-white/35">
+                  {unansweredCurrentStepQuestions.length === 0
+                    ? "Pasul curent este confirmat."
+                    : `Mai sunt ${unansweredCurrentStepQuestions.length} răspunsuri.`}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleIntakeStepContinue}
+                  disabled={unansweredCurrentStepQuestions.length > 0}
+                  className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-blue-500 disabled:opacity-40"
+                >
+                  Continuă
+                </button>
               </div>
             </div>
           )}
 
+          {step === "review" && (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{INTAKE_STEP_COPY.review.title}</p>
+                    <p className="mt-1 text-xs text-white/40">{INTAKE_STEP_COPY.review.description}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-xs text-white/40">
+                    {unansweredQuestions.length === 0
+                      ? "Tot ce schimbă prima rundă de findings este confirmat."
+                      : `Mai sunt ${unansweredQuestions.length} răspunsuri.`}
+                  </p>
+                  <span className="text-[10px] text-white/30">
+                    {answeredQuestionCount}/{visibleQuestionCount}
+                  </span>
+                </div>
+                <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-300"
+                    style={{
+                      width: `${visibleQuestionCount === 0 ? 100 : (answeredQuestionCount / visibleQuestionCount) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {visibleSuggestedAnswers.length > 0 && (
+                <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+                  <div className="flex items-start gap-2.5">
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                    <div>
+                      <p className="text-sm font-medium text-white/70">Ce am înțeles deja</p>
+                      <p className="mt-1 text-xs text-white/35">
+                        Semnalele cu încredere mare sunt precompletate.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visibleSuggestedAnswers.map((suggestion) => (
+                      <Badge
+                        key={suggestion.questionId}
+                        className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}
+                      >
+                        {questionLabelForSuggestion(suggestion.questionId)} · {answerLabel(suggestion.value)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => void handleSubmit()}
+                disabled={saving || unansweredQuestions.length > 0}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-40"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {completionLabel}
+              </button>
+            </div>
+          )}
+
         </div>
-      </CardContent>
-    </Card>
+        </div>
+    </div>
   )
 }
 
@@ -855,34 +973,36 @@ function PrefillContextCard({
         : "Am găsit semnale în AI Compliance Pack"
 
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-eos-text">{title}</p>
-          <p className="mt-1 text-xs text-eos-text-muted">
+          <p className="text-sm font-semibold text-white/80">{title}</p>
+          <p className="mt-1 text-xs text-white/40">
             {subtitleParts.join(" · ")}
           </p>
         </div>
-        <Badge className="shrink-0 border-eos-border bg-eos-success-soft text-eos-success">
-          ✓ Detectat din {sourceLabel}
-        </Badge>
+        <span className="shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+          ✓ {sourceLabel}
+        </span>
       </div>
 
       {prefill.address ? (
-        <p className="mt-2 text-xs text-eos-text-muted">{prefill.address}</p>
+        <p className="mt-2 text-xs text-white/30">{prefill.address}</p>
       ) : null}
 
       {prefill.source === "anaf_vat_registry" ? (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {prefill.mainCaen ? (
-            <Badge className="border-eos-border bg-eos-surface text-eos-text">CAEN {prefill.mainCaen}</Badge>
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
+              CAEN {prefill.mainCaen}
+            </span>
           ) : null}
-          <Badge className="border-eos-border bg-eos-surface text-eos-text">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
             TVA {prefill.vatRegistered ? "activ" : "inactiv"}
-          </Badge>
-          <Badge className="border-eos-border bg-eos-surface text-eos-text">
-            RO e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
-          </Badge>
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
+            e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
+          </span>
           {(() => {
             const nis2 = classifyNis2FromSector(prefill.suggestions.sector?.value)
             return nis2 ? <Badge className={nis2.badge}>{nis2.label}</Badge> : null
@@ -891,7 +1011,7 @@ function PrefillContextCard({
       ) : null}
 
       {prefill.source === "anaf_vat_registry" && prefill.fiscalStatus ? (
-        <p className="mt-3 text-xs text-eos-text-muted">{prefill.fiscalStatus}</p>
+        <p className="mt-3 text-xs text-white/30">{prefill.fiscalStatus}</p>
       ) : null}
 
       {prefill.vendorSignals ? (
@@ -1091,21 +1211,17 @@ function QuestionCard({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-      <div className="space-y-2">
+    <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4">
+      <div className="space-y-3">
         <div>
-          <p className="text-sm font-medium text-eos-text">{question.text}</p>
+          <p className="text-sm font-medium text-white/75">{question.text}</p>
           {suggestion ? (
-            <div className="mt-1 space-y-2">
-              <div className="flex flex-wrap gap-2">
-                <Badge className={`normal-case tracking-normal ${CONFIDENCE_BADGE[suggestion.confidence]}`}>
-                  Sugestie automată
-                </Badge>
-              </div>
-              <p className="text-xs text-eos-text-muted">
-                Sugestie: <span className="text-eos-text">{answerLabel(suggestion.value)}</span> · {suggestion.reason}
-              </p>
-            </div>
+            <p className="mt-1 text-xs text-white/35">
+              Sugestie automată:{" "}
+              <span className="text-white/60">{answerLabel(suggestion.value)}</span>
+              {" · "}
+              {suggestion.reason}
+            </p>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1116,11 +1232,12 @@ function QuestionCard({
                 key={option.value}
                 type="button"
                 onClick={() => onChange(option.value)}
-                className={`rounded-eos-md border px-3 py-2 text-sm transition ${
+                className={[
+                  "rounded-lg border px-3 py-1.5 text-sm transition",
                   active
-                    ? "border-eos-primary bg-eos-primary/10 text-eos-primary"
-                    : "border-eos-border bg-eos-surface text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text"
-                }`}
+                    ? "border-blue-500/40 bg-blue-500/15 text-blue-400"
+                    : "border-white/10 bg-white/[0.03] text-white/45 hover:border-white/20 hover:text-white/75",
+                ].join(" ")}
               >
                 {option.label}
               </button>
@@ -1148,6 +1265,14 @@ function buildProfileSnapshot(values: WizardState): OrgProfile | null {
     ...(website ? { website } : {}),
     completedAtISO: new Date().toISOString(),
   }
+}
+
+function isIntakeQuestionStep(step: ApplicabilityWizardStep): step is Exclude<IntakeFlowStep, "review"> {
+  return isIntakeFlowStep(step) && step !== "review"
+}
+
+function isIntakeFlowStep(step: ApplicabilityWizardStep): step is IntakeFlowStep {
+  return INTAKE_FLOW_STEPS.includes(step as IntakeFlowStep)
 }
 
 function getUnansweredQuestions(answers: FullIntakeAnswers, conditionalQuestions: IntakeQuestion[]) {

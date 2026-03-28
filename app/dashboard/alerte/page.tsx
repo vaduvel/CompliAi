@@ -398,8 +398,8 @@ export default function DriftPage() {
 
       {openTasks.length === 0 && openDrifts.length === 0 ? (
         <EmptyState
-          title="Fara drift deschis"
-          label="Momentan nu exista semnale de drift sau actiuni care sa ceara atentie imediata."
+          title="Fără drift deschis"
+          label="Momentan nu există semnale de drift sau acțiuni care să ceară atenție imediată."
         />
       ) : openTasks.length > 0 ? (
         <AlertsList tasks={openTasks} />

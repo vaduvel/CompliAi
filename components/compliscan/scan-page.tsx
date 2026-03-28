@@ -7,16 +7,11 @@ import dynamic from "next/dynamic"
 import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
 import {
   ScanSourceTypeSelector,
   type ScanSourceType,
 } from "@/components/evidence-os/ScanSourceTypeSelector"
-import { SectionDividerCard } from "@/components/evidence-os/SectionDividerCard"
 import { LoadingScreen, ScanWorkspace } from "@/components/compliscan/route-sections"
 import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -31,8 +26,8 @@ const AgentWorkspace = dynamic(
     ssr: false,
     loading: () => (
       <SectionLoadingCard
-        title="Agent workspace in incarcare"
-        detail="Panoul agentilor se incarca in fundal."
+        title="Agent workspace în încărcare"
+        detail="Panoul agenților se încarcă în fundal."
       />
     ),
   }
@@ -44,13 +39,30 @@ const AIDiscoveryPanel = dynamic(
     ssr: false,
     loading: () => (
       <SectionLoadingCard
-        title="Autodiscovery in incarcare"
-        detail="Panoul de detectie automata se incarca in fundal."
+        title="Autodiscovery în încărcare"
+        detail="Panoul de detecție automată se încarcă în fundal."
       />
     ),
   }
 )
 
+function SectionHeader({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string
+  title: string
+  description?: string
+}) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/20">{eyebrow}</p>
+      <p className="mt-1 text-sm font-semibold text-white/65">{title}</p>
+      {description && <p className="mt-0.5 text-xs text-white/35">{description}</p>}
+    </div>
+  )
+}
 
 export function ScanPageSurface() {
   const runtime = useDashboardRuntime()
@@ -156,15 +168,17 @@ export function ScanPageSurface() {
   )
 
   return (
-    <div className="space-y-8">
-      {latestDocumentFindings.length > 0 ? (
-        <div className="flex items-center gap-3 rounded-eos-lg border-2 border-eos-primary/25 bg-gradient-to-r from-eos-primary/[0.06] via-transparent to-transparent px-5 py-4">
-          <AlertTriangle className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
+    <div className="space-y-6">
+
+      {/* Last scan alert */}
+      {latestDocumentFindings.length > 0 && (
+        <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-500/[0.05] px-5 py-4">
+          <AlertTriangle className="size-5 shrink-0 text-blue-400" strokeWidth={2} />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-eos-text">
+            <p className="text-sm font-semibold text-white/80">
               {latestDocumentFindings.length} findings din ultima scanare
             </p>
-            <p className="mt-0.5 text-xs text-eos-text-muted">
+            <p className="mt-0.5 text-xs text-white/40">
               {criticalOrHighFindings.length > 0
                 ? `${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată. `
                 : ""}
@@ -173,81 +187,86 @@ export function ScanPageSurface() {
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-eos-primary/90"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
           >
             Mergi la De rezolvat
             <ArrowRight className="size-3.5" strokeWidth={2.5} />
           </Link>
         </div>
-      ) : null}
-      <PageIntro
-        eyebrow="Intake"
-        title="Alimentezi Compli cu surse noi"
-        description={
-          isSolo
-            ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
-            : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."
-        }
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {sourceType === "document"
-                ? "document"
-                : sourceType === "text"
-                  ? "text manual"
-                  : sourceType === "manifest"
-                    ? "manifest / repo"
-                    : "compliscan.yaml"}
-            </Badge>
-            {agentFlow.agentModeActive ? (
-              <Badge variant="warning" className="normal-case tracking-normal">
-                mod agent activ
-              </Badge>
-            ) : null}
-          </>
-        }
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {activeFindingsCount > 0 ? (
-              <Button asChild>
-                <Link href="/dashboard/resolve" className="gap-2">
-                  Mergi la De rezolvat
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            ) : null}
-            <Button
-              variant={agentFlow.agentModeActive ? "default" : "outline"}
-              className="gap-2"
-              onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
-            >
-              <Bot className="size-4" />
-              {agentFlow.agentModeActive ? "Iesi din Mod Agent" : "Mod Agent"}
-            </Button>
-          </div>
-        }
-      />
+      )}
 
-      {!agentFlow.agentModeActive && activeFindingsCount > 0 ? (
-        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-          <AlertTriangle className="size-5 shrink-0 text-eos-warning" strokeWidth={2} />
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Scanează</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-white">Alimentezi Compli cu surse noi</h1>
+        <p className="mt-1 text-sm text-white/40">
+          {isSolo
+            ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
+            : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+            {sourceType === "document"
+              ? "document"
+              : sourceType === "text"
+                ? "text manual"
+                : sourceType === "manifest"
+                  ? "manifest / repo"
+                  : "compliscan.yaml"}
+          </span>
+          {agentFlow.agentModeActive && (
+            <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">
+              mod agent activ
+            </span>
+          )}
+          <div className="ml-auto flex flex-wrap gap-2">
+            {activeFindingsCount > 0 && (
+              <Link
+                href="/dashboard/resolve"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500"
+              >
+                Mergi la De rezolvat
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
+              className={[
+                "inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-medium transition",
+                agentFlow.agentModeActive
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                  : "border-white/[0.08] bg-white/[0.04] text-white/50 hover:text-white/70",
+              ].join(" ")}
+            >
+              <Bot className="size-4" strokeWidth={2} />
+              {agentFlow.agentModeActive ? "Ieși din Mod Agent" : "Mod Agent"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Active findings nudge */}
+      {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
+        <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
+          <AlertTriangle className="size-5 shrink-0 text-amber-400/70" strokeWidth={2} />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-eos-text">
+            <p className="text-sm font-semibold text-white/70">
               Scanarea alimentează cockpitul, nu îl dublează
             </p>
-            <p className="mt-0.5 text-xs text-eos-text-muted">
+            <p className="mt-0.5 text-xs text-white/35">
               {activeFindingsCount} finding-uri sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
             </p>
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border px-4 py-2 text-sm font-medium text-eos-text transition hover:bg-eos-surface-variant"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/45 transition hover:text-white/70"
           >
             Deschide cockpiturile
             <ArrowRight className="size-3.5" strokeWidth={2.5} />
           </Link>
         </div>
-      ) : null}
+      )}
 
       {agentFlow.agentModeActive ? (
         <AgentWorkspace
@@ -278,8 +297,8 @@ export function ScanPageSurface() {
           />
 
           {siteScanIntent ? (
-            <div className="space-y-6">
-              <SectionDividerCard
+            <div className="space-y-4">
+              <SectionHeader
                 eyebrow="Re-scan website"
                 title="Reverifici bannerul, trackerele și politicile site-ului"
                 description={
@@ -296,8 +315,8 @@ export function ScanPageSurface() {
               />
             </div>
           ) : sourceType === "manifest" || sourceType === "yaml" ? (
-            <div className="space-y-6">
-              <SectionDividerCard
+            <div className="space-y-4">
+              <SectionHeader
                 eyebrow="Flux activ"
                 title={
                   sourceType === "yaml"
@@ -322,8 +341,8 @@ export function ScanPageSurface() {
               />
             </div>
           ) : (
-            <div className="space-y-6">
-              <SectionDividerCard
+            <div className="space-y-4">
+              <SectionHeader
                 eyebrow="Flux activ"
                 title={
                   sourceType === "text"
@@ -362,8 +381,8 @@ export function ScanPageSurface() {
           )}
 
           <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
-            <summary className="flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-5 py-4 text-sm font-medium text-eos-text hover:bg-eos-surface-variant [&::-webkit-details-marker]:hidden">
-              <ChevronRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
+            <summary className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
+              <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-open:rotate-90" strokeWidth={2} />
               Detalii context scanare
             </summary>
             <div className="mt-4">
@@ -376,10 +395,10 @@ export function ScanPageSurface() {
             </div>
           </details>
 
-          <div className="flex justify-end border-t border-eos-border-subtle pt-3">
+          <div className="flex justify-end border-t border-white/[0.05] pt-3">
             <Link
               href="/dashboard/scan/history"
-              className="inline-flex items-center gap-1 text-xs text-eos-text-muted hover:text-eos-text"
+              className="inline-flex items-center gap-1 text-xs text-white/25 hover:text-white/50"
             >
               Istoricul scanărilor
               <ArrowRight className="size-3" strokeWidth={2} />
@@ -394,11 +413,9 @@ export function ScanPageSurface() {
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <Card className="border-eos-border bg-eos-bg-inset">
-      <CardHeader className="border-b border-eos-border pb-4">
-        <CardTitle className="text-base">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4 text-sm text-eos-text-muted">{detail}</CardContent>
-    </Card>
+    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+      <p className="text-sm font-semibold text-white/60">{title}</p>
+      <p className="mt-1 text-xs text-white/30">{detail}</p>
+    </div>
   )
 }
