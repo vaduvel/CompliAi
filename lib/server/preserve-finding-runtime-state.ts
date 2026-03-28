@@ -1,4 +1,5 @@
 import type { ScanFinding } from "@/lib/compliance/types"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 
 function preserveFindingRuntimeState(existing: ScanFinding | undefined, incoming: ScanFinding): ScanFinding {
   if (!existing) return incoming
@@ -22,7 +23,19 @@ export function preserveRuntimeStateForRegeneratedFindings(
   incomingFindings: ScanFinding[]
 ) {
   const existingById = new Map(existingFindings.map((finding) => [finding.id, finding]))
-  return incomingFindings.map((finding) => preserveFindingRuntimeState(existingById.get(finding.id), finding))
+  const mergedFindings = incomingFindings.map((finding) => preserveFindingRuntimeState(existingById.get(finding.id), finding))
+  const incomingIds = new Set(incomingFindings.map((finding) => finding.id))
+  const preservedMissingFindings = existingFindings.filter((finding) => {
+    if (incomingIds.has(finding.id)) return false
+
+    const status = finding.findingStatus ?? "open"
+    if (!["confirmed", "resolved", "under_monitoring"].includes(status)) return false
+
+    const recipe = buildCockpitRecipe(finding)
+    return recipe.executionClass === "specialist_handoff"
+  })
+
+  return [...mergedFindings, ...preservedMissingFindings]
 }
 
 export function preserveRuntimeStateForSingleFinding(

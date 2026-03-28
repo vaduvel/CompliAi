@@ -38,6 +38,47 @@ describe("preserveRuntimeStateForRegeneratedFindings", () => {
     expect(merged.operationalEvidenceNote).toBe("Dovadă veche")
     expect(merged.detail).toBe("Detaliu nou")
   })
+
+  it("păstrează finding-urile specialist_handoff confirmate chiar dacă dispar din regenerare", () => {
+    const existing = makeFinding({
+      id: "nis2-gov-training-member-1",
+      title: "Training NIS2 lipsă",
+      detail: "Training NIS2 lipsă pentru membrul board.",
+      remediationHint: "Actualizează registrul Board & CISO.",
+      category: "NIS2",
+      findingStatus: "confirmed",
+      findingStatusUpdatedAtISO: "2026-03-28T05:10:00.000Z",
+      operationalEvidenceNote: "Registru în curs de actualizare.",
+    })
+    const incoming = makeFinding({
+      id: "nis2-finding-nis2-rm-01",
+      detail: "Alt finding rămas activ.",
+    })
+
+    const merged = preserveRuntimeStateForRegeneratedFindings([existing], [incoming])
+    expect(merged).toHaveLength(2)
+    expect(merged.some((finding) => finding.id === "nis2-gov-training-member-1")).toBe(true)
+    expect(merged.find((finding) => finding.id === "nis2-gov-training-member-1")?.findingStatus).toBe("confirmed")
+  })
+
+  it("nu păstrează finding-urile specialist_handoff open care dispar din regenerare", () => {
+    const existing = makeFinding({
+      id: "nis2-gov-training-member-1",
+      title: "Training NIS2 lipsă",
+      detail: "Training NIS2 lipsă pentru membrul board.",
+      remediationHint: "Actualizează registrul Board & CISO.",
+      category: "NIS2",
+      findingStatus: "open",
+    })
+    const incoming = makeFinding({
+      id: "nis2-finding-nis2-rm-01",
+      detail: "Alt finding rămas activ.",
+    })
+
+    const merged = preserveRuntimeStateForRegeneratedFindings([existing], [incoming])
+    expect(merged).toHaveLength(1)
+    expect(merged.some((finding) => finding.id === "nis2-gov-training-member-1")).toBe(false)
+  })
 })
 
 describe("preserveRuntimeStateForSingleFinding", () => {
