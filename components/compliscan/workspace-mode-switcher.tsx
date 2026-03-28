@@ -50,7 +50,7 @@ export function WorkspaceModeSwitcher({
               strokeWidth={2}
             />
           )}
-          <span className="truncate">Portofoliu</span>
+          <span className="truncate">Portofoliu · triage</span>
         </button>
 
         <button
@@ -76,7 +76,7 @@ export function WorkspaceModeSwitcher({
             />
           )}
           <span className="truncate">
-            {workspaceMode === "org" ? currentOrgName : "Firma activă"}
+            {workspaceMode === "org" ? `Execuție · ${currentOrgName}` : "Execuție în firmă"}
           </span>
         </button>
       </div>
