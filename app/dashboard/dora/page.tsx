@@ -158,10 +158,10 @@ export default function DoraPage() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-3 gap-3">
-        <Card className={`border-eos-border ${majorOpen.length > 0 ? "border-red-300 bg-red-50/20" : ""}`}>
+        <Card className={`border-eos-border ${majorOpen.length > 0 ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
           <CardContent className="px-4 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-eos-text-muted">Incidente majore</p>
-            <p className={`mt-1 text-2xl font-bold ${majorOpen.length > 0 ? "text-red-600" : "text-eos-text"}`}>
+            <p className={`mt-1 text-2xl font-bold ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
               {majorOpen.length}
             </p>
             <p className="text-[10px] text-eos-text-muted">{openIncidents.length} deschise total</p>
@@ -303,7 +303,7 @@ function IncidentRow({
   } as Record<DoraIncidentStatus, DoraIncidentStatus[]>)[i.status]
 
   return (
-    <Card className={`border-eos-border ${i.severity === "major" && !isClosed ? "border-red-300 bg-red-50/20" : ""}`}>
+    <Card className={`border-eos-border ${i.severity === "major" && !isClosed ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
       <CardContent className="px-5 py-4 space-y-3">
         <button
           type="button"
@@ -409,7 +409,7 @@ function IncidentRow({
             </div>
 
             <div className="text-[10px] text-eos-text-muted space-y-0.5">
-              <p>Termen raportare inițial: <span className={timeLeft(i.initialReportDeadlineISO).urgent ? "text-red-600 font-semibold" : ""}>{new Date(i.initialReportDeadlineISO).toLocaleString("ro-RO")}</span></p>
+              <p>Termen raportare inițial: <span className={timeLeft(i.initialReportDeadlineISO).urgent ? "text-eos-error font-semibold" : ""}>{new Date(i.initialReportDeadlineISO).toLocaleString("ro-RO")}</span></p>
               <p>Termen raport final: {new Date(i.finalReportDeadlineISO).toLocaleDateString("ro-RO")}</p>
               {i.notifiedAuthorityAtISO && (
                 <p>Raportat la autoritate: {new Date(i.notifiedAuthorityAtISO).toLocaleString("ro-RO")}</p>
@@ -440,7 +440,7 @@ function TprmRow({
   const isActive = e.status === "active"
 
   return (
-    <Card className={`border-eos-border ${e.criticality === "critical" && e.riskLevel === "high" ? "border-orange-300 bg-orange-50/20" : ""}`}>
+    <Card className={`border-eos-border ${e.criticality === "critical" && e.riskLevel === "high" ? "border-eos-warning/30 bg-eos-warning-soft" : ""}`}>
       <CardContent className="px-5 py-4 space-y-3">
         <button
           type="button"
@@ -672,9 +672,9 @@ function IncidentForm({
         </div>
 
         {severity === "major" && (
-          <div className="rounded-eos-md border border-red-200 bg-red-50 px-3 py-2 flex items-center gap-2">
-            <AlertTriangle className="size-4 text-red-500 shrink-0" />
-            <p className="text-xs text-red-700">Incident major — trebuie raportat la autoritatea competentă (ASF/BNR) în <strong>4 ore</strong> de la detectare.</p>
+          <div className="rounded-eos-md border border-eos-error/30 bg-eos-error-soft px-3 py-2 flex items-center gap-2">
+            <AlertTriangle className="size-4 text-eos-error shrink-0" />
+            <p className="text-xs text-eos-error">Incident major — trebuie raportat la autoritatea competentă (ASF/BNR) în <strong>4 ore</strong> de la detectare.</p>
           </div>
         )}
 

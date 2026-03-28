@@ -43,17 +43,17 @@ function AnswerSelector({
         const baseClass = "rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer"
         const colorMap: Record<string, string> = {
           emerald: selected
-            ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-            : "border-gray-200 text-gray-500 hover:border-emerald-200 hover:text-emerald-600",
+            ? "border-eos-success/40 bg-eos-success-soft text-eos-success"
+            : "border-eos-border text-eos-text-muted hover:border-eos-success/30 hover:text-eos-success",
           amber: selected
-            ? "border-amber-400 bg-amber-50 text-amber-700"
-            : "border-gray-200 text-gray-500 hover:border-amber-200 hover:text-amber-600",
+            ? "border-eos-warning/40 bg-eos-warning-soft text-eos-warning"
+            : "border-eos-border text-eos-text-muted hover:border-eos-warning/30 hover:text-eos-warning",
           red: selected
-            ? "border-red-400 bg-red-50 text-red-700"
-            : "border-gray-200 text-gray-500 hover:border-red-200 hover:text-red-600",
+            ? "border-eos-error/40 bg-eos-error-soft text-eos-error"
+            : "border-eos-border text-eos-text-muted hover:border-eos-error/30 hover:text-eos-error",
           gray: selected
-            ? "border-gray-400 bg-gray-100 text-gray-700"
-            : "border-gray-200 text-gray-400 hover:border-gray-300",
+            ? "border-eos-border bg-eos-surface-variant text-eos-text-muted"
+            : "border-eos-border text-eos-text-tertiary hover:border-eos-border",
         }
         return (
           <button
@@ -75,10 +75,10 @@ function AnswerSelector({
 function ConformityScore({ result }: { result: AssessmentResult }) {
   const color =
     result.riskLabel === "risc-acceptabil"
-      ? "text-emerald-600"
+      ? "text-eos-success"
       : result.riskLabel === "lacune-moderate"
-      ? "text-amber-600"
-      : "text-red-600"
+      ? "text-eos-warning"
+      : "text-eos-error"
 
   const badgeVariant =
     result.riskLabel === "risc-acceptabil"
@@ -110,9 +110,9 @@ function GapItem({ gap }: { gap: AssessmentResult["gaps"][0] }) {
   const Icon = gap.severity === "critical" ? XCircle : AlertTriangle
   const colorClass =
     gap.severity === "critical"
-      ? "text-red-500"
+      ? "text-eos-error"
       : gap.severity === "high"
-      ? "text-amber-500"
+      ? "text-eos-warning"
       : "text-yellow-500"
 
   return (
@@ -306,10 +306,10 @@ export default function ConformitatePage() {
                         <div
                           className={`h-full rounded-full transition-all ${
                             liveResult.conformityPercent >= 80
-                              ? "bg-emerald-500"
+                              ? "bg-eos-success"
                               : liveResult.conformityPercent >= 50
-                              ? "bg-amber-400"
-                              : "bg-red-500"
+                              ? "bg-eos-warning"
+                              : "bg-eos-error"
                           }`}
                           style={{ width: `${liveResult.conformityPercent}%` }}
                         />
@@ -344,11 +344,11 @@ export default function ConformitatePage() {
                               {currentAnswer && (
                                 <div className="flex items-center gap-1.5">
                                   {currentAnswer === "yes" || (q.positiveAnswer === "no" && currentAnswer === "no") ? (
-                                    <CheckCircle2 className="size-3.5 text-emerald-500" strokeWidth={2} />
+                                    <CheckCircle2 className="size-3.5 text-eos-success" strokeWidth={2} />
                                   ) : currentAnswer === "na" ? (
                                     <CheckCircle2 className="size-3.5 text-gray-400" strokeWidth={2} />
                                   ) : (
-                                    <AlertTriangle className="size-3.5 text-amber-500" strokeWidth={2} />
+                                    <AlertTriangle className="size-3.5 text-eos-warning" strokeWidth={2} />
                                   )}
                                   {(currentAnswer === "no" || currentAnswer === "partial") && (
                                     <p className="text-xs text-eos-text-muted">{q.remediationHint}</p>
@@ -413,12 +413,12 @@ export default function ConformitatePage() {
                   )}
 
                   {savedResult && savedResult.gaps.length === 0 && (
-                    <Card className="border-emerald-200 bg-emerald-50">
+                    <Card className="border-eos-success/30 bg-eos-success-soft">
                       <CardContent className="flex items-center gap-3 px-5 py-4">
-                        <CheckCircle2 className="size-5 text-emerald-600" strokeWidth={2} />
+                        <CheckCircle2 className="size-5 text-eos-success" strokeWidth={2} />
                         <div>
-                          <p className="text-sm font-semibold text-emerald-800">Evaluare completă</p>
-                          <p className="text-xs text-emerald-600">Nicio lacună identificată la răspunsurile furnizate.</p>
+                          <p className="text-sm font-semibold text-eos-success">Evaluare completă</p>
+                          <p className="text-xs text-eos-success">Nicio lacună identificată la răspunsurile furnizate.</p>
                         </div>
                       </CardContent>
                     </Card>

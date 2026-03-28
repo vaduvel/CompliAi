@@ -32,13 +32,13 @@ import type { MaturityAssessment } from "@/lib/server/nis2-store"
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const ANSWER_OPTIONS: { value: MaturityAnswer; label: string; color: string }[] = [
-  { value: "yes", label: "Da", color: "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100" },
+  { value: "yes", label: "Da", color: "text-eos-success bg-eos-success-soft border-eos-success/40 hover:bg-eos-success-soft" },
   {
     value: "partial",
     label: "Parțial",
-    color: "text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100",
+    color: "text-eos-warning bg-eos-warning-soft border-eos-warning/40 hover:bg-eos-warning-soft",
   },
-  { value: "no", label: "Nu", color: "text-red-700 bg-red-50 border-red-200 hover:bg-red-100" },
+  { value: "no", label: "Nu", color: "text-eos-error bg-eos-error-soft border-eos-error/40 hover:bg-eos-error-soft" },
   {
     value: "na",
     label: "Nu se aplică",
@@ -105,14 +105,14 @@ function ResultsView({
             <div className="shrink-0 text-right">
               <p className="text-xs text-eos-text-muted">Plan remediere datorat până la</p>
               <p
-                className={`text-sm font-semibold ${daysToDeadline < 7 ? "text-red-600" : daysToDeadline < 14 ? "text-amber-600" : "text-eos-text"}`}
+                className={`text-sm font-semibold ${daysToDeadline < 7 ? "text-eos-error" : daysToDeadline < 14 ? "text-eos-warning" : "text-eos-text"}`}
               >
                 {formatDate(assessment.remediationPlanDue)}
               </p>
               {daysToDeadline > 0 ? (
                 <p className="text-xs text-eos-text-muted">în {daysToDeadline} zile</p>
               ) : (
-                <p className="text-xs font-medium text-red-600 animate-pulse">DEPĂȘIT</p>
+                <p className="text-xs font-medium text-eos-error animate-pulse">DEPĂȘIT</p>
               )}
             </div>
           </div>
@@ -122,10 +122,10 @@ function ResultsView({
             <div
               className={`h-full rounded-full transition-all ${
                 assessment.overallScore >= 70
-                  ? "bg-emerald-500"
+                  ? "bg-eos-success"
                   : assessment.overallScore >= 40
-                    ? "bg-amber-500"
-                    : "bg-red-500"
+                    ? "bg-eos-warning"
+                    : "bg-eos-error"
               }`}
               style={{ width: `${assessment.overallScore}%` }}
             />
@@ -156,14 +156,14 @@ function ResultsView({
                 <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-variant">
                   <div
                     className={`h-full rounded-full ${
-                      d.score >= 70 ? "bg-emerald-500" : d.score >= 40 ? "bg-amber-500" : "bg-red-500"
+                      d.score >= 70 ? "bg-eos-success" : d.score >= 40 ? "bg-eos-warning" : "bg-eos-error"
                     }`}
                     style={{ width: `${d.score}%` }}
                   />
                 </div>
                 {d.score < 50 && (
-                  <div className="mt-2 flex items-start gap-1.5 rounded-eos-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                    <AlertTriangle className="mt-0.5 size-3 shrink-0 text-amber-600" />
+                  <div className="mt-2 flex items-start gap-1.5 rounded-eos-md bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
+                    <AlertTriangle className="mt-0.5 size-3 shrink-0 text-eos-warning" />
                     <span>{def.closureRecipe}</span>
                   </div>
                 )}
@@ -174,12 +174,12 @@ function ResultsView({
       </Card>
 
       {weakDomains.length > 0 && (
-        <div className="rounded-eos-lg border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
+        <div className="rounded-eos-lg border border-eos-warning/30 bg-eos-warning-soft p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-eos-warning">
             <ShieldAlert className="size-4" />
             {weakDomains.length} domeniu{weakDomains.length > 1 ? "i" : ""} cu scor sub 50% — findings automate generate
           </div>
-          <p className="mt-1 text-xs text-amber-700">
+          <p className="mt-1 text-xs text-eos-warning">
             Problemele detectate au fost adăugate în tabloul de remediere. Vezi secțiunea Acțiuni active.
           </p>
         </div>
@@ -453,9 +453,9 @@ export default function MaturitatePage() {
                         i === step
                           ? "bg-eos-primary"
                           : p.complete
-                            ? "bg-emerald-400"
+                            ? "bg-eos-success"
                             : p.answered > 0
-                              ? "bg-amber-400"
+                              ? "bg-eos-warning"
                               : "bg-eos-surface-variant"
                       }`}
                       onClick={() => setStep(i)}
