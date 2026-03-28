@@ -19,6 +19,7 @@ import {
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 import { isNavItemActive, type DashboardNavItem } from "@/components/compliscan/navigation"
 import { useOptionalCockpitData } from "@/components/compliscan/use-cockpit"
+import { DashboardBreadcrumb } from "@/components/compliscan/dashboard-breadcrumb"
 import { WorkspaceModeSwitcher } from "@/components/compliscan/workspace-mode-switcher"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
 import {
@@ -342,6 +343,7 @@ export function DashboardShell({
           )}
 
           <DashboardRuntimeProvider user={currentUser}>
+            <DashboardBreadcrumb />
             {children}
             <footer className="mt-12 pb-4">
               <LegalDisclaimer variant="short" />

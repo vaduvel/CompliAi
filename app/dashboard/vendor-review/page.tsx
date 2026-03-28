@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import Link from "next/link"
 import {
+  ArrowLeft,
   ShieldAlert,
   ChevronRight,
   ChevronDown,
@@ -954,7 +956,15 @@ export default function VendorReviewPage() {
   )
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl space-y-6">
+      <Link
+        href="/dashboard/resolve"
+        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+      >
+        <ArrowLeft className="size-3.5" strokeWidth={2} />
+        Înapoi la De rezolvat
+      </Link>
+
       <PageIntro
         eyebrow="Furnizori · Review"
         title="Vendor Review"

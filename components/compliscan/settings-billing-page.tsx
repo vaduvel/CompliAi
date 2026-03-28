@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
+  ArrowLeft,
   CreditCard,
   CheckCircle2,
   Clock,
@@ -143,7 +144,15 @@ export function SettingsBillingPageSurface() {
   const canManageOrgBilling = planData?.canManageOrgBilling ?? false
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl space-y-6">
+      <Link
+        href="/dashboard/settings"
+        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+      >
+        <ArrowLeft className="size-3.5" strokeWidth={2} />
+        Înapoi la Setări
+      </Link>
+
       <PageIntro
         title="Abonament"
         description="Gestionează planul și facturarea organizației tale."

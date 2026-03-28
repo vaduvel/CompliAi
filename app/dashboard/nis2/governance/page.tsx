@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
+  ArrowLeft,
   CheckCircle2,
   Loader2,
   Plus,
@@ -247,6 +248,14 @@ export default function GovernancePage() {
 
   return (
     <div className="space-y-6">
+      <Link
+        href="/dashboard/nis2"
+        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+      >
+        <ArrowLeft className="size-3.5" strokeWidth={2} />
+        Înapoi la NIS2
+      </Link>
+
       <PageIntro
         eyebrow="NIS2 — Guvernanță"
         title="Training Board & CISO"

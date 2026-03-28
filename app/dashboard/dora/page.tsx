@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
   AlertTriangle,
+  ArrowLeft,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -140,6 +142,14 @@ export default function DoraPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
+      <Link
+        href="/dashboard/resolve"
+        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+      >
+        <ArrowLeft className="size-3.5" strokeWidth={2} />
+        Înapoi la De rezolvat
+      </Link>
+
       <PageIntro
         eyebrow="DORA · Reziliență Operațională"
         title="Reziliență Digitală"

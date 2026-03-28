@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useParams } from "next/navigation"
-import { ArrowRight, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react"
 
 import { RecentScansCard } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
@@ -336,6 +336,15 @@ export default function ScanResultsPage() {
 
   return (
     <div className="space-y-8">
+
+      {/* ── Back nav ──────────────────────────────────────────────────────── */}
+      <Link
+        href={dashboardRoutes.scan}
+        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+      >
+        <ArrowLeft className="size-3.5" strokeWidth={2} />
+        Înapoi la Scanează
+      </Link>
 
       {/* ── Success Banner ─────────────────────────────────────────────────── */}
       {targetScan.analysisStatus === "completed" && (
