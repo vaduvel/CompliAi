@@ -205,8 +205,8 @@
 
   --card-bg: var(--bg-panel);
   --card-bg-hover: var(--bg-panel-2);
-  --card-border: var(--border-subtle);
-  --card-border-hover: var(--border-default);
+  --card-border: var(--border-default);
+  --card-border-hover: var(--border-strong);
   --card-radius: 18px;
   --card-padding: var(--spacing-5);
   --card-shadow: var(--shadow-sm);

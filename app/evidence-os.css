@@ -48,25 +48,29 @@
 }
 
 :root {
-  --eos-surface-base: hsl(220 14% 4%);
-  --eos-surface-primary: hsl(220 14% 8%);
-  --eos-surface-secondary: hsl(220 14% 12%);
-  --eos-surface-tertiary: hsl(220 14% 16%);
-  --eos-surface-elevated: hsl(220 14% 18%);
+  /* ── CompliScan Dark Premium — surface ────────────────────── */
+  --eos-surface-base:      #060810;                    /* canvas — cel mai întunecat */
+  --eos-surface-primary:   #0a0b0f;                    /* sidebar, panels */
+  --eos-surface-secondary: rgba(255, 255, 255, 0.02);  /* card bg */
+  --eos-surface-tertiary:  rgba(255, 255, 255, 0.04);  /* hover pe card */
+  --eos-surface-elevated:  rgba(255, 255, 255, 0.06);  /* active / selected */
 
-  --eos-border-subtle: hsl(220 14% 16%);
-  --eos-border-default: hsl(220 14% 22%);
-  --eos-border-strong: hsl(220 14% 30%);
+  /* ── border ───────────────────────────────────────────────── */
+  --eos-border-subtle:  rgba(255, 255, 255, 0.04);   /* dividers, fine separators */
+  --eos-border-default: rgba(255, 255, 255, 0.07);   /* card borders */
+  --eos-border-strong:  rgba(255, 255, 255, 0.14);   /* input focus, hover */
 
-  --eos-text-primary: hsl(220 14% 93%);
-  --eos-text-secondary: hsl(220 14% 63%);
-  --eos-text-tertiary: hsl(220 14% 40%);
-  --eos-text-inverse: hsl(220 14% 10%);
+  /* ── text ─────────────────────────────────────────────────── */
+  --eos-text-primary:   rgba(255, 255, 255, 0.88);   /* heading, labels */
+  --eos-text-secondary: rgba(255, 255, 255, 0.55);   /* body, descriptions */
+  --eos-text-tertiary:  rgba(255, 255, 255, 0.35);   /* captions, muted */
+  --eos-text-inverse:   #060810;
 
-  --eos-accent-primary: hsl(230 80% 62%);
-  --eos-accent-primary-hover: hsl(230 80% 55%);
-  --eos-accent-primary-subtle: hsl(230 80% 62% / 0.12);
-  --eos-accent-secondary: hsl(230 60% 72%);
+  /* ── accent — blue-500 ────────────────────────────────────── */
+  --eos-accent-primary:        #3b82f6;
+  --eos-accent-primary-hover:  #2563eb;
+  --eos-accent-primary-subtle: rgba(59, 130, 246, 0.11);
+  --eos-accent-secondary:      rgba(147, 197, 253, 0.80);
 
   --eos-severity-critical: hsl(0 72% 62%);
   --eos-severity-high: hsl(25 90% 58%);
@@ -102,16 +106,16 @@
   --eos-page-cluster-gap: 16px;
   --eos-page-summary-item-min: 220px;
 
-  --eos-radius-sm: 4px;
-  --eos-radius-md: 8px;
-  --eos-radius-lg: 12px;
-  --eos-radius-xl: 16px;
+  --eos-radius-sm: 8px;
+  --eos-radius-md: 12px;
+  --eos-radius-lg: 16px;
+  --eos-radius-xl: 20px;
   --eos-radius-full: 9999px;
 
-  --eos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --eos-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --eos-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --eos-shadow-focus: 0 0 0 2px hsl(230 80% 62% / 0.4);
+  --eos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --eos-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.50);
+  --eos-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.60);
+  --eos-shadow-focus: 0 0 0 2px rgba(59, 130, 246, 0.40);
 
   --eos-motion-instant: 100ms;
   --eos-motion-fast: 150ms;
