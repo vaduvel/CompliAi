@@ -331,7 +331,7 @@ export function GeneratorDrawer({
               {docTypeLabel}
             </p>
             <p className="text-sm text-eos-text-muted">
-              {findingTitle} · generezi, validezi și confirmi documentul chiar în acest cockpit.
+              {findingTitle}
             </p>
         </div>
 
@@ -495,7 +495,7 @@ export function GeneratorDrawer({
                       Verificare rapidă
                     </p>
                     <p className="mt-1 text-sm text-eos-text-muted">
-                      Verifici dacă draftul poate fi folosit pentru rezolvarea riscului, înainte să ajungă la Dosar.
+                      Verifici dacă draftul poate fi folosit pentru rezolvarea riscului.
                     </p>
                   </div>
                   <span
@@ -520,11 +520,7 @@ export function GeneratorDrawer({
                   <p className="text-xs text-eos-text-muted">
                     Ultima verificare: {new Date(validationRunAtISO).toLocaleString("ro-RO")}
                   </p>
-                ) : (
-                  <p className="text-xs text-eos-text-muted">
-                    Rulează verificarea rapidă înainte să confirmi documentul pentru rezolvare.
-                  </p>
-                )}
+                ) : null}
 
                 <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
                   {validationResult?.checks.map((check) => (
@@ -605,9 +601,6 @@ export function GeneratorDrawer({
                   )}
                   Confirmă documentul pentru rezolvare
                 </Button>
-                <p className="text-xs text-eos-text-muted">
-                  Aici doar generezi, verifici și aprobi documentul. Rezolvarea riscului și trimiterea la Dosar rămân pași separați în același cockpit.
-                </p>
               </div>
             </div>
           )}
