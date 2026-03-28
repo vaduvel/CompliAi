@@ -73,6 +73,10 @@ type FindingDetailResponse = {
 }
 
 function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
+  if (recipe.documentSupport?.mode === "assistive") {
+    return "Acțiune asistată"
+  }
+
   switch (recipe.executionClass) {
     case "documentary":
       return "Document"
@@ -295,10 +299,8 @@ export default function FindingDetailPage() {
     linkedGeneratedDocument: linkedGeneratedDocument ?? undefined,
   })
   const introDescription = recipe.whatUserSees || finding.detail
-  const generatorDocumentType = (
-    finding.suggestedDocumentType ??
-    (recipe.findingTypeId === "GDPR-016" ? "retention-policy" : "")
-  ) as DocumentType | ""
+  const generatorDocumentType = (recipe.documentSupport?.documentType ?? "") as DocumentType | ""
+  const isOperationalAssisted = recipe.documentSupport?.mode === "assistive"
   const preparedDocumentReady =
     linkedGeneratedDocument?.validationStatus === "passed" &&
     linkedGeneratedDocument?.approvalStatus !== "approved_as_evidence"
@@ -309,7 +311,8 @@ export default function FindingDetailPage() {
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
   const documentaryGeneratorVisible = hasGenerator && (status === "open" || status === "confirmed")
-  const needsDocumentResolution = status === "confirmed" && hasGenerator && preparedDocumentReady
+  const needsDocumentResolution =
+    status === "confirmed" && hasGenerator && preparedDocumentReady && !isOperationalAssisted
   const showConfirmedHeroAction = status === "confirmed" && !hasGenerator
   const resolvedMomentVisible =
     status === "resolved" &&
@@ -322,7 +325,10 @@ export default function FindingDetailPage() {
     preparedDocumentReady &&
     Boolean(linkedGeneratedDocument?.id)
   const closeGating = getCloseGatingRequirements(recipe.findingTypeId)
-  const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && closeGating.requiresEvidenceNote
+  const requiresOperationalEvidence =
+    status === "confirmed" &&
+    closeGating.requiresEvidenceNote &&
+    (!hasGenerator || (isOperationalAssisted && preparedDocumentReady))
   const requiresRevalidation = status === "confirmed" && !hasGenerator && recipe.resolveFlowState === "needs_revalidation"
   const inlineOperationalAction =
     status === "confirmed" &&
@@ -390,10 +396,24 @@ export default function FindingDetailPage() {
       : recipe.findingTypeId === "GDPR-017"
           ? {
               eyebrow: "Dovadă de ștergere / anonimizare",
-              body: "Spune ce date au fost șterse sau anonimizate, din ce sisteme, când a rulat controlul și ce log sau export poți arăta la audit.",
+              body: "Politica de retenție generată te ajută, dar aici închizi cazul doar după ce spui ce date au fost șterse sau anonimizate, din ce sisteme, când a rulat controlul și ce log sau export poți arăta la audit.",
               placeholder: "Ex: Lead-urile expirate >12 luni au fost șterse din CRM la 26.03.2026. Export job #retention-2026-03-26 salvat, verificare făcută pe 124 înregistrări, fără excepții.",
               footer: "Cazul nu poate intra în monitorizare fără urma clară a execuției reale, nu doar politica de retenție.",
             }
+      : recipe.findingTypeId === "AI-OPS"
+        ? {
+            eyebrow: "Dovadă operațională AI obligatorie",
+            body: "Politica AI generată te ajută, dar aici închizi cazul doar după ce spui ce restricții, training sau protecții ai aplicat efectiv în firmă.",
+            placeholder: "Ex: Politica AI publicată și comunicată la 28.03.2026. Echipa folosește doar ChatGPT Team, prompturile cu date personale sunt interzise, iar trainingul intern a fost ținut în aceeași zi.",
+            footer: "Cazul nu poate intra în monitorizare doar cu politica. Trebuie și urma clară a aplicării reale.",
+          }
+      : recipe.findingTypeId === "GDPR-005"
+        ? {
+            eyebrow: "Dovadă operațională cookies obligatorie",
+            body: "Politica de cookies generată te ajută, dar aici închizi cazul doar după ce spui ce ai schimbat în banner și ce verificare curată ai obținut la re-scan.",
+            placeholder: "Ex: Bannerul a fost actualizat la 28.03.2026 ca să blocheze analytics înainte de consimțământ. Politica de cookies a fost publicată, iar re-scanul site-ului a confirmat lipsa trackerelor înainte de accept.",
+            footer: "Cazul nu poate intra în monitorizare doar cu politica. Trebuie și urma clară a remedierii tehnice.",
+          }
       : recipe.findingTypeId === "GDPR-020"
         ? {
             eyebrow: "Dovadă contractuală obligatorie",
@@ -827,6 +847,16 @@ export default function FindingDetailPage() {
                 documentFlowState: result.documentFlowState,
                 feedbackMessage: result.feedbackMessage,
               })
+            }
+            if (
+              recipe.documentSupport?.mode === "assistive" &&
+              result?.linkedGeneratedDocument?.approvalStatus === "draft" &&
+              result.linkedGeneratedDocument.validationStatus === "passed"
+            ) {
+              setTimeout(() => {
+                const evidenceField = document.querySelector<HTMLElement>('[data-testid="operational-evidence-note"]')
+                evidenceField?.scrollIntoView({ behavior: "smooth", block: "center" })
+              }, 50)
             }
             refetchFinding()
           }}

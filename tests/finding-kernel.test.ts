@@ -811,7 +811,7 @@ describe("buildCockpitRecipe", () => {
   })
 
   describe("Archetype 1c — GDPR-017 (deletion proof / external_action)", () => {
-    it("returnează external_action fără generator și cu CTA de control operațional", () => {
+    it("returnează external_action asistat de document și cu CTA de control operațional", () => {
       const finding = makeFinding({
         id: "retention-deletion-proof-1",
         category: "GDPR",
@@ -825,9 +825,30 @@ describe("buildCockpitRecipe", () => {
       expect(recipe.findingTypeId).toBe("GDPR-017")
       expect(recipe.uiState).toBe("external_action_required")
       expect(recipe.primaryCTA.action).toBe("open_external_steps")
-      expect(recipe.visibleBlocks.detailBlocks).not.toContain("generator")
+      expect(recipe.documentSupport?.mode).toBe("assistive")
+      expect(recipe.documentSupport?.documentType).toBe("retention-policy")
+      expect(recipe.visibleBlocks.detailBlocks).toContain("generator")
       expect(recipe.closureCTA).toBe("Marchează ștergerea / anonimizarea")
       expect(recipe.acceptedEvidence).toContain("Export log / jurnal operațional")
+    })
+  })
+
+  describe("Archetype 1d — AI-OPS (operational-assisted)", () => {
+    it("păstrează clasa operațională, dar afișează generatorul de politică AI", () => {
+      const finding = makeFinding({
+        id: "intake-ai-confidential-data",
+        category: "EU_AI_ACT",
+        title: "Date confidențiale introduse în AI fără protecție",
+        detail: "Tool-uri AI externe primesc date sensibile fără reguli.",
+        findingStatus: "open",
+      })
+
+      const recipe = buildCockpitRecipe(finding)
+      expect(recipe.findingTypeId).toBe("AI-OPS")
+      expect(recipe.executionClass).toBe("operational")
+      expect(recipe.documentSupport?.mode).toBe("assistive")
+      expect(recipe.documentSupport?.documentType).toBe("ai-governance")
+      expect(recipe.visibleBlocks.detailBlocks).toContain("generator")
     })
   })
 
@@ -949,13 +970,13 @@ describe("getCloseGatingRequirements", () => {
 
   it("cere dovadă operațională pentru GDPR-005", () => {
     const requirements = getCloseGatingRequirements("GDPR-005")
-    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresGeneratedDocument).toBe(true)
     expect(requirements.requiresEvidenceNote).toBe(true)
   })
 
   it("cere dovadă operațională pentru GDPR-017", () => {
     const requirements = getCloseGatingRequirements("GDPR-017")
-    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresGeneratedDocument).toBe(true)
     expect(requirements.requiresEvidenceNote).toBe(true)
     expect(requirements.acceptedEvidence).toContain("Export log / jurnal operațional")
   })
@@ -976,7 +997,7 @@ describe("getCloseGatingRequirements", () => {
 
   it("cere dovadă operațională pentru AI-OPS", () => {
     const requirements = getCloseGatingRequirements("AI-OPS")
-    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresGeneratedDocument).toBe(true)
     expect(requirements.requiresEvidenceNote).toBe(true)
     expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
   })

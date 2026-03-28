@@ -105,6 +105,37 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.documentFlowState).toBe("draft_missing")
   })
 
+  it("returnează draft_missing și pentru AI-OPS asistat de politică AI", async () => {
+    const aiOpsState = {
+      findings: [
+        {
+          id: "intake-ai-confidential-data",
+          title: "Date confidențiale introduse în AI fără protecție",
+          detail: "Tool-uri AI externe primesc date sensibile fără reguli.",
+          category: "EU_AI_ACT",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "scan.pdf",
+          findingStatus: "open",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+
+    const response = await GET(
+      new Request("http://localhost/api/findings/intake-ai-confidential-data"),
+      { params: Promise.resolve({ id: "intake-ai-confidential-data" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.finding.suggestedDocumentType ?? null).toBeNull()
+    expect(payload.documentFlowState).toBe("draft_missing")
+  })
+
   it("returnează feedback util când finding-ul este confirmat fără auto-generare", async () => {
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -577,6 +608,91 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.code).toBe("DOCUMENT_NOT_READY_FOR_RESOLUTION")
   })
 
+  it("blochează AI-OPS dacă documentul de suport lipsește, chiar dacă dovada operațională este prezentă", async () => {
+    const aiOpsState = {
+      findings: [
+        {
+          id: "intake-ai-confidential-data",
+          title: "Date confidențiale introduse în AI fără protecție",
+          detail: "Tool-uri AI externe primesc date sensibile fără reguli.",
+          category: "EU_AI_ACT",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "scan.pdf",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/intake-ai-confidential-data", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          evidenceNote: "Politica AI a fost comunicată și trainingul a fost ținut.",
+        }),
+      }),
+      { params: Promise.resolve({ id: "intake-ai-confidential-data" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("DOCUMENT_NOT_READY_FOR_RESOLUTION")
+  })
+
+  it("blochează AI-OPS dacă documentul există, dar lipsește dovada operațională", async () => {
+    const aiOpsState = {
+      findings: [
+        {
+          id: "intake-ai-confidential-data",
+          title: "Date confidențiale introduse în AI fără protecție",
+          detail: "Tool-uri AI externe primesc date sensibile fără reguli.",
+          category: "EU_AI_ACT",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-03-27T10:00:00.000Z",
+          sourceDocument: "scan.pdf",
+          findingStatus: "confirmed",
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-ai-1",
+          documentType: "ai-governance",
+          title: "Politică de utilizare AI",
+          generatedAtISO: "2026-03-27T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "intake-ai-confidential-data",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-27T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/intake-ai-confidential-data", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "resolved" }),
+      }),
+      { params: Promise.resolve({ id: "intake-ai-confidential-data" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("OPERATIONAL_EVIDENCE_REQUIRED")
+  })
+
   it("trimite documentul la dosar doar după ce riscul este deja rezolvat cu el", async () => {
     const resolvedDocumentState = {
       findings: [
@@ -953,7 +1069,7 @@ describe("PATCH /api/findings/[id]", () => {
     )
   })
 
-  it("închide GDPR-017 cu dovadă de ștergere și intră în monitoring", async () => {
+  it("rezolvă GDPR-017 doar după documentul de suport și dovada de ștergere", async () => {
     const retentionState = {
       findings: [
         {
@@ -970,7 +1086,21 @@ describe("PATCH /api/findings/[id]", () => {
           findingStatus: "confirmed",
         },
       ],
-      generatedDocuments: [],
+      generatedDocuments: [
+        {
+          id: "doc-retention-1",
+          documentType: "retention-policy",
+          title: "Politică și Matrice de Retenție",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "retention-deletion-proof-1",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-22T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
     }
     mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
 
@@ -989,10 +1119,11 @@ describe("PATCH /api/findings/[id]", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(payload.status).toBe("under_monitoring")
+    expect(payload.status).toBe("resolved")
     expect(payload.finding.operationalEvidenceNote).toContain("Lead-urile expirate")
-    expect(typeof payload.finding.nextMonitoringDateISO).toBe("string")
-    expect(payload.feedbackMessage).toContain("operațională")
+    expect(payload.documentFlowState).toBe("draft_ready")
+    expect(payload.feedbackMessage).toContain("Riscul este rezolvat")
+    expect(payload.feedbackMessage).toContain("Acum adaugi documentul la Dosar")
   })
 
   it("blochează SYS-002 fără reconfirmare explicită", async () => {

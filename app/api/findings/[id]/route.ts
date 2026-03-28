@@ -19,6 +19,7 @@ import {
   classifyFinding,
   computeNextMonitoringDateISO,
   getCloseGatingRequirements,
+  getRuntimeCockpitDocumentType,
   normalizeFindingSuggestedDocumentType,
 } from "@/lib/compliscan/finding-kernel"
 import type { ScanFinding } from "@/lib/compliance/types"
@@ -74,7 +75,10 @@ export async function GET(
     return NextResponse.json({
       finding: runtimeFinding,
       linkedGeneratedDocument,
-      documentFlowState: getDocumentFlowState(runtimeFinding.suggestedDocumentType, linkedGeneratedDocument?.approvalStatus),
+      documentFlowState: getDocumentFlowState(
+        getRuntimeCockpitDocumentType(runtimeFinding) ?? undefined,
+        linkedGeneratedDocument?.approvalStatus
+      ),
     })
   } catch {
     return jsonError("Eroare la citirea finding-ului.", 500)
@@ -120,6 +124,7 @@ export async function PATCH(
     const nowISO = new Date().toISOString()
     const { findingTypeId } = classifyFinding(finding)
     const closeGating = getCloseGatingRequirements(findingTypeId)
+    const cockpitDocumentType = getRuntimeCockpitDocumentType(finding) ?? undefined
 
     const storedStatus = (
       newStatus === "resolved" && !closeGating.requiresGeneratedDocument
@@ -181,7 +186,7 @@ export async function PATCH(
         status: "open",
         linkedGeneratedDocument,
         documentFlowState: getDocumentFlowState(
-          updatedFindings[findingIdx]?.suggestedDocumentType,
+          getRuntimeCockpitDocumentType(updatedFindings[findingIdx]) ?? undefined,
           linkedGeneratedDocument?.approvalStatus
         ),
         suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,
@@ -221,8 +226,8 @@ export async function PATCH(
         linkTo: `/dashboard/resolve/${findingId}`,
       }).catch(() => {})
 
-      if (finding.suggestedDocumentType) {
-        const docType = finding.suggestedDocumentType as DocumentType
+      if (cockpitDocumentType) {
+        const docType = cockpitDocumentType as DocumentType
         if (VALID_DOC_TYPES.includes(docType)) {
           feedbackMessage += ` Deschide flow-ul ghidat pentru ${docType}, verifică draftul și confirmă-l aici înainte să rezolvi riscul.`
         }
@@ -327,6 +332,13 @@ export async function PATCH(
           "Pentru acest finding trebuie să confirmi și să validezi documentul înainte să rezolvi riscul.",
           400,
           "DOCUMENT_NOT_READY_FOR_RESOLUTION"
+        )
+      }
+      if (closeGating.requiresEvidenceNote && !body.evidenceNote?.trim()) {
+        return jsonError(
+          "Pentru acest finding trebuie să adaugi și dovada operațională a aplicării măsurii înainte de închidere.",
+          400,
+          "OPERATIONAL_EVIDENCE_REQUIRED"
         )
       }
       const nextResolution: FindingResolution = {
@@ -572,7 +584,7 @@ export async function PATCH(
             ? generatedDocuments.find((document) => document.sourceFindingId === findingId && document.approvalStatus === "approved_as_evidence") ?? linkedGeneratedDocument
             : linkedGeneratedDocument,
       documentFlowState: getDocumentFlowState(
-        updatedFindings[findingIdx]?.suggestedDocumentType,
+        getRuntimeCockpitDocumentType(updatedFindings[findingIdx]) ?? undefined,
         generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus
       ),
       suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,

@@ -127,6 +127,10 @@ export type CockpitRecipe = {
   findingTypeId: string
   framework: FindingFramework
   executionClass: SmartResolveExecutionClass
+  documentSupport?: {
+    documentType: GeneratedDocumentKind
+    mode: "required" | "assistive"
+  }
   resolutionMode: ResolutionMode
   statusLabel: string
   collapsedStatusLabel: string
@@ -256,13 +260,54 @@ const CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, Generat
   "AI-005": "ai-governance",
 }
 
+const ASSISTIVE_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, GeneratedDocumentKind>> = {
+  "GDPR-005": "cookie-policy",
+  "GDPR-017": "retention-policy",
+  "AI-OPS": "ai-governance",
+}
+
 export function getCanonicalSuggestedDocumentTypeForFindingType(findingTypeId: string): GeneratedDocumentKind | null {
   return CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID[findingTypeId] ?? null
+}
+
+export function getAssistiveDocumentTypeForFindingType(findingTypeId: string): GeneratedDocumentKind | null {
+  return ASSISTIVE_DOCUMENT_TYPE_BY_FINDING_TYPE_ID[findingTypeId] ?? null
+}
+
+export function getDocumentSupportForFindingType(
+  findingTypeId: string
+): CockpitRecipe["documentSupport"] | undefined {
+  const canonicalType = getCanonicalSuggestedDocumentTypeForFindingType(findingTypeId)
+  if (canonicalType) {
+    return {
+      documentType: canonicalType,
+      mode: "required",
+    }
+  }
+
+  const assistiveType = getAssistiveDocumentTypeForFindingType(findingTypeId)
+  if (assistiveType) {
+    return {
+      documentType: assistiveType,
+      mode: "assistive",
+    }
+  }
+
+  return undefined
 }
 
 export function getRuntimeSuggestedDocumentType(record: ScanFinding): string | null {
   const { findingTypeId } = classifyFinding(record)
   return getCanonicalSuggestedDocumentTypeForFindingType(findingTypeId) ?? record.suggestedDocumentType ?? null
+}
+
+export function getRuntimeCockpitDocumentType(record: ScanFinding): GeneratedDocumentKind | null {
+  const { findingTypeId } = classifyFinding(record)
+  return (
+    getDocumentSupportForFindingType(findingTypeId)?.documentType ??
+    (record.suggestedDocumentType as GeneratedDocumentKind | undefined) ??
+    null
+  )
 }
 
 export function normalizeFindingSuggestedDocumentType<T extends ScanFinding>(record: T): T {
@@ -1502,7 +1547,7 @@ function resolveDocumentFlowState(
   const doc = artifacts?.linkedGeneratedDocument
   if (doc?.approvalStatus === "approved_as_evidence") return "attached_as_evidence"
   if (doc?.approvalStatus === "draft") return "draft_ready"
-  if (record.suggestedDocumentType) return "draft_missing"
+  if (getRuntimeCockpitDocumentType(record)) return "draft_missing"
   return "not_required"
 }
 
@@ -1534,19 +1579,18 @@ function buildVisibleBlocks(
 ): CockpitVisibleBlocks {
   const primaryMode = findingType.resolutionModes[0]
   const rules = RESOLUTION_MODE_BLOCK_RULES[primaryMode]
-  const executionClass = getSmartResolveExecutionClass(findingType.findingTypeId)
+  const documentSupport = getDocumentSupportForFindingType(findingType.findingTypeId)
   const { collapsedPrimaryCTA, collapsedStatusLabel } = getCollapsedPresentation(
     uiState,
     flow.primaryCTA
   )
 
   const allBlocks: CockpitBlockKey[] = []
-  const hasDocumentTrack =
-    documentFlowState !== "not_required" &&
-    findingType.requiredEvidenceKinds.includes("generated_document")
+  const hasDocumentTrack = documentFlowState !== "not_required" && Boolean(documentSupport)
   const shouldShowGenerator =
-    executionClass === "documentary" &&
+    Boolean(documentSupport) &&
     (
+      documentSupport?.mode === "assistive" ||
       rules.generatorBlock ||
       (primaryMode === "in_app_guided" &&
         (uiState === "ready_to_generate" || uiState === "evidence_uploaded" || hasDocumentTrack))
@@ -2603,10 +2647,12 @@ export function getCloseGatingRequirements(findingTypeId: string): CloseGatingRe
   const findingType = getFindingTypeDefinition(findingTypeId)
   const flow = getResolveFlowRecipe(findingTypeId)
   const primaryMode = findingType.resolutionModes[0]
-  const isDocumentary = isSmartResolveDocumentaryFindingType(findingTypeId)
+  const documentSupport = getDocumentSupportForFindingType(findingTypeId)
+  const isOperationalAssisted = documentSupport?.mode === "assistive"
   const requiresGeneratedDocument =
-    isDocumentary &&
+    Boolean(documentSupport) &&
     (
+      isOperationalAssisted ||
       findingType.requiredEvidenceKinds.includes("generated_document") ||
       (flow.initialFlowState === "ready_to_generate" &&
         (primaryMode === "in_app_guided" || primaryMode === "in_app_full"))
@@ -2617,9 +2663,10 @@ export function getCloseGatingRequirements(findingTypeId: string): CloseGatingRe
     requiresGeneratedDocument,
     requiresConfirmationChecklist: requiresGeneratedDocument,
     requiresEvidenceNote:
-      !requiresGeneratedDocument &&
+      isOperationalAssisted ||
+      (!requiresGeneratedDocument &&
       !requiresRevalidationConfirmation &&
-      (primaryMode === "external_action" || findingType.requiredEvidenceKinds.includes("uploaded_file")),
+      (primaryMode === "external_action" || findingType.requiredEvidenceKinds.includes("uploaded_file"))),
     requiresRevalidationConfirmation,
     requiresNextReviewDate: requiresRevalidationConfirmation,
     acceptedEvidence: findingType.requiredEvidenceKinds.map((k) => EVIDENCE_KIND_LABELS[k] ?? k),
@@ -2703,6 +2750,7 @@ export function buildCockpitRecipe(
   const statusLabels = UI_STATE_STATUS_LABELS[uiState]
   const primaryMode = findingType.resolutionModes[0]
   const executionClass = getSmartResolveExecutionClass(findingTypeId)
+  const documentSupport = getDocumentSupportForFindingType(findingTypeId)
   const visibleBlocks = buildVisibleBlocks(uiState, flow, findingType, documentFlowState)
   const resolveFlowState = uiStateToFlowState(uiState, flow.initialFlowState)
   const vendorContext = inferVendorContext(record, findingTypeId)
@@ -3013,6 +3061,7 @@ export function buildCockpitRecipe(
     findingTypeId,
     framework: findingType.framework,
     executionClass,
+    documentSupport,
     resolutionMode: primaryMode,
     statusLabel: statusLabels.full,
     collapsedStatusLabel: statusLabels.collapsed,
