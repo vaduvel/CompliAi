@@ -1902,6 +1902,7 @@ function getWorkflowLink(
             findingId: record.id,
             source: "cockpit",
             focus: governanceFocus,
+            returnTo: `/dashboard/resolve/${record.id}`,
           }).toString()}`,
           label:
             governanceFocus === "certification"
@@ -1917,6 +1918,7 @@ function getWorkflowLink(
             findingId: record.id,
             source: "cockpit",
             focus: maturityFocus,
+            returnTo: `/dashboard/resolve/${record.id}`,
           }).toString()}`,
           label: "Deschide evaluarea de maturitate",
         }
@@ -1928,6 +1930,7 @@ function getWorkflowLink(
         tab: "vendors",
         focus: "vendor",
         findingId: record.id,
+        returnTo: `/dashboard/resolve/${record.id}`,
       })
       if (vendorContext?.vendorName) {
         search.set("vendor", vendorContext.vendorName)
@@ -2127,9 +2130,9 @@ export function getSpecialistHandoffContract(
         startHref: workflowLink.href,
         startLabel: workflowLink.label,
         targetReturnMode: "automatic",
-        runtimeReturnMode: "manual_link",
+        runtimeReturnMode: "automatic",
         runtimeStatusNote:
-          "Registrul de guvernanță afișează un traseu contextual, dar nu readuce încă automat userul în cockpit după actualizare.",
+          "După ce actualizezi training-ul sau certificarea în registrul Board & CISO, modulul te readuce automat în același cockpit pentru închidere.",
         returnEvidenceLabel: "Actualizare registru Board & CISO",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească automat training-ul sau certificarea actualizată, împreună cu urma salvată în registru.",
@@ -2140,9 +2143,9 @@ export function getSpecialistHandoffContract(
         startHref: workflowLink.href,
         startLabel: workflowLink.label,
         targetReturnMode: "automatic",
-        runtimeReturnMode: "manual_link",
+        runtimeReturnMode: "automatic",
         runtimeStatusNote:
-          "Evaluarea de maturitate NIS2 oferă doar întoarcere prin link; round-trip-ul automat spre cockpit nu este încă implementat.",
+          "După ce evaluarea de maturitate este salvată, modulul te readuce automat în același cockpit pentru închidere.",
         returnEvidenceLabel: "Evaluare maturitate salvată",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească automat domeniul evaluat, răspunsurile salvate și planul de remediere aferent.",
@@ -2153,9 +2156,9 @@ export function getSpecialistHandoffContract(
         startHref: workflowLink.href,
         startLabel: workflowLink.label,
         targetReturnMode: "automatic",
-        runtimeReturnMode: "manual_link",
+        runtimeReturnMode: "automatic",
         runtimeStatusNote:
-          "Registrul furnizorilor NIS2 afișează contextul și permite revenire prin link, dar nu te readuce încă automat în finding după revizuire.",
+          "După ce marchezi revizuirea furnizorului în registrul NIS2, modulul te readuce automat în același cockpit pentru închidere.",
         returnEvidenceLabel: "Revizuire furnizor salvată",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească automat revizuirea contractuală, vendorul afectat și dovada salvată în registru.",

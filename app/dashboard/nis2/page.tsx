@@ -2096,11 +2096,14 @@ function VendorsTab({
   highlightedVendorName,
   focusMode,
   sourceFindingId,
+  returnTo,
 }: {
   highlightedVendorName?: string
   focusMode?: "vendor"
   sourceFindingId?: string
+  returnTo?: string
 }) {
+  const router = useRouter()
   const [vendors, setVendors] = useState<Nis2Vendor[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -2215,6 +2218,29 @@ function VendorsTab({
       if (!res.ok) throw new Error(data.error ?? "Eroare la actualizare.")
       setVendors((prev) => prev.map((v) => (v.id === id ? data.vendor! : v)))
       toast.success("Furnizor actualizat")
+      if (
+        sourceFindingId &&
+        returnTo &&
+        highlightedVendor?.id === id &&
+        typeof patch.lastReviewDate === "string"
+      ) {
+        const evidenceNote = [
+          `Revizuire furnizor salvată pentru ${data.vendor!.name}.`,
+          data.vendor!.hasDPA ? "DPA verificat." : "DPA încă lipsă.",
+          data.vendor!.hasSecuritySLA ? "SLA de securitate verificat." : "SLA de securitate încă lipsă.",
+          data.vendor!.lastReviewDate
+            ? `Ultima revizuire: ${new Date(data.vendor!.lastReviewDate).toLocaleDateString("ro-RO")}.`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" ")
+        const params = new URLSearchParams({
+          vendorFlow: "done",
+          evidenceNote,
+        })
+        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+        return
+      }
     } catch (err) {
       toast.error("Eroare", { description: err instanceof Error ? err.message : "Încearcă din nou." })
     }
@@ -2231,12 +2257,12 @@ function VendorsTab({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Registrul furnizorilor este deschis din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
-                Furnizorul „{highlightedVendor.name}” este deja selectat mai jos. Verifică DPA-ul, clauzele de securitate și marchează revizuirea contractuală înainte să revii în finding.
+                Furnizorul „{highlightedVendor.name}” este deja selectat mai jos. Verifică DPA-ul, clauzele de securitate și marchează revizuirea contractuală; după salvare, revii automat în cockpit.
               </p>
             </div>
             {sourceFindingId ? (
               <Link
-                href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+                href={returnTo || `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
                 className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
               >
                 <ArrowLeft className="size-3" strokeWidth={2} />
@@ -2255,11 +2281,11 @@ function VendorsTab({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Alege furnizorul corect din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
-                Nu am putut selecta automat furnizorul potrivit. Alege vendorul afectat din registru, marchează revizuirea și apoi revino în același finding.
+                Nu am putut selecta automat furnizorul potrivit. Alege vendorul afectat din registru, marchează revizuirea și apoi revii automat în același finding.
               </p>
             </div>
             <Link
-              href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+              href={returnTo || `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
               className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
             >
               <ArrowLeft className="size-3" strokeWidth={2} />
@@ -2740,6 +2766,7 @@ export default function Nis2Page() {
             highlightedVendorName={highlightedVendorName}
             focusMode={focusMode === "vendor" ? "vendor" : undefined}
             sourceFindingId={sourceFindingId}
+            returnTo={returnTo}
           />
         </TabsContent>
       </Tabs>

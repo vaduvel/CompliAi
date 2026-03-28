@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -240,6 +240,7 @@ function buildSuggestedAnswers(
 }
 
 export default function MaturitatePage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const [loading, setLoading] = useState(true)
@@ -271,6 +272,7 @@ export default function MaturitatePage() {
   const liveResult = scoreMaturity(answers)
   const currentDomainResult = liveResult.domains[step]
   const findingId = searchParams.get("findingId") ?? searchParams.get("sourceFindingId") ?? ""
+  const returnTo = searchParams.get("returnTo") ?? ""
   const source = (searchParams.get("source") ?? searchParams.get("from") ?? "").toLowerCase()
   const focus = (searchParams.get("focus") ?? "").toLowerCase()
   const fromCockpit = Boolean(findingId) && (source.includes("cockpit") || source.includes("finding") || searchParams.has("sourceFindingId"))
@@ -304,6 +306,21 @@ export default function MaturitatePage() {
       toast.success("Auto-evaluare de maturitate salvată", {
         description: `Scor general: ${data.assessment!.overallScore}% — nivel ${data.assessment!.level}`,
       })
+      if (fromCockpit && findingId && returnTo) {
+        const evidenceNote = [
+          `Evaluare de maturitate NIS2 salvată la ${new Date(data.assessment!.completedAt).toLocaleDateString("ro-RO")}.`,
+          focus ? `Domeniu focus: ${focus}.` : null,
+          `Scor general ${data.assessment!.overallScore}% și nivel ${data.assessment!.level}.`,
+        ]
+          .filter(Boolean)
+          .join(" ")
+        const params = new URLSearchParams({
+          maturityFlow: "done",
+          evidenceNote,
+        })
+        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+        return
+      }
     } catch (err) {
       toast.error("Eroare la salvare", {
         description: err instanceof Error ? err.message : "Încearcă din nou.",
@@ -356,7 +373,7 @@ export default function MaturitatePage() {
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm" className="gap-2">
-                  <Link href={`/dashboard/resolve/${findingId}`}>
+                  <Link href={returnTo || `/dashboard/resolve/${findingId}`}>
                     <ArrowLeft className="size-4" strokeWidth={2} />
                     Înapoi la finding
                   </Link>

@@ -222,6 +222,33 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("governanceFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din registrul Board & CISO. Revizuiește dovada precompletată și închide cazul doar dacă training-ul sau certificarea au fost salvate corect în registru."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
+    if (searchParams.get("maturityFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din evaluarea de maturitate. Revizuiește dovada precompletată și închide cazul doar dacă domeniul evaluat și scorul salvat reflectă situația reală."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
+    if (searchParams.get("vendorFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din registrul furnizorilor NIS2. Revizuiește dovada precompletată și închide cazul doar dacă revizuirea contractuală și urma din registru sunt complete."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
   }, [finding, searchParams])
 
   async function updateStatus(

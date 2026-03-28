@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   CheckCircle2,
@@ -50,6 +50,21 @@ function TrainingBadge({ status }: { status: ReturnType<typeof trainingStatus> }
   return <Badge variant="success">Completat</Badge>
 }
 
+function deriveGovernanceMemberId(findingId?: string | null) {
+  if (!findingId) return ""
+  const prefixes = [
+    "nis2-gov-training-expired-",
+    "nis2-gov-training-",
+    "nis2-gov-cert-expired-",
+  ]
+  for (const prefix of prefixes) {
+    if (findingId.startsWith(prefix)) {
+      return findingId.slice(prefix.length)
+    }
+  }
+  return ""
+}
+
 // ── Add member form ────────────────────────────────────────────────────────────
 
 const ROLE_SUGGESTIONS = [
@@ -94,8 +109,10 @@ const emptyForm = (): FormState => ({
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function GovernancePage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const findingId = searchParams.get("findingId")?.trim()
+  const returnTo = searchParams.get("returnTo")?.trim()
   const source = (searchParams.get("source") ?? searchParams.get("from") ?? "").toLowerCase()
   const openedFromCockpit = Boolean(findingId) && (source.includes("cockpit") || source.includes("resolve"))
   const focus = (searchParams.get("focus") ?? "").toLowerCase()
@@ -110,6 +127,10 @@ export default function GovernancePage() {
   const [form, setForm] = useState<FormState>(emptyForm())
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [inlineTrainingDate, setInlineTrainingDate] = useState("")
+  const [inlineCertification, setInlineCertification] = useState("")
+  const [inlineCertExpiry, setInlineCertExpiry] = useState("")
+  const [inlineSaving, setInlineSaving] = useState(false)
 
   useEffect(() => {
     fetch("/api/nis2/governance", { cache: "no-store" })
@@ -169,6 +190,58 @@ export default function GovernancePage() {
     return t.expired || c?.expired
   })
   const totalIssues = missingTraining.length + expiredIssues.length
+  const targetedMemberId = deriveGovernanceMemberId(findingId)
+  const targetedMember = targetedMemberId ? members.find((member) => member.id === targetedMemberId) ?? null : null
+
+  useEffect(() => {
+    if (!targetedMember) return
+    setInlineTrainingDate(targetedMember.nis2TrainingCompleted?.slice(0, 10) ?? new Date().toISOString().slice(0, 10))
+    setInlineCertification(targetedMember.cisoCertification ?? "")
+    setInlineCertExpiry(targetedMember.cisoCertExpiry?.slice(0, 10) ?? "")
+  }, [targetedMember])
+
+  async function handleInlineSave() {
+    if (!targetedMember) return
+    setInlineSaving(true)
+    try {
+      const patch =
+        focus === "certification"
+          ? {
+              cisoCertification: inlineCertification.trim(),
+              cisoCertExpiry: inlineCertExpiry || undefined,
+            }
+          : {
+              nis2TrainingCompleted: inlineTrainingDate || new Date().toISOString().slice(0, 10),
+            }
+
+      const res = await fetch(`/api/nis2/governance/${targetedMember.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      })
+      const data = (await res.json()) as { member?: BoardMember; error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Actualizarea a eșuat.")
+
+      setMembers((prev) => prev.map((member) => (member.id === targetedMember.id ? data.member! : member)))
+      const evidenceNote =
+        focus === "certification"
+          ? `Registrul Board & CISO actualizat pentru ${data.member!.name}. Certificare ${data.member!.cisoCertification ?? "actualizată"} cu expirare ${data.member!.cisoCertExpiry?.slice(0, 10) ?? "nedefinită"} salvată în registru.`
+          : `Training NIS2 actualizat pentru ${data.member!.name} la data ${data.member!.nis2TrainingCompleted?.slice(0, 10) ?? inlineTrainingDate}. Registrul Board & CISO a fost salvat.`
+
+      toast.success("Registrul de guvernanță a fost actualizat")
+      if (findingId && returnTo) {
+        const params = new URLSearchParams({
+          governanceFlow: "done",
+          evidenceNote,
+        })
+        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+      }
+    } catch (err) {
+      toast.error("Eroare", { description: err instanceof Error ? err.message : "Încearcă din nou." })
+    } finally {
+      setInlineSaving(false)
+    }
+  }
 
   if (loading) return <LoadingScreen variant="section" />
 
@@ -198,7 +271,7 @@ export default function GovernancePage() {
           </p>
           <div className="mt-3">
             <Link
-              href={`/dashboard/resolve/${findingId}`}
+              href={returnTo || `/dashboard/resolve/${findingId}`}
               className="inline-flex h-9 items-center justify-center rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-hover"
             >
               Înapoi la finding
@@ -206,6 +279,69 @@ export default function GovernancePage() {
           </div>
         </div>
       )}
+
+      {openedFromCockpit && targetedMember ? (
+        <Card className="border-eos-primary/30 bg-eos-primary/5">
+          <CardHeader className="px-5 pt-4 pb-0">
+            <CardTitle className="text-sm font-semibold">
+              {focus === "certification" ? "Actualizează certificarea în acest pas" : "Actualizează training-ul în acest pas"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 px-5 pb-5 pt-3">
+            <p className="text-sm text-eos-text-muted">
+              {targetedMember.name} · {targetedMember.role}
+            </p>
+            {focus === "certification" ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_180px]">
+                <div>
+                  <label className="mb-1 block text-xs text-eos-text-muted">Certificare CISO</label>
+                  <select
+                    value={inlineCertification}
+                    onChange={(e) => setInlineCertification(e.target.value)}
+                    className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  >
+                    {CERT_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c || "— Fără certificare —"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-eos-text-muted">Data expirare</label>
+                  <input
+                    type="date"
+                    value={inlineCertExpiry}
+                    onChange={(e) => setInlineCertExpiry(e.target.value)}
+                    className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="mb-1 block text-xs text-eos-text-muted">Data training-ului NIS2</label>
+                <input
+                  type="date"
+                  value={inlineTrainingDate}
+                  onChange={(e) => setInlineTrainingDate(e.target.value)}
+                  className="h-9 w-full max-w-56 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                />
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                className="gap-2"
+                disabled={inlineSaving || (focus === "certification" && (!inlineCertification.trim() || !inlineCertExpiry))}
+                onClick={() => void handleInlineSave()}
+              >
+                {inlineSaving && <Loader2 className="size-3.5 animate-spin" />}
+                Salvează și revino în cockpit
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Summary strip */}
       {members.length > 0 && (

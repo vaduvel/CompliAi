@@ -524,6 +524,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2?tab=vendors")
     expect(recipe.workflowLink?.href).toContain("focus=vendor")
     expect(recipe.workflowLink?.href).toContain("findingId=nis2-supply-chain-gap")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-supply-chain-gap")
     expect(recipe.workflowLink?.label).toContain("Deschide registrul")
     expect(recipe.closureCTA).toBe("Marchează furnizorul revizuit")
     expect(recipe.monitoringSignals.length).toBeGreaterThan(0)
@@ -545,6 +546,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/maturitate")
     expect(recipe.workflowLink?.href).toContain("focus=risk-management")
     expect(recipe.workflowLink?.href).toContain("findingId=nis2-maturity-risk-management")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-maturity-risk-management")
     expect(recipe.workflowLink?.label).toBe("Deschide evaluarea de maturitate")
     expect(recipe.closureCTA).toBe("Marchează evaluarea salvată")
     expect(recipe.acceptedEvidence[0]).toContain("Managementul riscului cibernetic")
@@ -579,6 +581,7 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.findingTypeId).toBe("NIS2-GENERIC")
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/governance")
     expect(recipe.workflowLink?.href).toContain("focus=training")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-gov-training-demo-board-1")
     expect(recipe.closureCTA).toBe("Marchează training-ul documentat")
     expect(recipe.primaryCTA.label).toBe("Actualizează training-ul boardului")
   })
@@ -596,6 +599,7 @@ describe("getResolveFlowRecipe", () => {
 
     expect(recipe.workflowLink?.href).toContain("/dashboard/nis2/governance")
     expect(recipe.workflowLink?.href).toContain("focus=certification")
+    expect(recipe.workflowLink?.href).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-gov-cert-expired-demo-ciso-1")
     expect(recipe.workflowLink?.label).toBe("Deschide registrul CISO")
     expect(recipe.closureCTA).toBe("Marchează certificarea actualizată")
   })
@@ -1069,6 +1073,55 @@ describe("getSpecialistHandoffContract", () => {
     expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fincident-ops-2026")
     expect(contract?.runtimeReturnMode).toBe("automatic")
     expect(contract?.returnEvidenceLabel).toContain("early warning")
+  })
+
+  it("mapează guvernanța NIS2 pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-GENERIC",
+      makeFinding({
+        id: "nis2-gov-training-demo-board-1",
+        category: "NIS2",
+        title: "Ana Popescu nu a completat training-ul de securitate cibernetică",
+        detail: "Membrul conducerii nu are documentat training-ul de securitate cibernetică.",
+        sourceDocument: "Registru Guvernanță — Board Training Tracker",
+      })
+    )
+    expect(contract?.surface).toBe("nis2_governance")
+    expect(contract?.startHref).toContain("/dashboard/nis2/governance?")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-gov-training-demo-board-1")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează maturitatea NIS2 generică pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-GENERIC",
+      makeFinding({
+        id: "nis2-maturity-risk-management",
+        category: "NIS2",
+        title: "Maturitate insuficientă: Managementul riscului cibernetic (33%)",
+        detail: "Domeniu NIS2 cu scor sub 50%. Documentează o Politică de Management al Riscului Cibernetic.",
+      })
+    )
+    expect(contract?.surface).toBe("nis2_maturity")
+    expect(contract?.startHref).toContain("/dashboard/nis2/maturitate?")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-maturity-risk-management")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
+  it("mapează registrul de furnizori NIS2 pe handoff cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "NIS2-GENERIC",
+      makeFinding({
+        id: "nis2-supply-chain-gap",
+        category: "NIS2",
+        title: "2 furnizori tehnici fără DPA semnat",
+        detail: "Microsoft și AWS apar în registrul furnizorilor fără DPA actualizat.",
+      })
+    )
+    expect(contract?.surface).toBe("nis2_vendor_registry")
+    expect(contract?.startHref).toContain("/dashboard/nis2?tab=vendors")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-supply-chain-gap")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
   })
 
   it("include contractul specialist_handoff și în recipe", () => {
