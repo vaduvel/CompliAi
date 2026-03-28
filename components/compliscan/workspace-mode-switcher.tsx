@@ -2,7 +2,6 @@
 
 import { Briefcase, Building2, Loader2 } from "lucide-react"
 
-import { Button } from "@/components/evidence-os/Button"
 import type { WorkspaceMode } from "@/lib/server/auth"
 
 type WorkspaceModeSwitcherProps = {
@@ -11,31 +10,6 @@ type WorkspaceModeSwitcherProps = {
   loadingMode?: WorkspaceMode | null
   workspaceMode: WorkspaceMode
   onSwitch: (mode: WorkspaceMode) => void
-}
-
-function SwitchButton({
-  active,
-  children,
-  disabled,
-  onClick,
-}: {
-  active: boolean
-  children: React.ReactNode
-  disabled?: boolean
-  onClick: () => void
-}) {
-  return (
-    <Button
-      type="button"
-      variant={active ? "default" : "outline"}
-      size="sm"
-      disabled={disabled}
-      className="h-auto flex-1 justify-start gap-2 px-3 py-2 text-left"
-      onClick={onClick}
-    >
-      {children}
-    </Button>
-  )
 }
 
 export function WorkspaceModeSwitcher({
@@ -49,39 +23,63 @@ export function WorkspaceModeSwitcher({
   const switchingToOrg = loadingMode === "org"
 
   return (
-    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-3 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-2">
+      <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">
         Mod de lucru
       </p>
-      <div className="mt-3 flex gap-2">
-        <SwitchButton
-          active={workspaceMode === "portfolio"}
+      <div className="flex flex-col gap-0.5">
+        <button
+          type="button"
           disabled={disabled || switchingToPortfolio}
           onClick={() => onSwitch("portfolio")}
+          className={[
+            "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 disabled:opacity-50",
+            workspaceMode === "portfolio"
+              ? "bg-blue-500/[0.11] font-semibold text-white shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
+              : "font-medium text-white/45 hover:bg-white/[0.06] hover:text-white/80",
+          ].join(" ")}
         >
           {switchingToPortfolio ? (
-            <Loader2 className="size-4 animate-spin" strokeWidth={2} />
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-blue-400" strokeWidth={2} />
           ) : (
-            <Briefcase className="size-4" strokeWidth={2} />
+            <Briefcase
+              className={[
+                "h-4 w-4 shrink-0 transition-colors duration-150",
+                workspaceMode === "portfolio" ? "text-blue-400" : "text-white/30",
+              ].join(" ")}
+              strokeWidth={2}
+            />
           )}
-          <span>Portofoliu</span>
-        </SwitchButton>
-        <SwitchButton
-          active={workspaceMode === "org"}
+          <span className="truncate">Portofoliu</span>
+        </button>
+
+        <button
+          type="button"
           disabled={disabled || switchingToOrg}
           onClick={() => onSwitch("org")}
+          className={[
+            "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 disabled:opacity-50",
+            workspaceMode === "org"
+              ? "bg-blue-500/[0.11] font-semibold text-white shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
+              : "font-medium text-white/45 hover:bg-white/[0.06] hover:text-white/80",
+          ].join(" ")}
         >
           {switchingToOrg ? (
-            <Loader2 className="size-4 animate-spin" strokeWidth={2} />
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-blue-400" strokeWidth={2} />
           ) : (
-            <Building2 className="size-4" strokeWidth={2} />
+            <Building2
+              className={[
+                "h-4 w-4 shrink-0 transition-colors duration-150",
+                workspaceMode === "org" ? "text-blue-400" : "text-white/30",
+              ].join(" ")}
+              strokeWidth={2}
+            />
           )}
-          <span className="truncate">{workspaceMode === "org" ? currentOrgName : "Firma activa"}</span>
-        </SwitchButton>
+          <span className="truncate">
+            {workspaceMode === "org" ? currentOrgName : "Firma activă"}
+          </span>
+        </button>
       </div>
-      <p className="mt-3 text-xs leading-5 text-eos-text-muted">
-        Portofoliul ramane cross-client. Firma activa pastreaza ultimul org valid pentru drilldown.
-      </p>
     </div>
   )
 }
