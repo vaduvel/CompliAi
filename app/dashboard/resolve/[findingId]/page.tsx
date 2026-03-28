@@ -9,6 +9,7 @@ import {
   FileText,
   XCircle,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -33,6 +34,8 @@ import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { getCloseGatingRequirements } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import type { DocumentType } from "@/lib/server/document-generator"
+
+const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
 
 // Extended finding type — automation fields are optional so the page
 // compiles regardless of which branch supplies the data.
@@ -265,6 +268,9 @@ export default function FindingDetailPage() {
     if (!finding) return
     setActionLoading(true)
     try {
+      if (status === "resolved" || status === "under_monitoring") {
+        toast.dismiss(GENERATOR_PROGRESS_TOAST_ID)
+      }
       const res = await fetch(`/api/findings/${encodeURIComponent(finding.id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
