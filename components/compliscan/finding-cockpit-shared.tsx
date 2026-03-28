@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, FileText, FolderKanban, ShieldCheck } from "lucide-react"
+import { ArrowRight, CheckCircle2, FolderKanban, ShieldCheck } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -352,11 +352,6 @@ export function FindingHeroAction({
       <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
         {cockpitRecipe.whatUserMustDo}
       </p>
-      {cockpitRecipe.whatCompliDoes && cockpitRecipe.whatCompliDoes !== cockpitRecipe.whatUserMustDo && (
-        <p className="mt-1.5 text-sm text-eos-text-muted">
-          {cockpitRecipe.whatCompliDoes}
-        </p>
-      )}
       {cockpitRecipe.vendorContext ? (
         <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
