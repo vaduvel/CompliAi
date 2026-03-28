@@ -265,16 +265,15 @@ Acestea sunt adevăr de direcție, nu adevăr de runtime.
 ### 4.2 Orice comportament care nu e confirmat live
 
 Conform [compliai-user-flow-1to1-runtime-audit.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai-user-flow-1to1-runtime-audit.md), nu putem declara încă 100% înghețat:
-- operational close end-to-end pentru toate familiile
-- toate colțurile monitoring/alerts/drift
 - snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
+- warning-urile tehnice rămase de tip `React #418` pe unele suprafețe live, chiar dacă flow-ul principal trece
 
 ### 4.3 Cockpitul live ca adevăr final
 
-Nu putem îngheța cockpitul actual drept final, pentru că auditul live a confirmat deja deviații:
-- succesul documentar către Dosar nu este încă adevăr final confirmat pe toate ramurile
-- cockpitul operațional încă suferă de expulzare în unele flow-uri
-- aftercare și monitoring sunt încă sub-expuse în runtime
+Nu putem îngheța cockpitul actual drept final ca expresie UX, chiar dacă runtime-ul s-a întărit mult:
+- clasele `documentary`, `operational` și `specialist_handoff` sunt confirmate live cap-coadă
+- `revalidation`, `reopen` și `alerts/drift` sunt confirmate live
+- dar snapshotul de ieșire din onboarding și expresia unor suprafețe secundare încă nu sunt forma finală de produs
 
 ### 4.4 Partner și compliance ca adevăr final
 

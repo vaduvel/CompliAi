@@ -1015,8 +1015,11 @@ După runde separate de audit live, adevărul pe clase este:
 ### 14.7 Încă neconfirmat live
 
 Nu sunt încă închise live cap-coadă:
-- `alerts / drift UI` cu seed dedicat
 - snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
+
+Note tehnice rămase:
+- `alerts / drift UI` este acum `CONFIRMAT LIVE` pe `open -> acknowledge -> in_progress -> resolved -> reopen`
+- în auditul live de drift încă apare în consolă `React #418`, dar fără să rupă lifecycle-ul sau state-ul driftului
 
 ### 14.8 Concluzie live
 
@@ -1032,6 +1035,7 @@ Dar după verificarea live din `2026-03-27`, adevărul s-a întărit astfel:
 - clasa `specialist_handoff` este confirmată live cap-coadă cu revenire automată în cockpit
 - `SYS-002 revalidation` este confirmat live cap-coadă
 - `reopen` este confirmat live pentru documentary, operational și `specialist_handoff`
+- `alerts / drift UI` este confirmat live cap-coadă pe seed dedicat
 - partner și compliance sunt confirmate live pe flow-ul principal
 - suprafețele secundare partner/compliance sunt funcționale live, dar încă mai late decât spine-ul principal
 
