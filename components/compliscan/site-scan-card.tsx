@@ -8,6 +8,32 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import type { SiteScanResult } from "@/lib/compliance/site-scanner"
 
+const SITE_SCAN_TIME_ZONE = "Europe/Bucharest"
+
+const SITE_SCAN_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: SITE_SCAN_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+})
+
+const SITE_SCAN_DATE_FORMATTER = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: SITE_SCAN_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+})
+
+function formatSiteScanDateTime(value: string) {
+  return SITE_SCAN_DATE_TIME_FORMATTER.format(new Date(value))
+}
+
+function formatSiteScanDate(value: string) {
+  return SITE_SCAN_DATE_FORMATTER.format(new Date(value))
+}
+
 type SiteScanCardProps = {
   existingScan?: {
     scannedAtISO: string
@@ -46,7 +72,7 @@ function buildSiteScanEvidenceNote(result: SiteScanResult) {
           .map((suggestion) => suggestion.title)
           .join("; ")}.`
 
-  return `Site scan rulat la ${new Date(result.scannedAtISO).toLocaleString("ro-RO")} pentru ${result.url}. ${bannerSummary}; ${trackerSummary}; ${privacySummary}. ${findingSummary}`
+  return `Site scan rulat la ${formatSiteScanDateTime(result.scannedAtISO)} pentru ${result.url}. ${bannerSummary}; ${trackerSummary}; ${privacySummary}. ${findingSummary}`
 }
 
 export function SiteScanCard({
@@ -115,7 +141,7 @@ export function SiteScanCard({
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text-muted">
             Scan anterior: <span className="font-medium text-eos-text">{existingScan.websiteUrl}</span>
             {" "}· {existingScan.trackerCount} trackere · {existingScan.findingCount} finding-uri
-            {" "}· {new Date(existingScan.scannedAtISO).toLocaleDateString("ro-RO")}
+            {" "}· {formatSiteScanDate(existingScan.scannedAtISO)}
           </div>
         )}
 
@@ -163,7 +189,7 @@ export function SiteScanCard({
                     { label: "Trackere", value: result.trackers.length, warn: result.trackers.length > 0 },
                     { label: "Formulare", value: result.forms.length, warn: false },
                     { label: "Banner cookie", value: result.hasCookieBanner ? "Da" : "Nu", warn: !result.hasCookieBanner },
-                    { label: "Privacy Policy", value: result.hasPrivacyPolicy ? "Da" : "Nu", warn: !result.hasPrivacyPolicy },
+                    { label: "Politică confidențialitate", value: result.hasPrivacyPolicy ? "Da" : "Nu", warn: !result.hasPrivacyPolicy },
                   ].map((stat) => (
                     <div key={stat.label} className={`rounded-eos-sm border p-2 text-center ${stat.warn ? "border-eos-warning/20 bg-eos-warning-soft" : "border-eos-border bg-eos-bg-inset"}`}>
                       <p className={`text-base font-semibold ${stat.warn ? "text-eos-warning" : "text-eos-text"}`}>{stat.value}</p>
