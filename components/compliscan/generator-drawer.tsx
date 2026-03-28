@@ -198,7 +198,6 @@ export function GeneratorDrawer({
 
       const doc = (await res.json()) as GeneratedDocumentResponse
       setResult(doc)
-      toast.success(`${doc.title} generat`)
 
       // Scroll to preview
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth" }), 100)
@@ -232,9 +231,6 @@ export function GeneratorDrawer({
         throw new Error(payload.error ?? "Nu am putut atasa draftul ca dovada.")
       }
 
-      toast.success("Documentul este confirmat", {
-        description: "Documentul este pregătit. Acum rezolvi riscul din același cockpit, apoi îl trimiți la Dosar.",
-      })
       onComplete({
         ...payload,
         evidenceAttached: true,
@@ -273,7 +269,6 @@ export function GeneratorDrawer({
     setValidationRunAtISO(new Date().toISOString())
 
     if (validation.status === "valid") {
-      toast.success("Draftul a trecut verificarea rapidă")
       return
     }
 
