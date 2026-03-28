@@ -29,8 +29,27 @@ import {
   formatDriftLifecycleStatus,
   isDriftSlaBreached,
 } from "@/lib/compliance/drift-lifecycle"
-import { formatRelativeRomanian } from "@/lib/compliance/engine"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+
+const DRIFT_TIME_ZONE = "Europe/Bucharest"
+
+const DRIFT_DETECTED_AT_FORMATTER = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: DRIFT_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+})
+
+function formatDriftDetectedAt(value?: string | null) {
+  if (!value) return "fără moment"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "fără moment"
+
+  return DRIFT_DETECTED_AT_FORMATTER.format(date)
+}
 
 export default function DriftPage() {
   const cockpit = useCockpitData()
@@ -250,7 +269,7 @@ export default function DriftPage() {
                             ) : null}
                           </div>
                           <p className="mt-1 text-xs text-eos-text-muted">
-                            {formatDriftTypeLabel(drift.type)} · {formatRelativeRomanian(drift.detectedAtISO)}
+                            {formatDriftTypeLabel(drift.type)} · {formatDriftDetectedAt(drift.detectedAtISO)}
                           </p>
                         </div>
                         <div className="flex flex-wrap justify-end gap-2">
@@ -333,7 +352,7 @@ export default function DriftPage() {
                         {[
                           drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
                           drift.change,
-                          formatRelativeRomanian(drift.detectedAtISO),
+                          formatDriftDetectedAt(drift.detectedAtISO),
                         ].filter(Boolean).join(" · ")}
                       </p>
                       <ActionCluster

@@ -341,7 +341,9 @@ export function formatDriftEscalationDeadline(value?: string | null) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return "fără termen explicit"
 
+  const timeZone = "Europe/Bucharest"
   return date.toLocaleString("ro-RO", {
+    timeZone,
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

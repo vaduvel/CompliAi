@@ -47,6 +47,21 @@ export type DashboardPayload = {
   evidenceLedger?: EvidenceRegistryEntry[]
 }
 
+const COCKPIT_TIME_ZONE = "Europe/Bucharest"
+
+const COCKPIT_SCAN_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("ro-RO", {
+  timeZone: COCKPIT_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+})
+
+function formatCockpitDateTime(iso: string) {
+  return COCKPIT_SCAN_DATE_TIME_FORMATTER.format(new Date(iso))
+}
+
 type TaskUpdateFeedback = {
   status: "todo" | "done"
   closedAlerts: number
@@ -120,7 +135,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
   const latestScanInsights = buildScanInsights(latestScanText)
   const nextBestAction = getNextBestAction(tasks)
   const lastScanLabel = latestScan
-    ? new Date(latestScan.createdAtISO).toLocaleString("ro-RO")
+    ? formatCockpitDateTime(latestScan.createdAtISO)
     : "inca fara scan"
 
   async function withBusyOperation<T>(operation: () => Promise<T>): Promise<T> {
