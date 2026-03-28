@@ -10,6 +10,7 @@ import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2Operationa
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 import { mutateState } from "@/lib/server/mvp-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
+import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
   try {
@@ -85,7 +86,10 @@ export async function POST(request: Request) {
       if (finding) {
         await mutateState((s) => ({
           ...s,
-          findings: [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding],
+          findings: [
+            ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+            preserveRuntimeStateForSingleFinding(s.findings, finding),
+          ],
         }))
       }
     }

@@ -12,6 +12,7 @@ import type { MaturityAssessment } from "@/lib/server/nis2-store"
 import { scoreMaturity, convertMaturityGapsToFindings } from "@/lib/compliance/nis2-maturity"
 import type { MaturityAnswers } from "@/lib/compliance/nis2-maturity"
 import { mutateState } from "@/lib/server/mvp-store"
+import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
   try {
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
       findings: [
         // Remove previous maturity findings, keep everything else
         ...current.findings.filter((f) => !f.id.startsWith("nis2-maturity-")),
-        ...maturityFindings,
+        ...preserveRuntimeStateForRegeneratedFindings(current.findings, maturityFindings),
       ],
     }))
 

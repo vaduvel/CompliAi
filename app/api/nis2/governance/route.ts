@@ -11,6 +11,7 @@ import { readBoardMembers, createBoardMember } from "@/lib/server/nis2-store"
 import type { BoardMember } from "@/lib/server/nis2-store"
 import { buildGovernanceFindings } from "@/lib/compliance/governance-findings"
 import { mutateState } from "@/lib/server/mvp-store"
+import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
   try {
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
       ...current,
       findings: [
         ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
-        ...govFindings,
+        ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
       ],
     }))
 

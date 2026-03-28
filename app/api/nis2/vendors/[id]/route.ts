@@ -10,6 +10,7 @@ import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
 import { buildVendorRiskFindings } from "@/lib/compliance/vendor-risk"
 import { mutateState } from "@/lib/server/mvp-store"
+import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function PATCH(
   request: Request,
@@ -39,7 +40,7 @@ export async function PATCH(
       ...current,
       findings: [
         ...current.findings.filter((f) => !f.id.startsWith("nis2-vendor-risk-")),
-        ...riskFindings,
+        ...preserveRuntimeStateForRegeneratedFindings(current.findings, riskFindings),
       ],
     }))
 

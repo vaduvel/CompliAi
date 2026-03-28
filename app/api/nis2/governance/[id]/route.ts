@@ -11,6 +11,7 @@ import { deleteBoardMember, updateBoardMember, readBoardMembers } from "@/lib/se
 import type { BoardMember } from "@/lib/server/nis2-store"
 import { buildGovernanceFindings } from "@/lib/compliance/governance-findings"
 import { mutateState } from "@/lib/server/mvp-store"
+import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 async function refreshGovernanceFindings(orgId: string) {
   const allMembers = await readBoardMembers(orgId)
@@ -19,7 +20,7 @@ async function refreshGovernanceFindings(orgId: string) {
     ...current,
     findings: [
       ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
-      ...govFindings,
+      ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
     ],
   }))
 }

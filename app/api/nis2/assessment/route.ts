@@ -9,6 +9,10 @@ import { readNis2State, saveNis2Assessment, getDnscRegistrationStatus } from "@/
 import { scoreNis2Assessment, convertNIS2GapsToFindings, type Nis2Answers, type Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
 import { mutateState } from "@/lib/server/mvp-store"
+import {
+  preserveRuntimeStateForRegeneratedFindings,
+  preserveRuntimeStateForSingleFinding,
+} from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
   try {
@@ -62,8 +66,10 @@ export async function POST(request: Request) {
           ...current.findings.filter(
             (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
           ),
-          ...nis2Findings,
-          ...(rescueFinding ? [rescueFinding] : []),
+          ...preserveRuntimeStateForRegeneratedFindings(current.findings, nis2Findings),
+          ...(rescueFinding
+            ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)]
+            : []),
         ],
       }))
     } else {
@@ -74,7 +80,9 @@ export async function POST(request: Request) {
           ...current.findings.filter(
             (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
           ),
-          ...(rescueFinding ? [rescueFinding] : []),
+          ...(rescueFinding
+            ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)]
+            : []),
         ],
       }))
     }

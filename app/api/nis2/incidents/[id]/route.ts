@@ -11,6 +11,7 @@ import { updateIncident, deleteIncident, readNis2State } from "@/lib/server/nis2
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 import { mutateState } from "@/lib/server/mvp-store"
+import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import type {
   Nis2Incident,
   Nis2EarlyWarningReport,
@@ -137,7 +138,10 @@ export async function PATCH(
       await mutateState((s) => ({
         ...s,
         findings: finding
-          ? [...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)), finding]
+          ? [
+              ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+              preserveRuntimeStateForSingleFinding(s.findings, finding),
+            ]
           : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
       }))
     }
