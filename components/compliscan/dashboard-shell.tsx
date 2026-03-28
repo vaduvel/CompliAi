@@ -260,7 +260,7 @@ export function DashboardShell({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" align="start" className="w-[220px]">
                   <DropdownMenuLabel>
-                    {currentUser.workspaceMode === "portfolio" ? "Firma activă pentru drilldown" : "Workspace activ"}
+                    {currentUser.workspaceMode === "portfolio" ? "Firmă selectată pentru execuție" : "Workspace activ"}
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
                     {memberships.filter((m) => m.status === "active").map((m) => {
@@ -328,13 +328,20 @@ export function DashboardShell({
 
           {/* Partner context banner */}
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
-            <div className="mb-4 flex items-center gap-3 rounded-eos-lg border border-blue-500/20 bg-blue-500/[0.05] px-4 py-2.5">
-              <span className="text-xs font-medium text-blue-400/70 shrink-0">Lucrezi pentru:</span>
-              <span className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</span>
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-primary/70">
+                  Execuție în firmă
+                </p>
+                <p className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</p>
+                <p className="text-xs text-eos-text-tertiary">
+                  Triage-ul cross-client rămâne în Portofoliu. Aici execuți doar în firma selectată.
+                </p>
+              </div>
               <button
                 onClick={() => void handleSwitchWorkspaceMode("portfolio")}
                 disabled={switchingWorkspaceMode === "portfolio"}
-                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-eos-md px-2.5 py-1 text-xs font-medium text-eos-primary transition hover:bg-blue-500/10 disabled:opacity-50"
+                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-eos-md px-2.5 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
               >
                 <ArrowLeft className="h-3 w-3" strokeWidth={2} />
                 Portofoliu

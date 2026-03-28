@@ -132,7 +132,7 @@ export function PortfolioAlertsPage() {
           <span className="font-medium">Drilldown pe firmă</span>
         </div>
         <p className="mt-1">
-          Butonul “Intră în firmă” schimbă contextul la orgul selectat și te duce direct în workspace-ul per-firmă pentru execuție.
+          Butonul “Intră în firmă” schimbă contextul la orgul selectat și te duce direct în workspace-ul per-firmă, unde continui execuția.
         </p>
       </div>
     </div>

@@ -415,7 +415,7 @@ export function PortfolioOverviewClient() {
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
           <h1 className="mt-1 text-2xl font-bold text-eos-text">Portofoliu firme</h1>
           <p className="mt-1.5 max-w-xl text-sm leading-6 text-eos-text-tertiary">
-            Lucrezi cross-client dintr-un singur loc. Vezi cine arde, apoi intri în firmă doar pentru drilldown.
+            Aici faci triage cross-client. Intri în firmă doar când trebuie să execuți într-un workspace real.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-xs text-eos-text-muted">
@@ -616,14 +616,14 @@ export function PortfolioOverviewClient() {
           <Building2 className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Portofoliu-first, fără switch constant</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
-            Lucrezi cross-client din portofoliu și intri pe firmă doar când ai nevoie de execuție. Poți importa firme în masă și exporta snapshot-ul curent.
+            Triage-ul rămâne aici. Intrarea în firmă deschide doar execuția pe clientul selectat. Poți importa firme în masă și exporta snapshot-ul curent.
           </p>
         </div>
         <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
           <CalendarClock className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Drilldown rapid</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
-            Click pe orice firmă ca să intri direct în contextul ei. Modul portofoliu păstrează ultimul org valid în sesiune.
+            Click pe orice firmă ca să intri direct în contextul ei de execuție. Modul portofoliu păstrează ultimul org valid în sesiune.
           </p>
         </div>
       </div>
