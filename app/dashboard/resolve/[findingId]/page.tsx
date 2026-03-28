@@ -350,20 +350,6 @@ export default function FindingDetailPage() {
     finding.operationalEvidenceNote ||
     finding.resolution?.closureEvidence ||
     linkedGeneratedDocument?.title
-  const detailHelperText =
-    status === "open" && hasGenerator
-      ? "Confirmi cazul și deschizi imediat mai jos zona de generare, fără pagină separată și fără side panel."
-      : status === "open"
-        ? "Mai întâi confirmi sau respingi finding-ul. După confirmare, Compli deschide fluxul corect de închidere."
-      : status === "confirmed" && hasGenerator
-        ? preparedDocumentReady
-          ? "Documentul este confirmat și validat. Acum rezolvi riscul cu el, din același cockpit."
-          : "Completezi, generezi, re-scannezi și confirmi documentul chiar mai jos. Închiderea riscului și Dosarul vin după aceea, separat."
-        : status === "resolved" && hasGenerator
-          ? "Riscul este deja rezolvat cu documentul confirmat. Ultimul pas este să trimiți documentul la Dosar; abia apoi pornește monitorizarea."
-        : status === "confirmed"
-          ? recipe.heroSummary
-          : "Finding-ul rămâne în istoric, cu dovada salvată și monitorizare activă pentru reverificări sau drift."
   const evidenceCardCopy =
     recipe.findingTypeId === "GDPR-013"
       ? {
@@ -594,7 +580,6 @@ export default function FindingDetailPage() {
         <FindingHeroAction
           finding={finding}
           recipe={recipe}
-          helperText="Confirmă dacă problema este reală și începi remedierea. Respinge doar dacă este fals pozitiv sau deja acoperită."
         >
           {hasGenerator ? (
             <Button
@@ -658,7 +643,6 @@ export default function FindingDetailPage() {
         <FindingHeroAction
           finding={finding}
           recipe={recipe}
-          helperText={detailHelperText}
         >
           {hasGenerator ? (
             <>

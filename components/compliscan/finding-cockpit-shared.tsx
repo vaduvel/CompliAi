@@ -425,15 +425,21 @@ export function FindingExecutionCard({
     finding.category === "E_FACTURA" && finding.findingStatus === "under_monitoring"
       ? "Fiscal"
       : "Monitoring"
+  const artifactLabel = linkedGeneratedDocument?.title ?? suggestedDocumentLabel ?? null
+  const artifactDetail = linkedGeneratedDocument
+    ? `${linkedGeneratedDocument.approvalStatus === "approved_as_evidence" ? "Validat și aprobat ca dovadă" : "Draft pregătit pentru confirmare"} · ${new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}`
+    : suggestedDocumentLabel
+      ? `${suggestedDocumentLabel} intră pe aceeași urmă a finding-ului și ajunge la dosar după confirmare.`
+      : null
 
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Execuție și aftercare</CardTitle>
+            <CardTitle className="text-base">Harta cazului</CardTitle>
             <p className="mt-2 text-sm text-eos-text-muted">
-              Progresul rămâne vizibil aici, iar dosarul și monitoring-ul stau mai jos, ca aftercare.
+              Vezi progresul, dovada și ce rămâne sub watch, fără să concureze cu acțiunea principală.
             </p>
           </div>
           <Badge variant={status.variant} className="normal-case tracking-normal">
@@ -472,50 +478,46 @@ export function FindingExecutionCard({
           <div className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
             <p className="text-xs font-medium text-eos-text">Pas activ: {activeStep.label}</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">{activeStep.hint}</p>
-          </div>
-        </div>
-
-        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-          <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-            <div>
-            <p className="text-sm font-medium text-eos-text">Cum se închide corect</p>
-            <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                {cockpitRecipe.closeCondition}
+            <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+              Închidere corectă: {cockpitRecipe.closeCondition}
             </p>
           </div>
         </div>
-        </div>
 
-        {linkedGeneratedDocument ? (
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
-            <div className="flex items-start gap-2">
-              <FileText className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
-              <div>
-                <p className="text-sm font-medium text-eos-text">{linkedGeneratedDocument.title}</p>
-                <p className="mt-1 text-xs text-eos-text-muted">
-                  Generat {new Date(linkedGeneratedDocument.generatedAtISO).toLocaleString("ro-RO")}
-                  {linkedGeneratedDocument.approvalStatus === "approved_as_evidence"
-                    ? " · validat și aprobat ca dovadă"
-                    : " · în așteptare pentru confirmare"}
-                  {linkedGeneratedDocument.validatedAtISO
-                    ? ` · verificat ${new Date(linkedGeneratedDocument.validatedAtISO).toLocaleString("ro-RO")}`
-                    : ""}
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {suggestedDocumentLabel ? (
+        {artifactLabel ? (
           <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
               <div>
-                <p className="text-sm font-medium text-eos-text">Asset recomandat</p>
+                <p className="text-sm font-medium text-eos-text">Artefact pe aceeași urmă</p>
                 <p className="mt-1 text-sm text-eos-text-muted">
-                  {suggestedDocumentLabel} intră în flow-ul acestui finding și, după confirmare, merge la dosar pe aceeași urmă de dovadă și audit.
+                  {artifactLabel}
                 </p>
+                {artifactDetail ? (
+                  <p className="mt-1 text-xs text-eos-text-tertiary">
+                    {artifactDetail}
+                  </p>
+                ) : null}
+                {linkedGeneratedDocument?.validatedAtISO ? (
+                  <p className="mt-1 text-xs text-eos-text-tertiary">
+                    Verificat {new Date(linkedGeneratedDocument.validatedAtISO).toLocaleString("ro-RO")}
+                  </p>
+                ) : null}
+                {linkedGeneratedDocument?.approvedAtISO ? (
+                  <p className="mt-1 text-xs text-eos-text-tertiary">
+                    Aprobat {new Date(linkedGeneratedDocument.approvedAtISO).toLocaleString("ro-RO")}
+                  </p>
+                ) : null}
+                {!linkedGeneratedDocument ? (
+                  <>
+                    <p className="mt-1 text-xs text-eos-text-tertiary">
+                      Se leagă la dosar doar după confirmarea finală.
+                    </p>
+                    <p className="mt-1 text-xs text-eos-text-tertiary">
+                      Artefactul nu concurează cu acțiunea principală; doar păstrează urma clară a cazului.
+                    </p>
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
@@ -530,7 +532,7 @@ export function FindingExecutionCard({
                   Context vendor pentru DPA
                 </p>
                 <p className="mt-1 text-sm text-eos-text-muted">
-                  {cockpitRecipe.vendorContext.vendorName} este vendorul detectat în finding. Cockpitul păstrează aceeași urmă între draft, semnare și dovada salvată la dosar.
+                  {cockpitRecipe.vendorContext.vendorName} rămâne ancorat pe aceeași urmă între draft, semnare și dovada salvată la dosar.
                 </p>
                 {cockpitRecipe.vendorContext.dpaUrl ? (
                   <a
