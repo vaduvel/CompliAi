@@ -378,17 +378,17 @@ export function SettingsPageSurface() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Setări</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-white">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
           {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
         </h1>
-        <p className="mt-1 text-sm text-white/40">
+        <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
             ? "Aici rămân doar organizația, membrii, notificările și drumul către planul de facturare."
             : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."}
         </p>
         <div className="mt-3">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+          <span className="rounded-full border border-eos-border bg-eos-surface-variant px-3 py-1 text-xs font-medium text-eos-text-tertiary">
             {isSolo ? "admin firmă" : "operational admin"}
           </span>
         </div>
@@ -397,9 +397,9 @@ export function SettingsPageSurface() {
       <div className="space-y-6">
         {/* Tab navigation */}
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/20">Zone Setari</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Zone Setari</p>
           <div className="overflow-x-auto pb-1">
-            <div className="flex min-w-max gap-0 border-b border-white/[0.06]">
+            <div className="flex min-w-max gap-0 border-b border-eos-border-subtle">
               {visibleTabs.map((tab) => (
                 <button
                   key={tab.value}
@@ -408,12 +408,12 @@ export function SettingsPageSurface() {
                   className={[
                     "inline-flex min-h-[56px] min-w-[152px] flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
                     activeTab === tab.value
-                      ? "border-blue-500 text-white"
-                      : "border-transparent text-white/30 hover:text-white/55",
+                      ? "border-b-2 border-eos-primary text-eos-text"
+                      : "border-transparent text-eos-text-tertiary hover:text-eos-text-muted",
                   ].join(" ")}
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
-                  <span className={`mt-1 whitespace-normal text-xs font-normal leading-5 ${activeTab === tab.value ? "text-white/40" : "text-white/20"}`}>
+                  <span className={`mt-1 whitespace-normal text-xs font-normal leading-5 ${activeTab === tab.value ? "text-eos-text-tertiary" : "text-eos-text-tertiary"}`}>
                     {tab.description}
                   </span>
                 </button>
@@ -426,52 +426,52 @@ export function SettingsPageSurface() {
         {activeTab === "workspace" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-white/75">Workspace</h2>
-              <p className="mt-1 text-sm text-white/40">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Workspace</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
-                <h2 className="text-lg font-semibold text-white/75">Setari workspace</h2>
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                <h2 className="text-lg font-semibold text-eos-text-muted">Setari workspace</h2>
               </div>
               <div className="px-5 py-5 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <p className="text-sm text-white/40">Workspace activ</p>
-                    <p className="mt-2 text-lg font-semibold text-white/75">
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                    <p className="text-sm text-eos-text-tertiary">Workspace activ</p>
+                    <p className="mt-2 text-lg font-semibold text-eos-text-muted">
                       {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <p className="text-sm text-white/40">Motor OCR</p>
-                    <p className="mt-2 text-lg font-semibold text-white/75">Google Vision API</p>
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                    <p className="text-sm text-eos-text-tertiary">Motor OCR</p>
+                    <p className="mt-2 text-lg font-semibold text-eos-text-muted">Google Vision API</p>
                   </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <p className="text-sm text-white/40">Scor de risc curent</p>
-                    <p className="mt-2 text-lg font-semibold text-white/75">{cockpit.data.summary.score}%</p>
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                    <p className="text-sm text-eos-text-tertiary">Scor de risc curent</p>
+                    <p className="mt-2 text-lg font-semibold text-eos-text-muted">{cockpit.data.summary.score}%</p>
                   </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <p className="text-sm text-white/40">Ultimul scan</p>
-                    <p className="mt-2 text-lg font-semibold text-white/75">{cockpit.lastScanLabel}</p>
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                    <p className="text-sm text-eos-text-tertiary">Ultimul scan</p>
+                    <p className="mt-2 text-lg font-semibold text-eos-text-muted">{cockpit.lastScanLabel}</p>
                   </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-2">
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4 md:col-span-2">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div>
-                        <p className="text-sm text-white/40">Baseline validat pentru drift</p>
-                        <p className="mt-2 text-lg font-semibold text-white/75">
+                        <p className="text-sm text-eos-text-tertiary">Baseline validat pentru drift</p>
+                        <p className="mt-2 text-lg font-semibold text-eos-text-muted">
                           {validatedBaseline
                             ? `Snapshot validat din ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
                             : "Inca nu exista baseline validat"}
                         </p>
                         <div className="mt-3">
                           {validatedBaseline ? (
-                            <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">Baseline activ</span>
+                            <span className="rounded-full bg-eos-success-soft px-2.5 py-0.5 text-xs font-semibold text-eos-success">Baseline activ</span>
                           ) : (
-                            <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400">Cere baseline</span>
+                            <span className="rounded-full bg-eos-warning-soft px-2.5 py-0.5 text-xs font-semibold text-eos-warning">Cere baseline</span>
                           )}
                         </div>
                         {!validatedBaseline && (
-                          <p className="mt-1 text-sm text-white/40">
+                          <p className="mt-1 text-sm text-eos-text-tertiary">
                             {activeSnapshot
                               ? "Poti valida snapshot-ul curent ca reper stabil pentru drift."
                               : "Scaneaza mai intai un document sau un manifest ca sa generam primul snapshot."}
@@ -483,7 +483,7 @@ export function SettingsPageSurface() {
                           type="button"
                           disabled={cockpit.busy || !activeSnapshot}
                           onClick={() => void cockpitActions.setValidatedBaseline()}
-                          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Valideaza snapshot-ul curent
                         </button>
@@ -491,7 +491,7 @@ export function SettingsPageSurface() {
                           type="button"
                           disabled={cockpit.busy || !validatedBaseline}
                           onClick={() => void cockpitActions.clearValidatedBaseline()}
-                          className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Elimina baseline-ul
                         </button>
@@ -520,25 +520,25 @@ export function SettingsPageSurface() {
         {activeTab === "acces" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-white/75">Acces</h2>
-              <p className="mt-1 text-sm text-white/40">Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare.</p>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Acces</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">Aici vezi cine are acces în organizație și cum sunt împărțite rolurile de control și validare.</p>
             </div>
 
             {canViewClaimStatus ? (
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-                <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+              <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <h2 className="text-lg font-semibold text-white/75">Ownership și claim</h2>
-                      <p className="mt-2 text-sm text-white/40">
+                      <h2 className="text-lg font-semibold text-eos-text-muted">Ownership și claim</h2>
+                      <p className="mt-2 text-sm text-eos-text-tertiary">
                         Consultantul poate opera firma ca <strong>partner_manager</strong>, dar ownership-ul final
                         rămâne la client. Aici vezi dacă organizația este deja revendicată și poți pregăti transferul.
                       </p>
                     </div>
                     {claimStatus?.ownership.ownerState === "claimed" ? (
-                      <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">owner revendicat</span>
+                      <span className="rounded-full bg-eos-success-soft px-2.5 py-0.5 text-xs font-semibold text-eos-success">owner revendicat</span>
                     ) : (
-                      <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400">owner placeholder system</span>
+                      <span className="rounded-full bg-eos-warning-soft px-2.5 py-0.5 text-xs font-semibold text-eos-warning">owner placeholder system</span>
                     )}
                   </div>
                 </div>
@@ -546,64 +546,64 @@ export function SettingsPageSurface() {
                   {claimStatusLoading ? (
                     <OperationalLoadingCard>Incarcam statusul de ownership...</OperationalLoadingCard>
                   ) : claimStatusError ? (
-                    <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-400">
+                    <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                       {claimStatusError}
                     </div>
                   ) : claimStatus ? (
                     <>
-                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                      <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
                         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                           <div>
-                            <p className="text-sm font-semibold text-white/75">Status curent</p>
+                            <p className="text-sm font-semibold text-eos-text-muted">Status curent</p>
                             {claimStatus.ownership.ownerState === "claimed" ? (
-                              <p className="mt-1 text-sm leading-6 text-white/40">
+                              <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
                                 Owner-ul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
                                 poate controla membrii, billing-ul și poate elimina consultantul din organizație.
                               </p>
                             ) : (
-                              <p className="mt-1 text-sm leading-6 text-white/40">
+                              <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
                                 Organizația nu are încă un owner real. Consultantul operează firma ca{" "}
                                 <strong>partner_manager</strong> până când clientul acceptă claim-ul.
                               </p>
                             )}
                           </div>
                           {claimStatus.pendingInvite ? (
-                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">claim activ</span>
+                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">claim activ</span>
                           ) : (
-                            <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-xs font-medium text-white/35">fără claim activ</span>
+                            <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">fără claim activ</span>
                           )}
                         </div>
                       </div>
 
                       {claimStatus.pendingInvite ? (
-                        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-                          <p className="text-sm font-semibold text-white/75">
+                        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                          <p className="text-sm font-semibold text-eos-text-muted">
                             Claim pregătit pentru {claimStatus.pendingInvite.invitedEmail}
                           </p>
-                          <p className="mt-1 text-xs leading-5 text-white/40">
+                          <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
                             Expiră la {new Date(claimStatus.pendingInvite.expiresAtISO).toLocaleString("ro-RO")}. Linkul
                             de mai jos poate fi trimis manual clientului.
                           </p>
                           <input
                             readOnly
                             value={claimStatus.pendingInvite.claimUrl}
-                            className="mt-3 h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-xs text-white outline-none"
+                            className="mt-3 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-xs text-eos-text outline-none"
                             aria-label="Link claim ownership"
                           />
                         </div>
                       ) : null}
 
                       {currentUser?.role === "partner_manager" && claimStatus.ownership.ownerState === "system" ? (
-                        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
                           <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                             <div>
-                              <p className="text-sm font-semibold text-white/75">Trimite claim ownership</p>
-                              <p className="mt-1 text-xs leading-5 text-white/40">
+                              <p className="text-sm font-semibold text-eos-text-muted">Trimite claim ownership</p>
+                              <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
                                 Introdu emailul clientului care trebuie să devină owner. Dacă persoana nu are cont,
                                 își va seta parola direct din linkul de claim.
                               </p>
                             </div>
-                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">partner-only</span>
+                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">partner-only</span>
                           </div>
                           <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                             <input
@@ -612,13 +612,13 @@ export function SettingsPageSurface() {
                               onChange={(event) => setClaimInviteEmail(event.target.value)}
                               placeholder="owner@client.ro"
                               aria-label="Email pentru claim ownership"
-                              className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                              className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                             />
                             <button
                               type="button"
                               disabled={creatingClaimInvite || !claimInviteEmail.trim()}
                               onClick={() => void handleCreateClaimInvite()}
-                              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Trimite claim
                             </button>
@@ -631,18 +631,18 @@ export function SettingsPageSurface() {
               </div>
             ) : null}
 
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white/75">Membri si roluri</h2>
-                    <p className="mt-2 text-sm text-white/40">
+                    <h2 className="text-lg font-semibold text-eos-text-muted">Membri si roluri</h2>
+                    <p className="mt-2 text-sm text-eos-text-tertiary">
                       Owner-ul poate ajusta rolurile si poate elimina consultantul. Compliance si partner manager vad lista
                       pentru audit si separarea responsabilitatilor.
                     </p>
                   </div>
                   {currentUser?.role && (
-                    <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+                    <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">
                       Rolul tau: {formatMemberRole(currentUser.role)}
                     </span>
                   )}
@@ -650,17 +650,17 @@ export function SettingsPageSurface() {
               </div>
               <div className="px-5 py-5 space-y-4">
                 {currentUser?.role === "owner" ? (
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-white/75">
+                        <p className="text-sm font-semibold text-eos-text-muted">
                           Adauga utilizator existent din workspace
                         </p>
-                        <p className="mt-1 text-xs leading-6 text-white/40">
+                        <p className="mt-1 text-xs leading-6 text-eos-text-tertiary">
                           Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
                         </p>
                       </div>
-                      <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">owner-only</span>
+                      <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">owner-only</span>
                     </div>
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
@@ -670,10 +670,10 @@ export function SettingsPageSurface() {
                         onChange={(event) => setNewMemberEmail(event.target.value)}
                         placeholder="coleg@companie.ro"
                         aria-label="Email utilizator nou"
-                        className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                        className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                       />
                       <select
-                        className="h-9 rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+                        className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
                         value={newMemberRole}
                         aria-label="Rol utilizator nou"
                         onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
@@ -688,14 +688,14 @@ export function SettingsPageSurface() {
                         type="button"
                         disabled={creatingMember || !newMemberEmail.trim()}
                         onClick={() => void handleAddMember()}
-                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Adauga membru
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm text-white/40">
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4 text-sm text-eos-text-tertiary">
                     Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
                   </div>
                 )}
@@ -703,7 +703,7 @@ export function SettingsPageSurface() {
                 {membersLoading ? (
                   <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
                 ) : membersError ? (
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-400">
+                  <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                     {membersError}
                   </div>
                 ) : membersData?.members.length ? (
@@ -719,23 +719,23 @@ export function SettingsPageSurface() {
                       return (
                         <div
                           key={member.membershipId}
-                          className="grid gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
+                          className="grid gap-4 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr]"
                         >
                           <div>
-                            <p className="text-sm font-semibold text-white/75">
+                            <p className="text-sm font-semibold text-eos-text-muted">
                               {member.email}
                             </p>
-                            <p className="mt-1 text-xs text-white/40">
+                            <p className="mt-1 text-xs text-eos-text-tertiary">
                               Adaugat pe {new Date(member.createdAtISO).toLocaleString("ro-RO")}
                             </p>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">
                               {formatMemberRole(member.role)}
                             </span>
                             {isSelf && (
-                              <span className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-xs font-medium text-white/35">
+                              <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">
                                 Tu
                               </span>
                             )}
@@ -745,7 +745,7 @@ export function SettingsPageSurface() {
                             {canManageRoles ? (
                               <>
                                 <select
-                                  className="h-9 min-w-[180px] rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-60 focus:border-blue-500/50 transition-all"
+                                  className="h-9 min-w-[180px] rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none disabled:cursor-not-allowed disabled:opacity-60 focus:border-eos-border-strong transition-all"
                                   value={member.role}
                                   aria-label={`Rol pentru ${member.email}`}
                                   disabled={isSelf || updatingMembershipId === member.membershipId}
@@ -764,7 +764,7 @@ export function SettingsPageSurface() {
                                     type="button"
                                     disabled={removingMembershipId === member.membershipId}
                                     onClick={() => void handleRemoveMember(member.membershipId, member.email)}
-                                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white/40 transition hover:text-white/60 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-eos-lg px-4 py-2 text-sm font-medium text-eos-text-tertiary transition hover:text-eos-text-muted disabled:opacity-50"
                                   >
                                     <Trash2 className="size-3.5" strokeWidth={2} />
                                     Elimină
@@ -772,7 +772,7 @@ export function SettingsPageSurface() {
                                 ) : null}
                               </>
                             ) : (
-                              <p className="text-xs text-white/40">
+                              <p className="text-xs text-eos-text-tertiary">
                                 Doar owner-ul poate schimba rolurile.
                               </p>
                             )}
@@ -782,9 +782,9 @@ export function SettingsPageSurface() {
                     })}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-10 text-center">
-                    <p className="text-sm font-medium text-white/35">Nu exista membri suplimentari</p>
-                    <p className="mt-1 text-xs text-white/20">Organizatia curenta are doar utilizatorii deja inregistrati in workspace.</p>
+                  <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
+                    <p className="text-sm font-medium text-eos-text-tertiary">Nu exista membri suplimentari</p>
+                    <p className="mt-1 text-xs text-eos-text-tertiary">Organizatia curenta are doar utilizatorii deja inregistrati in workspace.</p>
                   </div>
                 )}
               </div>
@@ -813,8 +813,8 @@ export function SettingsPageSurface() {
         {activeTab === "notificari" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-white/75">Notificari</h2>
-              <p className="mt-1 text-sm text-white/40">Configurezi canalele de alertare proactiva: email si webhook la evenimente de drift, task expirat sau alerta critica.</p>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Notificari</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">Configurezi canalele de alertare proactiva: email si webhook la evenimente de drift, task expirat sau alerta critica.</p>
             </div>
 
             {alertPrefsLoading ? (
@@ -822,11 +822,11 @@ export function SettingsPageSurface() {
             ) : (
               <div className="space-y-4">
                 {/* ── Email ─────────────────────────────────────────────────── */}
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
-                      <Bell className="size-4 text-white/30" strokeWidth={1.8} />
-                      <h2 className="text-lg font-semibold text-white/75">Email</h2>
+                      <Bell className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+                      <h2 className="text-lg font-semibold text-eos-text-muted">Email</h2>
                     </div>
                   </div>
                   <div className="px-5 py-5 space-y-4">
@@ -839,15 +839,15 @@ export function SettingsPageSurface() {
                           setAlertPrefs((p) => p ? { ...p, emailEnabled: e.target.checked } : p)
                         }
                       />
-                      <span className="text-sm text-white/75">Activează notificari email</span>
+                      <span className="text-sm text-eos-text-muted">Activează notificari email</span>
                     </label>
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-white/40">
+                      <label className="mb-1.5 block text-xs font-medium text-eos-text-tertiary">
                         Adresa email destinatar
                       </label>
                       <input
                         type="email"
-                        className="h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                        className="h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all disabled:opacity-50"
                         placeholder="alerte@companie.ro"
                         value={alertPrefs?.emailAddress ?? ""}
                         disabled={!alertPrefs?.emailEnabled}
@@ -868,8 +868,8 @@ export function SettingsPageSurface() {
                         }
                       />
                       <div>
-                        <span className="text-sm text-white/75">Primesc digest săptămânal</span>
-                        <p className="text-xs text-white/40">
+                        <span className="text-sm text-eos-text-muted">Primesc digest săptămânal</span>
+                        <p className="text-xs text-eos-text-tertiary">
                           Email automat luni 08:00 — scor, alerte, deadline-uri iminente.
                         </p>
                       </div>
@@ -878,11 +878,11 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Webhook ───────────────────────────────────────────────── */}
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
-                      <Webhook className="size-4 text-white/30" strokeWidth={1.8} />
-                      <h2 className="text-lg font-semibold text-white/75">Webhook</h2>
+                      <Webhook className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+                      <h2 className="text-lg font-semibold text-eos-text-muted">Webhook</h2>
                     </div>
                   </div>
                   <div className="px-5 py-5 space-y-4">
@@ -895,15 +895,15 @@ export function SettingsPageSurface() {
                           setAlertPrefs((p) => p ? { ...p, webhookEnabled: e.target.checked } : p)
                         }
                       />
-                      <span className="text-sm text-white/75">Activează webhook la evenimente</span>
+                      <span className="text-sm text-eos-text-muted">Activează webhook la evenimente</span>
                     </label>
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-white/40">
+                      <label className="mb-1.5 block text-xs font-medium text-eos-text-tertiary">
                         URL webhook (POST JSON)
                       </label>
                       <input
                         type="url"
-                        className="h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                        className="h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all disabled:opacity-50"
                         placeholder="https://hooks.slack.com/..."
                         value={alertPrefs?.webhookUrl ?? ""}
                         disabled={!alertPrefs?.webhookEnabled}
@@ -911,7 +911,7 @@ export function SettingsPageSurface() {
                           setAlertPrefs((p) => p ? { ...p, webhookUrl: e.target.value } : p)
                         }
                       />
-                      <p className="mt-1 text-xs text-white/25">
+                      <p className="mt-1 text-xs text-eos-text-tertiary">
                         Compatibil cu Slack, Teams, Make, Zapier sau orice endpoint HTTP.
                       </p>
                     </div>
@@ -919,9 +919,9 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Events ────────────────────────────────────────────────── */}
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-                  <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
-                    <h2 className="text-lg font-semibold text-white/75">Evenimente monitorizate</h2>
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                    <h2 className="text-lg font-semibold text-eos-text-muted">Evenimente monitorizate</h2>
                   </div>
                   <div className="px-5 py-5 space-y-3">
                     {(
@@ -932,7 +932,7 @@ export function SettingsPageSurface() {
                         { id: "score.dropped" as AlertEventType, label: "Scor scăzut", hint: "Scorul de conformitate a scăzut față de ziua anterioară" },
                       ] as const
                     ).map((ev) => (
-                      <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+                      <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-3">
                         <input
                           type="checkbox"
                           className="mt-0.5 size-4 accent-blue-500"
@@ -944,8 +944,8 @@ export function SettingsPageSurface() {
                           }
                         />
                         <div>
-                          <p className="text-sm font-medium text-white/75">{ev.label}</p>
-                          <p className="text-xs text-white/40">{ev.hint}</p>
+                          <p className="text-sm font-medium text-eos-text-muted">{ev.label}</p>
+                          <p className="text-xs text-eos-text-tertiary">{ev.hint}</p>
                         </div>
                       </label>
                     ))}
@@ -956,7 +956,7 @@ export function SettingsPageSurface() {
                   type="button"
                   disabled={alertPrefsSaving || !alertPrefs}
                   onClick={() => void handleSaveAlertPrefs()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {alertPrefsSaving ? (
                     <>
@@ -983,16 +983,16 @@ export function SettingsPageSurface() {
         {activeTab === "avansat" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-white/75">Avansat</h2>
-              <p className="mt-1 text-sm text-white/40">Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces.</p>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Avansat</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces.</p>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white/75">Drift severity policy</h2>
-                    <p className="mt-2 text-sm text-white/40">
+                    <h2 className="text-lg font-semibold text-eos-text-muted">Drift severity policy</h2>
+                    <p className="mt-2 text-sm text-eos-text-tertiary">
                       Schimbi doar severitatea per tip de schimbare. Impactul, dovada ceruta si actiunea recomandata raman in politica de drift. Politica implicita ramane activa pentru tot ce nu configurezi.
                     </p>
                   </div>
@@ -1000,7 +1000,7 @@ export function SettingsPageSurface() {
                     type="button"
                     disabled={cockpit.busy}
                     onClick={() => void cockpitActions.updateDriftSeverityOverrides(driftOverrides)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Salvează severitatea drift
                   </button>
@@ -1011,11 +1011,11 @@ export function SettingsPageSurface() {
                   {DRIFT_OVERRIDE_FIELDS.map((item) => (
                     <label
                       key={item.change}
-                      className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4"
+                      className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4"
                     >
-                      <span className="text-sm font-medium text-white/75">{item.label}</span>
+                      <span className="text-sm font-medium text-eos-text-muted">{item.label}</span>
                       <select
-                        className="mt-3 h-9 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+                        className="mt-3 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
                         value={driftOverrides[item.change] ?? "default"}
                         onChange={(event) =>
                           setDriftOverrides((current) => ({
@@ -1036,25 +1036,25 @@ export function SettingsPageSurface() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold text-red-400">Reset workspace local</h2>
-                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">Actiune destructiva</span>
+                  <h2 className="text-lg font-semibold text-eos-error">Reset workspace local</h2>
+                  <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-semibold text-eos-error">Actiune destructiva</span>
                 </div>
               </div>
               <div className="px-5 py-5 space-y-4">
-                <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-white/40">
+                <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-tertiary">
                   Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
                   task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
                 </div>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/75">
+                    <p className="text-sm font-medium text-eos-text-muted">
                       Vrei sa vezi exact experienta unui utilizator nou?
                     </p>
-                    <p className="mt-1 text-sm text-white/40">
+                    <p className="mt-1 text-sm text-eos-text-tertiary">
                       Dupa reset, dashboard-ul revine la starea initiala de onboarding.
                     </p>
                   </div>
@@ -1062,7 +1062,7 @@ export function SettingsPageSurface() {
                   <button
                     type="button"
                     disabled={cockpit.busy}
-                    className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => {
                       if (
                         !window.confirm(
@@ -1083,28 +1083,28 @@ export function SettingsPageSurface() {
             </div>
 
             {/* ── GDPR Rights ──────────────────────────────────────────────── */}
-            <div className="border-t border-white/[0.05] pt-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/40">GDPR · Drepturile tale</p>
-              <p className="mt-1 text-sm text-white/40">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
+            <div className="border-t border-eos-border-subtle pt-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
+              <p className="mt-1 text-sm text-eos-text-tertiary">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
             </div>
 
             {/* Art. 20 — Export date */}
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
-                <h2 className="text-lg font-semibold text-white/75">Exportă datele personale</h2>
-                <p className="mt-1 text-sm text-white/40">
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                <h2 className="text-lg font-semibold text-eos-text-muted">Exportă datele personale</h2>
+                <p className="mt-1 text-sm text-eos-text-tertiary">
                   GDPR Art. 20 — Dreptul la portabilitatea datelor. Descarcă toate datele tale într-un fișier JSON structurat.
                 </p>
               </div>
               <div className="px-5 py-5 space-y-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <p className="text-sm text-white/40">
+                  <p className="text-sm text-eos-text-tertiary">
                     Include: profil, findings, scanări, documente generate, furnizori, incidente, alerte și activitate.
                   </p>
                   <button
                     type="button"
                     disabled={gdprExporting}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => void handleGdprExport()}
                   >
                     {gdprExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
@@ -1115,28 +1115,28 @@ export function SettingsPageSurface() {
             </div>
 
             {/* Art. 17 — Ștergere date conformitate */}
-            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold text-red-400">Șterge datele de conformitate</h2>
-                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">GDPR Art. 17</span>
+                  <h2 className="text-lg font-semibold text-eos-error">Șterge datele de conformitate</h2>
+                  <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-semibold text-eos-error">GDPR Art. 17</span>
                 </div>
-                <p className="mt-1 text-sm text-white/40">
+                <p className="mt-1 text-sm text-eos-text-tertiary">
                   Dreptul la ștergere — resetează complet toate datele de conformitate din workspace. Contul rămâne activ.
                 </p>
               </div>
               <div className="px-5 py-5 space-y-4">
-                <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-white/40">
+                <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-tertiary">
                   Această acțiune șterge permanent: scanări, findings, documente generate, alerte, sisteme AI înregistrate și toată activitatea. Nu poate fi anulată.
                 </div>
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <p className="text-sm font-medium text-white/75">
+                  <p className="text-sm font-medium text-eos-text-muted">
                     Sesiunea și contul rămân active după ștergere.
                   </p>
                   <button
                     type="button"
                     disabled={gdprDeleting || currentUser?.role !== "owner"}
-                    className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => void handleGdprDeleteData()}
                   >
                     {gdprDeleting ? <Loader2 className="size-4 animate-spin" /> : <ShieldX className="size-4" />}
@@ -1144,32 +1144,32 @@ export function SettingsPageSurface() {
                   </button>
                 </div>
                 {currentUser?.role !== "owner" && (
-                  <p className="mt-2 text-xs text-white/40">Doar administratorul poate șterge datele.</p>
+                  <p className="mt-2 text-xs text-eos-text-tertiary">Doar administratorul poate șterge datele.</p>
                 )}
               </div>
             </div>
 
             {/* Art. 17 — Solicită ștergere cont */}
-            <div className="rounded-2xl border border-red-500/20 bg-white/[0.02]">
-              <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
+            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+              <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold text-red-400">Solicită ștergerea contului</h2>
-                  <span className="rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">GDPR Art. 17</span>
+                  <h2 className="text-lg font-semibold text-eos-error">Solicită ștergerea contului</h2>
+                  <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-semibold text-eos-error">GDPR Art. 17</span>
                 </div>
-                <p className="mt-1 text-sm text-white/40">
+                <p className="mt-1 text-sm text-eos-text-tertiary">
                   Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
                 </p>
               </div>
               <div className="px-5 py-5 space-y-4">
                 {!gdprShowDeletionForm ? (
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <p className="text-sm text-white/40">
+                    <p className="text-sm text-eos-text-tertiary">
                       Vei primi un email de confirmare când cererea este procesată.
                     </p>
                     <button
                       type="button"
                       disabled={currentUser?.role !== "owner"}
-                      className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => setGdprShowDeletionForm(true)}
                     >
                       <MailWarning className="size-4" />
@@ -1178,11 +1178,11 @@ export function SettingsPageSurface() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-white/75">
+                    <label className="block text-sm font-medium text-eos-text-muted">
                       Motivul ștergerii (opțional)
                     </label>
                     <textarea
-                      className="h-20 w-full rounded-xl border border-white/[0.09] bg-white/[0.05] px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 transition-all"
+                      className="h-20 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                       placeholder="Spune-ne de ce dorești ștergerea contului..."
                       value={gdprDeletionReason}
                       onChange={(e) => setGdprDeletionReason(e.target.value)}
@@ -1190,7 +1190,7 @@ export function SettingsPageSurface() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white/40 transition hover:text-white/60 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-eos-lg px-4 py-2 text-sm font-medium text-eos-text-tertiary transition hover:text-eos-text-muted disabled:opacity-50"
                         onClick={() => {
                           setGdprShowDeletionForm(false)
                           setGdprDeletionReason("")
@@ -1201,7 +1201,7 @@ export function SettingsPageSurface() {
                       <button
                         type="button"
                         disabled={gdprRequestingDeletion}
-                        className="inline-flex items-center gap-2 rounded-xl bg-red-600/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 rounded-eos-lg bg-red-600/80 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => void handleGdprRequestDeletion()}
                       >
                         {gdprRequestingDeletion ? <Loader2 className="size-4 animate-spin" /> : <MailWarning className="size-4" />}
@@ -1211,7 +1211,7 @@ export function SettingsPageSurface() {
                   </div>
                 )}
                 {currentUser?.role !== "owner" && (
-                  <p className="text-xs text-white/40">Doar administratorul poate solicita ștergerea contului.</p>
+                  <p className="text-xs text-eos-text-tertiary">Doar administratorul poate solicita ștergerea contului.</p>
                 )}
               </div>
             </div>

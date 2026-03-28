@@ -57,9 +57,9 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/20">{eyebrow}</p>
-      <p className="mt-1 text-sm font-semibold text-white/65">{title}</p>
-      {description && <p className="mt-0.5 text-xs text-white/35">{description}</p>}
+      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="mt-1 text-sm font-semibold text-eos-text-muted">{title}</p>
+      {description && <p className="mt-0.5 text-xs text-eos-text-tertiary">{description}</p>}
     </div>
   )
 }
@@ -172,13 +172,13 @@ export function ScanPageSurface() {
 
       {/* Last scan alert */}
       {latestDocumentFindings.length > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-500/[0.05] px-5 py-4">
-          <AlertTriangle className="size-5 shrink-0 text-blue-400" strokeWidth={2} />
+        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border bg-eos-primary-soft px-5 py-4">
+          <AlertTriangle className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white/80">
+            <p className="text-sm font-semibold text-eos-text">
               {latestDocumentFindings.length} findings din ultima scanare
             </p>
-            <p className="mt-0.5 text-xs text-white/40">
+            <p className="mt-0.5 text-xs text-eos-text-tertiary">
               {criticalOrHighFindings.length > 0
                 ? `${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată. `
                 : ""}
@@ -187,7 +187,7 @@ export function ScanPageSurface() {
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500"
           >
             Mergi la De rezolvat
             <ArrowRight className="size-3.5" strokeWidth={2.5} />
@@ -197,15 +197,15 @@ export function ScanPageSurface() {
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Scanează</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-white">Alimentezi Compli cu surse noi</h1>
-        <p className="mt-1 text-sm text-white/40">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">Alimentezi Compli cu surse noi</h1>
+        <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
             ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
             : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+          <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
             {sourceType === "document"
               ? "document"
               : sourceType === "text"
@@ -215,7 +215,7 @@ export function ScanPageSurface() {
                   : "compliscan.yaml"}
           </span>
           {agentFlow.agentModeActive && (
-            <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">
+            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
               mod agent activ
             </span>
           )}
@@ -223,7 +223,7 @@ export function ScanPageSurface() {
             {activeFindingsCount > 0 && (
               <Link
                 href="/dashboard/resolve"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500"
+                className="inline-flex items-center gap-1.5 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition hover:bg-blue-500"
               >
                 Mergi la De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
@@ -233,10 +233,10 @@ export function ScanPageSurface() {
               type="button"
               onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
               className={[
-                "inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm font-medium transition",
+                "inline-flex items-center gap-1.5 rounded-eos-lg border px-4 py-2 text-sm font-medium transition",
                 agentFlow.agentModeActive
-                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-                  : "border-white/[0.08] bg-white/[0.04] text-white/50 hover:text-white/70",
+                  ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning hover:bg-amber-500/20"
+                  : "border-eos-border bg-eos-surface-active text-eos-text-muted hover:text-eos-text-muted",
               ].join(" ")}
             >
               <Bot className="size-4" strokeWidth={2} />
@@ -248,19 +248,19 @@ export function ScanPageSurface() {
 
       {/* Active findings nudge */}
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
+        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
           <AlertTriangle className="size-5 shrink-0 text-amber-400/70" strokeWidth={2} />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white/70">
+            <p className="text-sm font-semibold text-eos-text-muted">
               Scanarea alimentează cockpitul, nu îl dublează
             </p>
-            <p className="mt-0.5 text-xs text-white/35">
+            <p className="mt-0.5 text-xs text-eos-text-tertiary">
               {activeFindingsCount} finding-uri sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
             </p>
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/45 transition hover:text-white/70"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted"
           >
             Deschide cockpiturile
             <ArrowRight className="size-3.5" strokeWidth={2.5} />
@@ -381,8 +381,8 @@ export function ScanPageSurface() {
           )}
 
           <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
-            <summary className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
-              <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-open:rotate-90" strokeWidth={2} />
+            <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
+              <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
               Detalii context scanare
             </summary>
             <div className="mt-4">
@@ -395,10 +395,10 @@ export function ScanPageSurface() {
             </div>
           </details>
 
-          <div className="flex justify-end border-t border-white/[0.05] pt-3">
+          <div className="flex justify-end border-t border-eos-border-subtle pt-3">
             <Link
               href="/dashboard/scan/history"
-              className="inline-flex items-center gap-1 text-xs text-white/25 hover:text-white/50"
+              className="inline-flex items-center gap-1 text-xs text-eos-text-tertiary hover:text-eos-text-muted"
             >
               Istoricul scanărilor
               <ArrowRight className="size-3" strokeWidth={2} />
@@ -413,9 +413,9 @@ export function ScanPageSurface() {
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-      <p className="text-sm font-semibold text-white/60">{title}</p>
-      <p className="mt-1 text-xs text-white/30">{detail}</p>
+    <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-5">
+      <p className="text-sm font-semibold text-eos-text-muted">{title}</p>
+      <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>
   )
 }

@@ -127,30 +127,30 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   return (
     <Link
       href={cockpitHref}
-      className="flex w-full items-center gap-3 overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 transition-all hover:border-white/[0.11] hover:bg-white/[0.04]"
+      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3.5 transition-all hover:border-white/[0.11] hover:bg-eos-surface-variant"
     >
       <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
       <div className="min-w-0 flex-1">
-        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-white/80">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
           {finding.title}
         </p>
-        <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-white/35">
+        <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-eos-text-tertiary">
           {getFindingRiskLine(finding, recipe)}
         </p>
       </div>
-      <span className="hidden shrink-0 rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-white/35 sm:inline-flex">
+      <span className="hidden shrink-0 rounded-full bg-eos-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-eos-text-tertiary sm:inline-flex">
         {canonicalFrameworkLabel(recipe.framework)}
       </span>
       <span className={`hidden shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold lg:inline-flex ${
-        flowStatus.variant === "success" ? "bg-emerald-500/15 text-emerald-400" :
-        flowStatus.variant === "warning" ? "bg-amber-500/15 text-amber-400" :
-        flowStatus.variant === "destructive" ? "bg-red-500/15 text-red-400" :
-        "bg-white/[0.05] text-white/30"
+        flowStatus.variant === "success" ? "bg-eos-success-soft text-eos-success" :
+        flowStatus.variant === "warning" ? "bg-eos-warning-soft text-eos-warning" :
+        flowStatus.variant === "destructive" ? "bg-eos-error-soft text-eos-error" :
+        "bg-eos-surface-active text-eos-text-tertiary"
       }`}>
         {flowStatus.label}
       </span>
-      <span className="shrink-0 text-[11px] text-white/25">{ageLabel(finding.createdAtISO)}</span>
-      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/20" strokeWidth={2} />
+      <span className="shrink-0 text-[11px] text-eos-text-tertiary">{ageLabel(finding.createdAtISO)}</span>
+      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
     </Link>
   )
 }
@@ -209,10 +209,10 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
 
   return (
     <div>
-      <div className="mb-4 space-y-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-4 py-4">
+      <div className="mb-4 space-y-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-sm font-semibold text-white/70">
+            <p className="text-sm font-semibold text-eos-text-muted">
               {soloMode ? "Prioritatea de azi" : "Queue de finding-uri"}
             </p>
           </div>
@@ -223,8 +223,8 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               className={[
                 "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "active"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
+                  ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                  : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
               ].join(" ")}
             >
               Deschise · {findings.filter(isFindingActive).length}
@@ -235,8 +235,8 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
               className={[
                 "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === "all"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
+                  ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                  : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
               ].join(" ")}
             >
               Toate · {findings.length}
@@ -244,31 +244,31 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
           </div>
         </div>
 
-        <label className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2.5">
-          <Search className="h-4 w-4 text-white/25" strokeWidth={2} />
+        <label className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-3 py-2.5">
+          <Search className="h-4 w-4 text-eos-text-tertiary" strokeWidth={2} />
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Caută după titlu, sursă sau referință legală"
-            className="w-full bg-transparent text-sm text-white/70 outline-none placeholder:text-white/20"
+            className="w-full bg-transparent text-sm text-eos-text-muted outline-none placeholder:text-eos-text-tertiary"
           />
         </label>
 
         {soloMode ? (
-          <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
-            <p className="text-sm text-white/45">Lucrezi pe ce e activ acum</p>
-            <span className="rounded-full border border-white/[0.08] px-2.5 py-0.5 text-[11px] text-white/30">
+          <div className="flex items-center justify-between rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
+            <p className="text-sm text-eos-text-muted">Lucrezi pe ce e activ acum</p>
+            <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-[11px] text-eos-text-tertiary">
               {filtered.length} vizibile
             </span>
           </div>
         ) : (
-          <details className="group rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+          <details className="group rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <p className="text-sm font-medium text-white/50">Filtre secundare</p>
-              <span className="rounded-full border border-white/[0.08] px-2.5 py-0.5 text-[11px] text-white/25">Deschide</span>
+              <p className="text-sm font-medium text-eos-text-muted">Filtre secundare</p>
+              <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-[11px] text-eos-text-tertiary">Deschide</span>
             </summary>
-            <div className="mt-4 space-y-4 border-t border-white/[0.05] pt-4">
+            <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
               <div className="flex flex-wrap gap-2">
                 {severityTabs.map((tab) => {
                   const active = severityFilter === tab.id
@@ -280,8 +280,8 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       className={[
                         "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                          : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
+                          ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                          : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
                       ].join(" ")}
                     >
                       {tab.label}
@@ -301,8 +301,8 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       className={[
                         "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                          : "border-white/[0.08] bg-white/[0.03] text-white/35 hover:text-white/60",
+                          ? "border-blue-500/30 bg-blue-500/10 text-eos-primary"
+                          : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
                       ].join(" ")}
                     >
                       {tab.label}
@@ -317,8 +317,8 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-10 text-center">
-          <p className="text-sm text-white/30">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
+          <p className="text-sm text-eos-text-tertiary">
             {findings.length === 0
               ? "Nu există finding-uri. Rulează o scanare pentru a detecta probleme."
               : statusFilter === "active"
@@ -369,32 +369,32 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
   return (
     <section aria-label="Urgențe cu deadline" className="space-y-2">
       <div className="flex items-center gap-2">
-        <AlertTriangle className="size-4 text-red-400" strokeWidth={2} />
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/30">
+        <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-tertiary">
           Urgențe cu deadline — {items.length} active
         </p>
       </div>
-      <div className="divide-y divide-white/[0.04] rounded-xl border border-white/[0.07] bg-white/[0.02]">
+      <div className="divide-y divide-eos-border-subtle rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {[...critical, ...rest].map((item) => (
           <Link
             key={item.id}
             href={item.href}
-            className="flex items-start justify-between gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+            className="flex items-start justify-between gap-3 px-4 py-3 transition-colors hover:bg-eos-surface-variant"
           >
             <div className="min-w-0 space-y-0.5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                  item.severity === "critical" ? "bg-red-500/15 text-red-400"
-                  : item.severity === "high" ? "bg-amber-500/15 text-amber-400"
-                  : "bg-blue-500/15 text-blue-400"
+                  item.severity === "critical" ? "bg-eos-error-soft text-eos-error"
+                  : item.severity === "high" ? "bg-eos-warning-soft text-eos-warning"
+                  : "bg-eos-primary-soft text-eos-primary"
                 }`}>
                   {SOURCE_LABELS[item.source]}
                 </span>
-                <p className="truncate text-sm font-medium text-white/75">{item.title}</p>
+                <p className="truncate text-sm font-medium text-eos-text">{item.title}</p>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-white/35">
+              <div className="flex items-center gap-1.5 text-xs text-eos-text-tertiary">
                 {item.daysLeft !== undefined && (
-                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-red-400 font-medium" : item.daysLeft <= 3 ? "text-red-400" : ""}`}>
+                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-eos-error font-medium" : item.daysLeft <= 3 ? "text-eos-error" : ""}`}>
                     <Clock className="size-3" strokeWidth={2} />
                     {item.daysLeft < 0 ? `Depășit cu ${Math.abs(item.daysLeft)}z` : `${item.daysLeft}z rămase`}
                   </span>
@@ -402,7 +402,7 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
                 <span>{item.detail}</span>
               </div>
             </div>
-            <ArrowRight className="mt-0.5 size-4 shrink-0 text-white/25" strokeWidth={2} />
+            <ArrowRight className="mt-0.5 size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
           </Link>
         ))}
       </div>
@@ -432,28 +432,28 @@ export function ResolvePageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">De rezolvat</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-white">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
           {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
         </h1>
-        <p className="mt-1 text-sm text-white/40">
+        <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
             ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz."
             : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {urgencyItems.length > 0 && (
-            <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-400">
+            <span className="rounded-full bg-eos-error-soft px-3 py-1 text-xs font-semibold text-eos-error">
               {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
             </span>
           )}
           {criticalCount > 0 && (
-            <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-400">
+            <span className="rounded-full bg-eos-error-soft px-3 py-1 text-xs font-semibold text-eos-error">
               {criticalCount} critice
             </span>
           )}
           {highCount > 0 && (
-            <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">
+            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
               {highCount} ridicate
             </span>
           )}
@@ -465,7 +465,7 @@ export function ResolvePageSurface() {
           {openTasks.length > 0 && (
             <Link
               href={dashboardRoutes.resolveSupport}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/45 transition-colors hover:text-white/70"
+              className="inline-flex items-center gap-1.5 rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
             >
               Task-uri de suport · {openTasks.length}
               <ArrowRight className="h-3 w-3" strokeWidth={2} />
@@ -480,17 +480,17 @@ export function ResolvePageSurface() {
       </section>
 
       {urgencyItems.length > 0 && (
-        <details className="group rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
+        <details className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/30">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Deadline-uri și semnale conexe
               </p>
-              <p className="mt-1 text-sm text-white/40">
+              <p className="mt-1 text-sm text-eos-text-tertiary">
                 Rămân dedesubt, ca să nu concureze cu inbox-ul principal de finding-uri.
               </p>
             </div>
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
               {urgencyItems.length} active
             </span>
           </summary>
@@ -518,31 +518,31 @@ export function ResolveSupportPageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Task-uri de suport</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-white">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Task-uri de suport</p>
+        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
           Board separat · {openTasks.length} deschise
         </h1>
-        <p className="mt-1 text-sm text-white/40">
+        <p className="mt-1 text-sm text-eos-text-tertiary">
           Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare.
         </p>
         <div className="mt-3">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+          <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
             Board secundar
           </span>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-5 py-4">
+      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-white/70">Nu concurează cu cockpitul</p>
-            <p className="text-xs text-white/35">
+            <p className="text-sm font-medium text-eos-text-muted">Nu concurează cu cockpitul</p>
+            <p className="text-xs text-eos-text-tertiary">
               Când un task are caz asociat, intri în cockpitul finding-ului ca să generezi, atașezi dovada și închizi cu urmă clară.
             </p>
           </div>
           <Link
             href={dashboardRoutes.resolve}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/45 transition-colors hover:text-white/70"
+            className="inline-flex items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
           >
             Înapoi la De rezolvat
             <ArrowRight className="size-3" strokeWidth={2} />

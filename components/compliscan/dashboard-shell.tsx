@@ -158,19 +158,19 @@ export function DashboardShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white">
+    <div className="min-h-screen bg-eos-bg text-eos-text">
       <div className="mx-auto flex max-w-[1680px]">
 
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-        <aside className="sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0b0f] md:flex">
+        <aside className="sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-eos-border bg-eos-surface md:flex">
 
           {/* Logo + Bell */}
-          <div className="flex items-center justify-between gap-2 border-b border-white/[0.07] px-4 py-4">
+          <div className="flex items-center justify-between gap-2 border-b border-eos-border px-4 py-4">
             <CompliScanLogoLockup
               variant="flat"
               size="sm"
-              titleClassName="text-white"
-              subtitleClassName="text-white/35"
+              titleClassName="text-eos-text"
+              subtitleClassName="text-eos-text-tertiary"
             />
             <NotificationBell />
           </div>
@@ -194,7 +194,7 @@ export function DashboardShell({
             {navSections.map((section, sectionIdx) => (
               <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
                 {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/30">
+                  <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">
                     {section.label}
                   </p>
                 ) : null}
@@ -203,7 +203,7 @@ export function DashboardShell({
                     const active = isNavItemActive(pathname, item)
                     const badge =
                       item.id === "resolve" && resolveBadgeCount > 0 && !active ? (
-                        <span className="rounded-full bg-red-500/25 px-1.5 py-0.5 text-[10px] font-bold text-red-400">
+                        <span className="rounded-full bg-eos-error-soft px-1.5 py-0.5 text-[10px] font-bold text-eos-error">
                           {resolveBadgeCount}
                         </span>
                       ) : null
@@ -216,16 +216,16 @@ export function DashboardShell({
                           if (handleNavItemSelection(item)) e.preventDefault()
                         }}
                         className={[
-                          "group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all duration-150",
+                          "group flex w-full items-center gap-2.5 rounded-eos-lg px-3 py-2.5 text-sm transition-all duration-150",
                           active
-                            ? "bg-blue-500/[0.11] font-semibold text-white shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
-                            : "font-medium text-white/45 hover:bg-white/[0.06] hover:text-white/80",
+                            ? "bg-eos-primary-soft font-semibold text-eos-text shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
+                            : "font-medium text-eos-text-tertiary hover:bg-eos-surface-elevated hover:text-eos-text",
                         ].join(" ")}
                       >
                         <item.icon
                           className={[
                             "h-4 w-4 shrink-0 transition-colors duration-150",
-                            active ? "text-blue-400" : "text-white/30 group-hover:text-white/60",
+                            active ? "text-eos-primary" : "text-eos-text-tertiary group-hover:text-eos-text-muted",
                           ].join(" ")}
                           strokeWidth={2}
                         />
@@ -240,21 +240,21 @@ export function DashboardShell({
           </div>
 
           {/* User card */}
-          <div className="border-t border-white/[0.06] p-3">
+          <div className="border-t border-eos-border-subtle p-3">
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-white/[0.05]">
-                    <Avatar size="sm" className="shrink-0 border border-white/[0.12] bg-white/[0.08]">
-                      <AvatarFallback className="bg-transparent text-xs font-bold text-white/70">
+                  <button className="flex w-full items-center gap-2.5 rounded-eos-lg px-3 py-2.5 text-left transition-all hover:bg-eos-surface-active">
+                    <Avatar size="sm" className="shrink-0 border border-eos-border-strong bg-eos-surface-elevated">
+                      <AvatarFallback className="bg-transparent text-xs font-bold text-eos-text-muted">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-white/75">{currentUser.orgName}</p>
-                      <p className="truncate text-[11px] text-white/30">{currentUser.email}</p>
+                      <p className="truncate text-sm font-semibold text-eos-text">{currentUser.orgName}</p>
+                      <p className="truncate text-[11px] text-eos-text-tertiary">{currentUser.email}</p>
                     </div>
-                    <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-white/20" strokeWidth={2} />
+                    <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" align="start" className="w-[220px]">
@@ -293,7 +293,7 @@ export function DashboardShell({
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="h-12 animate-pulse rounded-xl border border-white/[0.06] bg-white/[0.03]" />
+              <div className="h-12 animate-pulse rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant" />
             )}
           </div>
         </aside>
@@ -303,8 +303,8 @@ export function DashboardShell({
 
           {/* Dev banner */}
           {process.env.NODE_ENV !== "production" && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-xs text-amber-400/80">
-              <span className="shrink-0 rounded-md bg-amber-500/20 px-1.5 py-0.5 font-bold uppercase tracking-wide text-amber-400">
+            <div className="mb-4 flex items-center gap-2 rounded-eos-lg border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-xs text-amber-400/80">
+              <span className="shrink-0 rounded-eos-md bg-amber-500/20 px-1.5 py-0.5 font-bold uppercase tracking-wide text-amber-400">
                 {process.env.NEXT_PUBLIC_APP_ENV ?? "dev"}
               </span>
               <span>Mediu de dezvoltare — datele nu sunt reale.</span>
@@ -327,13 +327,13 @@ export function DashboardShell({
 
           {/* Partner context banner */}
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
-            <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.05] px-4 py-2.5">
+            <div className="mb-4 flex items-center gap-3 rounded-eos-lg border border-blue-500/20 bg-blue-500/[0.05] px-4 py-2.5">
               <span className="text-xs font-medium text-blue-400/70 shrink-0">Lucrezi pentru:</span>
-              <span className="truncate text-sm font-semibold text-white/70">{currentUser.orgName}</span>
+              <span className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</span>
               <button
                 onClick={() => void handleSwitchWorkspaceMode("portfolio")}
                 disabled={switchingWorkspaceMode === "portfolio"}
-                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-blue-400 transition hover:bg-blue-500/10 disabled:opacity-50"
+                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-eos-md px-2.5 py-1 text-xs font-medium text-eos-primary transition hover:bg-blue-500/10 disabled:opacity-50"
               >
                 <ArrowLeft className="h-3 w-3" strokeWidth={2} />
                 Portofoliu

@@ -88,20 +88,20 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/25">Rapoarte</p>
-          <h1 className="mt-1.5 text-2xl font-bold text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Rapoarte</p>
+          <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
             {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
           </h1>
-          <p className="mt-1 text-sm text-white/40">
+          <p className="mt-1 text-sm text-eos-text-tertiary">
             {isSolo
               ? "Documentele generate, exporturile și dovezile aprobate — tot ce ai nevoie pentru un audit sau un control."
               : "Output-ul conformității tale — livrabile gata de trimis, dovezi aprobate și pachet de handoff."}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
               read-only
             </span>
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/35">
+            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
               Audit: {auditStatusLabel}
             </span>
           </div>
@@ -134,8 +134,8 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
 
       {/* Secondary: detailed info under fold */}
       <details className="group">
-        <summary className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-4 shrink-0 text-white/25 transition-transform group-open:rotate-90" strokeWidth={2} />
+        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
           Detalii snapshot și semnale
         </summary>
         <div className="mt-4 space-y-6">
@@ -155,25 +155,25 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
           <div className="grid gap-3 sm:grid-cols-2">
             <Link
               href="/dashboard/reports/trust-center"
-              className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm transition-colors hover:border-white/[0.10] hover:bg-white/[0.04]"
+              className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
             >
-              <Shield className="size-4 shrink-0 text-white/30" strokeWidth={2} />
+              <Shield className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-white/70">Trust Center</p>
-                <p className="text-xs text-white/35">Profil public de conformitate</p>
+                <p className="font-medium text-eos-text-muted">Trust Center</p>
+                <p className="text-xs text-eos-text-tertiary">Profil public de conformitate</p>
               </div>
-              <ArrowRight className="size-3.5 shrink-0 text-white/25" strokeWidth={2} />
+              <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
             </Link>
             <Link
               href="/dashboard/reports/audit-log"
-              className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm transition-colors hover:border-white/[0.10] hover:bg-white/[0.04]"
+              className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
             >
-              <ScrollText className="size-4 shrink-0 text-white/30" strokeWidth={2} />
+              <ScrollText className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-white/70">Log de audit</p>
-                <p className="text-xs text-white/35">Istoricul complet al acțiunilor</p>
+                <p className="font-medium text-eos-text-muted">Log de audit</p>
+                <p className="text-xs text-eos-text-tertiary">Istoricul complet al acțiunilor</p>
               </div>
-              <ArrowRight className="size-3.5 shrink-0 text-white/25" strokeWidth={2} />
+              <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
             </Link>
           </div>
         </div>
@@ -184,9 +184,9 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-      <p className="text-sm font-semibold text-white/60">{title}</p>
-      <p className="mt-1 text-xs text-white/30">{detail}</p>
+    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
+      <p className="text-sm font-semibold text-eos-text-muted">{title}</p>
+      <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>
   )
 }
@@ -215,27 +215,27 @@ function SnapshotStatusCard({
   driftCount: number
 }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
-        <h2 className="text-lg font-semibold text-white/75">Snapshot curent</h2>
-        <p className="mt-1 text-sm text-white/40">Baza din care pornesc exporturile și dovezile.</p>
+    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+        <h2 className="text-lg font-semibold text-eos-text">Snapshot curent</h2>
+        <p className="mt-1 text-sm text-eos-text-tertiary">Baza din care pornesc exporturile și dovezile.</p>
       </div>
       <div className="space-y-4 px-5 py-5">
         {!latestSnapshot && (
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-10 text-center">
-            <p className="text-sm font-medium text-white/35">Niciun snapshot înregistrat</p>
-            <p className="mt-1 text-xs text-white/20">Rulează un scan complet, apoi revino pentru export.</p>
+          <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
+            <p className="text-sm font-medium text-eos-text-tertiary">Niciun snapshot înregistrat</p>
+            <p className="mt-1 text-xs text-eos-text-tertiary">Rulează un scan complet, apoi revino pentru export.</p>
           </div>
         )}
 
         {latestSnapshot && (
           <>
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/30">Generat</p>
-              <p className="mt-2 text-sm font-semibold text-white/75">
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-tertiary">Generat</p>
+              <p className="mt-2 text-sm font-semibold text-eos-text">
                 {new Date(latestSnapshot.generatedAt).toLocaleString("ro-RO")}
               </p>
-              <p className="mt-2 text-xs text-white/25">
+              <p className="mt-2 text-xs text-eos-text-tertiary">
                 {latestSnapshot.snapshotId}
               </p>
             </div>
@@ -247,16 +247,16 @@ function SnapshotStatusCard({
               <SnapshotMeta label="Modificari incluse" value={driftCount} />
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+                <span className="rounded-full border border-eos-border bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">
                   comparat cu
                 </span>
-                <span className="text-sm text-white/60">
+                <span className="text-sm text-eos-text-muted">
                   {latestSnapshot.comparedToSnapshotId || "fara comparatie"}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-white/40">
+              <p className="mt-3 text-sm text-eos-text-tertiary">
                 {validatedBaseline
                   ? `Baseline validat activ: ${validatedBaseline.snapshotId}`
                   : "Nu exista baseline validat."}
@@ -271,9 +271,9 @@ function SnapshotStatusCard({
 
 function SnapshotMeta({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-white/30">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-white/70">{value}</p>
+    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-tertiary">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-eos-text-muted">{value}</p>
     </div>
   )
 }
@@ -344,25 +344,25 @@ function PartnerCounselPack() {
   }, [])
 
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="border-b border-white/[0.05] px-5 pt-5 pb-4">
-        <h2 className="text-lg font-semibold text-white/75">Partner & Counsel Pack</h2>
-        <p className="mt-1 text-sm text-white/40">
+    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+        <h2 className="text-lg font-semibold text-eos-text">Partner & Counsel Pack</h2>
+        <p className="mt-1 text-sm text-eos-text-tertiary">
           Partajează starea conformității cu contabilul sau generează un brief juridic.
         </p>
       </div>
       <div className="grid gap-4 px-5 py-5 sm:grid-cols-2">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-          <div className="flex items-center gap-2 text-white/65">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+          <div className="flex items-center gap-2 text-eos-text-muted">
             <Scale className="size-4" strokeWidth={2} />
             <p className="text-sm font-medium">Brief juridic (Counsel)</p>
           </div>
-          <p className="mt-2 text-xs leading-5 text-white/35">
+          <p className="mt-2 text-xs leading-5 text-eos-text-tertiary">
             Sumar legal cu referințe la legislație, gap-uri critice și recomandări.
           </p>
           <button
             type="button"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => void handleCounselBrief()}
             disabled={briefLoading}
           >
@@ -371,18 +371,18 @@ function PartnerCounselPack() {
           </button>
         </div>
 
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
-          <div className="flex items-center gap-2 text-white/65">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+          <div className="flex items-center gap-2 text-eos-text-muted">
             <Share2 className="size-4" strokeWidth={2} />
             <p className="text-sm font-medium">Partajează cu contabilul</p>
           </div>
-          <p className="mt-2 text-xs leading-5 text-white/35">
+          <p className="mt-2 text-xs leading-5 text-eos-text-tertiary">
             Link securizat cu expirare 72h. Contabilul vede doar starea.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => void handleShareToken("accountant")}
               disabled={shareLoading}
             >
@@ -391,7 +391,7 @@ function PartnerCounselPack() {
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/50 transition hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => void handleShareToken("counsel")}
               disabled={shareLoading}
             >
@@ -400,11 +400,11 @@ function PartnerCounselPack() {
             </button>
           </div>
           {shareLink && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2">
-              <p className="flex-1 truncate text-xs text-white/35">{shareLink}</p>
+            <div className="mt-3 flex items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-3 py-2">
+              <p className="flex-1 truncate text-xs text-eos-text-tertiary">{shareLink}</p>
               <button
                 type="button"
-                className="shrink-0 text-white/30 hover:text-white/60 transition-colors"
+                className="shrink-0 text-eos-text-tertiary hover:text-eos-text-muted transition-colors"
                 onClick={() => void navigator.clipboard.writeText(shareLink).then(() => toast.info("Link copiat"))}
               >
                 <Copy className="size-3.5" />
@@ -435,55 +435,55 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
   const hasAutoGenerated = sorted.some((d) => d.id.startsWith("audit-pack-auto-"))
 
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-      <div className="border-b border-white/[0.05] px-5 pt-4 pb-3">
+    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="border-b border-eos-border-subtle px-5 pt-4 pb-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-white/70">
-              <Archive className="size-4 text-blue-400/70" strokeWidth={2} />
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-eos-text-muted">
+              <Archive className="size-4 text-eos-primary/70" strokeWidth={2} />
               Vault — Documente generate
             </h2>
-            <p className="mt-1 text-xs text-white/35">
+            <p className="mt-1 text-xs text-eos-text-tertiary">
               {sorted.length} document{sorted.length !== 1 ? "e" : ""} înregistrat{sorted.length !== 1 ? "e" : ""} în registru
               {hasAutoGenerated && " · include generări automate lunare"}
             </p>
           </div>
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-white/40">
+          <span className="rounded-full border border-eos-border bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">
             {sorted.length} total
           </span>
         </div>
       </div>
       <div className="px-5 py-4">
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-eos-border-subtle">
           {recent.map((doc) => {
             const isAuto = doc.id.startsWith("audit-pack-auto-")
             const typeLabel = DOC_TYPE_LABELS[doc.documentType] ?? doc.documentType
             return (
               <div key={doc.id} className="flex flex-wrap items-center gap-3 py-3">
-                <FileCheck2 className="size-4 shrink-0 text-blue-400/60" strokeWidth={2} />
+                <FileCheck2 className="size-4 shrink-0 text-eos-primary/60" strokeWidth={2} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white/70">{doc.title}</p>
+                  <p className="text-sm font-medium text-eos-text-muted">{doc.title}</p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] text-white/30">
+                    <span className="text-[10px] text-eos-text-tertiary">
                       {new Date(doc.generatedAtISO).toLocaleDateString("ro-RO", {
                         day: "numeric", month: "long", year: "numeric",
                       })}
                     </span>
-                    <span className="rounded-full border border-white/[0.07] px-1.5 py-0.5 text-[10px] text-white/30">
+                    <span className="rounded-full border border-eos-border px-1.5 py-0.5 text-[10px] text-eos-text-tertiary">
                       {typeLabel}
                     </span>
                     {isAuto && (
-                      <span className="rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-400/70">
+                      <span className="rounded-full bg-eos-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-eos-primary/70">
                         generat automat
                       </span>
                     )}
                     {doc.approvalStatus === "approved_as_evidence" && (
-                      <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+                      <span className="rounded-full bg-eos-success-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-success">
                         aprobat
                       </span>
                     )}
                     {doc.approvalStatus === "draft" && (
-                      <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
+                      <span className="rounded-full bg-eos-warning-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-warning">
                         draft
                       </span>
                     )}
@@ -494,7 +494,7 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
           })}
         </div>
         {sorted.length > 6 && (
-          <p className="mt-3 text-center text-xs text-white/25">
+          <p className="mt-3 text-center text-xs text-eos-text-tertiary">
             + {sorted.length - 6} mai vechi
           </p>
         )}
