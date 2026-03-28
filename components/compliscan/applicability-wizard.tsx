@@ -454,12 +454,12 @@ export function ApplicabilityWizard({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+    <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
       <div className="px-5 py-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Shield className="h-4 w-4 shrink-0 text-blue-400" strokeWidth={1.5} />
-            <p className="text-sm font-medium text-white/60">
+            <Shield className="h-4 w-4 shrink-0 text-eos-primary" strokeWidth={1.5} />
+            <p className="text-sm font-medium text-eos-text-muted">
               {WIZARD_PROGRESS_LABELS[step]}
             </p>
           </div>
@@ -467,7 +467,7 @@ export function ApplicabilityWizard({
             <button
               type="button"
               onClick={goBack}
-              className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/50 transition hover:border-white/20 hover:text-white/80"
+              className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border bg-white/5 px-3 py-1.5 text-xs text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Înapoi
@@ -476,13 +476,13 @@ export function ApplicabilityWizard({
         </div>
 
         <div className="mt-4 space-y-1.5">
-          <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-right text-[10px] text-white/25">
+          <p className="text-right text-[10px] text-eos-text-tertiary">
             {step === "checking" ? "Compli verifică…" : `${Math.round(progressPercent)}% completat`}
           </p>
         </div>
@@ -490,27 +490,27 @@ export function ApplicabilityWizard({
         <div className="mt-5">
           {step === "cui" && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-blue-500/15 bg-blue-500/[0.06] px-4 py-3">
-                <p className="text-sm font-medium text-white/80">
+              <div className="rounded-eos-lg border border-eos-border bg-eos-primary-soft px-4 py-3">
+                <p className="text-sm font-medium text-eos-text">
                   CUI-ul sau website-ul precompletează automat profilul și reduc întrebările manuale.
                 </p>
-                <p className="mt-1 text-xs text-white/40">
+                <p className="mt-1 text-xs text-eos-text-tertiary">
                   Nu sunt obligatorii, dar scurtează flow-ul și cresc precizia primelor findings.
                 </p>
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-sm font-medium text-white/70">
+                <p className="text-sm font-medium text-eos-text">
                   CUI-ul organizației{" "}
-                  <span className="font-normal text-white/30">(opțional, recomandat)</span>
+                  <span className="font-normal text-eos-text-tertiary">(opțional, recomandat)</span>
                 </p>
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-eos-text-tertiary">
                   Codul de identificare fiscală (ex: RO12345678). Îl găsești pe orice factură sau pe{" "}
                   <a
                     href="https://www.anaf.ro/anaf/internet/RO/cautare-persoane-juridice"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400/70 underline underline-offset-2 hover:text-blue-400"
+                    className="text-eos-primary/70 underline underline-offset-2 hover:text-eos-primary"
                   >
                     anaf.ro
                   </a>
@@ -526,7 +526,7 @@ export function ApplicabilityWizard({
                     setPrefillError(null)
                   }}
                   placeholder="Ex: RO12345678 sau 12345678"
-                  className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.05] px-3.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07]"
+                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active"
                   onBlur={() => void handleCuiBlur()}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
@@ -535,9 +535,9 @@ export function ApplicabilityWizard({
               </div>
 
               <div className="space-y-1.5">
-                <p className="text-sm font-medium text-white/70">
+                <p className="text-sm font-medium text-eos-text">
                   Website-ul public{" "}
-                  <span className="font-normal text-white/30">(opțional)</span>
+                  <span className="font-normal text-eos-text-tertiary">(opțional)</span>
                 </p>
                 <input
                   type="url"
@@ -549,28 +549,28 @@ export function ApplicabilityWizard({
                     setPrefillError(null)
                   }}
                   placeholder="Ex: https://firmatamea.ro"
-                  className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.05] px-3.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-blue-500/50 focus:bg-white/[0.07]"
+                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
                   }}
                 />
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-eos-text-tertiary">
                   Analizăm cookie banner, formulare, newsletter, politica de confidențialitate.
                 </p>
               </div>
 
               {prefillError ? (
-                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
+                <div className="rounded-eos-lg border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {prefillError}
                 </div>
               ) : null}
 
               {orgPrefill ? (
-                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3">
+                <div className="rounded-eos-lg border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-white">{orgPrefill.companyName}</p>
-                      <p className="mt-1 text-xs text-white/40">
+                      <p className="text-sm font-semibold text-eos-text">{orgPrefill.companyName}</p>
+                      <p className="mt-1 text-xs text-eos-text-tertiary">
                         {[
                           orgPrefill.normalizedCui,
                           orgPrefill.mainCaen ? `CAEN ${orgPrefill.mainCaen}` : null,
@@ -580,7 +580,7 @@ export function ApplicabilityWizard({
                           .join(" · ")}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+                    <span className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
                       ✓ ANAF
                     </span>
                   </div>
@@ -598,8 +598,7 @@ export function ApplicabilityWizard({
               <button
                 type="button"
                 onClick={() => void handleCuiContinue()}
-                disabled={prefillLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50"
               >
                 {prefillLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Continuă
@@ -611,16 +610,16 @@ export function ApplicabilityWizard({
             <div className="flex flex-col items-center justify-center py-14">
               <div className="relative mb-8">
                 <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-xl" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10">
-                  <Loader2 className="h-7 w-7 animate-spin text-blue-400" strokeWidth={1.5} />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-eos-border bg-eos-primary-soft">
+                  <Loader2 className="h-7 w-7 animate-spin text-eos-primary" strokeWidth={1.5} />
                 </div>
                 <Sparkles
-                  className="absolute -right-1 -top-1 h-5 w-5 animate-pulse text-blue-400"
+                  className="absolute -right-1 -top-1 h-5 w-5 animate-pulse text-eos-primary"
                   strokeWidth={2}
                 />
               </div>
-              <p className="mb-2 text-lg font-semibold text-white">Compli verifică</p>
-              <p className="mb-8 text-sm text-white/40">
+              <p className="mb-2 text-lg font-semibold text-eos-text">Compli verifică</p>
+              <p className="mb-8 text-sm text-eos-text-tertiary">
                 Pornim din CUI, website și semnalele deja găsite.
               </p>
               <div className="w-full max-w-xs space-y-2">
@@ -628,12 +627,12 @@ export function ApplicabilityWizard({
                   <div
                     key={msg}
                     className={[
-                      "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-all duration-500",
+                      "flex items-center gap-3 rounded-eos-lg px-4 py-2.5 text-sm transition-all duration-500",
                       i < checkingMessageIndex
-                        ? "text-emerald-400"
+                        ? "text-eos-success"
                         : i === checkingMessageIndex
-                          ? "bg-blue-500/10 font-medium text-blue-400"
-                          : "text-white/20",
+                          ? "bg-eos-primary-soft font-medium text-eos-primary"
+                          : "text-eos-text-tertiary",
                     ].join(" ")}
                   >
                     {i < checkingMessageIndex ? (
@@ -652,11 +651,11 @@ export function ApplicabilityWizard({
 
           {step === "sector" && (
             <div className="space-y-4">
-              <p className="text-sm font-medium text-white/70">
+              <p className="text-sm font-medium text-eos-text">
                 Care este sectorul principal de activitate?
               </p>
               {prefillError ? (
-                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
+                <div className="rounded-eos-lg border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {prefillError}
                 </div>
               ) : null}
@@ -678,7 +677,7 @@ export function ApplicabilityWizard({
                       setValues((current) => ({ ...current, sector: value }))
                       setStep("size")
                     }}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left text-sm text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                    className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-left text-sm text-eos-text-muted transition hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text"
                   >
                     {label}
                   </button>
@@ -689,7 +688,7 @@ export function ApplicabilityWizard({
 
           {step === "size" && (
             <div className="space-y-4">
-              <p className="text-sm font-medium text-white/70">
+              <p className="text-sm font-medium text-eos-text">
                 Câți oameni sunt în firmă acum?
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -700,7 +699,7 @@ export function ApplicabilityWizard({
                       setValues((current) => ({ ...current, employeeCount: value }))
                       setStep("ai")
                     }}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left text-sm text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                    className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-left text-sm text-eos-text-muted transition hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text"
                   >
                     {label}
                   </button>
@@ -712,12 +711,12 @@ export function ApplicabilityWizard({
           {step === "ai" && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-white/70">
+                <p className="text-sm font-medium text-eos-text">
                   Folosiți unelte AI în activitatea firmei?
                 </p>
-                <p className="mt-1 text-xs text-white/35">
+                <p className="mt-1 text-xs text-eos-text-tertiary">
                   Exemple: ChatGPT, Copilot, Gemini, Google Translate, chatbot pe site, tool de recrutare automatizat. Dacă nu ești sigur, alege{" "}
-                  <strong className="font-medium text-white/60">Da</strong> — poți corecta mai târziu.
+                  <strong className="font-medium text-eos-text-muted">Da</strong> — poți corecta mai târziu.
                 </p>
               </div>
               {orgPrefill?.aiSignals ? (
@@ -759,7 +758,7 @@ export function ApplicabilityWizard({
                     setValues((current) => ({ ...current, usesAITools: true }))
                     setStep("efactura")
                   }}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-white"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant py-3 text-sm font-medium text-eos-text-muted transition hover:border-eos-border hover:bg-eos-primary-soft hover:text-eos-text"
                 >
                   Da
                 </button>
@@ -768,7 +767,7 @@ export function ApplicabilityWizard({
                     setValues((current) => ({ ...current, usesAITools: false }))
                     setStep("efactura")
                   }}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant py-3 text-sm font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text"
                 >
                   Nu
                 </button>
@@ -779,12 +778,12 @@ export function ApplicabilityWizard({
           {step === "efactura" && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-white/70">
+                <p className="text-sm font-medium text-eos-text">
                   Trimiți facturi electronice prin SPV ANAF (e-Factura)?
                 </p>
-                <p className="mt-1 text-xs text-white/35">
+                <p className="mt-1 text-xs text-eos-text-tertiary">
                   Obligatorie pentru firmele care emit facturi B2B în România. Dacă facturezi alte companii (nu doar persoane fizice), probabil da. Dacă nu ești sigur, alege{" "}
-                  <strong className="font-medium text-white/60">Da</strong>.
+                  <strong className="font-medium text-eos-text-muted">Da</strong>.
                 </p>
               </div>
               {orgPrefill?.suggestions.requiresEfactura ? (
@@ -800,7 +799,7 @@ export function ApplicabilityWizard({
                     setValues((current) => ({ ...current, requiresEfactura: true }))
                     hydrateIntakeStep(true)
                   }}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-white"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant py-3 text-sm font-medium text-eos-text-muted transition hover:border-eos-border hover:bg-eos-primary-soft hover:text-eos-text"
                 >
                   Da
                 </button>
@@ -809,7 +808,7 @@ export function ApplicabilityWizard({
                     setValues((current) => ({ ...current, requiresEfactura: false }))
                     hydrateIntakeStep(false)
                   }}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] py-3 text-sm font-medium text-white/60 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant py-3 text-sm font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text"
                 >
                   Nu / Nu știu
                 </button>
@@ -819,14 +818,14 @@ export function ApplicabilityWizard({
 
           {isIntakeQuestionStep(step) && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+              <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
                 <div className="flex items-start gap-2.5">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white/80">{INTAKE_STEP_COPY[step].title}</p>
-                    <p className="mt-1 text-xs text-white/40">{INTAKE_STEP_COPY[step].description}</p>
+                    <p className="text-sm font-medium text-eos-text">{INTAKE_STEP_COPY[step].title}</p>
+                    <p className="mt-1 text-xs text-eos-text-tertiary">{INTAKE_STEP_COPY[step].description}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/30">
+                  <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-eos-text-tertiary">
                     {currentStepQuestions.length - unansweredCurrentStepQuestions.length}/{currentStepQuestions.length}
                   </span>
                 </div>
@@ -850,13 +849,13 @@ export function ApplicabilityWizard({
               </div>
 
               {error && (
-                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
+                <div className="rounded-eos-lg border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {error}
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3">
-                <p className="text-xs text-white/35">
+              <div className="flex items-center justify-between gap-3 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
+                <p className="text-xs text-eos-text-tertiary">
                   {unansweredCurrentStepQuestions.length === 0
                     ? "Pasul curent este confirmat."
                     : `Mai sunt ${unansweredCurrentStepQuestions.length} răspunsuri.`}
@@ -865,7 +864,7 @@ export function ApplicabilityWizard({
                   type="button"
                   onClick={handleIntakeStepContinue}
                   disabled={unansweredCurrentStepQuestions.length > 0}
-                  className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-blue-500 disabled:opacity-40"
+                  className="rounded-eos-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-eos-text transition hover:bg-blue-500 disabled:opacity-40"
                 >
                   Continuă
                 </button>
@@ -875,25 +874,25 @@ export function ApplicabilityWizard({
 
           {step === "review" && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+              <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
                 <div className="flex items-start gap-2.5">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
                   <div>
-                    <p className="text-sm font-medium text-white/80">{INTAKE_STEP_COPY.review.title}</p>
-                    <p className="mt-1 text-xs text-white/40">{INTAKE_STEP_COPY.review.description}</p>
+                    <p className="text-sm font-medium text-eos-text">{INTAKE_STEP_COPY.review.title}</p>
+                    <p className="mt-1 text-xs text-eos-text-tertiary">{INTAKE_STEP_COPY.review.description}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-eos-text-tertiary">
                     {unansweredQuestions.length === 0
                       ? "Tot ce schimbă prima rundă de findings este confirmat."
                       : `Mai sunt ${unansweredQuestions.length} răspunsuri.`}
                   </p>
-                  <span className="text-[10px] text-white/30">
+                  <span className="text-[10px] text-eos-text-tertiary">
                     {answeredQuestionCount}/{visibleQuestionCount}
                   </span>
                 </div>
-                <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
                   <div
                     className="h-full bg-blue-500 transition-all duration-300"
                     style={{
@@ -904,12 +903,12 @@ export function ApplicabilityWizard({
               </div>
 
               {visibleSuggestedAnswers.length > 0 && (
-                <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
                   <div className="flex items-start gap-2.5">
-                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-eos-primary" />
                     <div>
-                      <p className="text-sm font-medium text-white/70">Ce am înțeles deja</p>
-                      <p className="mt-1 text-xs text-white/35">
+                      <p className="text-sm font-medium text-eos-text">Ce am înțeles deja</p>
+                      <p className="mt-1 text-xs text-eos-text-tertiary">
                         Semnalele cu încredere mare sunt precompletate.
                       </p>
                     </div>
@@ -928,7 +927,7 @@ export function ApplicabilityWizard({
               )}
 
               {error && (
-                <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
+                <div className="rounded-eos-lg border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {error}
                 </div>
               )}
@@ -937,7 +936,7 @@ export function ApplicabilityWizard({
                 type="button"
                 onClick={() => void handleSubmit()}
                 disabled={saving || unansweredQuestions.length > 0}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-40"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {completionLabel}
@@ -973,34 +972,34 @@ function PrefillContextCard({
         : "Am găsit semnale în AI Compliance Pack"
 
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white/80">{title}</p>
-          <p className="mt-1 text-xs text-white/40">
+          <p className="text-sm font-semibold text-eos-text">{title}</p>
+          <p className="mt-1 text-xs text-eos-text-tertiary">
             {subtitleParts.join(" · ")}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+        <span className="shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
           ✓ {sourceLabel}
         </span>
       </div>
 
       {prefill.address ? (
-        <p className="mt-2 text-xs text-white/30">{prefill.address}</p>
+        <p className="mt-2 text-xs text-eos-text-tertiary">{prefill.address}</p>
       ) : null}
 
       {prefill.source === "anaf_vat_registry" ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {prefill.mainCaen ? (
-            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
+            <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
               CAEN {prefill.mainCaen}
             </span>
           ) : null}
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
+          <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
             TVA {prefill.vatRegistered ? "activ" : "inactiv"}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/50">
+          <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
             e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
           </span>
           {(() => {
@@ -1011,7 +1010,7 @@ function PrefillContextCard({
       ) : null}
 
       {prefill.source === "anaf_vat_registry" && prefill.fiscalStatus ? (
-        <p className="mt-3 text-xs text-white/30">{prefill.fiscalStatus}</p>
+        <p className="mt-3 text-xs text-eos-text-tertiary">{prefill.fiscalStatus}</p>
       ) : null}
 
       {prefill.vendorSignals ? (
@@ -1211,14 +1210,14 @@ function QuestionCard({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-4">
       <div className="space-y-3">
         <div>
-          <p className="text-sm font-medium text-white/75">{question.text}</p>
+          <p className="text-sm font-medium text-eos-text">{question.text}</p>
           {suggestion ? (
-            <p className="mt-1 text-xs text-white/35">
+            <p className="mt-1 text-xs text-eos-text-tertiary">
               Sugestie automată:{" "}
-              <span className="text-white/60">{answerLabel(suggestion.value)}</span>
+              <span className="text-eos-text-muted">{answerLabel(suggestion.value)}</span>
               {" · "}
               {suggestion.reason}
             </p>
@@ -1233,10 +1232,10 @@ function QuestionCard({
                 type="button"
                 onClick={() => onChange(option.value)}
                 className={[
-                  "rounded-lg border px-3 py-1.5 text-sm transition",
+                  "rounded-eos-md border px-3 py-1.5 text-sm transition",
                   active
-                    ? "border-blue-500/40 bg-blue-500/15 text-blue-400"
-                    : "border-white/10 bg-white/[0.03] text-white/45 hover:border-white/20 hover:text-white/75",
+                    ? "border-blue-500/40 bg-eos-primary-soft text-eos-primary"
+                    : "border-eos-border bg-eos-surface-variant text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text",
                 ].join(" ")}
               >
                 {option.label}

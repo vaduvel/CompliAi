@@ -38,13 +38,13 @@ const MODE_OPTIONS = [
       "Gestionezi conformitatea firmei tale. Dashboard simplificat, axat pe acțiuni concrete și primul risc rezolvat.",
     icon: Building2,
     badge: "Solo",
-    iconClass: "text-blue-400",
-    iconBg: "bg-blue-500/10 border-blue-500/20",
+    iconClass: "text-eos-primary",
+    iconBg: "bg-eos-primary-soft border-eos-border",
     activeBorder: "border-blue-500/40",
-    activeBg: "bg-blue-500/[0.06]",
+    activeBg: "bg-eos-primary-soft",
     activeShadow: "shadow-[0_0_28px_rgba(59,130,246,0.10)]",
-    badgeClass: "bg-blue-500/20 text-blue-400",
-    checkClass: "text-blue-400",
+    badgeClass: "bg-blue-500/20 text-eos-primary",
+    checkClass: "text-eos-primary",
   },
   {
     id: "partner" as ModeId,
@@ -53,13 +53,13 @@ const MODE_OPTIONS = [
       "Gestionezi mai multe firme simultan. Portofoliu agregat cu vedere cross-client și livrabile pentru clienți.",
     icon: Briefcase,
     badge: "Partner",
-    iconClass: "text-violet-400",
-    iconBg: "bg-violet-500/10 border-violet-500/20",
+    iconClass: "text-eos-primary",
+    iconBg: "bg-eos-primary-soft border-violet-500/20",
     activeBorder: "border-violet-500/40",
     activeBg: "bg-violet-500/[0.06]",
     activeShadow: "shadow-[0_0_28px_rgba(139,92,246,0.10)]",
-    badgeClass: "bg-violet-500/20 text-violet-400",
-    checkClass: "text-violet-400",
+    badgeClass: "bg-violet-500/20 text-eos-primary",
+    checkClass: "text-eos-primary",
   },
   {
     id: "compliance" as ModeId,
@@ -68,20 +68,20 @@ const MODE_OPTIONS = [
       "Lucrezi intern pe o singură firmă, cu drepturi extinse de audit, raportare și instrumente de control.",
     icon: ShieldCheck,
     badge: "Compliance",
-    iconClass: "text-emerald-400",
-    iconBg: "bg-emerald-500/10 border-emerald-500/20",
+    iconClass: "text-eos-success",
+    iconBg: "bg-eos-success-soft border-eos-border",
     activeBorder: "border-emerald-500/40",
     activeBg: "bg-emerald-500/[0.06]",
     activeShadow: "shadow-[0_0_28px_rgba(16,185,129,0.10)]",
-    badgeClass: "bg-emerald-500/20 text-emerald-400",
-    checkClass: "text-emerald-400",
+    badgeClass: "bg-emerald-500/20 text-eos-success",
+    checkClass: "text-eos-success",
   },
 ]
 
 const PHASES = [
   { label: "Rolul tău" },
   { label: "Date firmă" },
-  { label: "Legi aplicabile" },
+  { label: "Confirmări finale" },
 ]
 
 function getPhaseIndex(mode: ModeId | null, wizardStep: ApplicabilityWizardStep | null): number {
@@ -181,12 +181,12 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   }
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white">
+    <div className="min-h-screen bg-eos-bg text-eos-text">
       {/* Header */}
-      <header className="border-b border-white/[0.06] px-6 py-4">
+      <header className="border-b border-eos-border-subtle px-6 py-4">
         <div className="mx-auto flex max-w-xl items-center justify-between">
           <CompliScanLogoLockup variant="flat" size="sm" />
-          <span className="text-xs text-white/30">
+          <span className="text-xs text-eos-text-tertiary">
             Pasul {phaseIndex + 1} din {PHASES.length}
             {" · "}
             {PHASES[phaseIndex]?.label}
@@ -195,7 +195,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
       </header>
 
       {/* Progress bar */}
-      <div className="h-0.5 bg-white/[0.05]">
+      <div className="h-0.5 bg-eos-surface-active">
         <div
           className="h-full bg-blue-500 transition-all duration-500"
           style={{ width: `${((phaseIndex + 1) / PHASES.length) * 100}%` }}
@@ -211,10 +211,10 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                 className={[
                   "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-all",
                   i < phaseIndex
-                    ? "bg-blue-500 text-white"
+                    ? "bg-blue-500 text-eos-text"
                     : i === phaseIndex
-                      ? "border border-blue-500/50 bg-blue-500/15 text-blue-400"
-                      : "border border-white/10 text-white/20",
+                      ? "border border-blue-500/50 bg-eos-primary-soft text-eos-primary"
+                      : "border border-eos-border text-eos-text-tertiary",
                 ].join(" ")}
               >
                 {i < phaseIndex ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
@@ -222,7 +222,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               <span
                 className={[
                   "text-xs",
-                  i === phaseIndex ? "font-medium text-white/80" : "text-white/25",
+                  i === phaseIndex ? "font-medium text-eos-text" : "text-eos-text-tertiary",
                 ].join(" ")}
               >
                 {phase.label}
@@ -236,8 +236,8 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
         {!currentMode && (
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-white">Cum vei folosi CompliScan?</h1>
-              <p className="mt-2 text-sm leading-6 text-white/45">
+              <h1 className="text-2xl font-bold text-eos-text">Cum vei folosi CompliScan?</h1>
+              <p className="mt-2 text-sm leading-6 text-eos-text-muted">
                 Alege rolul care descrie cel mai bine modul în care lucrezi. Poți schimba
                 ulterior din Setări.
               </p>
@@ -252,19 +252,19 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                     type="button"
                     onClick={() => setSelectedMode(option.id)}
                     className={[
-                      "w-full rounded-2xl border p-5 text-left transition-all duration-200",
+                      "w-full rounded-eos-xl border p-5 text-left transition-all duration-200",
                       isSelected
                         ? [option.activeBorder, option.activeBg, option.activeShadow].join(" ")
-                        : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14] hover:bg-white/[0.04]",
+                        : "border-eos-border bg-eos-surface-variant hover:border-eos-border-strong hover:bg-eos-surface-active",
                     ].join(" ")}
                   >
                     <div className="flex items-start gap-4">
                       <div
                         className={[
-                          "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all",
+                          "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-eos-lg border transition-all",
                           isSelected
                             ? [option.iconBg, option.iconClass].join(" ")
-                            : "border-white/10 bg-white/5 text-white/30",
+                            : "border-eos-border bg-white/5 text-eos-text-tertiary",
                         ].join(" ")}
                       >
                         <option.icon className="h-5 w-5" strokeWidth={1.5} />
@@ -274,7 +274,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                           <p
                             className={[
                               "font-semibold transition-colors",
-                              isSelected ? "text-white" : "text-white/65",
+                              isSelected ? "text-eos-text" : "text-eos-text-muted",
                             ].join(" ")}
                           >
                             {option.label}
@@ -282,7 +282,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                           <span
                             className={[
                               "rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all",
-                              isSelected ? option.badgeClass : "bg-white/5 text-white/20",
+                              isSelected ? option.badgeClass : "bg-white/5 text-eos-text-tertiary",
                             ].join(" ")}
                           >
                             {option.badge}
@@ -291,7 +291,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                         <p
                           className={[
                             "mt-1 text-sm leading-relaxed transition-colors",
-                            isSelected ? "text-white/55" : "text-white/30",
+                            isSelected ? "text-eos-text-muted" : "text-eos-text-tertiary",
                           ].join(" ")}
                         >
                           {option.description}
@@ -309,7 +309,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              <div className="rounded-eos-lg border border-eos-error-border bg-red-500/10 px-4 py-3 text-sm text-eos-error">
                 {error}
               </div>
             )}
@@ -318,7 +318,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               type="button"
               disabled={!selectedMode || loading}
               onClick={() => void handleConfirm()}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
                 <>
@@ -340,12 +340,12 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
           <div className="space-y-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-white">
-                  {phaseIndex === 1 ? "Date firmă și semnale publice" : "Legi aplicabile și confirmări"}
+                <h1 className="text-2xl font-bold text-eos-text">
+                  {phaseIndex === 1 ? "Date firmă și semnale publice" : "Confirmări finale și pornire în runtime"}
                 </h1>
-                <p className="mt-1.5 text-sm text-white/45">
+                <p className="mt-1.5 text-sm text-eos-text-muted">
                   {orgName ?? "Organizația ta"} · intri direct în{" "}
-                  <span className="text-white/70">{destination.summaryLabel}</span> la final
+                  <span className="text-eos-text">{destination.summaryLabel}</span> la final
                 </p>
               </div>
               {currentMeta && (
@@ -353,7 +353,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                   className={[
                     "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5",
                     currentMeta.activeBorder,
-                    "bg-white/[0.03]",
+                    "bg-eos-surface-variant",
                   ].join(" ")}
                 >
                   <currentMeta.icon
