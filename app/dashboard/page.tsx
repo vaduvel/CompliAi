@@ -166,6 +166,17 @@ export default function DashboardPage() {
         count: findings.length,
       }
     })
+  const applicabilitySummary =
+    applicableEntries.length > 0
+      ? applicableEntries.map((entry) => APPLICABILITY_TAG_LABELS[entry.tag]).join(" · ")
+      : "Se completează după primul snapshot"
+  const findingsSummary =
+    activeFindings.length === 0
+      ? "Nicio problemă activă."
+      : `${activeFindings.length} cazuri active · ${openAlerts.length} alerte · ${activeDrifts.length} drift`
+  const nextActionSummary = nextBestAction
+    ? nextBestAction.title
+    : "Intră în De rezolvat și lucrează pe cazul prioritar."
 
   const internalFeedItems = buildActivityFeedItems({
     events: state.events,
@@ -209,6 +220,23 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-3 pb-20 sm:space-y-4 sm:pb-0" role="main">
+      <section
+        aria-label="Snapshot scurt după onboarding"
+        className="grid gap-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant p-4 md:grid-cols-3"
+      >
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Se aplică</p>
+          <p className="mt-1 text-sm text-eos-text">{applicabilitySummary}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Am găsit</p>
+          <p className="mt-1 text-sm text-eos-text">{findingsSummary}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="mt-1 text-sm text-eos-text">{nextActionSummary}</p>
+        </div>
+      </section>
 
       {/* ── Row 1: Score ring + 3 key metrics ─────────────────────────────── */}
       <div className="grid gap-3 sm:grid-cols-[180px_1fr]">

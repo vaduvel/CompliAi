@@ -18,11 +18,20 @@ import {
 } from "@/lib/compliscan/finding-cockpit"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
+import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 
 type TaskFilter = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 type FrameworkFilter = "toate" | "gdpr" | "nis2" | "ai-act" | "furnizori"
 type SeverityFilter = "toate" | "critical" | "high" | "medium" | "low"
 type FindingStatusFilter = "active" | "all"
+
+const TAG_TO_FRAMEWORK: Partial<Record<ApplicabilityTag, FrameworkFilter>> = {
+  gdpr: "gdpr",
+  nis2: "nis2",
+  "ai-act": "ai-act",
+  efactura: "furnizori",
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -97,6 +106,21 @@ function getFindingRiskLine(
   recipe: ReturnType<typeof buildCockpitRecipe>
 ) {
   return compactRiskSummary(recipe.whatUserSees || describeFindingRiskForTriage(finding))
+}
+
+function getResolveNextActionLine(findings: ScanFinding[]) {
+  const firstFinding = sortFindingsForTriage(findings.filter(isFindingActive))[0]
+  if (!firstFinding) return "Nu ai un caz deschis. Rulezi o scanare nouă sau verifici Dosarul."
+
+  const recipe = buildCockpitRecipe(firstFinding)
+  switch (recipe.executionClass) {
+    case "documentary":
+      return "Intri în primul caz și generezi documentul de rezolvare."
+    case "specialist_handoff":
+      return "Intri în primul caz și pornești flow-ul asistat, cu revenire în cockpit."
+    default:
+      return "Intri în primul caz, faci acțiunea reală și lași dovada în același cockpit."
+  }
 }
 
 
@@ -427,9 +451,39 @@ export function ResolvePageSurface() {
   const mediumCount = activeFindings.filter((f) => f.severity === "medium").length
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const isSolo = runtime?.userMode === "solo"
+  const applicabilityEntries = (cockpit.data.state.applicability?.entries ?? []).filter(
+    (entry) => entry.certainty !== "unlikely" && TAG_TO_FRAMEWORK[entry.tag]
+  )
+  const applicabilityLabels =
+    applicabilityEntries.length > 0
+      ? applicabilityEntries.map((entry) => APPLICABILITY_TAG_LABELS[entry.tag]).join(" · ")
+      : "Se completează după primul snapshot"
+  const foundSummary =
+    activeFindings.length === 0
+      ? "Nicio problemă activă în acest moment."
+      : `${activeFindings.length} cazuri deschise · ${criticalCount} critice · ${highCount} ridicate`
+  const nextActionLine = getResolveNextActionLine(findings)
 
   return (
     <div className="space-y-6">
+      <section
+        aria-label="Snapshot scurt după onboarding"
+        className="grid gap-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant p-4 md:grid-cols-3"
+      >
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Se aplică</p>
+          <p className="mt-1 text-sm text-eos-text">{applicabilityLabels}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Am găsit</p>
+          <p className="mt-1 text-sm text-eos-text">{foundSummary}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="mt-1 text-sm text-eos-text">{nextActionLine}</p>
+        </div>
+      </section>
+
       {/* Header */}
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
