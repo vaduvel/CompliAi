@@ -1854,6 +1854,12 @@ function deriveNis2MaturityFocus(record: ScanFinding): Nis2MaturityFocus | null 
   return null
 }
 
+function deriveNis2VendorId(record: ScanFinding): string | null {
+  if (!record.id.startsWith("nis2-vendor-risk-")) return null
+  const vendorId = record.id.slice("nis2-vendor-risk-".length).trim()
+  return vendorId || null
+}
+
 function getWorkflowLink(
   findingTypeId: string,
   record: ScanFinding
@@ -1926,12 +1932,16 @@ function getWorkflowLink(
 
       if (!isNis2SupplyChainFinding(record)) return undefined
       const vendorContext = inferVendorContext(record, findingTypeId)
+      const vendorId = vendorContext?.vendorId ?? deriveNis2VendorId(record)
       const search = new URLSearchParams({
         tab: "vendors",
         focus: "vendor",
         findingId: record.id,
         returnTo: `/dashboard/resolve/${record.id}`,
       })
+      if (vendorId) {
+        search.set("vendorId", vendorId)
+      }
       if (vendorContext?.vendorName) {
         search.set("vendor", vendorContext.vendorName)
       }

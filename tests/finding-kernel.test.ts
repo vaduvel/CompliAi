@@ -1112,15 +1112,16 @@ describe("getSpecialistHandoffContract", () => {
     const contract = getSpecialistHandoffContract(
       "NIS2-GENERIC",
       makeFinding({
-        id: "nis2-supply-chain-gap",
+        id: "nis2-vendor-risk-vendor-123",
         category: "NIS2",
-        title: "2 furnizori tehnici fără DPA semnat",
-        detail: "Microsoft și AWS apar în registrul furnizorilor fără DPA actualizat.",
+        title: "Furnizorul Vendor 123 are risc ridicat și nu a fost revizuit",
+        detail: "Vendor 123 apare în registrul furnizorilor fără DPA și SLA actualizat.",
       })
     )
     expect(contract?.surface).toBe("nis2_vendor_registry")
     expect(contract?.startHref).toContain("/dashboard/nis2?tab=vendors")
-    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-supply-chain-gap")
+    expect(contract?.startHref).toContain("vendorId=vendor-123")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fnis2-vendor-risk-vendor-123")
     expect(contract?.runtimeReturnMode).toBe("automatic")
   })
 

@@ -2093,11 +2093,13 @@ function VendorRow({
 }
 
 function VendorsTab({
+  highlightedVendorId,
   highlightedVendorName,
   focusMode,
   sourceFindingId,
   returnTo,
 }: {
+  highlightedVendorId?: string
   highlightedVendorName?: string
   focusMode?: "vendor"
   sourceFindingId?: string
@@ -2130,13 +2132,15 @@ function VendorsTab({
   const normalizeVendorName = (value: string) =>
     value.toLowerCase().replace(/corporation|emea sarl|services|web|amazon/g, "").replace(/\s+/g, " ").trim()
 
-  const highlightedVendor = highlightedVendorName
-    ? vendors.find((vendor) => {
-        const current = normalizeVendorName(vendor.name)
-        const target = normalizeVendorName(highlightedVendorName)
-        return current.includes(target) || target.includes(current)
-      })
-    : null
+  const highlightedVendor =
+    (highlightedVendorId ? vendors.find((vendor) => vendor.id === highlightedVendorId) ?? null : null) ??
+    (highlightedVendorName
+      ? vendors.find((vendor) => {
+          const current = normalizeVendorName(vendor.name)
+          const target = normalizeVendorName(highlightedVendorName)
+          return current.includes(target) || target.includes(current)
+        }) ?? null
+      : null)
 
   useEffect(() => {
     if (loading || !highlightedVendor) return
@@ -2650,6 +2654,7 @@ export default function Nis2Page() {
   const [activeTab, setActiveTab] = useState<Nis2TabValue>("assessment")
   const requestedTab = normalizeNis2TabValue(searchParams.get("tab"))
   const highlightedIncidentId = searchParams.get("incidentId") ?? undefined
+  const highlightedVendorId = searchParams.get("vendorId") ?? undefined
   const highlightedVendorName = searchParams.get("vendor") ?? undefined
   const rawFocusMode = searchParams.get("focus")
   const focusMode =
@@ -2763,6 +2768,7 @@ export default function Nis2Page() {
         </TabsContent>
         <TabsContent value="vendors">
           <VendorsTab
+            highlightedVendorId={highlightedVendorId}
             highlightedVendorName={highlightedVendorName}
             focusMode={focusMode === "vendor" ? "vendor" : undefined}
             sourceFindingId={sourceFindingId}
