@@ -34,7 +34,7 @@ type PortfolioPlanResponse = {
   maxOrgs: number | null
   currentOrgs: number
   canAddOrg: boolean
-  partnerPlanSource: "account" | "legacy_org_partner" | "none"
+  partnerPlanSource: "account" | "legacy_org_partner" | "trial"
 }
 
 function formatDate(value: string | null | undefined) {
@@ -227,7 +227,7 @@ function ClientRow({
           href={`/trust/${client.orgId}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-white/65"
+          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text-muted"
           title="Trust Profile"
         >
           <ExternalLink className="size-3.5" strokeWidth={2} />
@@ -467,10 +467,10 @@ export function PortfolioOverviewClient() {
         <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-xl border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
           <div>
             <p className="text-sm font-semibold text-eos-text">Capacitatea portofoliului este atinsă</p>
-            <p className="mt-1 text-xs leading-5 text-amber-400/75">
-              {planData.planType
-                ? `Planul ${PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} permite până la ${planData.maxOrgs} firme.`
-                : "Ai nevoie de un plan Partner pe cont pentru a adăuga firme noi."}
+            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+              {planData.partnerPlanSource === "trial"
+                ? `Ai atins limita trial (${planData.maxOrgs} firme). Activează un plan Partner din Setări cont pentru a adăuga mai multe.`
+                : `Planul ${PARTNER_ACCOUNT_PLAN_LABELS[planData.planType!]} permite până la ${planData.maxOrgs} firme.`}
             </p>
           </div>
           <Link
@@ -523,7 +523,7 @@ export function PortfolioOverviewClient() {
                 >
                   <span className="size-1.5 shrink-0 rounded-full bg-eos-error" />
                   {u.label}
-                  <span className="ml-auto text-[10px] text-red-400/60">Filtrează →</span>
+                  <span className="ml-auto text-[10px] text-eos-text-tertiary">Filtrează →</span>
                 </button>
               ))}
             </div>
@@ -570,7 +570,7 @@ export function PortfolioOverviewClient() {
       <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-5 py-16 text-center">
-            <Users className="size-8 text-white/15" strokeWidth={1.5} />
+            <Users className="size-8 text-eos-text-tertiary" strokeWidth={1.5} />
             <p className="text-sm font-medium text-eos-text-tertiary">Nicio firmă activă</p>
             <p className="text-xs text-eos-text-tertiary">Adaugă organizații sau acceptă invitații pentru a popula portofoliul.</p>
           </div>

@@ -48,10 +48,10 @@ const PLANS = [
     ctaHref: "/login",
     Icon: Building2,
     iconClass: "text-eos-text-tertiary",
-    iconBg: "bg-white/5 border-white/10",
+    iconBg: "bg-eos-surface-elevated border-eos-border",
     borderClass: "border-eos-border",
     bgClass: "bg-eos-surface-variant",
-    ctaClass: "border border-white/10 bg-white/5 text-eos-text-muted hover:bg-white/10 hover:text-eos-text",
+    ctaClass: "border border-eos-border bg-eos-surface-elevated text-eos-text-muted hover:bg-eos-surface-hover hover:text-eos-text",
   },
   {
     id: "pro" as const,
@@ -83,7 +83,7 @@ const PLANS = [
     iconBg: "bg-violet-500/10 border-violet-500/20",
     borderClass: "border-eos-border",
     bgClass: "bg-eos-surface-variant",
-    ctaClass: "border border-white/10 bg-white/5 text-eos-text-muted hover:bg-white/10 hover:text-eos-text",
+    ctaClass: "border border-eos-border bg-eos-surface-elevated text-eos-text-muted hover:bg-eos-surface-hover hover:text-eos-text",
   },
 ]
 
@@ -253,7 +253,7 @@ export default function PricingPage() {
                             ? "bg-blue-500/20"
                             : plan.id === "partner"
                               ? "bg-violet-500/15"
-                              : "bg-white/8",
+                              : "bg-eos-surface-elevated",
                         ].join(" ")}
                       >
                         <Check
@@ -301,7 +301,7 @@ export default function PricingPage() {
                   Toate funcționalitățile față în față pe cele 3 planuri.
                 </p>
               </div>
-              <span className="rounded-eos-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-eos-text-tertiary transition-colors group-open:text-eos-text-muted">
+              <span className="rounded-eos-md border border-eos-border bg-eos-surface-elevated px-3 py-1.5 text-xs font-medium text-eos-text-tertiary transition-colors group-open:text-eos-text-muted">
                 Deschide
               </span>
             </summary>
@@ -331,7 +331,7 @@ export default function PricingPage() {
                       key={feature.label}
                       className={[
                         "border-b border-eos-border-subtle",
-                        i % 2 === 0 ? "" : "bg-white/[0.015]",
+                        i % 2 === 0 ? "" : "bg-eos-surface-secondary",
                       ].join(" ")}
                     >
                       <td className="px-5 py-3 text-sm text-eos-text-muted">{feature.label}</td>
@@ -349,7 +349,7 @@ export default function PricingPage() {
                               />
                             ) : val === false ? (
                               <X
-                                className="mx-auto h-4 w-4 text-white/15"
+                                className="mx-auto h-4 w-4 text-eos-text-tertiary"
                                 strokeWidth={2}
                               />
                             ) : (
@@ -380,7 +380,7 @@ export default function PricingPage() {
                   +
                 </span>
               </summary>
-              <div className="border-t border-white/[0.05] px-5 py-4">
+              <div className="border-t border-eos-border-subtle px-5 py-4">
                 <p className="text-sm leading-relaxed text-eos-text-muted">{item.a}</p>
               </div>
             </details>
@@ -408,7 +408,7 @@ export default function PricingPage() {
             </Link>
             <Link
               href="mailto:contact@compliscan.ro"
-              className="rounded-eos-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-medium text-eos-text-muted transition-all hover:bg-white/10 hover:text-eos-text"
+              className="rounded-eos-xl border border-eos-border bg-eos-surface-elevated px-6 py-3.5 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
             >
               Vorbește cu echipa
             </Link>

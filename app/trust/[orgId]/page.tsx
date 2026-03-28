@@ -29,7 +29,7 @@ function TrustMetricCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-eos-md border border-gray-200 bg-white p-4 shadow-sm">
       <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400">{label}</p>
       <div className="mt-2">{children}</div>
     </div>
@@ -120,7 +120,7 @@ export default async function TrustPage({
 
         {/* Header */}
         <div className="mb-8 flex items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-blue-50 ring-1 ring-blue-100">
+          <div className="grid size-12 shrink-0 place-items-center rounded-eos-lg bg-blue-50 ring-1 ring-blue-100">
             <ShieldCheck className="size-6 text-blue-600" strokeWidth={2} />
           </div>
           <div className="min-w-0 flex-1">
@@ -137,7 +137,7 @@ export default async function TrustPage({
         </div>
 
         {/* Score hero */}
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-eos-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-end gap-3">
             <span className="text-5xl font-bold text-gray-900">{summary.score}%</span>
             <div className="mb-1">

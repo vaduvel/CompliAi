@@ -467,7 +467,7 @@ export function ApplicabilityWizard({
             <button
               type="button"
               onClick={goBack}
-              className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border bg-white/5 px-3 py-1.5 text-xs text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+              className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-elevated px-3 py-1.5 text-xs text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Înapoi
@@ -825,7 +825,7 @@ export function ApplicabilityWizard({
                     <p className="text-sm font-medium text-eos-text">{INTAKE_STEP_COPY[step].title}</p>
                     <p className="mt-1 text-xs text-eos-text-tertiary">{INTAKE_STEP_COPY[step].description}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-eos-text-tertiary">
+                  <span className="shrink-0 rounded-full bg-eos-surface-elevated px-2 py-0.5 text-[10px] text-eos-text-tertiary">
                     {currentStepQuestions.length - unansweredCurrentStepQuestions.length}/{currentStepQuestions.length}
                   </span>
                 </div>
@@ -992,14 +992,14 @@ function PrefillContextCard({
       {prefill.source === "anaf_vat_registry" ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {prefill.mainCaen ? (
-            <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
+            <span className="rounded-full border border-eos-border bg-eos-surface-elevated px-2.5 py-0.5 text-[11px] text-eos-text-muted">
               CAEN {prefill.mainCaen}
             </span>
           ) : null}
-          <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
+          <span className="rounded-full border border-eos-border bg-eos-surface-elevated px-2.5 py-0.5 text-[11px] text-eos-text-muted">
             TVA {prefill.vatRegistered ? "activ" : "inactiv"}
           </span>
-          <span className="rounded-full border border-eos-border bg-white/5 px-2.5 py-0.5 text-[11px] text-eos-text-muted">
+          <span className="rounded-full border border-eos-border bg-eos-surface-elevated px-2.5 py-0.5 text-[11px] text-eos-text-muted">
             e-Factura {prefill.efacturaRegistered ? "activ" : "neconfirmat"}
           </span>
           {(() => {

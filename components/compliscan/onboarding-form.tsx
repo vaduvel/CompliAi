@@ -227,7 +227,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               >
                 {phase.label}
               </span>
-              {i < PHASES.length - 1 && <div className="mx-1 h-px w-6 bg-white/10" />}
+              {i < PHASES.length - 1 && <div className="mx-1 h-px w-6 bg-eos-border" />}
             </div>
           ))}
         </div>
@@ -264,7 +264,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                           "mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-eos-lg border transition-all",
                           isSelected
                             ? [option.iconBg, option.iconClass].join(" ")
-                            : "border-eos-border bg-white/5 text-eos-text-tertiary",
+                            : "border-eos-border bg-eos-surface-elevated text-eos-text-tertiary",
                         ].join(" ")}
                       >
                         <option.icon className="h-5 w-5" strokeWidth={1.5} />
@@ -282,7 +282,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                           <span
                             className={[
                               "rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all",
-                              isSelected ? option.badgeClass : "bg-white/5 text-eos-text-tertiary",
+                              isSelected ? option.badgeClass : "bg-eos-surface-elevated text-eos-text-tertiary",
                             ].join(" ")}
                           >
                             {option.badge}

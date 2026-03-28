@@ -151,7 +151,7 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   return (
     <Link
       href={cockpitHref}
-      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3.5 transition-all hover:border-white/[0.11] hover:bg-eos-surface-variant"
+      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3.5 transition-all hover:border-eos-border-strong hover:bg-eos-surface-variant"
     >
       <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
       <div className="min-w-0 flex-1">
@@ -512,7 +512,7 @@ export function ResolvePageSurface() {
             </span>
           )}
           {mediumCount > 0 && (
-            <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-400/70">
+            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
               {mediumCount} medii
             </span>
           )}

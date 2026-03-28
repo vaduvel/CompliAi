@@ -85,15 +85,15 @@ function ProductMock() {
       <div className="absolute left-1/2 top-0 h-64 w-3/4 -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
 
       {/* Browser chrome */}
-      <div className="relative overflow-hidden rounded-eos-lg border border-white/10 bg-[#0d1117] shadow-[0_0_60px_rgba(0,0,0,0.6)]">
+      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-[#0d1117] shadow-[0_0_60px_rgba(0,0,0,0.6)]">
         {/* Top bar */}
-        <div className="flex items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-eos-border bg-eos-surface-elevated px-4 py-3">
           <div className="flex gap-1.5">
             <span className="block h-3 w-3 rounded-full bg-[#ff5f57]" />
             <span className="block h-3 w-3 rounded-full bg-[#febc2e]" />
             <span className="block h-3 w-3 rounded-full bg-[#28c840]" />
           </div>
-          <div className="mx-auto rounded-eos-md bg-white/5 px-4 py-1.5 text-[11px] text-eos-text-tertiary">
+          <div className="mx-auto rounded-eos-md bg-eos-surface-elevated px-4 py-1.5 text-[11px] text-eos-text-tertiary">
             compliscanag.vercel.app/dashboard/resolve
           </div>
         </div>
@@ -131,7 +131,7 @@ function ProductMock() {
           <div className="flex flex-1 flex-col overflow-hidden p-5">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-semibold text-eos-text">De rezolvat</p>
-              <span className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-eos-text-tertiary">
+              <span className="rounded-full bg-eos-surface-elevated px-2.5 py-1 text-[11px] text-eos-text-tertiary">
                 4 riscuri identificate
               </span>
             </div>
@@ -220,7 +220,7 @@ export default function HomePage() {
             {REGS.map((reg) => (
               <span
                 key={reg}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-eos-text-muted"
+                className="rounded-full border border-eos-border bg-eos-surface-elevated px-3 py-1 text-[11px] font-medium text-eos-text-muted"
               >
                 {reg}
               </span>
@@ -235,7 +235,7 @@ export default function HomePage() {
             <span className="mt-2 block bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
               Rezolvi clar.
             </span>
-            <span className="block text-white/90">Rămâi acoperit.</span>
+            <span className="block text-eos-text">Rămâi acoperit.</span>
           </h1>
 
           {/* Subtitle */}
@@ -255,7 +255,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/demo/imm"
-              className="rounded-eos-xl border border-white/10 bg-white/5 px-7 py-3 text-sm font-medium text-eos-text-muted transition-all hover:bg-white/10 hover:text-eos-text"
+              className="rounded-eos-xl border border-eos-border bg-eos-surface-elevated px-7 py-3 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
             >
               Vezi demo live
             </Link>

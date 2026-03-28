@@ -58,7 +58,7 @@ export default async function SharedCompliancePage({
   if (!payload) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto size-10 text-amber-500" strokeWidth={1.5} />
           <h1 className="mt-4 text-lg font-semibold text-slate-900">Link invalid sau expirat</h1>
           <p className="mt-2 text-sm text-slate-500">
@@ -77,7 +77,7 @@ export default async function SharedCompliancePage({
   if (!rawState) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto size-10 text-amber-500" strokeWidth={1.5} />
           <h1 className="mt-4 text-lg font-semibold text-slate-900">Date indisponibile</h1>
           <p className="mt-2 text-sm text-slate-500">
@@ -116,7 +116,7 @@ export default async function SharedCompliancePage({
       <div className="mx-auto max-w-2xl space-y-6">
 
         {/* Header */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export default async function SharedCompliancePage({
               </p>
             </div>
             <div
-              className="shrink-0 rounded-lg px-4 py-3 text-center"
+              className="shrink-0 rounded-eos-md px-4 py-3 text-center"
               style={{ background: `${color}18`, border: `1px solid ${color}33` }}
             >
               <p className="text-2xl font-bold" style={{ color }}>{score}%</p>
@@ -146,7 +146,7 @@ export default async function SharedCompliancePage({
         </div>
 
         {/* Framework status */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
             Stare framework-uri
           </h2>
@@ -190,7 +190,7 @@ export default async function SharedCompliancePage({
 
         {/* Open risks */}
         {criticalFindings.length > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
               Riscuri deschise prioritare
             </h2>
@@ -198,7 +198,7 @@ export default async function SharedCompliancePage({
               {criticalFindings.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+                  className="flex items-start gap-3 rounded-eos-md border border-slate-100 bg-slate-50 px-4 py-3"
                 >
                   <span
                     className={`mt-0.5 size-2 shrink-0 rounded-full ${
@@ -226,7 +226,7 @@ export default async function SharedCompliancePage({
         )}
 
         {/* Disclaimer */}
-        <div className="rounded-xl border border-amber-100 bg-amber-50 p-5">
+        <div className="rounded-eos-lg border border-amber-100 bg-amber-50 p-5">
           <p className="text-xs leading-relaxed text-amber-700">
             <strong>Notă juridică:</strong> Acest document este un rezumat automatizat generat de CompliAI
             și nu constituie consultanță juridică sau contabilă. Informațiile reflectă starea internă

@@ -8,6 +8,7 @@
   --color-eos-surface-variant: var(--eos-surface-secondary);
   --color-eos-surface-active: var(--eos-surface-tertiary);
   --color-eos-surface-elevated: var(--eos-surface-elevated);
+  --color-eos-surface-hover: var(--eos-surface-hover);
 
   --color-eos-border: var(--eos-border-default);
   --color-eos-border-subtle: var(--eos-border-subtle);
@@ -54,6 +55,7 @@
   --eos-surface-secondary: rgba(255, 255, 255, 0.02);  /* card bg */
   --eos-surface-tertiary:  rgba(255, 255, 255, 0.04);  /* hover pe card */
   --eos-surface-elevated:  rgba(255, 255, 255, 0.06);  /* active / selected */
+  --eos-surface-hover:     rgba(255, 255, 255, 0.10);  /* button hover, interactive surface hover */
 
   /* ── border ───────────────────────────────────────────────── */
   --eos-border-subtle:  rgba(255, 255, 255, 0.04);   /* dividers, fine separators */
@@ -129,6 +131,7 @@
   --eos-surface-primary: hsl(220 14% 98%);
   --eos-surface-secondary: hsl(220 14% 95%);
   --eos-surface-tertiary: hsl(220 14% 91%);
+  --eos-surface-hover: hsl(220 14% 87%);
   --eos-surface-elevated: hsl(0 0% 100%);
 
   --eos-border-subtle: hsl(220 14% 90%);

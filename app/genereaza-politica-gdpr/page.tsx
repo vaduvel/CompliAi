@@ -59,7 +59,7 @@ export default function GenereazaPoliticaGdprPage() {
           </Link>
           <Link
             href="/login"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="rounded-eos-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
           >
             Deschide dashboard →
           </Link>
@@ -85,14 +85,14 @@ export default function GenereazaPoliticaGdprPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-eos-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               Generează gratuit
               <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-eos-md border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
             >
               Înregistrează-te gratuit
             </Link>
@@ -111,7 +111,7 @@ export default function GenereazaPoliticaGdprPage() {
             </h2>
             <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {FEATURES.map((feature) => (
-                <div key={feature} className="flex items-start gap-2.5 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                <div key={feature} className="flex items-start gap-2.5 rounded-eos-md border border-gray-100 bg-gray-50 p-3">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500" strokeWidth={2} />
                   <p className="text-sm text-gray-700">{feature}</p>
                 </div>
@@ -127,7 +127,7 @@ export default function GenereazaPoliticaGdprPage() {
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {STEPS.map((s) => (
-              <div key={s.step} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div key={s.step} className="rounded-eos-lg border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex size-8 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
                   {s.step}
                 </div>
@@ -175,7 +175,7 @@ export default function GenereazaPoliticaGdprPage() {
             </p>
             <Link
               href="/login"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50"
+              className="mt-6 inline-flex items-center gap-2 rounded-eos-md bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50"
             >
               Creează cont gratuit
               <ArrowRight className="size-4" strokeWidth={2} />
