@@ -329,6 +329,8 @@ export default function FindingDetailPage() {
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
   const needsDocumentResolution = status === "confirmed" && hasGenerator && preparedDocumentReady
+  const showConfirmedHeroAction =
+    status === "confirmed" && (!hasGenerator || !generatorOpen || needsDocumentResolution)
   const resolvedMomentVisible =
     status === "resolved" &&
     hasGenerator &&
@@ -639,7 +641,7 @@ export default function FindingDetailPage() {
         </FindingHeroAction>
       )}
 
-      {status === "confirmed" && (
+      {showConfirmedHeroAction && (
         <FindingHeroAction
           finding={finding}
           recipe={recipe}
