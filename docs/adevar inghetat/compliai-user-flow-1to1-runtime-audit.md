@@ -1014,8 +1014,11 @@ După runde separate de audit live, adevărul pe clase este:
 
 ### 14.7 Încă neconfirmat live
 
-Nu sunt încă închise live cap-coadă:
-- snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
+Nu mai există restanțe de confirmare live pe spine-ul principal:
+- `solo` iese din onboarding în `/dashboard/resolve`
+- `partner` iese din onboarding în `/portfolio`
+- `compliance` iese din onboarding în `/dashboard`
+- suprafețele de ieșire exprimă live următorul pas fără ecran intermediar fals
 
 Note tehnice rămase:
 - `alerts / drift UI` este acum `CONFIRMAT LIVE` pe `open -> acknowledge -> in_progress -> resolved -> reopen`
@@ -1041,5 +1044,5 @@ Dar după verificarea live din `2026-03-27`, adevărul s-a întărit astfel:
 - suprafețele secundare partner/compliance sunt funcționale live, dar încă mai late decât spine-ul principal
 
 Prin urmare, produsul este mai sănătos decât arăta prima rundă de audit, dar tot nu poate fi declarat `1:1` sau `client-ready 100%` până când:
-- snapshotul de ieșire din onboarding spune clar `ce se aplică / ce am găsit / ce faci acum`
-- partner/compliance sunt verificate live pe ramurile reale de utilizare
+- expresia UX a unor suprafețe secundare este adusă la disciplina spine-ului principal
+- cockpitul live este compactat până la forma finală de produs, nu doar la adevărul bun de runtime
