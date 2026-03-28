@@ -131,7 +131,7 @@ function LoginContent() {
 
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-blue-600/[0.06] blur-[120px]" />
+        <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-eos-primary/[0.06] blur-[120px]" />
       </div>
 
       <div className="relative mx-auto w-full max-w-md">
@@ -154,7 +154,7 @@ function LoginContent() {
           <ul className="mt-4 space-y-2">
             {VALUE_PROPS.map((prop) => (
               <li key={prop} className="flex items-center justify-center gap-2 text-sm text-eos-text-muted">
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500/70" strokeWidth={2.5} />
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success/70" strokeWidth={2.5} />
                 {prop}
               </li>
             ))}
@@ -190,7 +190,7 @@ function LoginContent() {
             >
               Cont nou
               {mode === "register" && (
-                <span className="ml-2 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-eos-primary">
+                <span className="ml-2 rounded-full bg-eos-primary/20 px-2 py-0.5 text-[10px] font-bold text-eos-primary">
                   14 zile Pro
                 </span>
               )}
@@ -213,7 +213,7 @@ function LoginContent() {
                     placeholder="Ex: BRRR SRL"
                     required
                     autoComplete="organization"
-                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active transition-all"
+                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
                   />
                 </div>
               )}
@@ -229,7 +229,7 @@ function LoginContent() {
                   placeholder="email@firma.ro"
                   required
                   autoComplete="email"
-                  className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active transition-all"
+                  className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
                 />
               </div>
 
@@ -245,7 +245,7 @@ function LoginContent() {
                     placeholder={mode === "register" ? "Minim 8 caractere" : "Parola ta"}
                     required
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
-                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active transition-all"
+                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
                   />
                   <button
                     type="button"
@@ -278,10 +278,10 @@ function LoginContent() {
                       className={[
                         "h-12 w-full rounded-eos-lg border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary transition-all",
                         confirmPassword && password !== confirmPassword
-                          ? "border-red-500/40 focus:border-red-500/60"
+                          ? "border-eos-error/50/40 focus:border-eos-error/50/60"
                           : confirmPassword && password === confirmPassword
-                            ? "border-emerald-500/40 focus:border-emerald-500/50"
-                            : "border-eos-border focus:border-blue-500/50 focus:bg-eos-surface-active",
+                            ? "border-eos-success/50/40 focus:border-eos-success/50/50"
+                            : "border-eos-border focus:border-eos-primary/50 focus:bg-eos-surface-active",
                       ].join(" ")}
                     />
                     <button
@@ -314,15 +314,15 @@ function LoginContent() {
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-blue-500"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-eos-primary"
                   />
                   <span className="text-xs leading-relaxed text-eos-text-tertiary">
                     Am citit și accept{" "}
-                    <Link href="/terms" target="_blank" className="text-eos-primary hover:text-blue-300 hover:underline">
+                    <Link href="/terms" target="_blank" className="text-eos-primary hover:text-eos-primary hover:underline">
                       Termenii și Condițiile
                     </Link>{" "}
                     și{" "}
-                    <Link href="/privacy" target="_blank" className="text-eos-primary hover:text-blue-300 hover:underline">
+                    <Link href="/privacy" target="_blank" className="text-eos-primary hover:text-eos-primary hover:underline">
                       Politica de Confidențialitate
                     </Link>
                     .
@@ -331,7 +331,7 @@ function LoginContent() {
               )}
 
               {error && (
-                <div className="rounded-eos-lg border border-eos-error-border bg-red-500/10 px-4 py-3 text-sm text-eos-error">
+                <div className="rounded-eos-lg border border-eos-error-border bg-eos-error/10 px-4 py-3 text-sm text-eos-error">
                   {error}
                 </div>
               )}
@@ -341,11 +341,11 @@ function LoginContent() {
                   <button
                     type="button"
                     onClick={switchToLogin}
-                    className="text-sm text-eos-primary hover:text-blue-300 hover:underline"
+                    className="text-sm text-eos-primary hover:text-eos-primary hover:underline"
                   >
                     Mergi la autentificare
                   </button>
-                  <Link href="/reset-password" className="text-sm text-eos-primary hover:text-blue-300 hover:underline">
+                  <Link href="/reset-password" className="text-sm text-eos-primary hover:text-eos-primary hover:underline">
                     Resetează parola
                   </Link>
                 </div>
@@ -354,7 +354,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={submitDisabled}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {loading ? (
                   <>

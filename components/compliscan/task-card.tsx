@@ -267,7 +267,7 @@ export function TaskCard({
                     L{task.validationLevel} · {getValidationLevelMeta(task.validationLevel).shortLabel}
                   </Badge>
                   {task.category === "NIS2" ? (
-                    <Badge className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                    <Badge className="border-eos-primary/20 bg-eos-primary-soft text-eos-primary dark:border-eos-primary/30 dark:bg-eos-primary-soft dark:text-eos-primary">
                       NIS2
                     </Badge>
                   ) : null}

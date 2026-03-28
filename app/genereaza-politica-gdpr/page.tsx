@@ -54,12 +54,12 @@ export default function GenereazaPoliticaGdprPage() {
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <ShieldCheck className="size-5 text-blue-600" strokeWidth={2} />
+            <ShieldCheck className="size-5 text-eos-primary" strokeWidth={2} />
             CompliScan
           </Link>
           <Link
             href="/login"
-            className="rounded-eos-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-eos-primary-hover"
           >
             Deschide dashboard →
           </Link>
@@ -69,7 +69,7 @@ export default function GenereazaPoliticaGdprPage() {
       {/* Hero */}
       <main>
         <section className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-eos-success-soft px-3 py-1 text-xs font-medium text-eos-success ring-1 ring-emerald-200">
             <Sparkles className="size-3" strokeWidth={2} />
             Gratuit — fără card, fără cont
           </span>
@@ -85,7 +85,7 @@ export default function GenereazaPoliticaGdprPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-eos-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-eos-md bg-eos-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-eos-primary-hover"
             >
               Generează gratuit
               <ArrowRight className="size-4" strokeWidth={2} />
@@ -112,7 +112,7 @@ export default function GenereazaPoliticaGdprPage() {
             <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {FEATURES.map((feature) => (
                 <div key={feature} className="flex items-start gap-2.5 rounded-eos-md border border-gray-100 bg-gray-50 p-3">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500" strokeWidth={2} />
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
                   <p className="text-sm text-gray-700">{feature}</p>
                 </div>
               ))}
@@ -128,7 +128,7 @@ export default function GenereazaPoliticaGdprPage() {
           <div className="grid gap-6 sm:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.step} className="rounded-eos-lg border border-gray-200 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex size-8 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
+                <div className="mb-3 flex size-8 items-center justify-center rounded-full bg-eos-primary-soft text-sm font-bold text-eos-primary">
                   {s.step}
                 </div>
                 <h3 className="font-semibold text-gray-900">{s.title}</h3>
@@ -164,18 +164,18 @@ export default function GenereazaPoliticaGdprPage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-blue-600 py-12">
+        <section className="bg-eos-primary py-12">
           <div className="mx-auto max-w-2xl px-4 text-center">
-            <Lock className="mx-auto mb-3 size-8 text-blue-200" strokeWidth={1.5} />
+            <Lock className="mx-auto mb-3 size-8 text-eos-primary" strokeWidth={1.5} />
             <h2 className="text-xl font-bold text-white">
               Generează politica în 30 de secunde
             </h2>
-            <p className="mt-2 text-sm text-blue-100">
+            <p className="mt-2 text-sm text-eos-primary">
               Gratuit pentru Privacy Policy și Cookie Policy. GDPR + AI Act + e-Factura — toate într-un singur loc.
             </p>
             <Link
               href="/login"
-              className="mt-6 inline-flex items-center gap-2 rounded-eos-md bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50"
+              className="mt-6 inline-flex items-center gap-2 rounded-eos-md bg-white px-6 py-3 text-sm font-semibold text-eos-primary shadow-sm transition hover:bg-eos-primary-soft"
             >
               Creează cont gratuit
               <ArrowRight className="size-4" strokeWidth={2} />

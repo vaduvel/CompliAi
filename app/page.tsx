@@ -51,7 +51,7 @@ const FEATURES = [
   {
     icon: Activity,
     color: "text-eos-success",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
+    bg: "bg-eos-success/10 border-eos-success/50/20",
     title: "Dosar și monitorizare",
     description:
       "Dovada intră automat în dosar. Cazul rămâne sub watch și îți semnalează când trebuie revizuit.",
@@ -82,7 +82,7 @@ function ProductMock() {
   return (
     <div className="relative mx-auto mt-16 max-w-4xl px-4">
       {/* Glow */}
-      <div className="absolute left-1/2 top-0 h-64 w-3/4 -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
+      <div className="absolute left-1/2 top-0 h-64 w-3/4 -translate-x-1/2 rounded-full bg-eos-primary/20 blur-3xl" />
 
       {/* Browser chrome */}
       <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-[#0d1117] shadow-[0_0_60px_rgba(0,0,0,0.6)]">
@@ -103,7 +103,7 @@ function ProductMock() {
           {/* Sidebar */}
           <div className="hidden w-52 shrink-0 flex-col gap-1 border-r border-eos-border bg-eos-surface-variant p-4 sm:flex">
             <div className="mb-2 flex items-center gap-2 px-2 py-1.5">
-              <span className="h-6 w-6 rounded bg-blue-500/30" />
+              <span className="h-6 w-6 rounded bg-eos-primary/30" />
               <span className="text-[11px] font-semibold text-eos-text-muted">CompliScan</span>
             </div>
             {["Acasă", "Scanează", "De rezolvat", "Dosar", "Setări"].map((item, i) => (
@@ -112,14 +112,14 @@ function ProductMock() {
                 className={[
                   "flex items-center gap-2.5 rounded-eos-md px-2 py-1.5 text-xs",
                   i === 2
-                    ? "bg-blue-500/15 text-eos-primary font-medium"
+                    ? "bg-eos-primary/15 text-eos-primary font-medium"
                     : "text-eos-text-tertiary",
                 ].join(" ")}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-current" />
                 {item}
                 {i === 2 && (
-                  <span className="ml-auto rounded-full bg-blue-500/25 px-1.5 py-0.5 text-[10px] text-eos-primary">
+                  <span className="ml-auto rounded-full bg-eos-primary/25 px-1.5 py-0.5 text-[10px] text-eos-primary">
                     4
                   </span>
                 )}
@@ -138,7 +138,7 @@ function ProductMock() {
 
             <div className="space-y-2.5">
               {[
-                { title: "Politică de confidențialitate lipsă", badge: "GDPR", dot: "bg-red-500", priority: "Critic" },
+                { title: "Politică de confidențialitate lipsă", badge: "GDPR", dot: "bg-eos-error", priority: "Critic" },
                 { title: "DPA cu furnizori neconfirmat", badge: "GDPR", dot: "bg-orange-400", priority: "Ridicat" },
                 { title: "Registru evidență ANAF neemis", badge: "e-Factura", dot: "bg-yellow-400", priority: "Mediu" },
               ].map((f) => (
@@ -148,7 +148,7 @@ function ProductMock() {
                 >
                   <span className={`h-2 w-2 shrink-0 rounded-full ${f.dot}`} />
                   <span className="flex-1 truncate text-xs text-eos-text-muted">{f.title}</span>
-                  <span className="shrink-0 rounded bg-blue-500/15 px-2 py-0.5 text-[10px] font-medium text-eos-primary">
+                  <span className="shrink-0 rounded bg-eos-primary/15 px-2 py-0.5 text-[10px] font-medium text-eos-primary">
                     {f.badge}
                   </span>
                   <span className="hidden shrink-0 text-[10px] text-eos-text-tertiary sm:block">
@@ -159,12 +159,12 @@ function ProductMock() {
               ))}
 
               {/* Resolved row */}
-              <div className="flex items-center gap-3 rounded-eos-md border border-emerald-500/15 bg-emerald-500/5 px-3.5 py-2.5 opacity-60">
+              <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/50/15 bg-eos-success/5 px-3.5 py-2.5 opacity-60">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" />
-                <span className="flex-1 truncate text-xs text-emerald-400/80">
+                <span className="flex-1 truncate text-xs text-eos-success/80">
                   Cookie policy publicată · dovadă în dosar
                 </span>
-                <span className="shrink-0 text-[10px] text-emerald-500/60">Rezolvat</span>
+                <span className="shrink-0 text-[10px] text-eos-success/60">Rezolvat</span>
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/login?mode=register"
-              className="flex items-center gap-1.5 rounded-eos-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-eos-text transition-colors hover:bg-blue-500"
+              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-primary"
             >
               Începe gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -212,7 +212,7 @@ export default function HomePage() {
         <section className="relative overflow-hidden px-6 pb-8 pt-20 text-center">
           {/* Background glow */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-blue-600/10 blur-3xl" />
+            <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-eos-primary/10 blur-3xl" />
           </div>
 
           {/* Regulation badges */}
@@ -248,7 +248,7 @@ export default function HomePage() {
           <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/login?mode=register"
-              className="flex items-center gap-2 rounded-eos-xl bg-blue-600 px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/40"
+              className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/25 transition-all hover:bg-eos-primary hover:shadow-eos-primary/20/40"
             >
               Începe gratuit
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
@@ -295,11 +295,11 @@ export default function HomePage() {
                 <div key={item.step} className="relative flex flex-col gap-3">
                   {/* Step number */}
                   <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-2">
-                    <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-blue-500/30 bg-eos-primary-soft text-xs font-bold text-eos-primary">
+                    <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-eos-primary/30 bg-eos-primary-soft text-xs font-bold text-eos-primary">
                       {i + 1}
                       {/* Pulse dot for first step */}
                       {i === 0 && (
-                        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-eos-bg bg-blue-500" />
+                        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-eos-bg bg-eos-primary" />
                       )}
                     </div>
                     <p className="font-semibold text-eos-text md:mt-3">{item.title}</p>
@@ -363,7 +363,7 @@ export default function HomePage() {
                   key={p.role}
                   className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-6"
                 >
-                  <span className="mb-4 inline-block rounded-full border border-blue-500/25 bg-eos-primary-soft px-3 py-1 text-[11px] font-semibold text-eos-primary">
+                  <span className="mb-4 inline-block rounded-full border border-eos-primary/25 bg-eos-primary-soft px-3 py-1 text-[11px] font-semibold text-eos-primary">
                     {p.label}
                   </span>
                   <p className="mb-3 font-semibold text-eos-text">{p.role}</p>
@@ -377,7 +377,7 @@ export default function HomePage() {
         {/* ── Final CTA ── */}
         <section className="relative overflow-hidden border-t border-eos-border-subtle px-6 py-20 text-center">
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/8 blur-3xl" />
+            <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-eos-primary/8 blur-3xl" />
           </div>
           <div className="relative mx-auto max-w-2xl">
             <h2 className="text-2xl font-bold text-eos-text md:text-3xl lg:text-4xl">
@@ -392,7 +392,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/login?mode=register"
-                className="flex items-center gap-2 rounded-eos-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
+                className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
               >
                 Încearcă gratuit
                 <ArrowRight className="h-4 w-4" strokeWidth={2.5} />

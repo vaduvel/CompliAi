@@ -40,10 +40,10 @@ const MODE_OPTIONS = [
     badge: "Solo",
     iconClass: "text-eos-primary",
     iconBg: "bg-eos-primary-soft border-eos-border",
-    activeBorder: "border-blue-500/40",
+    activeBorder: "border-eos-primary/40",
     activeBg: "bg-eos-primary-soft",
     activeShadow: "shadow-[0_0_28px_rgba(59,130,246,0.10)]",
-    badgeClass: "bg-blue-500/20 text-eos-primary",
+    badgeClass: "bg-eos-primary/20 text-eos-primary",
     checkClass: "text-eos-primary",
   },
   {
@@ -70,10 +70,10 @@ const MODE_OPTIONS = [
     badge: "Compliance",
     iconClass: "text-eos-success",
     iconBg: "bg-eos-success-soft border-eos-border",
-    activeBorder: "border-emerald-500/40",
-    activeBg: "bg-emerald-500/[0.06]",
+    activeBorder: "border-eos-success/50/40",
+    activeBg: "bg-eos-success/[0.06]",
     activeShadow: "shadow-[0_0_28px_rgba(16,185,129,0.10)]",
-    badgeClass: "bg-emerald-500/20 text-eos-success",
+    badgeClass: "bg-eos-success/20 text-eos-success",
     checkClass: "text-eos-success",
   },
 ]
@@ -197,7 +197,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
       {/* Progress bar */}
       <div className="h-0.5 bg-eos-surface-active">
         <div
-          className="h-full bg-blue-500 transition-all duration-500"
+          className="h-full bg-eos-primary transition-all duration-500"
           style={{ width: `${((phaseIndex + 1) / PHASES.length) * 100}%` }}
         />
       </div>
@@ -211,9 +211,9 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                 className={[
                   "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-all",
                   i < phaseIndex
-                    ? "bg-blue-500 text-eos-text"
+                    ? "bg-eos-primary text-eos-text"
                     : i === phaseIndex
-                      ? "border border-blue-500/50 bg-eos-primary-soft text-eos-primary"
+                      ? "border border-eos-primary/50 bg-eos-primary-soft text-eos-primary"
                       : "border border-eos-border text-eos-text-tertiary",
                 ].join(" ")}
               >
@@ -309,7 +309,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             </div>
 
             {error && (
-              <div className="rounded-eos-lg border border-eos-error-border bg-red-500/10 px-4 py-3 text-sm text-eos-error">
+              <div className="rounded-eos-lg border border-eos-error-border bg-eos-error/10 px-4 py-3 text-sm text-eos-error">
                 {error}
               </div>
             )}
@@ -318,7 +318,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               type="button"
               disabled={!selectedMode || loading}
               onClick={() => void handleConfirm()}
-              className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
                 <>

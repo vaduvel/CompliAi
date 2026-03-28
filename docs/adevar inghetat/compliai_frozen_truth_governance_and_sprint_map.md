@@ -266,9 +266,8 @@ Acestea sunt adevăr de direcție, nu adevăr de runtime.
 
 Conform [compliai-user-flow-1to1-runtime-audit.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai-user-flow-1to1-runtime-audit.md), nu putem declara încă 100% înghețat:
 - operational close end-to-end pentru toate familiile
-- reopen complet după închidere reușită pe toate familiile, inclusiv `specialist_handoff`
-- full partner intake pe cont fresh fără blocaje de plan
 - toate colțurile monitoring/alerts/drift
+- snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
 
 ### 4.3 Cockpitul live ca adevăr final
 
@@ -279,18 +278,19 @@ Nu putem îngheța cockpitul actual drept final, pentru că auditul live a confi
 
 ### 4.4 Partner și compliance ca adevăr final
 
-Nu putem spune încă:
-- compliance flow este definitiv
-
 Putem spune:
 - partner flow principal este confirmat live:
   - onboarding partner
   - portofoliu
   - import client
   - drilldown în workspace client
-- compliance flow încă nu este definitiv
+- compliance flow principal este confirmat live:
+  - dashboard
+  - cockpit
+  - audit log
+  - vault
 - structura corectă este definită
-- runtime-ul actual rămâne parțial pe suprafețele secundare
+- runtime-ul actual rămâne parțial doar pe expresia UX a suprafețelor secundare
 - pentru `specialist_handoff`, current runtime truth este acum `automatic return to cockpit` pe familia canonică înghețată:
   - `GDPR-013`
   - `GDPR-014`

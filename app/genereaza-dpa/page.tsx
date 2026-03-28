@@ -36,12 +36,12 @@ export default function GenereazaDpaPage() {
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <ShieldCheck className="size-5 text-blue-600" strokeWidth={2} />
+            <ShieldCheck className="size-5 text-eos-primary" strokeWidth={2} />
             CompliScan
           </Link>
           <Link
             href="/login"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="rounded-lg bg-eos-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-eos-primary-hover"
           >
             Deschide dashboard →
           </Link>
@@ -51,7 +51,7 @@ export default function GenereazaDpaPage() {
       <main>
         {/* Hero */}
         <section className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-eos-primary-soft px-3 py-1 text-xs font-medium text-eos-primary ring-1 ring-blue-200">
             <Sparkles className="size-3" strokeWidth={2} />
             GDPR Art. 28 — obligatoriu cu procesatorii
           </span>
@@ -67,7 +67,7 @@ export default function GenereazaDpaPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-lg bg-eos-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-eos-primary-hover"
             >
               Generează DPA
               <ArrowRight className="size-4" strokeWidth={2} />
@@ -111,7 +111,7 @@ export default function GenereazaDpaPage() {
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {FEATURES.map((feature) => (
               <div key={feature} className="flex items-start gap-2.5 rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-blue-500" strokeWidth={2} />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-primary" strokeWidth={2} />
                 <p className="text-sm text-gray-700">{feature}</p>
               </div>
             ))}
@@ -130,7 +130,7 @@ export default function GenereazaDpaPage() {
             </p>
             <Link
               href="/login"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-eos-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-eos-primary-hover"
             >
               Înregistrează-te gratuit
               <ArrowRight className="size-4" strokeWidth={2} />

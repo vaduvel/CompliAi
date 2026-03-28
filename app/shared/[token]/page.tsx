@@ -59,7 +59,7 @@ export default async function SharedCompliancePage({
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <AlertTriangle className="mx-auto size-10 text-amber-500" strokeWidth={1.5} />
+          <AlertTriangle className="mx-auto size-10 text-eos-warning" strokeWidth={1.5} />
           <h1 className="mt-4 text-lg font-semibold text-slate-900">Link invalid sau expirat</h1>
           <p className="mt-2 text-sm text-slate-500">
             Acest link de partajare nu mai este valid. Solicită un link nou de la organizația care l-a generat.
@@ -78,7 +78,7 @@ export default async function SharedCompliancePage({
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <AlertTriangle className="mx-auto size-10 text-amber-500" strokeWidth={1.5} />
+          <AlertTriangle className="mx-auto size-10 text-eos-warning" strokeWidth={1.5} />
           <h1 className="mt-4 text-lg font-semibold text-slate-900">Date indisponibile</h1>
           <p className="mt-2 text-sm text-slate-500">
             Profilul de conformitate pentru această organizație nu este disponibil momentan.
@@ -202,7 +202,7 @@ export default async function SharedCompliancePage({
                 >
                   <span
                     className={`mt-0.5 size-2 shrink-0 rounded-full ${
-                      f.severity === "critical" ? "bg-red-500" : "bg-amber-400"
+                      f.severity === "critical" ? "bg-eos-error" : "bg-eos-warning"
                     }`}
                   />
                   <div className="min-w-0">
@@ -226,8 +226,8 @@ export default async function SharedCompliancePage({
         )}
 
         {/* Disclaimer */}
-        <div className="rounded-eos-lg border border-amber-100 bg-amber-50 p-5">
-          <p className="text-xs leading-relaxed text-amber-700">
+        <div className="rounded-eos-lg border border-eos-warning/10 bg-eos-warning-soft p-5">
+          <p className="text-xs leading-relaxed text-eos-warning">
             <strong>Notă juridică:</strong> Acest document este un rezumat automatizat generat de CompliAI
             și nu constituie consultanță juridică sau contabilă. Informațiile reflectă starea internă
             a workspace-ului la momentul generării și necesită validare profesională înainte de utilizare
@@ -260,9 +260,9 @@ function FrameworkRow({
   return (
     <div className="flex items-start gap-3">
       {ok ? (
-        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500" strokeWidth={2} />
+        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
       ) : (
-        <XCircle className="mt-0.5 size-4 shrink-0 text-amber-500" strokeWidth={2} />
+        <XCircle className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
       )}
       <div className="min-w-0">
         <p className="text-sm font-medium text-slate-800">{name}</p>

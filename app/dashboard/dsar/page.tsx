@@ -399,7 +399,7 @@ function DsarRow({
   const closeBlocked = !canClose && nextStatuses.includes("responded")
 
   return (
-    <Card className={`border-eos-border ${dl.expired && !isClosed ? "border-red-300 bg-red-50/30" : ""}`}>
+    <Card className={`border-eos-border ${dl.expired && !isClosed ? "border-eos-error/30 bg-eos-error-soft/30" : ""}`}>
       <CardContent className="px-5 py-4 space-y-3">
         {/* Header row — clickable to expand */}
         <button
@@ -435,7 +435,7 @@ function DsarRow({
                   </span>
                 )}
                 {req.responseSentAtISO && (
-                  <span className="text-green-600">
+                  <span className="text-eos-success">
                     <CheckCircle2 className="mr-0.5 inline size-3" />
                     Răspuns: {new Date(req.responseSentAtISO).toLocaleDateString("ro-RO")}
                   </span>
@@ -447,7 +447,7 @@ function DsarRow({
             <button
               type="button"
               onClick={() => onDelete(req.id)}
-              className="rounded-eos-md p-1.5 text-eos-text-muted hover:bg-red-50 hover:text-red-600"
+              className="rounded-eos-md p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
               title="Șterge"
             >
               <Trash2 className="size-3.5" />

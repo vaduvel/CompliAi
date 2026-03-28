@@ -65,9 +65,9 @@ const PLANS = [
     Icon: ShieldCheck,
     iconClass: "text-eos-primary",
     iconBg: "bg-eos-primary-soft border-eos-border",
-    borderClass: "border-blue-500/40",
+    borderClass: "border-eos-primary/40",
     bgClass: "bg-eos-primary-soft",
-    ctaClass: "bg-blue-600 text-eos-text shadow-lg shadow-blue-500/25 hover:bg-blue-500",
+    ctaClass: "bg-eos-primary text-eos-text shadow-lg shadow-eos-primary/20/25 hover:bg-eos-primary",
   },
   {
     id: "partner" as const,
@@ -159,7 +159,7 @@ export default function PricingPage() {
             </Link>
             <Link
               href="/login"
-              className="flex items-center gap-1.5 rounded-eos-md bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
+              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
             >
               Începe gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -205,7 +205,7 @@ export default function PricingPage() {
               >
                 {plan.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full border border-blue-500/30 bg-blue-500/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-eos-primary">
+                    <span className="rounded-full border border-eos-primary/30 bg-eos-primary/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-eos-primary">
                       {plan.badge}
                     </span>
                   </div>
@@ -250,7 +250,7 @@ export default function PricingPage() {
                         className={[
                           "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
                           isHighlighted
-                            ? "bg-blue-500/20"
+                            ? "bg-eos-primary/20"
                             : plan.id === "partner"
                               ? "bg-violet-500/15"
                               : "bg-eos-surface-elevated",
@@ -389,7 +389,7 @@ export default function PricingPage() {
 
         {/* Bottom CTA */}
         <div className="mt-16 rounded-eos-xl border border-eos-border bg-eos-primary-soft px-8 py-10 text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-blue-400/70">
+          <p className="text-sm font-medium uppercase tracking-widest text-eos-primary/70">
             Fără card. Fără angajament.
           </p>
           <h2 className="mt-3 text-2xl font-bold text-eos-text md:text-3xl">
@@ -401,7 +401,7 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-eos-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-500"
+              className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-6 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/25 transition-all hover:bg-eos-primary"
             >
               Creează cont gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />

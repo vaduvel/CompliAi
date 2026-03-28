@@ -110,7 +110,7 @@ export default function EUDatabaseWizardPage() {
           <div
             key={s}
             className={`h-1.5 flex-1 rounded-full ${
-              s < step ? "bg-green-500" : s === step ? "bg-eos-primary" : "bg-eos-surface-variant"
+              s < step ? "bg-eos-success" : s === step ? "bg-eos-primary" : "bg-eos-surface-variant"
             }`}
           />
         ))}
@@ -199,11 +199,11 @@ export default function EUDatabaseWizardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {entry.missingFields.length > 0 && (
-              <div className="rounded-eos-md border border-amber-200 bg-amber-50/50 px-3 py-2">
-                <p className="text-[10px] font-medium uppercase text-amber-700">Câmpuri lipsă</p>
+              <div className="rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft/50 px-3 py-2">
+                <p className="text-[10px] font-medium uppercase text-eos-warning">Câmpuri lipsă</p>
                 <ul className="mt-1 space-y-0.5">
                   {entry.missingFields.map((f) => (
-                    <li key={f} className="text-xs text-amber-600">• {f}</li>
+                    <li key={f} className="text-xs text-eos-warning">• {f}</li>
                   ))}
                 </ul>
               </div>
@@ -238,15 +238,15 @@ export default function EUDatabaseWizardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-green-500" />
+              <CheckCircle2 className="size-4 text-eos-success" />
               Pas 4: Instrucțiuni de submit
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Sprint 10: Boundary clarity — legal safety */}
-            <div className="rounded-eos-md border border-red-200 bg-red-50/50 px-4 py-3 space-y-1">
-              <p className="text-xs font-semibold text-red-700">Limitele acestui instrument</p>
-              <p className="text-xs text-red-600">
+            <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft/50 px-4 py-3 space-y-1">
+              <p className="text-xs font-semibold text-eos-error">Limitele acestui instrument</p>
+              <p className="text-xs text-eos-error">
                 JSON-ul generat este un <strong>draft de pregătire</strong>, nu o înregistrare validată oficial.
                 CompliScan nu este certificat ca organism de evaluare a conformității EU AI Act.
                 Înainte de submit, documentația trebuie verificată de un expert legal sau consultant
@@ -266,9 +266,9 @@ export default function EUDatabaseWizardPage() {
               </ol>
             </div>
 
-            <div className="rounded-eos-md border border-amber-200 bg-amber-50/50 px-4 py-3">
-              <p className="text-xs font-semibold text-amber-700">Important</p>
-              <p className="mt-1 text-xs text-amber-600">
+            <div className="rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft/50 px-4 py-3">
+              <p className="text-xs font-semibold text-eos-warning">Important</p>
+              <p className="mt-1 text-xs text-eos-warning">
                 CompliScan NU trimite automat la EU AI Database. Submiterea este responsabilitatea organizației.
                 Deadline pentru sisteme high-risk existente: <strong>2 august 2026</strong>.
               </p>

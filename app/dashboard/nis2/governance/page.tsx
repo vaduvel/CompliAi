@@ -360,13 +360,13 @@ export default function GovernancePage() {
             <p className="text-xs text-eos-text-muted">Membri conducere</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${missingTraining.length > 0 ? "text-red-600" : "text-emerald-600"}`}>
+            <p className={`text-2xl font-bold ${missingTraining.length > 0 ? "text-eos-error" : "text-eos-success"}`}>
               {missingTraining.length}
             </p>
             <p className="text-xs text-eos-text-muted">Fără training</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${expiredIssues.length > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+            <p className={`text-2xl font-bold ${expiredIssues.length > 0 ? "text-eos-warning" : "text-eos-success"}`}>
               {expiredIssues.length}
             </p>
             <p className="text-xs text-eos-text-muted">Expirate</p>
@@ -375,7 +375,7 @@ export default function GovernancePage() {
       )}
 
       {totalIssues > 0 && (
-        <div className="flex items-center gap-2 rounded-eos-md border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+        <div className="flex items-center gap-2 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-2.5 text-sm text-eos-warning">
           <AlertTriangle className="size-4 shrink-0" />
           <span>
             {totalIssues} problemă{totalIssues > 1 ? "i" : ""} detectată{totalIssues > 1 ? "e" : ""} — findings automate generate în tabloul de remediere
@@ -518,9 +518,9 @@ export default function GovernancePage() {
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
                     <div className="flex items-center gap-1.5">
                       {ts.missing || ts.expired ? (
-                        <XCircle className="size-3.5 text-red-500" />
+                        <XCircle className="size-3.5 text-eos-error" />
                       ) : (
-                        <CheckCircle2 className="size-3.5 text-emerald-500" />
+                        <CheckCircle2 className="size-3.5 text-eos-success" />
                       )}
                       <span className="text-eos-text-muted">Training NIS2:</span>
                       <TrainingBadge status={ts} />
@@ -532,11 +532,11 @@ export default function GovernancePage() {
                     {cs !== null && (
                       <div className="flex items-center gap-1.5">
                         {cs.expired ? (
-                          <XCircle className="size-3.5 text-amber-500" />
+                          <XCircle className="size-3.5 text-eos-warning" />
                         ) : (
-                          <CheckCircle2 className="size-3.5 text-emerald-500" />
+                          <CheckCircle2 className="size-3.5 text-eos-success" />
                         )}
-                        <span className={`text-xs ${cs.expired ? "text-amber-700" : "text-eos-text-muted"}`}>
+                        <span className={`text-xs ${cs.expired ? "text-eos-warning" : "text-eos-text-muted"}`}>
                           {cs.label}
                         </span>
                       </div>
@@ -550,7 +550,7 @@ export default function GovernancePage() {
 
                 <button
                   type="button"
-                  className="mt-0.5 shrink-0 text-eos-text-muted transition-colors hover:text-red-500 disabled:opacity-40"
+                  className="mt-0.5 shrink-0 text-eos-text-muted transition-colors hover:text-eos-error disabled:opacity-40"
                   disabled={deleting === member.id}
                   onClick={() => void handleDelete(member.id, member.name)}
                   title="Elimină din registru"

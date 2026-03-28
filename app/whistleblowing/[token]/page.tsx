@@ -59,7 +59,7 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
         <div className="w-full max-w-md rounded-eos-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <CheckCircle2 className="mx-auto size-12 text-green-500" strokeWidth={1.5} />
+          <CheckCircle2 className="mx-auto size-12 text-eos-success" strokeWidth={1.5} />
           <h1 className="mt-4 text-xl font-semibold text-gray-900">Sesizare înregistrată</h1>
           <p className="mt-2 text-sm text-gray-500">
             Sesizarea ta a fost primită și va fi analizată în termen de 3 luni, conform Directivei EU 2019/1937.
@@ -74,8 +74,8 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-blue-100">
-            <Flag className="size-6 text-blue-600" strokeWidth={1.5} />
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-eos-primary-soft">
+            <Flag className="size-6 text-eos-primary" strokeWidth={1.5} />
           </div>
           <h1 className="mt-3 text-xl font-semibold text-gray-900">Canal de sesizare</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -87,7 +87,7 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Categorie</label>
             <select
-              className="w-full rounded-eos-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-eos-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-eos-primary focus:ring-1 focus:ring-blue-500"
               value={category}
               onChange={(e) => setCategory(e.target.value as Category)}
             >
@@ -100,7 +100,7 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Descriere (minim 20 caractere)</label>
             <textarea
-              className="w-full rounded-eos-md border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-eos-md border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-eos-primary focus:ring-1 focus:ring-blue-500"
               rows={5}
               placeholder="Descrie situația în detaliu: ce s-a întâmplat, când, cine a fost implicat..."
               value={description}
@@ -112,13 +112,13 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                className="mt-0.5 size-4 rounded border-gray-300 accent-blue-600"
+                className="mt-0.5 size-4 rounded border-gray-300 accent-eos-primary"
                 checked={anonymous}
                 onChange={(e) => setAnonymous(e.target.checked)}
               />
               <div>
                 <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                  <Shield className="size-3.5 text-blue-500" />
+                  <Shield className="size-3.5 text-eos-primary" />
                   Sesizare anonimă
                 </p>
                 <p className="text-xs text-gray-500">Datele tale nu vor fi salvate și nu vei putea fi identificat.</p>
@@ -128,7 +128,7 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Date contact (opțional)</label>
                 <input
-                  className="w-full rounded-eos-md border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500"
+                  className="w-full rounded-eos-md border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-eos-primary"
                   placeholder="Email sau telefon pentru follow-up"
                   value={contactInfo}
                   onChange={(e) => setContactInfo(e.target.value)}
@@ -138,14 +138,14 @@ export default function WhistleblowingSubmitPage({ params }: { params: Promise<{
           </div>
 
           {error && (
-            <p className="rounded-eos-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+            <p className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft px-3 py-2 text-sm text-eos-error">{error}</p>
           )}
 
           <button
             type="button"
             disabled={submitting}
             onClick={() => void handleSubmit()}
-            className="flex w-full items-center justify-center gap-2 rounded-eos-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-eos-md bg-eos-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-eos-primary-hover disabled:opacity-60"
           >
             {submitting && <Loader2 className="size-4 animate-spin" />}
             Trimite sesizarea

@@ -52,7 +52,7 @@ export function FeedbackPrompt({ context, label, onDismiss }: FeedbackPromptProp
   if (sent) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground py-2 px-3 bg-muted/40 rounded-lg">
-        <ThumbsUp className="h-4 w-4 text-green-500" />
+        <ThumbsUp className="h-4 w-4 text-eos-success" />
         <span>Mulțumim pentru feedback!</span>
       </div>
     )
@@ -63,7 +63,7 @@ export function FeedbackPrompt({ context, label, onDismiss }: FeedbackPromptProp
       <span className="text-muted-foreground flex-1">{promptLabel}</span>
       <button
         onClick={() => sendFeedback("up")}
-        className="p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/30 text-muted-foreground hover:text-green-600 transition-colors"
+        className="p-1.5 rounded hover:bg-eos-success-soft dark:hover:bg-eos-success/30 text-muted-foreground hover:text-eos-success transition-colors"
         aria-label="Da, a fost util"
         title="Da"
       >
@@ -71,7 +71,7 @@ export function FeedbackPrompt({ context, label, onDismiss }: FeedbackPromptProp
       </button>
       <button
         onClick={() => sendFeedback("down")}
-        className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-500 transition-colors"
+        className="p-1.5 rounded hover:bg-eos-error-soft dark:hover:bg-eos-error/30 text-muted-foreground hover:text-eos-error transition-colors"
         aria-label="Nu, nu a fost util"
         title="Nu"
       >

@@ -295,20 +295,20 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
             <div
               className={`rounded-eos-md border p-4 ${
                 output.result === "intri"
-                  ? "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30"
+                  ? "border-eos-warning/30 bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-eos-warning-soft/30"
                   : output.result === "posibil"
                     ? "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950/30"
-                    : "border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30"
+                    : "border-eos-success/30 bg-eos-success-soft dark:border-eos-success/70 dark:bg-eos-success-soft/30"
               }`}
             >
               <div className="flex items-center gap-2">
                 <resultConfig.icon
                   className={`size-5 ${
                     output.result === "intri"
-                      ? "text-amber-600 dark:text-amber-400"
+                      ? "text-eos-warning dark:text-eos-warning"
                       : output.result === "posibil"
                         ? "text-yellow-600 dark:text-yellow-400"
-                        : "text-emerald-600 dark:text-emerald-400"
+                        : "text-eos-success dark:text-eos-success"
                   }`}
                   strokeWidth={2}
                 />
@@ -338,7 +338,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-sm text-eos-error dark:text-eos-error">{error}</p>
             )}
 
             {!saved && (
@@ -358,7 +358,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
 
             {saved && (
               <div className="flex items-center gap-2 text-xs text-eos-text-muted">
-                <CheckCircle2 className="size-3.5 text-emerald-600" strokeWidth={2} />
+                <CheckCircle2 className="size-3.5 text-eos-success" strokeWidth={2} />
                 Salvat la {new Date(saved.savedAtISO).toLocaleDateString("ro-RO")}
               </div>
             )}

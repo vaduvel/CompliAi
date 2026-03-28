@@ -109,8 +109,8 @@ Adevărul corect este:
 | NIS2 | `FUNCȚIONAL, DAR SUITĂ SEPARATĂ` |
 | Fiscal | `PARȚIAL, DOAR SPV E APROAPE` |
 | Sisteme / DORA / Whistleblowing | `PRODUSE PARALELE` |
-| Partner / portfolio | `BUN PE FLOW PRINCIPAL, PARȚIAL PE SECUNDARE` |
-| Viewer / compliance IA | `PARȚIAL` |
+| Partner / portfolio | `CONFIRMAT PE FLOW PRINCIPAL, FUNCȚIONAL PE SECUNDARE` |
+| Viewer / compliance IA | `BUN PE FLOW PRINCIPAL, FUNCȚIONAL PE SECUNDARE` |
 
 ---
 
@@ -1010,14 +1010,12 @@ După runde separate de audit live, adevărul pe clase este:
     - bannerul verde de succes afișează aceeași dată nouă de control
     - footerul cockpitului afișează aceeași dată nouă de control
 - `reopen` = `CONFIRMAT LIVE`
-  - documentary și operational trec live pe `monitorizare -> redeschidere`
+  - documentary, operational și `specialist_handoff` trec live pe `monitorizare -> redeschidere`
 
 ### 14.7 Încă neconfirmat live
 
 Nu sunt încă închise live cap-coadă:
-- `reopen` pe toate familiile, inclusiv `specialist_handoff`
 - `alerts / drift UI` cu seed dedicat
-- `client import + client context` în partner mode pe cont fresh fără plan Partner
 - snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
 
 ### 14.8 Concluzie live
@@ -1033,7 +1031,9 @@ Dar după verificarea live din `2026-03-27`, adevărul s-a întărit astfel:
 - clasa `operational` este și ea confirmată live cap-coadă
 - clasa `specialist_handoff` este confirmată live cap-coadă cu revenire automată în cockpit
 - `SYS-002 revalidation` este confirmat live cap-coadă
-- `reopen` este confirmat live pentru documentary și operational
+- `reopen` este confirmat live pentru documentary, operational și `specialist_handoff`
+- partner și compliance sunt confirmate live pe flow-ul principal
+- suprafețele secundare partner/compliance sunt funcționale live, dar încă mai late decât spine-ul principal
 
 Prin urmare, produsul este mai sănătos decât arăta prima rundă de audit, dar tot nu poate fi declarat `1:1` sau `client-ready 100%` până când:
 - snapshotul de ieșire din onboarding spune clar `ce se aplică / ce am găsit / ce faci acum`

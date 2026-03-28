@@ -40,29 +40,29 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 function severityColors(severity: CalendarEvent["severity"]) {
-  if (severity === "critical") return "bg-red-100 text-red-700 border-red-200"
-  if (severity === "high") return "bg-amber-100 text-amber-700 border-amber-200"
-  if (severity === "medium") return "bg-blue-100 text-blue-700 border-blue-200"
+  if (severity === "critical") return "bg-eos-error-soft text-eos-error border-eos-error/20"
+  if (severity === "high") return "bg-eos-warning-soft text-eos-warning border-eos-warning/20"
+  if (severity === "medium") return "bg-eos-primary-soft text-eos-primary border-eos-primary/20"
   return "bg-eos-surface-variant text-eos-text-muted border-eos-border"
 }
 
 function DaysLeftBadge({ days }: { days: number }) {
   if (days < 0)
     return (
-      <span className="flex items-center gap-1 text-xs font-semibold text-red-600">
+      <span className="flex items-center gap-1 text-xs font-semibold text-eos-error">
         <AlertTriangle className="size-3" strokeWidth={2} />
         Depășit cu {Math.abs(days)}z
       </span>
     )
   if (days === 0)
     return (
-      <span className="flex items-center gap-1 text-xs font-semibold text-red-600">
+      <span className="flex items-center gap-1 text-xs font-semibold text-eos-error">
         <Clock className="size-3" strokeWidth={2} />
         Azi
       </span>
     )
   return (
-    <span className={`flex items-center gap-1 text-xs font-medium ${days <= 3 ? "text-red-500" : days <= 7 ? "text-amber-600" : "text-eos-text-muted"}`}>
+    <span className={`flex items-center gap-1 text-xs font-medium ${days <= 3 ? "text-eos-error" : days <= 7 ? "text-eos-warning" : "text-eos-text-muted"}`}>
       <Clock className="size-3" strokeWidth={2} />
       {days}z rămase
     </span>
@@ -103,12 +103,12 @@ function GroupSection({ group, events }: { group: CalendarEventGroup; events: Ca
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-2">
-        {group === "overdue" && <AlertTriangle className="size-4 text-red-500" strokeWidth={2} />}
-        {group === "today" && <Clock className="size-4 text-amber-500" strokeWidth={2} />}
+        {group === "overdue" && <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />}
+        {group === "today" && <Clock className="size-4 text-eos-warning" strokeWidth={2} />}
         {(group === "this-week" || group === "this-month" || group === "later") && (
           <Calendar className="size-4 text-eos-text-muted" strokeWidth={2} />
         )}
-        <p className={`text-[11px] font-medium uppercase tracking-[0.2em] ${group === "overdue" ? "text-red-600" : "text-eos-text-muted"}`}>
+        <p className={`text-[11px] font-medium uppercase tracking-[0.2em] ${group === "overdue" ? "text-eos-error" : "text-eos-text-muted"}`}>
           {GROUP_LABELS[group]} · {events.length}
         </p>
       </div>
@@ -191,7 +191,7 @@ export default function CalendarPage() {
       {!loading && !hasEvents && (
         <Card className="border-eos-border bg-eos-surface">
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CheckCircle2 className="size-10 text-green-500" strokeWidth={1.5} />
+            <CheckCircle2 className="size-10 text-eos-success" strokeWidth={1.5} />
             <div className="space-y-1">
               <p className="text-base font-medium text-eos-text">Niciun deadline activ</p>
               <p className="text-sm text-eos-text-muted">

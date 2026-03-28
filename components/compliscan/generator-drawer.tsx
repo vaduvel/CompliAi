@@ -505,7 +505,7 @@ export function GeneratorDrawer({
                         ? "border border-eos-border bg-eos-bg-inset text-eos-text-muted"
                         : validationPassed
                           ? "bg-eos-success-soft text-eos-success"
-                          : "bg-red-100 text-red-700",
+                          : "bg-eos-error-soft text-eos-error",
                     ].join(" ")}
                   >
                     {validationRunAtISO === null
@@ -532,10 +532,10 @@ export function GeneratorDrawer({
                       {check.passed ? (
                         <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
                       ) : (
-                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" strokeWidth={2} />
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error" strokeWidth={2} />
                       )}
                       <div>
-                        <p className={check.passed ? "text-eos-text" : "text-red-700"}>
+                        <p className={check.passed ? "text-eos-text" : "text-eos-error"}>
                           {check.label}
                         </p>
                         <p className="mt-0.5 text-xs text-eos-text-muted">{check.help}</p>
@@ -545,8 +545,8 @@ export function GeneratorDrawer({
                 </div>
 
                 {validationFailed ? (
-                  <div className="rounded-eos-md border border-red-200 bg-red-50 px-4 py-3">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-red-700">
+                  <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft px-4 py-3">
+                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-eos-error">
                       Ce trebuie corectat
                     </p>
                     <ul className="mt-2 space-y-1 text-sm text-eos-text-muted">

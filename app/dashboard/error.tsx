@@ -50,7 +50,7 @@ export default function DashboardError({
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-red-50 text-red-500">
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-eos-error-soft text-eos-error">
           <AlertTriangle className="size-6" strokeWidth={1.5} />
         </div>
         <h2 className="text-lg font-semibold text-eos-text">Eroare neașteptată</h2>

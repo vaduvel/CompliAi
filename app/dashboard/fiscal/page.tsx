@@ -502,7 +502,7 @@ function SpvCheckTab() {
                       <p className="mt-1 text-xs text-eos-text-muted">{s.date}</p>
                     </div>
                     {s.converted && (
-                      <Badge variant="default" className="shrink-0 bg-blue-600/20 text-eos-primary">
+                      <Badge variant="default" className="shrink-0 bg-eos-primary/20 text-eos-primary">
                         Finding creat
                       </Badge>
                     )}

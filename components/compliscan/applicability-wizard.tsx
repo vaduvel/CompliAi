@@ -478,7 +478,7 @@ export function ApplicabilityWizard({
         <div className="mt-4 space-y-1.5">
           <div className="h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
             <div
-              className="h-full bg-blue-500 transition-all duration-300"
+              className="h-full bg-eos-primary transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -526,7 +526,7 @@ export function ApplicabilityWizard({
                     setPrefillError(null)
                   }}
                   placeholder="Ex: RO12345678 sau 12345678"
-                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active"
+                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active"
                   onBlur={() => void handleCuiBlur()}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
@@ -549,7 +549,7 @@ export function ApplicabilityWizard({
                     setPrefillError(null)
                   }}
                   placeholder="Ex: https://firmatamea.ro"
-                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-blue-500/50 focus:bg-eos-surface-active"
+                  className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleCuiContinue()
                   }}
@@ -566,7 +566,7 @@ export function ApplicabilityWizard({
               ) : null}
 
               {orgPrefill ? (
-                <div className="rounded-eos-lg border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3">
+                <div className="rounded-eos-lg border border-eos-success/50/25 bg-eos-success/[0.07] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-eos-text">{orgPrefill.companyName}</p>
@@ -580,7 +580,7 @@ export function ApplicabilityWizard({
                           .join(" · ")}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
+                    <span className="shrink-0 rounded-full bg-eos-success/20 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
                       ✓ ANAF
                     </span>
                   </div>
@@ -598,7 +598,7 @@ export function ApplicabilityWizard({
               <button
                 type="button"
                 onClick={() => void handleCuiContinue()}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50"
               >
                 {prefillLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Continuă
@@ -609,7 +609,7 @@ export function ApplicabilityWizard({
           {step === "checking" && (
             <div className="flex flex-col items-center justify-center py-14">
               <div className="relative mb-8">
-                <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-xl" />
+                <div className="absolute inset-0 rounded-full bg-eos-primary/20 blur-xl" />
                 <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-eos-border bg-eos-primary-soft">
                   <Loader2 className="h-7 w-7 animate-spin text-eos-primary" strokeWidth={1.5} />
                 </div>
@@ -864,7 +864,7 @@ export function ApplicabilityWizard({
                   type="button"
                   onClick={handleIntakeStepContinue}
                   disabled={unansweredCurrentStepQuestions.length > 0}
-                  className="rounded-eos-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-eos-text transition hover:bg-blue-500 disabled:opacity-40"
+                  className="rounded-eos-md bg-eos-primary px-4 py-1.5 text-sm font-medium text-eos-text transition hover:bg-eos-primary disabled:opacity-40"
                 >
                   Continuă
                 </button>
@@ -894,7 +894,7 @@ export function ApplicabilityWizard({
                 </div>
                 <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
                   <div
-                    className="h-full bg-blue-500 transition-all duration-300"
+                    className="h-full bg-eos-primary transition-all duration-300"
                     style={{
                       width: `${visibleQuestionCount === 0 ? 100 : (answeredQuestionCount / visibleQuestionCount) * 100}%`,
                     }}
@@ -936,7 +936,7 @@ export function ApplicabilityWizard({
                 type="button"
                 onClick={() => void handleSubmit()}
                 disabled={saving || unansweredQuestions.length > 0}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-blue-600 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary disabled:opacity-40"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {completionLabel}
@@ -980,7 +980,7 @@ function PrefillContextCard({
             {subtitleParts.join(" · ")}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
+        <span className="shrink-0 rounded-full bg-eos-success/15 px-2.5 py-1 text-[10px] font-semibold text-eos-success">
           ✓ {sourceLabel}
         </span>
       </div>
@@ -1234,7 +1234,7 @@ function QuestionCard({
                 className={[
                   "rounded-eos-md border px-3 py-1.5 text-sm transition",
                   active
-                    ? "border-blue-500/40 bg-eos-primary-soft text-eos-primary"
+                    ? "border-eos-primary/40 bg-eos-primary-soft text-eos-primary"
                     : "border-eos-border bg-eos-surface-variant text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text",
                 ].join(" ")}
               >

@@ -122,8 +122,8 @@ export const RISK_LEVEL_LABELS: Record<AIActRiskLevel, string> = {
 }
 
 export const RISK_LEVEL_COLORS: Record<AIActRiskLevel, string> = {
-  prohibited: "text-red-700 bg-red-100 border-red-300",
-  high_risk: "text-amber-700 bg-amber-100 border-amber-300",
-  limited_risk: "text-blue-700 bg-blue-100 border-blue-300",
-  minimal_risk: "text-green-700 bg-green-100 border-green-300",
+  prohibited: "text-eos-error bg-eos-error-soft border-eos-error/30",
+  high_risk: "text-eos-warning bg-eos-warning-soft border-eos-warning/30",
+  limited_risk: "text-eos-primary bg-eos-primary-soft border-eos-primary/30",
+  minimal_risk: "text-eos-success bg-eos-success-soft border-eos-success/30",
 }

@@ -571,8 +571,8 @@ function CompactNextAction({
   }
 
   const prioColor =
-    task.priority === "P1" ? "bg-eos-error-soft text-eos-error border-red-500/25" :
-    task.priority === "P2" ? "bg-eos-warning-soft text-eos-warning border-amber-500/25" :
+    task.priority === "P1" ? "bg-eos-error-soft text-eos-error border-eos-error/50/25" :
+    task.priority === "P2" ? "bg-eos-warning-soft text-eos-warning border-eos-warning/50/25" :
     "bg-eos-surface-active text-eos-text-tertiary border-eos-border-subtle"
 
   const sevLabel =
@@ -586,7 +586,7 @@ function CompactNextAction({
 
   return (
     <div className="rounded-eos-xl border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
-      <div className="flex items-center gap-3 border-b border-blue-500/[0.10] px-5 py-3">
+      <div className="flex items-center gap-3 border-b border-eos-primary/[0.10] px-5 py-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Ce faci acum</p>
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${prioColor}`}>{task.priority}</span>
         <span className={`text-[11px] font-semibold ${sevColor}`}>{sevLabel}</span>
@@ -605,7 +605,7 @@ function CompactNextAction({
         </div>
         <button
           onClick={onResolve}
-          className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
+          className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
         >
           Deschide <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
         </button>

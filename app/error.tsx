@@ -42,7 +42,7 @@ export default function GlobalError({
       <body>
         <div className="flex min-h-screen items-center justify-center bg-eos-bg px-4">
           <div className="w-full max-w-md text-center">
-            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500">
+            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-eos-error-soft text-eos-error">
               <AlertTriangle className="size-7" strokeWidth={1.5} />
             </div>
             <h1 className="text-xl font-semibold text-eos-text">A apărut o eroare</h1>

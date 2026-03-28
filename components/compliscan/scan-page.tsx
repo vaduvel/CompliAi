@@ -187,7 +187,7 @@ export function ScanPageSurface() {
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500"
+            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary"
           >
             Mergi la De rezolvat
             <ArrowRight className="size-3.5" strokeWidth={2.5} />
@@ -223,7 +223,7 @@ export function ScanPageSurface() {
             {activeFindingsCount > 0 && (
               <Link
                 href="/dashboard/resolve"
-                className="inline-flex items-center gap-1.5 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition hover:bg-blue-500"
+                className="inline-flex items-center gap-1.5 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary"
               >
                 Mergi la De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />

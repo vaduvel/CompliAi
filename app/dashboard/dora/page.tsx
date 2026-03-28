@@ -186,9 +186,9 @@ export default function DoraPage() {
       </div>
 
       {/* DORA context banner */}
-      <Card className="border-blue-200 bg-blue-50/30">
+      <Card className="border-eos-primary/20 bg-eos-primary-soft/30">
         <CardContent className="flex items-start gap-3 px-5 py-4">
-          <Shield className="mt-0.5 size-4 shrink-0 text-blue-500" />
+          <Shield className="mt-0.5 size-4 shrink-0 text-eos-primary" />
           <div className="text-xs text-eos-text-muted space-y-1">
             <p><span className="font-semibold text-eos-text">Termene DORA:</span> Incidente majore → raportare inițială la autoritate în <span className="font-semibold">4 ore</span>, raport detaliat în <span className="font-semibold">72 ore</span>, raport final în <span className="font-semibold">1 lună</span>.</p>
             <p>Furnizori ICT critici trebuie evaluați anual. Contractele trebuie să includă clauze DORA (Art. 30).</p>

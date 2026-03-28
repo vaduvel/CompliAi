@@ -618,7 +618,7 @@ export function SettingsPageSurface() {
                               type="button"
                               disabled={creatingClaimInvite || !claimInviteEmail.trim()}
                               onClick={() => void handleCreateClaimInvite()}
-                              className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Trimite claim
                             </button>
@@ -688,7 +688,7 @@ export function SettingsPageSurface() {
                         type="button"
                         disabled={creatingMember || !newMemberEmail.trim()}
                         onClick={() => void handleAddMember()}
-                        className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Adauga membru
                       </button>
@@ -833,7 +833,7 @@ export function SettingsPageSurface() {
                     <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="checkbox"
-                        className="size-4 accent-blue-500"
+                        className="size-4 accent-eos-primary"
                         checked={alertPrefs?.emailEnabled ?? false}
                         onChange={(e) =>
                           setAlertPrefs((p) => p ? { ...p, emailEnabled: e.target.checked } : p)
@@ -860,7 +860,7 @@ export function SettingsPageSurface() {
                     <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="checkbox"
-                        className="size-4 accent-blue-500"
+                        className="size-4 accent-eos-primary"
                         checked={alertPrefs?.weeklyDigestEnabled ?? true}
                         disabled={!alertPrefs?.emailEnabled}
                         onChange={(e) =>
@@ -889,7 +889,7 @@ export function SettingsPageSurface() {
                     <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="checkbox"
-                        className="size-4 accent-blue-500"
+                        className="size-4 accent-eos-primary"
                         checked={alertPrefs?.webhookEnabled ?? false}
                         onChange={(e) =>
                           setAlertPrefs((p) => p ? { ...p, webhookEnabled: e.target.checked } : p)
@@ -935,7 +935,7 @@ export function SettingsPageSurface() {
                       <label key={ev.id} className="flex cursor-pointer items-start gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-3">
                         <input
                           type="checkbox"
-                          className="mt-0.5 size-4 accent-blue-500"
+                          className="mt-0.5 size-4 accent-eos-primary"
                           checked={alertPrefs?.events[ev.id] ?? true}
                           onChange={(e) =>
                             setAlertPrefs((p) =>
@@ -956,7 +956,7 @@ export function SettingsPageSurface() {
                   type="button"
                   disabled={alertPrefsSaving || !alertPrefs}
                   onClick={() => void handleSaveAlertPrefs()}
-                  className="inline-flex items-center gap-2 rounded-eos-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {alertPrefsSaving ? (
                     <>

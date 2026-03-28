@@ -163,7 +163,7 @@ function DocumentPreview({ content }: { content: string }) {
         }
         if (line.startsWith("> ")) {
           return (
-            <div key={i} className="rounded-eos-md border-l-2 border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div key={i} className="rounded-eos-md border-l-2 border-eos-warning/40 bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
               {line.slice(2)}
             </div>
           )

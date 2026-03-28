@@ -166,20 +166,20 @@ export default function SistemePage() {
       <PillarTabs sectionId="control" />
 
       {/* ── GOLD 8: AI Act deadline banner ───────────────────────────────────── */}
-      <div className="flex items-start gap-3 rounded-eos-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800/40 dark:bg-amber-950/20">
-        <CalendarClock className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-eos-warning" strokeWidth={2} />
+      <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm dark:border-eos-warning/80/40 dark:bg-eos-warning-soft/20">
+        <CalendarClock className="mt-0.5 size-4 shrink-0 text-eos-warning dark:text-eos-warning" strokeWidth={2} />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-amber-900 dark:text-amber-200">
+          <p className="font-semibold text-eos-warning dark:text-eos-warning">
             AI Act — deadline 2 august 2026
           </p>
-          <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+          <p className="mt-0.5 text-xs text-eos-warning dark:text-eos-warning">
             Sistemele AI cu risc ridicat trebuie înregistrate în EU AI Database înainte de 2 aug 2026
             (Regulament (UE) 2024/1689, Art. 49). Folosește wizardul per sistem pentru pregătire.
           </p>
         </div>
         <Link
           href="/dashboard/sisteme/eu-db-wizard"
-          className="shrink-0 rounded-eos-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition hover:bg-amber-50 dark:border-amber-700 dark:bg-transparent dark:text-amber-300"
+          className="shrink-0 rounded-eos-md border border-eos-warning/30 bg-white px-3 py-1.5 text-xs font-medium text-eos-warning transition hover:bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-transparent dark:text-eos-warning"
         >
           Wizard EU DB →
         </Link>
@@ -187,13 +187,13 @@ export default function SistemePage() {
 
       {/* ── Sprint 10: False confidence prevention ────────────────────────────── */}
       {aiHighRisk > 0 && (
-        <div className="flex items-start gap-3 rounded-eos-md border border-red-200 bg-red-50/60 px-4 py-3 text-sm dark:border-red-800/40 dark:bg-red-950/20">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-eos-error" strokeWidth={2} />
+        <div className="flex items-start gap-3 rounded-eos-md border border-eos-error/20 bg-eos-error-soft/60 px-4 py-3 text-sm dark:border-eos-error/50/40 dark:bg-eos-error-soft/20">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error dark:text-eos-error" strokeWidth={2} />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-eos-error dark:text-eos-error">
               {aiHighRisk} sistem{aiHighRisk !== 1 ? "e" : ""} high-risk — obligații active
             </p>
-            <p className="mt-0.5 text-xs text-red-700 dark:text-red-300">
+            <p className="mt-0.5 text-xs text-eos-error dark:text-eos-error">
               Clasificarea automată este un punct de plecare, nu un verdict juridic.
               Fiecare sistem high-risk necesită documentație Annex IV verificată de expert,
               evaluare de conformitate și înregistrare EU DB înainte de utilizare operațională.
@@ -743,7 +743,7 @@ function ControlSystemsWorkspace({
                           </Link>
                         )}
                         {aiActClass.riskLevel === "prohibited" && (
-                          <span className="text-[11px] font-semibold text-red-700">
+                          <span className="text-[11px] font-semibold text-eos-error">
                             Verifică imediat — posibil interzis
                           </span>
                         )}

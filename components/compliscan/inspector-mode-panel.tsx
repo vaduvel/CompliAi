@@ -262,7 +262,7 @@ export function InspectorModePanel() {
 
             {/* Critical gaps */}
             {result.criticalGaps.length > 0 && (
-              <div className="rounded-eos-md border border-red-200 bg-red-50 p-3">
+              <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft p-3">
                 <div className="mb-2 flex items-center gap-2">
                   <ShieldAlert className="size-4 shrink-0 text-eos-error" strokeWidth={2} />
                   <p className="text-sm font-semibold text-eos-error">
@@ -271,7 +271,7 @@ export function InspectorModePanel() {
                 </div>
                 <ul className="space-y-1">
                   {result.criticalGaps.map((gap) => (
-                    <li key={gap.id} className="text-xs text-red-800">
+                    <li key={gap.id} className="text-xs text-eos-error">
                       · {gap.topic}: {gap.detail}
                     </li>
                   ))}

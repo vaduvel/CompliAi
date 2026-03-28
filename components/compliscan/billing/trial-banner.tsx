@@ -27,10 +27,10 @@ export function TrialBanner() {
 
   const isExpired = info.state === "trial_expired"
   const bgColor = isExpired
-    ? "bg-red-900/90 border-red-700"
+    ? "bg-eos-error/90 border-eos-error/50"
     : info.bannerSeverity === "error"
-      ? "bg-amber-900/90 border-amber-700"
-      : "bg-amber-800/80 border-amber-600"
+      ? "bg-eos-warning/90 border-eos-warning/70"
+      : "bg-eos-warning/80 border-eos-warning/60"
 
   const Icon = isExpired ? AlertTriangle : Clock
 
@@ -59,7 +59,7 @@ export function TrialBanner() {
         {isExpired && (
           <Link
             href="/pricing"
-            className="rounded bg-emerald-500 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-400"
+            className="rounded bg-eos-success px-3 py-1 text-xs font-semibold text-white hover:bg-eos-success"
           >
             Reactivează cont
           </Link>

@@ -49,8 +49,8 @@ function StatusPill({
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
         ok
-          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-          : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+          ? "bg-eos-success-soft text-eos-success ring-1 ring-emerald-200"
+          : "bg-eos-warning-soft text-eos-warning ring-1 ring-amber-200"
       }`}
     >
       {ok ? (
@@ -120,8 +120,8 @@ export default async function TrustPage({
 
         {/* Header */}
         <div className="mb-8 flex items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-eos-lg bg-blue-50 ring-1 ring-blue-100">
-            <ShieldCheck className="size-6 text-blue-600" strokeWidth={2} />
+          <div className="grid size-12 shrink-0 place-items-center rounded-eos-lg bg-eos-primary-soft ring-1 ring-blue-100">
+            <ShieldCheck className="size-6 text-eos-primary" strokeWidth={2} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -144,10 +144,10 @@ export default async function TrustPage({
               <span
                 className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
                   summary.score >= 70
-                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                    ? "bg-eos-success-soft text-eos-success ring-1 ring-emerald-200"
                     : summary.score >= 40
-                    ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-                    : "bg-red-50 text-red-700 ring-1 ring-red-200"
+                    ? "bg-eos-warning-soft text-eos-warning ring-1 ring-amber-200"
+                    : "bg-eos-error-soft text-eos-error ring-1 ring-red-200"
                 }`}
               >
                 {summary.riskLabel}
@@ -161,10 +161,10 @@ export default async function TrustPage({
             <div
               className={`h-full rounded-full transition-all ${
                 summary.score >= 70
-                  ? "bg-emerald-500"
+                  ? "bg-eos-success"
                   : summary.score >= 40
-                  ? "bg-amber-400"
-                  : "bg-red-400"
+                  ? "bg-eos-warning"
+                  : "bg-eos-error"
               }`}
               style={{ width: `${summary.score}%` }}
             />
@@ -207,7 +207,7 @@ export default async function TrustPage({
           <TrustMetricCard label="Ultima actualizare">
             <p className="text-sm font-semibold text-gray-800">{updatedAt}</p>
             <div className="mt-1.5 flex items-center gap-1">
-              <CheckCircle2 className="size-3.5 text-emerald-500" strokeWidth={2} />
+              <CheckCircle2 className="size-3.5 text-eos-success" strokeWidth={2} />
               <p className="text-xs text-gray-400">Status verificat</p>
             </div>
           </TrustMetricCard>

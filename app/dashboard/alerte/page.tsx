@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ArrowRight } from "lucide-react"
 
 import { EmptyState } from "@/components/evidence-os/EmptyState"
@@ -37,18 +37,34 @@ export default function DriftPage() {
   const cockpitActions = useCockpitMutations()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
   const [expandedDriftId, setExpandedDriftId] = useState<string | null>(null)
+  const driftRecords = cockpit.data?.state.driftRecords ?? []
   const openDrifts = cockpit.activeDrifts
+  const resolvedDrifts = useMemo(
+    () =>
+      driftRecords
+        .filter((drift) => !drift.open)
+        .sort((left, right) =>
+          (right.lastStatusUpdatedAtISO || right.resolvedAtISO || right.waivedAtISO || right.detectedAtISO).localeCompare(
+            left.lastStatusUpdatedAtISO || left.resolvedAtISO || left.waivedAtISO || left.detectedAtISO
+          )
+        ),
+    [driftRecords]
+  )
+  const visibleDrifts = useMemo(
+    () => (openDrifts.length > 0 ? [...openDrifts, ...resolvedDrifts.slice(0, 1)] : resolvedDrifts.slice(0, 3)),
+    [openDrifts, resolvedDrifts]
+  )
 
   useEffect(() => {
-    if (openDrifts.length === 0) {
+    if (visibleDrifts.length === 0) {
       setExpandedDriftId(null)
       return
     }
 
     setExpandedDriftId((current) =>
-      current && openDrifts.some((drift) => drift.id === current) ? current : openDrifts[0].id
+      current && visibleDrifts.some((drift) => drift.id === current) ? current : visibleDrifts[0].id
     )
-  }, [openDrifts])
+  }, [visibleDrifts])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -196,14 +212,16 @@ export default function DriftPage() {
         />
       </div>
 
-      {openDrifts.length > 0 && (
+      {visibleDrifts.length > 0 && (
         <Card className="border-eos-border bg-eos-surface">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Compliance drift</CardTitle>
-            <p className="text-sm text-eos-text-muted">Schimbari detectate fata de snapshot.</p>
+            <p className="text-sm text-eos-text-muted">
+              Schimbari detectate fata de snapshot. Drift-urile inchise recent raman vizibile pentru redeschidere rapida.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            {openDrifts.map((drift) => {
+            {visibleDrifts.map((drift) => {
               const guidance = getDriftPolicyFromRecord(drift)
               const breached = isDriftSlaBreached(drift)
               const isActing = actingDriftId === drift.id

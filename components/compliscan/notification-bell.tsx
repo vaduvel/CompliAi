@@ -104,13 +104,13 @@ export function NotificationBell() {
       >
         <Bell className="size-4" strokeWidth={2} />
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-eos-error text-[10px] font-bold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
         {notifications.some((n) => !n.readAt && ANAF_TYPES.has(n.type)) && (
           <span
-            className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border border-white bg-amber-500"
+            className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border border-white bg-eos-warning"
             title="Notificări ANAF nerezolvate"
           />
         )}
@@ -148,9 +148,9 @@ export function NotificationBell() {
             const anafUnread = notifications.filter((n) => !n.readAt && ANAF_TYPES.has(n.type)).length
             if (anafUnread === 0) return null
             return (
-              <div className="flex items-center gap-2 border-b border-eos-border-subtle bg-amber-50 px-4 py-2">
-                <span className="size-2 rounded-full bg-amber-500" />
-                <span className="text-[11px] font-medium text-amber-800">
+              <div className="flex items-center gap-2 border-b border-eos-border-subtle bg-eos-warning-soft px-4 py-2">
+                <span className="size-2 rounded-full bg-eos-warning" />
+                <span className="text-[11px] font-medium text-eos-warning">
                   {anafUnread} semnal{anafUnread > 1 ? "e" : ""} ANAF nerezolvat{anafUnread > 1 ? "e" : ""}
                 </span>
               </div>

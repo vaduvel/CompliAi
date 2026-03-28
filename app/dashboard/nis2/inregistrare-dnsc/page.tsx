@@ -738,7 +738,7 @@ export default function DnscRegistrationPage() {
                           className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
                             entry.direction === "received"
                               ? "bg-eos-primary/10 text-eos-primary"
-                              : "bg-amber-100 text-amber-700"
+                              : "bg-eos-warning-soft text-eos-warning"
                           }`}
                         >
                           {entry.direction === "received" ? "Primit" : "Trimis"}
@@ -750,7 +750,7 @@ export default function DnscRegistrationPage() {
                         <button
                           type="button"
                           onClick={() => void deleteCorrespondenceEntry(entry.id)}
-                          className="shrink-0 rounded p-1 text-eos-text-muted hover:bg-eos-surface-variant hover:text-red-500"
+                          className="shrink-0 rounded p-1 text-eos-text-muted hover:bg-eos-surface-variant hover:text-eos-error"
                           title="Șterge"
                         >
                           <Trash2 className="size-3.5" strokeWidth={2} />

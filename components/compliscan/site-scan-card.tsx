@@ -145,7 +145,7 @@ export function SiteScanCard({
         </div>
 
         {error && (
-          <p className="flex items-center gap-1.5 text-sm text-red-600">
+          <p className="flex items-center gap-1.5 text-sm text-eos-error">
             <AlertTriangle className="size-4 shrink-0" strokeWidth={2} />
             {error}
           </p>
@@ -155,7 +155,7 @@ export function SiteScanCard({
         {result && (
           <div className="space-y-3">
             {!result.reachable ? (
-              <p className="text-sm text-red-600">Site-ul nu a putut fi accesat: {result.errorMessage}</p>
+              <p className="text-sm text-eos-error">Site-ul nu a putut fi accesat: {result.errorMessage}</p>
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -165,8 +165,8 @@ export function SiteScanCard({
                     { label: "Banner cookie", value: result.hasCookieBanner ? "Da" : "Nu", warn: !result.hasCookieBanner },
                     { label: "Privacy Policy", value: result.hasPrivacyPolicy ? "Da" : "Nu", warn: !result.hasPrivacyPolicy },
                   ].map((stat) => (
-                    <div key={stat.label} className={`rounded-eos-sm border p-2 text-center ${stat.warn ? "border-amber-200 bg-amber-50" : "border-eos-border bg-eos-bg-inset"}`}>
-                      <p className={`text-base font-semibold ${stat.warn ? "text-amber-700" : "text-eos-text"}`}>{stat.value}</p>
+                    <div key={stat.label} className={`rounded-eos-sm border p-2 text-center ${stat.warn ? "border-eos-warning/20 bg-eos-warning-soft" : "border-eos-border bg-eos-bg-inset"}`}>
+                      <p className={`text-base font-semibold ${stat.warn ? "text-eos-warning" : "text-eos-text"}`}>{stat.value}</p>
                       <p className="text-[11px] text-eos-text-muted">{stat.label}</p>
                     </div>
                   ))}
@@ -182,12 +182,12 @@ export function SiteScanCard({
                       <div
                         key={i}
                         className={`flex items-start gap-2 rounded-eos-sm border px-3 py-2 ${
-                          s.severity === "high" ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"
+                          s.severity === "high" ? "border-eos-error/20 bg-eos-error-soft" : "border-eos-warning/20 bg-eos-warning-soft"
                         }`}
                       >
-                        <ShieldAlert className={`mt-0.5 size-4 shrink-0 ${s.severity === "high" ? "text-red-600" : "text-amber-600"}`} strokeWidth={2} />
+                        <ShieldAlert className={`mt-0.5 size-4 shrink-0 ${s.severity === "high" ? "text-eos-error" : "text-eos-warning"}`} strokeWidth={2} />
                         <div className="min-w-0">
-                          <p className={`text-sm font-medium ${s.severity === "high" ? "text-red-700" : "text-amber-700"}`}>{s.title}</p>
+                          <p className={`text-sm font-medium ${s.severity === "high" ? "text-eos-error" : "text-eos-warning"}`}>{s.title}</p>
                           <p className="text-xs text-eos-text-muted">{s.detail}</p>
                         </div>
                       </div>
@@ -196,9 +196,9 @@ export function SiteScanCard({
                 )}
 
                 {result.findingSuggestions.length === 0 && (
-                  <div className="flex items-center gap-2 rounded-eos-sm border border-green-200 bg-green-50 px-3 py-2">
-                    <CheckCircle2 className="size-4 shrink-0 text-green-600" strokeWidth={2} />
-                    <p className="text-sm text-green-700">Niciun finding critic detectat pe site.</p>
+                  <div className="flex items-center gap-2 rounded-eos-sm border border-eos-success/20 bg-eos-success-soft px-3 py-2">
+                    <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                    <p className="text-sm text-eos-success">Niciun finding critic detectat pe site.</p>
                   </div>
                 )}
 
@@ -213,9 +213,9 @@ export function SiteScanCard({
                         <div key={t.id} className="flex items-center justify-between px-3 py-2 text-xs">
                           <span className="font-medium text-eos-text">{t.name}</span>
                           <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            t.gdprRisk === "high" ? "bg-red-100 text-red-700"
-                            : t.gdprRisk === "medium" ? "bg-amber-100 text-amber-700"
-                            : "bg-green-100 text-green-700"
+                            t.gdprRisk === "high" ? "bg-eos-error-soft text-eos-error"
+                            : t.gdprRisk === "medium" ? "bg-eos-warning-soft text-eos-warning"
+                            : "bg-eos-success-soft text-eos-success"
                           }`}>
                             {t.gdprRisk === "high" ? "Risc ridicat" : t.gdprRisk === "medium" ? "Risc mediu" : "Risc scăzut"}
                           </span>

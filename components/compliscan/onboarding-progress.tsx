@@ -160,7 +160,7 @@ export function OnboardingProgress({
               <li key={step.id} className="flex items-start gap-3">
                 <span className="mt-0.5 shrink-0">
                   {step.done ? (
-                    <CheckCircle2 className="size-4 text-emerald-500" strokeWidth={2} />
+                    <CheckCircle2 className="size-4 text-eos-success" strokeWidth={2} />
                   ) : (
                     <Circle className="size-4 text-eos-border" strokeWidth={2} />
                   )}

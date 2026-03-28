@@ -57,9 +57,9 @@ export function AIActTimelineCard({ system }: { system: AISystemRecord }) {
                 key={i}
                 className={`rounded-eos-md border px-3 py-3 ${
                   ob.deadlineStatus === "active"
-                    ? "border-emerald-200 bg-emerald-50"
+                    ? "border-eos-success/20 bg-eos-success-soft"
                     : ob.deadlineStatus === "proposed_delay"
-                      ? "border-amber-200 bg-amber-50"
+                      ? "border-eos-warning/20 bg-eos-warning-soft"
                       : "border-eos-border bg-eos-bg-inset"
                 }`}
               >
