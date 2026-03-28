@@ -206,7 +206,7 @@ describe("lib/compliance/audit-quality-gates", () => {
     const state = createState()
     state.findings = [
       {
-        id: "nis2-risk-management-gap",
+        id: "nis2-finding-nis2-rm-01",
         title: "Politică de management al riscului lipsă",
         severity: "high",
         category: "nis2_risk_management",
@@ -228,7 +228,7 @@ describe("lib/compliance/audit-quality-gates", () => {
       ...createTask(),
       id: "nis2-task-1",
       title: "Elaboreaza politica de management al riscului NIS2",
-      relatedFindingIds: ["nis2-risk-management-gap"],
+      relatedFindingIds: ["nis2-finding-nis2-rm-01"],
       relatedDriftIds: [],
       lawReference: "OUG 155/2024 Art. 21",
     }

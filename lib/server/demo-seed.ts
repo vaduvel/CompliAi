@@ -379,7 +379,7 @@ function buildNis2ComplianceState(): ComplianceState {
 
   const findings: ScanFinding[] = [
     {
-      id: "nis2-risk-management-gap",
+      id: "nis2-finding-nis2-rm-01",
       title: "Politica de management al riscului cibernetic lipsă",
       detail:
         "Organizația nu are o politică formală de management al riscului conform NIS2 Art. 21(2)(a).",
@@ -630,7 +630,7 @@ function buildNis2ComplianceState(): ComplianceState {
         updatedAtISO: "2026-03-05T10:30:00.000Z",
         attachedEvidence: "Plan IR generat și aprobat de conducere.",
       },
-      "nis2-risk-management-gap": {
+      "nis2-finding-nis2-rm-01": {
         status: "todo",
         updatedAtISO: "2026-03-06T08:00:00.000Z",
       },
