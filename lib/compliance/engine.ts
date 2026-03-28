@@ -181,6 +181,7 @@ function normalizeGeneratedDocuments(
         item.documentType === "privacy-policy" ||
         item.documentType === "cookie-policy" ||
         item.documentType === "dpa" ||
+        item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
         item.documentType === "ai-governance"
           ? item.documentType
