@@ -97,6 +97,19 @@ export async function mutateState(
 }
 
 /**
+ * Fresh-state mutation path for runtime-critical flows that must not start
+ * from an already-loaded in-memory snapshot.
+ */
+export async function mutateFreshState(
+  updater: (current: ComplianceState) => ComplianceState | Promise<ComplianceState>
+): Promise<ComplianceState> {
+  const current = await readFreshState()
+  const next = await updater(current)
+  await writeState(next)
+  return readFreshState()
+}
+
+/**
  * Read state for a specific orgId — bypasses getOrgContext().
  * Used by partner portal, trust page, cron, demo routes that need
  * cross-org access without relying on request headers.

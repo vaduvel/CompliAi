@@ -10,7 +10,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { updateIncident, deleteIncident, readNis2State } from "@/lib/server/nis2-store"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import type {
   Nis2Incident,
@@ -135,7 +135,7 @@ export async function PATCH(
         incident.anspdcpNotification?.status,
         new Date().toISOString()
       )
-      await mutateState((s) => ({
+      await mutateFreshState((s) => ({
         ...s,
         findings: finding
           ? [

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   readNis2StateMock: vi.fn(),
   updateIncidentMock: vi.fn(),
   deleteIncidentMock: vi.fn(),
+  mutateFreshStateMock: vi.fn().mockResolvedValue(undefined),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -38,6 +39,10 @@ vi.mock("@/lib/server/nis2-store", () => ({
   readNis2State: mocks.readNis2StateMock,
   updateIncident: mocks.updateIncidentMock,
   deleteIncident: mocks.deleteIncidentMock,
+}))
+
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateFreshState: mocks.mutateFreshStateMock,
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }

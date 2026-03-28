@@ -8,7 +8,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         new Date().toISOString()
       )
       if (finding) {
-        await mutateState((s) => ({
+        await mutateFreshState((s) => ({
           ...s,
           findings: [
             ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),

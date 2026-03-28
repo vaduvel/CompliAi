@@ -10,7 +10,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { readBoardMembers, createBoardMember } from "@/lib/server/nis2-store"
 import type { BoardMember } from "@/lib/server/nis2-store"
 import { buildGovernanceFindings } from "@/lib/compliance/governance-findings"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     // Regenerate governance findings after member change
     const allMembers = await readBoardMembers(orgId)
     const govFindings = buildGovernanceFindings(allMembers, new Date().toISOString())
-    await mutateState((current) => ({
+    await mutateFreshState((current) => ({
       ...current,
       findings: [
         ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),

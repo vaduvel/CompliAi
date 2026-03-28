@@ -10,7 +10,7 @@ import {
 } from "@/lib/server/nis2-store"
 import { detectEntityType } from "@/lib/compliance/nis2-rules"
 import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 
 const VALID_STATUSES: DnscRegistrationStatus[] = [
   "not-started",
@@ -56,7 +56,7 @@ export async function PUT(req: Request) {
   const now = new Date().toISOString()
   const rescueFinding = buildDnscRescueFinding(entityType, newStatus, now)
 
-  await mutateState((current) => ({
+  await mutateFreshState((current) => ({
     ...current,
     findings: [
       ...current.findings.filter((f) => f.id !== DNSC_RESCUE_FINDING_ID),

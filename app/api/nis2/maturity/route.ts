@@ -11,7 +11,7 @@ import { saveMaturityAssessment, readMaturityAssessment } from "@/lib/server/nis
 import type { MaturityAssessment } from "@/lib/server/nis2-store"
 import { scoreMaturity, convertMaturityGapsToFindings } from "@/lib/compliance/nis2-maturity"
 import type { MaturityAnswers } from "@/lib/compliance/nis2-maturity"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function GET(request: Request) {
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
     // Auto-generate findings for domains with score < 50%
     const maturityFindings = convertMaturityGapsToFindings(result.domains, now)
-    await mutateState((current) => ({
+    await mutateFreshState((current) => ({
       ...current,
       findings: [
         // Remove previous maturity findings, keep everything else

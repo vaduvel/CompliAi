@@ -8,7 +8,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State, saveNis2Assessment, getDnscRegistrationStatus } from "@/lib/server/nis2-store"
 import { scoreNis2Assessment, convertNIS2GapsToFindings, type Nis2Answers, type Nis2Sector } from "@/lib/compliance/nis2-rules"
 import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import {
   preserveRuntimeStateForRegeneratedFindings,
   preserveRuntimeStateForSingleFinding,
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     // Replaces any existing NIS2 findings so re-runs don't accumulate duplicates.
     if (result.gaps.length > 0) {
       const nis2Findings = convertNIS2GapsToFindings(result.gaps, body.sector, now)
-      await mutateState((current) => ({
+      await mutateFreshState((current) => ({
         ...current,
         findings: [
           ...current.findings.filter(
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       }))
     } else {
       // No gaps — clear gap findings but keep/update the rescue finding
-      await mutateState((current) => ({
+      await mutateFreshState((current) => ({
         ...current,
         findings: [
           ...current.findings.filter(

@@ -9,7 +9,7 @@ import { updateVendor, deleteVendor, readNis2State } from "@/lib/server/nis2-sto
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
 import { buildVendorRiskFindings } from "@/lib/compliance/vendor-risk"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
 
 export async function PATCH(
@@ -36,7 +36,7 @@ export async function PATCH(
     // Regenerate vendor risk findings after any update
     const nis2State = await readNis2State(orgId)
     const riskFindings = buildVendorRiskFindings(nis2State.vendors, new Date().toISOString())
-    await mutateState((current) => ({
+    await mutateFreshState((current) => ({
       ...current,
       findings: [
         ...current.findings.filter((f) => !f.id.startsWith("nis2-vendor-risk-")),

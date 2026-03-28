@@ -12,7 +12,7 @@ import {
   type Nis2EmployeeRange,
   type Nis2RevenueRange,
 } from "@/lib/compliscan/nis2-eligibility"
-import { readState, writeState } from "@/lib/server/mvp-store"
+import { readFreshState, writeState } from "@/lib/server/mvp-store"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 
 const VALID_EMPLOYEES: Nis2EmployeeRange[] = ["sub50", "50-250", "peste250"]
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   await saveNis2Eligibility(orgId, record)
 
   // Generate or clear finding based on result
-  const state = (await readState()) as ComplianceState
+  const state = (await readFreshState()) as ComplianceState
   const findings = (state.findings ?? []).filter(
     (f) => f.id !== "nis2-finding-eligibility"
   )

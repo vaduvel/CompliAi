@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   getDnscRegistrationStatusMock: vi.fn(),
   scoreNis2AssessmentMock: vi.fn(),
   convertNIS2GapsToFindingsMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateFreshStateMock: vi.fn(),
   buildDnscRescueFindingMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
@@ -44,7 +44,7 @@ vi.mock("@/lib/compliance/nis2-rules", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateFreshState: mocks.mutateFreshStateMock,
 }))
 
 vi.mock("@/lib/compliance/nis2-rescue", () => ({
@@ -115,7 +115,7 @@ describe("POST /api/nis2/assessment", () => {
     mocks.saveNis2AssessmentMock.mockResolvedValue({})
     mocks.getDnscRegistrationStatusMock.mockResolvedValue("not-started")
     mocks.convertNIS2GapsToFindingsMock.mockReturnValue([])
-    mocks.mutateStateMock.mockImplementation(async (fn: (s: unknown) => unknown) => fn({ findings: [] }))
+    mocks.mutateFreshStateMock.mockImplementation(async (fn: (s: unknown) => unknown) => fn({ findings: [] }))
     mocks.buildDnscRescueFindingMock.mockReturnValue(null)
   })
 

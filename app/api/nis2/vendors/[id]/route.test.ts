@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   updateVendorMock: vi.fn(),
   deleteVendorMock: vi.fn(),
   readNis2StateMock: vi.fn().mockResolvedValue({ assessment: null, incidents: [], vendors: [] }),
-  mutateStateMock: vi.fn().mockResolvedValue(undefined),
+  mutateFreshStateMock: vi.fn().mockResolvedValue(undefined),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -41,7 +41,7 @@ vi.mock("@/lib/server/nis2-store", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateFreshState: mocks.mutateFreshStateMock,
 }))
 
 vi.mock("@/lib/compliance/vendor-risk", () => ({
