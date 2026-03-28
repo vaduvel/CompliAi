@@ -261,8 +261,8 @@ export default function EUDatabaseWizardPage() {
                 <li>Consultă un expert legal pentru validarea clasificării de risc</li>
                 <li>Accesează platforma EU AI Database (euaidb.eu)</li>
                 <li>Autentifică-te cu credențialele organizației</li>
-                <li>Selectează &quot;Register a new AI system&quot; și completează cu datele din JSON</li>
-                <li>Verifică toate câmpurile, atașează Annex IV și submitează</li>
+                <li>Selectează &quot;Register a new AI system&quot; (buton în interfața EU AI Database) și completează cu datele din JSON</li>
+                <li>Verifică toate câmpurile, atașează Annex IV și trimite formularul</li>
               </ol>
             </div>
 

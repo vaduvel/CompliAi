@@ -452,7 +452,7 @@ export default function DashboardPage() {
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Activitate recentă</p>
           </div>
           <Link href={dashboardRoutes.auditLog} className="flex items-center gap-1 text-[11px] font-medium text-eos-text-tertiary transition-colors hover:text-eos-text-muted">
-            Audit log <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+            Jurnal audit <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
           </Link>
         </div>
         {activityFeedItems.length === 0 ? (

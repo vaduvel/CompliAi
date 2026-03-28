@@ -6,7 +6,7 @@ import { Toaster } from "@/components/evidence-os/Toaster";
 import { CookieConsent } from "@/components/compliscan/cookie-consent";
 
 export const metadata: Metadata = {
-  title: "CompliScan – Dashboard",
+  title: "CompliScan – Tablou de bord",
   description:
     "Asistent AI care îți scanează documentele și îți arată riscurile (EU AI Act + GDPR + e-Factura).",
 };

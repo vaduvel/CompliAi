@@ -712,7 +712,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
         setScanInfo(null)
         setLastExtractedPreview("")
         resetPendingScanReview()
-        toast.success("Workspace resetat", {
+        toast.success("Spațiu de lucru resetat", {
           description:
             payload.message ||
             "Toate scanarile, drift-ul si task-urile au fost sterse din workspace-ul curent.",

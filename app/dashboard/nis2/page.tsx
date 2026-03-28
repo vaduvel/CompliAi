@@ -392,7 +392,7 @@ function AssessmentTab({
                           {answersMeta[q.id] && !answersMeta[q.id].userConfirmed && (
                             <div className="mb-1 flex items-center gap-2">
                               <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${answersMeta[q.id].confidence === "high" ? "bg-eos-success-soft text-eos-success" : answersMeta[q.id].confidence === "medium" ? "bg-eos-warning-soft text-eos-warning" : "bg-eos-error-soft text-eos-error"}`}>
-                                {answersMeta[q.id].source === "vendor_data" ? "Vendor" : answersMeta[q.id].source === "org_profile" ? "Profil org" : "Prefill"} · {answersMeta[q.id].confidence}
+                                {answersMeta[q.id].source === "vendor_data" ? "Vendor" : answersMeta[q.id].source === "org_profile" ? "Profil org" : "Precomplet"} · {answersMeta[q.id].confidence === "high" ? "ridicat" : answersMeta[q.id].confidence === "medium" ? "mediu" : "scăzut"}
                               </span>
                               <button
                                 type="button"

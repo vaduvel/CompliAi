@@ -127,7 +127,7 @@ const ENTRIES: Entry[] = [
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
       { label: "Dosar", href: "/dashboard/dosar" },
-      { label: "Audit log" },
+      { label: "Jurnal audit" },
     ],
   },
   {
@@ -175,7 +175,7 @@ const ENTRIES: Entry[] = [
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
       { label: "Dosar", href: "/dashboard/dosar" },
-      { label: "Audit log" },
+      { label: "Jurnal audit" },
     ],
   },
   {

@@ -82,7 +82,7 @@ export function ScanHistoryPageSurface() {
     {
       label: "Ultimul document",
       value: latestDocumentScan?.documentName ?? "inca lipseste",
-      hint: latestDocumentScan ? "rezultatul curent ramane read-only aici" : "porneste din Flux scanare",
+      hint: latestDocumentScan ? "rezultatul curent rămâne doar pentru vizualizare" : "porneste din Flux scanare",
       tone: latestDocumentScan ? "success" : "neutral",
     },
   ]
@@ -92,14 +92,14 @@ export function ScanHistoryPageSurface() {
       <PageIntro
         eyebrow="Scaneaza / Istoric"
         title="Istoric documente si rezultate confirmate"
-        description="Aici vezi istoricul document-first si rezultatele deja extrase, separat de fluxul activ de scanare. Pagina ramane read-only pentru consultare si handoff spre De rezolvat sau Rapoarte."
+        description="Aici vezi istoricul document-first si rezultatele deja extrase, separat de fluxul activ de scanare. Pagina rămâne doar pentru consultare și transfer spre De rezolvat sau Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               istoric documente
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              read-only
+              doar vizualizare
             </Badge>
           </>
         }

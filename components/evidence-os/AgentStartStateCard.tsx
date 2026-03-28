@@ -28,7 +28,7 @@ export function AgentStartStateCard({
       )}
     >
       <div className="flex flex-wrap justify-center gap-2">
-        <Badge variant="outline">Agent Workspace</Badge>
+        <Badge variant="outline">Spațiu agent</Badge>
         <Badge variant="secondary">Pregatit de rulare</Badge>
       </div>
       <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-eos-bg-inset">

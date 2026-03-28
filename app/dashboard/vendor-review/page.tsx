@@ -144,7 +144,7 @@ function LibraryDetailPanel({ vendorName }: { vendorName: string }) {
           Recunoscut din Library: {vendor.canonicalName}
         </p>
         <Badge variant="outline" className="text-[9px]">
-          {Math.round(confidence * 100)}% match
+          {Math.round(confidence * 100)}% potrivire
         </Badge>
       </div>
       <div className="grid gap-1 text-xs text-eos-text-muted sm:grid-cols-2">
@@ -569,7 +569,7 @@ function ReviewPanel({
           <p className="text-sm font-medium text-eos-text">{review.detectionSource}</p>
         </div>
         <div>
-          <p className="text-xs text-eos-text-tertiary">Confidence</p>
+          <p className="text-xs text-eos-text-tertiary">Încredere</p>
           <p className="text-sm font-medium text-eos-text capitalize">{review.confidence}</p>
         </div>
         {review.reviewCase && (
@@ -853,7 +853,7 @@ function VendorPicker({
           >
             <span className="font-medium text-eos-text">{v.name}</span>
             <span className="text-xs text-eos-text-muted">
-              {v.techConfidence ? `tech (${v.techConfidence})` : v.service || "—"}
+              {v.techConfidence ? `tehnic (${v.techConfidence})` : v.service || "—"}
             </span>
           </button>
         ))}

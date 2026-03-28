@@ -156,7 +156,7 @@ export default function AsistentPage() {
           <>
             <Button asChild variant="outline">
               <Link href={dashboardRoutes.home}>
-                Dashboard
+                Acasă
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>
@@ -185,7 +185,7 @@ export default function AsistentPage() {
         <SectionBoundary
           eyebrow="Flux canonic"
           title="Asistentul explica si te redirectioneaza, nu executa in locul produsului"
-          description="Poti clarifica riscul, obligatia sau urmatorul pas, apoi revii in Dashboard, Scaneaza sau De rezolvat pentru actiunea reala."
+          description="Poți clarifica riscul, obligația sau următorul pas, apoi revii în Acasă, Scanează sau De rezolvat pentru acțiunea reală."
           support={
             <div className="grid gap-4 md:grid-cols-3">
               <GuideCard

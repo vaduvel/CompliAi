@@ -68,7 +68,7 @@ export default function DashboardError({
               </Button>
               <Button onClick={() => router.push("/dashboard")} variant="ghost" className="gap-2">
                 <Home className="size-4" strokeWidth={2} />
-                Dashboard
+                Acasă
               </Button>
             </>
           )}

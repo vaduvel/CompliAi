@@ -128,7 +128,7 @@ export default async function TrustPage({
               <h1 className="text-2xl font-semibold text-gray-900">Trust Center</h1>
               <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-0.5 text-[11px] text-gray-400">
                 <Lock className="size-3" strokeWidth={2} />
-                read-only
+                doar vizualizare
               </span>
             </div>
             <p className="mt-1 text-base text-gray-600">{orgName}</p>

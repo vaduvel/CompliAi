@@ -179,7 +179,7 @@ export default function RemediationPage() {
 
         {shouldShowHandoff ? (
           <HandoffCard
-            title="Ai terminat board-ul — mergi in paginile read-only"
+            title="Ai terminat board-ul — mergi în paginile de consultare"
             description="Remedierea rămâne pagina de acțiune. Vault și Audit și export te ajută să verifici ce este audit-ready, fără să concureze cu execuția."
             destinationLabel="vault / audit pack"
             checklist={[

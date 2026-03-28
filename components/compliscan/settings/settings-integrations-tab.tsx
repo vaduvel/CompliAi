@@ -42,8 +42,8 @@ export function SettingsIntegrationsTab({
   return (
     <div className="space-y-6">
       <SettingsTabIntro
-        title="Integrari"
-        description="Status operational pentru traseele externe si actiunile utile de administrare."
+        title="Integrări"
+        description="Status operațional pentru traseele externe și acțiunile utile de administrare."
       />
 
       <Card className="border-eos-border bg-eos-surface">
@@ -83,7 +83,7 @@ export function SettingsIntegrationsTab({
         <CardContent className="space-y-4">
           {supabaseStatusLoading ? (
             <OperationalLoadingCard>
-              Verificam traseul Supabase pentru auth, data si storage...
+              Verificăm traseul Supabase pentru autentificare, date și stocare...
             </OperationalLoadingCard>
           ) : supabaseStatusError ? (
             <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">

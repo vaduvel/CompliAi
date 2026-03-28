@@ -70,7 +70,7 @@ function BatchActionModal({
         body: JSON.stringify({ action: "generate_drafts", orgIds }),
       })
 
-      if (!response.ok) throw new Error("Batch action failed")
+      if (!response.ok) throw new Error("Eroare la acțiunea în bloc")
       const data = (await response.json()) as { message: string; count: number }
       toast.success(data.message)
       onClose()

@@ -99,7 +99,7 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-              read-only
+              doar vizualizare
             </span>
             <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
               Audit: {auditStatusLabel}
@@ -170,7 +170,7 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
             >
               <ScrollText className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-eos-text-muted">Log de audit</p>
+                <p className="font-medium text-eos-text-muted">Jurnal audit</p>
                 <p className="text-xs text-eos-text-tertiary">Istoricul complet al acțiunilor</p>
               </div>
               <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
@@ -421,7 +421,7 @@ function PartnerCounselPack() {
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   "ai-governance": "Audit Pack",
-  "privacy-policy": "Privacy Policy",
+  "privacy-policy": "Politică de confidențialitate",
   "nis2-incident-response": "Plan IR NIS2",
   "dpa-agreement": "Acord DPA",
   "data-processing-record": "Registru Prelucrări",

@@ -21,7 +21,7 @@ export function AgentRunBadge({ status }: AgentRunBadgeProps) {
   const config = {
     queued: { icon: Clock, variant: "outline" as const, label: "In coada" },
     completed: { icon: CheckCircle2, variant: "success" as const, label: "Finalizat" },
-    failed: { icon: XCircle, variant: "destructive" as const, label: "Esuat" },
+    failed: { icon: XCircle, variant: "destructive" as const, label: "Eșuat" },
     cancelled: { icon: XCircle, variant: "secondary" as const, label: "Anulat" },
   }[status] || { icon: Clock, variant: "secondary" as const, label: status }
 

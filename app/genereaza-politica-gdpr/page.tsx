@@ -171,7 +171,7 @@ export default function GenereazaPoliticaGdprPage() {
               Generează politica în 30 de secunde
             </h2>
             <p className="mt-2 text-sm text-eos-primary">
-              Gratuit pentru Privacy Policy și Cookie Policy. GDPR + AI Act + e-Factura — toate într-un singur loc.
+              Gratuit pentru Politică de confidențialitate și Politică cookie. GDPR + AI Act + e-Factura — toate într-un singur loc.
             </p>
             <Link
               href="/login"

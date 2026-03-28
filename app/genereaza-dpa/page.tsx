@@ -123,7 +123,7 @@ export default function GenereazaDpaPage() {
           <div className="mx-auto max-w-2xl px-4 text-center">
             <FileText className="mx-auto mb-3 size-8 text-gray-400" strokeWidth={1.5} />
             <h2 className="text-xl font-bold text-white">
-              DPA + Privacy Policy + Cookie Policy + NIS2
+              DPA + Politică confidențialitate + Politică cookie + NIS2
             </h2>
             <p className="mt-2 text-sm text-gray-400">
               Toate documentele de conformitate într-un singur loc. GDPR, EU AI Act, e-Factura.
@@ -143,7 +143,7 @@ export default function GenereazaDpaPage() {
         <div className="mx-auto max-w-5xl px-4 text-center text-xs text-gray-400">
           © {new Date().getFullYear()} CompliScan.ro ·{" "}
           <Link href="/genereaza-politica-gdpr" className="hover:text-gray-600">
-            Generator Privacy Policy
+Generator politică GDPR
           </Link>{" "}
           ·{" "}
           <Link href="/trust" className="hover:text-gray-600">

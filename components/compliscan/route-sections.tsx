@@ -71,7 +71,7 @@ export function ErrorScreen({
       <div className="flex flex-col items-center gap-3 px-6 text-center">
         <AlertCircle className="size-8 text-eos-error" strokeWidth={1.5} />
         <p className="text-sm font-medium text-eos-text">
-          {message ?? "Dashboard-ul nu a putut fi incarcat."}
+          {message ?? "Tabloul de bord nu a putut fi încărcat."}
         </p>
         <p className="text-xs text-eos-text-muted">
           Verifica conexiunea si incearca din nou.

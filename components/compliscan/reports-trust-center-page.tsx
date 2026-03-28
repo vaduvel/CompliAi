@@ -133,7 +133,7 @@ export function ReportsTrustCenterPageSurface() {
               </div>
               <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                 <Lock className="size-3 mr-1" strokeWidth={2} />
-                read-only
+                doar vizualizare
               </Badge>
             </div>
 

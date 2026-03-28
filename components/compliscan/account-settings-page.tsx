@@ -144,7 +144,7 @@ export function AccountSettingsPageSurface() {
               Mod: {planData.userMode ?? "neales"}
             </Badge>
             <Badge variant="outline" className="normal-case tracking-normal">
-              Workspace: {currentUser.workspaceMode}
+              Spațiu de lucru: {currentUser.workspaceMode}
             </Badge>
           </>
         }
@@ -178,7 +178,7 @@ export function AccountSettingsPageSurface() {
                 <p className="mt-1 leading-6">
                   {isPartner
                     ? `Portofoliul tău activ conține ${slotUsageLabel}. Intrarea în firmă se face din portofoliu sau prin selectorul de workspace.`
-                    : `Workspace-ul activ rămâne ${currentUser.orgName}. Pentru billingul firmei active folosește pagina de abonament per-org.`}
+                    : `Spațiul de lucru activ rămâne ${currentUser.orgName}. Pentru billingul firmei active folosește pagina de abonament per-org.`}
                 </p>
               </div>
             </div>

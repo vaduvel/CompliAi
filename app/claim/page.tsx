@@ -138,8 +138,8 @@ function ClaimContent() {
             </CardTitle>
             <p className="text-sm text-eos-text-muted">
               {done
-                ? "Te redirectionam catre workspace-ul firmei revendicate."
-                : "Confirma ca vrei sa preiei ownership-ul firmei partajate de consultantul tau."}
+                ? "Te redirecționăm către spațiul de lucru al firmei revendicate."
+                : "Confirmă că vrei să preiei dreptul de proprietar al firmei partajate de consultantul tău."}
             </p>
           </CardHeader>
 
@@ -236,7 +236,7 @@ function ClaimContent() {
                       Se procesează...
                     </>
                   ) : (
-                    "Revendică ownership-ul"
+                    "Revendică proprietarul"
                   )}
                 </Button>
 

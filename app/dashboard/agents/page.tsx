@@ -365,7 +365,7 @@ export default function AgentDashboardPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/agents")
-      if (!res.ok) throw new Error("Failed to load agents")
+      if (!res.ok) throw new Error("Eroare la încărcarea agenților")
       const data = (await res.json()) as AgentsResponse
       setAgents(data.agents)
       setRecentRuns(data.recentRuns)

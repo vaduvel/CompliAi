@@ -35,7 +35,7 @@ const MODE_OPTIONS = [
     id: "solo" as ModeId,
     label: "Proprietar / Manager",
     description:
-      "Gestionezi conformitatea firmei tale. Dashboard simplificat, axat pe acțiuni concrete și primul risc rezolvat.",
+      "Gestionezi conformitatea firmei tale. Tablou de bord simplificat, axat pe acțiuni concrete și primul risc rezolvat.",
     icon: Building2,
     badge: "Solo",
     iconClass: "text-eos-primary",

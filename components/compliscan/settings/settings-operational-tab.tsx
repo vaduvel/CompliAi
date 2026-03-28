@@ -58,8 +58,8 @@ export function SettingsOperationalTab({
   return (
     <div className="space-y-6">
       <SettingsTabIntro
-        title="Operational"
-        description="Aici verifici starea instalatiei si decizi daca build-ul poate fi promovat controlat."
+        title="Operațional"
+        description="Aici verifici starea instalației și decizi dacă build-ul poate fi promovat controlat."
       />
 
       <Card className="border-eos-border bg-eos-surface">
@@ -87,7 +87,7 @@ export function SettingsOperationalTab({
         <CardContent className="space-y-4">
           {appHealthLoading ? (
             <OperationalLoadingCard>
-              Verificam starea aplicatiei si preflight-ul operational...
+              Verificăm starea aplicației și diagnosticul operațional...
             </OperationalLoadingCard>
           ) : appHealthError ? (
             <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
@@ -168,7 +168,7 @@ export function SettingsOperationalTab({
                       title="Fara semnale majore"
                       items={[]}
                       tone="success"
-                      emptyMessage="Aplicatia trece health check-ul curent fara blocaje sau avertismente operationale majore."
+                      emptyMessage="Aplicația trece verificarea curentă fără blocaje sau avertismente operaționale majore."
                     />
                   )}
                 </div>
@@ -211,16 +211,16 @@ export function SettingsOperationalTab({
         <CardContent className="space-y-4">
           {!currentUserResolved ? (
             <OperationalLoadingCard>
-              Verificam sesiunea curenta pentru a decide ce diagnostice operationale poti vedea...
+              Verificăm sesiunea curentă pentru a decide ce diagnostice operaționale poți vedea...
             </OperationalLoadingCard>
           ) : !canViewReleaseReadiness ? (
             <EmptyState
               title="Acces restrictionat"
-              label="Verdictul complet de release readiness este vizibil doar pentru rolurile Owner si Responsabil conformitate."
+              label="Verdictul complet de pregătire lansare este vizibil doar pentru rolurile Owner și Responsabil conformitate."
               className="rounded-eos-md"
             />
           ) : releaseReadinessLoading ? (
-            <OperationalLoadingCard>Verificam release readiness...</OperationalLoadingCard>
+            <OperationalLoadingCard>Verificăm pregătirea de lansare...</OperationalLoadingCard>
           ) : releaseReadinessError ? (
             <div className="rounded-eos-md border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
               {releaseReadinessError}

@@ -3,8 +3,8 @@ import { DashboardSegmentSkeleton } from "@/components/compliscan/dashboard-segm
 export default function Loading() {
   return (
     <DashboardSegmentSkeleton
-      title="Dashboard"
-      description="Pregatim overview-ul si datele esentiale."
+      title="Tabloul de bord"
+      description="Pregătim datele esențiale."
     />
   )
 }

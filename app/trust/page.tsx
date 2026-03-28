@@ -54,7 +54,7 @@ const SUBPROCESSORS = [
   },
   {
     name: "ANAF / SPV",
-    role: "integrare read-only pentru status si fluxuri e-Factura atunci cand clientul o activeaza",
+    role: "integrare doar-vizualizare pentru status și fluxuri e-Factura atunci cand clientul o activeaza",
     location: "Romania public authority endpoint",
   },
 ] as const

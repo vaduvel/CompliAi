@@ -539,9 +539,9 @@ export function AIDiscoveryPanel({
                             }
                             className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-surface px-3 text-sm text-eos-text outline-none"
                           >
-                            <option value="low">Confidence low</option>
-                            <option value="medium">Confidence medium</option>
-                            <option value="high">Confidence high</option>
+                            <option value="low">Încredere scăzută</option>
+                            <option value="medium">Încredere medie</option>
+                            <option value="high">Încredere ridicată</option>
                           </select>
                           <input
                             value={editDraft.frameworks}

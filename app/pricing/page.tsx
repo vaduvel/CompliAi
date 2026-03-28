@@ -23,7 +23,7 @@ const FEATURES: FeatureRow[] = [
   { label: "Findings complet + Resolution Layer", free: false, pro: true, partner: true },
   { label: "NIS2 complet (assessment, DNSC, incidente, vendori)", free: false, pro: true, partner: true },
   { label: "AI Act complet (inventar, Annex IV, timeline)", free: false, pro: true, partner: true },
-  { label: "e-Factura Signal Dashboard", free: false, pro: true, partner: true },
+  { label: "e-Factura Signal — tablou semnale fiscale", free: false, pro: true, partner: true },
   { label: "Audit Pack + One-Page Report + Response Pack", free: false, pro: true, partner: true },
   { label: "Health Check periodic", free: false, pro: true, partner: true },
   { label: "Inspector Mode / Simulare Control", free: false, pro: true, partner: true },

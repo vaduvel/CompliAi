@@ -260,7 +260,7 @@ export function DashboardShell({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" align="start" className="w-[220px]">
                   <DropdownMenuLabel>
-                    {currentUser.workspaceMode === "portfolio" ? "Firmă selectată pentru execuție" : "Workspace activ"}
+                    {currentUser.workspaceMode === "portfolio" ? "Firmă selectată pentru execuție" : "Spațiu de lucru activ"}
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
                     {memberships.filter((m) => m.status === "active").map((m) => {

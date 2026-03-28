@@ -90,7 +90,7 @@ const SettingsIntegrationsTab = dynamic(
     ),
   {
     loading: () => (
-      <OperationalLoadingCard>Incarcam zona de integrari si diagnosticele externe...</OperationalLoadingCard>
+      <OperationalLoadingCard>Încărcăm integrările și diagnosticele externe...</OperationalLoadingCard>
     ),
   }
 )
@@ -107,7 +107,7 @@ const SettingsBillingEmbed = dynamic(
     ),
   {
     loading: () => (
-      <OperationalLoadingCard>Incarcam datele de facturare...</OperationalLoadingCard>
+      <OperationalLoadingCard>Încărcăm datele de facturare...</OperationalLoadingCard>
     ),
   }
 )
@@ -119,7 +119,7 @@ const SettingsOperationalTab = dynamic(
     ),
   {
     loading: () => (
-      <OperationalLoadingCard>Incarcam health check-ul si verdictul operational...</OperationalLoadingCard>
+      <OperationalLoadingCard>Încărcăm verificarea stării și verdictul operațional...</OperationalLoadingCard>
     ),
   }
 )
@@ -127,38 +127,38 @@ const SettingsOperationalTab = dynamic(
 const SETTINGS_VIEW_TABS = [
   {
     value: "workspace",
-    label: "Workspace",
-    description: "Org, baseline si context local.",
+    label: "Spațiu de lucru",
+    description: "Organizație, baseline și context local.",
   },
   {
     value: "integrari",
-    label: "Integrari",
-    description: "Conexiuni si status extern.",
+    label: "Integrări",
+    description: "Conexiuni și status extern.",
   },
   {
     value: "acces",
     label: "Acces",
-    description: "Membri, roluri si ownership.",
+    description: "Membri, roluri și proprietar.",
   },
   {
     value: "operational",
-    label: "Operational",
-    description: "Health check si stare operationala.",
+    label: "Operațional",
+    description: "Verificare stare și diagnostic operațional.",
   },
   {
     value: "notificari",
-    label: "Notificari",
-    description: "Email si webhook la evenimente.",
+    label: "Notificări",
+    description: "Email și webhook la evenimente.",
   },
   {
     value: "facturare",
     label: "Plan & Facturare",
-    description: "Abonament, upgrade si facturi.",
+    description: "Abonament, upgrade și facturi.",
   },
   {
     value: "avansat",
     label: "Avansat",
-    description: "Politici locale si reset.",
+    description: "Politici locale și resetare.",
   },
 ] as const
 
@@ -271,16 +271,16 @@ export function SettingsPageSurface() {
         setReleaseReadiness(null)
 
         setMembersError(
-          error instanceof Error ? error.message : "Nu am putut incarca membrii."
+          error instanceof Error ? error.message : "Nu am putut încărca membrii."
         )
         setSupabaseStatusError(
           error instanceof Error ? error.message : "Nu am putut verifica statusul Supabase."
         )
         setAppHealthError(
-          error instanceof Error ? error.message : "Nu am putut verifica health check-ul aplicației."
+          error instanceof Error ? error.message : "Nu am putut verifica starea aplicației."
         )
         setReleaseReadinessError(
-          error instanceof Error ? error.message : "Nu am putut verifica release readiness."
+          error instanceof Error ? error.message : "Nu am putut verifica starea de lansare."
         )
       } finally {
         if (!active) return
@@ -323,7 +323,7 @@ export function SettingsPageSurface() {
           throw new Error(
             payload && typeof payload === "object" && "error" in payload && payload.error
               ? payload.error
-              : "Nu am putut incarca ownership-ul."
+              : "Nu am putut încărca statusul de proprietar."
           )
         }
 
@@ -332,7 +332,7 @@ export function SettingsPageSurface() {
       } catch (error) {
         if (!active) return
         setClaimStatus(null)
-        setClaimStatusError(error instanceof Error ? error.message : "Nu am putut incarca ownership-ul.")
+        setClaimStatusError(error instanceof Error ? error.message : "Nu am putut încărca statusul de proprietar.")
       } finally {
         if (active) {
           setClaimStatusLoading(false)
@@ -426,18 +426,18 @@ export function SettingsPageSurface() {
         {activeTab === "workspace" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-eos-text-muted">Workspace</h2>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Spațiu de lucru</h2>
               <p className="mt-1 text-sm text-eos-text-tertiary">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
             </div>
 
             <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
-                <h2 className="text-lg font-semibold text-eos-text-muted">Setari workspace</h2>
+                <h2 className="text-lg font-semibold text-eos-text-muted">Setări spațiu de lucru</h2>
               </div>
               <div className="px-5 py-5 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
-                    <p className="text-sm text-eos-text-tertiary">Workspace activ</p>
+                    <p className="text-sm text-eos-text-tertiary">Spațiu de lucru activ</p>
                     <p className="mt-2 text-lg font-semibold text-eos-text-muted">
                       {cockpit.data.workspace.workspaceOwner} · {cockpit.data.workspace.orgName}
                     </p>
@@ -529,22 +529,22 @@ export function SettingsPageSurface() {
                 <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <h2 className="text-lg font-semibold text-eos-text-muted">Ownership și claim</h2>
+                      <h2 className="text-lg font-semibold text-eos-text-muted">Proprietar și revendicare</h2>
                       <p className="mt-2 text-sm text-eos-text-tertiary">
-                        Consultantul poate opera firma ca <strong>partner_manager</strong>, dar ownership-ul final
+                        Consultantul poate opera firma ca <strong>partner_manager</strong>, dar proprietarul final
                         rămâne la client. Aici vezi dacă organizația este deja revendicată și poți pregăti transferul.
                       </p>
                     </div>
                     {claimStatus?.ownership.ownerState === "claimed" ? (
-                      <span className="rounded-full bg-eos-success-soft px-2.5 py-0.5 text-xs font-semibold text-eos-success">owner revendicat</span>
+                      <span className="rounded-full bg-eos-success-soft px-2.5 py-0.5 text-xs font-semibold text-eos-success">proprietar revendicat</span>
                     ) : (
-                      <span className="rounded-full bg-eos-warning-soft px-2.5 py-0.5 text-xs font-semibold text-eos-warning">owner placeholder system</span>
+                      <span className="rounded-full bg-eos-warning-soft px-2.5 py-0.5 text-xs font-semibold text-eos-warning">proprietar implicit</span>
                     )}
                   </div>
                 </div>
                 <div className="px-5 py-5 space-y-4">
                   {claimStatusLoading ? (
-                    <OperationalLoadingCard>Incarcam statusul de ownership...</OperationalLoadingCard>
+                    <OperationalLoadingCard>Încărcăm statusul de proprietar...</OperationalLoadingCard>
                   ) : claimStatusError ? (
                     <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                       {claimStatusError}
@@ -557,20 +557,20 @@ export function SettingsPageSurface() {
                             <p className="text-sm font-semibold text-eos-text-muted">Status curent</p>
                             {claimStatus.ownership.ownerState === "claimed" ? (
                               <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
-                                Owner-ul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
-                                poate controla membrii, billing-ul și poate elimina consultantul din organizație.
+                                Proprietarul curent este <strong>{claimStatus.ownership.owner.email}</strong>. Acesta
+                                poate controla membrii, facturarea și poate elimina consultantul din organizație.
                               </p>
                             ) : (
                               <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
                                 Organizația nu are încă un owner real. Consultantul operează firma ca{" "}
-                                <strong>partner_manager</strong> până când clientul acceptă claim-ul.
+                                <strong>partner_manager</strong> până când clientul acceptă invitația.
                               </p>
                             )}
                           </div>
                           {claimStatus.pendingInvite ? (
-                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">claim activ</span>
+                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">invitație activă</span>
                           ) : (
-                            <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">fără claim activ</span>
+                            <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">fără invitație activă</span>
                           )}
                         </div>
                       </div>
@@ -588,7 +588,7 @@ export function SettingsPageSurface() {
                             readOnly
                             value={claimStatus.pendingInvite.claimUrl}
                             className="mt-3 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-xs text-eos-text outline-none"
-                            aria-label="Link claim ownership"
+                            aria-label="Link invitație proprietar"
                           />
                         </div>
                       ) : null}
@@ -597,13 +597,13 @@ export function SettingsPageSurface() {
                         <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
                           <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                             <div>
-                              <p className="text-sm font-semibold text-eos-text-muted">Trimite claim ownership</p>
+                              <p className="text-sm font-semibold text-eos-text-muted">Trimite invitație proprietar</p>
                               <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
                                 Introdu emailul clientului care trebuie să devină owner. Dacă persoana nu are cont,
                                 își va seta parola direct din linkul de claim.
                               </p>
                             </div>
-                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">partner-only</span>
+                            <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">exclusiv partener</span>
                           </div>
                           <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                             <input
@@ -611,7 +611,7 @@ export function SettingsPageSurface() {
                               value={claimInviteEmail}
                               onChange={(event) => setClaimInviteEmail(event.target.value)}
                               placeholder="owner@client.ro"
-                              aria-label="Email pentru claim ownership"
+                              aria-label="Email pentru invitația de proprietar"
                               className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                             />
                             <button
@@ -637,7 +637,7 @@ export function SettingsPageSurface() {
                   <div>
                     <h2 className="text-lg font-semibold text-eos-text-muted">Membri si roluri</h2>
                     <p className="mt-2 text-sm text-eos-text-tertiary">
-                      Owner-ul poate ajusta rolurile si poate elimina consultantul. Compliance si partner manager vad lista
+                      Proprietarul poate ajusta rolurile și elimina consultantul. Compliance și partenerul managerial văd lista
                       pentru audit si separarea responsabilitatilor.
                     </p>
                   </div>
@@ -654,13 +654,13 @@ export function SettingsPageSurface() {
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-eos-text-muted">
-                          Adauga utilizator existent din workspace
+                          Adaugă utilizator existent din spațiul de lucru
                         </p>
                         <p className="mt-1 text-xs leading-6 text-eos-text-tertiary">
-                          Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitatiile externe raman pas separat.
+                          Aici adaugi doar utilizatori care au deja cont in workspace-ul local. Invitațiile externe rămân pas separat.
                         </p>
                       </div>
-                      <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">owner-only</span>
+                      <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">exclusiv proprietar</span>
                     </div>
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
@@ -690,18 +690,18 @@ export function SettingsPageSurface() {
                         onClick={() => void handleAddMember()}
                         className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Adauga membru
+                        Adaugă membru
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4 text-sm text-eos-text-tertiary">
-                    Doar owner-ul poate adauga membri noi. Lista de mai jos ramane read-only pentru audit si separarea responsabilitatilor.
+                    Doar proprietarul poate adăuga membri noi. Lista de mai jos rămâne doar pentru vizualizare (audit și separarea responsabilităților).
                   </div>
                 )}
 
                 {membersLoading ? (
-                  <OperationalLoadingCard>Incarcam membrii organizatiei...</OperationalLoadingCard>
+                  <OperationalLoadingCard>Încărcăm membrii organizației...</OperationalLoadingCard>
                 ) : membersError ? (
                   <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-error">
                     {membersError}
@@ -773,7 +773,7 @@ export function SettingsPageSurface() {
                               </>
                             ) : (
                               <p className="text-xs text-eos-text-tertiary">
-                                Doar owner-ul poate schimba rolurile.
+                                Doar proprietarul poate schimba rolurile.
                               </p>
                             )}
                           </div>
@@ -818,7 +818,7 @@ export function SettingsPageSurface() {
             </div>
 
             {alertPrefsLoading ? (
-              <OperationalLoadingCard>Incarcam preferintele de notificare...</OperationalLoadingCard>
+              <OperationalLoadingCard>Încărcăm preferințele de notificare...</OperationalLoadingCard>
             ) : (
               <div className="space-y-4">
                 {/* ── Email ─────────────────────────────────────────────────── */}
@@ -1045,7 +1045,7 @@ export function SettingsPageSurface() {
               </div>
               <div className="px-5 py-5 space-y-4">
                 <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft p-4 text-sm text-eos-text-tertiary">
-                  Acest buton sterge starea de lucru din workspace-ul curent: scanari, findings, drift,
+                  Acest buton șterge starea de lucru din spațiul de lucru curent: scanari, findings, drift,
                   task-uri, dovezi atasate si activitate salvata. Sesiunea de autentificare ramane activa.
                 </div>
 
@@ -1076,7 +1076,7 @@ export function SettingsPageSurface() {
                     }}
                   >
                     <Trash2 className="size-5" strokeWidth={2} />
-                    Sterge scanarile si reseteaza workspace-ul
+                    Șterge scanările și resetează spațiul de lucru
                   </button>
                 </div>
               </div>

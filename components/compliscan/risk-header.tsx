@@ -158,7 +158,7 @@ export function RiskHeader({
   const activeWorkspace = workspace ?? {
     orgId: "org-local-workspace",
     orgName: "Magazin Online S.R.L.",
-    workspaceLabel: "Workspace local",
+    workspaceLabel: "Spațiu de lucru local",
     workspaceOwner: "Ion Popescu",
     workspaceInitials: "IP",
   }
@@ -214,7 +214,7 @@ export function RiskHeader({
   return (
     <section className="space-y-4">
       <PageIntro
-        eyebrow="Dashboard"
+        eyebrow="Tablou de bord"
         badges={
           <>
             <Badge className="border-eos-border bg-eos-surface-variant px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">

@@ -492,7 +492,7 @@ export default function GeneratorPage() {
               </Badge>
             ) : (
               <Badge variant="success" dot className="normal-case tracking-normal">
-                Privacy Policy gratuit
+                Politică confidențialitate — gratuit
               </Badge>
             )}
           </>
