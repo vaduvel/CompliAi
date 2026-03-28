@@ -57,8 +57,8 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
-      <p className="mt-1 text-sm font-semibold text-eos-text-muted">{title}</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="mt-1 text-sm font-semibold text-eos-text">{title}</p>
       {description && <p className="mt-0.5 text-xs text-eos-text-tertiary">{description}</p>}
     </div>
   )
@@ -187,18 +187,18 @@ export function ScanPageSurface() {
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text transition hover:bg-eos-primary"
+            className="flex shrink-0 items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
           >
             Mergi la De rezolvat
-            <ArrowRight className="size-3.5" strokeWidth={2.5} />
+            <ArrowRight className="size-4" strokeWidth={2} />
           </Link>
         </div>
       )}
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">Alimentezi Compli cu surse noi</h1>
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
+        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Alimentezi Compli cu surse noi</h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
             ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
@@ -223,7 +223,7 @@ export function ScanPageSurface() {
             {activeFindingsCount > 0 && (
               <Link
                 href="/dashboard/resolve"
-                className="inline-flex items-center gap-1.5 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary"
+                className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary"
               >
                 Mergi la De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
@@ -233,7 +233,7 @@ export function ScanPageSurface() {
               type="button"
               onClick={() => agentFlow.setAgentModeActive(!agentFlow.agentModeActive)}
               className={[
-                "inline-flex items-center gap-1.5 rounded-eos-lg border px-4 py-2 text-sm font-medium transition",
+                "inline-flex items-center gap-2 rounded-eos-lg border px-4 py-2 text-sm font-medium transition",
                 agentFlow.agentModeActive
                   ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning hover:bg-eos-warning/20"
                   : "border-eos-border bg-eos-surface-active text-eos-text-muted hover:text-eos-text-muted",
@@ -260,10 +260,10 @@ export function ScanPageSurface() {
           </div>
           <Link
             href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted"
+            className="flex shrink-0 items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted"
           >
             Deschide cockpiturile
-            <ArrowRight className="size-3.5" strokeWidth={2.5} />
+            <ArrowRight className="size-4" strokeWidth={2} />
           </Link>
         </div>
       )}
@@ -414,7 +414,7 @@ export function ScanPageSurface() {
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
     <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-5">
-      <p className="text-sm font-semibold text-eos-text-muted">{title}</p>
+      <p className="text-sm font-semibold text-eos-text">{title}</p>
       <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>
   )

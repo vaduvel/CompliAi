@@ -234,7 +234,7 @@ export function ReportsTrustCenterPageSurface() {
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-5">
           <div>
-            <CardTitle className="text-xl">Ce se arată public</CardTitle>
+            <CardTitle className="text-base">Ce se arată public</CardTitle>
             <p className="mt-1 text-sm text-eos-text-muted">
               Activează sau dezactivează ce văd auditorii externi în profilul tău public.
             </p>

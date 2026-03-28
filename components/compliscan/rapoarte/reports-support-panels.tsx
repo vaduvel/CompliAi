@@ -77,7 +77,7 @@ export function ExportArtifactsCard() {
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Ce exporta fiecare artefact</CardTitle>
+        <CardTitle className="text-base">Ce exporta fiecare artefact</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {artifactGroups.map((group) => (
@@ -151,7 +151,7 @@ export function RecentDriftCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Drift inclus in snapshot</CardTitle>
+        <CardTitle className="text-base">Drift inclus in snapshot</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-6">
         {drifts.length === 0 && (

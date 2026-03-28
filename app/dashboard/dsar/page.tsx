@@ -25,6 +25,7 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 import type { DsarRequest, DsarRequestType, DsarStatus } from "@/lib/server/dsar-store"
@@ -221,7 +222,7 @@ export default function DsarPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <PageIntro
-        eyebrow="GDPR · DSAR"
+        eyebrow={<><SimpleTooltip content="Regulamentul General privind Protecția Datelor — Art. 15-22"><span className="cursor-help border-b border-dotted border-current">GDPR</span></SimpleTooltip>{" · "}<SimpleTooltip content="Data Subject Access Request — cerere de acces la date personale"><span className="cursor-help border-b border-dotted border-current">DSAR</span></SimpleTooltip></>}
         title="Cereri acces date"
         description="Gestionează cererile de acces, rectificare și ștergere GDPR Art. 15-22. Deadline legal: 30 de zile de la primire."
         badges={

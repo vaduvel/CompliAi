@@ -140,7 +140,7 @@ export function DriftCommandCenter({
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">Control drift</CardTitle>
+            <CardTitle className="text-base">Control drift</CardTitle>
             <p className="mt-2 max-w-2xl text-sm text-eos-text-muted">
               Schimbarile detectate, impactul operational si escalarea activa.
             </p>
@@ -399,7 +399,7 @@ export function ScanWorkspace({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Flux scanare</CardTitle>
+        <CardTitle className="text-base">Flux scanare</CardTitle>
         <p className="text-sm text-eos-text-muted">
           {isTextMode
             ? "Lipeste textul integral sau un extras relevant. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura fara sa mai incarci un fisier."
@@ -596,7 +596,7 @@ export function LatestDocumentSection({
         <CardHeader className="border-b border-eos-border pb-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <CardTitle className="text-xl">Ultimul document analizat</CardTitle>
+              <CardTitle className="text-base">Ultimul document analizat</CardTitle>
               <p className="mt-2 text-sm text-eos-text-muted">
                 Rezultatul este legat explicit de documentul tocmai scanat.
               </p>
@@ -763,7 +763,7 @@ export function RecentScansCard({
       <CardHeader className="border-b border-eos-border pb-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <CardTitle className="text-xl">Surse recente analizate</CardTitle>
+            <CardTitle className="text-base">Surse recente analizate</CardTitle>
             <p className="text-sm text-eos-text-muted">
               Documentele si manifestele raman separate ca sa vezi rapid ce ai scanat si unde continui.
             </p>

@@ -257,10 +257,10 @@ export function SiteScanCard({
                       Rezultatul scanării poate merge direct în cockpit ca dovadă de recheck. Revizuiești nota precompletată și decizi dacă poți închide cazul.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button asChild className="gap-1.5">
+                      <Button asChild className="gap-2">
                         <Link href={returnHref}>
                           Înapoi în cockpit
-                          <ArrowRight className="size-3.5" strokeWidth={2} />
+                          <ArrowRight className="size-4" strokeWidth={2} />
                         </Link>
                       </Button>
                     </div>

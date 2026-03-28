@@ -191,7 +191,7 @@ export function SettingsBillingPageSurface() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-eos-text">
+                  <p className="text-2xl font-semibold text-eos-text">
                     {PLAN_LABELS[currentPlan]}
                   </p>
                   <p className="mt-0.5 text-sm text-eos-text-muted">
@@ -266,7 +266,7 @@ export function SettingsBillingPageSurface() {
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-primary">
                       Pro
                     </p>
-                    <p className="mt-1.5 text-2xl font-bold text-eos-text">
+                    <p className="mt-1.5 text-2xl font-semibold text-eos-text">
                       {PLAN_PRICES.pro}
                     </p>
                     <p className="mt-1 text-sm text-eos-text-muted">

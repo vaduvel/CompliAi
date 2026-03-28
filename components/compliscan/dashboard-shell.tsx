@@ -195,7 +195,7 @@ export function DashboardShell({
             {navSections.map((section, sectionIdx) => (
               <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
                 {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
                     {section.label}
                   </p>
                 ) : null}
@@ -217,7 +217,7 @@ export function DashboardShell({
                           if (handleNavItemSelection(item)) e.preventDefault()
                         }}
                         className={[
-                          "group flex w-full items-center gap-2.5 rounded-eos-lg px-3 py-2.5 text-sm transition-all duration-150",
+                          "group flex w-full items-center gap-3 rounded-eos-lg px-3 py-2.5 text-sm transition-all duration-150",
                           active
                             ? "bg-eos-primary-soft font-semibold text-eos-text shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
                             : "font-medium text-eos-text-tertiary hover:bg-eos-surface-elevated hover:text-eos-text",
@@ -245,7 +245,7 @@ export function DashboardShell({
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex w-full items-center gap-2.5 rounded-eos-lg px-3 py-2.5 text-left transition-all hover:bg-eos-surface-active">
+                  <button className="flex w-full items-center gap-3 rounded-eos-lg px-3 py-2.5 text-left transition-all hover:bg-eos-surface-active">
                     <Avatar size="sm" className="shrink-0 border border-eos-border-strong bg-eos-surface-elevated">
                       <AvatarFallback className="bg-transparent text-xs font-bold text-eos-text-muted">
                         {initials}
@@ -255,7 +255,7 @@ export function DashboardShell({
                       <p className="truncate text-sm font-semibold text-eos-text">{currentUser.orgName}</p>
                       <p className="truncate text-[11px] text-eos-text-tertiary">{currentUser.email}</p>
                     </div>
-                    <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+                    <ChevronsUpDown className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" align="start" className="w-[220px]">
@@ -330,7 +330,7 @@ export function DashboardShell({
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
             <div className="mb-4 flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-primary/70">
+                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary/70">
                   Execuție în firmă
                 </p>
                 <p className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</p>
@@ -341,9 +341,9 @@ export function DashboardShell({
               <button
                 onClick={() => void handleSwitchWorkspaceMode("portfolio")}
                 disabled={switchingWorkspaceMode === "portfolio"}
-                className="ml-auto flex shrink-0 items-center gap-1.5 rounded-eos-md px-2.5 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
+                className="ml-auto flex shrink-0 items-center gap-2 rounded-eos-md px-3 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
               >
-                <ArrowLeft className="h-3 w-3" strokeWidth={2} />
+                <ArrowLeft className="size-4" strokeWidth={2} />
                 Portofoliu
               </button>
             </div>

@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, ChevronRight } from "
 import { RecentScansCard } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
+import { Breadcrumb } from "@/components/evidence-os"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
@@ -337,14 +338,11 @@ export default function ScanResultsPage() {
   return (
     <div className="space-y-8">
 
-      {/* ── Back nav ──────────────────────────────────────────────────────── */}
-      <Link
-        href={dashboardRoutes.scan}
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={2} />
-        Înapoi la Scanează
-      </Link>
+      {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
+      <Breadcrumb items={[
+        { label: "Scanează", href: dashboardRoutes.scan },
+        { label: "Rezultat" },
+      ]} />
 
       {/* ── Success Banner ─────────────────────────────────────────────────── */}
       {targetScan.analysisStatus === "completed" && (

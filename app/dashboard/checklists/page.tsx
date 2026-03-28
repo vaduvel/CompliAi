@@ -6,7 +6,8 @@ import { ArrowRight } from "lucide-react"
 
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
-import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
+import { ErrorScreen } from "@/components/compliscan/route-sections"
+import { Skeleton, SkeletonCard } from "@/components/evidence-os/Skeleton"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
@@ -25,7 +26,17 @@ export default function RemediationPage() {
   const [showHandoff, setShowHandoff] = useState(false)
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+  if (cockpit.loading || !cockpit.data) return (
+    <div className="space-y-8">
+      <Skeleton className="h-20 w-full rounded-eos-xl" />
+      <Skeleton className="h-12 w-full rounded-eos-lg" />
+      <div className="grid gap-3">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    </div>
+  )
 
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
   const evidenceAttached = cockpit.tasks.filter((task) => Boolean(task.attachedEvidence))
@@ -92,7 +103,6 @@ export default function RemediationPage() {
       <PageIntro
         eyebrow="Dovada / Remediere"
         title="Execuți, atașezi dovada și validezi"
-        description="Aici închizi task-ul corect. Vault, Audit și export rămân pași de verificare separați, nu execuție."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -195,7 +205,7 @@ export default function RemediationPage() {
                     <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>
                 </Button>
-                <Button asChild>
+                <Button asChild variant="outline">
                   <Link href="/dashboard/rapoarte">
                     Audit si export
                     <ArrowRight className="size-4" strokeWidth={2} />

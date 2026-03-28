@@ -45,7 +45,7 @@ export function EFacturaValidatorCard({
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Validator e-Factura XML</CardTitle>
+        <CardTitle className="text-base">Validator e-Factura XML</CardTitle>
         <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">
           Valideaza rapid structura UBL de baza inainte sa trimiti XML-ul spre fluxul ANAF.
         </p>

@@ -18,7 +18,8 @@ import {
 } from "lucide-react"
 
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
-import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
+import { ErrorScreen } from "@/components/compliscan/route-sections"
+import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
 import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
@@ -114,7 +115,22 @@ export default function DashboardPage() {
   }, [searchParams])
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
-  if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+  if (cockpit.loading || !cockpit.data) return (
+    <div className="space-y-8">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <SkeletonMetric />
+        <SkeletonMetric />
+        <SkeletonMetric />
+        <SkeletonMetric />
+      </div>
+      <Skeleton className="h-32 w-full rounded-eos-xl" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Skeleton className="h-24 rounded-eos-xl" />
+        <Skeleton className="h-24 rounded-eos-xl" />
+        <Skeleton className="h-24 rounded-eos-xl" />
+      </div>
+    </div>
+  )
 
   const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
   const state = data.state
@@ -225,15 +241,19 @@ export default function DashboardPage() {
         className="grid gap-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant p-4 md:grid-cols-3"
       >
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Se aplică</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-1 text-sm text-eos-text">{applicabilitySummary}</p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Am găsit</p>
-          <p className="mt-1 text-sm text-eos-text">{findingsSummary}</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Dovezi lipsă</p>
+          <p className="mt-1 text-sm text-eos-text">
+            {missingEvidenceCount === 0
+              ? "Toate task-urile au dovadă"
+              : `${missingEvidenceCount} task${missingEvidenceCount === 1 ? "" : "-uri"} fără dovadă`}
+          </p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
           <p className="mt-1 text-sm text-eos-text">{nextActionSummary}</p>
         </div>
       </section>
@@ -268,7 +288,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Readiness</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Readiness</p>
             <p className={`mt-1 text-sm font-semibold ${score >= 80 ? "text-eos-text" : score >= 60 ? "text-eos-warning" : "text-eos-error"}`}>
               {score >= 80 ? "Stabil" : score >= 60 ? "În progres" : "Risc ridicat"}
             </p>
@@ -284,7 +304,7 @@ export default function DashboardPage() {
         {/* 3 key metrics */}
         <div className="grid grid-cols-3 gap-3">
           <Link href={dashboardRoutes.resolve} className="group flex flex-col justify-between rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4 transition-all hover:border-eos-border-strong hover:bg-eos-surface-active">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Cazuri active</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
             <div className="mt-2">
               <span className={`text-3xl font-bold ${activeFindings.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
                 {activeFindings.length}
@@ -296,7 +316,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link href={dashboardRoutes.drifts} className="group flex flex-col justify-between rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4 transition-all hover:border-eos-border-strong hover:bg-eos-surface-active">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Drift activ</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Drift activ</p>
             <div className="mt-2">
               <span className={`text-3xl font-bold ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
                 {activeDrifts.length}
@@ -314,7 +334,7 @@ export default function DashboardPage() {
                 ? "border-eos-error/20 bg-eos-surface-variant"
                 : "border-eos-border bg-eos-surface-variant"
           }`}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Audit</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Audit</p>
             <div className="mt-2">
               <span className={`text-lg font-bold ${
                 auditStatusLabel === "Pregătit" ? "text-eos-success" :
@@ -346,7 +366,7 @@ export default function DashboardPage() {
         {frameworkItems.length > 0 && (
           <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
             <div className="border-b border-eos-border-subtle px-5 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Framework-uri aplicabile</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Framework-uri aplicabile</p>
             </div>
             <div className="divide-y divide-eos-border-subtle">
               {frameworkItems.map((fw) => (
@@ -381,7 +401,7 @@ export default function DashboardPage() {
         {/* Cazuri active */}
         <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
           <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
               Cazuri active{activeFindings.length > 0 && <span className="ml-2 text-eos-text-muted">— {activeFindings.length}</span>}
             </p>
             <Link
@@ -449,7 +469,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-eos-text-tertiary" strokeWidth={2} />
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Activitate recentă</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Activitate recentă</p>
           </div>
           <Link href={dashboardRoutes.auditLog} className="flex items-center gap-1 text-[11px] font-medium text-eos-text-tertiary transition-colors hover:text-eos-text-muted">
             Jurnal audit <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
@@ -468,7 +488,7 @@ export default function DashboardPage() {
               const body = (
                 <div className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-eos-surface-variant">
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-eos-text-tertiary shrink-0">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary shrink-0">
                     {item.eyebrow}
                   </span>
                   <span className="flex-1 truncate text-sm text-eos-text-muted">{item.title}</span>
@@ -490,7 +510,7 @@ export default function DashboardPage() {
 
       {/* ── Secondary tools — collapsed ──────────────────────────────────── */}
       <details className="group rounded-eos-xl border border-eos-border-subtle">
-        <summary className="flex cursor-pointer list-none items-center gap-2.5 px-5 py-4 select-none">
+        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 select-none">
           <ChevronRight className="h-4 w-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
           <span className="text-sm font-medium text-eos-text-tertiary">Instrumente secundare</span>
           <span className="ml-auto text-xs text-eos-text-tertiary">Scanare · valoare acumulată · rute dedicate</span>
@@ -558,12 +578,12 @@ function CompactNextAction({
           <CheckCircle2 className="h-4 w-4 text-eos-success" strokeWidth={2} />
         </div>
         <div className="flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-eos-text-tertiary">Ce faci acum</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
           <p className="mt-0.5 text-sm text-eos-text-muted">{msg}</p>
         </div>
         {ctaHref && (
-          <Link href={ctaHref} className="shrink-0 flex items-center gap-1.5 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-active px-3.5 py-2 text-xs font-semibold text-eos-text-muted transition-all hover:bg-eos-surface-elevated hover:text-eos-text">
-            {!hasEvidence ? "Scanare" : "Alerte"} <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+          <Link href={ctaHref} className="shrink-0 flex items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-active px-4 py-2 text-xs font-semibold text-eos-text-muted transition-all hover:bg-eos-surface-elevated hover:text-eos-text">
+            {!hasEvidence ? "Scanare" : "Alerte"} <ArrowRight className="size-4" strokeWidth={2} />
           </Link>
         )}
       </div>
@@ -587,7 +607,7 @@ function CompactNextAction({
   return (
     <div className="rounded-eos-xl border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
       <div className="flex items-center gap-3 border-b border-eos-primary/[0.10] px-5 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Ce faci acum</p>
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${prioColor}`}>{task.priority}</span>
         <span className={`text-[11px] font-semibold ${sevColor}`}>{sevLabel}</span>
         <div className="ml-auto flex items-center gap-3 text-[11px] text-eos-text-tertiary">

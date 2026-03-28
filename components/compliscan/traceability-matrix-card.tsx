@@ -42,7 +42,7 @@ export function TraceabilityMatrixCard({
             <ClipboardList className="size-4" strokeWidth={2} />
           </div>
           <div>
-            <CardTitle className="text-xl">Matrice de trasabilitate</CardTitle>
+            <CardTitle className="text-base">Matrice de trasabilitate</CardTitle>
             <p className="mt-1 text-sm text-eos-text-muted">
               Traseul dintre sursa, finding, task, drift si snapshot pentru fiecare control urmarit la audit.
             </p>

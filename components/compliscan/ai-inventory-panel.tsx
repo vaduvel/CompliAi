@@ -22,6 +22,8 @@ import type { AISystemPurpose, AISystemRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { Checkbox } from "@/components/evidence-os/Checkbox"
+import { Input } from "@/components/evidence-os/Input"
 import { AIActTimelineCard } from "@/components/compliscan/ai-act-timeline-card"
 
 type AIInventoryPanelProps = {
@@ -214,7 +216,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader className="border-b border-eos-border pb-5">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-xl">Flux inventar AI</CardTitle>
+            <CardTitle className="text-base">Flux inventar AI</CardTitle>
             <span className="text-xs text-eos-text-muted">
               {step} / 4 — {STEP_LABELS[step]}
             </span>
@@ -237,24 +239,21 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               <p className="text-sm text-eos-text-muted">
                 Identifica sistemul pe care il confirmi acum in inventar.
               </p>
-              <input
+              <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nume sistem AI (ex: ChatBot Clienti, ScoreRisc v2)"
-                className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
               />
               <div className="grid gap-4 md:grid-cols-2">
-                <input
+                <Input
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
                   placeholder="Furnizor (ex: OpenAI, intern)"
-                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
-                <input
+                <Input
                   value={modelType}
                   onChange={(e) => setModelType(e.target.value)}
                   placeholder="Tip model (ex: LLM, reguli, ML)"
-                  className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
             </div>
@@ -347,11 +346,10 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                     </span>
                     <p className="mt-1 text-xs text-eos-text-muted">{item.hint}</p>
                   </div>
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={item.checked}
-                    onChange={(e) => item.onChecked(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-eos-primary"
+                    onCheckedChange={(checked) => item.onChecked(checked === true)}
+                    className="mt-0.5 shrink-0"
                   />
                 </label>
               ))}
@@ -451,7 +449,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
 
         <Card className="border-eos-border bg-eos-surface">
           <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-xl">Sisteme AI inventariate</CardTitle>
+            <CardTitle className="text-base">Sisteme AI inventariate</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             {systems.length === 0 && (
@@ -534,9 +532,9 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                         <Button
                           onClick={() => void handleRemove(system.id)}
                           disabled={removingId === system.id || busy}
-                          variant="outline"
+                          variant="destructive"
                           size="sm"
-                          className="gap-2 border-eos-border bg-eos-surface text-eos-error hover:bg-eos-error-soft"
+                          className="gap-2"
                         >
                           <Trash2 className="size-3.5" strokeWidth={2} />
                           Sterge

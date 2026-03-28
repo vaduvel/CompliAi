@@ -286,7 +286,7 @@ export function AccountSettingsPageSurface() {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-primary">
                     {PARTNER_ACCOUNT_PLAN_LABELS[plan]}
                   </p>
-                  <p className="mt-2 text-2xl font-bold text-eos-text">
+                  <p className="mt-2 text-2xl font-semibold text-eos-text">
                     {PARTNER_ACCOUNT_PLAN_LIMITS[plan]} firme
                   </p>
                   <p className="mt-1 text-sm text-eos-text-muted">

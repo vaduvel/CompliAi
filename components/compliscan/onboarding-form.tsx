@@ -236,7 +236,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
         {!currentMode && (
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-eos-text">Cum vei folosi CompliScan?</h1>
+              <h1 className="text-2xl font-semibold text-eos-text">Cum vei folosi CompliScan?</h1>
               <p className="mt-2 text-sm leading-6 text-eos-text-muted">
                 Alege rolul care descrie cel mai bine modul în care lucrezi. Poți schimba
                 ulterior din Setări.
@@ -340,7 +340,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
           <div className="space-y-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-eos-text">
+                <h1 className="text-2xl font-semibold text-eos-text">
                   {phaseIndex === 1 ? "Date firmă și semnale publice" : "Confirmări finale și pornire în runtime"}
                 </h1>
                 <p className="mt-1.5 text-sm text-eos-text-muted">

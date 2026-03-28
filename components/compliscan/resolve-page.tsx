@@ -471,23 +471,23 @@ export function ResolvePageSurface() {
         className="grid gap-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant p-4 md:grid-cols-3"
       >
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Se aplică</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-1 text-sm text-eos-text">{applicabilityLabels}</p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Am găsit</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Am găsit</p>
           <p className="mt-1 text-sm text-eos-text">{foundSummary}</p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
           <p className="mt-1 text-sm text-eos-text">{nextActionLine}</p>
         </div>
       </section>
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
+        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
         </h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -519,10 +519,10 @@ export function ResolvePageSurface() {
           {openTasks.length > 0 && (
             <Link
               href={dashboardRoutes.resolveSupport}
-              className="inline-flex items-center gap-1.5 rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
+              className="inline-flex items-center gap-2 rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
             >
               Task-uri de suport · {openTasks.length}
-              <ArrowRight className="h-3 w-3" strokeWidth={2} />
+              <ArrowRight className="size-4" strokeWidth={2} />
             </Link>
           )}
         </div>
@@ -572,8 +572,8 @@ export function ResolveSupportPageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Task-uri de suport</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Task-uri de suport</p>
+        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           Board separat · {openTasks.length} deschise
         </h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -596,10 +596,10 @@ export function ResolveSupportPageSurface() {
           </div>
           <Link
             href={dashboardRoutes.resolve}
-            className="inline-flex items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
+            className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
           >
             Înapoi la De rezolvat
-            <ArrowRight className="size-3" strokeWidth={2} />
+            <ArrowRight className="size-4" strokeWidth={2} />
           </Link>
         </div>
       </div>

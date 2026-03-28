@@ -428,25 +428,25 @@ export default function AgentDashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-eos-primary">{activeAgents}</p>
+            <p className="text-2xl font-semibold text-eos-primary">{activeAgents}</p>
             <p className="mt-1 text-xs text-eos-text-muted">Agenți activi</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-eos-text">{recentRuns.length}</p>
+            <p className="text-2xl font-semibold text-eos-text">{recentRuns.length}</p>
             <p className="mt-1 text-xs text-eos-text-muted">Run-uri recente</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-eos-warning">{totalIssues}</p>
+            <p className="text-2xl font-semibold text-eos-warning">{totalIssues}</p>
             <p className="mt-1 text-xs text-eos-text-muted">Probleme detectate</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-eos-success">{totalActions}</p>
+            <p className="text-2xl font-semibold text-eos-success">{totalActions}</p>
             <p className="mt-1 text-xs text-eos-text-muted">Acțiuni executate</p>
           </CardContent>
         </Card>

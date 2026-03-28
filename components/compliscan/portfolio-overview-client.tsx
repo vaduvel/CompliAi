@@ -75,7 +75,7 @@ function SortHeader({
     <button
       type="button"
       onClick={() => onSort(sortKey)}
-      className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-150 ${
+      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors duration-150 ${
         active ? "text-eos-text-muted" : "text-eos-text-tertiary hover:text-eos-text-muted"
       } ${className}`}
     >
@@ -260,10 +260,10 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
     <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1 px-5 py-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">
+          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
             {stat.label}
           </span>
-          <span className="text-xl font-bold text-eos-text">{stat.value}</span>
+          <span className="text-xl font-semibold text-eos-text">{stat.value}</span>
         </div>
       ))}
     </div>
@@ -409,8 +409,8 @@ export function PortfolioOverviewClient() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
-          <h1 className="mt-1 text-2xl font-bold text-eos-text">Portofoliu firme</h1>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
+          <h1 className="mt-1 text-2xl font-semibold text-eos-text">Portofoliu firme</h1>
           <p className="mt-1.5 max-w-xl text-sm leading-6 text-eos-text-tertiary">
             Aici faci triage cross-client. Intri în firmă doar când trebuie să execuți într-un workspace real.
           </p>
@@ -435,25 +435,25 @@ export function PortfolioOverviewClient() {
             type="button"
             onClick={() => setShowImport(true)}
             disabled={planData ? !planData.canAddOrg : false}
-            className="flex items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text disabled:opacity-40"
+            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text disabled:opacity-40"
           >
-            <Upload className="size-3.5" strokeWidth={2} />
+            <Upload className="size-4" strokeWidth={2} />
             {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
           </button>
           <button
             type="button"
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
+            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
           >
-            <Download className="size-3.5" strokeWidth={2} />
+            <Download className="size-4" strokeWidth={2} />
             Exportă CSV
           </button>
           <button
             type="button"
             onClick={() => { void fetchClients(); void fetchPlanData() }}
-            className="flex items-center gap-1.5 rounded-eos-lg px-3 py-2 text-sm font-medium text-eos-text-tertiary transition-all duration-150 hover:bg-eos-surface-active hover:text-eos-text-muted"
+            className="flex items-center gap-2 rounded-eos-lg px-3 py-2 text-sm font-medium text-eos-text-tertiary transition-all duration-150 hover:bg-eos-surface-active hover:text-eos-text-muted"
           >
-            <RefreshCw className="size-3.5" strokeWidth={2} />
+            <RefreshCw className="size-4" strokeWidth={2} />
             Actualizează
           </button>
         </div>
@@ -472,7 +472,7 @@ export function PortfolioOverviewClient() {
           </div>
           <Link
             href={dashboardRoutes.accountSettings}
-            className="rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 py-2 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-elevated hover:text-eos-text"
+            className="rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-elevated hover:text-eos-text"
           >
             Setări cont
           </Link>

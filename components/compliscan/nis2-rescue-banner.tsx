@@ -59,7 +59,7 @@ export function Nis2RescueBanner() {
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`text-[11px] font-bold uppercase tracking-[0.18em] ${
+              className={`text-[11px] font-medium uppercase tracking-[0.22em] ${
                 isCritical ? "text-eos-error" : "text-eos-warning"
               }`}
             >

@@ -7,6 +7,8 @@ import { Bell, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { Input } from "@/components/evidence-os/Input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/evidence-os/Select"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import {
   CurrentUser,
@@ -378,8 +380,8 @@ export function SettingsPageSurface() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
-        <h1 className="mt-1.5 text-2xl font-bold text-eos-text">
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
+        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
         </h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -606,13 +608,12 @@ export function SettingsPageSurface() {
                             <span className="rounded-full border border-eos-border bg-eos-surface-variant px-2.5 py-0.5 text-xs font-medium text-eos-text-tertiary">exclusiv partener</span>
                           </div>
                           <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-                            <input
+                            <Input
                               type="email"
                               value={claimInviteEmail}
                               onChange={(event) => setClaimInviteEmail(event.target.value)}
                               placeholder="owner@client.ro"
                               aria-label="Email pentru invitația de proprietar"
-                              className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                             />
                             <button
                               type="button"
@@ -664,26 +665,28 @@ export function SettingsPageSurface() {
                     </div>
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_auto]">
-                      <input
+                      <Input
                         type="email"
                         value={newMemberEmail}
                         onChange={(event) => setNewMemberEmail(event.target.value)}
                         placeholder="coleg@companie.ro"
                         aria-label="Email utilizator nou"
-                        className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-all"
                       />
-                      <select
-                        className="h-9 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                      <Select
                         value={newMemberRole}
-                        aria-label="Rol utilizator nou"
-                        onChange={(event) => setNewMemberRole(event.target.value as OrganizationMember["role"])}
+                        onValueChange={(value) => setNewMemberRole(value as OrganizationMember["role"])}
                       >
-                        {MEMBER_ROLE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger aria-label="Rol utilizator nou">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MEMBER_ROLE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <button
                         type="button"
                         disabled={creatingMember || !newMemberEmail.trim()}

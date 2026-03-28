@@ -6,6 +6,14 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/evidence-os/Dialog"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { TaskCard } from "@/components/compliscan/task-card"
 import type { CockpitTask, TaskPriority } from "@/components/compliscan/types"
@@ -61,6 +69,7 @@ export function RemediationBoard({
   onExport,
 }: RemediationBoardProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false)
   const findingById = new Map(findings.map((finding) => [finding.id, finding]))
 
   function toggleSelect(id: string) {
@@ -114,7 +123,7 @@ export function RemediationBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold text-eos-text-muted uppercase tracking-[0.12em]">
+              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.12em]">
                 Task-uri de suport
               </CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
@@ -154,16 +163,39 @@ export function RemediationBoard({
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={clearSelection}>Anulează</Button>
             {onBulkMarkDone && (
-              <Button
-                size="sm"
-                onClick={() => { onBulkMarkDone(Array.from(selectedIds)); clearSelection() }}
-              >
+              <Button size="sm" onClick={() => setShowBulkConfirm(true)}>
                 Marchează rezolvate ({selectedIds.size})
               </Button>
             )}
           </div>
         </div>
       )}
+
+      {/* Bulk mark-done confirmation dialog */}
+      <Dialog open={showBulkConfirm} onOpenChange={setShowBulkConfirm}>
+        <DialogContent size="sm">
+          <DialogHeader>
+            <DialogTitle>Marchezi {selectedIds.size} task-uri ca rezolvate?</DialogTitle>
+            <DialogDescription>
+              Această acțiune este ireversibilă. Task-urile vor fi marcate ca done și scoase din board.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkConfirm(false)}>
+              Anulează
+            </Button>
+            <Button
+              onClick={() => {
+                onBulkMarkDone?.(Array.from(selectedIds))
+                clearSelection()
+                setShowBulkConfirm(false)
+              }}
+            >
+              Confirmă ({selectedIds.size})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <CardContent className="space-y-4 pt-6">
         {/* Select all */}
