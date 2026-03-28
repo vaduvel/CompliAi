@@ -344,6 +344,11 @@ export default function FindingDetailPage() {
   const closeGating = getCloseGatingRequirements(recipe.findingTypeId)
   const requiresOperationalEvidence = status === "confirmed" && !hasGenerator && closeGating.requiresEvidenceNote
   const requiresRevalidation = status === "confirmed" && !hasGenerator && recipe.resolveFlowState === "needs_revalidation"
+  const inlineOperationalAction =
+    status === "confirmed" &&
+    !hasGenerator &&
+    !recipe.workflowLink &&
+    (requiresOperationalEvidence || requiresRevalidation)
   const resolveDisabled =
     actionLoading ||
     (requiresOperationalEvidence && !operationalEvidenceNote.trim()) ||
@@ -641,7 +646,7 @@ export default function FindingDetailPage() {
         </FindingHeroAction>
       )}
 
-      {showConfirmedHeroAction && (
+      {showConfirmedHeroAction && !inlineOperationalAction && (
         <FindingHeroAction
           finding={finding}
           recipe={recipe}
@@ -772,6 +777,23 @@ export default function FindingDetailPage() {
             <p className="text-xs text-eos-text-muted">
               {evidenceCardCopy.footer}
             </p>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Button
+                data-testid="mark-finding-resolved"
+                onClick={() =>
+                  updateStatus("resolved", {
+                    evidenceNote: operationalEvidenceNote.trim() || undefined,
+                    revalidationConfirmed,
+                    newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
+                  })
+                }
+                disabled={resolveDisabled}
+                className="gap-1.5"
+              >
+                <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                {recipe.closureCTA ?? recipe.primaryCTA.label}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -813,6 +835,23 @@ export default function FindingDetailPage() {
                 className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
               />
             </div>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Button
+                data-testid="mark-finding-resolved"
+                onClick={() =>
+                  updateStatus("resolved", {
+                    evidenceNote: operationalEvidenceNote.trim() || undefined,
+                    revalidationConfirmed,
+                    newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
+                  })
+                }
+                disabled={resolveDisabled}
+                className="gap-1.5"
+              >
+                <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                {recipe.closureCTA ?? recipe.primaryCTA.label}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -820,6 +859,7 @@ export default function FindingDetailPage() {
       {statusFeedback &&
         !successMomentVisible &&
         !(status === "confirmed" && hasGenerator) &&
+        !inlineOperationalAction &&
         !needsDossierHandoff && (
         <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
           <CardContent className="px-5 py-4">
