@@ -266,7 +266,6 @@ Acestea sunt adevăr de direcție, nu adevăr de runtime.
 
 Conform [compliai-user-flow-1to1-runtime-audit.md](/Users/vaduvageorge/Desktop/CompliAI/docs/adevar%20inghetat/compliai-user-flow-1to1-runtime-audit.md), nu putem declara încă 100% înghețat:
 - snapshotul de ieșire din onboarding, ca expresie clară a rezultatului
-- warning-urile tehnice rămase de tip `React #418` pe unele suprafețe live, chiar dacă flow-ul principal trece
 
 ### 4.3 Cockpitul live ca adevăr final
 
