@@ -472,6 +472,7 @@ export function mergeDriftRecords(
   nowISO = new Date().toISOString()
 ) {
   const previousById = new Map(previousDrifts.map((item) => [item.id, item]))
+  const matchedPreviousIds = new Set<string>()
   const events: Array<{
     type: "detected" | "breached"
     driftId: string
@@ -480,6 +481,7 @@ export function mergeDriftRecords(
 
   const drifts = generatedDrifts.map((drift) => {
     const previous = previousById.get(drift.id)
+    matchedPreviousIds.add(drift.id)
     const lifecycleStatus = normalizeDriftLifecycleStatus(
       previous?.lifecycleStatus,
       previous?.open !== false
@@ -521,6 +523,37 @@ export function mergeDriftRecords(
 
     return merged
   })
+
+  for (const previous of previousDrifts) {
+    if (matchedPreviousIds.has(previous.id)) continue
+
+    const lifecycleStatus = normalizeDriftLifecycleStatus(
+      previous.lifecycleStatus,
+      previous.open !== false
+    )
+    const escalationBreachedAtISO =
+      previous.escalationBreachedAtISO ??
+      (isEscalationBreached(previous, lifecycleStatus, nowISO) ? nowISO : undefined)
+
+    if (!previous.escalationBreachedAtISO && escalationBreachedAtISO) {
+      events.push({
+        type: "breached",
+        driftId: previous.id,
+        message: `SLA depășit pentru drift: ${previous.summary}`,
+      })
+    }
+
+    drifts.push({
+      ...previous,
+      open:
+        lifecycleStatus === "resolved" || lifecycleStatus === "waived"
+          ? false
+          : true,
+      lifecycleStatus,
+      escalationBreachedAtISO,
+      lastStatusUpdatedAtISO: previous.lastStatusUpdatedAtISO ?? previous.detectedAtISO,
+    })
+  }
 
   return { drifts, events }
 }

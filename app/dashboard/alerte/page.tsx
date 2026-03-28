@@ -37,18 +37,17 @@ export default function DriftPage() {
   const cockpitActions = useCockpitMutations()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
   const [expandedDriftId, setExpandedDriftId] = useState<string | null>(null)
-  const driftRecords = cockpit.data?.state.driftRecords ?? []
   const openDrifts = cockpit.activeDrifts
   const resolvedDrifts = useMemo(
     () =>
-      driftRecords
+      (cockpit.data?.state.driftRecords ?? [])
         .filter((drift) => !drift.open)
         .sort((left, right) =>
           (right.lastStatusUpdatedAtISO || right.resolvedAtISO || right.waivedAtISO || right.detectedAtISO).localeCompare(
             left.lastStatusUpdatedAtISO || left.resolvedAtISO || left.waivedAtISO || left.detectedAtISO
           )
         ),
-    [driftRecords]
+    [cockpit.data?.state.driftRecords]
   )
   const visibleDrifts = useMemo(
     () => (openDrifts.length > 0 ? [...openDrifts, ...resolvedDrifts.slice(0, 1)] : resolvedDrifts.slice(0, 3)),
