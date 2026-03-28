@@ -98,6 +98,31 @@ describe("POST /api/auth/register", () => {
     )
   })
 
+  it("permite register fara nume de organizatie in primul pas", async () => {
+    mocks.registerUserMock.mockResolvedValueOnce({
+      id: "user-3",
+      email: "rapid@site.ro",
+      orgId: "org-3",
+      orgName: "rapid",
+      role: "owner",
+      membershipId: "membership-3",
+    })
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "rapid@site.ro",
+          password: "secret123",
+        }),
+      })
+    )
+
+    expect(response.status).toBe(200)
+    expect(mocks.registerUserMock).toHaveBeenCalledWith("rapid@site.ro", "secret123", "")
+  })
+
   it("creeaza identitatea in Supabase cand backend-ul o cere", async () => {
     mocks.shouldUseSupabaseAuthMock.mockReturnValueOnce(true)
     mocks.registerSupabaseIdentityMock.mockResolvedValueOnce({

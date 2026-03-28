@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   readDsarStateMock: vi.fn(),
   createDsarMock: vi.fn(),
+  updateDsarMock: vi.fn(),
+  generateDsarDraftMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -36,6 +38,11 @@ vi.mock("@/lib/server/org-context", () => ({
 vi.mock("@/lib/server/dsar-store", () => ({
   readDsarState: mocks.readDsarStateMock,
   createDsar: mocks.createDsarMock,
+  updateDsar: mocks.updateDsarMock,
+}))
+
+vi.mock("@/lib/compliance/dsar-drafts", () => ({
+  generateDsarDraft: mocks.generateDsarDraftMock,
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
@@ -90,6 +97,13 @@ describe("POST /api/dsar", () => {
     mocks.requireRoleMock.mockReturnValue(SESSION)
     mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
     mocks.createDsarMock.mockResolvedValue(SAMPLE_DSAR)
+    mocks.updateDsarMock.mockResolvedValue({ ...SAMPLE_DSAR, draftResponseGenerated: true })
+    mocks.generateDsarDraftMock.mockReturnValue({
+      subject: "DSAR",
+      body: "Draft",
+      legalBasis: "Art. 15 GDPR",
+      requiredActions: [],
+    })
   })
 
   it("creeaza cerere DSAR cu deadline 30 zile", async () => {

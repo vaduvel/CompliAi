@@ -167,7 +167,7 @@ export default function SistemePage() {
 
       {/* ── GOLD 8: AI Act deadline banner ───────────────────────────────────── */}
       <div className="flex items-start gap-3 rounded-eos-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800/40 dark:bg-amber-950/20">
-        <CalendarClock className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+        <CalendarClock className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-eos-warning" strokeWidth={2} />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-amber-900 dark:text-amber-200">
             AI Act — deadline 2 august 2026
@@ -188,7 +188,7 @@ export default function SistemePage() {
       {/* ── Sprint 10: False confidence prevention ────────────────────────────── */}
       {aiHighRisk > 0 && (
         <div className="flex items-start gap-3 rounded-eos-md border border-red-200 bg-red-50/60 px-4 py-3 text-sm dark:border-red-800/40 dark:bg-red-950/20">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-red-400" strokeWidth={2} />
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-eos-error" strokeWidth={2} />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-red-900 dark:text-red-200">
               {aiHighRisk} sistem{aiHighRisk !== 1 ? "e" : ""} high-risk — obligații active

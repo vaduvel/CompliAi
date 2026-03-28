@@ -47,11 +47,11 @@ const PLANS = [
     cta: "Începe gratuit",
     ctaHref: "/login",
     Icon: Building2,
-    iconClass: "text-white/30",
+    iconClass: "text-eos-text-tertiary",
     iconBg: "bg-white/5 border-white/10",
-    borderClass: "border-white/[0.08]",
-    bgClass: "bg-white/[0.02]",
-    ctaClass: "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
+    borderClass: "border-eos-border",
+    bgClass: "bg-eos-surface-variant",
+    ctaClass: "border border-white/10 bg-white/5 text-eos-text-muted hover:bg-white/10 hover:text-eos-text",
   },
   {
     id: "pro" as const,
@@ -63,11 +63,11 @@ const PLANS = [
     cta: "Pornește Pro — 14 zile gratuit",
     ctaHref: "/login",
     Icon: ShieldCheck,
-    iconClass: "text-blue-400",
-    iconBg: "bg-blue-500/10 border-blue-500/20",
+    iconClass: "text-eos-primary",
+    iconBg: "bg-eos-primary-soft border-eos-border",
     borderClass: "border-blue-500/40",
-    bgClass: "bg-blue-500/[0.04]",
-    ctaClass: "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-500",
+    bgClass: "bg-eos-primary-soft",
+    ctaClass: "bg-blue-600 text-eos-text shadow-lg shadow-blue-500/25 hover:bg-blue-500",
   },
   {
     id: "partner" as const,
@@ -81,9 +81,9 @@ const PLANS = [
     Icon: Briefcase,
     iconClass: "text-violet-400",
     iconBg: "bg-violet-500/10 border-violet-500/20",
-    borderClass: "border-white/[0.08]",
-    bgClass: "bg-white/[0.02]",
-    ctaClass: "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
+    borderClass: "border-eos-border",
+    bgClass: "bg-eos-surface-variant",
+    ctaClass: "border border-white/10 bg-white/5 text-eos-text-muted hover:bg-white/10 hover:text-eos-text",
   },
 ]
 
@@ -141,11 +141,11 @@ const FAQ = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#060810] text-white">
+    <div className="min-h-screen bg-eos-bg text-eos-text">
       <PricingVisitTracker />
 
       {/* Nav */}
-      <header className="border-b border-white/[0.06] px-6 py-4">
+      <header className="border-b border-eos-border-subtle px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link href="/">
             <CompliScanLogoLockup variant="flat" size="sm" />
@@ -153,13 +153,13 @@ export default function PricingPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="rounded-lg px-4 py-2 text-sm text-white/50 transition-colors hover:text-white/80"
+              className="rounded-eos-md px-4 py-2 text-sm text-eos-text-muted transition-colors hover:text-eos-text"
             >
               Conectare
             </Link>
             <Link
               href="/login"
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
+              className="flex items-center gap-1.5 rounded-eos-md bg-blue-600 px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500"
             >
               Începe gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -172,14 +172,14 @@ export default function PricingPage() {
 
         {/* Hero */}
         <div className="mb-16 text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3.5 py-1.5">
-            <Zap className="h-3.5 w-3.5 text-blue-400" strokeWidth={2} />
-            <span className="text-xs font-semibold text-blue-400">Prețuri clare, fără surprize</span>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-eos-border bg-eos-primary-soft px-3.5 py-1.5">
+            <Zap className="h-3.5 w-3.5 text-eos-primary" strokeWidth={2} />
+            <span className="text-xs font-semibold text-eos-primary">Prețuri clare, fără surprize</span>
           </div>
-          <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl">
+          <h1 className="text-4xl font-bold leading-tight text-eos-text md:text-5xl">
             Alege planul potrivit
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-white/45 md:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-eos-text-muted md:text-lg">
             Pornești gratuit ca să vezi ce ți se aplică și ce trebuie rezolvat acum.
             Pro deblochează cockpitul complet, dovada, dosarul și monitorizarea continuă.
           </p>
@@ -195,7 +195,7 @@ export default function PricingPage() {
               <div
                 key={plan.id}
                 className={[
-                  "relative flex flex-col rounded-2xl border p-7 transition-all",
+                  "relative flex flex-col rounded-eos-xl border p-7 transition-all",
                   plan.borderClass,
                   plan.bgClass,
                   isHighlighted
@@ -205,7 +205,7 @@ export default function PricingPage() {
               >
                 {plan.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full border border-blue-500/30 bg-blue-500/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-400">
+                    <span className="rounded-full border border-blue-500/30 bg-blue-500/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-eos-primary">
                       {plan.badge}
                     </span>
                   </div>
@@ -215,13 +215,13 @@ export default function PricingPage() {
                 <div className="mb-6 flex items-center gap-3">
                   <div
                     className={[
-                      "flex h-10 w-10 items-center justify-center rounded-xl border",
+                      "flex h-10 w-10 items-center justify-center rounded-eos-lg border",
                       plan.iconBg,
                     ].join(" ")}
                   >
                     <plan.Icon className={["h-5 w-5", plan.iconClass].join(" ")} strokeWidth={1.5} />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/35">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-eos-text-tertiary">
                     {plan.label}
                   </p>
                 </div>
@@ -229,18 +229,18 @@ export default function PricingPage() {
                 {/* Price */}
                 <div className="mb-2">
                   <div className="flex items-end gap-2">
-                    <span className="text-4xl font-bold text-white md:text-5xl">
+                    <span className="text-4xl font-bold text-eos-text md:text-5xl">
                       {plan.price.split(" / ")[0]}
                     </span>
                     {plan.price.includes("/") && (
-                      <span className="mb-1.5 text-sm text-white/35">/ lună</span>
+                      <span className="mb-1.5 text-sm text-eos-text-tertiary">/ lună</span>
                     )}
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/40">{plan.subtitle}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-eos-text-tertiary">{plan.subtitle}</p>
                 </div>
 
                 {/* Divider */}
-                <div className="my-6 h-px bg-white/[0.07]" />
+                <div className="my-6 h-px bg-eos-border" />
 
                 {/* Features */}
                 <div className="flex-1 space-y-3.5">
@@ -260,15 +260,15 @@ export default function PricingPage() {
                           className={[
                             "h-2.5 w-2.5",
                             isHighlighted
-                              ? "text-blue-400"
+                              ? "text-eos-primary"
                               : plan.id === "partner"
                                 ? "text-violet-400"
-                                : "text-white/40",
+                                : "text-eos-text-tertiary",
                           ].join(" ")}
                           strokeWidth={3}
                         />
                       </div>
-                      <span className="text-sm leading-relaxed text-white/65">{feat}</span>
+                      <span className="text-sm leading-relaxed text-eos-text-muted">{feat}</span>
                     </div>
                   ))}
                 </div>
@@ -278,7 +278,7 @@ export default function PricingPage() {
                   <Link
                     href={plan.ctaHref}
                     className={[
-                      "flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold transition-all",
+                      "flex w-full items-center justify-center gap-2 rounded-eos-xl py-3.5 text-sm font-semibold transition-all",
                       plan.ctaClass,
                     ].join(" ")}
                   >
@@ -293,23 +293,23 @@ export default function PricingPage() {
 
         {/* Feature comparison */}
         <div className="mt-16">
-          <details className="group rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+          <details className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-5 select-none">
               <div>
-                <h2 className="text-base font-semibold text-white">Comparație completă</h2>
-                <p className="mt-0.5 text-sm text-white/35">
+                <h2 className="text-base font-semibold text-eos-text">Comparație completă</h2>
+                <p className="mt-0.5 text-sm text-eos-text-tertiary">
                   Toate funcționalitățile față în față pe cele 3 planuri.
                 </p>
               </div>
-              <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/40 transition-colors group-open:text-white/60">
+              <span className="rounded-eos-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-eos-text-tertiary transition-colors group-open:text-eos-text-muted">
                 Deschide
               </span>
             </summary>
-            <div className="overflow-x-auto border-t border-white/[0.06]">
+            <div className="overflow-x-auto border-t border-eos-border-subtle">
               <table className="w-full border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-white/30">
+                  <tr className="border-b border-eos-border-subtle">
+                    <th className="px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-eos-text-tertiary">
                       Funcționalitate
                     </th>
                     {PLANS.map((p) => (
@@ -317,7 +317,7 @@ export default function PricingPage() {
                         key={p.id}
                         className={[
                           "px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider",
-                          p.highlight ? "text-blue-400" : "text-white/40",
+                          p.highlight ? "text-eos-primary" : "text-eos-text-tertiary",
                         ].join(" ")}
                       >
                         {p.label}
@@ -330,11 +330,11 @@ export default function PricingPage() {
                     <tr
                       key={feature.label}
                       className={[
-                        "border-b border-white/[0.04]",
+                        "border-b border-eos-border-subtle",
                         i % 2 === 0 ? "" : "bg-white/[0.015]",
                       ].join(" ")}
                     >
-                      <td className="px-5 py-3 text-sm text-white/55">{feature.label}</td>
+                      <td className="px-5 py-3 text-sm text-eos-text-muted">{feature.label}</td>
                       {PLANS.map((p) => {
                         const val = feature[p.id]
                         return (
@@ -343,7 +343,7 @@ export default function PricingPage() {
                               <Check
                                 className={[
                                   "mx-auto h-4 w-4",
-                                  p.highlight ? "text-blue-400" : p.id === "partner" ? "text-violet-400" : "text-white/40",
+                                  p.highlight ? "text-eos-primary" : p.id === "partner" ? "text-violet-400" : "text-eos-text-tertiary",
                                 ].join(" ")}
                                 strokeWidth={2.5}
                               />
@@ -353,7 +353,7 @@ export default function PricingPage() {
                                 strokeWidth={2}
                               />
                             ) : (
-                              <span className="text-xs text-white/55">{val}</span>
+                              <span className="text-xs text-eos-text-muted">{val}</span>
                             )}
                           </td>
                         )
@@ -368,47 +368,47 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="mt-10 space-y-3">
-          <h2 className="mb-6 text-base font-semibold text-white/60">Întrebări frecvente</h2>
+          <h2 className="mb-6 text-base font-semibold text-eos-text-muted">Întrebări frecvente</h2>
           {FAQ.map((item) => (
             <details
               key={item.q}
-              className="group rounded-xl border border-white/[0.07] bg-white/[0.02]"
+              className="group rounded-eos-lg border border-eos-border bg-eos-surface-variant"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 select-none">
-                <span className="text-sm font-medium text-white/75">{item.q}</span>
-                <span className="shrink-0 text-lg font-light text-white/25 transition-transform group-open:rotate-45">
+                <span className="text-sm font-medium text-eos-text">{item.q}</span>
+                <span className="shrink-0 text-lg font-light text-eos-text-tertiary transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>
               <div className="border-t border-white/[0.05] px-5 py-4">
-                <p className="text-sm leading-relaxed text-white/45">{item.a}</p>
+                <p className="text-sm leading-relaxed text-eos-text-muted">{item.a}</p>
               </div>
             </details>
           ))}
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 rounded-2xl border border-blue-500/20 bg-blue-500/[0.04] px-8 py-10 text-center">
+        <div className="mt-16 rounded-eos-xl border border-eos-border bg-eos-primary-soft px-8 py-10 text-center">
           <p className="text-sm font-medium uppercase tracking-widest text-blue-400/70">
             Fără card. Fără angajament.
           </p>
-          <h2 className="mt-3 text-2xl font-bold text-white md:text-3xl">
+          <h2 className="mt-3 text-2xl font-bold text-eos-text md:text-3xl">
             Începe gratuit și afli în 5 minute ce ți se aplică.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/40">
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-eos-text-tertiary">
             14 zile Pro incluse la înregistrare. Dacă nu e pentru tine, rămâi pe Free — gratis permanent.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-500"
+              className="flex items-center gap-2 rounded-eos-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-500"
             >
               Creează cont gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
             </Link>
             <Link
               href="mailto:contact@compliscan.ro"
-              className="rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-medium text-white/60 transition-all hover:bg-white/10 hover:text-white"
+              className="rounded-eos-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-medium text-eos-text-muted transition-all hover:bg-white/10 hover:text-eos-text"
             >
               Vorbește cu echipa
             </Link>
@@ -417,17 +417,17 @@ export default function PricingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-8">
+      <footer className="border-t border-eos-border-subtle py-8">
         <div className="mx-auto max-w-5xl px-6">
           <LegalDisclaimer variant="short" />
-          <div className="mt-4 flex flex-wrap gap-4 text-xs text-white/25">
-            <Link href="/terms" className="transition-colors hover:text-white/50">
+          <div className="mt-4 flex flex-wrap gap-4 text-xs text-eos-text-tertiary">
+            <Link href="/terms" className="transition-colors hover:text-eos-text-muted">
               Termeni și condiții
             </Link>
-            <Link href="/privacy" className="transition-colors hover:text-white/50">
+            <Link href="/privacy" className="transition-colors hover:text-eos-text-muted">
               Politica de confidențialitate
             </Link>
-            <Link href="/dpa" className="transition-colors hover:text-white/50">
+            <Link href="/dpa" className="transition-colors hover:text-eos-text-muted">
               DPA
             </Link>
           </div>

@@ -440,7 +440,7 @@ function SpvCheckTab() {
       {error && (
         <Card className="border-red-500/30 bg-red-950/20">
           <CardContent className="py-3">
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-eos-error">{error}</p>
           </CardContent>
         </Card>
       )}
@@ -459,7 +459,7 @@ function SpvCheckTab() {
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-eos-text-muted">SPV:</span>
                 {result.spvRegistered === true && (
-                  <Badge variant="default" className="gap-1 bg-emerald-600/20 text-emerald-400">
+                  <Badge variant="default" className="gap-1 bg-emerald-600/20 text-eos-success">
                     <CheckCircle2 className="size-3" /> Inregistrat
                   </Badge>
                 )}
@@ -502,7 +502,7 @@ function SpvCheckTab() {
                       <p className="mt-1 text-xs text-eos-text-muted">{s.date}</p>
                     </div>
                     {s.converted && (
-                      <Badge variant="default" className="shrink-0 bg-blue-600/20 text-blue-400">
+                      <Badge variant="default" className="shrink-0 bg-blue-600/20 text-eos-primary">
                         Finding creat
                       </Badge>
                     )}
@@ -622,7 +622,7 @@ function EFacturaSignalsTab() {
               onClick={() => setFilter(f)}
               className={`rounded-eos-md px-3 py-1.5 text-xs font-medium transition ${
                 filter === f
-                  ? "bg-eos-primary text-white"
+                  ? "bg-eos-primary text-eos-text"
                   : "bg-eos-bg-inset text-eos-text-muted hover:text-eos-text"
               }`}
             >
@@ -706,7 +706,7 @@ export default function FiscalPage() {
   return (
     <div className="space-y-8">
       {fromCockpit && (
-        <div className="flex items-start gap-3 rounded-lg border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
+        <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-warning" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-eos-text">

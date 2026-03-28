@@ -142,15 +142,15 @@ Regula de produs:
 
 | Tip canonic | Suprafață specialist | Current runtime truth | Target truth | Dovadă care trebuie să revină în cockpit |
 |---|---|---|---|---|
-| `GDPR-013` | `DSAR access` | `manual_banner` | `automatic` | verificare identitate + răspuns DSAR trimis |
-| `GDPR-014` | `DSAR erasure` | `manual_banner` | `automatic` | execuție ștergere + răspuns trimis |
-| `GDPR-019` | `ANSPDCP breach flow` | `conditional_link` | `automatic` | număr înregistrare ANSPDCP sau raționament documentat |
+| `GDPR-013` | `DSAR access` | `automatic` | `automatic` | verificare identitate + răspuns DSAR trimis |
+| `GDPR-014` | `DSAR erasure` | `automatic` | `automatic` | execuție ștergere + răspuns trimis |
+| `GDPR-019` | `ANSPDCP breach flow` | `automatic` | `automatic` | număr înregistrare ANSPDCP sau raționament documentat |
 | `NIS2-001` | `NIS2 eligibility` | `automatic` | `automatic` | rezultat eligibilitate salvat |
 | `NIS2-005` | `NIS2 assessment` | `automatic` | `automatic` | assessment salvat |
 | `NIS2-015` | `NIS2 incident timeline` | `automatic` | `automatic` | referință early warning + incident legat |
-| `NIS2-GENERIC` guvernanță | `NIS2 governance` | `manual_link` | `automatic` | training / certificare salvată în registru |
-| `NIS2-GENERIC` maturitate | `NIS2 maturity` | `manual_link` | `automatic` | evaluare domeniu + plan salvat |
-| `NIS2-GENERIC` furnizori | `NIS2 vendor registry` | `manual_link` | `automatic` | revizuire furnizor + dovadă contractuală |
+| `NIS2-GENERIC` guvernanță | `NIS2 governance` | `automatic` | `automatic` | training / certificare salvată în registru |
+| `NIS2-GENERIC` maturitate | `NIS2 maturity` | `automatic` | `automatic` | evaluare domeniu + plan salvat |
+| `NIS2-GENERIC` furnizori | `NIS2 vendor registry` | `automatic` | `automatic` | revizuire furnizor + dovadă contractuală |
 
 Regula înghețată:
 - `specialist_handoff` nu înseamnă că userul ghicește drumul înapoi

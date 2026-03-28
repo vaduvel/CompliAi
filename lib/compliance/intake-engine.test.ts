@@ -374,6 +374,11 @@ describe("intake-engine", () => {
       ])
     )
     expect(findings).toHaveLength(13)
+    expect(findings.find((finding) => finding.id === "intake-ai-missing-policy")).toEqual(
+      expect.objectContaining({
+        suggestedDocumentType: "ai-governance",
+      })
+    )
 
     expect(documentRequests.map((document) => document.id)).toEqual(
       expect.arrayContaining([
@@ -383,7 +388,7 @@ describe("intake-engine", () => {
         "contracts-template",
         "hr-procedures",
         "job-descriptions",
-        "ai-policy",
+        "ai-governance",
         "dsar-procedure",
         "vendor-docs",
       ])
@@ -394,6 +399,44 @@ describe("intake-engine", () => {
       label: "Generează prima politică GDPR",
       href: "/dashboard/resolve/intake-b2c-privacy?action=generate",
       estimatedMinutes: 3,
+    })
+  })
+
+  it("keeps the AI policy gap on the finding cockpit generator path", () => {
+    const answers = {
+      sellsToConsumers: "no",
+      hasEmployees: "no",
+      processesPersonalData: "no",
+      usesAITools: "yes",
+      usesExternalVendors: "no",
+      hasSiteWithForms: "no",
+      hasStandardContracts: "yes",
+      hasAiPolicy: "no",
+      aiUsesConfidentialData: "no",
+    } as const
+
+    const findings = buildInitialFindings(answers)
+    const documentRequests = buildDocumentRequests(answers)
+    const nextBestAction = buildNextBestAction(findings)
+
+    expect(findings).toHaveLength(1)
+    expect(findings[0]).toEqual(
+      expect.objectContaining({
+        id: "intake-ai-missing-policy",
+        suggestedDocumentType: "ai-governance",
+      })
+    )
+    expect(documentRequests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "ai-governance",
+        }),
+      ])
+    )
+    expect(nextBestAction).toEqual({
+      label: "Deschide politica AI în cockpit",
+      href: "/dashboard/resolve/intake-ai-missing-policy?action=generate",
+      estimatedMinutes: 4,
     })
   })
 })
