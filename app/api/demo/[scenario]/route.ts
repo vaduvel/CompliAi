@@ -1,7 +1,7 @@
 // app/api/demo/[scenario]/route.ts
 // GET — pornire demo org: seed state + sesiune temporară → redirect /dashboard
 //
-// Parametri acceptați: imm | nis2 | partner
+// Parametri acceptați: imm | nis2 | partner | revalidation
 // Sesiunea demo expiră în 2 ore. Datele demo sunt resetate la fiecare vizita.
 
 import { NextResponse } from "next/server"

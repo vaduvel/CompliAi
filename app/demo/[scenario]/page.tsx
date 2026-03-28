@@ -34,7 +34,7 @@ export default function DemoScenarioPage() {
           Scenariu demo necunoscut: <code className="font-mono">{scenario}</code>
         </p>
         <p className="text-xs text-eos-text-muted">
-          Disponibil: <code>/demo/imm</code>, <code>/demo/nis2</code>, <code>/demo/partner</code>
+          Disponibil: <code>/demo/imm</code>, <code>/demo/nis2</code>, <code>/demo/partner</code>, <code>/demo/revalidation</code>
         </p>
       </div>
     )

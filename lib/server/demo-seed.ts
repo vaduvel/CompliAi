@@ -10,7 +10,7 @@ import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import type { Nis2OrgState, Nis2Vendor, Nis2Incident, BoardMember, MaturityAssessment } from "@/lib/server/nis2-store"
 
-export type DemoScenario = "imm" | "nis2" | "partner"
+export type DemoScenario = "imm" | "nis2" | "partner" | "revalidation"
 
 export type DemoOrgConfig = {
   orgId: string
@@ -38,6 +38,12 @@ export const DEMO_ORG: Record<DemoScenario, DemoOrgConfig> = {
     orgId: "org-demo-partner",
     orgName: "Demo Contabil & Asociații",
     email: "demo@demo-partner.compliscan.ro",
+    role: "owner",
+  },
+  revalidation: {
+    orgId: "org-demo-revalidation",
+    orgName: "Demo Revalidation SRL",
+    email: "demo@demo-revalidation.compliscan.ro",
     role: "owner",
   },
 }
@@ -1070,6 +1076,144 @@ function buildPartnerState(): ComplianceState {
   return stateWithFiscal
 }
 
+// ── Scenariul D — Revalidare / SYS-002 ───────────────────────────────────────
+
+function buildRevalidationState(): ComplianceState {
+  const profile: OrgProfile = {
+    sector: "retail",
+    employeeCount: "10-49",
+    usesAITools: false,
+    requiresEfactura: true,
+    cui: "RO99000004",
+    completedAtISO: "2026-03-10T10:00:00.000Z",
+  }
+  const applicability = evaluateApplicability(profile)
+
+  const findings: ScanFinding[] = [
+    {
+      id: "demo-review-1",
+      title: "Dovadă veche / necesită revalidare",
+      detail:
+        "Politica publicată și dovada din dosar trebuie reconfirmate înainte să rămână în monitorizare.",
+      category: "GDPR",
+      severity: "medium",
+      risk: "high",
+      principles: ["privacy_data_governance", "transparency"],
+      createdAtISO: "2026-03-22T10:00:00.000Z",
+      sourceDocument: "vault",
+      legalReference: "GDPR Art. 5 și Art. 24",
+      impactSummary: "Poți rămâne cu o dovadă veche în dosar și cu monitoring fals.",
+      remediationHint: "Reconfirmă acum dovada și setează următorul review.",
+      resolution: {
+        problem: "Dovadă veche pentru politica de confidențialitate",
+        impact: "Monitorizarea continuă nu mai are o urmă de control actuală.",
+        action: "Reconfirmă dovada și stabilește următorul review.",
+        closureEvidence: "Politică publicată și revizuită anterior",
+        revalidation: "Reconfirmare trimestrială sau după schimbări majore în website.",
+        reviewedAtISO: "2025-09-22T09:00:00.000Z",
+      },
+      findingStatus: "open",
+      findingStatusUpdatedAtISO: "2026-03-22T10:00:00.000Z",
+      nextMonitoringDateISO: "2026-03-20T00:00:00.000Z",
+      operationalEvidenceNote:
+        "Politica este publicată la https://demo-retail.example/privacy și ultima revizuire confirmată în dosar este din 22.09.2025.",
+    },
+  ]
+
+  const generatedDocuments: GeneratedDocumentRecord[] = [
+    {
+      id: "demo-review-doc-1",
+      documentType: "privacy-policy",
+      title: "Politica de Confidențialitate — Demo Revalidation SRL",
+      generatedAtISO: "2025-09-22T09:00:00.000Z",
+      llmUsed: true,
+      approvalStatus: "approved_as_evidence",
+      approvedAtISO: "2025-09-22T09:15:00.000Z",
+      approvedByEmail: "demo@demo-revalidation.compliscan.ro",
+      validationStatus: "passed",
+      validatedAtISO: "2025-09-22T09:10:00.000Z",
+      sourceFindingId: "demo-review-1",
+      refreshStatus: "refresh-candidate",
+      nextReviewDateISO: "2026-03-20T00:00:00.000Z",
+      evidenceNote:
+        "Versiunea din dosar folosită la ultima confirmare. Necesită reverificare periodică.",
+    },
+  ]
+
+  const events = [
+    {
+      id: "demo-review-ev-1",
+      type: "document_generated",
+      entityType: "system" as const,
+      entityId: "demo-review-doc-1",
+      message: "Politica de confidențialitate a fost confirmată anterior ca dovadă.",
+      createdAtISO: "2025-09-22T09:15:00.000Z",
+      actorSource: "session" as const,
+      actorId: "demo-user-revalidation",
+    },
+    {
+      id: "demo-review-ev-2",
+      type: "alert_created",
+      entityType: "alert" as const,
+      entityId: "demo-review-alert-1",
+      message: "Review-ul politicii a expirat și dovada trebuie reconfirmată.",
+      createdAtISO: "2026-03-22T10:00:00.000Z",
+      actorSource: "system" as const,
+      actorId: "revalidation-engine",
+    },
+  ]
+
+  return {
+    highRisk: 1,
+    lowRisk: 0,
+    gdprProgress: 78,
+    efacturaSyncedAtISO: "2026-03-20T08:00:00.000Z",
+    efacturaConnected: true,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 1,
+    orgProfile: profile,
+    applicability,
+    alerts: [
+      {
+        id: "demo-review-alert-1",
+        message: "Politica de confidențialitate trebuie reconfirmată și primește un review nou.",
+        severity: "medium",
+        open: true,
+        createdAtISO: "2026-03-22T10:00:00.000Z",
+        findingId: "demo-review-1",
+      },
+    ],
+    findings,
+    scans: [
+      {
+        id: "demo-review-scan-1",
+        documentName: "Vault_Privacy_Policy_2025.pdf",
+        contentPreview: "Versiunea din dosar a politicii publicate — [DEMO]",
+        createdAtISO: "2025-09-22T09:00:00.000Z",
+        findingsCount: 1,
+      },
+    ],
+    generatedDocuments,
+    chat: [],
+    taskState: {
+      "demo-review-1": {
+        status: "todo",
+        updatedAtISO: "2026-03-22T10:00:00.000Z",
+      },
+    },
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events,
+  }
+}
+
 // ── Public factory ────────────────────────────────────────────────────────────
 
 export function buildDemoState(scenario: DemoScenario): ComplianceState {
@@ -1080,6 +1224,8 @@ export function buildDemoState(scenario: DemoScenario): ComplianceState {
       return buildNis2ComplianceState()
     case "partner":
       return buildPartnerState()
+    case "revalidation":
+      return buildRevalidationState()
   }
 }
 
@@ -1092,10 +1238,11 @@ export function buildDemoNis2State(scenario: DemoScenario): Nis2OrgState | null 
   return null
 }
 
-export const DEMO_SCENARIOS: DemoScenario[] = ["imm", "nis2", "partner"]
+export const DEMO_SCENARIOS: DemoScenario[] = ["imm", "nis2", "partner", "revalidation"]
 
 export const DEMO_SCENARIO_LABELS: Record<DemoScenario, string> = {
   imm: "IMM clasic (GDPR + e-Factura)",
   nis2: "Firmă eligibilă NIS2",
   partner: "Partener / Contabil",
+  revalidation: "Revalidare / SYS-002",
 }
