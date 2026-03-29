@@ -52,6 +52,7 @@ function canonicalFrameworkLabel(framework: ReturnType<typeof buildCockpitRecipe
     eFactura: "eFactura",
     "AI Act": "AI Act",
     Cross: "Transversal",
+    "Codul Muncii": "Codul Muncii",
   }
 
   return labels[framework]
