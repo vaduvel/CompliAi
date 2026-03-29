@@ -217,6 +217,7 @@ Status:
 Status:
 
 - `v1 livrat` pe 2026-03-29
+- `v2 follow-up UX livrat` pe 2026-03-29
 
 Ce livrăm:
 
@@ -233,7 +234,14 @@ Livrat în `v1`:
 - reparare sigură pentru coduri frecvente `T003`, `V002`, `V003`, `V006`
 - smoke live verde pe aliasul public
 
-Rămâne pentru `v2`:
+Livrat în `v2`:
+
+- download pentru XML-ul reparat
+- notă pregătită pentru cockpit după repair
+- protocol explicit de retransmitere și revenire în finding
+- smoke live verde pentru affordance-urile noi pe aliasul public
+
+Rămâne pentru `v3`:
 
 - acoperire mai largă de coduri
 - diff clar XML inițial vs reparat

@@ -258,7 +258,7 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 - status azi: `operational-assisted puternic`
 - clasă: `operational`
-- cât avem deja: `78%`
+- cât avem deja: `84%`
 - ce există:
   - validator e-Factura
   - hartă de erori
@@ -268,10 +268,10 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
   - API `POST /api/efactura/repair`
   - helper de reparare sigură pentru coduri frecvente (`T003`, `V002`, `V003`, `V006`)
   - handoff direct din cockpit pentru `EF-003` și `EF-005`
+  - `Fiscal Pre-Validator v2`: download XML reparat, notă pregătită pentru cockpit, protocol explicit după repair
 - ce mai lipsește până la 100%:
   - acoperire mai largă de coduri ANAF / CIUS-RO
-  - diff clar între XML inițial și XML reparat
-  - export/handoff fiscal mai explicit după reparație
+  - diff mai clar între XML inițial și XML reparat
   - legare mai bună cu stările SPV după retransmitere
 - ce ar urca riscul:
   - extinderea `Fiscal Pre-Validator` din `v1` în protocol complet de retransmitere
