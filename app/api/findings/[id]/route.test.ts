@@ -801,6 +801,74 @@ describe("PATCH /api/findings/[id]", () => {
     expect(payload.code).toBe("FINDING_NOT_RESOLVED_FOR_DOSSIER")
   })
 
+  it("creează follow-up-ul GDPR-017 când GDPR-016 intră în monitorizare", async () => {
+    const retentionMonitoringState = {
+      findings: [
+        {
+          id: "finding-retention",
+          title: "Retenție date neclară",
+          detail: "Nu este clar cât timp păstrăm datele și când se execută ștergerea.",
+          category: "GDPR",
+          severity: "medium",
+          risk: "low",
+          principles: ["privacy_data_governance"],
+          createdAtISO: "2026-03-22T10:00:00.000Z",
+          sourceDocument: "doc.pdf",
+          suggestedDocumentType: "retention-policy",
+          findingStatus: "resolved",
+          resolution: {
+            problem: "Durate neclare",
+            impact: "Date păstrate prea mult sau prea puțin.",
+            action: "Definești retenția și o salvezi la dosar.",
+            generatedAsset: "Politică și Matrice de Retenție",
+            closureEvidence: "Matrice salvată și aprobată.",
+          },
+        },
+      ],
+      generatedDocuments: [
+        {
+          id: "doc-retention-1",
+          documentType: "retention-policy",
+          title: "Politică și Matrice de Retenție",
+          generatedAtISO: "2026-03-22T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-retention",
+          approvalStatus: "draft",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-22T11:10:00.000Z",
+          confirmationChecklist: ["content-reviewed", "facts-confirmed", "approved-for-evidence"],
+          validationChecklist: ["validation-reviewed", "validation-ready"],
+        },
+      ],
+    }
+    mocks.readFreshStateMock.mockResolvedValueOnce(retentionMonitoringState)
+
+    const response = await PATCH(
+      new Request("http://localhost/api/findings/finding-retention", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "under_monitoring",
+          generatedDocumentId: "doc-retention-1",
+        }),
+      }),
+      { params: Promise.resolve({ id: "finding-retention" }) }
+    )
+    const payload = await response.json()
+    const writtenState = mocks.writeStateMock.mock.calls[0]?.[0]
+    const followUpFinding = writtenState?.findings?.find(
+      (finding: { id: string }) => finding.id === "retention-deletion-proof-finding-retention"
+    )
+
+    expect(response.status).toBe(200)
+    expect(payload.status).toBe("under_monitoring")
+    expect(payload.feedbackMessage).toContain("follow-up-ul pentru dovada de ștergere / anonimizare")
+    expect(followUpFinding).toBeTruthy()
+    expect(followUpFinding.title).toBe("Ștergere / anonimizare neconfirmată")
+    expect(followUpFinding.findingStatus).toBe("open")
+    expect(followUpFinding.suggestedDocumentType).toBe("retention-policy")
+  })
+
   it("blochează EF-003 fără dovadă operațională", async () => {
     const efacturaState = {
       findings: [

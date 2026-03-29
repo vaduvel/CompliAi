@@ -473,6 +473,11 @@ export async function PATCH(
       }
       feedbackMessage =
         "Documentul a intrat în Dosar, iar cazul a intrat în monitorizare cu urmă clară pentru reverificare."
+
+      if (findingTypeId === "GDPR-016") {
+        upsertRetentionExecutionFollowUpFinding(updatedFindings, updatedFindings[findingIdx], nowISO)
+        feedbackMessage += " A apărut și follow-up-ul pentru dovada de ștergere / anonimizare."
+      }
     }
 
     if (isFindingResolvedLike(storedStatus) && !closeGating.requiresGeneratedDocument) {
@@ -711,5 +716,65 @@ function buildFiscalMonitoringNotification(
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
         linkTo: `/dashboard/resolve/${finding.id}`,
       }
+  }
+}
+
+function upsertRetentionExecutionFollowUpFinding(
+  findings: ScanFinding[],
+  sourceFinding: ScanFinding,
+  nowISO: string
+) {
+  const followUpId = getRetentionExecutionFollowUpId(sourceFinding.id)
+  const existingIndex = findings.findIndex((item) => item.id === followUpId)
+
+  if (existingIndex !== -1) return
+
+  findings.push(buildRetentionExecutionFollowUpFinding(sourceFinding, nowISO))
+}
+
+function getRetentionExecutionFollowUpId(sourceFindingId: string) {
+  return `retention-deletion-proof-${sourceFindingId}`
+}
+
+function buildRetentionExecutionFollowUpFinding(
+  sourceFinding: ScanFinding,
+  nowISO: string
+): ScanFinding {
+  return {
+    id: getRetentionExecutionFollowUpId(sourceFinding.id),
+    title: "Ștergere / anonimizare neconfirmată",
+    detail:
+      "Ai salvat regula de retenție, dar nu avem încă dovada că ștergerea sau anonimizarea se execută în practică pentru datele expirate.",
+    category: "GDPR",
+    severity: "medium",
+    risk: "high",
+    principles: sourceFinding.principles ?? [],
+    createdAtISO: nowISO,
+    sourceDocument: "retention-follow-up",
+    impactSummary:
+      "Politica există, dar fără log, export sau screenshot de control nu poți demonstra execuția reală la audit.",
+    remediationHint:
+      "Rulează ștergerea sau anonimizarea și lasă logul, exportul sau captura de control în același cockpit.",
+    evidenceRequired: "Log de ștergere / anonimizare, export de control sau screenshot verificabil.",
+    suggestedDocumentType: "retention-policy",
+    findingStatus: "open",
+    findingStatusUpdatedAtISO: nowISO,
+    resolution: {
+      problem:
+        "Regula de retenție este definită, dar nu există încă dovada execuției reale pentru datele expirate.",
+      impact:
+        "Fără urmă de execuție rămâi cu o politică bună, dar fără dovadă că ștergerea sau anonimizarea se aplică în practică.",
+      action:
+        "Revino după ce rulezi controlul real și lasă logul, exportul sau screenshotul de verificare în cockpit.",
+      generatedAsset:
+        sourceFinding.resolution?.generatedAsset ??
+        "Politică și matrice de retenție salvată ca suport",
+      humanStep:
+        "Execută ștergerea sau anonimizarea în sistemele reale și păstrează urma verificabilă.",
+      closureEvidence:
+        "Log, export sau screenshot de control care confirmă ștergerea / anonimizarea executată.",
+      revalidation: "Reverificare periodică la 90 de zile sau la schimbarea procesului.",
+      reviewedAtISO: nowISO,
+    },
   }
 }

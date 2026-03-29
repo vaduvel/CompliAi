@@ -29,9 +29,12 @@ export function preserveRuntimeStateForRegeneratedFindings(
     if (incomingIds.has(finding.id)) return false
 
     const status = finding.findingStatus ?? "open"
-    if (!["confirmed", "resolved", "under_monitoring"].includes(status)) return false
 
     const recipe = buildCockpitRecipe(finding)
+    if (recipe.findingTypeId === "GDPR-017") return true
+
+    if (!["confirmed", "resolved", "under_monitoring"].includes(status)) return false
+
     return recipe.executionClass === "specialist_handoff"
   })
 

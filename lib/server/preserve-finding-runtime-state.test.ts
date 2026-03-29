@@ -79,6 +79,30 @@ describe("preserveRuntimeStateForRegeneratedFindings", () => {
     expect(merged).toHaveLength(1)
     expect(merged.some((finding) => finding.id === "nis2-gov-training-member-1")).toBe(false)
   })
+
+  it("păstrează follow-up-ul GDPR-017 chiar dacă dispare din regenerare", () => {
+    const existing = makeFinding({
+      id: "retention-deletion-proof-finding-1",
+      title: "Ștergere / anonimizare neconfirmată",
+      detail: "Ai regula de retenție, dar lipsește dovada execuției reale.",
+      remediationHint: "Lasă logul sau exportul de control.",
+      category: "GDPR",
+      findingStatus: "open",
+      suggestedDocumentType: "retention-policy",
+      sourceDocument: "retention-follow-up",
+    })
+    const incoming = makeFinding({
+      id: "finding-retention",
+      title: "Retenție date neclară",
+      detail: "Alt finding rămas activ.",
+      category: "GDPR",
+    })
+
+    const merged = preserveRuntimeStateForRegeneratedFindings([existing], [incoming])
+    expect(merged).toHaveLength(2)
+    expect(merged.some((finding) => finding.id === "retention-deletion-proof-finding-1")).toBe(true)
+    expect(merged.find((finding) => finding.id === "retention-deletion-proof-finding-1")?.findingStatus).toBe("open")
+  })
 })
 
 describe("preserveRuntimeStateForSingleFinding", () => {
