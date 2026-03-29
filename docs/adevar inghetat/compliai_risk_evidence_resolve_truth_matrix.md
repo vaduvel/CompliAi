@@ -90,16 +90,16 @@ Acesta este grupul principal pentru flow-ul:
 | `intake-vendor-no-dpa` | DPA lipsă pentru furnizori care procesează date personale | `GDPR-010` | `dpa` | `DOCUMENTAR REAL` | flow documentar complet în cockpit |
 | `intake-ai-missing-policy` | Politică de utilizare AI lipsă | `AI-005` | `ai-governance` | `DOCUMENTAR REAL` | flow documentar complet în cockpit |
 
-### 2.2 Riscuri care NU trebuie tratate ca documentare, ci operațional
+### 2.2 Riscuri care NU trebuie tratate ca documentare, ci operațional sau handoff asistat
 
 | Finding ID emis în intake | Titlu user-facing | Tip canonic | Dovadă reală care închide cazul | Verdict current truth | Observație |
 |---|---|---|---|---|---|
-| `intake-hr-job-descriptions` | Fișe de post lipsă sau incomplete | `GDPR-OPS` | fișe pregătite + urmă clară / fișier / notă | `OPERAȚIONAL` | nu există motor real de `job-descriptions` |
+| `intake-hr-job-descriptions` | Fișe de post lipsă sau incomplete | `GDPR-021` | pachet HR revizuit + urmă clară pentru rollout-ul pe roluri + fișe finale / notă | `SPECIALIST_HANDOFF REAL` | handoff în `Documente`, cu pachet HR și revenire automată în cockpit |
 | `intake-hr-registry` | REGES / evidență contracte angajați | `GDPR-OPS` | export / confirmare operațională / notă auditabilă | `OPERAȚIONAL` | nu trebuie să se închidă din confirmare simplă |
 | `intake-hr-procedures` | Proceduri interne angajați lipsă | `GDPR-OPS` | regulament / procedură încărcată sau notă auditabilă | `OPERAȚIONAL` | nu există generator real de `hr-procedures` |
-| `intake-gdpr-dsar` | Proces DSAR lipsă | `GDPR-OPS` | procedură reală + owner desemnat + urmă clară | `OPERAȚIONAL` | azi nu are generator DSAR procedural real |
+| `intake-gdpr-dsar` | Proces DSAR lipsă | `GDPR-012` | procedură reală + owner desemnat + urmă clară | `SPECIALIST_HANDOFF REAL` | pachet DSAR real cu revenire automată în cockpit |
 | `intake-ai-confidential-data` | Date confidențiale introduse în AI fără protecție | `AI-OPS` | regulă aplicată + training / policy / notă clară | `OPERAȚIONAL` | documentul poate ajuta, dar dovada principală este operațională |
-| `intake-vendor-missing-docs` | Furnizori externi fără documentație | `GDPR-OPS` | vendor review + documente reale + notă clară | `OPERAȚIONAL` | nu are flow documentar unic suficient |
+| `intake-vendor-missing-docs` | Furnizori externi fără documentație | `GDPR-011` | vendor review + documente reale + notă clară | `SPECIALIST_HANDOFF REAL` | Vendor Pack real cu revenire automată în cockpit |
 | `intake-site-cookies` | Cookies consent / policy lipsă | `GDPR-005` | banner corectat + rescan / screenshot | `OPERAȚIONAL` | generatorul de `cookie-policy` nu închide singur cazul |
 | `intake-contracts-baseline` | Contracte standard lipsă sau incomplete | `GDPR-020` | template-uri reale + locație + folosire + urmă clară | `OPERAȚIONAL` | nu trebuie tratat ca document auto-generat |
 

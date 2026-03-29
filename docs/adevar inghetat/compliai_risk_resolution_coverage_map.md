@@ -173,18 +173,20 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 9. Fișe de post lipsă sau incomplete
 
-- status azi: `doar detectat`
-- clasă: `operational`
-- cât avem deja: `15%`
+- status azi: `specialist_handoff real`
+- clasă: `specialist_handoff`
+- cât avem deja: `65%`
 - ce există:
   - finding de intake
+  - tip canonic dedicat `GDPR-021`
+  - `Job Description Pack` în suprafața `Documente`
+  - revenire automată în cockpit cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `Job Description Pack`
   - generator per rol
   - formular scurt: rol, departament, senioritate, manager
   - circuit de confirmare / semnare
 - ce ar urca riscul:
-  - mutare în `operational-assisted`
+  - generare per rol + rollout asistat până la fișiere finale
 
 ### 10. REGES / evidență contracte angajați neactualizată
 

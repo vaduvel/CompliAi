@@ -626,10 +626,12 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "medium",
           {
             remediationHint: "Pregătește fișe de post standard pentru fiecare rol.",
+            suggestedDocumentType: "job-description",
             resolution: {
               problem: "Fișe de post lipsă sau neactualizate.",
               impact: "Risc de sancțiune la control ITM.",
               action: "Generează template fișe de post din CompliAI.",
+              generatedAsset: "Fișă de Post (generată AI)",
               humanStep: "Adaptează fișele la rolurile reale din firmă.",
               closureEvidence: "Fișele semnate și arhivate.",
             },
@@ -647,11 +649,13 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "high",
           {
             remediationHint: "Verifică înregistrările în REGES și completează lipsurile.",
+            suggestedDocumentType: "reges-correction-brief",
             resolution: {
               problem: "REGES / evidență contracte neactualizată.",
-              impact: "Sancțiuni de la ITM pentru neconformitate.",
-              action: "Verifică REGES și completează înregistrările lipsă.",
-              humanStep: "Contabilul sau HR-ul confirmă că Revisal e la zi.",
+              impact: "Sancțiuni de la ITM pentru neconformitate (5.000-10.000 RON/angajat).",
+              action: "Generează Brief Corecție REGES din CompliAI și trimite-l contabilului.",
+              generatedAsset: "Brief Corecție REGES/Revisal (generat AI)",
+              humanStep: "Contabilul sau HR-ul verifică Revisal-ul și confirmă conformitatea.",
               closureEvidence: "Export REGES actualizat.",
             },
           }
@@ -668,10 +672,12 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
           "medium",
           {
             remediationHint: "Generează regulament intern din CompliAI.",
+            suggestedDocumentType: "hr-internal-procedures",
             resolution: {
               problem: "Lipsa regulamentului intern / procedurilor pentru angajați.",
               impact: "Neconformitate cu Codul Muncii.",
               action: "Generează regulament intern standard.",
+              generatedAsset: "Regulament Intern (generat AI)",
               humanStep: "Adaptează la specificul firmei și obține semnăturile.",
               closureEvidence: "Regulament semnat și comunicat angajaților.",
             },
@@ -984,6 +990,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   const aiFinding = findings.find((f) => f.id === "intake-ai-missing-policy")
   const vendorDpaFinding = findings.find((f) => f.id === "intake-vendor-no-dpa")
   const vendorPackFinding = findings.find((f) => f.id === "intake-vendor-missing-docs")
+  const hrJobFinding = findings.find((f) => f.id === "intake-hr-job-descriptions")
 
   if (privacyFinding) {
     return {
@@ -1005,6 +1012,14 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
     return {
       label: "Deschide pachetul vendor în cockpit",
       href: `${dashboardRoutes.resolve}/${vendorPackFinding.id}`,
+      estimatedMinutes: 5,
+    }
+  }
+
+  if (hrJobFinding) {
+    return {
+      label: "Deschide pachetul fișelor de post",
+      href: `${dashboardRoutes.resolve}/${hrJobFinding.id}`,
       estimatedMinutes: 5,
     }
   }

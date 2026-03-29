@@ -23,7 +23,7 @@ import { MATURITY_DOMAINS } from "@/lib/compliance/nis2-maturity"
 // 1. TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type FindingFramework = "GDPR" | "NIS2" | "eFactura" | "AI Act" | "Cross"
+export type FindingFramework = "GDPR" | "NIS2" | "eFactura" | "AI Act" | "Cross" | "Codul Muncii"
 
 export type ResolutionMode =
   | "in_app_guided"
@@ -193,6 +193,7 @@ export type CloseGatingRequirements = {
 export type SmartResolveExecutionClass = "documentary" | "operational" | "specialist_handoff"
 
 export type SpecialistHandoffSurface =
+  | "job_description_pack"
   | "vendor_review_pack"
   | "dsar_process"
   | "dsar_access"
@@ -228,10 +229,15 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "GDPR-003",
   "GDPR-010",
   "GDPR-016",
+  "GDPR-020",
   "AI-005",
+  "HR-001",
+  "HR-002",
+  "HR-003",
 ])
 
 const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
+  "GDPR-021",
   "GDPR-011",
   "GDPR-012",
   "GDPR-013",
@@ -261,12 +267,16 @@ const CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, Generat
   "GDPR-003": "cookie-policy",
   "GDPR-010": "dpa",
   "GDPR-016": "retention-policy",
+  "GDPR-020": "contract-template",
   "AI-005": "ai-governance",
+  "HR-001": "job-description",
+  "HR-002": "hr-internal-procedures",
+  "HR-003": "reges-correction-brief",
 }
 
 const ASSISTIVE_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, GeneratedDocumentKind>> = {
   "GDPR-005": "cookie-policy",
-  "GDPR-017": "retention-policy",
+  "GDPR-017": "deletion-attestation",
   "AI-OPS": "ai-governance",
 }
 
@@ -572,6 +582,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     autoRecheck: "partial",
     closingRule: "template-uri contractuale revizuite și urmă clară salvată la dosar",
   },
+  "GDPR-021": {
+    findingTypeId: "GDPR-021",
+    framework: "GDPR",
+    title: "Fișe de post lipsă sau incomplete",
+    category: "HR / job descriptions",
+    typicalSeverity: "medium",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["in_app_guided", "external_action"],
+    primaryActors: ["user", "owner"],
+    compliCapabilities: ["pregătește pachetul HR", "deschide suprafața Documente", "orientează spre generatorul fișei de post"],
+    userResponsibilities: ["confirmă rolurile reale", "adaptează fișele per rol", "obține semnătura sau dovada de comunicare"],
+    requiredEvidenceKinds: ["uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "pachetul HR este revizuit și există urmă clară pentru rollout-ul fișelor de post",
+  },
   "GDPR-OPS": {
     findingTypeId: "GDPR-OPS",
     framework: "GDPR",
@@ -639,10 +664,10 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     category: "SPV",
     typicalSeverity: "high",
     signalTypes: ["direct", "inferred"],
-    resolutionModes: ["external_action"],
+    resolutionModes: ["in_app_guided"],
     primaryActors: ["user"],
-    compliCapabilities: ["explică pașii", "cere dovada activării"],
-    userResponsibilities: ["activează SPV"],
+    compliCapabilities: ["oferă wizard interactiv SPV", "verifică automat API-ul ANAF"],
+    userResponsibilities: ["verifică SPV din aplicație", "încarcă token-ul dacă e cerut"],
     requiredEvidenceKinds: ["screenshot", "official_reference"],
     autoRecheck: "partial",
     closingRule: "dovada activării",
@@ -654,11 +679,11 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     category: "Invoice error",
     typicalSeverity: "high",
     signalTypes: ["direct"],
-    resolutionModes: ["external_action"],
+    resolutionModes: ["in_app_guided", "external_action"],
     primaryActors: ["user"],
-    compliCapabilities: ["afișează motivul și acțiunea recomandată"],
-    userResponsibilities: ["corectează în ERP / soft"],
-    requiredEvidenceKinds: ["xml", "screenshot"],
+    compliCapabilities: ["parsează XML-ul", "identifică eroarea", "propune auto-fix", "generează XML corectat"],
+    userResponsibilities: ["confirmă corecția", "retransmite XML-ul"],
+    requiredEvidenceKinds: ["xml", "screenshot", "confirmation"],
     autoRecheck: "yes",
     closingRule: "status nou valid sau dovada corecției",
   },
@@ -812,6 +837,51 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["confirmation"],
     autoRecheck: "no",
     closingRule: "confirmare prezentă",
+  },
+  "HR-001": {
+    findingTypeId: "HR-001",
+    framework: "Codul Muncii",
+    title: "Fișe de post lipsă sau incomplete",
+    category: "HR",
+    typicalSeverity: "medium",
+    signalTypes: ["questionnaire"],
+    resolutionModes: ["in_app_full"],
+    primaryActors: ["user", "compli"],
+    compliCapabilities: ["generează fișa de post pe baza datelor firmei", "pre-completează structura Art. 17"],
+    userResponsibilities: ["completează titlul postului și atribuțiile specifice", "verifică cu HR/managementul"],
+    requiredEvidenceKinds: ["generated_document"],
+    autoRecheck: "no",
+    closingRule: "fișă de post generată, confirmată și salvată la dosar",
+  },
+  "HR-002": {
+    findingTypeId: "HR-002",
+    framework: "Codul Muncii",
+    title: "Regulament intern lipsă sau incomplet",
+    category: "HR",
+    typicalSeverity: "medium",
+    signalTypes: ["questionnaire"],
+    resolutionModes: ["in_app_full"],
+    primaryActors: ["user", "compli"],
+    compliCapabilities: ["generează regulament intern conform Art. 241-246", "include capitolele obligatorii"],
+    userResponsibilities: ["personalizează programul și politicile specifice", "aduce la cunoștința angajaților"],
+    requiredEvidenceKinds: ["generated_document"],
+    autoRecheck: "no",
+    closingRule: "regulament generat, confirmat și confirmare luare la cunoștință",
+  },
+  "HR-003": {
+    findingTypeId: "HR-003",
+    framework: "Codul Muncii",
+    title: "REGES / Revisal neconform sau neverificat",
+    category: "HR",
+    typicalSeverity: "high",
+    signalTypes: ["questionnaire"],
+    resolutionModes: ["in_app_guided"],
+    primaryActors: ["user", "compli"],
+    compliCapabilities: ["generează brief corecție pentru contabil", "include checklist verificare și termene ITM"],
+    userResponsibilities: ["trimite brief-ul la contabil", "obține export Revisal actualizat ca dovadă"],
+    requiredEvidenceKinds: ["generated_document", "uploaded_file"],
+    autoRecheck: "no",
+    closingRule: "brief trimis + export Revisal primit ca dovadă",
   },
 }
 
@@ -988,6 +1058,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Template-uri contractuale pregătite și urmă clară salvată în cockpit.",
     revalidationTriggers: ["model contractual schimbat", "jurisdicție nouă", "review contractual periodic"],
   },
+  "GDPR-021": {
+    findingTypeId: "GDPR-021",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Deschide pachetul HR",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă un set clar de fișe de post și nici o urmă coerentă despre rolurile care trebuie acoperite.",
+    whatCompliDoes:
+      "Deschide suprafața Documente cu pachetul HR pregătit: modelul de fișă, inventarul de roluri și checklistul de rollout.",
+    whatUserMustDo:
+      "Revizuiești pachetul, confirmi rolurile reale, apoi adaptezi și semnezi fișele de post pentru pozițiile relevante.",
+    closeCondition: "Pachetul HR este revizuit și există urmă clară pentru rollout-ul fișelor de post.",
+    revalidationTriggers: ["rol nou", "schimbare de organigramă", "review HR periodic"],
+  },
   "GDPR-OPS": {
     findingTypeId: "GDPR-OPS",
     initialFlowState: "external_action_required",
@@ -1143,6 +1227,40 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserMustDo: "Reconfirmă sau reînnoiește dovada.",
     closeCondition: "Dată nouă de review salvată.",
     revalidationTriggers: ["la expirarea review-ului", "politică învechiată"],
+  },
+  // ── HR Pack — Sprint 16/16 ──────────────────────────────────────────────────
+  "HR-001": {
+    findingTypeId: "HR-001",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Generează Fișa de Post",
+    secondaryCTA: "Ce conține",
+    whatUserSees: "Fișele de post lipsesc sau sunt incomplete — sunt obligatorii conform Codului Muncii Art. 17.",
+    whatCompliDoes: "Generăm fișa de post cu structura legală completă. Tu completezi titlul, departamentul și atribuțiile specifice.",
+    whatUserMustDo: "Personalizează, revizuiește cu HR și semnează cu angajatul.",
+    closeCondition: "Fișă generată, confirmată și salvată la Dosar.",
+    revalidationTriggers: ["la schimbarea rolului", "la modificarea structurii organizaționale"],
+  },
+  "HR-002": {
+    findingTypeId: "HR-002",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Generează Regulament Intern",
+    secondaryCTA: "De ce e obligatoriu",
+    whatUserSees: "Regulamentul intern lipsește — este obligatoriu conform Codului Muncii Art. 241-246.",
+    whatCompliDoes: "Generăm regulament cu toate capitolele obligatorii (program, concedii, disciplină, SSM, GDPR, whistleblowing).",
+    whatUserMustDo: "Personalizează programul, regulile specifice și asigură confirmarea luării la cunoștință de fiecare angajat.",
+    closeCondition: "Regulament generat, confirmat și cu dovadă de comunicare la angajați.",
+    revalidationTriggers: ["la schimbarea legislației muncii", "anual recomandat"],
+  },
+  "HR-003": {
+    findingTypeId: "HR-003",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Generează Brief Corecție REGES",
+    secondaryCTA: "Ce riscuri sunt",
+    whatUserSees: "REGES/Revisal nu a fost verificat sau are neconcordanțe — amendă ITM: 5.000-10.000 RON/angajat.",
+    whatCompliDoes: "Generăm un brief structurat cu checklist pentru contabilul tău: ce să verifice, termene legale și consecințe.",
+    whatUserMustDo: "Trimite brief-ul la contabil. Când revine cu export Revisal actualizat, încarcă-l ca dovadă.",
+    closeCondition: "Brief trimis + export Revisal primit și salvat la Dosar.",
+    revalidationTriggers: ["la fiecare angajare/plecare", "la orice modificare contract"],
   },
   // Generic fallbacks
   "GDPR-GENERIC": {
@@ -1300,6 +1418,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "dsar-no-procedure") return "GDPR-013"
   if (id === "dsar-erasure-active") return "GDPR-014"
   if (id === "intake-gdpr-dsar") return "GDPR-012"
+  if (id === "intake-hr-job-descriptions") return "GDPR-021"
   if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
@@ -2096,6 +2215,15 @@ function getWorkflowLink(
         }).toString()}`,
         label: "Deschide DSAR",
       }
+    case "GDPR-021":
+      return {
+        href: `/dashboard/documente?${new URLSearchParams({
+          focus: "job-descriptions",
+          findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide pachetul HR",
+      }
     case "GDPR-011":
       return {
         href: `/dashboard/vendor-review?${new URLSearchParams({
@@ -2170,6 +2298,8 @@ function getSpecialistHandoffSurface(
   record: ScanFinding
 ): SpecialistHandoffSurface | null {
   switch (findingTypeId) {
+    case "GDPR-021":
+      return "job_description_pack"
     case "GDPR-011":
       return "vendor_review_pack"
     case "GDPR-012":
@@ -2212,6 +2342,19 @@ export function getSpecialistHandoffContract(
   if (!workflowLink || !surface) return undefined
 
   switch (surface) {
+    case "job_description_pack":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce pachetul HR este revizuit și planul de rollout pentru fișele de post este clar, suprafața Documente te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Pachet HR pregătit",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească dovada că modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite și asumate pentru pașii următori.",
+      }
     case "vendor_review_pack":
       return {
         surface,
@@ -2363,6 +2506,8 @@ function getClosureCTA(
   primaryMode: ResolutionMode
 ): string | undefined {
   switch (findingTypeId) {
+    case "GDPR-021":
+      return "Marchează pachetul HR pregătit"
     case "GDPR-011":
       return "Marchează pachetul vendor pregătit"
     case "NIS2-001":
@@ -2410,6 +2555,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-017": 90,
   "GDPR-019": null,
   "GDPR-020": 180,
+  "GDPR-021": 180,
   "GDPR-OPS": 180,
   "NIS2-001": 365,
   "NIS2-005": 180,
@@ -2983,6 +3129,15 @@ export function buildCockpitRecipe(
       ])
     )
     closeCondition = "Baseline-ul contractual este pregătit și documentat clar în cockpit."
+  } else if (findingTypeId === "GDPR-021") {
+    acceptedEvidence = Array.from(
+      new Set([
+        "Model de fișă de post adaptat sau încărcat la dosar",
+        "Inventar clar al rolurilor acoperite și al rolurilor rămase",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition = "Pachetul HR este revizuit, iar următorii pași pentru fișele de post sunt documentați clar în cockpit."
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
     primaryCTALabel =
       nis2GovernanceFocus === "certification" ? "Actualizează certificarea CISO" : "Actualizează training-ul boardului"
@@ -3134,6 +3289,8 @@ export function buildCockpitRecipe(
     dossierOutcome = `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
   } else if (findingTypeId === "GDPR-020") {
     dossierOutcome = "Baseline-ul contractual și nota despre unde sunt salvate template-urile intră în dosar pentru audit și review juridic."
+  } else if (findingTypeId === "GDPR-021") {
+    dossierOutcome = "Pachetul HR, modelul de fișă și nota despre rollout-ul per rol intră în dosar pentru audit HR și control ITM."
   }
 
   let recipeMonitoringSignals = monitoringSignals
@@ -3149,6 +3306,13 @@ export function buildCockpitRecipe(
       new Set([
         ...monitoringSignals,
         "Reverificăm baseline-ul contractual când se schimbă modelul de contract, furnizorii sau jurisdicția.",
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "GDPR-021") {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        "Reverificăm fișele de post când apar roluri noi, se schimbă organigrama sau responsabilitățile reale.",
       ])
     ).slice(0, 5)
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {

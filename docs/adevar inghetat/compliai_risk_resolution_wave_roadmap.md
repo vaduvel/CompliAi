@@ -120,13 +120,16 @@ Dificultate:
 
 Ce livrăm:
 
-- generator de fișă de post per rol
-- formular scurt pentru context
-- pachet gata de revizuire și semnare
+- tip canonic dedicat `GDPR-021`
+- handoff în `Documente` cu pachet HR pregătit
+- model de fișă, inventar de roluri și checklist de rollout
+- revenire automată în cockpit cu dovadă precompletată
 
 Ce reutilizăm deja:
 
-- aproape nimic reutilizabil direct, doar intake
+- intake-ul existent pentru HR
+- suprafața `Documente`
+- infrastructura de `specialist_handoff`
 
 Impact:
 
@@ -135,6 +138,11 @@ Impact:
 Dificultate:
 
 - `medie`
+
+Status:
+
+- `livrat`
+- următorul pas este generatorul per rol și circuitul de semnare
 
 ### 4. HR Procedure Pack
 

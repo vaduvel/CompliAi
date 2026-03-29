@@ -466,6 +466,30 @@ describe("intake-engine", () => {
     })
   })
 
+  it("trimite fișele de post pe cockpitul pachetului HR", () => {
+    const findings = buildInitialFindings({
+      sellsToConsumers: "no",
+      hasEmployees: "yes",
+      processesPersonalData: "no",
+      usesAITools: "no",
+      usesExternalVendors: "no",
+      hasSiteWithForms: "no",
+      hasStandardContracts: "yes",
+      hasJobDescriptions: "no",
+      hasEmployeeRegistry: "yes",
+      hasInternalProcedures: "yes",
+    } as const)
+
+    const nextBestAction = buildNextBestAction(findings)
+
+    expect(findings.map((finding) => finding.id)).toContain("intake-hr-job-descriptions")
+    expect(nextBestAction).toEqual({
+      label: "Deschide pachetul fișelor de post",
+      href: "/dashboard/resolve/intake-hr-job-descriptions",
+      estimatedMinutes: 5,
+    })
+  })
+
   it("creează finding și document request pentru retenție când regula nu este clară", () => {
     const answers = {
       sellsToConsumers: "no",

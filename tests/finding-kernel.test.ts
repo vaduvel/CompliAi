@@ -119,7 +119,7 @@ describe("classifyFinding", () => {
     expect(result.framework).toBe("GDPR")
   })
 
-  it("mapează intake HR fără generator → GDPR-OPS", () => {
+  it("mapează registrul HR din intake → GDPR-OPS", () => {
     const result = classifyFinding(
       makeFinding({
         id: "intake-hr-registry",
@@ -129,6 +129,19 @@ describe("classifyFinding", () => {
       })
     )
     expect(result.findingTypeId).toBe("GDPR-OPS")
+    expect(result.framework).toBe("GDPR")
+  })
+
+  it("mapează fișele de post din intake pe flow-ul dedicat de HR pack", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-hr-job-descriptions",
+        category: "GDPR",
+        title: "Fișe de post lipsă sau incomplete",
+        detail: "Angajații necesită fișe de post actualizate conform Codului Muncii.",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-021")
     expect(result.framework).toBe("GDPR")
   })
 
@@ -983,9 +996,9 @@ describe("buildCockpitRecipe", () => {
       expect(recipe.workflowLink?.href).toContain("focus=process")
     })
 
-    it("mapează intake-vendor-missing-docs pe flow-ul dedicat de vendor pack", () => {
-      const finding = makeFinding({
-        id: "intake-vendor-missing-docs",
+  it("mapează intake-vendor-missing-docs pe flow-ul dedicat de vendor pack", () => {
+    const finding = makeFinding({
+      id: "intake-vendor-missing-docs",
         category: "GDPR",
         title: "Furnizori externi fără documentație",
         detail: "Nu avem DPA, termeni sau evaluare de risc pentru furnizorii externi relevanți.",
@@ -993,9 +1006,23 @@ describe("buildCockpitRecipe", () => {
       const recipe = buildCockpitRecipe(finding)
       expect(recipe.findingTypeId).toBe("GDPR-011")
       expect(recipe.executionClass).toBe("specialist_handoff")
-      expect(recipe.workflowLink?.href).toContain("/dashboard/vendor-review?")
-      expect(recipe.workflowLink?.href).toContain("focus=pack")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/vendor-review?")
+    expect(recipe.workflowLink?.href).toContain("focus=pack")
+  })
+
+  it("mapează intake-hr-job-descriptions pe flow-ul dedicat de HR pack", () => {
+    const finding = makeFinding({
+      id: "intake-hr-job-descriptions",
+      category: "GDPR",
+      title: "Fișe de post lipsă sau incomplete",
+      detail: "Angajații necesită fișe de post actualizate conform Codului Muncii.",
     })
+    const recipe = buildCockpitRecipe(finding)
+    expect(recipe.findingTypeId).toBe("GDPR-021")
+    expect(recipe.executionClass).toBe("specialist_handoff")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/documente?")
+    expect(recipe.workflowLink?.href).toContain("focus=job-descriptions")
+  })
   })
 })
 
@@ -1015,6 +1042,13 @@ describe("getCloseGatingRequirements", () => {
 
   it("cere dovadă la întoarcerea din vendor pack pentru GDPR-011", () => {
     const requirements = getCloseGatingRequirements("GDPR-011")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
+  })
+
+  it("cere dovadă la întoarcerea din HR pack pentru GDPR-021", () => {
+    const requirements = getCloseGatingRequirements("GDPR-021")
     expect(requirements.requiresGeneratedDocument).toBe(false)
     expect(requirements.requiresEvidenceNote).toBe(true)
     expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
@@ -1078,6 +1112,7 @@ describe("getSmartResolveExecutionClass", () => {
   })
 
   it("marchează DSAR și NIS2 asistat ca specialist_handoff", () => {
+    expect(getSmartResolveExecutionClass("GDPR-021")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-011")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-012")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-013")).toBe("specialist_handoff")
@@ -1087,6 +1122,18 @@ describe("getSmartResolveExecutionClass", () => {
 })
 
 describe("getSpecialistHandoffContract", () => {
+  it("mapează HR pack pe handoff contextual cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-021",
+      makeFinding({ id: "intake-hr-job-descriptions", category: "GDPR" })
+    )
+    expect(contract?.surface).toBe("job_description_pack")
+    expect(contract?.startHref).toContain("/dashboard/documente?")
+    expect(contract?.startHref).toContain("focus=job-descriptions")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fintake-hr-job-descriptions")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
   it("mapează vendor pack pe handoff contextual cu întoarcere automată", () => {
     const contract = getSpecialistHandoffContract(
       "GDPR-011",
