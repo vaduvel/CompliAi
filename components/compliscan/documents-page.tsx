@@ -16,6 +16,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { HrPackKind, HrPreparedPack } from "@/lib/compliance/hr-drafts"
+import type { ContractsPackKind, ContractsPreparedPack } from "@/lib/compliance/contracts-drafts"
 
 const QUICK_DOC_TYPES = [
   { id: "privacy-policy", label: "Politică de Confidențialitate", desc: "GDPR Art. 13–14 — obligatorie", icon: "📄" },
@@ -25,12 +26,15 @@ const QUICK_DOC_TYPES = [
   { id: "ai-governance", label: "Politică Guvernanță AI", desc: "EU AI Act Art. 9, 17", icon: "🤖" },
 ] as const
 
-type HrPackResponse = {
-  pack: HrPreparedPack
+type PreparedPack = HrPreparedPack | ContractsPreparedPack
+type PreparedPackKind = HrPackKind | ContractsPackKind
+
+type PreparedPackResponse = {
+  pack: PreparedPack
 }
 
-const HR_PACK_FALLBACKS: Record<
-  HrPackKind,
+const PREPARED_PACK_FALLBACKS: Record<
+  PreparedPackKind,
   {
     title: string
     summary: string
@@ -70,6 +74,16 @@ const HR_PACK_FALLBACKS: Record<
     returnEvidenceNote:
       "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   },
+  "contracts-baseline": {
+    title: "Pachet minim baseline contractual",
+    summary:
+      "Pregătim matricea de template-uri, checklistul de clauze și planul minim de adoptare, ca baseline-ul contractual să nu pornească de la zero.",
+    generatorDocumentType: "contract-template",
+    generatorLabel: "Generează template-ul",
+    loadingLabel: "Încărcăm pachetul pregătit pentru baseline-ul contractual.",
+    returnEvidenceNote:
+      "CompliAI a pregătit pachetul contractual: matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite. Următorul pas este validarea juridică și punerea în uz a template-urilor pentru relațiile comerciale reale.",
+  },
 }
 
 export function DocumentsPageSurface() {
@@ -77,59 +91,69 @@ export function DocumentsPageSurface() {
   const cockpit = useCockpitData()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [hrPack, setHrPack] = useState<HrPreparedPack | null>(null)
-  const [hrPackLoading, setHrPackLoading] = useState(false)
-  const [hrPackError, setHrPackError] = useState<string | null>(null)
+  const [preparedPack, setPreparedPack] = useState<PreparedPack | null>(null)
+  const [preparedPackLoading, setPreparedPackLoading] = useState(false)
+  const [preparedPackError, setPreparedPackError] = useState<string | null>(null)
   const focusedPack = searchParams.get("focus")
-  const hrPackKind =
-    focusedPack === "job-descriptions" || focusedPack === "hr-procedures" || focusedPack === "reges-correction"
-      ? (focusedPack as HrPackKind)
+  const preparedPackKind =
+    focusedPack === "job-descriptions" ||
+    focusedPack === "hr-procedures" ||
+    focusedPack === "reges-correction" ||
+    focusedPack === "contracts-baseline"
+      ? (focusedPack as PreparedPackKind)
       : null
-  const hrPackFallback = hrPackKind ? HR_PACK_FALLBACKS[hrPackKind] : null
+  const preparedPackFallback = preparedPackKind ? PREPARED_PACK_FALLBACKS[preparedPackKind] : null
   const findingId = searchParams.get("findingId")
   const returnTo = searchParams.get("returnTo")
 
   useEffect(() => {
-    if (!hrPackKind) {
-      setHrPack(null)
-      setHrPackError(null)
-      setHrPackLoading(false)
+    if (!preparedPackKind) {
+      setPreparedPack(null)
+      setPreparedPackError(null)
+      setPreparedPackLoading(false)
       return
     }
 
     let cancelled = false
-    setHrPackLoading(true)
-    setHrPackError(null)
+    setPreparedPack(null)
+    setPreparedPackLoading(true)
+    setPreparedPackError(null)
 
-    fetch(`/api/hr/pack?kind=${encodeURIComponent(hrPackKind)}`, { cache: "no-store" })
+    const endpoint =
+      preparedPackKind === "contracts-baseline"
+        ? `/api/contracts/pack?kind=${encodeURIComponent(preparedPackKind)}`
+        : `/api/hr/pack?kind=${encodeURIComponent(preparedPackKind)}`
+
+    fetch(endpoint, { cache: "no-store" })
       .then(async (response) => {
-        const payload = (await response.json().catch(() => null)) as HrPackResponse | { error?: string } | null
+        const payload = (await response.json().catch(() => null)) as PreparedPackResponse | { error?: string } | null
         if (!response.ok) {
           throw new Error(
             payload && "error" in payload && typeof payload.error === "string"
               ? payload.error
-              : "Nu am putut încărca pachetul HR."
+              : "Nu am putut încărca pachetul pregătit."
           )
         }
         if (!cancelled) {
-          setHrPack((payload as HrPackResponse).pack)
+          setPreparedPack((payload as PreparedPackResponse).pack)
         }
       })
       .catch((error: Error) => {
         if (!cancelled) {
-          setHrPackError(error.message)
+          setPreparedPack(null)
+          setPreparedPackError(error.message)
         }
       })
       .finally(() => {
         if (!cancelled) {
-          setHrPackLoading(false)
+          setPreparedPackLoading(false)
         }
       })
 
     return () => {
       cancelled = true
     }
-  }, [hrPackKind])
+  }, [preparedPackKind])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -147,18 +171,23 @@ export function DocumentsPageSurface() {
     })
 
   function handleReturnToCockpit() {
-    if (!returnTo || !hrPackKind) return
+    if (!returnTo || !preparedPackKind) return
 
     const target = new URL(returnTo, window.location.origin)
     target.searchParams.set(
-      hrPackKind === "job-descriptions"
+      preparedPackKind === "job-descriptions"
         ? "jobDescriptionPackFlow"
-        : hrPackKind === "hr-procedures"
+        : preparedPackKind === "hr-procedures"
           ? "hrProcedurePackFlow"
-          : "regesCorrectionFlow",
+          : preparedPackKind === "reges-correction"
+            ? "regesCorrectionFlow"
+            : "contractsPackFlow",
       "done"
     )
-    target.searchParams.set("evidenceNote", hrPack?.returnEvidenceNote ?? hrPackFallback?.returnEvidenceNote ?? "")
+    target.searchParams.set(
+      "evidenceNote",
+      preparedPack?.returnEvidenceNote ?? preparedPackFallback?.returnEvidenceNote ?? ""
+    )
     if (findingId) {
       target.searchParams.set("sourceFindingId", findingId)
     }
@@ -204,7 +233,7 @@ export function DocumentsPageSurface() {
         }
       />
 
-      {hrPackKind && hrPackFallback && (
+      {preparedPackKind && preparedPackFallback && (
         <Card className="border-eos-primary/30 bg-eos-primary/[0.06]">
           <CardHeader className="border-b border-eos-border-subtle pb-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -214,21 +243,21 @@ export function DocumentsPageSurface() {
                 </p>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BriefcaseBusiness className="size-4 text-eos-primary" />
-                  {hrPack?.title ?? hrPackFallback.title}
+                  {preparedPack?.title ?? preparedPackFallback.title}
                 </CardTitle>
                 <p className="max-w-3xl text-sm text-eos-text-muted">
-                  {hrPack?.summary ?? hrPackFallback.summary}
+                  {preparedPack?.summary ?? preparedPackFallback.summary}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm">
                   <Link
                     href={`${dashboardRoutes.generator}?documentType=${
-                      hrPack?.generatorDocumentType ?? hrPackFallback.generatorDocumentType
+                      preparedPack?.generatorDocumentType ?? preparedPackFallback.generatorDocumentType
                     }`}
                   >
                     <Sparkles className="mr-1.5 size-3.5" />
-                    {hrPack?.generatorLabel ?? hrPackFallback.generatorLabel}
+                    {preparedPack?.generatorLabel ?? preparedPackFallback.generatorLabel}
                   </Link>
                 </Button>
                 {returnTo ? (
@@ -240,28 +269,28 @@ export function DocumentsPageSurface() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            {hrPackLoading ? (
+            {preparedPackLoading ? (
               <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
                 <Loader2 className="size-4 animate-spin" />
-                {hrPackFallback.loadingLabel}
+                {preparedPackFallback.loadingLabel}
               </div>
-            ) : hrPackError ? (
+            ) : preparedPackError ? (
               <div className="rounded-eos-lg border border-eos-danger/30 bg-eos-danger/[0.08] px-4 py-3 text-sm text-eos-text">
-                {hrPackError}
+                {preparedPackError}
               </div>
-            ) : hrPack ? (
+            ) : preparedPack ? (
               <>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="normal-case tracking-normal">
-                    {hrPack.assets.length} materiale pregătite
+                    {preparedPack.assets.length} materiale pregătite
                   </Badge>
                   <Badge variant="outline" className="normal-case tracking-normal">
-                    {hrPack.completionChecklist.length} confirmări minime
+                    {preparedPack.completionChecklist.length} confirmări minime
                   </Badge>
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">
-                  {hrPack.assets.map((asset) => (
+                  {preparedPack.assets.map((asset) => (
                     <Card key={asset.id} className="border-eos-border bg-eos-surface">
                       <CardHeader className="border-b border-eos-border-subtle pb-3">
                         <CardTitle className="text-sm">{asset.title}</CardTitle>
@@ -282,7 +311,7 @@ export function DocumentsPageSurface() {
                   </CardHeader>
                   <CardContent className="pt-3">
                     <ul className="space-y-2 text-sm text-eos-text-muted">
-                      {hrPack.completionChecklist.map((item) => (
+                      {preparedPack.completionChecklist.map((item) => (
                         <li key={item} className="flex gap-2">
                           <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-primary" />
                           <span>{item}</span>

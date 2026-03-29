@@ -193,6 +193,7 @@ export type CloseGatingRequirements = {
 export type SmartResolveExecutionClass = "documentary" | "operational" | "specialist_handoff"
 
 export type SpecialistHandoffSurface =
+  | "contracts_pack"
   | "job_description_pack"
   | "hr_procedure_pack"
   | "reges_correction_pack"
@@ -231,7 +232,6 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "GDPR-003",
   "GDPR-010",
   "GDPR-016",
-  "GDPR-020",
   "AI-005",
   "HR-001",
   "HR-002",
@@ -239,6 +239,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
 ])
 
 const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
+  "GDPR-020",
   "GDPR-021",
   "GDPR-022",
   "GDPR-023",
@@ -578,10 +579,10 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     category: "Contractual baseline",
     typicalSeverity: "medium",
     signalTypes: ["direct", "inferred"],
-    resolutionModes: ["external_action"],
+    resolutionModes: ["in_app_guided", "external_action"],
     primaryActors: ["user", "owner"],
-    compliCapabilities: ["explică dovada contractuală cerută", "ține cazul deschis până la urmă clară"],
-    userResponsibilities: ["pregătește sau actualizează template-urile", "notează unde sunt salvate și cum sunt folosite"],
+    compliCapabilities: ["pregătește pachetul contractual", "deschide suprafața Documente", "orientează spre generatorul baseline-ului contractual"],
+    userResponsibilities: ["adaptează template-urile la relațiile reale", "validează baseline-ul cu juristul sau responsabilul intern", "notează unde sunt salvate și cum intră în uz"],
     requiredEvidenceKinds: ["uploaded_file", "public_link", "note"],
     autoRecheck: "partial",
     closingRule: "template-uri contractuale revizuite și urmă clară salvată la dosar",
@@ -1080,16 +1081,16 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
   },
   "GDPR-020": {
     findingTypeId: "GDPR-020",
-    initialFlowState: "external_action_required",
-    primaryCTA: "Pregătește baseline-ul contractual",
-    secondaryCTA: "Vezi dovada cerută",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Deschide pachetul contractual",
+    secondaryCTA: "Vezi ce pregătește",
     whatUserSees:
-      "Nu avem încă un baseline contractual clar pentru clienți și furnizori, iar cazul nu se poate închide doar prin confirmare.",
+      "Nu avem încă un baseline contractual clar pentru clienți și furnizori și nici o urmă coerentă despre versiunea care intră efectiv în uz.",
     whatCompliDoes:
-      "Ține cazul în cockpit până când documentezi ce template-uri există, unde sunt salvate și ce urmă contractuală poți arăta la audit.",
+      "Deschide suprafața Documente cu pachetul contractual pregătit: matricea de template-uri, checklistul de clauze și planul minim de adoptare.",
     whatUserMustDo:
-      "Pregătește sau actualizează template-urile contractuale, apoi notează explicit unde sunt salvate, pentru ce relații le folosești și ce ai verificat cu juristul sau responsabilul intern.",
-    closeCondition: "Template-uri contractuale pregătite și urmă clară salvată în cockpit.",
+      "Revizuiești pachetul, adaptezi template-urile la relațiile comerciale reale, verifici baseline-ul cu juristul sau responsabilul intern și revii doar după ce știi clar unde este salvat și cum intră în uz.",
+    closeCondition: "Pachetul contractual este revizuit și există urmă clară pentru baseline-ul pus în uz.",
     revalidationTriggers: ["model contractual schimbat", "jurisdicție nouă", "review contractual periodic"],
   },
   "GDPR-021": {
@@ -1722,6 +1723,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (docType === "retention-policy") return "GDPR-016"
   if (docType === "nis2-incident-response") return "NIS2-015"
   if (docType === "ai-governance") return "AI-005"
+  if (docType === "contract-template") return "GDPR-020"
   if (docType === "hr-internal-procedures") return "GDPR-022"
   if (docType === "reges-correction-brief") return "GDPR-023"
 
@@ -2281,6 +2283,15 @@ function getWorkflowLink(
         }).toString()}`,
         label: "Deschide DSAR",
       }
+    case "GDPR-020":
+      return {
+        href: `/dashboard/documente?${new URLSearchParams({
+          focus: "contracts-baseline",
+          findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide pachetul contractual",
+      }
     case "GDPR-021":
       return {
         href: `/dashboard/documente?${new URLSearchParams({
@@ -2382,6 +2393,8 @@ function getSpecialistHandoffSurface(
   record: ScanFinding
 ): SpecialistHandoffSurface | null {
   switch (findingTypeId) {
+    case "GDPR-020":
+      return "contracts_pack"
     case "GDPR-021":
       return "job_description_pack"
     case "GDPR-022":
@@ -2430,6 +2443,19 @@ export function getSpecialistHandoffContract(
   if (!workflowLink || !surface) return undefined
 
   switch (surface) {
+    case "contracts_pack":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce baseline-ul contractual este revizuit și regula de folosire este clară, suprafața Documente te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Pachet contractual pregătit",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească dovada că matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite și că știi unde rămâne versiunea contractuală în uz.",
+      }
     case "job_description_pack":
       return {
         surface,
@@ -3243,12 +3269,12 @@ export function buildCockpitRecipe(
   } else if (findingTypeId === "GDPR-020") {
     acceptedEvidence = Array.from(
       new Set([
-        "Template contractual salvat sau încărcat la dosar",
-        "Notă clară despre unde este salvat și pentru ce relații este folosit",
+        "Template contractual de bază pregătit sau încărcat la dosar",
+        "Notă clară despre unde este salvat baseline-ul și pentru ce relații comerciale intră în uz",
         ...acceptedEvidence,
       ])
     )
-    closeCondition = "Baseline-ul contractual este pregătit și documentat clar în cockpit."
+    closeCondition = "Pachetul contractual este revizuit, iar baseline-ul pus în uz este documentat clar în cockpit."
   } else if (findingTypeId === "GDPR-021") {
     acceptedEvidence = Array.from(
       new Set([
@@ -3428,7 +3454,8 @@ export function buildCockpitRecipe(
   } else if (findingTypeId === "GDPR-010" && vendorContext) {
     dossierOutcome = `DPA-ul pentru ${vendorContext.vendorName} intră în dosar, rămâne legat de finding și poate fi reverificat la următoarea schimbare contractuală.`
   } else if (findingTypeId === "GDPR-020") {
-    dossierOutcome = "Baseline-ul contractual și nota despre unde sunt salvate template-urile intră în dosar pentru audit și review juridic."
+    dossierOutcome =
+      "Pachetul contractual, template-ul de bază și nota despre unde este salvat baseline-ul contractual intră în dosar pentru audit și review juridic."
   } else if (findingTypeId === "GDPR-021") {
     dossierOutcome = "Pachetul HR, modelul de fișă și nota despre rollout-ul per rol intră în dosar pentru audit HR și control ITM."
   } else if (findingTypeId === "GDPR-022") {
@@ -3451,7 +3478,7 @@ export function buildCockpitRecipe(
     recipeMonitoringSignals = Array.from(
       new Set([
         ...monitoringSignals,
-        "Reverificăm baseline-ul contractual când se schimbă modelul de contract, furnizorii sau jurisdicția.",
+        "Reverificăm baseline-ul contractual când se schimbă modelul de contract, furnizorii, tipul de client sau jurisdicția.",
       ])
     ).slice(0, 5)
   } else if (findingTypeId === "GDPR-021") {

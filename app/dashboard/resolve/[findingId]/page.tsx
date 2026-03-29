@@ -364,7 +364,8 @@ export default function FindingDetailPage() {
     successMomentVisible &&
     linkedGeneratedDocument?.approvalStatus === "approved_as_evidence"
   const caseClosedMomentVisible = successMomentVisible && !dossierMomentVisible
-  const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
+  const hasGenerator =
+    recipe.visibleBlocks.detailBlocks.includes("generator") && recipe.executionClass !== "specialist_handoff"
   const documentaryGeneratorVisible = hasGenerator && (status === "open" || status === "confirmed")
   const needsDocumentResolution =
     status === "confirmed" && hasGenerator && preparedDocumentReady && !isOperationalAssisted

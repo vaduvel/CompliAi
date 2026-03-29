@@ -190,48 +190,54 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 10. REGES / evidență contracte angajați neactualizată
 
-- status azi: `doar detectat`
-- clasă: `operational`
-- cât avem deja: `20%`
+- status azi: `specialist_handoff real`
+- clasă: `specialist_handoff`
+- cât avem deja: `60%`
 - ce există:
   - finding de intake
+  - tip canonic dedicat `GDPR-023`
+  - `REGES Correction Brief` în suprafața `Documente`
+  - revenire automată în cockpit cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `REGES Correction Brief`
   - import/export și comparație minimă
   - pachet pentru HR/contabil
   - checklist de confirmare după operare
 - ce ar urca riscul:
-  - mutare în `operational-assisted`
+  - integrare mai adâncă HR / registru angajați
 
 ### 11. Proceduri interne pentru angajați lipsă
 
-- status azi: `doar detectat`
-- clasă: `operational`
-- cât avem deja: `15%`
+- status azi: `specialist_handoff real`
+- clasă: `specialist_handoff`
+- cât avem deja: `60%`
 - ce există:
   - finding de intake
+  - tip canonic dedicat `GDPR-022`
+  - `HR Procedure Pack` în suprafața `Documente`
+  - revenire automată în cockpit cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `HR Procedure Pack`
   - pachet minim de proceduri interne
   - confirmare distribuire internă
 - ce ar urca riscul:
-  - mutare în `operational-assisted`
+  - rollout asistat și confirmare de distribuire
 
 ### 12. Contracte standard lipsă sau incomplete
 
-- status azi: `doar detectat`
-- clasă: `operational`
-- cât avem deja: `15%`
+- status azi: `specialist_handoff real`
+- clasă: `specialist_handoff`
+- cât avem deja: `60%`
 - ce există:
   - finding de intake
+  - tip canonic dedicat `GDPR-020`
+  - `Contracts Pack` în suprafața `Documente`
+  - revenire automată în cockpit cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `Contracts Pack`
   - NDA
   - client services template
   - supplier baseline
   - configurare pe B2B/B2C și tip business
 - ce ar urca riscul:
-  - mutare în `operational-assisted`
+  - semnare / adoptare bilaterală și rollout asistat
 
 ### 13. Înregistrare SPV lipsă
 
@@ -318,12 +324,9 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### Doar detectate azi
 
-- `4/16`
+- `1/16`
 - acestea sunt:
-  - `Fișe de post`
-  - `REGES`
-  - `Proceduri interne`
-  - `Contracte standard`
+  - `SPV`
 
 ## Unde Putem Crește Cel Mai Repede
 
@@ -337,7 +340,8 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 Impact estimat:
 
-- urcare de la `6/16` la `9-10/16` rezolvate sau aproape rezolvate serios
+- implementat pe toate cele 5 inițiative
+- acoperirea reală a urcat peste baseline-ul inițial de `6/16`
 
 ### Wave 2 — Leverage Mare
 

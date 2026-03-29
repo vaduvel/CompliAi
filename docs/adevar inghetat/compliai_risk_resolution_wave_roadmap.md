@@ -102,7 +102,7 @@ Status acum:
 - handoff-ul deschide Vendor Review cu `focus=pack`
 - revenirea în cockpit este automată cu dovadă precompletată
 - validare locală: teste țintite + build verzi
-- mai lipsește smoke live final pe deploymentul public
+- smoke live reușit pe deploymentul public
 
 Impact:
 
@@ -167,6 +167,11 @@ Dificultate:
 
 - `medie`
 
+Status:
+
+- `livrat`
+- flow canonic: `intake-hr-procedures -> GDPR-022 -> /dashboard/documente?focus=hr-procedures -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`
+
 ### 5. Contracts Pack
 
 Țintă:
@@ -191,6 +196,11 @@ Impact:
 Dificultate:
 
 - `medie spre mare`
+
+Status:
+
+- `livrat`
+- flow canonic: `intake-contracts-baseline -> GDPR-020 -> /dashboard/documente?focus=contracts-baseline -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`
 
 ## Wave 2 — Leverage Mare
 
@@ -245,6 +255,11 @@ Impact:
 Dificultate:
 
 - `medie`
+
+Status:
+
+- `livrat`
+- flow canonic: `intake-hr-registry -> GDPR-023 -> /dashboard/documente?focus=reges-correction -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`
 
 ### 3. SPV Enrollment Guide
 
@@ -367,8 +382,8 @@ Ordinea corectă este:
 1. `DSAR Pack`
 2. `Vendor Pack`
 3. `Fiscal Pre-Validator`
-4. `REGES Correction Brief`
-5. restul pack-urilor din Wave 1
+4. `SPV Enrollment Guide`
+5. `Fiscal Status Interpreter`
 
 Nu urmărim `16/16 automat`.
 
