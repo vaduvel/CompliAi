@@ -491,9 +491,59 @@ export default function FindingDetailPage() {
           footer: "Cazul nu poate intra în monitorizare fără această dovadă operațională.",
         }
 
+  // Status progression rail steps
+  const PROGRESS_STEPS = [
+    { id: "open",             label: "Detectat" },
+    { id: "confirmed",        label: "Confirmat" },
+    { id: "resolved",         label: "Rezolvat" },
+    { id: "under_monitoring", label: "Monitorizat" },
+  ] as const
+  const currentStepIdx = status === "dismissed"
+    ? -1
+    : PROGRESS_STEPS.findIndex((s) => s.id === status)
+
   return (
     <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
       <Breadcrumb items={[{ label: "De rezolvat", href: dashboardRoutes.resolve }, { label: finding.title }]} />
+
+      {/* Status progression rail */}
+      {status !== "dismissed" && (
+        <div className="flex items-center gap-0 overflow-x-auto rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
+          {PROGRESS_STEPS.map((step, i) => {
+            const isPast    = i < currentStepIdx
+            const isCurrent = i === currentStepIdx
+            return (
+              <div key={step.id} className="flex flex-1 items-center">
+                <div className="flex flex-col items-center gap-1.5 shrink-0">
+                  <div className={[
+                    "size-6 rounded-full border-2 grid place-items-center transition-all",
+                    isPast    ? "border-eos-success bg-eos-success"             : "",
+                    isCurrent ? "border-eos-primary bg-eos-primary/15"          : "",
+                    !isPast && !isCurrent ? "border-eos-border-subtle bg-eos-surface-variant" : "",
+                  ].join(" ")}>
+                    {isPast
+                      ? <CheckCircle2 className="size-3.5 text-white" strokeWidth={2.5} />
+                      : <div className={["size-2 rounded-full", isCurrent ? "bg-eos-primary" : "bg-eos-border"].join(" ")} />
+                    }
+                  </div>
+                  <span className={[
+                    "text-[10px] font-medium whitespace-nowrap",
+                    isCurrent ? "text-eos-text" : isPast ? "text-eos-success" : "text-eos-text-tertiary",
+                  ].join(" ")}>
+                    {step.label}
+                  </span>
+                </div>
+                {i < PROGRESS_STEPS.length - 1 && (
+                  <div className={[
+                    "h-[2px] flex-1 mx-2 mb-4 rounded-full transition-all",
+                    i < currentStepIdx ? "bg-eos-success" : "bg-eos-border-subtle",
+                  ].join(" ")} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <PageIntro
         eyebrow={`Caz · ${finding.category.replace("_", " ")}`}
@@ -739,22 +789,34 @@ export default function FindingDetailPage() {
       ) : null}
 
       {requiresOperationalEvidence ? (
-        <Card className="border-eos-border bg-eos-surface">
+        <Card className={`bg-eos-surface border-2 transition-colors ${operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-primary/20"}`}>
           <CardContent className="space-y-3 px-5 py-5">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                {evidenceCardCopy.eyebrow}
-              </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                {evidenceCardCopy.body}
-              </p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full transition-colors ${operationalEvidenceNote.trim() ? "bg-eos-success/15" : "bg-eos-primary/10"}`}>
+                  <FileText className={`size-3 ${operationalEvidenceNote.trim() ? "text-eos-success" : "text-eos-primary"}`} strokeWidth={2.5} />
+                </span>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                    {evidenceCardCopy.eyebrow}
+                  </p>
+                  <p className="mt-1 text-sm text-eos-text-muted">
+                    {evidenceCardCopy.body}
+                  </p>
+                </div>
+              </div>
+              {operationalEvidenceNote.trim() ? (
+                <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] bg-eos-success/10 text-eos-success">
+                  Completat
+                </span>
+              ) : null}
             </div>
             <textarea
               data-testid="operational-evidence-note"
               value={operationalEvidenceNote}
               onChange={(event) => setOperationalEvidenceNote(event.target.value)}
               rows={4}
-              className="ring-focus w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
+              className={`ring-focus w-full rounded-eos-md border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none transition-colors ${operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-border"}`}
               placeholder={evidenceCardCopy.placeholder}
             />
             <p className="text-xs text-eos-text-muted">

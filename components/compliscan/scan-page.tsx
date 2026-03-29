@@ -166,32 +166,81 @@ export function ScanPageSurface() {
   const criticalOrHighFindings = latestDocumentFindings.filter(
     (f) => f.severity === "critical" || f.severity === "high"
   )
+  const resolvedFromLastScan = latestDocumentFindings.filter((f) =>
+    isFindingResolvedLike(f.findingStatus)
+  ).length
+  const activeFromLastScan = latestDocumentFindings.length - resolvedFromLastScan
+  const categoriesFromLastScan = new Set(latestDocumentFindings.map((f) => f.category)).size
 
   return (
     <div className="space-y-6">
 
-      {/* Last scan alert */}
-      {latestDocumentFindings.length > 0 && (
-        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border bg-eos-primary-soft px-5 py-4">
-          <AlertTriangle className="size-5 shrink-0 text-eos-primary" strokeWidth={2} />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-eos-text">
-              {latestDocumentFindings.length} findings din ultima scanare
-            </p>
-            <p className="mt-0.5 text-xs text-eos-text-tertiary">
-              {criticalOrHighFindings.length > 0
-                ? `${criticalOrHighFindings.length} critice/ridicate necesită atenție imediată. `
-                : ""}
-              Rezolvarea se face prin cockpitul fiecărui finding.
-            </p>
+      {/* Last scan metrics strip */}
+      {latestDocumentScan && latestDocumentFindings.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Ultima scanare
+              </p>
+              <p className="mt-0.5 text-xs text-eos-text-muted truncate max-w-[260px]">
+                {latestDocumentScan.documentName}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/resolve"
+              className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-3.5 py-2 text-xs font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
+            >
+              De rezolvat
+              <ArrowRight className="size-3.5" strokeWidth={2} />
+            </Link>
           </div>
-          <Link
-            href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
-          >
-            Mergi la De rezolvat
-            <ArrowRight className="size-4" strokeWidth={2} />
-          </Link>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Findings
+              </p>
+              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
+                {latestDocumentFindings.length}
+              </p>
+              <p className="mt-0.5 text-[11px] text-eos-text-muted">
+                {activeFromLastScan} active
+              </p>
+            </div>
+            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Critice / ridicate
+              </p>
+              <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${criticalOrHighFindings.length > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
+                {criticalOrHighFindings.length}
+              </p>
+              <p className="mt-0.5 text-[11px] text-eos-text-muted">
+                {criticalOrHighFindings.length > 0 ? "necesită atenție" : "nicio alertă"}
+              </p>
+            </div>
+            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Rezolvate
+              </p>
+              <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${resolvedFromLastScan > 0 ? "text-eos-success" : "text-eos-text-tertiary"}`}>
+                {resolvedFromLastScan}
+              </p>
+              <p className="mt-0.5 text-[11px] text-eos-text-muted">
+                din {latestDocumentFindings.length} total
+              </p>
+            </div>
+            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Categorii
+              </p>
+              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
+                {categoriesFromLastScan}
+              </p>
+              <p className="mt-0.5 text-[11px] text-eos-text-muted">
+                afectate
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
