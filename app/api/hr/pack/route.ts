@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import {
+  generateRegesCorrectionPack,
   generateHrProcedurePack,
   generateJobDescriptionPack,
   type HrPackKind,
@@ -20,7 +21,12 @@ export async function GET(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
 
     const requestedKind = new URL(request.url).searchParams.get("kind")
-    if (requestedKind && requestedKind !== "job-descriptions" && requestedKind !== "hr-procedures") {
+    if (
+      requestedKind &&
+      requestedKind !== "job-descriptions" &&
+      requestedKind !== "hr-procedures" &&
+      requestedKind !== "reges-correction"
+    ) {
       return jsonError("Tipul de pachet HR nu este suportat.", 400, "HR_PACK_KIND_INVALID", undefined, context)
     }
 
@@ -33,10 +39,19 @@ export async function GET(request: Request) {
       employeeCount: orgProfile?.employeeCount ?? null,
       hasAiTools: Boolean(orgProfile?.usesAITools),
     }
-    const packKind: HrPackKind = requestedKind === "hr-procedures" ? "hr-procedures" : "job-descriptions"
+    const packKind: HrPackKind =
+      requestedKind === "hr-procedures"
+        ? "hr-procedures"
+        : requestedKind === "reges-correction"
+          ? "reges-correction"
+          : "job-descriptions"
 
     const pack =
-      packKind === "hr-procedures" ? generateHrProcedurePack(packInput) : generateJobDescriptionPack(packInput)
+      packKind === "hr-procedures"
+        ? generateHrProcedurePack(packInput)
+        : packKind === "reges-correction"
+          ? generateRegesCorrectionPack(packInput)
+          : generateJobDescriptionPack(packInput)
 
     return NextResponse.json({ pack }, withRequestIdHeaders(undefined, context))
   } catch (error) {

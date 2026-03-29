@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   readStateMock: vi.fn(),
   generateJobDescriptionPackMock: vi.fn(),
   generateHrProcedurePackMock: vi.fn(),
+  generateRegesCorrectionPackMock: vi.fn(),
   logRouteErrorMock: vi.fn(),
 }))
 
@@ -35,6 +36,7 @@ vi.mock("@/lib/server/mvp-store", () => ({
 vi.mock("@/lib/compliance/hr-drafts", () => ({
   generateJobDescriptionPack: mocks.generateJobDescriptionPackMock,
   generateHrProcedurePack: mocks.generateHrProcedurePackMock,
+  generateRegesCorrectionPack: mocks.generateRegesCorrectionPackMock,
 }))
 
 vi.mock("@/lib/server/operational-logger", () => ({
@@ -73,6 +75,16 @@ describe("GET /api/hr/pack", () => {
       generatorDocumentType: "hr-internal-procedures",
       generatorLabel: "Generează regulamentul",
       returnEvidenceNote: "return note proc",
+    })
+    mocks.generateRegesCorrectionPackMock.mockReturnValue({
+      kind: "reges-correction",
+      title: "Pachet minim corecție REGES",
+      summary: "sumar reges",
+      assets: [{ id: "template-reges" }],
+      completionChecklist: ["r1", "r2", "r3"],
+      generatorDocumentType: "reges-correction-brief",
+      generatorLabel: "Generează brief-ul",
+      returnEvidenceNote: "return note reges",
     })
   })
 
@@ -145,6 +157,39 @@ describe("GET /api/hr/pack", () => {
       },
     })
     expect(mocks.generateHrProcedurePackMock).toHaveBeenCalledWith({
+      orgName: "Demo Retail SRL",
+      sector: "retail",
+      employeeCount: "10-49",
+      hasAiTools: true,
+    })
+  })
+
+  it("returnează pachetul REGES când kind=reges-correction", async () => {
+    mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-demo-imm",
+      email: "demo@demo-imm.compliscan.ro",
+      orgName: "Demo Retail SRL",
+      role: "owner",
+    })
+
+    const response = await GET(new Request("http://localhost/api/hr/pack?kind=reges-correction"))
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload).toEqual({
+      pack: {
+        kind: "reges-correction",
+        title: "Pachet minim corecție REGES",
+        summary: "sumar reges",
+        assets: [{ id: "template-reges" }],
+        completionChecklist: ["r1", "r2", "r3"],
+        generatorDocumentType: "reges-correction-brief",
+        generatorLabel: "Generează brief-ul",
+        returnEvidenceNote: "return note reges",
+      },
+    })
+    expect(mocks.generateRegesCorrectionPackMock).toHaveBeenCalledWith({
       orgName: "Demo Retail SRL",
       sector: "retail",
       employeeCount: "10-49",

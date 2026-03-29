@@ -13,7 +13,7 @@ export type HrPackAsset = {
   content: string
 }
 
-export type HrPackKind = "job-descriptions" | "hr-procedures"
+export type HrPackKind = "job-descriptions" | "hr-procedures" | "reges-correction"
 
 export type HrPreparedPack = {
   kind: HrPackKind
@@ -293,5 +293,105 @@ ${params.hasAiTools ? "- Utilizarea uneltelor AI se face doar conform politicii 
     generatorLabel: "Generează regulamentul",
     returnEvidenceNote:
       "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
+  }
+}
+
+export function generateRegesCorrectionPack(
+  params: GenerateJobDescriptionPackParams
+): HrPreparedPack {
+  const orgName = params.orgName.trim() || "Organizația"
+  const sectorLabel = params.sector ? ORG_SECTOR_LABELS[params.sector] : "sector neconfirmat"
+  const employeeCountLabel = params.employeeCount
+    ? ORG_EMPLOYEE_COUNT_LABELS[params.employeeCount]
+    : "număr de angajați neconfirmat"
+
+  return {
+    kind: "reges-correction",
+    title: "Pachet minim corecție REGES",
+    summary:
+      "CompliAI pregătește brief-ul de corecție, checklistul pentru HR / contabil și mesajul de handoff. Firma tot trebuie să opereze remedierea reală în REGES și să păstreze exportul sau confirmarea rezultată.",
+    assets: [
+      {
+        id: "reges-correction-brief",
+        title: "Brief corecție REGES / Revisal",
+        summary: "Documentul scurt pe care îl trimiți către contabil sau HR ca să nu înceapă remedierea de la zero.",
+        content: `# Brief corecție REGES / Revisal — ${orgName}
+
+## Context
+
+- Firmă: ${orgName}
+- Sector: ${sectorLabel}
+- Dimensiune: ${employeeCountLabel}
+- Motiv: evidența contractelor de muncă nu este confirmată ca fiind la zi în REGES / Revisal.
+
+## Ce trebuie verificat imediat
+
+1. Dacă toate contractele active sunt prezente și au statusul corect.
+2. Dacă modificările de salariu, funcție, normă sau suspendare au fost operate la timp.
+3. Dacă încetările și reluările de activitate sunt reflectate corect.
+4. Dacă există documente suport pentru fiecare schimbare operată.
+
+## Ce așteptăm ca rezultat
+
+- o confirmare clară că registrul este adus la zi
+- un export / printscreen / raport din sistemul real
+- o notă despre ce neconcordanțe au fost corectate
+
+## Urma bună pentru dosar
+
+- export REGES / Revisal actualizat
+- confirmare scrisă de la contabil sau HR
+- listă scurtă cu pozițiile / modificările corectate`,
+      },
+      {
+        id: "reges-verification-checklist",
+        title: "Checklist verificare HR / contabil",
+        summary: "Pașii minimi pe care îi urmărești înainte să marchezi cazul rezolvat în cockpit.",
+        content: `# Checklist verificare REGES — ${orgName}
+
+1. Confirmi care este registrul sau sursa principală folosită de firmă.
+2. Verifici toate contractele active și modificările recente.
+3. Notezi ce lipsuri sau întârzieri au fost identificate.
+4. Corectezi în sistemul real și verifici că remedierea este salvată.
+5. Păstrezi exportul / captura / confirmarea finală.
+
+## Întrebări de control
+
+- Știm exact cine a operat corecția?
+- Există dovadă clară că registrul este acum la zi?
+- Dovada poate fi verificată într-un control ITM fără explicații suplimentare?`,
+      },
+      {
+        id: "reges-handoff-message",
+        title: "Mesaj minim către contabil / HR",
+        summary: "Textul de pornire pe care îl poți trimite imediat, fără să-l scrii de la zero.",
+        content: `Subiect: Verificare și corecție REGES / Revisal — ${orgName}
+
+Bună,
+
+CompliAI a detectat că evidența contractelor de muncă trebuie verificată și posibil corectată în REGES / Revisal pentru ${orgName}.
+
+Te rog să verifici:
+- contractele active
+- modificările recente (salariu, funcție, normă, suspendări)
+- încetările și orice actualizare restantă
+
+După verificare, avem nevoie de:
+- confirmarea că registrul este la zi
+- exportul / captura / dovada de control
+- o scurtă notă cu ce a fost corectat
+
+Mulțumesc.`,
+      },
+    ],
+    completionChecklist: [
+      "Ai trimis brief-ul sau ai pornit clar handoff-ul către contabil / HR.",
+      "Ai stabilit ce dovadă finală trebuie să se întoarcă în cockpit: export, captură sau confirmare scrisă.",
+      "Știi unde va fi salvată urma finală pentru audit ITM / HR.",
+    ],
+    generatorDocumentType: "reges-correction-brief",
+    generatorLabel: "Generează brief-ul",
+    returnEvidenceNote:
+      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   }
 }

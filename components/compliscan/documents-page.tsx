@@ -60,6 +60,16 @@ const HR_PACK_FALLBACKS: Record<
     returnEvidenceNote:
       "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
   },
+  "reges-correction": {
+    title: "Pachet minim corecție REGES",
+    summary:
+      "Pregătim brief-ul de corecție, checklistul pentru contabil / HR și mesajul de handoff, ca remedierea reală să nu pornească de la zero.",
+    generatorDocumentType: "reges-correction-brief",
+    generatorLabel: "Generează brief-ul",
+    loadingLabel: "Încărcăm pachetul pregătit pentru corecția REGES.",
+    returnEvidenceNote:
+      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
+  },
 }
 
 export function DocumentsPageSurface() {
@@ -72,7 +82,7 @@ export function DocumentsPageSurface() {
   const [hrPackError, setHrPackError] = useState<string | null>(null)
   const focusedPack = searchParams.get("focus")
   const hrPackKind =
-    focusedPack === "job-descriptions" || focusedPack === "hr-procedures"
+    focusedPack === "job-descriptions" || focusedPack === "hr-procedures" || focusedPack === "reges-correction"
       ? (focusedPack as HrPackKind)
       : null
   const hrPackFallback = hrPackKind ? HR_PACK_FALLBACKS[hrPackKind] : null
@@ -141,7 +151,11 @@ export function DocumentsPageSurface() {
 
     const target = new URL(returnTo, window.location.origin)
     target.searchParams.set(
-      hrPackKind === "job-descriptions" ? "jobDescriptionPackFlow" : "hrProcedurePackFlow",
+      hrPackKind === "job-descriptions"
+        ? "jobDescriptionPackFlow"
+        : hrPackKind === "hr-procedures"
+          ? "hrProcedurePackFlow"
+          : "regesCorrectionFlow",
       "done"
     )
     target.searchParams.set("evidenceNote", hrPack?.returnEvidenceNote ?? hrPackFallback?.returnEvidenceNote ?? "")

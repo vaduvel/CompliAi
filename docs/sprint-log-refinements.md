@@ -85,6 +85,10 @@
 | DS-H1 | Hierarchy Audit — eyebrow/h1/CardTitle/button/color/aria-label standardization across all pages | 🟢 Închis | 2026-03-28 | 2026-03-28 |
 | DS-7 | Breadcrumb + Pagination — Breadcrumb (nav, ChevronRight separator, aria-current), Pagination (page numbers, ellipsis, keyboard) + 3 deep page integrations | 🟢 Închis | 2026-03-28 | 2026-03-28 |
 | DS-8 | tokens.json — W3C DTCG format export from evidence-os.css (92 tokens: surface, border, text, accent, severity, status, space, layout, radius, shadow, motion) | 🟢 Închis | 2026-03-28 | 2026-03-28 |
+| DS-COCKPIT | Dashboard redesign cu ierarhie vizuală reală — cercetare Vanta/Drata/Sprinto/Linear, 4 KPI cards diferențiate (accent bar, border-l colorat), mini progress bars pe framework-uri, border-l-[3px] per severitate pe findings, pill badges în activity feed, space-y-6 între secțiuni | 🟢 Închis | 2026-03-29 | 2026-03-29 |
+| DS-REDESIGN-W1-W3 | Visual hierarchy redesign Wave 1-3 — finding detail evidence card, scan metrics strip, DORA/Alerte/DSAR/Fiscal/Dosar border-l rails | 🟢 Închis | 2026-03-29 | 2026-03-29 |
+| DS-REDESIGN-W4-W5 | Visual hierarchy Wave 4-5 — vendor-review, conformitate, calendar, reports-vault, reports-policies, nis2, whistleblowing, scan/results, ai-inventory, resolve/findingId | 🟢 Închis | 2026-03-29 | 2026-03-29 |
+| RR-1 | Wave 1 Resolution Packs — unificare backend Gemini + HR Procedure / REGES / Contracts | 🟡 În progres | 2026-03-29 | — |
 
 **Legende:** 🔵 Planificat · 🟡 În progres · 🟢 Închis · 🔴 Blocat · ⚪ Anulat
 
@@ -100,6 +104,8 @@
 > **Sesiunea 7b (2026-03-18):** Worktree cleanup — separare V4/V5 release-safe de V6 WIP. V6 → `feat/v6-agentic-engine-wip`. Junk docs `(1)` șterse. `.claude/` adăugat la .gitignore. Navigation agents entry eliminat. Build clean, 491 teste, 0 erori TS.
 > **Sesiunea EOS (2026-03-21):** Automation Layer complet — 8 sprint-uri (S2→S8) pe branch `codex/eos-v1-blueprint-main`. Implementat Faze A→G din `00-master-source.md`: Gemini primary scan engine, finding→task mapper, auto-doc generation, vendor sync/prefill/DPA, evidence quality, task re-open rules, document expiry, legislation radar (ANSPDCP/DNSC/ANAF), NIS2@RO tool importer, ANAF OAuth2+SPV, enhanced one-page report (audit readiness, content hash), partner/counsel pack, compliance streak, sector benchmark, invoice smart prefill. S8: conectare UI — streak strip, benchmark strip, counsel brief button, share token buttons, invoice prefill trigger în wizard. Definition of Done: 12/12 criterii. 0 erori TS non-test. Commits: b075724→93ff3c5.
 > **F12 (2026-03-28):** EOS Token Migration — Faza 1: eliminare valorile raw Tailwind albe (bg-white/X, border-white/X, text-white/X, rounded-2xl). Token nou --eos-surface-hover adăugat. Deploy Vercel prod.
+> **DS-REDESIGN-W4-W5 (2026-03-29):** Visual hierarchy Wave 4-5 — border-l-[3px] rails pe toate paginile rămase: vendor-review (urgency), conformitate/GapItem (severity + error-soft tint), calendar/EventCard (severity + overdue tint), reports-vault/DriftWatch (drift.severity + breached tint), reports-policies/PolicyCard (confirmed→success, unconfirmed→warning), nis2 (sky-* → eos tokens), whistleblowing (orange-* → eos-warning), scan/results/FindingRow, ai-inventory (riskLevel), resolve/[findingId] evidence card. Commit: a130db6. Deploy Vercel prod. 0 erori TS non-test.
+> **DS-REDESIGN-W1-W3 (2026-03-29):** Visual hierarchy redesign Wave 1-3 — finding detail evidence card (dynamic border-2 green/primary, FileText icon în cerc colorat, "Completat" pill badge), scan page 4-tile metrics strip (Findings/Critice-Ridicate/Rezolvate/Categorii cu border-l-[3px] per severitate), DORA (border-l per severitate pe incident rows, criticality pe TPRM rows, top accent bar pe Incidente majore KPI), Alerte (border-l per drift severity, bg-eos-error-soft pe SLA-breached), DSAR (border-l per status: primary=received, warning=in-progress, success=responded, error=refused/expired), Fiscal (discrepancy + filing records din shared-card+divide-y → individual cards cu border-l), Dosar (border-l per finding severity pe resolved rows). 3 commituri: f024866, ea57c2d, 20e34f2. Deploy Vercel prod. 0 erori TS non-test. Fișiere: app/dashboard/resolve/[findingId]/page.tsx, components/compliscan/scan-page.tsx, app/dashboard/alerte/page.tsx, app/dashboard/dora/page.tsx, app/dashboard/dsar/page.tsx, app/dashboard/fiscal/page.tsx, components/compliscan/dosar-page.tsx.
 > **DS-8 (2026-03-28):** tokens.json — `docs/eos-tokens.json` creat în format W3C Design Tokens Community Group (DTCG). 92 tokens exportate din `app/evidence-os.css`: surface (6), border (3), text (4), accent (4), severity (4), status (10), space (11), layout (5), radius (5), shadow (4), motion (5). Fiecare token cu $value, $type, $description. index.ts barrel actualizat cu Breadcrumb + Pagination. Build clean. Branch: wave0/ux-foundation-ds-v2.
 > **DS-7 (2026-03-28):** Breadcrumb + Pagination — Breadcrumb.tsx creat: nav aria-label, items array cu label+href opțional, ChevronRight separator (size-3), ultimul element font-medium text-eos-text cu aria-current="page", link-uri cu hover:text-eos-text, se ascunde dacă <2 items. Pagination.tsx creat: buildPageNumbers helper (ellipsis la >7 pagini), Button ghost/default pe pagina curentă, ChevronLeft/Right cu labels "Înapoi"/"Următor" (responsive hidden pe mobile), aria-label pe fiecare buton, tabular-nums, MoreHorizontal ellipsis. Integrare: NIS2/governance (back link → Breadcrumb "NIS2 > Guvernanță"), scan/results/[scanId] (back link → "Scanează > Rezultat"), DORA (back link → "De rezolvat > DORA"). index.ts: +Breadcrumb, +Pagination exports. Build clean, 0 erori TS. Branch: wave0/ux-foundation-ds-v2.
 > **DS-H1 (2026-03-28):** Hierarchy Audit — audit complet ierarhie UX/UI pe toate paginile dashboard + componente. **Eyebrow standardization:** 30+ instanțe `text-[10px] font-bold` → `text-[11px] font-medium uppercase tracking-[0.22em]` în 12 fișiere (settings-page, dosar-page, reports-page, resolve-page, scan-page, portfolio-overview-client, dashboard-shell, workspace-mode-switcher, nis2-rescue-banner, Table.tsx, pricing, app/dashboard/page). Tracking normalizat: `[0.12em]`/`[0.14em]`/`[0.16em]`/`[0.18em]` → `[0.22em]`. **H1/KPI font-weight:** 20+ instanțe `text-2xl font-bold` → `font-semibold` în 14 fișiere (toate h1 headers + KPI values: settings, dosar, reports, resolve, scan, portfolio, account-settings, onboarding-form, settings-billing, efactura-risk-card, dora, agents, vendor-review, nis2/governance). `text-xl font-bold` → `font-semibold` (portfolio stats). **CardTitle hierarchy:** 26 instanțe `CardTitle className="text-xl"` → `text-base` în 11 fișiere (reports-vault, ai-inventory, reports-trust-center, route-sections, settings-integrations/operational, ai-discovery, efactura-validator, reports-support-panels, ai-compliance-pack, traceability-matrix). 1× `text-lg` → `text-base`. **Button variants:** ai-inventory delete `variant="outline"` → `variant="destructive"` (cu className cleanup). alerte + checklists: navigation buttons competing primary → ambele `variant="outline"`. Button.tsx destructive hover fix: `hover:bg-eos-error-soft` → `hover:bg-eos-error hover:text-white`. Link variant: adăugat `border-transparent`. **Color hierarchy:** scan-page section title `text-eos-text-muted` → `text-eos-text`. scan-page CTA `hover:bg-eos-primary` → `hover:bg-eos-primary-hover` + `text-eos-primary-text`. remediation-board CardTitle `text-eos-text-muted` → `text-eos-text`. DORA KPI labels `text-[10px] font-semibold tracking-wider text-eos-text-muted` → standardized eyebrow. DORA back link `gap-1.5 size-3.5` → `gap-2 size-4`. **Accessibility:** org-knowledge-panel: 2 icon-only buttons (RefreshCw, Trash2) primesc `aria-label`. Build clean, 0 erori TS. Branch: wave0/ux-foundation-ds-v2.
@@ -1337,3 +1343,102 @@ Explainability clasificare, generator Annex IV cu download per sistem, banner fa
 |---|---|---|
 | 2026-03-26 | Claude | Sprint 10 (F8) — AI Act + Legal Safety Layer — local. Fișiere: app/api/ai-act/annex-iv/route.ts, components/compliscan/ai-inventory-panel.tsx, app/dashboard/sisteme/eu-db-wizard/page.tsx, app/dashboard/sisteme/page.tsx |
 | 2026-03-26 | Claude | Sprint închis — DoD verificat. Build clean, 0 erori TS în fișierele sprint. |
+
+---
+
+## RR-1 — Wave 1 Resolution Packs: unificare backend Gemini + HR Procedure / REGES / Contracts
+
+**Origine:** `docs/adevar inghetat/compliai_risk_resolution_wave_roadmap.md` + backend necomis apărut în working tree (`lib/server/document-generator.ts`, `lib/compliance/types.ts`, `lib/compliance/efactura-xml-repair.ts`)
+**Impact:** Critic — mută următoarele 3 riscuri din detectare/generic assist în remediere asistată reală, pe același model deja validat pentru DSAR, Vendor și Job Description Pack
+**Efort estimat:** 1 sesiune mare / 3 implementări secvențiale + verificare live per flow
+
+### Descriere
+Sprintul unifică firul curent Wave 1 cu groundwork-ul de backend pregătit de Gemini, fără să rupă modelul produsului.
+
+Obiectivul nu este „mai multe documente în generator”, ci integrarea curată a 3 rezolvări reale în modelul canonic:
+
+- `finding în De rezolvat`
+- `confirmare în cockpit`
+- `handoff controlat în Documente`
+- `revenire automată în cockpit`
+- `dovadă precompletată`
+- `închidere onestă`
+- `Dosar + monitorizare`
+
+### Ce preluăm de la Gemini în acest sprint
+- extinderea `GeneratedDocumentKind` din `lib/compliance/types.ts`
+- șabloanele / fallback-urile noi din `lib/server/document-generator.ts` pentru:
+  - `hr-internal-procedures`
+  - `reges-correction-brief`
+  - `contract-template`
+
+### Ce NU intră în acest sprint
+- `deletion-attestation`
+  - se lovește de canonul deja stabilizat pentru `GDPR-016 -> GDPR-017`
+- `efactura-xml-repair.ts`
+  - rămâne separat ca fundament pentru `Wave 2 Fiscal Pre-Validator`
+- schimbările auxiliare din validator/tests care nu sunt necesare pentru aceste 3 flow-uri
+
+### Scope tehnic
+
+**Faza A — Curățare și canonizare backend**
+- verificare și păstrare doar a tipurilor/documentelor utile pentru sprint:
+  - `hr-internal-procedures`
+  - `reges-correction-brief`
+  - `contract-template`
+- excludere explicită pentru:
+  - `deletion-attestation`
+  - `efactura-xml-repair.ts`
+
+**Faza B — HR Procedure Pack**
+- finding țintă: `hr-procedures`
+- integrare canonică în `finding-kernel`
+- handoff în `Documente`
+- revenire automată în cockpit cu dovadă precompletată
+- închidere numai după confirmarea adaptării și distribuirii interne
+
+**Faza C — REGES Correction Brief**
+- finding țintă: `hr-registry`
+- brief operațional pentru contabil / HR
+- revenire automată în cockpit
+- închidere numai după dovadă de remediere:
+  - export REGES / Revisal actualizat
+  - sau confirmare clară operațională
+
+**Faza D — Contracts Pack**
+- finding țintă: `contracts-baseline`
+- template contractual de bază pregătit în `Documente`
+- revenire automată în cockpit
+- închidere numai după confirmarea adoptării reale a template-ului
+
+### Fișiere țintă anticipate
+- `lib/compliance/types.ts`
+- `lib/server/document-generator.ts`
+- `lib/compliscan/finding-kernel.ts`
+- `lib/compliance/intake-engine.ts`
+- `components/compliscan/documents-page.tsx`
+- `app/dashboard/resolve/[findingId]/page.tsx`
+- API route-uri noi dacă sunt necesare pentru pachete dedicate
+- documentele canonice de coverage / roadmap din `docs/adevar inghetat/`
+
+### Definition of Done
+- [ ] backend-ul Gemini util pentru Wave 1 este separat de bucățile premature/riscante
+- [x] `HR Procedure Pack` este integrat cap-coadă în flow-ul canonic
+- [x] `REGES Correction Brief` este integrat cap-coadă în flow-ul canonic
+- [ ] `Contracts Pack` este integrat cap-coadă în flow-ul canonic
+- [ ] niciunul dintre cele 3 cazuri nu se închide fals doar pe baza documentului generat
+- [ ] `deletion-attestation` NU este introdus accidental în acest sprint
+- [ ] `efactura-xml-repair.ts` NU este amestecat accidental în acest sprint
+- [ ] verificare live pentru fiecare flow implementat
+- [ ] orice script temporar de smoke este șters după utilizare
+- [ ] logul de sprint și roadmap-ul de coverage sunt actualizate la final
+
+### Log
+| Data | Autor | Acțiune |
+|---|---|---|
+| 2026-03-29 | Codex | Sprint deschis. Înainte de implementare am fixat contractul de lucru: preluăm din backend-ul Gemini doar `hr-internal-procedures`, `reges-correction-brief`, `contract-template`; excludem deocamdată `deletion-attestation` și `efactura-xml-repair.ts`; ordinea de execuție este HR Procedure Pack → REGES Correction Brief → Contracts Pack. |
+| 2026-03-29 | Codex | `HR Procedure Pack` livrat în flow-ul canonic: `intake-hr-procedures -> GDPR-022 -> /dashboard/documente?focus=hr-procedures -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`. Commit `69bd477` pe `main`. |
+| 2026-03-29 | Codex | Verificare live reușită pe aliasul public `https://compliscanag.vercel.app` după deploy curat `dpl_8n1FMQWyq2Z9GVdbsD5DsjR3BWM8`: `returnedToCockpit=true`, `evidencePrefilled=true`, `finalStatus=under_monitoring`. Falsul negativ intermediar a fost doar în smoke-ul temporar (selector/timing și preview project greșit), nu în flow-ul real. |
+| 2026-03-29 | Codex | Preflight `REGES Correction Brief`: păstrăm din groundwork-ul Gemini doar `reges-correction-brief` și îl unificăm pe flow-ul canonic `intake-hr-registry -> GDPR-023 -> /dashboard/documente?focus=reges-correction -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`. Înainte de commit verific explicit: mappingul din `finding-kernel`, contractul de handoff, revenirea în cockpit, testele țintite și smoke-ul live fără artefacte rămase în repo. |
+| 2026-03-29 | Codex | `REGES Correction Brief` livrat în flow-ul canonic: `intake-hr-registry -> GDPR-023 -> /dashboard/documente?focus=reges-correction -> returnTo cockpit -> evidence prefilled -> close -> under_monitoring`. Verificări: `app/api/hr/pack/route.test.ts` verde, subset țintit din `tests/finding-kernel.test.ts` verde, `npm run build` verde. |
+| 2026-03-29 | Codex | Smoke live reușit pe aliasul public `https://compliscanag.vercel.app` după deploy curat `dpl_2cRqrjxYTY5jUtSWC3LMXAGaWgKY`: `findingType=GDPR-023`, `returnedToCockpit=true`, `evidencePrefilled=true`, `finalStatus=under_monitoring`. Previewul intermediar a fost blocat doar de preview auth, nu de flow-ul REGES. |
