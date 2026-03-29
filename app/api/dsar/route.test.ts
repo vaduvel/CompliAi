@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   createDsarMock: vi.fn(),
   updateDsarMock: vi.fn(),
   generateDsarDraftMock: vi.fn(),
+  generateDsarProcessPackMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -43,10 +44,11 @@ vi.mock("@/lib/server/dsar-store", () => ({
 
 vi.mock("@/lib/compliance/dsar-drafts", () => ({
   generateDsarDraft: mocks.generateDsarDraftMock,
+  generateDsarProcessPack: mocks.generateDsarProcessPackMock,
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1" }
+const ORG_CTX = { orgId: "org-1", orgName: "Org Test SRL" }
 
 const SAMPLE_DSAR = {
   id: "dsar-abc123",
@@ -71,6 +73,12 @@ describe("GET /api/dsar", () => {
     mocks.requireRoleMock.mockReturnValue(SESSION)
     mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
     mocks.readDsarStateMock.mockResolvedValue({ requests: [SAMPLE_DSAR], updatedAtISO: "2026-03-20T10:00:00.000Z" })
+    mocks.generateDsarProcessPackMock.mockReturnValue({
+      title: "Pachet minim DSAR",
+      summary: "Pack",
+      assets: [],
+      completionChecklist: [],
+    })
   })
 
   it("returneaza lista de cereri DSAR", async () => {
@@ -80,6 +88,7 @@ describe("GET /api/dsar", () => {
     expect(res.status).toBe(200)
     expect(body.requests).toHaveLength(1)
     expect(body.requests[0].requesterName).toBe("Ion Popescu")
+    expect(body.processPack.title).toBe("Pachet minim DSAR")
   })
 
   it("respinge accesul fara sesiune", async () => {

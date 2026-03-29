@@ -957,6 +957,20 @@ describe("buildCockpitRecipe", () => {
       const recipe = buildCockpitRecipe(finding)
       expect(recipe.heroTitle).toBe("Politică GDPR lipsă")
     })
+
+    it("mapează intake-gdpr-dsar pe flow-ul dedicat de proces DSAR", () => {
+      const finding = makeFinding({
+        id: "intake-gdpr-dsar",
+        category: "GDPR",
+        title: "Proces DSAR (cereri de date) lipsă",
+        detail: "Nu există procedură DSAR clară pentru primire și răspuns.",
+      })
+      const recipe = buildCockpitRecipe(finding)
+      expect(recipe.findingTypeId).toBe("GDPR-012")
+      expect(recipe.executionClass).toBe("specialist_handoff")
+      expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?")
+      expect(recipe.workflowLink?.href).toContain("focus=process")
+    })
   })
 })
 
@@ -1032,6 +1046,7 @@ describe("getSmartResolveExecutionClass", () => {
   })
 
   it("marchează DSAR și NIS2 asistat ca specialist_handoff", () => {
+    expect(getSmartResolveExecutionClass("GDPR-012")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-013")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-019")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("NIS2-015")).toBe("specialist_handoff")
@@ -1039,6 +1054,18 @@ describe("getSmartResolveExecutionClass", () => {
 })
 
 describe("getSpecialistHandoffContract", () => {
+  it("mapează procesul DSAR pe handoff contextual cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-012",
+      makeFinding({ id: "intake-gdpr-dsar", category: "GDPR" })
+    )
+    expect(contract?.surface).toBe("dsar_process")
+    expect(contract?.startHref).toContain("/dashboard/dsar?")
+    expect(contract?.startHref).toContain("focus=process")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fintake-gdpr-dsar")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
   it("mapează DSAR access pe handoff contextual cu întoarcere automată", () => {
     const contract = getSpecialistHandoffContract(
       "GDPR-013",

@@ -29,6 +29,7 @@ import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 import type { DsarRequest, DsarRequestType, DsarStatus } from "@/lib/server/dsar-store"
+import type { DsarProcessPack } from "@/lib/compliance/dsar-drafts"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -92,6 +93,10 @@ function appendReturnParams(baseHref: string, params: URLSearchParams) {
   return `${baseHref}${baseHref.includes("?") ? "&" : "?"}${params.toString()}`
 }
 
+function buildDsarProcessReturnEvidence() {
+  return "Pachetul DSAR minim a fost revizuit: procedură DSAR, registru de cereri și playbook pentru responsabil. Ownerul intern a fost desemnat, iar circuitul de lucru a fost confirmat pentru utilizare reală."
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DsarPage() {
@@ -102,6 +107,8 @@ export default function DsarPage() {
   const [showForm, setShowForm] = useState(false)
   const [creating, setCreating] = useState(false)
   const [initialDrafts, setInitialDrafts] = useState<Record<string, DsarDraft>>({})
+  const [processPack, setProcessPack] = useState<DsarProcessPack | null>(null)
+  const [processChecklist, setProcessChecklist] = useState<boolean[]>([false, false, false])
   const [form, setForm] = useState({
     requesterName: "",
     requesterEmail: "",
@@ -110,6 +117,7 @@ export default function DsarPage() {
   })
   const sourceFindingId = searchParams.get("findingId")
   const requestedType = searchParams.get("type")
+  const focus = searchParams.get("focus")
   const returnTo =
     searchParams.get("returnTo") ??
     (sourceFindingId ? `/dashboard/resolve/${sourceFindingId}` : null)
@@ -117,7 +125,10 @@ export default function DsarPage() {
   useEffect(() => {
     fetch("/api/dsar", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setRequests(d.requests ?? []))
+      .then((d) => {
+        setRequests(d.requests ?? [])
+        setProcessPack(d.processPack ?? null)
+      })
       .catch(() => toast.error("Eroare la încărcare DSAR"))
       .finally(() => setLoading(false))
   }, [])
@@ -218,6 +229,7 @@ export default function DsarPage() {
 
   const active = requests.filter((r) => !["responded", "refused"].includes(r.status))
   const urgent = active.filter((r) => daysLeft(r.deadlineISO).urgent)
+  const processReady = processChecklist.every(Boolean)
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
@@ -239,6 +251,71 @@ export default function DsarPage() {
             <p className="text-sm text-eos-text">
               Ai venit aici din cockpitul unui finding GDPR. Deschide sau completează cazul DSAR, apoi întoarce-te înapoi în finding cu dovada răspunsului și a execuției.
             </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {processPack ? (
+        <Card className={`border-eos-primary/30 ${focus === "process" ? "bg-eos-primary-soft/20" : "bg-eos-primary/5"}`}>
+          <CardHeader>
+            <CardTitle className="text-sm">{processPack.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-eos-text-muted">{processPack.summary}</p>
+
+            <div className="grid gap-3">
+              {processPack.assets.map((asset) => (
+                <div key={asset.id} className="rounded-eos-md border border-eos-border bg-eos-surface p-3 space-y-2">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{asset.title}</p>
+                    <p className="text-xs text-eos-text-muted">{asset.summary}</p>
+                  </div>
+                  <pre className="whitespace-pre-wrap text-xs leading-relaxed text-eos-text-muted">{asset.content}</pre>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface p-3 space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Checklist minim de asumare</p>
+              {processPack.completionChecklist.map((item, index) => (
+                <label key={item} className="flex items-start gap-2 text-sm text-eos-text">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded"
+                    checked={processChecklist[index] ?? false}
+                    onChange={(e) =>
+                      setProcessChecklist((prev) => prev.map((value, i) => (i === index ? e.target.checked : value)))
+                    }
+                  />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </div>
+
+            {returnTo ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  disabled={!processReady}
+                  onClick={() => {
+                    const params = new URLSearchParams({
+                      dsarProcessFlow: "done",
+                      evidenceNote: buildDsarProcessReturnEvidence(),
+                    })
+                    router.push(appendReturnParams(returnTo, params))
+                  }}
+                >
+                  <CheckCircle2 className="size-3.5" />
+                  Folosește pachetul DSAR și revino în cockpit
+                </Button>
+                {!processReady ? (
+                  <p className="text-xs text-eos-text-muted">
+                    Bifează checklistul minim înainte să revii în cockpit.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}

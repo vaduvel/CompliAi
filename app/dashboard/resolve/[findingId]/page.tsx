@@ -180,6 +180,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("dsarProcessFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din pachetul DSAR. Revizuiește dovada precompletată și închide cazul doar dacă procedura, registrul și responsabilul sunt confirmate clar."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
     if (searchParams.get("assessmentFlow") === "done") {
       setStatusFeedback(
         "Ai revenit din evaluarea NIS2. Revizuiește dovada precompletată și închide cazul doar dacă assessment-ul salvat reflectă situația reală."

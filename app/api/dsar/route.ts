@@ -5,7 +5,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { createDsar, readDsarState, updateDsar } from "@/lib/server/dsar-store"
-import { generateDsarDraft } from "@/lib/compliance/dsar-drafts"
+import { generateDsarDraft, generateDsarProcessPack } from "@/lib/compliance/dsar-drafts"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import type { DsarRequestType } from "@/lib/server/dsar-store"
 
@@ -16,9 +16,12 @@ const VALID_TYPES: DsarRequestType[] = [
 export async function GET(request: Request) {
   try {
     requireRole(request, WRITE_ROLES, "vizualizarea cererilor DSAR")
-    const { orgId } = await getOrgContext()
+    const { orgId, orgName } = await getOrgContext()
     const state = await readDsarState(orgId)
-    return NextResponse.json({ requests: state.requests })
+    return NextResponse.json({
+      requests: state.requests,
+      processPack: generateDsarProcessPack({ orgName: orgName || orgId }),
+    })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Nu am putut încărca cererile DSAR.", 500, "DSAR_READ_FAILED")

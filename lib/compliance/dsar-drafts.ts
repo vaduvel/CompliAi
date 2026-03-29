@@ -13,6 +13,20 @@ export type DsarDraft = {
   requiredActions: string[]
 }
 
+export type DsarProcessAsset = {
+  id: string
+  title: string
+  summary: string
+  content: string
+}
+
+export type DsarProcessPack = {
+  title: string
+  summary: string
+  assets: DsarProcessAsset[]
+  completionChecklist: string[]
+}
+
 const ARTICLE_MAP: Record<DsarRequestType, string> = {
   access: "Art. 15 GDPR",
   rectification: "Art. 16 GDPR",
@@ -20,6 +34,106 @@ const ARTICLE_MAP: Record<DsarRequestType, string> = {
   portability: "Art. 20 GDPR",
   objection: "Art. 21 GDPR",
   restriction: "Art. 18 GDPR",
+}
+
+export function generateDsarProcessPack(params: { orgName: string }): DsarProcessPack {
+  const orgName = params.orgName.trim() || "Organizația"
+
+  return {
+    title: "Pachet minim DSAR",
+    summary:
+      "CompliAI pregătește procedura, registrul și playbook-ul minim. Firma trebuie să desemneze responsabilul, să confirme circuitul real și să păstreze urma la dosar.",
+    assets: [
+      {
+        id: "dsar-procedure",
+        title: "Procedură DSAR",
+        summary: "Flux minim pentru primire, verificare identitate, execuție și răspuns în termen.",
+        content: `# Procedură DSAR — ${orgName}
+
+## 1. Primirea cererii
+
+- Cererea intră prin email, formular, poștă sau alt canal oficial.
+- Toate cererile se înregistrează în registrul DSAR în ziua primirii.
+- Se notează: data, persoana vizată, tipul cererii, canalul, ownerul intern.
+
+## 2. Verificarea identității
+
+- ${orgName} verifică identitatea solicitantului înainte de orice divulgare sau ștergere.
+- Dacă identitatea nu este clară, se cere dovadă suplimentară și termenul se suspendă până la clarificare.
+
+## 3. Clasificarea cererii
+
+- Cererea se clasifică drept acces, rectificare, ștergere, portabilitate, opoziție sau restricționare.
+- Se stabilește imediat dacă există sisteme, furnizori sau colegi care trebuie implicați.
+
+## 4. Execuția internă
+
+- Ownerul DSAR coordonează colectarea informațiilor din toate sistemele relevante.
+- Pentru ștergere sau restricționare, ownerul notează explicit ce sisteme au fost afectate și ce excepții legale există.
+- Pentru portabilitate, exportul trebuie pregătit într-un format structurat.
+
+## 5. Răspunsul
+
+- Răspunsul final se trimite în termenul legal aplicabil.
+- Orice extindere de termen se documentează și se comunică persoanei vizate.
+
+## 6. Dovada la dosar
+
+- ${orgName} păstrează la dosar: registrul cazului, dovada verificării identității, răspunsul final și urmele de execuție relevante.
+
+⚠️ Acest pachet a fost generat cu ajutorul AI și trebuie confirmat de un responsabil uman înainte de folosire oficială.`,
+      },
+      {
+        id: "dsar-register",
+        title: "Registru DSAR",
+        summary: "Model minim de registru pentru urmărirea termenelor și a stadiului fiecărei cereri.",
+        content: `# Registru DSAR — ${orgName}
+
+| ID caz | Data primirii | Persoană vizată | Tip cerere | Owner intern | Termen | Status | Sisteme afectate | Data răspunsului | Notă finală |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| DSAR-001 | [completează] | [completează] | Acces / Ștergere / etc. | [completează] | [completează] | Primită / În lucru / Răspuns trimis | [completează] | [completează] | [completează] |
+
+## Reguli de folosire
+
+- Fiecare cerere primește un ID unic.
+- Ownerul se setează în aceeași zi.
+- Orice extindere de termen se notează cu motiv.
+- La închidere se păstrează linkul sau referința către dovada finală.`,
+      },
+      {
+        id: "dsar-playbook",
+        title: "Playbook responsabil DSAR",
+        summary: "Ce trebuie să verifice responsabilul înainte de a închide cazul.",
+        content: `# Playbook responsabil DSAR — ${orgName}
+
+## Checklist de control
+
+1. Cererea este înregistrată cu dată și tip corect.
+2. Identitatea persoanei vizate este verificată.
+3. Sunt identificate toate sistemele și furnizorii relevanți.
+4. Draftul de răspuns a fost revizuit de om.
+5. Excepțiile legale, dacă există, sunt explicate clar.
+6. Răspunsul final și urmele de execuție sunt salvate la dosar.
+
+## Owner recomandat
+
+- Un responsabil intern pentru privacy / compliance
+- Sau o persoană desemnată explicit de management
+
+## Urma minimă cerută
+
+- registru actualizat
+- dovada verificării identității
+- răspuns trimis sau refuz documentat
+- log sau notă despre execuția reală unde e cazul`,
+      },
+    ],
+    completionChecklist: [
+      "Ai desemnat responsabilul intern pentru DSAR.",
+      "Ai confirmat că registrul DSAR va fi folosit pentru toate cererile noi.",
+      "Ai revizuit procedura și template-urile înainte de utilizare oficială.",
+    ],
+  }
 }
 
 export function generateDsarDraft(params: {

@@ -193,6 +193,7 @@ export type CloseGatingRequirements = {
 export type SmartResolveExecutionClass = "documentary" | "operational" | "specialist_handoff"
 
 export type SpecialistHandoffSurface =
+  | "dsar_process"
   | "dsar_access"
   | "dsar_erasure"
   | "anspdcp_breach"
@@ -230,6 +231,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
 ])
 
 const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
+  "GDPR-012",
   "GDPR-013",
   "GDPR-014",
   "GDPR-019",
@@ -402,6 +404,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["vendor_document", "confirmation"],
     autoRecheck: "partial",
     closingRule: "DPA prezent și confirmat",
+  },
+  "GDPR-012": {
+    findingTypeId: "GDPR-012",
+    framework: "GDPR",
+    title: "Proces DSAR lipsă",
+    category: "Data subject rights",
+    typicalSeverity: "high",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["in_app_guided", "external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["generează procedura, registrul și playbook-ul minim", "deschide modulul DSAR cu pachetul pregătit"],
+    userResponsibilities: ["desemnează ownerul", "confirmă circuitul real", "păstrează urma la dosar"],
+    requiredEvidenceKinds: ["uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "pachet DSAR revizuit și owner desemnat",
   },
   "GDPR-013": {
     findingTypeId: "GDPR-013",
@@ -847,6 +864,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "DPA prezent și confirmat.",
     revalidationTriggers: ["expirare DPA", "vendor schimbat"],
   },
+  "GDPR-012": {
+    findingTypeId: "GDPR-012",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Deschide pachetul DSAR",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă un proces clar pentru cereri de acces, ștergere și celelalte drepturi GDPR.",
+    whatCompliDoes:
+      "Deschide modulul DSAR și pregătește procedura, registrul și playbook-ul minim de care ai nevoie pentru a porni corect.",
+    whatUserMustDo:
+      "Revizuiești pachetul, desemnezi responsabilul și confirmi că registrul și procedura vor fi folosite în practică.",
+    closeCondition: "Pachet DSAR revizuit și urmă clară salvată în cockpit.",
+    revalidationTriggers: ["proces nou", "sistem nou", "review periodic"],
+  },
   "GDPR-013": {
     findingTypeId: "GDPR-013",
     initialFlowState: "need_your_input",
@@ -1237,6 +1268,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   // Specific id pattern mappings first
   if (id === "dsar-no-procedure") return "GDPR-013"
   if (id === "dsar-erasure-active") return "GDPR-014"
+  if (id === "intake-gdpr-dsar") return "GDPR-012"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
   if (
@@ -1353,6 +1385,18 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     )
   ) {
     return "EF-003"
+  }
+
+  if (
+    framework === "GDPR" &&
+    (
+      title.includes("proces dsar") ||
+      (title.includes("procedur") && title.includes("dsar")) ||
+      detail.includes("proces dsar") ||
+      (detail.includes("procedur") && detail.includes("dsar"))
+    )
+  ) {
+    return "GDPR-012"
   }
 
   if (
@@ -2020,6 +2064,15 @@ function getWorkflowLink(
         }).toString()}`,
         label: "Deschide DSAR",
       }
+    case "GDPR-012":
+      return {
+        href: `/dashboard/dsar?${new URLSearchParams({
+          focus: "process",
+          findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide pachetul DSAR",
+      }
     case "GDPR-014":
       return {
         href: `/dashboard/dsar?${new URLSearchParams({
@@ -2076,6 +2129,8 @@ function getSpecialistHandoffSurface(
   record: ScanFinding
 ): SpecialistHandoffSurface | null {
   switch (findingTypeId) {
+    case "GDPR-012":
+      return "dsar_process"
     case "GDPR-013":
       return "dsar_access"
     case "GDPR-014":
@@ -2114,6 +2169,19 @@ export function getSpecialistHandoffContract(
   if (!workflowLink || !surface) return undefined
 
   switch (surface) {
+    case "dsar_process":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce procedura, registrul și responsabilul DSAR sunt confirmați, modulul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Pachet DSAR confirmat",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească dovada că procedura, registrul și ownerul DSAR au fost revizuite și asumate intern.",
+      }
     case "dsar_access":
       return {
         surface,
@@ -2247,6 +2315,8 @@ function getClosureCTA(
       return "Marchează early warning trimis"
     case "GDPR-005":
       return "Trimite la dosar și monitorizare"
+    case "GDPR-012":
+      return "Marchează pachetul DSAR pregătit"
     case "GDPR-013":
       return "Marchează răspunsul trimis"
     case "GDPR-014":
@@ -2274,6 +2344,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-003": 90,
   "GDPR-005": 60,
   "GDPR-010": 180,
+  "GDPR-012": 180,
   "GDPR-013": 30,
   "GDPR-014": 30,
   "GDPR-016": 180,
