@@ -555,9 +555,10 @@ export function GeneratorDrawer({
             </div>
           )}
 
-          {/* ── Preview ── */}
+          {/* ── Preview + sequential actions ── */}
           {result && (
             <div ref={previewRef} className="space-y-4">
+              {/* Document preview */}
               <div data-testid="generated-document-preview" className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
@@ -577,121 +578,93 @@ export function GeneratorDrawer({
                 </div>
               </div>
 
-              <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                      Re-scan / validare
-                    </p>
-                    <p className="mt-1 text-sm text-eos-text-muted">
-                      După generare, re-scannezi draftul. Asta este următoarea acțiune primară înainte de confirmare.
-                    </p>
-                  </div>
-                  <span
-                    className={[
-                      "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                      validationRunAtISO === null
-                        ? "border border-eos-border bg-eos-bg-inset text-eos-text-muted"
-                        : validationPassed
-                          ? "bg-eos-success-soft text-eos-success"
-                          : "bg-eos-error-soft text-eos-error",
-                    ].join(" ")}
-                  >
-                    {validationRunAtISO === null
-                      ? "Nevalidat încă"
-                      : validationPassed
-                        ? "Valid"
-                        : "Are observații"}
-                  </span>
-                </div>
-
-                {validationRunAtISO ? (
-                  <p className="text-xs text-eos-text-muted">
-                    Ultima verificare: {new Date(validationRunAtISO).toLocaleString("ro-RO")}
-                  </p>
-                ) : null}
-
-                <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
-                  {validationResult?.checks.map((check) => (
-                    <div key={check.id} className="flex items-start gap-2 text-sm">
-                      {check.passed ? (
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
-                      ) : (
-                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error" strokeWidth={2} />
-                      )}
-                      <div>
-                        <p className={check.passed ? "text-eos-text" : "text-eos-error"}>
-                          {check.label}
-                        </p>
-                        <p className="mt-0.5 text-xs text-eos-text-muted">{check.help}</p>
+              {/* Step: Re-scanează — acțiune primară când documentul nu e validat încă */}
+              {!validationPassed && !documentConfirmed && (
+                <div className="space-y-3">
+                  {validationRunAtISO && (
+                    <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">Rezultat re-scan</p>
+                        <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-eos-error-soft text-eos-error">Are observații</span>
+                      </div>
+                      <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
+                        {validationResult?.checks.map((check) => (
+                          <div key={check.id} className="flex items-start gap-2 text-sm">
+                            {check.passed
+                              ? <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                              : <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error" strokeWidth={2} />}
+                            <div>
+                              <p className={check.passed ? "text-eos-text" : "text-eos-error"}>{check.label}</p>
+                              <p className="mt-0.5 text-xs text-eos-text-muted">{check.help}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {validationFailed ? (
-                  <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft px-4 py-3">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-eos-error">
-                      Ce trebuie corectat
-                    </p>
-                    <ul className="mt-2 space-y-1 text-sm text-eos-text-muted">
-                      {validationResult?.checks
-                        .filter((check) => !check.passed)
-                        .map((check) => (
-                          <li key={check.id}>• {check.help}</li>
-                        ))}
-                    </ul>
-                  </div>
-                ) : null}
-
-                <label className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant">
-                  <input
-                    type="checkbox"
-                    checked={humanApprovalConfirmed}
-                    onChange={(event) => setHumanApprovalConfirmed(event.target.checked)}
-                    data-testid="drawer-human-approval"
-                    className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
-                  />
-                  <span className="text-sm text-eos-text">
-                    Confirm că am verificat datele generate și aprob documentul pentru rezolvarea riscului.
-                  </span>
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <Button
-                  onClick={runValidation}
-                  data-testid="rerun-document-validation"
-                  className="w-full gap-2"
-                >
-                  <RotateCw className="size-4" strokeWidth={2} />
-                  Re-scanează draftul
-                </Button>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={handleGenerate} disabled={generating}>
-                    Regenerează
-                  </Button>
-                  <Button variant="outline" onClick={() => setResult(null)}>
-                    Înlocuiește documentul
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Button
-                  onClick={handleAttach}
-                  disabled={attachDisabled}
-                    data-testid="confirm-generated-document"
-                  className="w-full gap-2"
-                >
-                  {attaching ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="size-4" strokeWidth={2} />
                   )}
-                  Confirmă documentul pentru rezolvare
-                </Button>
-              </div>
+                  <Button onClick={runValidation} data-testid="rerun-document-validation" className="w-full gap-2">
+                    <RotateCw className="size-4" strokeWidth={2} />
+                    {validationRunAtISO ? "Re-scanează din nou" : "Re-scanează draftul"}
+                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="ghost" size="sm" onClick={handleGenerate} disabled={generating}>Regenerează</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setResult(null)}>Înlocuiește</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step: Folosește să închizi riscul — acțiune primară după re-scan valid */}
+              {validationPassed && !documentConfirmed && (
+                <div className="space-y-3">
+                  <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">Rezultat re-scan</p>
+                      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-eos-success-soft text-eos-success">Valid</span>
+                    </div>
+                    <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
+                      {validationResult?.checks.map((check) => (
+                        <div key={check.id} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                          <p className="text-eos-text">{check.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant">
+                      <input
+                        type="checkbox"
+                        checked={humanApprovalConfirmed}
+                        onChange={(event) => setHumanApprovalConfirmed(event.target.checked)}
+                        data-testid="drawer-human-approval"
+                        className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+                      />
+                      <span className="text-sm text-eos-text">
+                        Confirm că am verificat datele generate și aprob documentul pentru rezolvarea riscului.
+                      </span>
+                    </label>
+                  </div>
+                  <Button
+                    onClick={handleAttach}
+                    disabled={!humanApprovalConfirmed || attaching}
+                    data-testid="confirm-generated-document"
+                    className="w-full gap-2"
+                  >
+                    {attaching ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" strokeWidth={2} />}
+                    Folosește să închizi riscul
+                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="ghost" size="sm" onClick={runValidation}>Re-scanează din nou</Button>
+                    <Button variant="ghost" size="sm" onClick={handleGenerate} disabled={generating}>Regenerează</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Stare finală: document confirmat */}
+              {documentConfirmed && (
+                <div className="flex items-center gap-2 rounded-eos-md border border-eos-success/25 bg-eos-success-soft/40 px-4 py-3">
+                  <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
+                  <p className="text-sm font-medium text-eos-success">Documentul a fost confirmat. Riscul este rezolvat.</p>
+                </div>
+              )}
             </div>
           )}
         </div>

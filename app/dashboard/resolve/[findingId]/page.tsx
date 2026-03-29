@@ -280,6 +280,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("contractsPackFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din pachetul contractual. Revizuiește dovada precompletată și închide cazul doar dacă baseline-ul contractual, locul de stocare și regula de folosire sunt clare pentru relațiile comerciale reale."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
   }, [finding, searchParams])
 
   async function updateStatus(
@@ -463,9 +472,9 @@ export default function FindingDetailPage() {
       : recipe.findingTypeId === "GDPR-020"
         ? {
             eyebrow: "Dovadă contractuală obligatorie",
-            body: "Notează ce template-uri contractuale ai pregătit sau actualizat, unde sunt salvate și pentru ce relații comerciale le vei folosi. Dacă ai fișierul sau linkul intern, menționează-l clar aici.",
-            placeholder: "Ex: Template contract client și template furnizor revizuite cu juristul la 27.03.2026. Salvate în Drive /Legal/Contracte-standard-v3 și folosite pentru onboarding clienți noi și furnizori recurenti.",
-            footer: "Cazul nu poate intra în monitorizare fără o urmă contractuală explicită. Confirmarea simplă nu este suficientă.",
+            body: "După pachetul contractual, notează ce template-uri ai pus în baseline, unde sunt salvate și pentru ce relații comerciale intră în uz. Dacă ai link intern sau fișier, menționează-l clar aici.",
+            placeholder: "Ex: Template contract client B2B și template furnizor revizuite cu juristul la 29.03.2026. Salvate în Drive /Legal/Contracte-standard-v4 și intră în uz pentru onboarding clienți noi și furnizori recurenti.",
+            footer: "Cazul nu poate intra în monitorizare fără o urmă contractuală explicită despre baseline-ul pus în uz.",
           }
       : recipe.findingTypeId === "EF-001"
         ? {
@@ -959,37 +968,16 @@ export default function FindingDetailPage() {
                 evidenceField?.scrollIntoView({ behavior: "smooth", block: "center" })
               }, 50)
             }
+            // Auto-resolve after document is confirmed — closes the loop without an extra card
+            if (result?.evidenceAttached && !isOperationalAssisted) {
+              void updateStatus("resolved")
+              return
+            }
             refetchFinding()
           }}
         />
       ) : null}
 
-      {needsDocumentResolution ? (
-        <Card
-          data-testid="documentary-resolve-next-step"
-          className="border-eos-success/25 bg-eos-success-soft/40"
-        >
-          <CardContent className="space-y-3 px-5 py-5">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
-                Pasul următor
-              </p>
-              <p className="mt-1 text-sm text-eos-text">
-                Documentul este confirmat. Acum folosești exact documentul validat pentru a rezolva riscul.
-              </p>
-            </div>
-            <Button
-              data-testid="mark-finding-resolved"
-              onClick={() => updateStatus("resolved")}
-              disabled={actionLoading}
-              className="w-full gap-1.5"
-            >
-              <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              Rezolvă riscul cu acest document
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
 
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
