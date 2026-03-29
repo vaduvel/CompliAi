@@ -10,7 +10,12 @@ import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { safeListReviews, createReview } from "@/lib/server/vendor-review-store"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { appendAudit, type VendorReview, type VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
+import {
+  appendAudit,
+  generateVendorGovernancePack,
+  type VendorReview,
+  type VendorReviewUrgency,
+} from "@/lib/compliance/vendor-review-engine"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -21,9 +26,14 @@ export async function GET(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
 
-    const { orgId } = await getOrgContext()
+    const { orgId, orgName } = await getOrgContext()
     const reviews = await safeListReviews(orgId)
-    return NextResponse.json({ reviews }, withRequestIdHeaders(undefined, context))
+    const nis2 = await readNis2State(orgId).catch(() => ({ vendors: [] }))
+    const pack = generateVendorGovernancePack({
+      orgName: orgName || orgId,
+      knownVendorCount: nis2.vendors?.length ?? 0,
+    })
+    return NextResponse.json({ reviews, pack }, withRequestIdHeaders(undefined, context))
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)
     await logRouteError(context, error, {

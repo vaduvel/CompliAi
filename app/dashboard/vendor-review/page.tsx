@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ShieldAlert,
@@ -38,6 +39,7 @@ import {
   type VendorReviewStatus,
   type VendorReviewUrgency,
   type EvidenceType,
+  type VendorGovernancePack,
 } from "@/lib/compliance/vendor-review-engine"
 import {
   fingerprintMatch,
@@ -865,12 +867,19 @@ function VendorPicker({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function VendorReviewPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [reviews, setReviews] = useState<VendorReview[]>([])
   const [vendors, setVendors] = useState<Nis2Vendor[]>([])
+  const [vendorPack, setVendorPack] = useState<VendorGovernancePack | null>(null)
+  const [packChecklist, setPackChecklist] = useState<boolean[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showPicker, setShowPicker] = useState(false)
+  const focusPack = searchParams.get("focus") === "pack"
+  const returnTo = searchParams.get("returnTo")
+  const findingId = searchParams.get("findingId")
 
   const load = useCallback(async () => {
     try {
@@ -878,9 +887,10 @@ export default function VendorReviewPage() {
         fetch("/api/vendor-review"),
         fetch("/api/nis2/vendors"),
       ])
-      const reviewsData = (await reviewsRes.json()) as { reviews: VendorReview[] }
+      const reviewsData = (await reviewsRes.json()) as { reviews: VendorReview[]; pack?: VendorGovernancePack | null }
       const vendorsData = (await vendorsRes.json()) as { vendors: Nis2Vendor[] }
       setReviews(reviewsData.reviews ?? [])
+      setVendorPack(reviewsData.pack ?? null)
       setVendors(vendorsData.vendors ?? [])
     } catch {
       toast.error("Nu am putut încărca datele.")
@@ -890,6 +900,21 @@ export default function VendorReviewPage() {
   }, [])
 
   useEffect(() => { void load() }, [load])
+
+  useEffect(() => {
+    if (!vendorPack) return
+    setPackChecklist((current) =>
+      current.length === vendorPack.completionChecklist.length
+        ? current
+        : vendorPack.completionChecklist.map(() => false)
+    )
+  }, [vendorPack])
+
+  useEffect(() => {
+    if (focusPack) {
+      setShowPicker(true)
+    }
+  }, [focusPack])
 
   async function handleCreateReview(vendorId: string) {
     setActionLoading(true)
@@ -903,9 +928,13 @@ export default function VendorReviewPage() {
         const data = (await r.json()) as { error?: string }
         throw new Error(data.error ?? "Eroare la creare.")
       }
+      const payload = (await r.json()) as { review?: VendorReview | null }
       toast.success("Review creat cu succes.")
       setShowPicker(false)
       await load()
+      if (payload.review?.id) {
+        setExpandedId(payload.review.id)
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Eroare.")
     } finally {
@@ -943,6 +972,26 @@ export default function VendorReviewPage() {
     }
   }
 
+  function togglePackChecklist(index: number) {
+    setPackChecklist((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? !item : item))
+    )
+  }
+
+  function handleReturnToCockpit() {
+    if (!returnTo) return
+
+    const totalReviews = reviews.length
+    const note = `Pachetul vendor a fost revizuit în Vendor Review, iar ${totalReviews} ${totalReviews === 1 ? "review" : "review-uri"} au fost pornite pentru furnizorii relevanți. Solicitarea de documentație și checklistul de follow-up sunt pregătite pentru execuție.`
+    const target = new URL(returnTo, window.location.origin)
+    target.searchParams.set("vendorPackFlow", "done")
+    target.searchParams.set("evidenceNote", note)
+    if (findingId) {
+      target.searchParams.set("sourceFindingId", findingId)
+    }
+    router.push(`${target.pathname}${target.search}`)
+  }
+
   // Stats
   const openReviews = reviews.filter((r) => r.status !== "closed")
   const closedReviews = reviews.filter((r) => r.status === "closed")
@@ -954,6 +1003,11 @@ export default function VendorReviewPage() {
   const existingVendorIds = new Set(
     reviews.filter((r) => r.status !== "closed").map((r) => r.vendorId),
   )
+  const canReturnFromPack =
+    Boolean(returnTo) &&
+    packChecklist.length > 0 &&
+    packChecklist.every(Boolean) &&
+    reviews.length > 0
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -976,6 +1030,52 @@ export default function VendorReviewPage() {
           </Button>
         }
       />
+
+      {vendorPack ? (
+        <Card className={focusPack ? "ring-1 ring-eos-primary/30" : undefined}>
+          <CardHeader>
+            <CardTitle>{vendorPack.title}</CardTitle>
+            <p className="text-sm text-eos-text-muted">{vendorPack.summary}</p>
+            {focusPack ? (
+              <p className="text-xs text-eos-text-tertiary">
+                Ai venit din cockpitul unui finding de vendor governance. Pregătește pachetul, pornește cel puțin un review relevant și apoi revii automat în caz.
+              </p>
+            ) : null}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AssetViewer assets={vendorPack.assets} />
+
+            <div className="space-y-2 rounded-eos-lg border border-eos-border bg-eos-surface/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                Checklist de revenire
+              </p>
+              {vendorPack.completionChecklist.map((item, index) => (
+                <label key={item} className="flex items-start gap-2 text-sm text-eos-text">
+                  <input
+                    type="checkbox"
+                    checked={packChecklist[index] ?? false}
+                    onChange={() => togglePackChecklist(index)}
+                    className="mt-0.5 h-4 w-4 rounded border-eos-border bg-eos-bg accent-eos-primary"
+                  />
+                  <span>{item}</span>
+                </label>
+              ))}
+              {returnTo ? (
+                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-eos-text-tertiary">
+                    {reviews.length > 0
+                      ? `Ai ${reviews.length} ${reviews.length === 1 ? "review" : "review-uri"} pornite.`
+                      : "Pornește cel puțin un vendor review înainte să revii în cockpit."}
+                  </p>
+                  <Button disabled={!canReturnFromPack || actionLoading} onClick={handleReturnToCockpit}>
+                    Folosește pachetul vendor și revino în cockpit
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {loading ? (
         <div className="mt-6 flex items-center gap-2 text-sm text-eos-text-muted">

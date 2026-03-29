@@ -444,6 +444,28 @@ describe("intake-engine", () => {
     })
   })
 
+  it("trimite vendor governance pe cockpitul vendor pack", () => {
+    const findings = buildInitialFindings({
+      sellsToConsumers: "no",
+      hasEmployees: "no",
+      processesPersonalData: "no",
+      usesAITools: "no",
+      usesExternalVendors: "yes",
+      hasVendorDocumentation: "no",
+      hasSiteWithForms: "no",
+      hasStandardContracts: "yes",
+    } as const)
+
+    const nextBestAction = buildNextBestAction(findings)
+
+    expect(findings.map((finding) => finding.id)).toContain("intake-vendor-missing-docs")
+    expect(nextBestAction).toEqual({
+      label: "Deschide pachetul vendor în cockpit",
+      href: "/dashboard/resolve/intake-vendor-missing-docs",
+      estimatedMinutes: 5,
+    })
+  })
+
   it("creează finding și document request pentru retenție când regula nu este clară", () => {
     const answers = {
       sellsToConsumers: "no",

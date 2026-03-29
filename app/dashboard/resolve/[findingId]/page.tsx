@@ -243,6 +243,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("vendorPackFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din Vendor Review. Revizuiește dovada precompletată și închide cazul doar dacă pachetul vendor este pregătit și review-ul pentru furnizorii relevanți a fost pornit clar."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
   }, [finding, searchParams])
 
   async function updateStatus(

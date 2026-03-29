@@ -54,6 +54,13 @@ export type VendorReviewAsset = {
   generatedAtISO: string
 }
 
+export type VendorGovernancePack = {
+  title: string
+  summary: string
+  assets: VendorReviewAsset[]
+  completionChecklist: string[]
+}
+
 // ── V5.3 — Audit trail & evidence ──────────────────────────────────────────
 
 export type AuditAction =
@@ -547,6 +554,118 @@ Review-ul rămâne deschis cu urgență ridicată.
       generatedAtISO: now,
     },
   ]
+}
+
+export function generateVendorGovernancePack(params: {
+  orgName: string
+  knownVendorCount?: number
+}): VendorGovernancePack {
+  const now = new Date().toISOString()
+  const orgLabel = params.orgName.trim() || "Organizația ta"
+  const vendorCountLabel =
+    typeof params.knownVendorCount === "number" && params.knownVendorCount > 0
+      ? `${params.knownVendorCount} furnizori deja detectați în registru`
+      : "furnizorii activi identificați intern"
+
+  return {
+    title: "Pachet minim Vendor Review",
+    summary:
+      "Pachetul pregătește solicitarea către furnizori, checklistul de verificare și urma internă de follow-up pentru cazurile cu documentație vendor lipsă.",
+    assets: [
+      {
+        id: assetId(),
+        type: "dpa-request-checklist",
+        title: "Template solicitare documentație vendor",
+        content: `# Solicitare documentație vendor — ${orgLabel}
+
+## Scop
+Folosește acest mesaj când furnizorul procesează date, oferă servicii cloud/SaaS sau păstrează informații confidențiale pentru firmă.
+
+## Template email
+
+> Subiect: Solicitare documentație GDPR / securitate — ${orgLabel}
+>
+> Bună ziua,
+>
+> În cadrul revizuirii noastre interne de conformitate, avem nevoie de documentația actualizată pentru serviciile furnizate către ${orgLabel}.
+>
+> Vă rugăm să ne transmiteți:
+> 1. DPA sau anexa contractuală pentru procesare date
+> 2. Lista subprocesatorilor / subcontractorilor relevanți
+> 3. Politica de securitate sau documentația TOMs
+> 4. Certificări relevante (ISO 27001, SOC 2, etc.), dacă există
+> 5. Mecanismul de transfer internațional aplicabil, dacă datele ies din UE/SEE
+>
+> Termen recomandat: 10 zile lucrătoare.
+>
+> Mulțumim,
+> [Nume / rol]
+
+## Checklist follow-up
+- [ ] Furnizorul și persoana de contact au fost identificați
+- [ ] Solicitarea a fost trimisă
+- [ ] Follow-up planificat dacă nu răspunde în 10 zile
+
+---
+*Generat automat de CompliScan — nu constituie consultanță juridică.*`,
+        generatedAtISO: now,
+      },
+      {
+        id: assetId(),
+        type: "privacy-review-checklist",
+        title: "Checklist vendor governance",
+        content: `# Checklist Vendor Governance — ${orgLabel}
+
+## Inventar minim
+- [ ] Avem lista cu ${vendorCountLabel}
+- [ ] Pentru fiecare vendor știm dacă trimitem date personale
+- [ ] Pentru fiecare vendor știm dacă trimitem date confidențiale / interne
+
+## Documente minime de urmărit
+- [ ] DPA / anexă contractuală
+- [ ] Termeni de privacy / security
+- [ ] Mecanism de transfer (DPF / SCC / altul)
+- [ ] Certificări sau TOMs relevante
+
+## Decizie per vendor
+- [ ] Păstrăm vendorul
+- [ ] Cerem documente suplimentare
+- [ ] Limităm datele transmise
+- [ ] Oprim utilizarea dacă riscul rămâne neacoperit
+
+---
+*Generat automat de CompliScan — nu constituie consultanță juridică.*`,
+        generatedAtISO: now,
+      },
+      {
+        id: assetId(),
+        type: "finding-resolution-steps",
+        title: "Plan intern de remediere vendor",
+        content: `# Plan intern de remediere — Vendor Governance
+
+## Pașii recomandați
+1. Pornește review pentru furnizorii principali sau critici
+2. Trimite pachetul de solicitare către furnizorii fără documente
+3. Atașează în review dovada primită sau nota internă de follow-up
+4. Închide review-ul numai când există urmă clară
+5. Revino în cockpit și notează ce ai acoperit deja
+
+## Rezultat minim acceptabil
+- cel puțin un review vendor pornit
+- solicitarea de documentație pregătită
+- checklistul intern completat
+
+---
+*Generat automat de CompliScan — nu constituie consultanță juridică.*`,
+        generatedAtISO: now,
+      },
+    ],
+    completionChecklist: [
+      "Am revizuit pachetul de solicitare și checklistul vendor.",
+      "Am pornit cel puțin un vendor review pentru un furnizor relevant.",
+      "Știu ce dovadă trebuie să adaug în review și ce voi confirma în cockpit.",
+    ],
+  }
 }
 
 /**

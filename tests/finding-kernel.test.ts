@@ -95,6 +95,17 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-010")
   })
 
+  it("mapează finding-ul intake vendor missing docs → GDPR-011", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-vendor-missing-docs",
+        category: "GDPR",
+        title: "Furnizori externi fără documentație",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-011")
+  })
+
   it("mapează baseline-ul contractual din intake → GDPR-020", () => {
     const result = classifyFinding(
       makeFinding({
@@ -971,6 +982,20 @@ describe("buildCockpitRecipe", () => {
       expect(recipe.workflowLink?.href).toContain("/dashboard/dsar?")
       expect(recipe.workflowLink?.href).toContain("focus=process")
     })
+
+    it("mapează intake-vendor-missing-docs pe flow-ul dedicat de vendor pack", () => {
+      const finding = makeFinding({
+        id: "intake-vendor-missing-docs",
+        category: "GDPR",
+        title: "Furnizori externi fără documentație",
+        detail: "Nu avem DPA, termeni sau evaluare de risc pentru furnizorii externi relevanți.",
+      })
+      const recipe = buildCockpitRecipe(finding)
+      expect(recipe.findingTypeId).toBe("GDPR-011")
+      expect(recipe.executionClass).toBe("specialist_handoff")
+      expect(recipe.workflowLink?.href).toContain("/dashboard/vendor-review?")
+      expect(recipe.workflowLink?.href).toContain("focus=pack")
+    })
   })
 })
 
@@ -986,6 +1011,13 @@ describe("getCloseGatingRequirements", () => {
     const requirements = getCloseGatingRequirements("GDPR-005")
     expect(requirements.requiresGeneratedDocument).toBe(true)
     expect(requirements.requiresEvidenceNote).toBe(true)
+  })
+
+  it("cere dovadă la întoarcerea din vendor pack pentru GDPR-011", () => {
+    const requirements = getCloseGatingRequirements("GDPR-011")
+    expect(requirements.requiresGeneratedDocument).toBe(false)
+    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
   })
 
   it("cere dovadă operațională pentru GDPR-017", () => {
@@ -1046,6 +1078,7 @@ describe("getSmartResolveExecutionClass", () => {
   })
 
   it("marchează DSAR și NIS2 asistat ca specialist_handoff", () => {
+    expect(getSmartResolveExecutionClass("GDPR-011")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-012")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-013")).toBe("specialist_handoff")
     expect(getSmartResolveExecutionClass("GDPR-019")).toBe("specialist_handoff")
@@ -1054,6 +1087,18 @@ describe("getSmartResolveExecutionClass", () => {
 })
 
 describe("getSpecialistHandoffContract", () => {
+  it("mapează vendor pack pe handoff contextual cu întoarcere automată", () => {
+    const contract = getSpecialistHandoffContract(
+      "GDPR-011",
+      makeFinding({ id: "intake-vendor-missing-docs", category: "GDPR" })
+    )
+    expect(contract?.surface).toBe("vendor_review_pack")
+    expect(contract?.startHref).toContain("/dashboard/vendor-review?")
+    expect(contract?.startHref).toContain("focus=pack")
+    expect(contract?.startHref).toContain("returnTo=%2Fdashboard%2Fresolve%2Fintake-vendor-missing-docs")
+    expect(contract?.runtimeReturnMode).toBe("automatic")
+  })
+
   it("mapează procesul DSAR pe handoff contextual cu întoarcere automată", () => {
     const contract = getSpecialistHandoffContract(
       "GDPR-012",

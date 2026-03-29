@@ -94,6 +94,16 @@ Ce reutilizăm deja:
 - vendor prefill
 - vendor review page
 
+Status acum:
+
+- implementat în produs
+- `GET /api/vendor-review` livrează și `Vendor Pack`
+- cockpitul `intake-vendor-missing-docs` intră pe `GDPR-011`
+- handoff-ul deschide Vendor Review cu `focus=pack`
+- revenirea în cockpit este automată cu dovadă precompletată
+- validare locală: teste țintite + build verzi
+- mai lipsește smoke live final pe deploymentul public
+
 Impact:
 
 - `mare`

@@ -193,6 +193,7 @@ export type CloseGatingRequirements = {
 export type SmartResolveExecutionClass = "documentary" | "operational" | "specialist_handoff"
 
 export type SpecialistHandoffSurface =
+  | "vendor_review_pack"
   | "dsar_process"
   | "dsar_access"
   | "dsar_erasure"
@@ -231,6 +232,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
 ])
 
 const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
+  "GDPR-011",
   "GDPR-012",
   "GDPR-013",
   "GDPR-014",
@@ -404,6 +406,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["vendor_document", "confirmation"],
     autoRecheck: "partial",
     closingRule: "DPA prezent și confirmat",
+  },
+  "GDPR-011": {
+    findingTypeId: "GDPR-011",
+    framework: "GDPR",
+    title: "Furnizori externi fără documentație",
+    category: "Vendor governance",
+    typicalSeverity: "high",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["in_app_guided", "external_action"],
+    primaryActors: ["user"],
+    compliCapabilities: ["pregătește Vendor Pack", "deschide vendor review", "structurează solicitarea către furnizori"],
+    userResponsibilities: ["pornește review pentru vendorii relevanți", "trimite solicitările reale", "păstrează urma de follow-up"],
+    requiredEvidenceKinds: ["vendor_document", "uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "Vendor Pack revizuit și primul review pornit cu urmă clară",
   },
   "GDPR-012": {
     findingTypeId: "GDPR-012",
@@ -864,6 +881,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "DPA prezent și confirmat.",
     revalidationTriggers: ["expirare DPA", "vendor schimbat"],
   },
+  "GDPR-011": {
+    findingTypeId: "GDPR-011",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Deschide pachetul vendor",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă documentația minimă și review-ul clar pentru furnizorii externi relevanți.",
+    whatCompliDoes:
+      "Deschide modulul Vendor Review și pregătește pachetul de solicitare, checklistul de evaluare și pașii de follow-up.",
+    whatUserMustDo:
+      "Revizuiești pachetul, pornești cel puțin un vendor review pentru un furnizor relevant și confirmi urma reală de solicitare sau follow-up.",
+    closeCondition: "Vendor Pack revizuit și primul review vendor pornit cu urmă clară.",
+    revalidationTriggers: ["vendor nou", "schimbare contractuală", "review periodic"],
+  },
   "GDPR-012": {
     findingTypeId: "GDPR-012",
     initialFlowState: "need_your_input",
@@ -1269,6 +1300,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "dsar-no-procedure") return "GDPR-013"
   if (id === "dsar-erasure-active") return "GDPR-014"
   if (id === "intake-gdpr-dsar") return "GDPR-012"
+  if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
   if (
@@ -2064,6 +2096,15 @@ function getWorkflowLink(
         }).toString()}`,
         label: "Deschide DSAR",
       }
+    case "GDPR-011":
+      return {
+        href: `/dashboard/vendor-review?${new URLSearchParams({
+          focus: "pack",
+          findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide pachetul vendor",
+      }
     case "GDPR-012":
       return {
         href: `/dashboard/dsar?${new URLSearchParams({
@@ -2129,6 +2170,8 @@ function getSpecialistHandoffSurface(
   record: ScanFinding
 ): SpecialistHandoffSurface | null {
   switch (findingTypeId) {
+    case "GDPR-011":
+      return "vendor_review_pack"
     case "GDPR-012":
       return "dsar_process"
     case "GDPR-013":
@@ -2169,6 +2212,19 @@ export function getSpecialistHandoffContract(
   if (!workflowLink || !surface) return undefined
 
   switch (surface) {
+    case "vendor_review_pack":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce pachetul vendor este revizuit și pornești primul review relevant, modulul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Vendor Pack pregătit și review pornit",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească dovada că pachetul vendor a fost revizuit și că există cel puțin un vendor review pornit pentru furnizorii relevanți.",
+      }
     case "dsar_process":
       return {
         surface,
@@ -2307,6 +2363,8 @@ function getClosureCTA(
   primaryMode: ResolutionMode
 ): string | undefined {
   switch (findingTypeId) {
+    case "GDPR-011":
+      return "Marchează pachetul vendor pregătit"
     case "NIS2-001":
       return "Salvează eligibilitatea"
     case "NIS2-005":
@@ -2344,6 +2402,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-003": 90,
   "GDPR-005": 60,
   "GDPR-010": 180,
+  "GDPR-011": 180,
   "GDPR-012": 180,
   "GDPR-013": 30,
   "GDPR-014": 30,

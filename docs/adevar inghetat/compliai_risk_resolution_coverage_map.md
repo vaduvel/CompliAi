@@ -90,21 +90,26 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 4. Vendor governance / documentație externă lipsă
 
-- status azi: `asistat slab-mediu`
-- clasă: `operational`
-- cât avem deja: `45%`
+- status azi: `asistat puternic`
+- clasă: `specialist_handoff`
+- cât avem deja: `75%`
 - ce există:
   - vendor review engine
   - vendor review page
   - vendor risk / vendor library / vendor prefill
+  - `Vendor Pack` generat în produs
+  - template solicitare documentație vendor
+  - checklist vendor governance
+  - plan intern de remediere
+  - checklist de revenire în cockpit
+  - handoff + revenire automată în cockpit
 - ce mai lipsește până la 100%:
-  - `Vendor Pack`
-  - email/request pack către furnizor
-  - checklist DPA/security
   - scorecard vendor
   - tracking expirări și răspunsuri
+  - follow-up mai clar pe review-ul pornit
+  - smoke live final confirmat pe deploymentul public
 - ce ar urca riscul:
-  - mutare în `operational-assisted`
+  - specialist flow aproape complet, cu Vendor Pack gata de folosit în produs
 
 ### 5. Proces DSAR lipsă
 

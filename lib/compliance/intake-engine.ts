@@ -983,7 +983,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   )
   const aiFinding = findings.find((f) => f.id === "intake-ai-missing-policy")
   const vendorDpaFinding = findings.find((f) => f.id === "intake-vendor-no-dpa")
-  const hasVendorFinding = findings.some((f) => f.id === "intake-vendor-missing-docs")
+  const vendorPackFinding = findings.find((f) => f.id === "intake-vendor-missing-docs")
 
   if (privacyFinding) {
     return {
@@ -1001,6 +1001,14 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
     }
   }
 
+  if (vendorPackFinding) {
+    return {
+      label: "Deschide pachetul vendor în cockpit",
+      href: `${dashboardRoutes.resolve}/${vendorPackFinding.id}`,
+      estimatedMinutes: 5,
+    }
+  }
+
   if (aiFinding) {
     return {
       label: "Deschide politica AI în cockpit",
@@ -1008,15 +1016,6 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
       estimatedMinutes: 4,
     }
   }
-
-  if (hasVendorFinding) {
-    return {
-      label: "Începe review-ul primului furnizor extern",
-      href: "/dashboard/vendor-review",
-      estimatedMinutes: 5,
-    }
-  }
-
   if (findings.length > 0) {
     return {
       label: "Rezolvă primul finding din board",
