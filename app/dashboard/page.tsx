@@ -216,7 +216,7 @@ export default function DashboardPage() {
         <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-primary-soft">
           <ShieldAlert className="h-6 w-6 text-eos-primary" strokeWidth={1.5} />
         </div>
-        <h2 className="text-xl font-bold text-eos-text">Completează profilul firmei</h2>
+        <h2 className="text-xl font-semibold text-eos-text">Completează profilul firmei</h2>
         <p className="mt-2 max-w-sm text-sm leading-relaxed text-eos-text-tertiary">
           În 2 minute afli ce legi ți se aplică, ce documente ai nevoie și ce riscuri există.
         </p>
@@ -259,10 +259,10 @@ export default function DashboardPage() {
       </section>
 
       {/* ── Row 1: Score ring + 3 key metrics ─────────────────────────────── */}
-      <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+      <div className="grid gap-3 sm:grid-cols-[240px_1fr]">
 
         {/* Score ring */}
-        <div className="flex items-center gap-4 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
+        <div className="flex items-center gap-4 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4">
           <div className="relative h-[80px] w-[80px] shrink-0">
             <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
               <circle
@@ -283,8 +283,8 @@ export default function DashboardPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold leading-none text-eos-text">{score}</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-eos-text-tertiary">%</span>
+              <span className="text-xl font-semibold leading-none text-eos-text">{score}</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-eos-text-tertiary">%</span>
             </div>
           </div>
           <div>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
           <Link href={dashboardRoutes.resolve} className="group flex flex-col justify-between rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4 transition-all hover:border-eos-border-strong hover:bg-eos-surface-active">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
             <div className="mt-2">
-              <span className={`text-3xl font-bold ${activeFindings.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
+              <span className={`text-2xl font-semibold ${activeFindings.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
                 {activeFindings.length}
               </span>
             </div>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
           <Link href={dashboardRoutes.drifts} className="group flex flex-col justify-between rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4 transition-all hover:border-eos-border-strong hover:bg-eos-surface-active">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Drift activ</p>
             <div className="mt-2">
-              <span className={`text-3xl font-bold ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
+              <span className={`text-2xl font-semibold ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
                 {activeDrifts.length}
               </span>
             </div>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
           }`}>
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Audit</p>
             <div className="mt-2">
-              <span className={`text-lg font-bold ${
+              <span className={`text-lg font-semibold ${
                 auditStatusLabel === "Pregătit" ? "text-eos-success" :
                 auditStatusLabel === "Blocat" ? "text-eos-error" :
                 "text-eos-warning"
