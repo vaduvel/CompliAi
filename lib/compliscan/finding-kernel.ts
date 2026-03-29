@@ -194,6 +194,7 @@ export type SmartResolveExecutionClass = "documentary" | "operational" | "specia
 
 export type SpecialistHandoffSurface =
   | "job_description_pack"
+  | "hr_procedure_pack"
   | "vendor_review_pack"
   | "dsar_process"
   | "dsar_access"
@@ -238,6 +239,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
 
 const SPECIALIST_HANDOFF_FINDING_TYPE_IDS = new Set([
   "GDPR-021",
+  "GDPR-022",
   "GDPR-011",
   "GDPR-012",
   "GDPR-013",
@@ -596,6 +598,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["uploaded_file", "note"],
     autoRecheck: "partial",
     closingRule: "pachetul HR este revizuit și există urmă clară pentru rollout-ul fișelor de post",
+  },
+  "GDPR-022": {
+    findingTypeId: "GDPR-022",
+    framework: "GDPR",
+    title: "Proceduri interne angajați lipsă",
+    category: "HR / internal procedures",
+    typicalSeverity: "medium",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["in_app_guided", "external_action"],
+    primaryActors: ["user", "owner"],
+    compliCapabilities: ["pregătește pachetul HR pentru regulament intern", "deschide suprafața Documente", "orientează spre generatorul regulamentului"],
+    userResponsibilities: ["confirmă programul și regulile reale", "adaptează regulamentul", "comunică documentul către angajați"],
+    requiredEvidenceKinds: ["uploaded_file", "note"],
+    autoRecheck: "partial",
+    closingRule: "pachetul HR pentru regulament intern este revizuit și există urmă clară pentru comunicarea internă",
   },
   "GDPR-OPS": {
     findingTypeId: "GDPR-OPS",
@@ -1072,6 +1089,20 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Pachetul HR este revizuit și există urmă clară pentru rollout-ul fișelor de post.",
     revalidationTriggers: ["rol nou", "schimbare de organigramă", "review HR periodic"],
   },
+  "GDPR-022": {
+    findingTypeId: "GDPR-022",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Deschide pachetul HR",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă un regulament intern clar și nici o urmă coerentă despre cum este comunicat și asumat în firmă.",
+    whatCompliDoes:
+      "Deschide suprafața Documente cu pachetul HR pregătit: structura regulamentului intern, planul de comunicare și checklistul de rollout.",
+    whatUserMustDo:
+      "Revizuiești pachetul, adaptezi regulile la programul și disciplina reală din firmă, apoi comunici documentul către angajați și păstrezi urma.",
+    closeCondition: "Pachetul HR pentru regulament intern este revizuit și există urmă clară pentru comunicarea internă.",
+    revalidationTriggers: ["program de lucru schimbat", "procedură internă nouă", "review HR periodic"],
+  },
   "GDPR-OPS": {
     findingTypeId: "GDPR-OPS",
     initialFlowState: "external_action_required",
@@ -1419,6 +1450,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "dsar-erasure-active") return "GDPR-014"
   if (id === "intake-gdpr-dsar") return "GDPR-012"
   if (id === "intake-hr-job-descriptions") return "GDPR-021"
+  if (id === "intake-hr-procedures" || id === "hr-procedures") return "GDPR-022"
   if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
@@ -1658,6 +1690,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (docType === "retention-policy") return "GDPR-016"
   if (docType === "nis2-incident-response") return "NIS2-015"
   if (docType === "ai-governance") return "AI-005"
+  if (docType === "hr-internal-procedures") return "GDPR-022"
 
   // Framework-level fallbacks
   switch (framework) {
@@ -2224,6 +2257,15 @@ function getWorkflowLink(
         }).toString()}`,
         label: "Deschide pachetul HR",
       }
+    case "GDPR-022":
+      return {
+        href: `/dashboard/documente?${new URLSearchParams({
+          focus: "hr-procedures",
+          findingId: record.id,
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide pachetul HR",
+      }
     case "GDPR-011":
       return {
         href: `/dashboard/vendor-review?${new URLSearchParams({
@@ -2300,6 +2342,8 @@ function getSpecialistHandoffSurface(
   switch (findingTypeId) {
     case "GDPR-021":
       return "job_description_pack"
+    case "GDPR-022":
+      return "hr_procedure_pack"
     case "GDPR-011":
       return "vendor_review_pack"
     case "GDPR-012":
@@ -2354,6 +2398,19 @@ export function getSpecialistHandoffContract(
         returnEvidenceLabel: "Pachet HR pregătit",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească dovada că modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite și asumate pentru pașii următori.",
+      }
+    case "hr_procedure_pack":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce pachetul HR pentru regulament intern este revizuit și planul de comunicare către angajați este clar, suprafața Documente te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Pachet HR pentru regulament intern pregătit",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească dovada că structura regulamentului, planul de comunicare și checklistul de rollout au fost revizuite și asumate pentru pașii următori.",
       }
     case "vendor_review_pack":
       return {
@@ -2508,6 +2565,8 @@ function getClosureCTA(
   switch (findingTypeId) {
     case "GDPR-021":
       return "Marchează pachetul HR pregătit"
+    case "GDPR-022":
+      return "Marchează regulamentul pregătit"
     case "GDPR-011":
       return "Marchează pachetul vendor pregătit"
     case "NIS2-001":
@@ -2556,6 +2615,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "GDPR-019": null,
   "GDPR-020": 180,
   "GDPR-021": 180,
+  "GDPR-022": 180,
   "GDPR-OPS": 180,
   "NIS2-001": 365,
   "NIS2-005": 180,
@@ -3138,6 +3198,16 @@ export function buildCockpitRecipe(
       ])
     )
     closeCondition = "Pachetul HR este revizuit, iar următorii pași pentru fișele de post sunt documentați clar în cockpit."
+  } else if (findingTypeId === "GDPR-022") {
+    acceptedEvidence = Array.from(
+      new Set([
+        "Regulament intern adaptat sau încărcat la dosar",
+        "Notă clară despre cum a fost comunicat și asumat intern",
+        ...acceptedEvidence,
+      ])
+    )
+    closeCondition =
+      "Pachetul HR pentru regulament intern este revizuit, iar pașii de comunicare și asumare sunt documentați clar în cockpit."
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {
     primaryCTALabel =
       nis2GovernanceFocus === "certification" ? "Actualizează certificarea CISO" : "Actualizează training-ul boardului"
@@ -3291,6 +3361,9 @@ export function buildCockpitRecipe(
     dossierOutcome = "Baseline-ul contractual și nota despre unde sunt salvate template-urile intră în dosar pentru audit și review juridic."
   } else if (findingTypeId === "GDPR-021") {
     dossierOutcome = "Pachetul HR, modelul de fișă și nota despre rollout-ul per rol intră în dosar pentru audit HR și control ITM."
+  } else if (findingTypeId === "GDPR-022") {
+    dossierOutcome =
+      "Pachetul HR, regulamentul intern și nota despre comunicarea către angajați intră în dosar pentru audit HR și control ITM."
   }
 
   let recipeMonitoringSignals = monitoringSignals
@@ -3313,6 +3386,13 @@ export function buildCockpitRecipe(
       new Set([
         ...monitoringSignals,
         "Reverificăm fișele de post când apar roluri noi, se schimbă organigrama sau responsabilitățile reale.",
+      ])
+    ).slice(0, 5)
+  } else if (findingTypeId === "GDPR-022") {
+    recipeMonitoringSignals = Array.from(
+      new Set([
+        ...monitoringSignals,
+        "Reverificăm regulamentul intern când se schimbă programul, disciplina muncii sau procedurile interne aplicabile echipei.",
       ])
     ).slice(0, 5)
   } else if (findingTypeId === "NIS2-GENERIC" && nis2GovernanceFocus) {

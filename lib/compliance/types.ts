@@ -25,6 +25,11 @@ export type GeneratedDocumentKind =
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
+  | "job-description"
+  | "hr-internal-procedures"
+  | "reges-correction-brief"
+  | "contract-template"
+  | "deletion-attestation"
 
 export type WorkspaceContext = {
   orgId: string

@@ -1,5 +1,7 @@
 // LLM-powered compliance document generator.
-// Generates: Privacy Policy, Cookie Policy, DPA, NIS2 Incident Response Plan, AI Governance Policy.
+// Generates: Privacy Policy, Cookie Policy, DPA, Retention Policy, NIS2 Incident Response Plan,
+// AI Governance Policy, Job Description, HR Internal Procedures, REGES Correction Brief,
+// Contract Template, Deletion Attestation.
 // Uses Gemini API. Falls back to a static skeleton when GEMINI_API_KEY is absent.
 
 import { fetchWithOperationalGuard } from "@/lib/server/http-client"
@@ -14,6 +16,11 @@ export type DocumentType =
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
+  | "job-description"
+  | "hr-internal-procedures"
+  | "reges-correction-brief"
+  | "contract-template"
+  | "deletion-attestation"
 
 export type DocumentGenerationInput = {
   documentType: DocumentType
@@ -26,6 +33,29 @@ export type DocumentGenerationInput = {
   dataFlows?: string
   counterpartyName?: string
   counterpartyReferenceUrl?: string
+  // ── Sprint 16/16 — Extended fields ──────────────────────────────────────
+  /** Job description: title of the position */
+  jobTitle?: string
+  /** Job description: department */
+  department?: string
+  /** Job description: contract type (full-time, part-time, etc.) */
+  contractType?: string
+  /** Job description: specific duties (optional — AI fills gaps) */
+  specificDuties?: string
+  /** HR procedures: standard work schedule */
+  workSchedule?: string
+  /** HR procedures: employee count */
+  employeeCount?: number
+  /** REGES: accountant contact for briefing */
+  accountantContact?: string
+  /** Contracts: type of services provided */
+  serviceDescription?: string
+  /** Contracts: payment terms */
+  paymentTerms?: string
+  /** Deletion attestation: target system */
+  targetSystem?: string
+  /** Deletion attestation: data category */
+  dataCategory?: string
 }
 
 export type GeneratedDocument = {
@@ -50,6 +80,11 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
+  "job-description": 12,
+  "hr-internal-procedures": 24,
+  "reges-correction-brief": 6,
+  "contract-template": 24,
+  "deletion-attestation": 6,
 }
 
 // Review date = 30 days before expiry
@@ -93,6 +128,26 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   "ai-governance": {
     title: "Politică de Guvernanță AI",
     legalBasis: "EU AI Act (Regulamentul UE 2024/1689) Art. 9, 17",
+  },
+  "job-description": {
+    title: "Fișă de Post",
+    legalBasis: "Codul Muncii Art. 17, 39 (Legea 53/2003)",
+  },
+  "hr-internal-procedures": {
+    title: "Regulament Intern",
+    legalBasis: "Codul Muncii Art. 241–246 (Legea 53/2003)",
+  },
+  "reges-correction-brief": {
+    title: "Brief Corecție REGES/Revisal",
+    legalBasis: "HG 905/2017, Codul Muncii Art. 34",
+  },
+  "contract-template": {
+    title: "Contract-Cadru Prestări Servicii",
+    legalBasis: "Codul Civil Art. 1166–1323, GDPR Art. 28",
+  },
+  "deletion-attestation": {
+    title: "Atestare Ștergere/Anonimizare Date",
+    legalBasis: "GDPR Art. 5(1)(e), Art. 17",
   },
 }
 
@@ -309,6 +364,147 @@ Cerințe:
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
+    "job-description": `
+Generează o Fișă de Post completă în română conform Codului Muncii.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.jobTitle ? `Titlul postului: ${input.jobTitle}.` : ""}
+${input.department ? `Departament: ${input.department}.` : ""}
+${input.contractType ? `Tip contract: ${input.contractType}.` : ""}
+${input.specificDuties ? `Atribuții specifice menționate: ${input.specificDuties}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Structura obligatorie Art. 17 Codul Muncii: identificare post, loc de muncă, felul muncii
+- Atribuțiile și responsabilitățile principale (minim 8-10 puncte concrete)
+- Competențe profesionale și personale cerute
+- Studii și experiență necesare
+- Relații ierarhice: subordonare, coordonare, colaborare
+- Condiții de muncă, program, eventuale deplasări
+- Criterii de evaluare a performanței (minim 4-5 criterii)
+- Clauza privind modificarea fișei de post
+- Semnături: angajat, șef direct, HR
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "hr-internal-procedures": `
+Generează un Regulament Intern complet în română conform Codului Muncii Art. 241-246.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.employeeCount ? `Număr angajați: ${input.employeeCount}.` : ""}
+${input.workSchedule ? `Program standard: ${input.workSchedule}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Cap. I: Dispoziții generale — scopul, domeniul, baza legală
+- Cap. II: Drepturile și obligațiile angajatorului (Art. 40 Codul Muncii)
+- Cap. III: Drepturile și obligațiile angajaților (Art. 39 Codul Muncii)
+- Cap. IV: Programul de lucru — durata, pauze, ore suplimentare, telemuncă
+- Cap. V: Concedii — de odihnă, medicale, evenimente familiale, formare (Art. 139-158)
+- Cap. VI: Disciplina muncii — abateri, sancțiuni, procedura cercetării (Art. 247-252)
+- Cap. VII: Sănătate și securitate în muncă — obligații SSM
+- Cap. VIII: Protecția datelor angajaților — GDPR, drepturile angajaților ca persoane vizate
+- Cap. IX: Protecția maternității — conform OUG 96/2003
+- Cap. X: Egalitate de șanse — nediscriminare, hărțuire (Legea 202/2002)
+- Cap. XI: Semnalarea neregulilor — whistleblowing (Legea 361/2022)
+- Cap. XII: Dispoziții finale — modificare, afișare, confirmare luare la cunoștință
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "reges-correction-brief": `
+Generează un Brief de Corecție REGES/Revisal în română — un document structurat de instrucțiuni pentru contabilul sau responsabilul HR al organizației.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.employeeCount ? `Număr angajați: ${input.employeeCount}.` : ""}
+${input.accountantContact ? `Contact contabil: ${input.accountantContact}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Secțiunea 1: Scop — ce trebuie verificat și de ce
+- Secțiunea 2: Checklist de verificare REGES:
+  - [ ] Toate contractele de muncă sunt înregistrate în Revisal
+  - [ ] Datele de început/sfârșit contract sunt corecte
+  - [ ] Funcțiile/posturile corespund cu COR (Clasificarea Ocupațiilor din România)
+  - [ ] Salariile de bază sunt actualizate
+  - [ ] Modificările contractuale (acte adiționale) sunt transmise
+  - [ ] Suspendările/încetările sunt înregistrate la termen (3 zile lucrătoare)
+- Secțiunea 3: Termene legale — HG 905/2017 Art. 4 (3 zile lucrătoare pt transmitere)
+- Secțiunea 4: Consecințe neconformitate — amenzi ITM (5.000-10.000 RON/angajat)
+- Secțiunea 5: Pași de acțiune imediată cu prioritizare
+- Secțiunea 6: Ce dovadă trebuie adusă înapoi (export Revisal, confirmare transmitere)
+- Ton direct, operațional, adresat contabilului/HR-ului
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare și checklist-uri
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "contract-template": `
+Generează un Contract-Cadru de Prestări Servicii complet în română.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.counterpartyName ? `Beneficiar/Prestator vizat: ${input.counterpartyName}.` : ""}
+${input.serviceDescription ? `Descriere servicii: ${input.serviceDescription}.` : ""}
+${input.paymentTerms ? `Condiții de plată: ${input.paymentTerms}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Art. 1: Părțile contractante (cu placeholdere pentru date: nume, CUI, adresă, reprezentant)
+- Art. 2: Obiectul contractului — descrierea serviciilor
+- Art. 3: Durata contractului — perioadă, prelungire automată/tacită
+- Art. 4: Prețul și modalitatea de plată — valoare, termen, penalități
+- Art. 5: Obligațiile prestatorului
+- Art. 6: Obligațiile beneficiarului
+- Art. 7: Confidențialitate — clauză NDA integrată
+- Art. 8: Protecția datelor personale — trimitere la DPA dacă se procesează date
+- Art. 9: Proprietate intelectuală
+- Art. 10: Răspunderea părților — limitare, forță majoră
+- Art. 11: Rezilierea — condiții, notificare prealabilă
+- Art. 12: Litigii — tentativă amiabilă, instanță competentă
+- Art. 13: Dispoziții finale — modificări prin act adițional, exemplare
+- Câmpuri de semnătură: Prestator, Beneficiar, Data, Semnătura
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "deletion-attestation": `
+Generează o Atestare de Ștergere/Anonimizare a Datelor Personale în română.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.targetSystem ? `Sistem vizat: ${input.targetSystem}.` : ""}
+${input.dataCategory ? `Categorie date: ${input.dataCategory}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Document scurt, de tip formular/atestare (1-2 pagini maximum)
+- Secțiune 1: Informații generale — organizație, data execuției, executant
+- Secțiune 2: Date despre acțiune:
+  - Sistemul/baza de date vizată
+  - Categoria de date personale afectate
+  - Număr estimat de înregistrări
+  - Metoda aplicată: ștergere definitivă / anonimizare / pseudonimizare
+  - Baza legală a acțiunii (expirare retenție, cerere ștergere, etc.)
+- Secțiune 3: Verificare (câmpuri de completat manual):
+  - [ ] Datele au fost șterse/anonimizate conform procedurii
+  - [ ] Back-up-urile sunt curățate sau programate pentru curățare
+  - [ ] Procesatorii/sub-procesatorii au fost notificați (dacă e cazul)
+  - [ ] Log de execuție sau export de control este atașat
+- Secțiune 4: Semnături — executant, verificator, data
+- Ton formal, operațional
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare și checkbox-uri
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
   }
 
   return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}`
@@ -481,6 +677,198 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       reviewWarning,
     ].join("\n"),
+    "job-description": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Identificare post",
+      `**Titlul postului:** ${input.jobTitle ?? "[Completează titlul postului]"}`,
+      `**Departament:** ${input.department ?? "[Completează departamentul]"}`,
+      `**Tip contract:** ${input.contractType ?? "Nedeterminat, normă întreagă"}`,
+      `**Subordonare directă:** [Completează șeful direct]`,
+      "",
+      "## Atribuții și responsabilități principale",
+      "- [ ] [Descrie atribuția principală #1]",
+      "- [ ] [Descrie atribuția principală #2]",
+      "- [ ] [Descrie atribuția principală #3]",
+      "- [ ] Respectă regulamentul intern și procedurile organizației",
+      "- [ ] Raportează neregulile conform procedurilor interne",
+      "- [ ] Participă la instruiri și sesiuni de formare profesională",
+      "",
+      "## Competențe cerute",
+      "**Studii:** [Completează nivelul minim de studii]",
+      "**Experiență:** [Completează experiența minimă cerută]",
+      "**Competențe profesionale:** Cunoașterea domeniului, capacitate de analiză, comunicare",
+      "**Competențe personale:** Responsabilitate, lucru în echipă, organizare",
+      "",
+      "## Criterii de evaluare a performanței",
+      "1. Calitatea și promptitudinea realizării sarcinilor",
+      "2. Respectarea termenelor și procedurilor",
+      "3. Inițiativă și contribuție la obiectivele echipei",
+      "4. Dezvoltarea profesională continuă",
+      "",
+      "## Semnături",
+      "| Angajat | Șef direct | HR |",
+      "| --- | --- | --- |",
+      "| Nume: _________ | Nume: _________ | Nume: _________ |",
+      "| Data: _________ | Data: _________ | Data: _________ |",
+      "| Semnătura: _____ | Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "hr-internal-procedures": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Cap. I — Dispoziții generale",
+      `Prezentul regulament intern stabilește regulile de organizare și funcționare a ${input.orgName}, drepturile și obligațiile angajatorului și ale angajaților, conform Codului Muncii (Legea 53/2003).`,
+      "",
+      "## Cap. II — Drepturile și obligațiile angajatorului",
+      "Angajatorul are dreptul de a stabili organizarea și funcționarea unității, de a exercita controlul și de a constata abateri disciplinare. Are obligația de a asigura condiții de muncă, plata salariului, respectarea legii și protecția datelor angajaților.",
+      "",
+      "## Cap. III — Drepturile și obligațiile angajaților",
+      "Angajații au dreptul la salariu, concediu, securitate în muncă, protecția datelor și demnitate. Au obligația de a respecta disciplina, secretul profesional, regulamentul intern și procedurile de lucru.",
+      "",
+      "## Cap. IV — Programul de lucru",
+      `Programul standard: ${input.workSchedule ?? "[Completează: ex. Luni-Vineri 09:00-17:00]"}. Orele suplimentare se prestează doar cu acordul angajatului și se compensează conform legii.`,
+      "",
+      "## Cap. V — Disciplina muncii",
+      "Abaterile disciplinare se constată prin cercetare disciplinară prealabilă. Sancțiunile aplicabile: avertisment scris, reducere salariu, retrogradare, desfacere contract. Angajatul are dreptul de a fi ascultat și asistat.",
+      "",
+      "## Cap. VI — Sănătate și securitate în muncă",
+      "Angajatorul asigură instruirea periodică SSM, echipamentul de protecție și evaluarea riscurilor. Angajații respectă procedurile SSM și raportează incidentele.",
+      "",
+      "## Cap. VII — Protecția datelor angajaților",
+      "Datele personale ale angajaților sunt prelucrate conform GDPR. Angajații au dreptul de acces, rectificare și ștergere. Cererile se adresează responsabilului de protecția datelor.",
+      "",
+      "## Cap. VIII — Dispoziții finale",
+      "Regulamentul se aduce la cunoștința fiecărui angajat, cu confirmare scrisă. Modificările se fac cu consultarea reprezentanților angajaților.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "reges-correction-brief": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Destinatar:** ${input.accountantContact ?? "[Contabil / Responsabil HR]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Scop",
+      `Acest brief solicită verificarea și corectarea înregistrărilor din Revisal (REGES) pentru ${input.orgName}. Conformitatea REGES este obligatorie și supusă control ITM.`,
+      "",
+      "## Checklist de verificare",
+      "- [ ] Toate contractele de muncă active sunt înregistrate în Revisal",
+      "- [ ] Datele de început/sfârșit contract sunt corecte",
+      "- [ ] Funcțiile corespund cu codurile COR",
+      "- [ ] Salariile de bază sunt actualizate (inclusiv indexări)",
+      "- [ ] Actele adiționale sunt transmise în termen",
+      "- [ ] Suspendările/încetările sunt înregistrate (termen: 3 zile lucrătoare)",
+      "- [ ] Programul de lucru este corect înregistrat",
+      "",
+      "## Termene legale",
+      "**HG 905/2017 Art. 4:** Transmiterea se face în termen de **3 zile lucrătoare** de la încheierea/modificarea/suspendarea/încetarea contractului.",
+      "",
+      "## Consecințe neconformitate",
+      "Amenzi ITM: **5.000 — 10.000 RON per angajat** pentru netransmiterea sau transmiterea eronată a datelor în Revisal.",
+      "",
+      "## Dovada necesară",
+      "După verificare, trimite înapoi: export Revisal actualizat + confirmare că toate înregistrările sunt la zi.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "contract-template": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Prestator:** ${input.orgName}`,
+      `**Beneficiar:** ${input.counterpartyName ?? "[Completează beneficiarul]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Art. 1 — Părțile contractante",
+      `**Prestatorul:** ${input.orgName}, CUI: ${input.orgCui ?? "________"}, cu sediul în ________, reprezentat prin ________.`,
+      `**Beneficiarul:** ${input.counterpartyName ?? "[Nume beneficiar]"}, CUI: ________, cu sediul în ________, reprezentat prin ________.`,
+      "",
+      "## Art. 2 — Obiectul contractului",
+      `${input.serviceDescription ?? "Prestatorul se obligă să furnizeze serviciile descrise în [Anexa 1 / specificațiile tehnice]."}`,
+      "",
+      "## Art. 3 — Durata",
+      "Contractul intră în vigoare la data semnării și este valabil pe o perioadă de _____ luni/ani, cu posibilitate de prelungire prin act adițional.",
+      "",
+      "## Art. 4 — Preț și plată",
+      `${input.paymentTerms ?? "Prețul este de _______ RON + TVA. Plata se face în termen de 30 de zile de la emiterea facturii."} Penalități de întârziere: 0.1% pe zi din suma restantă.`,
+      "",
+      "## Art. 5 — Confidențialitate",
+      "Părțile se obligă să păstreze confidențialitatea informațiilor primite în cadrul prezentului contract pe toată durata acestuia și 2 ani după încetare.",
+      "",
+      "## Art. 6 — Protecția datelor",
+      "Dacă în cadrul prestării serviciilor se procesează date personale, părțile încheie un Acord de Prelucrare a Datelor (DPA) separat, conform GDPR Art. 28.",
+      "",
+      "## Art. 7 — Reziliere",
+      "Contractul poate fi reziliat de oricare parte cu o notificare prealabilă de 30 de zile. Rezilierea pentru neexecutare operează de drept după punerea în întârziere.",
+      "",
+      "## Art. 8 — Litigii",
+      "Litigiile se rezolvă pe cale amiabilă. În caz contrar, competența revine instanțelor de la sediul prestatorului.",
+      "",
+      "## Semnături",
+      "| Prestator | Beneficiar |",
+      "| --- | --- |",
+      "| Nume: _________ | Nume: _________ |",
+      "| Data: _________ | Data: _________ |",
+      "| Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "deletion-attestation": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Informații generale",
+      `**Organizația:** ${input.orgName}`,
+      "**Data execuției:** _______________",
+      "**Executant:** _______________",
+      "",
+      "## Detalii acțiune",
+      `**Sistem/bază de date vizat(ă):** ${input.targetSystem ?? "_______________"}`,
+      `**Categorie date personale:** ${input.dataCategory ?? "_______________"}`,
+      "**Nr. estimat înregistrări afectate:** _______________",
+      "**Metoda aplicată:** ☐ Ștergere definitivă ☐ Anonimizare ☐ Pseudonimizare",
+      "**Baza legală:** ☐ Expirare retenție ☐ Cerere persoană vizată ☐ Altă bază: _______",
+      "",
+      "## Verificare",
+      "- [ ] Datele au fost șterse/anonimizate conform procedurii interne",
+      "- [ ] Back-up-urile sunt curățate sau programate pentru curățare",
+      "- [ ] Procesatorii/sub-procesatorii au fost notificați (dacă aplicabil)",
+      "- [ ] Log de execuție sau export de control este atașat",
+      "",
+      "## Semnături",
+      "| Executant | Verificator |",
+      "| --- | --- |",
+      "| Nume: _________ | Nume: _________ |",
+      "| Data: _________ | Data: _________ |",
+      "| Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
   }
 
   const content = contentMap[input.documentType]
@@ -634,5 +1022,40 @@ export const DOCUMENT_TYPES: Array<{
     description: "Cadrul de guvernanță pentru sistemele AI conform EU AI Act Art. 9, 17.",
     free: false,
     legalBasis: "EU AI Act Art. 9, 17",
+  },
+  {
+    id: "job-description",
+    label: "Fișă de Post",
+    description: "Document obligatoriu conform Codului Muncii Art. 17. Definește atribuțiile, competențele și criteriile de evaluare.",
+    free: false,
+    legalBasis: "Codul Muncii Art. 17, 39",
+  },
+  {
+    id: "hr-internal-procedures",
+    label: "Regulament Intern",
+    description: "Regulamentul intern obligatoriu conform Codului Muncii Art. 241-246: drepturi, obligații, disciplină, SSM, protecția datelor.",
+    free: false,
+    legalBasis: "Codul Muncii Art. 241–246",
+  },
+  {
+    id: "reges-correction-brief",
+    label: "Brief Corecție REGES/Revisal",
+    description: "Protocol de acțiune pentru contabil cu checklist verificare Revisal, termene ITM și consecințe.",
+    free: false,
+    legalBasis: "HG 905/2017, Codul Muncii Art. 34",
+  },
+  {
+    id: "contract-template",
+    label: "Contract-Cadru Prestări Servicii",
+    description: "Contract standard B2B cu clauze de confidențialitate, GDPR și protecție proprietate intelectuală.",
+    free: false,
+    legalBasis: "Codul Civil Art. 1166–1323",
+  },
+  {
+    id: "deletion-attestation",
+    label: "Atestare Ștergere/Anonimizare Date",
+    description: "Formular de atestare a execuției ștergerii sau anonimizării datelor personale conform GDPR.",
+    free: false,
+    legalBasis: "GDPR Art. 5(1)(e), Art. 17",
   },
 ]

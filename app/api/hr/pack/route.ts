@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server"
 
-import { generateJobDescriptionPack } from "@/lib/compliance/hr-drafts"
+import {
+  generateHrProcedurePack,
+  generateJobDescriptionPack,
+  type HrPackKind,
+} from "@/lib/compliance/hr-drafts"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -15,16 +19,24 @@ export async function GET(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
 
+    const requestedKind = new URL(request.url).searchParams.get("kind")
+    if (requestedKind && requestedKind !== "job-descriptions" && requestedKind !== "hr-procedures") {
+      return jsonError("Tipul de pachet HR nu este suportat.", 400, "HR_PACK_KIND_INVALID", undefined, context)
+    }
+
     const { orgId, orgName } = await getOrgContext()
     const state = await readState()
     const orgProfile = state.orgProfile
-
-    const pack = generateJobDescriptionPack({
+    const packInput = {
       orgName: orgName || orgId,
       sector: orgProfile?.sector ?? null,
       employeeCount: orgProfile?.employeeCount ?? null,
       hasAiTools: Boolean(orgProfile?.usesAITools),
-    })
+    }
+    const packKind: HrPackKind = requestedKind === "hr-procedures" ? "hr-procedures" : "job-descriptions"
+
+    const pack =
+      packKind === "hr-procedures" ? generateHrProcedurePack(packInput) : generateJobDescriptionPack(packInput)
 
     return NextResponse.json({ pack }, withRequestIdHeaders(undefined, context))
   } catch (error) {

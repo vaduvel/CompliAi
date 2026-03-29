@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   readStateMock: vi.fn(),
   generateJobDescriptionPackMock: vi.fn(),
+  generateHrProcedurePackMock: vi.fn(),
   logRouteErrorMock: vi.fn(),
 }))
 
@@ -33,6 +34,7 @@ vi.mock("@/lib/server/mvp-store", () => ({
 
 vi.mock("@/lib/compliance/hr-drafts", () => ({
   generateJobDescriptionPack: mocks.generateJobDescriptionPackMock,
+  generateHrProcedurePack: mocks.generateHrProcedurePackMock,
 }))
 
 vi.mock("@/lib/server/operational-logger", () => ({
@@ -53,10 +55,24 @@ describe("GET /api/hr/pack", () => {
       },
     })
     mocks.generateJobDescriptionPackMock.mockReturnValue({
+      kind: "job-descriptions",
       title: "Pachet minim fișe de post",
       summary: "sumar",
       assets: [{ id: "template-1" }],
       completionChecklist: ["c1", "c2", "c3"],
+      generatorDocumentType: "job-description",
+      generatorLabel: "Generează prima fișă",
+      returnEvidenceNote: "return note",
+    })
+    mocks.generateHrProcedurePackMock.mockReturnValue({
+      kind: "hr-procedures",
+      title: "Pachet minim proceduri interne HR",
+      summary: "sumar proceduri",
+      assets: [{ id: "template-proc" }],
+      completionChecklist: ["p1", "p2", "p3"],
+      generatorDocumentType: "hr-internal-procedures",
+      generatorLabel: "Generează regulamentul",
+      returnEvidenceNote: "return note proc",
     })
   })
 
@@ -89,6 +105,10 @@ describe("GET /api/hr/pack", () => {
         summary: "sumar",
         assets: [{ id: "template-1" }],
         completionChecklist: ["c1", "c2", "c3"],
+        kind: "job-descriptions",
+        generatorDocumentType: "job-description",
+        generatorLabel: "Generează prima fișă",
+        returnEvidenceNote: "return note",
       },
     })
     expect(mocks.generateJobDescriptionPackMock).toHaveBeenCalledWith({
@@ -97,5 +117,54 @@ describe("GET /api/hr/pack", () => {
       employeeCount: "10-49",
       hasAiTools: true,
     })
+  })
+
+  it("returnează pachetul de proceduri HR când kind=hr-procedures", async () => {
+    mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-demo-imm",
+      email: "demo@demo-imm.compliscan.ro",
+      orgName: "Demo Retail SRL",
+      role: "owner",
+    })
+
+    const response = await GET(new Request("http://localhost/api/hr/pack?kind=hr-procedures"))
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload).toEqual({
+      pack: {
+        kind: "hr-procedures",
+        title: "Pachet minim proceduri interne HR",
+        summary: "sumar proceduri",
+        assets: [{ id: "template-proc" }],
+        completionChecklist: ["p1", "p2", "p3"],
+        generatorDocumentType: "hr-internal-procedures",
+        generatorLabel: "Generează regulamentul",
+        returnEvidenceNote: "return note proc",
+      },
+    })
+    expect(mocks.generateHrProcedurePackMock).toHaveBeenCalledWith({
+      orgName: "Demo Retail SRL",
+      sector: "retail",
+      employeeCount: "10-49",
+      hasAiTools: true,
+    })
+  })
+
+  it("respinge tipurile de pachet necunoscute", async () => {
+    mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-demo-imm",
+      email: "demo@demo-imm.compliscan.ro",
+      orgName: "Demo Retail SRL",
+      role: "owner",
+    })
+
+    const response = await GET(new Request("http://localhost/api/hr/pack?kind=unknown"))
+    const payload = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(payload.code).toBe("HR_PACK_KIND_INVALID")
   })
 })

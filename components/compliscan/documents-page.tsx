@@ -15,7 +15,7 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
-import type { JobDescriptionPack } from "@/lib/compliance/hr-drafts"
+import type { HrPackKind, HrPreparedPack } from "@/lib/compliance/hr-drafts"
 
 const QUICK_DOC_TYPES = [
   { id: "privacy-policy", label: "Politică de Confidențialitate", desc: "GDPR Art. 13–14 — obligatorie", icon: "📄" },
@@ -26,7 +26,40 @@ const QUICK_DOC_TYPES = [
 ] as const
 
 type HrPackResponse = {
-  pack: JobDescriptionPack
+  pack: HrPreparedPack
+}
+
+const HR_PACK_FALLBACKS: Record<
+  HrPackKind,
+  {
+    title: string
+    summary: string
+    generatorDocumentType: string
+    generatorLabel: string
+    loadingLabel: string
+    returnEvidenceNote: string
+  }
+> = {
+  "job-descriptions": {
+    title: "Pachet minim fișe de post",
+    summary:
+      "Pregătim modelul de fișă, inventarul de roluri și checklistul de rollout pentru ca remedierea să nu pornească de la zero.",
+    generatorDocumentType: "job-description",
+    generatorLabel: "Generează prima fișă",
+    loadingLabel: "Încărcăm pachetul HR pregătit pentru fișe de post.",
+    returnEvidenceNote:
+      "CompliAI a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
+  },
+  "hr-procedures": {
+    title: "Pachet minim proceduri interne HR",
+    summary:
+      "Pregătim regulamentul intern, planul de comunicare și checklistul de rollout pentru ca remedierea să nu pornească de la zero.",
+    generatorDocumentType: "hr-internal-procedures",
+    generatorLabel: "Generează regulamentul",
+    loadingLabel: "Încărcăm pachetul HR pregătit pentru regulamentul intern.",
+    returnEvidenceNote:
+      "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
+  },
 }
 
 export function DocumentsPageSurface() {
@@ -34,16 +67,20 @@ export function DocumentsPageSurface() {
   const cockpit = useCockpitData()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [hrPack, setHrPack] = useState<JobDescriptionPack | null>(null)
+  const [hrPack, setHrPack] = useState<HrPreparedPack | null>(null)
   const [hrPackLoading, setHrPackLoading] = useState(false)
   const [hrPackError, setHrPackError] = useState<string | null>(null)
   const focusedPack = searchParams.get("focus")
-  const isJobDescriptionFocus = focusedPack === "job-descriptions"
+  const hrPackKind =
+    focusedPack === "job-descriptions" || focusedPack === "hr-procedures"
+      ? (focusedPack as HrPackKind)
+      : null
+  const hrPackFallback = hrPackKind ? HR_PACK_FALLBACKS[hrPackKind] : null
   const findingId = searchParams.get("findingId")
   const returnTo = searchParams.get("returnTo")
 
   useEffect(() => {
-    if (!isJobDescriptionFocus) {
+    if (!hrPackKind) {
       setHrPack(null)
       setHrPackError(null)
       setHrPackLoading(false)
@@ -54,7 +91,7 @@ export function DocumentsPageSurface() {
     setHrPackLoading(true)
     setHrPackError(null)
 
-    fetch("/api/hr/pack", { cache: "no-store" })
+    fetch(`/api/hr/pack?kind=${encodeURIComponent(hrPackKind)}`, { cache: "no-store" })
       .then(async (response) => {
         const payload = (await response.json().catch(() => null)) as HrPackResponse | { error?: string } | null
         if (!response.ok) {
@@ -82,7 +119,7 @@ export function DocumentsPageSurface() {
     return () => {
       cancelled = true
     }
-  }, [isJobDescriptionFocus])
+  }, [hrPackKind])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -100,14 +137,14 @@ export function DocumentsPageSurface() {
     })
 
   function handleReturnToCockpit() {
-    if (!returnTo) return
+    if (!returnTo || !hrPackKind) return
 
     const target = new URL(returnTo, window.location.origin)
-    target.searchParams.set("jobDescriptionPackFlow", "done")
     target.searchParams.set(
-      "evidenceNote",
-      "CompliAI a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă."
+      hrPackKind === "job-descriptions" ? "jobDescriptionPackFlow" : "hrProcedurePackFlow",
+      "done"
     )
+    target.searchParams.set("evidenceNote", hrPack?.returnEvidenceNote ?? hrPackFallback?.returnEvidenceNote ?? "")
     if (findingId) {
       target.searchParams.set("sourceFindingId", findingId)
     }
@@ -153,7 +190,7 @@ export function DocumentsPageSurface() {
         }
       />
 
-      {isJobDescriptionFocus && (
+      {hrPackKind && hrPackFallback && (
         <Card className="border-eos-primary/30 bg-eos-primary/[0.06]">
           <CardHeader className="border-b border-eos-border-subtle pb-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -163,23 +200,26 @@ export function DocumentsPageSurface() {
                 </p>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BriefcaseBusiness className="size-4 text-eos-primary" />
-                  {hrPack?.title ?? "Pachet minim fișe de post"}
+                  {hrPack?.title ?? hrPackFallback.title}
                 </CardTitle>
                 <p className="max-w-3xl text-sm text-eos-text-muted">
-                  {hrPack?.summary ??
-                    "Pregătim modelul de fișă, inventarul de roluri și checklistul de rollout pentru ca remedierea să nu pornească de la zero."}
+                  {hrPack?.summary ?? hrPackFallback.summary}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`${dashboardRoutes.generator}?documentType=job-description`}>
+                  <Link
+                    href={`${dashboardRoutes.generator}?documentType=${
+                      hrPack?.generatorDocumentType ?? hrPackFallback.generatorDocumentType
+                    }`}
+                  >
                     <Sparkles className="mr-1.5 size-3.5" />
-                    Generează prima fișă
+                    {hrPack?.generatorLabel ?? hrPackFallback.generatorLabel}
                   </Link>
                 </Button>
                 {returnTo ? (
                   <Button size="sm" onClick={handleReturnToCockpit}>
-                    Folosește pachetul și revino în cockpit
+                    Folosește materialele și revino în cockpit
                   </Button>
                 ) : null}
               </div>
@@ -189,7 +229,7 @@ export function DocumentsPageSurface() {
             {hrPackLoading ? (
               <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text-muted">
                 <Loader2 className="size-4 animate-spin" />
-                Încărcăm pachetul HR pregătit pentru fișe de post.
+                {hrPackFallback.loadingLabel}
               </div>
             ) : hrPackError ? (
               <div className="rounded-eos-lg border border-eos-danger/30 bg-eos-danger/[0.08] px-4 py-3 text-sm text-eos-text">

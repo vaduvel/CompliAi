@@ -4,20 +4,29 @@ import {
   type OrgEmployeeCount,
   type OrgSector,
 } from "@/lib/compliance/applicability"
+import type { GeneratedDocumentKind } from "@/lib/compliance/types"
 
-export type JobDescriptionPackAsset = {
+export type HrPackAsset = {
   id: string
   title: string
   summary: string
   content: string
 }
 
-export type JobDescriptionPack = {
+export type HrPackKind = "job-descriptions" | "hr-procedures"
+
+export type HrPreparedPack = {
+  kind: HrPackKind
   title: string
   summary: string
-  assets: JobDescriptionPackAsset[]
+  assets: HrPackAsset[]
   completionChecklist: string[]
+  generatorDocumentType: GeneratedDocumentKind
+  generatorLabel: string
+  returnEvidenceNote: string
 }
+
+export type JobDescriptionPack = HrPreparedPack
 
 type GenerateJobDescriptionPackParams = {
   orgName: string
@@ -28,7 +37,7 @@ type GenerateJobDescriptionPackParams = {
 
 export function generateJobDescriptionPack(
   params: GenerateJobDescriptionPackParams
-): JobDescriptionPack {
+): HrPreparedPack {
   const orgName = params.orgName.trim() || "Organizația"
   const sectorLabel = params.sector ? ORG_SECTOR_LABELS[params.sector] : "sector neconfirmat"
   const employeeCountLabel = params.employeeCount
@@ -36,6 +45,7 @@ export function generateJobDescriptionPack(
     : "număr de angajați neconfirmat"
 
   return {
+    kind: "job-descriptions",
     title: "Pachet minim fișe de post",
     summary:
       "CompliAI pregătește modelul de fișă, inventarul de roluri și planul de rollout. Firma trebuie să adapteze pe rolurile reale, să confirme lanțul ierarhic și să obțină semnătura internă.",
@@ -155,5 +165,133 @@ ${params.hasAiTools ? "- Respectă politica de utilizare AI și nu introduce dat
       "Ai revizuit modelul și știi ce câmpuri trebuie adaptate per rol.",
       "Ai stabilit unde se salvează și cum se semnează fișele finale în firmă.",
     ],
+    generatorDocumentType: "job-description",
+    generatorLabel: "Generează prima fișă",
+    returnEvidenceNote:
+      "CompliAI a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
+  }
+}
+
+export function generateHrProcedurePack(
+  params: GenerateJobDescriptionPackParams
+): HrPreparedPack {
+  const orgName = params.orgName.trim() || "Organizația"
+  const sectorLabel = params.sector ? ORG_SECTOR_LABELS[params.sector] : "sector neconfirmat"
+  const employeeCountLabel = params.employeeCount
+    ? ORG_EMPLOYEE_COUNT_LABELS[params.employeeCount]
+    : "număr de angajați neconfirmat"
+
+  return {
+    kind: "hr-procedures",
+    title: "Pachet minim proceduri interne HR",
+    summary:
+      "CompliAI pregătește regulamentul intern, planul de comunicare și checklistul de rollout. Firma trebuie să adapteze politicile la programul real, la relațiile de muncă și la modul în care documentul ajunge la angajați.",
+    assets: [
+      {
+        id: "internal-regulation-outline",
+        title: "Regulament intern — structură de bază",
+        summary: "Scheletul minim pe care îl personalizezi înainte să-l comunici sau să-l semnezi intern.",
+        content: `# Regulament intern — ${orgName}
+
+## Context firmă
+
+- Sector: ${sectorLabel}
+- Dimensiune: ${employeeCountLabel}
+- Acest draft trebuie adaptat la programul real, disciplina muncii și procedurile aplicabile în firmă.
+
+## 1. Scop și domeniu
+
+- Regulamentul stabilește regulile interne de organizare, disciplină și lucru pentru ${orgName}.
+- Se aplică tuturor angajaților, colaboratorilor interni și persoanelor cu acces la procesele de muncă.
+
+## 2. Drepturi și obligații
+
+- Drepturile și obligațiile angajaților și ale angajatorului se aliniază cu Codul Muncii.
+- Se confirmă cine aprobă abaterile, cercetarea disciplinară și comunicările interne.
+
+## 3. Programul de lucru
+
+- Program standard: [completează]
+- Pauze și ore suplimentare: [completează]
+- Teleworking / lucru hibrid: [completează]
+
+## 4. Disciplină și raportarea incidentelor
+
+- Abaterile disciplinare și pașii minimi ai cercetării interne: [completează]
+- Canal de raportare nereguli / whistleblowing: [completează]
+- Cine aprobă măsurile disciplinare: [completează]
+
+## 5. SSM, confidențialitate și protecția datelor
+
+- Reguli SSM: [completează]
+- Reguli de confidențialitate: [completează]
+- Datele angajaților se prelucrează conform procedurilor GDPR.
+${params.hasAiTools ? "- Utilizarea uneltelor AI se face doar conform politicii interne aprobate și fără date interzise." : ""}
+
+## 6. Confirmare internă
+
+- Revizuit de administrator / HR: [nume]
+- Comunicat angajaților la data de: [completează]
+- Dovada luării la cunoștință: [semnătură / confirmare digitală / e-mail intern]`,
+      },
+      {
+        id: "communication-plan",
+        title: "Plan minim de comunicare internă",
+        summary: "Ce trebuie să se întâmple ca regulamentul să nu rămână doar un draft frumos în folder.",
+        content: `# Plan de comunicare — ${orgName}
+
+## Ce confirmi înainte de rollout
+
+1. Cine aprobă versiunea finală?
+2. Unde se salvează versiunea oficială?
+3. Cum ajunge documentul la fiecare angajat?
+4. Ce dovadă păstrezi pentru luarea la cunoștință?
+
+## Varianta minimă de rollout
+
+1. Finalizezi draftul și verifici adaptările obligatorii pentru ${sectorLabel}.
+2. Confirmi lista angajaților / echipelor cărora li se aplică.
+3. Comunici documentul pe canalul oficial: e-mail intern / intranet / mapă HR.
+4. Ceri dovadă de luare la cunoștință: semnătură, confirmare digitală sau proces-verbal intern.
+5. Arhivezi versiunea finală și dovada într-un loc auditabil.
+
+## Dovadă bună pentru cockpit
+
+- PDF final al regulamentului
+- link / folder intern unde este salvat
+- listă cu angajații / echipele către care a fost comunicat
+- notă despre tipul de confirmare colectat`,
+      },
+      {
+        id: "hr-procedures-rollout",
+        title: "Checklist rollout regulament intern",
+        summary: "Pașii minimi înainte să închizi cazul în cockpit.",
+        content: `# Checklist rollout regulament intern — ${orgName}
+
+## Pași minimi
+
+1. Confirmi ce proceduri trebuie adaptate pentru ${employeeCountLabel}.
+2. Completezi programul real, disciplina muncii și regulile interne specifice.
+3. Verifici cine aprobă documentul final.
+4. Stabilești canalul de comunicare către angajați.
+5. Colectezi dovada de luare la cunoștință.
+6. Arhivezi versiunea finală și notele de rollout.
+
+## Întrebări de control
+
+- Regulamentul reflectă programul și realitatea din firmă?
+- Ai clar cine răspunde de actualizările viitoare?
+- Știi unde intră dovada în Dosar pentru audit ITM / HR?`,
+      },
+    ],
+    completionChecklist: [
+      "Ai revizuit structura regulamentului intern și știi ce capitole trebuie personalizate pentru firmă.",
+      "Ai stabilit cum comunici documentul către angajați și ce dovadă păstrezi pentru luarea la cunoștință.",
+      "Ai clar unde se salvează versiunea finală și cine răspunde de actualizările ulterioare.",
+    ],
+    generatorDocumentType: "hr-internal-procedures",
+    generatorLabel: "Generează regulamentul",
+    returnEvidenceNote:
+      "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
   }
 }
