@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { AlertTriangle, CheckCircle2, Copy, FileCode2, RefreshCw, Wand2, Zap } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, Download, FileCode2, RefreshCw, Wand2, Zap } from "lucide-react"
 import { toast } from "sonner"
 
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
@@ -72,6 +72,45 @@ export function EFacturaValidatorCard({
     } catch {
       toast.error("Nu am putut copia XML-ul reparat.")
     }
+  }
+
+  async function handleCopyRepairSummary() {
+    if (!repairResult) return
+    const summaryLines = [
+      `XML-ul ${repairResult.documentName} a fost reparat în CompliAI la ${new Date(repairResult.createdAtISO).toLocaleString("ro-RO")}.`,
+      repairResult.appliedFixes.length > 0
+        ? `Corecții aplicate: ${repairResult.appliedFixes.map((fix) => `${fix.errorCode} (${fix.field})`).join(", ")}.`
+        : "Nu au fost aplicate corecții automate sigure; corecția a rămas manuală.",
+      "După revizuire, XML-ul trebuie revalidat și retransmis manual în ERP/SPV ANAF.",
+      "Dovada de închidere pentru finding rămâne confirmarea retransmiterii și statusul final din SPV.",
+    ]
+
+    try {
+      await navigator.clipboard.writeText(summaryLines.join(" "))
+      toast.success("Rezumatul pentru cockpit a fost copiat", {
+        description: "Îl poți lipi direct în dovada operațională a findingului fiscal.",
+      })
+    } catch {
+      toast.error("Nu am putut copia rezumatul pentru cockpit.")
+    }
+  }
+
+  function handleDownloadRepairedXml() {
+    if (!repairResult?.repairedXml) return
+    const blob = new Blob([repairResult.repairedXml], { type: "application/xml;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const safeName =
+      repairResult.documentName.replace(/\.xml$/i, "").replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-") || "factura-anaf"
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${safeName}-repaired.xml`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success("XML-ul reparat a fost descărcat", {
+      description: "Poți încărca fișierul direct în ERP sau în fluxul de retransmitere.",
+    })
   }
 
   function handleReplaceWithRepairedXml() {
@@ -216,6 +255,18 @@ export function EFacturaValidatorCard({
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        data-testid="download-repaired-xml"
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownloadRepairedXml}
+                        disabled={!repairResult.repairedXml}
+                        className="gap-1.5"
+                      >
+                        <Download className="size-3.5" />
+                        Descarcă XML-ul reparat
+                      </Button>
+                      <Button
                         data-testid="copy-repaired-xml"
                         type="button"
                         variant="outline"
@@ -237,6 +288,17 @@ export function EFacturaValidatorCard({
                       >
                         <RefreshCw className="size-3.5" />
                         Inlocuieste in editor
+                      </Button>
+                      <Button
+                        data-testid="copy-repair-summary"
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleCopyRepairSummary()}
+                        className="gap-1.5"
+                      >
+                        <Copy className="size-3.5" />
+                        Copiază nota pentru cockpit
                       </Button>
                     </div>
                   </div>
@@ -271,6 +333,25 @@ export function EFacturaValidatorCard({
                           rows={8}
                           className="mt-3 min-h-[180px] w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-xs text-eos-text outline-none"
                         />
+                      </div>
+
+                      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Protocol după repair</p>
+                        <div className="mt-3 space-y-3">
+                          {[
+                            "Înlocuiește editorul sau descarcă XML-ul reparat ca fișier separat.",
+                            "Rulează încă o validare pe varianta reparată înainte de retransmitere.",
+                            "Retransmite manual XML-ul în ERP sau în fluxul SPV ANAF și păstrează confirmarea primită.",
+                            "Revino în cockpit și atașează nota de remediere + referința de confirmare din SPV.",
+                          ].map((step, index) => (
+                            <div key={step} className="flex items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-3">
+                              <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-eos-primary/10 text-[11px] font-semibold text-eos-primary">
+                                {index + 1}
+                              </div>
+                              <p className="text-sm text-eos-text-muted">{step}</p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ) : null}

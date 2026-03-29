@@ -814,7 +814,7 @@ export default function FiscalPage() {
             </p>
             <p className="mt-0.5 text-xs text-eos-text-muted">
               {tabParam === "validator"
-                ? "Validează sau repară XML-ul de mai jos, apoi revino în finding cu confirmarea retransmiterii și statusul SPV."
+                ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliAI când revii în finding cu confirmarea retransmiterii și statusul SPV."
                 : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
             </p>
           </div>
