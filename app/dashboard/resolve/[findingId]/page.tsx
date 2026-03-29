@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { Breadcrumb } from "@/components/evidence-os/Breadcrumb"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -492,14 +493,7 @@ export default function FindingDetailPage() {
 
   return (
     <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
-      {/* Back nav */}
-      <Link
-        href={dashboardRoutes.resolve}
-        className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-eos-text-muted transition-colors hover:text-eos-text"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={2} />
-        Înapoi la De rezolvat
-      </Link>
+      <Breadcrumb items={[{ label: "De rezolvat", href: dashboardRoutes.resolve }, { label: finding.title }]} />
 
       <PageIntro
         eyebrow={`Caz · ${finding.category.replace("_", " ")}`}
