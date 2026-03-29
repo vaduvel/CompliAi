@@ -246,8 +246,19 @@ export default function DriftPage() {
               const isExpanded = expandedDriftId === drift.id
               const lifecycleStatus = drift.lifecycleStatus ?? "open"
 
+              const driftBorderL =
+                drift.severity === "critical" || drift.severity === "high"
+                  ? "border-l-[3px] border-l-eos-error"
+                  : drift.severity === "medium"
+                    ? "border-l-[3px] border-l-eos-warning"
+                    : "border-l-[3px] border-l-eos-border-subtle"
+
               return (
-                <DenseListItem key={drift.id} active={isExpanded} className="p-5">
+                <DenseListItem
+                  key={drift.id}
+                  active={isExpanded}
+                  className={`p-5 ${driftBorderL} ${breached && drift.open ? "bg-eos-error-soft" : ""}`}
+                >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <button
                       type="button"

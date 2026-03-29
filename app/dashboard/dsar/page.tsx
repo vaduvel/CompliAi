@@ -476,8 +476,19 @@ function DsarRow({
   const canClose = req.identityVerified && req.responseReviewedByHuman
   const closeBlocked = !canClose && nextStatuses.includes("responded")
 
+  const dsarBorderL =
+    !isClosed && dl.expired
+      ? "border-l-eos-error"
+      : req.status === "responded"
+        ? "border-l-eos-success"
+        : req.status === "refused"
+          ? "border-l-eos-error"
+          : req.status === "in_progress" || req.status === "awaiting_verification"
+            ? "border-l-eos-warning"
+            : "border-l-eos-primary"
+
   return (
-    <Card className={`border-eos-border ${dl.expired && !isClosed ? "border-eos-error/30 bg-eos-error-soft/30" : ""}`}>
+    <Card className={`border border-l-[3px] ${dsarBorderL} ${dl.expired && !isClosed ? "border-eos-error/30 bg-eos-error-soft/30" : "border-eos-border"}`}>
       <CardContent className="px-5 py-4 space-y-3">
         {/* Header row — clickable to expand */}
         <button

@@ -157,26 +157,29 @@ export default function DoraPage() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-3 gap-3">
-        <Card className={`border-eos-border ${majorOpen.length > 0 ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
+        <Card className={`relative overflow-hidden border-eos-border ${majorOpen.length > 0 ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
+          {majorOpen.length > 0 && (
+            <div className="absolute inset-x-0 top-0 h-[3px] bg-eos-error" />
+          )}
           <CardContent className="px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Incidente majore</p>
-            <p className={`mt-1 text-2xl font-semibold ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
+            <p className={`mt-1 text-2xl font-semibold tabular-nums ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
               {majorOpen.length}
             </p>
             <p className="text-[10px] text-eos-text-muted">{openIncidents.length} deschise total</p>
           </CardContent>
         </Card>
-        <Card className="border-eos-border">
+        <Card className={`relative overflow-hidden border-eos-border border-l-[3px] ${criticalProviders.length > 0 ? "border-l-eos-warning" : "border-l-eos-border-subtle"}`}>
           <CardContent className="px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Furnizori critici</p>
-            <p className="mt-1 text-2xl font-semibold text-eos-text">{criticalProviders.length}</p>
+            <p className={`mt-1 text-2xl font-semibold tabular-nums ${criticalProviders.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>{criticalProviders.length}</p>
             <p className="text-[10px] text-eos-text-muted">{tprm.length} furnizori total</p>
           </CardContent>
         </Card>
-        <Card className="border-eos-border">
+        <Card className="border-eos-border border-l-[3px] border-l-eos-border-subtle">
           <CardContent className="px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Teste reziliență</p>
-            <p className="mt-1 text-2xl font-semibold text-eos-text">{state?.resilienceTests.length ?? 0}</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums text-eos-text">{state?.resilienceTests.length ?? 0}</p>
             <p className="text-[10px] text-eos-text-muted">
               {(state?.resilienceTests ?? []).filter((t) => t.status === "completed").length} completate
             </p>
@@ -301,8 +304,11 @@ function IncidentRow({
     closed: [],
   } as Record<DoraIncidentStatus, DoraIncidentStatus[]>)[i.status]
 
+  const incidentBorderL =
+    i.severity === "major" ? "border-l-eos-error" : i.severity === "significant" ? "border-l-eos-warning" : "border-l-eos-border-subtle"
+
   return (
-    <Card className={`border-eos-border ${i.severity === "major" && !isClosed ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
+    <Card className={`border border-l-[3px] ${incidentBorderL} ${!isClosed && i.severity === "major" ? "bg-eos-error-soft border-eos-error/30" : "border-eos-border"}`}>
       <CardContent className="px-5 py-4 space-y-3">
         <button
           type="button"
@@ -439,7 +445,7 @@ function TprmRow({
   const isActive = e.status === "active"
 
   return (
-    <Card className={`border-eos-border ${e.criticality === "critical" && e.riskLevel === "high" ? "border-eos-warning/30 bg-eos-warning-soft" : ""}`}>
+    <Card className={`border border-l-[3px] ${e.criticality === "critical" ? "border-l-eos-error border-eos-border" : e.criticality === "important" ? "border-l-eos-warning border-eos-border" : "border-l-eos-border-subtle border-eos-border"} ${e.criticality === "critical" && e.riskLevel === "high" ? "bg-eos-warning-soft" : ""}`}>
       <CardContent className="px-5 py-4 space-y-3">
         <button
           type="button"
