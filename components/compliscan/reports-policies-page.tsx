@@ -130,8 +130,9 @@ interface PolicyCardProps {
 
 function PolicyCard({ policy, ack, saving, onAcknowledge }: PolicyCardProps) {
   const acknowledged = Boolean(ack)
+  const policyBorderL = acknowledged ? "border-l-[3px] border-l-eos-success" : "border-l-[3px] border-l-eos-warning"
   return (
-    <Card className="flex flex-col">
+    <Card className={`flex flex-col ${policyBorderL}`}>
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <CardTitle className="text-base leading-snug">{policy.title}</CardTitle>

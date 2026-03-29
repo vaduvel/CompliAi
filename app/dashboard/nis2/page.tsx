@@ -1335,17 +1335,24 @@ function IncidentRow({
 
   const completedStages = [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
 
+  const nis2IncidentBorderL =
+    incident.severity === "critical" || incident.severity === "high"
+      ? "border-l-[3px] border-l-eos-error"
+      : incident.severity === "medium"
+        ? "border-l-[3px] border-l-eos-warning"
+        : "border-l-[3px] border-l-eos-border-subtle"
+
   return (
     <div
       id={`incident-${incident.id}`}
-      className={`space-y-3 px-5 py-4 ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-eos-warning-soft ring-1 ring-eos-warning/30" : ""}`}
+      className={`space-y-3 px-5 py-4 ${nis2IncidentBorderL} ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-eos-warning-soft ring-1 ring-eos-warning/30" : ""}`}
     >
       {highlighted && focusMode === "anspdcp" ? (
         <div className="rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
           Ai venit aici din cockpitul finding-ului GDPR de breach. Completează notificarea ANSPDCP și apoi întoarce-te cu dovada în același caz.
         </div>
       ) : highlighted && focusMode === "incident" ? (
-        <div className="rounded-eos-md border border-sky-300 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+        <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary-soft/20 px-3 py-2 text-xs text-eos-primary">
           Ai venit aici din cockpitul finding-ului NIS2. Parcurge timeline-ul 24h / 72h / 30 zile pentru incidentul selectat și întoarce-te cu dovada early warning-ului în același caz.
         </div>
       ) : null}
@@ -1947,12 +1954,19 @@ function VendorRow({
     }
   }
 
+  const nis2VendorBorderL =
+    riskLevel === "high"
+      ? "border-l-[3px] border-l-eos-error"
+      : riskLevel === "medium"
+        ? "border-l-[3px] border-l-eos-warning"
+        : "border-l-[3px] border-l-eos-border-subtle"
+
   return (
     <div
       id={`vendor-${vendor.id}`}
-      className={highlighted ? "scroll-mt-24 rounded-eos-lg bg-sky-50/40 ring-1 ring-sky-300" : ""}
+      className={highlighted ? "scroll-mt-24 rounded-eos-lg bg-eos-primary-soft/20 ring-1 ring-eos-primary/30" : ""}
     >
-      <div className="flex flex-wrap items-start gap-4 px-5 py-4">
+      <div className={`flex flex-wrap items-start gap-4 px-5 py-4 ${nis2VendorBorderL}`}>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-eos-text">{vendor.name}</p>

@@ -177,8 +177,17 @@ function ReportRow({
     closed: [],
   }[r.status] as WhistleblowingStatus[]
 
+  const wbBorderL =
+    r.status === "resolved"
+      ? "border-l-eos-success"
+      : r.status === "closed"
+        ? "border-l-eos-border-subtle"
+        : r.status === "under_investigation"
+          ? "border-l-eos-primary"
+          : "border-l-eos-warning"
+
   return (
-    <Card className={`border-eos-border ${dl.urgent && !isClosed ? "border-orange-300 bg-orange-50/20" : ""}`}>
+    <Card className={`border border-l-[3px] ${wbBorderL} ${dl.urgent && !isClosed ? "border-eos-warning/30 bg-eos-warning-soft/30" : "border-eos-border"}`}>
       <CardContent className="px-5 py-4 space-y-3">
         <button
           type="button"

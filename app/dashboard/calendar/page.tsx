@@ -73,10 +73,20 @@ function EventCard({ event }: { event: CalendarEvent }) {
   const dateLabel = new Date(event.deadlineISO).toLocaleDateString("ro-RO", {
     day: "numeric", month: "short", year: "numeric",
   })
+  const calBorderL =
+    event.severity === "critical" || event.severity === "high"
+      ? "border-l-[3px] border-l-eos-error"
+      : event.severity === "medium"
+        ? "border-l-[3px] border-l-eos-warning"
+        : "border-l-[3px] border-l-eos-border-subtle"
+  const calUrgentBg =
+    event.daysLeft < 0 && (event.severity === "critical" || event.severity === "high")
+      ? "bg-eos-error-soft/30 border-eos-error/20"
+      : "bg-eos-surface border-eos-border"
   return (
     <Link
       href={event.href}
-      className="flex items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 hover:bg-eos-surface-variant transition-colors"
+      className={`flex items-start gap-3 rounded-eos-md border ${calBorderL} ${calUrgentBg} p-3 hover:bg-eos-surface-variant transition-colors`}
     >
       <div className="mt-0.5 flex flex-col items-center gap-1">
         <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${severityColors(event.severity)}`}>

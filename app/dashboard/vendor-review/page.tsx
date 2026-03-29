@@ -1159,8 +1159,18 @@ export default function VendorReviewPage() {
               </p>
               {reviews.map((review) => {
                 const isExpanded = expandedId === review.id
+                const vrBorderL =
+                  review.urgency === "critical" || review.urgency === "high"
+                    ? "border-l-eos-error"
+                    : review.urgency === "medium"
+                      ? "border-l-eos-warning"
+                      : "border-l-eos-border-subtle"
+                const vrUrgentBg =
+                  (review.urgency === "critical" || review.urgency === "high") && review.status !== "closed"
+                    ? "bg-eos-error-soft/30 border-eos-error/20"
+                    : "border-eos-border"
                 return (
-                  <Card key={review.id} className={isExpanded ? "ring-1 ring-eos-primary/30" : ""}>
+                  <Card key={review.id} className={`border border-l-[3px] ${vrBorderL} ${vrUrgentBg} ${isExpanded ? "ring-1 ring-eos-primary/30" : ""}`}>
                     <div className="p-4">
                       {/* Row header */}
                       <button

@@ -271,6 +271,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("regesCorrectionFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din brief-ul REGES. Revizuiește dovada precompletată și închide cazul doar dacă handoff-ul este clar, iar exportul sau confirmarea de corecție pot fi urmărite fără ambiguități."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
   }, [finding, searchParams])
 
   async function updateStatus(

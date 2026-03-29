@@ -113,10 +113,20 @@ function GapItem({ gap }: { gap: AssessmentResult["gaps"][0] }) {
       ? "text-eos-error"
       : gap.severity === "high"
       ? "text-eos-warning"
-      : "text-yellow-500"
+      : "text-eos-warning"
+  const gapBorderL =
+    gap.severity === "critical"
+      ? "border-l-[3px] border-l-eos-error"
+      : gap.severity === "high"
+        ? "border-l-[3px] border-l-eos-warning"
+        : "border-l-[3px] border-l-eos-border-subtle"
+  const gapBg =
+    gap.severity === "critical"
+      ? "bg-eos-error-soft/30 border-eos-error/20"
+      : "bg-eos-surface border-eos-border"
 
   return (
-    <div className="flex gap-3 rounded-eos-md border border-eos-border bg-eos-surface p-3">
+    <div className={`flex gap-3 rounded-eos-md border ${gapBorderL} ${gapBg} p-3`}>
       <Icon className={`mt-0.5 size-4 shrink-0 ${colorClass}`} strokeWidth={2} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-eos-text">{gap.question}</p>

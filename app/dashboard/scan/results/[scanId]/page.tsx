@@ -127,11 +127,19 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const age = ageLabel(finding.createdAtISO)
   const inRemediation = Boolean(finding.resolution)
 
+  const scanBorderL =
+    finding.severity === "critical" || finding.severity === "high"
+      ? "border-l-eos-error"
+      : finding.severity === "medium"
+        ? "border-l-eos-warning"
+        : "border-l-eos-border-subtle"
+
   return (
     <div
       className={[
-        "overflow-hidden rounded-eos-md border transition-colors duration-150",
-        expanded ? "border-eos-border-default" : "border-eos-border-subtle",
+        "overflow-hidden rounded-eos-md border border-l-[3px] transition-colors duration-150",
+        scanBorderL,
+        expanded ? "border-eos-border" : "border-eos-border-subtle",
         "bg-eos-surface",
       ].join(" ")}
     >

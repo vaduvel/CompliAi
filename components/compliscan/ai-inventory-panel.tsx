@@ -464,10 +464,17 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               const Icon = tone.icon
               const explanation = classifyForExplain(system.purpose)
 
+              const inventoryBorderL =
+                system.riskLevel === "high"
+                  ? "border-l-[3px] border-l-eos-error"
+                  : system.riskLevel === "limited"
+                    ? "border-l-[3px] border-l-eos-warning"
+                    : "border-l-[3px] border-l-eos-border-subtle"
+
               return (
                 <div
                   key={system.id}
-                  className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5"
+                  className={`rounded-eos-md border border-eos-border bg-eos-surface-variant p-5 ${inventoryBorderL}`}
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-2">

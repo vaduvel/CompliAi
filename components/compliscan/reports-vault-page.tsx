@@ -742,11 +742,20 @@ function DriftWatchCard({
           (() => {
             const guidance = getDriftPolicyFromRecord(drift)
             const breached = isDriftSlaBreached(drift)
+            const driftBorderL =
+              drift.severity === "critical" || drift.severity === "high"
+                ? "border-l-[3px] border-l-eos-error"
+                : drift.severity === "medium"
+                  ? "border-l-[3px] border-l-eos-warning"
+                  : "border-l-[3px] border-l-eos-border-subtle"
+            const driftBg = breached
+              ? "border-eos-error/20 bg-eos-error-soft/30"
+              : "border-eos-border bg-eos-surface-variant"
 
             return (
               <div
                 key={drift.id}
-                className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
+                className={`rounded-eos-md border ${driftBorderL} ${driftBg} p-4`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
