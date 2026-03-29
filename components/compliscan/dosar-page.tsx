@@ -77,9 +77,17 @@ export function DosarPageSurface() {
             {resolvedFindings.map((finding) => {
               const linkedDoc = docByFindingId.get(finding.id) ?? null
               const isMonitored = finding.findingStatus === "under_monitoring"
+              const dosarBorderL =
+                finding.severity === "critical" || finding.severity === "high"
+                  ? "border-l-[3px] border-l-eos-error"
+                  : finding.severity === "medium"
+                    ? "border-l-[3px] border-l-eos-warning"
+                    : isMonitored
+                      ? "border-l-[3px] border-l-eos-success"
+                      : "border-l-[3px] border-l-eos-border-subtle"
 
               return (
-                <div key={finding.id} className="flex items-start gap-4 px-5 py-4">
+                <div key={finding.id} className={`flex items-start gap-4 px-5 py-4 ${dosarBorderL}`}>
                   <div className="mt-0.5 shrink-0">
                     {isMonitored ? (
                       <ShieldCheck className="h-4 w-4 text-eos-success" strokeWidth={2} />

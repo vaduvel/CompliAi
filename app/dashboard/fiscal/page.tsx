@@ -187,9 +187,17 @@ function DiscrepanciesTab() {
           label="Nicio discrepanta e-TVA. Adauga o discrepanta cand detectezi diferente intre declaratii si e-TVA precompletata."
         />
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
-          {items.map((d) => (
-            <CardContent key={d.id} className="space-y-2 py-3">
+        <div className="space-y-2">
+          {items.map((d) => {
+            const discrepancyBorderL =
+              d.severity === "critical" || d.severity === "high"
+                ? "border-l-eos-error"
+                : d.severity === "medium"
+                  ? "border-l-eos-warning"
+                  : "border-l-eos-border-subtle"
+            return (
+            <Card key={d.id} className={`border border-l-[3px] ${discrepancyBorderL} ${d.status === "resolved" ? "border-eos-border bg-eos-surface opacity-70" : "border-eos-border bg-eos-surface"}`}>
+            <CardContent className="space-y-2 py-3 px-4">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-eos-text">{ETVA_TYPE_LABELS[d.type]}</p>
                 <Badge variant={SEVERITY_VARIANT[d.severity] ?? "default"} className="text-[10px] normal-case tracking-normal">
@@ -225,8 +233,10 @@ function DiscrepanciesTab() {
                 </div>
               )}
             </CardContent>
-          ))}
-        </Card>
+            </Card>
+            )
+          })}
+        </div>
       )}
     </div>
   )
@@ -369,24 +379,36 @@ function FilingRecordsTab() {
           label="Nicio depunere inregistrata. Adauga declaratiile si depunerile fiscale pentru a calcula scorul de disciplina."
         />
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
-          {records.map((r) => (
-            <CardContent key={r.id} className="space-y-1 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-semibold text-eos-text">{FILING_TYPE_LABELS[r.type]}</p>
-                <Badge variant={FILING_STATUS_VARIANT[r.status]} className="text-[10px] normal-case tracking-normal">
-                  {FILING_STATUS_LABELS[r.status]}
-                </Badge>
-                <span className="text-xs text-eos-text-muted">Perioada: {r.period}</span>
-              </div>
-              <p className="flex items-center gap-1 text-xs text-eos-text-muted">
-                <Clock className="size-3" /> Termen: {new Date(r.dueISO).toLocaleDateString("ro-RO")}
-                {r.filedAtISO && <> · Depus: {new Date(r.filedAtISO).toLocaleDateString("ro-RO")}</>}
-              </p>
-              {r.note && <p className="text-xs text-eos-text-muted">{r.note}</p>}
-            </CardContent>
-          ))}
-        </Card>
+        <div className="space-y-2">
+          {records.map((r) => {
+            const filingBorderL =
+              r.status === "late" || r.status === "missing"
+                ? "border-l-eos-error"
+                : r.status === "upcoming"
+                  ? "border-l-eos-warning"
+                  : r.status === "on_time" || r.status === "rectified"
+                    ? "border-l-eos-success"
+                    : "border-l-eos-border-subtle"
+            return (
+              <Card key={r.id} className={`border border-l-[3px] ${filingBorderL} border-eos-border bg-eos-surface`}>
+                <CardContent className="space-y-1 py-3 px-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-eos-text">{FILING_TYPE_LABELS[r.type]}</p>
+                    <Badge variant={FILING_STATUS_VARIANT[r.status]} className="text-[10px] normal-case tracking-normal">
+                      {FILING_STATUS_LABELS[r.status]}
+                    </Badge>
+                    <span className="text-xs text-eos-text-muted">Perioada: {r.period}</span>
+                  </div>
+                  <p className="flex items-center gap-1 text-xs text-eos-text-muted">
+                    <Clock className="size-3" /> Termen: {new Date(r.dueISO).toLocaleDateString("ro-RO")}
+                    {r.filedAtISO && <> · Depus: {new Date(r.filedAtISO).toLocaleDateString("ro-RO")}</>}
+                  </p>
+                  {r.note && <p className="text-xs text-eos-text-muted">{r.note}</p>}
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
       )}
     </div>
   )
