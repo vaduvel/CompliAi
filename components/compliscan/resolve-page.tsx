@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useDeferredValue, useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, Clock, Search } from "lucide-react"
+import { AlertTriangle, ArrowRight, ChevronRight, Clock, Search } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
@@ -149,33 +149,39 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
     ? `/dashboard/resolve/${finding.id}?generator=1`
     : `/dashboard/resolve/${finding.id}`
 
+  const isHigh = finding.severity === "critical" || finding.severity === "high"
+  const isMed = finding.severity === "medium"
+  const leftBorder = isHigh ? "border-l-eos-error" : isMed ? "border-l-eos-warning" : "border-l-eos-border-subtle"
+
   return (
     <Link
       href={cockpitHref}
-      className="flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3.5 transition-all hover:border-eos-border-strong hover:bg-eos-surface-variant"
+      className={`group flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant border-l-[3px] py-3.5 pl-4 pr-4 transition-all hover:bg-eos-surface-active ${leftBorder}`}
     >
-      <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
       <div className="min-w-0 flex-1">
-        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-eos-text">
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-eos-text">
           {finding.title}
         </p>
         <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-eos-text-tertiary">
           {getFindingRiskLine(finding, recipe)}
         </p>
       </div>
-      <span className="hidden shrink-0 rounded-full bg-eos-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-eos-text-tertiary sm:inline-flex">
+      <span className="hidden shrink-0 rounded bg-eos-surface-elevated px-2 py-0.5 text-[10px] font-medium text-eos-text-tertiary sm:inline-flex">
         {canonicalFrameworkLabel(recipe.framework)}
       </span>
-      <span className={`hidden shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold lg:inline-flex ${
-        flowStatus.variant === "success" ? "bg-eos-success-soft text-eos-success" :
-        flowStatus.variant === "warning" ? "bg-eos-warning-soft text-eos-warning" :
-        flowStatus.variant === "destructive" ? "bg-eos-error-soft text-eos-error" :
+      <span className={`hidden shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold lg:inline-flex ${
+        flowStatus.variant === "success" ? "bg-eos-success/10 text-eos-success" :
+        flowStatus.variant === "warning" ? "bg-eos-warning/10 text-eos-warning" :
+        flowStatus.variant === "destructive" ? "bg-eos-error/10 text-eos-error" :
         "bg-eos-surface-active text-eos-text-tertiary"
       }`}>
         {flowStatus.label}
       </span>
-      <span className="shrink-0 text-[11px] text-eos-text-tertiary">{ageLabel(finding.createdAtISO)}</span>
-      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+      <span className={`shrink-0 text-[11px] font-semibold ${isHigh ? "text-eos-error" : isMed ? "text-eos-warning" : "text-eos-text-tertiary"}`}>
+        {finding.severity === "critical" ? "Critic" : finding.severity === "high" ? "Ridicat" : finding.severity === "medium" ? "Mediu" : "Scăzut"}
+      </span>
+      <span className="shrink-0 text-[10px] tabular-nums text-eos-text-tertiary">{ageLabel(finding.createdAtISO)}</span>
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
     </Link>
   )
 }
@@ -234,67 +240,80 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
 
   return (
     <div>
-      <div className="mb-4 space-y-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-eos-text-muted">
-              {soloMode ? "Prioritatea de azi" : "Queue de finding-uri"}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setStatusFilter("active")}
-              className={[
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                statusFilter === "active"
-                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                  : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
-              ].join(" ")}
-            >
-              Deschise · {findings.filter(isFindingActive).length}
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("all")}
-              className={[
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                statusFilter === "all"
-                  ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                  : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
-              ].join(" ")}
-            >
-              Toate · {findings.length}
-            </button>
-          </div>
-        </div>
-
-        <label className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-3 py-2.5">
-          <Search className="h-4 w-4 text-eos-text-tertiary" strokeWidth={2} />
+      {/* Filter bar — search + status toggle */}
+      <div className="mb-3 overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+        {/* Search */}
+        <label className="flex items-center gap-2 border-b border-eos-border-subtle px-4 py-3">
+          <Search className="h-4 w-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Caută după titlu, sursă sau referință legală"
-            className="w-full bg-transparent text-sm text-eos-text-muted outline-none placeholder:text-eos-text-tertiary"
+            className="w-full bg-transparent text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary"
           />
+          {filtered.length < findingsForStatus.length && (
+            <span className="shrink-0 text-[10px] tabular-nums text-eos-text-tertiary">{filtered.length} din {findingsForStatus.length}</span>
+          )}
         </label>
 
-        {soloMode ? (
-          <div className="flex items-center justify-between rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
-            <p className="text-sm text-eos-text-muted">Lucrezi pe ce e activ acum</p>
-            <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-[11px] text-eos-text-tertiary">
-              {filtered.length} vizibile
-            </span>
+        {/* Status + Framework filters */}
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3">
+          {/* Status tabs */}
+          <div className="flex gap-1">
+            {[
+              { id: "active" as FindingStatusFilter, label: "Deschise", count: findings.filter(isFindingActive).length },
+              { id: "all" as FindingStatusFilter, label: "Toate", count: findings.length },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStatusFilter(tab.id)}
+                className={[
+                  "rounded px-3 py-1.5 text-xs font-medium transition-all",
+                  statusFilter === tab.id
+                    ? "bg-eos-primary/10 text-eos-primary"
+                    : "text-eos-text-tertiary hover:text-eos-text-muted",
+                ].join(" ")}
+              >
+                {tab.label} <span className="ml-1 tabular-nums opacity-70">{tab.count}</span>
+              </button>
+            ))}
           </div>
-        ) : (
-          <details className="group rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <p className="text-sm font-medium text-eos-text-muted">Filtre secundare</p>
-              <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-[11px] text-eos-text-tertiary">Deschide</span>
+
+          <div className="h-4 w-px bg-eos-border-subtle" />
+
+          {/* Framework tabs */}
+          <div className="flex flex-wrap gap-1">
+            {filterTabs.map((tab) => {
+              const active = activeFilter === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveFilter(tab.id)}
+                  className={[
+                    "rounded px-3 py-1.5 text-xs font-medium transition-all",
+                    active
+                      ? "bg-eos-primary/10 text-eos-primary"
+                      : "text-eos-text-tertiary hover:text-eos-text-muted",
+                  ].join(" ")}
+                >
+                  {tab.label} <span className="ml-1 tabular-nums opacity-70">{counts[tab.id]}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {!soloMode && (
+          <details className="group border-t border-eos-border-subtle">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5">
+              <p className="text-xs font-medium text-eos-text-tertiary">Filtrare severitate</p>
+              <ChevronRight className="h-3.5 w-3.5 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
             </summary>
-            <div className="mt-4 space-y-4 border-t border-eos-border-subtle pt-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="border-t border-eos-border-subtle px-4 pb-3 pt-3">
+              <div className="flex flex-wrap gap-1.5">
                 {severityTabs.map((tab) => {
                   const active = severityFilter === tab.id
                   return (
@@ -303,35 +322,13 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       type="button"
                       onClick={() => setSeverityFilter(tab.id)}
                       className={[
-                        "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                        "rounded px-3 py-1.5 text-xs font-medium transition-all",
                         active
-                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                          : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
+                          ? "bg-eos-primary/10 text-eos-primary"
+                          : "text-eos-text-tertiary hover:text-eos-text-muted",
                       ].join(" ")}
                     >
-                      {tab.label}
-                      <span className="ml-1.5">{severityCounts[tab.id]}</span>
-                    </button>
-                  )
-                })}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filterTabs.map((tab) => {
-                  const active = activeFilter === tab.id
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveFilter(tab.id)}
-                      className={[
-                        "rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                        active
-                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                          : "border-eos-border bg-eos-surface-variant text-eos-text-tertiary hover:text-eos-text-muted",
-                      ].join(" ")}
-                    >
-                      {tab.label}
-                      <span className="ml-1.5">{counts[tab.id]}</span>
+                      {tab.label} <span className="ml-1 tabular-nums opacity-70">{severityCounts[tab.id]}</span>
                     </button>
                   )
                 })}
@@ -340,6 +337,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
           </details>
         )}
       </div>
+
 
       {filtered.length === 0 ? (
         <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
@@ -467,27 +465,26 @@ export function ResolvePageSurface() {
 
   return (
     <div className="space-y-6">
-      <section
-        aria-label="Snapshot scurt după onboarding"
-        className="grid gap-3 rounded-eos-xl border border-eos-border bg-eos-surface-variant p-4 md:grid-cols-3"
-      >
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
-          <p className="mt-1 text-sm text-eos-text">{applicabilityLabels}</p>
-        </div>
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Am găsit</p>
-          <p className="mt-1 text-sm text-eos-text">{foundSummary}</p>
-        </div>
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
-          <p className="mt-1 text-sm text-eos-text">{nextActionLine}</p>
-        </div>
-      </section>
 
-      {/* Header */}
+      {/* Context strip — lighter, no heavy card */}
+      <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
+        <div className="sm:flex-1 sm:pr-6">
+          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
+          <p className="mt-0.5 text-sm text-eos-text">{applicabilityLabels}</p>
+        </div>
+        <div className="sm:flex-1 sm:px-6">
+          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Am găsit</p>
+          <p className="mt-0.5 text-sm text-eos-text">{foundSummary}</p>
+        </div>
+        <div className="sm:flex-1 sm:pl-6">
+          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="mt-0.5 text-sm text-eos-text">{nextActionLine}</p>
+        </div>
+      </div>
+
+      {/* Header + Severity KPI row */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
+        <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
         </h1>
@@ -496,37 +493,41 @@ export function ResolvePageSurface() {
             ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz."
             : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."}
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {urgencyItems.length > 0 && (
-            <span className="rounded-full bg-eos-error-soft px-3 py-1 text-xs font-semibold text-eos-error">
-              {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
-            </span>
-          )}
-          {criticalCount > 0 && (
-            <span className="rounded-full bg-eos-error-soft px-3 py-1 text-xs font-semibold text-eos-error">
-              {criticalCount} critice
-            </span>
-          )}
-          {highCount > 0 && (
-            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
-              {highCount} ridicate
-            </span>
-          )}
-          {mediumCount > 0 && (
-            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
-              {mediumCount} medii
-            </span>
-          )}
-          {openTasks.length > 0 && (
-            <Link
-              href={dashboardRoutes.resolveSupport}
-              className="inline-flex items-center gap-2 rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
-            >
-              Task-uri de suport · {openTasks.length}
-              <ArrowRight className="size-4" strokeWidth={2} />
-            </Link>
-          )}
+
+        {/* Severity KPI row — diferențiere vizuală clară */}
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Critice", count: criticalCount, color: criticalCount > 0 ? "border-l-eos-error text-eos-error" : "border-l-eos-border-subtle text-eos-text-tertiary" },
+            { label: "Ridicate", count: highCount, color: highCount > 0 ? "border-l-eos-error text-eos-warning" : "border-l-eos-border-subtle text-eos-text-tertiary" },
+            { label: "Medii", count: mediumCount, color: mediumCount > 0 ? "border-l-eos-warning text-eos-warning" : "border-l-eos-border-subtle text-eos-text-tertiary" },
+            { label: "Scăzute", count: activeFindings.length - criticalCount - highCount - mediumCount, color: "border-l-eos-border-subtle text-eos-text-tertiary" },
+          ].map((item) => (
+            <div key={item.label} className={`flex flex-col gap-1 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant border-l-[3px] px-4 py-3 ${item.color}`}>
+              <span className="text-2xl font-semibold tabular-nums leading-none">{item.count}</span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">{item.label}</span>
+            </div>
+          ))}
         </div>
+
+        {/* Secondary actions */}
+        {(openTasks.length > 0 || urgencyItems.length > 0) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {urgencyItems.length > 0 && (
+              <span className="rounded bg-eos-error/10 px-2.5 py-1 text-xs font-semibold text-eos-error">
+                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
+              </span>
+            )}
+            {openTasks.length > 0 && (
+              <Link
+                href={dashboardRoutes.resolveSupport}
+                className="inline-flex items-center gap-1.5 rounded border border-eos-border bg-eos-surface-active px-2.5 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text"
+              >
+                Task-uri de suport · {openTasks.length}
+                <ChevronRight className="size-3" strokeWidth={2} />
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Main execution queue */}
