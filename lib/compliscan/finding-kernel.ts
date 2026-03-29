@@ -2383,6 +2383,26 @@ function getWorkflowLink(
         label: "Verifică SPV în Fiscal",
       }
     }
+    case "EF-003": {
+      const search = new URLSearchParams({
+        tab: "validator",
+        findingId: record.id,
+      })
+      return {
+        href: `/dashboard/fiscal?${search.toString()}`,
+        label: "Validează și repară XML-ul",
+      }
+    }
+    case "EF-005": {
+      const search = new URLSearchParams({
+        tab: "validator",
+        findingId: record.id,
+      })
+      return {
+        href: `/dashboard/fiscal?${search.toString()}`,
+        label: "Validează XML-ul înainte de transmitere",
+      }
+    }
     default:
       return undefined
   }

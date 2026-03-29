@@ -298,6 +298,24 @@ export type EFacturaValidationRecord = {
   createdAtISO: string
 }
 
+export type EFacturaXmlRepairFix = {
+  errorCode: string
+  field: string
+  oldValue: string
+  newValue: string
+  explanation: string
+}
+
+export type EFacturaXmlRepairRecord = {
+  documentName: string
+  originalXml: string
+  repairedXml: string
+  requestedErrorCodes: string[]
+  appliedFixes: EFacturaXmlRepairFix[]
+  canAutoFix: boolean
+  createdAtISO: string
+}
+
 export type PersistedTaskStatus = "todo" | "done"
 
 export type PersistedTaskState = {

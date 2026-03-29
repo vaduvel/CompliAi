@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { AlertTriangle, CheckCircle2, FileCode2, Zap } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, FileCode2, RefreshCw, Wand2, Zap } from "lucide-react"
+import { toast } from "sonner"
 
-import type { EFacturaValidationRecord } from "@/lib/compliance/types"
+import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -11,16 +12,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 type EFacturaValidatorCardProps = {
   validations: EFacturaValidationRecord[]
   busy: boolean
+  repairBusy: boolean
   onValidate: (input: { documentName: string; xml: string }) => Promise<EFacturaValidationRecord | null>
+  onRepair: (input: {
+    documentName: string
+    xml: string
+    errorCodes?: string[]
+  }) => Promise<EFacturaXmlRepairRecord | null>
 }
 
 export function EFacturaValidatorCard({
   validations,
   busy,
+  repairBusy,
   onValidate,
+  onRepair,
 }: EFacturaValidatorCardProps) {
   const [documentName, setDocumentName] = useState("factura-anaf.xml")
   const [xml, setXml] = useState("")
+  const [repairResult, setRepairResult] = useState<EFacturaXmlRepairRecord | null>(null)
   const latestValidation = validations[0] ?? null
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -42,8 +52,38 @@ export function EFacturaValidatorCard({
     setXml(await file.text())
   }
 
+  async function handleRepair() {
+    if (!xml.trim()) return
+    try {
+      const repair = await onRepair({ documentName, xml })
+      setRepairResult(repair)
+    } catch {
+      // Toast-ul este emis de handlerul din suprafața Fiscal.
+    }
+  }
+
+  async function handleCopyRepairedXml() {
+    if (!repairResult?.repairedXml) return
+    try {
+      await navigator.clipboard.writeText(repairResult.repairedXml)
+      toast.success("XML reparat copiat", {
+        description: "Îl poți lipi direct în ERP, validator sau în canalul de retransmitere.",
+      })
+    } catch {
+      toast.error("Nu am putut copia XML-ul reparat.")
+    }
+  }
+
+  function handleReplaceWithRepairedXml() {
+    if (!repairResult?.repairedXml) return
+    setXml(repairResult.repairedXml)
+    toast.success("Editorul a fost înlocuit cu XML-ul reparat", {
+      description: "Validarea live pornește din nou pe varianta corectată.",
+    })
+  }
+
   return (
-    <Card className="border-eos-border bg-eos-surface">
+    <Card className="border-eos-border bg-eos-surface" data-testid="efactura-validator-card">
       <CardHeader className="border-b border-eos-border pb-5">
         <CardTitle className="text-base">Validator e-Factura XML</CardTitle>
         <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">
@@ -68,6 +108,7 @@ export function EFacturaValidatorCard({
           </label>
 
           <input
+            data-testid="efactura-document-name"
             value={documentName}
             onChange={(event) => setDocumentName(event.target.value)}
             placeholder="Nume fisier XML"
@@ -75,6 +116,7 @@ export function EFacturaValidatorCard({
           />
 
           <textarea
+            data-testid="efactura-xml-input"
             value={xml}
             onChange={(event) => setXml(event.target.value)}
             rows={14}
@@ -84,6 +126,7 @@ export function EFacturaValidatorCard({
 
           <div className="flex items-center gap-2">
             <Button
+              data-testid="validate-xml"
               onClick={() => void onValidate({ documentName, xml })}
               disabled={!xml.trim() || busy}
               size="lg"
@@ -98,6 +141,17 @@ export function EFacturaValidatorCard({
               </span>
             )}
           </div>
+
+          <Button
+            data-testid="repair-xml"
+            variant="outline"
+            onClick={() => void handleRepair()}
+            disabled={!xml.trim() || repairBusy}
+            className="w-full gap-1.5"
+          >
+            {repairBusy ? <RefreshCw className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
+            Propune corectii sigure
+          </Button>
         </div>
 
         <div className="space-y-4">
@@ -112,6 +166,7 @@ export function EFacturaValidatorCard({
               <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge
+                    data-testid="efactura-validation-status"
                     className={
                       latestValidation.valid
                         ? "border-eos-border bg-eos-success-soft text-eos-success"
@@ -147,6 +202,80 @@ export function EFacturaValidatorCard({
                   tone="warning"
                 />
               </div>
+
+              {repairResult && (
+                <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/[0.06] p-5" data-testid="repair-result">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-eos-text">Corectii pregatite pentru XML</p>
+                      <p className="mt-1 text-xs text-eos-text-muted">
+                        {repairResult.appliedFixes.length > 0
+                          ? `${repairResult.appliedFixes.length} fixuri aplicate automat. XML-ul nu este retransmis de CompliAI; îl revezi și îl trimiți tu mai departe.`
+                          : "Nu am găsit fixuri automate sigure pentru XML-ul curent. Corecția rămâne manuală în ERP sau în exportul XML."}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        data-testid="copy-repaired-xml"
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleCopyRepairedXml()}
+                        disabled={!repairResult.repairedXml}
+                        className="gap-1.5"
+                      >
+                        <Copy className="size-3.5" />
+                        Copiaza XML-ul reparat
+                      </Button>
+                      <Button
+                        data-testid="replace-with-repaired-xml"
+                        type="button"
+                        size="sm"
+                        onClick={handleReplaceWithRepairedXml}
+                        disabled={!repairResult.repairedXml}
+                        className="gap-1.5"
+                      >
+                        <RefreshCw className="size-3.5" />
+                        Inlocuieste in editor
+                      </Button>
+                    </div>
+                  </div>
+
+                  {repairResult.appliedFixes.length > 0 ? (
+                    <div className="mt-4 space-y-2">
+                      {repairResult.appliedFixes.map((fix, index) => (
+                        <div
+                          key={`${fix.errorCode}-${fix.field}-${index}`}
+                          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className="normal-case tracking-normal">
+                              {fix.errorCode}
+                            </Badge>
+                            <p className="text-sm font-medium text-eos-text">{fix.field}</p>
+                          </div>
+                          <p className="mt-2 text-xs text-eos-text-muted">{fix.explanation}</p>
+                          <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <Meta label="Înainte" value={fix.oldValue || "Lipsă"} />
+                            <Meta label="După" value={fix.newValue} />
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">XML reparat</p>
+                        <textarea
+                          data-testid="repaired-xml-output"
+                          readOnly
+                          value={repairResult.repairedXml}
+                          rows={8}
+                          className="mt-3 min-h-[180px] w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-xs text-eos-text outline-none"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </>
           )}
         </div>

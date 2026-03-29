@@ -711,6 +711,10 @@ export default function FindingDetailPage() {
               <FileText className="size-3.5" strokeWidth={2} />
               {recipe.findingTypeId === "GDPR-005"
                 ? "Confirmă și scanează site-ul"
+                : recipe.findingTypeId === "EF-003"
+                  ? "Confirmă și deschide validatorul XML"
+                  : recipe.findingTypeId === "EF-005"
+                    ? "Confirmă și validează XML-ul"
                 : recipe.findingTypeId === "GDPR-019"
                   ? "Confirmă și deschide breach flow"
                   : recipe.findingTypeId === "NIS2-015"

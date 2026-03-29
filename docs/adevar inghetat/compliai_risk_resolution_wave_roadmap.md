@@ -214,12 +214,30 @@ Status:
 
 - `Factură respinsă / XML invalid în e-Factura`
 
+Status:
+
+- `v1 livrat` pe 2026-03-29
+
 Ce livrăm:
 
 - parser XML
 - mapare deterministă pe erori ANAF / CIUS-RO
 - recomandare exactă de corecție
 - eventual diff / helper
+
+Livrat în `v1`:
+
+- validator XML montat în `Fiscal`
+- handoff din cockpit pentru `EF-003` și `EF-005`
+- API `POST /api/efactura/repair`
+- reparare sigură pentru coduri frecvente `T003`, `V002`, `V003`, `V006`
+- smoke live verde pe aliasul public
+
+Rămâne pentru `v2`:
+
+- acoperire mai largă de coduri
+- diff clar XML inițial vs reparat
+- protocol de retransmitere / status SPV după repair
 
 Ce reutilizăm deja:
 

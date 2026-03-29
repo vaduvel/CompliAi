@@ -256,21 +256,25 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 14. Factură respinsă / XML invalid în e-Factura
 
-- status azi: `asistat mediu`
+- status azi: `operational-assisted puternic`
 - clasă: `operational`
-- cât avem deja: `55%`
+- cât avem deja: `78%`
 - ce există:
   - validator e-Factura
   - hartă de erori
   - fiscal risk card
   - prefill / client ANAF
+  - `Fiscal Pre-Validator v1` în `/dashboard/fiscal?tab=validator`
+  - API `POST /api/efactura/repair`
+  - helper de reparare sigură pentru coduri frecvente (`T003`, `V002`, `V003`, `V006`)
+  - handoff direct din cockpit pentru `EF-003` și `EF-005`
 - ce mai lipsește până la 100%:
-  - `Fiscal Pre-Validator`
-  - diagnostic mai precis pe eroare
-  - recomandare exactă de corecție
-  - eventual diff / XML helper
+  - acoperire mai largă de coduri ANAF / CIUS-RO
+  - diff clar între XML inițial și XML reparat
+  - export/handoff fiscal mai explicit după reparație
+  - legare mai bună cu stările SPV după retransmitere
 - ce ar urca riscul:
-  - mutare în `operational-assisted` puternic
+  - extinderea `Fiscal Pre-Validator` din `v1` în protocol complet de retransmitere
 
 ### 15. Factură blocată în prelucrare ANAF
 

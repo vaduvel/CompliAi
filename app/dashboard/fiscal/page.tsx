@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  FileCode2,
   FileText,
   Loader2,
   Plus,
@@ -23,10 +24,12 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
+import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
 import type { ETVADiscrepancy, ETVADiscrepancyType, ETVADiscrepancyStatus } from "@/lib/compliance/etva-discrepancy"
 import { ETVA_TYPE_LABELS, ETVA_STATUS_LABELS } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord, FilingType, FilingStatus, FilingDisciplineScore } from "@/lib/compliance/filing-discipline"
 import { FILING_TYPE_LABELS, FILING_STATUS_LABELS } from "@/lib/compliance/filing-discipline"
+import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
 
 // ── Severity badge helpers ───────────────────────────────────────────────────
 
@@ -722,8 +725,83 @@ export default function FiscalPage() {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get("tab")
   const findingIdParam = searchParams.get("findingId")
-  const fromCockpit = tabParam === "spv" && Boolean(findingIdParam)
-  const defaultTab = tabParam === "spv" ? "spv" : "discrepante"
+  const [validatorBusy, setValidatorBusy] = useState(false)
+  const [repairBusy, setRepairBusy] = useState(false)
+  const [validations, setValidations] = useState<EFacturaValidationRecord[]>([])
+  const fromCockpit = (tabParam === "spv" || tabParam === "validator") && Boolean(findingIdParam)
+  const defaultTab = tabParam === "spv" || tabParam === "validator" ? tabParam : "discrepante"
+
+  async function handleValidateXml(input: { documentName: string; xml: string }) {
+    setValidatorBusy(true)
+    try {
+      const response = await fetch("/api/efactura/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      })
+      const payload = (await response.json()) as {
+        error?: string
+        message?: string
+        validation?: EFacturaValidationRecord
+      }
+      if (!response.ok) throw new Error(payload.error || "Validarea XML a eșuat.")
+      if (payload.validation) {
+        setValidations((current) => [payload.validation!, ...current.filter((item) => item.id !== payload.validation!.id)].slice(0, 10))
+      }
+      toast.success(payload.validation?.valid ? "XML validat" : "XML cu probleme", {
+        description:
+          payload.message ||
+          (payload.validation?.valid
+            ? "Factura trece validarea structurală de bază."
+            : "Corectează XML-ul și validează din nou înainte de transmitere."),
+      })
+      return payload.validation ?? null
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Eroare la validarea XML."
+      toast.error("Validare eșuată", { description: message })
+      throw error
+    } finally {
+      setValidatorBusy(false)
+    }
+  }
+
+  async function handleRepairXml(input: {
+    documentName: string
+    xml: string
+    errorCodes?: string[]
+  }) {
+    setRepairBusy(true)
+    try {
+      const response = await fetch("/api/efactura/repair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      })
+      const payload = (await response.json()) as {
+        error?: string
+        message?: string
+        repair?: EFacturaXmlRepairRecord
+      }
+      if (!response.ok) throw new Error(payload.error || "Nu am putut genera corecțiile XML.")
+      toast.success(
+        payload.repair && payload.repair.appliedFixes.length > 0 ? "Corecții XML pregătite" : "Nu există fixuri automate sigure",
+        {
+          description:
+            payload.message ||
+            (payload.repair && payload.repair.appliedFixes.length > 0
+              ? "Revizuiește XML-ul reparat și retransmite-l manual."
+              : "Corecția rămâne manuală în ERP sau în exportul XML."),
+        }
+      )
+      return payload.repair ?? null
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Eroare la generarea corecțiilor XML."
+      toast.error("Reparare eșuată", { description: message })
+      throw error
+    } finally {
+      setRepairBusy(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -732,10 +810,12 @@ export default function FiscalPage() {
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-warning" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-eos-text">
-              Vii din cockpit pentru un finding SPV
+              Vii din cockpit pentru un finding fiscal
             </p>
             <p className="mt-0.5 text-xs text-eos-text-muted">
-              Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding.
+              {tabParam === "validator"
+                ? "Validează sau repară XML-ul de mai jos, apoi revino în finding cu confirmarea retransmiterii și statusul SPV."
+                : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
             </p>
           </div>
           <a
@@ -783,6 +863,13 @@ export default function FiscalPage() {
             SPV Check
           </TabsTrigger>
           <TabsTrigger
+            value="validator"
+            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+          >
+            <FileCode2 className="mr-1.5 size-3.5" />
+            Validator XML
+          </TabsTrigger>
+          <TabsTrigger
             value="semnale"
             className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
           >
@@ -801,6 +888,16 @@ export default function FiscalPage() {
 
         <TabsContent value="spv">
           <SpvCheckTab />
+        </TabsContent>
+
+        <TabsContent value="validator">
+          <EFacturaValidatorCard
+            validations={validations}
+            busy={validatorBusy}
+            repairBusy={repairBusy}
+            onValidate={handleValidateXml}
+            onRepair={handleRepairXml}
+          />
         </TabsContent>
 
         <TabsContent value="semnale">

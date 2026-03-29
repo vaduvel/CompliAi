@@ -469,6 +469,38 @@ describe("getResolveFlowRecipe", () => {
     expect(recipe.closureCTA).toBe("Marchează notificarea ANSPDCP")
   })
 
+  it("trimite EF-003 în Fiscal -> Validator XML", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "efactura-risk-xml-001",
+        category: "E_FACTURA",
+        title: "Factură respinsă ANAF",
+        detail: "CustomizationID lipsă sau incorect.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("EF-003")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/fiscal?tab=validator")
+    expect(recipe.workflowLink?.href).toContain("findingId=efactura-risk-xml-001")
+    expect(recipe.workflowLink?.label).toBe("Validează și repară XML-ul")
+  })
+
+  it("trimite EF-005 în Fiscal -> Validator XML înainte de transmitere", () => {
+    const recipe = buildCockpitRecipe(
+      makeFinding({
+        id: "efactura-risk-unsubmitted-001",
+        category: "E_FACTURA",
+        title: "Factură generată, netransmisă SPV",
+        detail: "Factura există local dar nu a fost transmisă în SPV.",
+      })
+    )
+
+    expect(recipe.findingTypeId).toBe("EF-005")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/fiscal?tab=validator")
+    expect(recipe.workflowLink?.href).toContain("findingId=efactura-risk-unsubmitted-001")
+    expect(recipe.workflowLink?.label).toBe("Validează XML-ul înainte de transmitere")
+  })
+
   it("returnează handoff real pentru NIS2-001 către wizardul de eligibilitate", () => {
     const recipe = buildCockpitRecipe(
       makeFinding({
