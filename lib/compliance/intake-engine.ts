@@ -36,6 +36,7 @@ export type ConditionalAnswers = {
   hasPrivacyPolicy?: IntakeAnswer
   hasDsarProcess?: IntakeAnswer
   hasVendorDpas?: IntakeAnswer
+  hasRetentionSchedule?: IntakeAnswer
   // Q4=yes/probably → AI
   aiToolsUsed?: string
   aiUsesConfidentialData?: IntakeAnswer
@@ -236,6 +237,18 @@ export const CONDITIONAL_QUESTIONS: IntakeQuestion[] = [
     options: [
       { value: "yes", label: "Da" },
       { value: "no", label: "Nu" },
+      { value: "unknown", label: "Nu știu" },
+    ],
+  },
+  {
+    id: "hasRetentionSchedule",
+    text: "Aveți reguli clare de retenție și ștergere pentru datele personale?",
+    conditional: true,
+    showWhen: (a) => isPositive(a.processesPersonalData),
+    options: [
+      { value: "yes", label: "Da" },
+      { value: "no", label: "Nu" },
+      { value: "partial", label: "Parțial" },
       { value: "unknown", label: "Nu știu" },
     ],
   },
@@ -713,6 +726,28 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
         )
       )
     }
+    if (answers.hasRetentionSchedule !== "yes") {
+      findings.push(
+        makeFinding(
+          "gdpr-retention",
+          "Retenție date neclară",
+          "Nu este clar cât păstrezi categoriile de date personale și cum dovedești ștergerea sau anonimizarea la expirare.",
+          "GDPR",
+          "medium",
+          {
+            remediationHint: "Generează politica și matricea de retenție din CompliAI.",
+            suggestedDocumentType: "retention-policy",
+            resolution: {
+              problem: "Duratele de retenție și regula de ștergere nu sunt definite clar.",
+              impact: "Risc GDPR prin păstrarea excesivă a datelor și lipsa unei urme clare de ștergere.",
+              action: "Generează politica și matricea de retenție din CompliAI.",
+              humanStep: "Confirmă duratele reale pe categorii de date și procesul de ștergere.",
+              closureEvidence: "Matricea de retenție salvată și confirmată.",
+            },
+          }
+        )
+      )
+    }
   }
 
   // ── AI = Da/Probabil → inventar + politică + vendor review
@@ -919,6 +954,14 @@ export function buildDocumentRequests(answers: FullIntakeAnswers): DocumentReque
 
   if (isPositive(answers.processesPersonalData)) {
     docs.push({ id: "dsar-procedure", label: "Procedură DSAR", priority: "recommended", category: "GDPR" })
+    if (answers.hasRetentionSchedule !== "yes") {
+      docs.push({
+        id: "retention-policy",
+        label: "Politică și matrice de retenție",
+        priority: "required",
+        category: "GDPR",
+      })
+    }
   }
 
   if (isPositive(answers.usesExternalVendors)) {

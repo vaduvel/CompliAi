@@ -17,6 +17,13 @@ describe("onboarding-steps", () => {
       "aiUsesConfidentialData",
       "hasAiPolicy",
     ])
+
+    expect(getQuestionIdsForIntakeFlowStep("intake-gdpr")).toEqual([
+      "hasPrivacyPolicy",
+      "hasDsarProcess",
+      "hasVendorDpas",
+      "hasRetentionSchedule",
+    ])
   })
 
   it("keeps conditional steps ordered and only visible when needed", () => {
