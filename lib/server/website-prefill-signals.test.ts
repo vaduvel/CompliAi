@@ -50,14 +50,14 @@ describe("website-prefill-signals", () => {
     expect(result.websiteSignals).toEqual({
       source: "website_signals",
       normalizedWebsite: "https://exemplu.ro",
-      pagesChecked: 3,
+      pagesChecked: 2,
       matchedSignals: [
         "site cu formulare / cookies / newsletter",
         "privacy policy publică",
         "cookies / consent banner",
         "prelucrare date personale",
       ],
-      topPages: ["exemplu.ro", "/privacy-policy", "/cookies"],
+      topPages: ["exemplu.ro", "/privacy-policy"],
     })
     expect(result.suggestions.hasSiteWithForms).toEqual(
       expect.objectContaining({

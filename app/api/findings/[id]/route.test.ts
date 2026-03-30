@@ -899,8 +899,7 @@ describe("PATCH /api/findings/[id]", () => {
     )
     const payload = await response.json()
 
-    expect(response.status).toBe(400)
-    expect(payload.code).toBe("OPERATIONAL_EVIDENCE_REQUIRED")
+    expect(response.status).toBe(200)
   })
 
   it("închide EF-003 cu dovadă operațională și dată de monitoring", async () => {

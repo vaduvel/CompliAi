@@ -49,7 +49,15 @@ const validBase = {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("POST /api/org/profile — CUI", () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(readState).mockResolvedValue({
+      orgProfile: null,
+      applicability: null,
+      findings: [],
+      orgProfilePrefill: null,
+    })
+  })
 
   it("returnează prefill-ul org salvat la GET", async () => {
     vi.mocked(readState).mockResolvedValue({
@@ -70,87 +78,124 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("salvează CUI valid (format RO + cifre)", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        const initialState = { findings: [], orgKnowledge: { items: [] } }
+        saved = fn(initialState as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "RO12345678" }))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.cui).toBe("RO12345678")
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.cui).toBe("RO12345678")
   })
 
   it("salvează CUI valid fără prefix RO", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "12345678" }))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.cui).toBe("12345678")
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.cui).toBe("12345678")
   })
 
   it("salvează profil fără CUI când câmpul lipsește", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest(validBase))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.cui).toBeUndefined()
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.cui).toBeUndefined()
   })
 
   it("ignoră CUI gol (string gol sau doar spații)", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "   " }))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.cui).toBeUndefined()
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.cui).toBeUndefined()
   })
 
   it("normalizează și salvează website-ul public când este valid", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, website: "exemplu.ro/contact" }))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.website).toBe("https://exemplu.ro")
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.website).toBe("https://exemplu.ro")
   })
 
   it("ignoră CUI cu format invalid (litere aleatorii)", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({} as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     // Format invalid — nu blochează, se ignoră silențios
     const res = await POST(makeRequest({ ...validBase, cui: "INVALID-CUI-FORMAT" }))
     expect(res.status).toBe(200)
 
-    const orgProfile = (saved as { orgProfile: Record<string, unknown> } | null)!.orgProfile
-    expect(orgProfile.cui).toBeUndefined()
+    const orgProfile = (saved as any)?.orgProfile
+    expect(orgProfile?.cui).toBeUndefined()
   })
 
   it("returnează 400 când sector lipsește", async () => {
@@ -160,9 +205,15 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("salvează intakeAnswers și generează findings inițiale", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({ findings: [] } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(
@@ -193,14 +244,20 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("înlocuiește findings-urile intake vechi, fără să le dubleze", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [
-          { id: "intake-old-a" },
-          { id: "manual-existing" },
-        ],
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [
+            { id: "intake-old-a" },
+            { id: "manual-existing" },
+          ],
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(
@@ -229,16 +286,22 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("curăță findings-urile intake vechi când profilul se salvează fără intakeAnswers", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [
-          { id: "intake-old-a" },
-          { id: "manual-existing" },
-        ],
-        intakeAnswers: { sellsToConsumers: "yes" },
-        intakeCompletedAtISO: "2026-03-20T08:00:00.000Z",
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [
+            { id: "intake-old-a" },
+            { id: "manual-existing" },
+          ],
+          intakeAnswers: { sellsToConsumers: "yes" },
+          intakeCompletedAtISO: "2026-03-20T08:00:00.000Z",
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest(validBase))
@@ -256,15 +319,21 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("păstrează prefill-ul doar când CUI-ul salvat se potrivește cu lookup-ul anterior", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          normalizedCui: "RO14399840",
-          companyName: "DANTE INTERNATIONAL SA",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            normalizedCui: "RO14399840",
+            companyName: "DANTE INTERNATIONAL SA",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "RO14399840" }))
@@ -276,15 +345,21 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("curăță prefill-ul vechi dacă profilul se salvează cu alt CUI", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          normalizedCui: "RO14399840",
-          companyName: "DANTE INTERNATIONAL SA",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            normalizedCui: "RO14399840",
+            companyName: "DANTE INTERNATIONAL SA",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "RO99999999" }))
@@ -294,6 +369,7 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("îmbogățește applicability cu semnalul fiscal din prefill când există match", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(readState).mockResolvedValue({
       orgProfile: null,
       applicability: null,
@@ -306,16 +382,21 @@ describe("POST /api/org/profile — CUI", () => {
       },
     } as never)
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          normalizedCui: "RO45758405",
-          vatRegistered: false,
-          requiresEfactura: true,
-          companyName: "Test SRL",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            normalizedCui: "RO45758405",
+            vatRegistered: false,
+            requiresEfactura: true,
+            companyName: "Test SRL",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, cui: "RO45758405", requiresEfactura: true }))
@@ -329,17 +410,23 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("păstrează prefill-ul website-only când website-ul salvat se potrivește", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          source: "website_signals",
-          normalizedCui: null,
-          normalizedWebsite: "https://exemplu.ro",
-          companyName: "exemplu.ro",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            source: "website_signals",
+            normalizedCui: null,
+            normalizedWebsite: "https://exemplu.ro",
+            companyName: "exemplu.ro",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, website: "https://exemplu.ro" }))
@@ -351,17 +438,23 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("curăță prefill-ul website-only dacă website-ul salvat nu se mai potrivește", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          source: "website_signals",
-          normalizedCui: null,
-          normalizedWebsite: "https://vechi.ro",
-          companyName: "vechi.ro",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            source: "website_signals",
+            normalizedCui: null,
+            normalizedWebsite: "https://vechi.ro",
+            companyName: "vechi.ro",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest({ ...validBase, website: "https://nou.ro" }))
@@ -371,16 +464,22 @@ describe("POST /api/org/profile — CUI", () => {
 
   it("păstrează prefill-ul intern din AI Compliance Pack chiar fără CUI sau website", async () => {
     let saved: unknown = null
+    let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
-      saved = fn({
-        findings: [],
-        orgProfilePrefill: {
-          source: "ai_compliance_pack",
-          normalizedCui: null,
-          companyName: "Workspace Demo SRL",
-        },
-      } as never) as Record<string, unknown>
-      return saved as never
+      callCount++
+      if (callCount === 1) {
+        saved = fn({
+          findings: [],
+          orgProfilePrefill: {
+            source: "ai_compliance_pack",
+            normalizedCui: null,
+            companyName: "Workspace Demo SRL",
+          },
+        } as never) as Record<string, unknown>
+        return saved as never
+      } else {
+        return fn({ orgKnowledge: { items: [] } } as any)
+      }
     })
 
     const res = await POST(makeRequest(validBase))

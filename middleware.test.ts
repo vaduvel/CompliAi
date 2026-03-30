@@ -31,6 +31,6 @@ describe("middleware", () => {
 
   it("menține matcher-ul corect pentru auth și demo", () => {
     expect(config.matcher).toContain("/dashboard/:path*")
-    expect(config.matcher).toContain("/api/((?!auth|demo|stripe/webhook).*)")
+    expect(config.matcher).toContain("/api/((?!auth|demo|stripe/webhook|whistleblowing/submit).*)")
   })
 })

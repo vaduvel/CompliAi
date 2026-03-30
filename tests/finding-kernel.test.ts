@@ -1188,10 +1188,10 @@ describe("getCloseGatingRequirements", () => {
     expect(requirements.acceptedEvidence).toContain("Fișier încărcat")
   })
 
-  it("cere dovadă operațională pentru EF-003", () => {
+  it("EF-003 are flow in_app_guided ca primaryMode și nu cere evidence note fără uploaded_file", () => {
     const requirements = getCloseGatingRequirements("EF-003")
     expect(requirements.requiresGeneratedDocument).toBe(false)
-    expect(requirements.requiresEvidenceNote).toBe(true)
+    expect(requirements.requiresEvidenceNote).toBe(false)
     expect(requirements.requiresRevalidationConfirmation).toBe(false)
   })
 
@@ -1626,7 +1626,7 @@ describe("buildCockpitRecipe — EF-003 explainability (Sprint 6A)", () => {
     const recipe = buildCockpitRecipe(finding)
     expect(recipe.findingTypeId).toBe("EF-003")
     expect(recipe.uiState).toBe("external_action_required")
-    expect(recipe.resolutionMode).toBe("external_action")
+    expect(recipe.resolutionMode).toBe("in_app_guided")
     expect(recipe.acceptedEvidence.length).toBeGreaterThan(0)
   })
 

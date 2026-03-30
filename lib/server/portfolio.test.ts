@@ -104,6 +104,7 @@ describe("lib/server/portfolio", () => {
         },
       },
     },
+    dsar: { requests: [], updatedAtISO: "2026-03-22T08:00:00.000Z" },
     remediationPlan: [
       {
         id: "high-risk-flow",

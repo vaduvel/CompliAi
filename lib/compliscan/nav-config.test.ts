@@ -58,8 +58,7 @@ describe("lib/compliscan/nav-config", () => {
       "/dashboard",
       "/dashboard/scan",
       "/dashboard/resolve",
-      "/dashboard/documente",
-      "/dashboard/reports",
+      "/dashboard/dosar",
       "/dashboard/settings",
     ])
   })
@@ -81,7 +80,7 @@ describe("lib/compliscan/nav-config", () => {
       role: "compliance",
     })
 
-    expect(items.map((item) => item.id)).toEqual(["home", "scan", "resolve", "reports", "settings"])
+    expect(items.map((item) => item.id)).toEqual(["home", "scan", "resolve", "dosar", "settings"])
   })
 
   it("permite switch la portfolio doar pentru userMode partner", () => {
