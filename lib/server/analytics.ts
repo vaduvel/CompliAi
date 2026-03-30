@@ -30,6 +30,7 @@ export type AnalyticsEvent =
   | "started_checkout_not_completed"
   // Feedback events
   | "submitted_feedback"
+  | "completed_partner_workspace"
 
 export type AnalyticsRecord = {
   id?: string
