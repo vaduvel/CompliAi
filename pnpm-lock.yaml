@@ -44,6 +44,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      nanoid:
+        specifier: ^3.3.11
+        version: 3.3.11
       pdfkit:
         specifier: ^0.18.0
         version: 0.18.0
