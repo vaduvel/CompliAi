@@ -258,43 +258,6 @@ async function fetchWebsiteHtml(url: string, fetchImpl: typeof fetch) {
   }
 }
 
-function extractCandidateLinks(html: string, normalizedWebsite: string) {
-  const base = new URL(`${normalizedWebsite}/`)
-  const matches = html.matchAll(/<a[^>]+href=["']([^"']+)["']/gi)
-  const links = new Set<string>()
-
-  for (const match of matches) {
-    const href = match[1]?.trim()
-    if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) continue
-
-    try {
-      const url = new URL(href, base)
-      if (url.origin !== base.origin) continue
-      if (!looksLikeRelevantPath(url.pathname)) continue
-
-      url.search = ""
-      url.hash = ""
-      links.add(url.toString())
-    } catch {
-      continue
-    }
-  }
-
-  return [...links].slice(0, MAX_PAGES)
-}
-
-function looksLikeRelevantPath(pathname: string) {
-  const path = pathname.toLowerCase()
-  return matchesAny(path, [
-    "privacy",
-    "confidential",
-    "cookie",
-    "cookies",
-    "contact",
-    "newsletter",
-    "gdpr",
-  ])
-}
 
 function simplifyHtml(html: string) {
   return html
