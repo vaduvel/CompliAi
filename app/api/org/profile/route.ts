@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     const payTransparencyFinding = buildPayTransparencyFinding(orgProfile.employeeCount, new Date().toISOString())
 
-    await mutateState((current) => {
+    const stateAfterProfile = await mutateState((current) => {
       const previousFindings = (current.findings ?? [])
         .filter((finding) => !finding.id.startsWith("intake-") && finding.id !== PAY_TRANSPARENCY_FINDING_ID)
       const fallbackPrefill = matchingPrefill
@@ -165,13 +165,6 @@ export async function POST(request: Request) {
         : payTransparencyFinding
           ? [...baseFindings, payTransparencyFinding]
           : baseFindings
-
-      const debugInfo = {
-        intakeAnswersPresent: !!intakeAnswers,
-        currentFindingsCount: current.findings?.length ?? 0,
-        allFindingsCount: allFindings.length,
-      }
-      console.error("[DEBUG]", JSON.stringify(debugInfo))
 
       return {
         ...current,
@@ -218,7 +211,6 @@ export async function POST(request: Request) {
         : {}),
     })
 
-    const afterMutate = await readState()
     return NextResponse.json({
       orgProfile,
       applicability,
@@ -226,7 +218,7 @@ export async function POST(request: Request) {
       initialFindings,
       documentRequests,
       nextBestAction,
-      findingsInState: (afterMutate.findings ?? []).map((f: { id: string }) => f.id),
+      findingsInState: (stateAfterProfile.findings ?? []).map((f: { id: string }) => f.id),
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
