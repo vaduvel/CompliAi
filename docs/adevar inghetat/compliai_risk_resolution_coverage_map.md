@@ -385,6 +385,12 @@ Impact estimat:
 - integrare fiscală mai adâncă
 - remindere și expirări vendor
 
+Notă de progres:
+
+- `integrare fiscală mai adâncă v1` este acum pornită în produs
+- `EF-004` și `EF-005` nu mai trimit userul doar într-un protocol static; există și un jurnal de execuție cu urmă persistată și notă dinamică de handoff spre cockpit
+- încă nu pretindem retransmitere automată, recipise SPV sincronizate sau închidere autonomă a cazului fiscal
+
 ## Reguli De Încredere
 
 CompliAI rămâne legal, curat și credibil doar dacă păstrăm aceste reguli:

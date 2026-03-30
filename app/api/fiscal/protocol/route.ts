@@ -1,0 +1,183 @@
+import { NextResponse } from "next/server"
+
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import {
+  buildFiscalProtocolDerived,
+  getFiscalProtocolKey,
+} from "@/lib/compliance/fiscal-protocol"
+import type { FiscalProtocolFindingType, FiscalProtocolRecord } from "@/lib/compliance/types"
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateState, readState } from "@/lib/server/mvp-store"
+
+type FiscalProtocolBody = {
+  findingId?: string
+  findingTypeId?: FiscalProtocolFindingType
+  invoiceRef?: string
+  actionStatus?: FiscalProtocolRecord["actionStatus"]
+  spvReference?: string
+  evidenceLocation?: string
+  operatorNote?: string
+}
+
+function normalizeFindingTypeId(value: unknown): FiscalProtocolFindingType | null {
+  return value === "EF-004" || value === "EF-005" ? value : null
+}
+
+function normalizeActionStatus(value: unknown): FiscalProtocolRecord["actionStatus"] {
+  return value === "checked_pending" ||
+    value === "transmitted" ||
+    value === "retransmitted" ||
+    value === "ok" ||
+    value === "rejected" ||
+    value === "escalated"
+    ? value
+    : undefined
+}
+
+export async function GET(request: Request) {
+  try {
+    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "protocolul fiscal")
+
+    const search = new URL(request.url).searchParams
+    const findingId = getFiscalProtocolKey(search.get("findingId"))
+    const findingTypeId = normalizeFindingTypeId(search.get("findingTypeId"))
+
+    if (!findingTypeId) {
+      return jsonError("Protocolul fiscal este disponibil doar pentru EF-004 și EF-005.", 400, "FISCAL_PROTOCOL_TYPE_INVALID")
+    }
+
+    const [state, { orgName }] = await Promise.all([readState(), getOrgContext()])
+    const protocol = state.fiscalProtocols?.[findingId] ?? null
+    const derived = buildFiscalProtocolDerived(protocol, {
+      findingId,
+      findingTypeId,
+      orgName,
+    })
+
+    return NextResponse.json({
+      findingId,
+      findingTypeId,
+      protocol,
+      derived,
+    })
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut încărca protocolul fiscal.",
+      500,
+      "FISCAL_PROTOCOL_READ_FAILED"
+    )
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer"],
+      "protocolul fiscal"
+    )
+    const body = (await request.json().catch(() => null)) as FiscalProtocolBody | null
+    const findingId = getFiscalProtocolKey(body?.findingId)
+    const findingTypeId = normalizeFindingTypeId(body?.findingTypeId)
+
+    if (!findingTypeId) {
+      return jsonError("Protocolul fiscal poate fi salvat doar pentru EF-004 sau EF-005.", 400, "FISCAL_PROTOCOL_TYPE_INVALID")
+    }
+
+    const invoiceRef = body?.invoiceRef?.trim() ?? ""
+    const spvReference = body?.spvReference?.trim() ?? ""
+    const evidenceLocation = body?.evidenceLocation?.trim() ?? ""
+    const operatorNote = body?.operatorNote?.trim() ?? ""
+    const actionStatus = normalizeActionStatus(body?.actionStatus)
+
+    if (!invoiceRef && !spvReference && !evidenceLocation && !operatorNote && !actionStatus) {
+      return jsonError(
+        "Completează măcar un câmp înainte să salvezi protocolul fiscal.",
+        400,
+        "FISCAL_PROTOCOL_EMPTY"
+      )
+    }
+
+    const nowISO = new Date().toISOString()
+    const { orgName } = await getOrgContext()
+    let savedProtocol: FiscalProtocolRecord | null = null
+
+    await mutateState((current) => {
+      const protocol: FiscalProtocolRecord = {
+        findingId,
+        findingTypeId,
+        invoiceRef: invoiceRef || undefined,
+        actionStatus,
+        spvReference: spvReference || undefined,
+        evidenceLocation: evidenceLocation || undefined,
+        operatorNote: operatorNote || undefined,
+        updatedAtISO: nowISO,
+      }
+      savedProtocol = protocol
+
+      return {
+        ...current,
+        fiscalProtocols: {
+          ...(current.fiscalProtocols ?? {}),
+          [findingId]: protocol,
+        },
+        events: appendComplianceEvents(current, [
+          createComplianceEvent(
+            {
+              type: "fiscal.protocol-updated",
+              entityType: "integration",
+              entityId: findingId,
+              message: `Protocolul fiscal a fost actualizat pentru ${orgName}.`,
+              createdAtISO: nowISO,
+              metadata: {
+                findingId,
+                findingTypeId,
+                actionStatus: actionStatus ?? "unset",
+              },
+            },
+            {
+              id: session.userId,
+              label: session.email,
+              role: session.role,
+              source: "session",
+            }
+          ),
+        ]),
+      }
+    })
+
+    const derived = buildFiscalProtocolDerived(savedProtocol, {
+      findingId,
+      findingTypeId,
+      orgName,
+    })
+
+    return NextResponse.json({
+      ok: true,
+      findingId,
+      findingTypeId,
+      protocol: savedProtocol,
+      derived,
+      feedbackMessage:
+        derived.readiness === "ready"
+          ? "Protocolul fiscal este pregătit pentru întoarcere în cockpit cu dovadă clară."
+          : "Am salvat protocolul fiscal. Mai completează pașii lipsă înainte să revii în cockpit.",
+    })
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut salva protocolul fiscal.",
+      500,
+      "FISCAL_PROTOCOL_UPDATE_FAILED"
+    )
+  }
+}

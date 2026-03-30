@@ -149,4 +149,63 @@ describe("normalizeComplianceState", () => {
       },
     })
   })
+
+  it("normalizează protocolul fiscal și păstrează doar intrările utile", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      fiscalProtocols: {
+        "finding-ef-005": {
+          findingId: "finding-ef-005",
+          findingTypeId: "EF-005",
+          invoiceRef: "INV-2026-204",
+          actionStatus: "transmitted",
+          spvReference: "MSG-7788",
+          evidenceLocation: "Dosar/Fiscal/aprilie-2026",
+          updatedAtISO: "2026-03-30T14:10:00.000Z",
+        },
+        empty: {
+          findingId: "empty",
+          findingTypeId: "EF-005",
+          invoiceRef: "   ",
+          updatedAtISO: "2026-03-30T14:10:00.000Z",
+        },
+      },
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.fiscalProtocols).toEqual({
+      "finding-ef-005": {
+        findingId: "finding-ef-005",
+        findingTypeId: "EF-005",
+        invoiceRef: "INV-2026-204",
+        actionStatus: "transmitted",
+        spvReference: "MSG-7788",
+        evidenceLocation: "Dosar/Fiscal/aprilie-2026",
+        updatedAtISO: "2026-03-30T14:10:00.000Z",
+      },
+    })
+  })
 })

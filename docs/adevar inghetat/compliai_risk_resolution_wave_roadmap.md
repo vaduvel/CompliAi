@@ -407,6 +407,21 @@ Status:
 - status live mai bogat
 - retransmitere orchestrată
 
+Status:
+
+- `v1 implementat în produs`
+- pentru `EF-004` și `EF-005`, tabul `Protocol fiscal` include acum un jurnal de execuție persistat:
+  - referință factură / mesaj urmărit
+  - status operațional
+  - referință SPV
+  - locația dovezii
+  - notă operator / contabil
+- întoarcerea în cockpit poate folosi o notă dinamică bazată pe execuția reală, nu doar pe protocolul static
+- ce rămâne pentru `Wave 3 complet`:
+  - legare mai strânsă cu retransmiterea efectivă / recipisele SPV
+  - interpretare mai bogată a codurilor și statusurilor fiscale
+  - dovadă fiscală și mai strictă după retransmitere / acceptare finală
+
 ### 4. Vendor lifecycle
 
 - expirări
