@@ -166,7 +166,12 @@ export async function POST(request: Request) {
           ? [...baseFindings, payTransparencyFinding]
           : baseFindings
 
-      console.error("[DEBUG] intakeAnswers=", intakeAnswers ? "present" : "ABSENT", "currentFindings=", current.findings?.length ?? 0, "allFindings=", allFindings.length)
+      const debugInfo = {
+        intakeAnswersPresent: !!intakeAnswers,
+        currentFindingsCount: current.findings?.length ?? 0,
+        allFindingsCount: allFindings.length,
+      }
+      console.error("[DEBUG]", JSON.stringify(debugInfo))
 
       return {
         ...current,
@@ -213,6 +218,7 @@ export async function POST(request: Request) {
         : {}),
     })
 
+    const afterMutate = await readState()
     return NextResponse.json({
       orgProfile,
       applicability,
@@ -220,6 +226,7 @@ export async function POST(request: Request) {
       initialFindings,
       documentRequests,
       nextBestAction,
+      findingsInState: (afterMutate.findings ?? []).map((f: { id: string }) => f.id),
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
