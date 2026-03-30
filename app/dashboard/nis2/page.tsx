@@ -2753,7 +2753,11 @@ export default function Nis2Page() {
       <MaturityCard />
       <GovernanceCard />
 
-      <Tabs value={activeTab} onValueChange={(next) => setActiveTab(normalizeNis2TabValue(next))} className="space-y-5">
+      <Tabs
+        value={activeTab}
+        onValueChange={(next: string) => setActiveTab(normalizeNis2TabValue(next))}
+        className="space-y-5"
+      >
         <TabsList className="border-b border-eos-border">
           <TabsTrigger value="assessment" className="min-h-12 flex-col items-start px-4 py-3 text-left">
             <span className="text-sm font-medium">Evaluare</span>
