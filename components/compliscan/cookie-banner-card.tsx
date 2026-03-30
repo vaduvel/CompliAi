@@ -173,7 +173,7 @@ export function CookieBannerCard() {
             {!result.hasConsentRequired && (
               <p className="text-xs text-eos-text-muted">
                 Nu au fost detectate trackere care necesită consimțământ pe ultimul scan.
-                Banner-ul include doar categoria „Strict necesare".
+                Banner-ul include doar categoria &ldquo;Strict necesare&rdquo;.
               </p>
             )}
 
