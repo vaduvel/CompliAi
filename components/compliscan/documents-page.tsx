@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, BriefcaseBusiness, FolderOpen, Loader2, Sparkles 
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import { CookieBannerCard } from "@/components/compliscan/cookie-banner-card"
 import { HrRegesReconciliationCard } from "@/components/compliscan/hr-reges-reconciliation-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -355,6 +356,7 @@ export function DocumentsPageSurface() {
 
         <TabsContent value="generate">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <CookieBannerCard />
             {QUICK_DOC_TYPES.map((doc) => (
               <Link
                 key={doc.id}
