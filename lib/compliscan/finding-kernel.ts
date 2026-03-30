@@ -996,6 +996,34 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Document publicat și salvat.",
     revalidationTriggers: ["trackere noi", "site schimbat"],
   },
+  "GDPR-004": {
+    findingTypeId: "GDPR-004",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Deschide registrul",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă un registru de prelucrări potrivit pentru activitatea firmei tale.",
+    whatCompliDoes:
+      "Deschide editorul RoPA, precompletează structura registrului și leagă documentul final de finding.",
+    whatUserMustDo:
+      "Confirmă findingul, completezi activitățile de prelucrare reale și salvezi registrul la dosar.",
+    closeCondition: "Registru RoPA completat, confirmat și salvat la dosar.",
+    revalidationTriggers: ["proces nou", "vendor nou", "sistem nou", "review periodic"],
+  },
+  "GDPR-006": {
+    findingTypeId: "GDPR-006",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Actualizează registrul",
+    secondaryCTA: "Vezi ce lipsește",
+    whatUserSees:
+      "Registrul de prelucrări existent nu mai reflectă complet activitatea firmei.",
+    whatCompliDoes:
+      "Deschide editorul RoPA și pregătește actualizarea registrului cu activitățile noi sau schimbate.",
+    whatUserMustDo:
+      "Confirmă findingul, completezi modificările reale și salvezi registrul actualizat la dosar.",
+    closeCondition: "Registru RoPA actualizat, confirmat și salvat la dosar.",
+    revalidationTriggers: ["proces nou", "vendor nou", "sistem nou", "review periodic"],
+  },
   "GDPR-005": {
     findingTypeId: "GDPR-005",
     initialFlowState: "external_action_required",

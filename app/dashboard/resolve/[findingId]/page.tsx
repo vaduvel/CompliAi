@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
@@ -12,7 +12,7 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
+import { Button, buttonVariants } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
@@ -116,6 +116,7 @@ export default function FindingDetailPage() {
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
+  const processedRopaFlowRef = useRef<string | null>(null)
   const { reloadDashboard } = useCockpitMutations()
 
   const applyFindingResponse = useCallback((data: FindingDetailResponse) => {
@@ -198,6 +199,13 @@ export default function FindingDetailPage() {
       const ropaDocId = searchParams.get("ropaDocId")
       const ropaNote = searchParams.get("evidenceNote") ?? ""
       const ropaChecklist = searchParams.get("checklist")?.split(",").filter(Boolean) ?? []
+      const ropaFlowKey = `${finding.id}:${ropaDocId ?? "missing"}:${ropaNote}:${ropaChecklist.join(",")}`
+
+      if (processedRopaFlowRef.current === ropaFlowKey) {
+        return
+      }
+
+      processedRopaFlowRef.current = ropaFlowKey
       if (ropaDocId) {
         void updateStatus("resolved", {
           generatedDocumentId: ropaDocId,
@@ -1041,17 +1049,13 @@ export default function FindingDetailPage() {
               <p className="text-sm text-eos-text-muted">
                 Completezi registrul de prelucrări în pagină dedicată, apoi te întorci în cockpit cu dovada atașată.
               </p>
-              <Button
-                className="gap-2"
-                onClick={() => {
-                  router.push(
-                    `/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/resolve/${encodeURIComponent(finding.id)}`)}`
-                  )
-                }}
+              <Link
+                className={buttonVariants({ className: "gap-2" })}
+                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/resolve/${encodeURIComponent(finding.id)}`)}`}
               >
                 <FileText className="size-3.5" strokeWidth={2} />
                 Deschide RoPA
-              </Button>
+              </Link>
             </CardContent>
           </Card>
         ) : (

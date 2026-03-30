@@ -1,6 +1,7 @@
 import type { OrgSector } from "@/lib/compliance/applicability"
 import type { OrgProfilePrefill, PrefillSuggestion } from "@/lib/compliance/org-profile-prefill"
 import { validateCUI } from "@/lib/server/request-validation"
+import { classifyCompanySector } from "@/lib/server/gemini"
 
 const ANAF_COMPANY_LOOKUP_URL = "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva"
 
@@ -61,22 +62,43 @@ export async function lookupOrgProfilePrefillByCui(
   const record = payload.found?.find((entry) => entry.date_generale?.cui === numericCui)
   if (!record?.date_generale?.denumire) return null
 
+  const caenDesc = getCaenDescription(record.date_generale?.cod_CAEN)
+  const heuristic = inferSectorSuggestion(record.date_generale?.cod_CAEN, record.date_generale?.denumire)
+  
+  // ULTRA-SMART: If heuristic is low-conf or missing, use Gemini AI
+  let sector = heuristic
+  if (!heuristic || (heuristic.confidence !== "high" && process.env.GEMINI_API_KEY)) {
+    const aiResult = await classifyCompanySector({
+      companyName: record.date_generale?.denumire ?? "Firmă",
+      caenDescription: caenDesc
+    }).catch(() => null)
+    
+    if (aiResult) {
+      sector = {
+        value: aiResult.sector,
+        confidence: aiResult.confidence,
+        reason: aiResult.reason,
+        source: "profile_inference"
+      }
+    }
+  }
+
   return {
     source: "anaf_vat_registry",
     fetchedAtISO: new Date().toISOString(),
     normalizedCui,
-    companyName: record.date_generale.denumire,
-    address: sanitizeOptionalText(record.date_generale.adresa),
-    legalForm: sanitizeOptionalText(record.date_generale.forma_juridica),
-    mainCaen: sanitizeOptionalText(record.date_generale.cod_CAEN),
-    fiscalStatus: sanitizeOptionalText(record.date_generale.stare_inregistrare),
+    companyName: record.date_generale?.denumire ?? "Firmă",
+    address: sanitizeOptionalText(record.date_generale?.adresa),
+    legalForm: sanitizeOptionalText(record.date_generale?.forma_juridica),
+    mainCaen: sanitizeOptionalText(record.date_generale?.cod_CAEN),
+    fiscalStatus: sanitizeOptionalText(record.date_generale?.stare_inregistrare),
     vatRegistered: Boolean(record.inregistrare_scop_Tva?.scpTVA),
     vatOnCashAccounting: Boolean(record.inregistrare_RTVAI?.statusTvaIncasare),
-    efacturaRegistered: Boolean(record.date_generale.statusRO_e_Factura),
+    efacturaRegistered: Boolean(record.date_generale?.statusRO_e_Factura),
     inactive: Boolean(record.stare_inactiv?.statusInactivi),
-    caenDescription: getCaenDescription(record.date_generale.cod_CAEN),
+    caenDescription: caenDesc,
     suggestions: {
-      sector: inferSectorSuggestion(record.date_generale.cod_CAEN),
+      sector: sector ?? undefined,
       requiresEfactura: inferEfacturaSuggestion(record),
     },
   }
@@ -102,8 +124,34 @@ function sanitizeOptionalText(value: string | undefined) {
   return trimmed ? trimmed : null
 }
 
-function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<OrgSector> | undefined {
+function inferSectorSuggestion(caenCode: string | undefined, companyName?: string): PrefillSuggestion<OrgSector> | undefined {
+  const name = (companyName ?? "").toLowerCase()
   const prefix = Number.parseInt((caenCode ?? "").slice(0, 2), 10)
+  
+  // High Priority: Keyword detection in name (often clearer than a generic CAEN)
+  if (name.includes("trans") || name.includes("logistic") || name.includes("forwarding") || name.includes("cargo") || name.includes("autotrans")) {
+    return { value: "transport", confidence: "high", reason: "Denumirea firmei indică activitate de transport/logistică.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("clinic") || name.includes("med") || name.includes("dent") || name.includes("spital") || name.includes("sanatate") || name.includes("stomatolog")) {
+    return { value: "health", confidence: "high", reason: "Denumirea firmei indică sectorul sănătate.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("bank") || name.includes("banc") || name.includes("credit") || name.includes("ifn")) {
+    return { value: "banking", confidence: "high", reason: "Denumirea firmei indică activitate bancară/IFN.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("shop") || name.includes("market") || name.includes("comert") || name.includes("retail") || name.includes("store") || name.includes("telco") || name.includes("boutique")) {
+    return { value: "retail", confidence: "high", reason: "Denumirea firmei indică activitate comercială/retail.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("software") || name.includes("it solution") || name.includes("digital") || name.includes("cloud") || name.includes("hosting") || name.includes("coding")) {
+    return { value: "digital-infrastructure", confidence: "high", reason: "Denumirea firmei indică servicii digitale/IT.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("prod") || name.includes("fabrica") || name.includes("industrial") || name.includes("uzina") || name.includes("metal") || name.includes("construct")) {
+    return { value: "manufacturing", confidence: "medium", reason: "Denumirea firmei indică activitate de producție sau construcții.", source: "anaf_vat_registry" }
+  }
+  if (name.includes("contab") || name.includes("legal") || name.includes("audit") || name.includes("consult") || name.includes("avocat") || name.includes("expert") || name.includes("prest") || name.includes("serv")) {
+    return { value: "professional-services", confidence: "high", reason: "Denumirea firmei indică servicii profesionale/consultanță.", source: "anaf_vat_registry" }
+  }
+
+  // Fallback: CAEN Prefix logic
   if (!Number.isFinite(prefix)) return undefined
 
   if (prefix === 35) {
@@ -118,7 +166,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
     return {
       value: "transport",
       confidence: "high",
-      reason: "Codul CAEN principal indică transport sau logistică.",
+      reason: "Codul CAEN principal (49-53) indică transport sau logistică.",
       source: "anaf_vat_registry",
     }
   }
@@ -126,7 +174,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
     return {
       value: "banking",
       confidence: "high",
-      reason: "Codul CAEN principal indică intermediere financiară bancară.",
+      reason: "Codul CAEN principal (64) indică intermediere financiară bancară.",
       source: "anaf_vat_registry",
     }
   }
@@ -134,7 +182,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
     return {
       value: "finance",
       confidence: "high",
-      reason: "Codul CAEN principal indică activitate financiară sau de asigurări.",
+      reason: "Codul CAEN principal (65-66) indică activitate financiară sau de asigurări.",
       source: "anaf_vat_registry",
     }
   }
@@ -142,39 +190,39 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
     return {
       value: "public-admin",
       confidence: "high",
-      reason: "Codul CAEN principal indică administrație publică.",
+      reason: "Codul CAEN principal (84) indică administrație publică.",
       source: "anaf_vat_registry",
     }
   }
-  if (prefix === 86) {
+  if (prefix === 86 || prefix === 87 || prefix === 88) {
     return {
       value: "health",
       confidence: "high",
-      reason: "Codul CAEN principal indică servicii medicale.",
+      reason: "Codul CAEN principal (86-88) indică servicii medicale sau asistență socială.",
       source: "anaf_vat_registry",
     }
   }
   if (prefix >= 61 && prefix <= 63) {
     return {
       value: "digital-infrastructure",
-      confidence: "medium",
-      reason: "Codul CAEN principal indică telecom, IT sau servicii digitale.",
+      confidence: "high",
+      reason: "Codul CAEN principal (61-63) indică telecom, IT sau servicii digitale.",
       source: "anaf_vat_registry",
     }
   }
-  if (prefix >= 10 && prefix <= 33) {
+  if ((prefix >= 10 && prefix <= 33) || (prefix >= 41 && prefix <= 43)) {
     return {
       value: "manufacturing",
       confidence: "medium",
-      reason: "Codul CAEN principal indică producție sau industrie.",
+      reason: "Codul CAEN principal indică producție, industrie sau construcții.",
       source: "anaf_vat_registry",
     }
   }
-  if (prefix === 47) {
+  if (prefix === 45 || prefix === 47) {
     return {
       value: "retail",
       confidence: "high",
-      reason: "Codul CAEN principal indică retail direct către clienți finali.",
+      reason: "Codul CAEN principal (45, 47) indică retail sau comerț auto.",
       source: "anaf_vat_registry",
     }
   }
@@ -182,7 +230,7 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
     return {
       value: "retail",
       confidence: "medium",
-      reason: "Codul CAEN principal indică comerț; îl tratăm ca sector comercial până la confirmare.",
+      reason: "Codul CAEN principal (46) indică comerț; îl tratăm ca sector comercial până la confirmare.",
       source: "anaf_vat_registry",
     }
   }
@@ -194,11 +242,11 @@ function inferSectorSuggestion(caenCode: string | undefined): PrefillSuggestion<
       source: "anaf_vat_registry",
     }
   }
-  if ((prefix >= 69 && prefix <= 74) || prefix === 78 || prefix === 82) {
+  if ((prefix >= 69 && prefix <= 75) || prefix === 78 || (prefix >= 80 && prefix <= 82)) {
     return {
       value: "professional-services",
       confidence: "medium",
-      reason: "Codul CAEN principal indică servicii profesionale (juridice, contabile, consultanță, design, IT).",
+      reason: "Codul CAEN principal indică servicii profesionale (juridice, contabile, consultanță, securitate).",
       source: "anaf_vat_registry",
     }
   }

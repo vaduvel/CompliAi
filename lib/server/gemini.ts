@@ -109,6 +109,81 @@ export async function generateComplianceAnswer(
   return text
 }
 
+export async function classifyCompanySector(params: {
+  companyName: string
+  caenDescription: string | null
+  websiteContent?: string
+}): Promise<{ sector: OrgSector; confidence: "high" | "medium"; reason: string }> {
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY lipsă.")
+  }
+
+  const sectors = [
+    "energy", "transport", "banking", "health", "digital-infrastructure",
+    "public-admin", "finance", "retail", "manufacturing", "professional-services", "other"
+  ]
+
+  const prompt = `
+    Ești un expert în clasificarea companiilor din România pentru conformitate legală (NIS2, GDPR, e-Factura).
+    Analizează datele de mai jos și alege cel mai potrivit SECTOR din această listă: [${sectors.join(", ")}].
+
+    Date firmă:
+    - Nume: "${params.companyName}"
+    - Descriere CAEN: "${params.caenDescription ?? "n/a"}"
+    ${params.websiteContent ? `- Conținut Site: "${params.websiteContent.slice(0, 1000)}"` : ""}
+
+    Reguli de clasificare:
+    - "digital-infrastructure": software, IT, cloud, data centers, telecom.
+    - "energy": petrol, gaze, electricitate, utilități.
+    - "transport": logistică, curierat, transport marfă/pasageri.
+    - "health": clinici, farmacii, spitale, producție med.
+    - "manufacturing": fabrici, producție bunuri, construcții mari.
+    - "professional-services": contabilitate, avocatură, consultanță, arhitectură, servicii pt firme.
+    - "retail": magazine, comerț online, showroom-uri.
+    - "banking" / "finance": bănci, IFN, asigurări, brokeri.
+
+    Răspunde DOAR cu un obiect JSON valid:
+    {
+      "sector": "un_singur_id_din_lista",
+      "confidence": "high" | "medium",
+      "reason": "o explicatie scurtă în română"
+    }
+  `
+
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.1,
+      responseMimeType: "application/json",
+    },
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  )
+
+  if (!response.ok) return { sector: "other", confidence: "medium", reason: "Eroare AI la clasificare" }
+
+  const json = await response.json()
+  try {
+    const result = JSON.parse(json.candidates[0].content.parts[0].text)
+    return {
+      sector: sectors.includes(result.sector) ? result.sector : "other",
+      confidence: result.confidence ?? "medium",
+      reason: result.reason ?? "Identificat prin analiză semantică AI."
+    }
+  } catch {
+    return { sector: "other", confidence: "medium", reason: "Nu am putut parsa răspunsul AI" }
+  }
+}
+
+import type { OrgSector } from "@/lib/compliance/applicability"
+
 function formatSyncLabel(iso: string) {
   if (!iso) return "neefectuat"
 

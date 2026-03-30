@@ -35,6 +35,29 @@ describe("finding-kernel AI document flows", () => {
     expect(getCloseGatingRequirements(recipe.findingTypeId).requiresGeneratedDocument).toBe(true)
   })
 
+  it("keeps ROPA findings on the generator path from open state", () => {
+    const recipe = buildCockpitRecipe({
+      id: "intake-gdpr-ropa-missing",
+      title: "Registru de prelucrări lipsă",
+      detail: "Compania procesează date personale, dar nu are registru Art. 30.",
+      category: "GDPR",
+      severity: "high",
+      risk: "high",
+      principles: [],
+      createdAtISO: "2026-03-27T10:00:00.000Z",
+      sourceDocument: "intake-questionnaire",
+      suggestedDocumentType: "ropa",
+      findingStatus: "open",
+    })
+
+    expect(recipe.findingTypeId).toBe("GDPR-004")
+    expect(recipe.visibleBlocks.detailBlocks).toContain("generator")
+    expect(recipe.visibleBlocks.aboveTheFoldBlocks).toContain("generator")
+    expect(recipe.resolveFlowState).toBe("ready_to_generate")
+    expect(recipe.primaryCTA.action).toBe("open_generator")
+    expect(getCloseGatingRequirements(recipe.findingTypeId).requiresGeneratedDocument).toBe(true)
+  })
+
   it("corectează retention findings la retention-policy pentru runtime truth", () => {
     const retentionFinding: ScanFinding = {
       id: "finding-retention",
