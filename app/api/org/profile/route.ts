@@ -166,6 +166,9 @@ export async function POST(request: Request) {
           ? [...baseFindings, payTransparencyFinding]
           : baseFindings
 
+      const returningFindings = allFindings.length
+      console.error("[PROFILE DEBUG] intakeAns=", !!intakeAnswers, "currFindings=", current.findings?.length ?? 0, "returning=", returningFindings)
+
       return {
         ...current,
         orgProfile,
@@ -219,6 +222,7 @@ export async function POST(request: Request) {
       documentRequests,
       nextBestAction,
       findingsInState: (stateAfterProfile.findings ?? []).map((f: { id: string }) => f.id),
+      debugOrgId: stateAfterProfile.orgProfile,
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
