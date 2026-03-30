@@ -50,6 +50,7 @@ export async function lookupOrgProfilePrefillByCui(
         data: new Date().toISOString().slice(0, 10),
       },
     ]),
+    signal: AbortSignal.timeout(8_000),
   })
 
   const payload = await parseLookupPayload(response)

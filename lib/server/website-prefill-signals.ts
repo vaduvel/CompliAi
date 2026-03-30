@@ -196,14 +196,16 @@ export async function buildWebsitePrefillSignals(
 }
 
 async function collectWebsiteSnapshots(normalizedWebsite: string, fetchImpl: typeof fetch) {
-  const queue = new Set<string>(buildCandidateUrls(normalizedWebsite))
+  // Fetch up to MAX_PAGES + 2 candidates in parallel instead of sequentially.
+  // Worst case drops from MAX_PAGES × TIMEOUT (24s) to 1 × TIMEOUT (6s).
+  const batch = buildCandidateUrls(normalizedWebsite).slice(0, MAX_PAGES + 2)
+  const htmlResults = await Promise.all(batch.map((url) => fetchWebsiteHtml(url, fetchImpl)))
+
   const snapshots: WebsitePageSnapshot[] = []
-
-  for (const url of queue) {
-    if (snapshots.length >= MAX_PAGES) break
-    const html = await fetchWebsiteHtml(url, fetchImpl)
+  for (let i = 0; i < batch.length && snapshots.length < MAX_PAGES; i++) {
+    const html = htmlResults[i]
     if (!html) continue
-
+    const url = batch[i]
     const text = simplifyHtml(html)
     snapshots.push({
       url,
@@ -223,11 +225,6 @@ async function collectWebsiteSnapshots(normalizedWebsite: string, fetchImpl: typ
       hasNewsletterSignal: matchesAny(text, ["newsletter", "abonare", "aboneaza-te", "subscribe"]),
       mentionsPersonalData: matchesAny(text, ["date personale", "personal data", "persoanelor vizate", "operator de date"]),
     })
-
-    for (const discovered of extractCandidateLinks(html, normalizedWebsite)) {
-      if (queue.size >= MAX_PAGES + DEFAULT_PATHS.length) break
-      queue.add(discovered)
-    }
   }
 
   return snapshots

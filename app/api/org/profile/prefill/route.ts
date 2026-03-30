@@ -34,8 +34,37 @@ export async function POST(request: Request) {
     }
 
     const state = await readState()
-    const basePrefill = cui ? await lookupOrgProfilePrefillByCui(cui) : null
-    const websitePrefill = await enrichOrgProfilePrefillWithWebsiteSignals(basePrefill, { website })
+    // Run ANAF lookup and website crawl in parallel — they're independent.
+    const [cuiPrefill, websiteOnlyPrefill] = await Promise.all([
+      cui ? lookupOrgProfilePrefillByCui(cui) : Promise.resolve(null),
+      enrichOrgProfilePrefillWithWebsiteSignals(null, { website }),
+    ])
+    // Merge: CUI data takes precedence; website signals are preserved from the website result.
+    const websitePrefill: OrgProfilePrefill | null =
+      cuiPrefill && websiteOnlyPrefill
+        ? {
+            ...websiteOnlyPrefill,
+            ...cuiPrefill,
+            normalizedWebsite: websiteOnlyPrefill.normalizedWebsite,
+            websiteSignals: websiteOnlyPrefill.websiteSignals,
+            suggestions: {
+              ...websiteOnlyPrefill.suggestions,
+              ...cuiPrefill.suggestions,
+              hasSiteWithForms:
+                cuiPrefill.suggestions.hasSiteWithForms ?? websiteOnlyPrefill.suggestions.hasSiteWithForms,
+              processesPersonalData:
+                cuiPrefill.suggestions.processesPersonalData ??
+                websiteOnlyPrefill.suggestions.processesPersonalData,
+              hasPrivacyPolicy:
+                cuiPrefill.suggestions.hasPrivacyPolicy ?? websiteOnlyPrefill.suggestions.hasPrivacyPolicy,
+              hasSitePrivacyPolicy:
+                cuiPrefill.suggestions.hasSitePrivacyPolicy ??
+                websiteOnlyPrefill.suggestions.hasSitePrivacyPolicy,
+              hasCookiesConsent:
+                cuiPrefill.suggestions.hasCookiesConsent ?? websiteOnlyPrefill.suggestions.hasCookiesConsent,
+            },
+          }
+        : websiteOnlyPrefill ?? cuiPrefill
     const packPrefill = await enrichOrgProfilePrefillWithAICompliancePack(websitePrefill, state)
     const vendorPrefill = enrichOrgProfilePrefillWithVendorSignals(packPrefill, state.efacturaValidations)
     const aiPrefill = enrichOrgProfilePrefillWithAiSignals(vendorPrefill, {
