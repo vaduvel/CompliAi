@@ -48,4 +48,52 @@ describe("normalizeComplianceState", () => {
     expect(normalized.generatedDocuments[0]?.documentType).toBe("retention-policy")
     expect(normalized.generatedDocuments[0]?.sourceFindingId).toBe("finding-retention-1")
   })
+
+  it("păstrează și tipurile noi de document împreună cu urma de adoptare", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [
+        {
+          id: "doc-contract-1",
+          documentType: "contract-template",
+          title: "Contract-cadru Prestări Servicii",
+          generatedAtISO: "2026-03-30T10:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-contract-1",
+          approvalStatus: "approved_as_evidence",
+          adoptionStatus: "sent_for_signature",
+          adoptionUpdatedAtISO: "2026-03-30T11:00:00.000Z",
+          adoptionEvidenceNote: "Trimis la semnare către client.",
+        },
+      ],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.generatedDocuments).toHaveLength(1)
+    expect(normalized.generatedDocuments[0]?.documentType).toBe("contract-template")
+    expect(normalized.generatedDocuments[0]?.adoptionStatus).toBe("sent_for_signature")
+    expect(normalized.generatedDocuments[0]?.adoptionEvidenceNote).toBe("Trimis la semnare către client.")
+  })
 })

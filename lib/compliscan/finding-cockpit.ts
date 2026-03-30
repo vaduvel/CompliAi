@@ -15,6 +15,11 @@ export const FINDING_DOCUMENT_LABELS: Record<string, string> = {
   "retention-policy": "Politică și matrice de retenție",
   "ai-governance": "Politică de utilizare AI",
   "nis2-incident-response": "Plan de răspuns NIS2",
+  "job-description": "Fișă de post",
+  "hr-internal-procedures": "Regulament intern",
+  "reges-correction-brief": "Brief corecție REGES",
+  "contract-template": "Contract-cadru",
+  "deletion-attestation": "Atestare ștergere / anonimizare",
 }
 
 export function getSuggestedDocumentLabel(documentType?: string | null) {

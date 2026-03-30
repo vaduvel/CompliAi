@@ -292,6 +292,19 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           source: "document_memory",
         },
       ]
+    case "contract-template":
+      return [
+        {
+          questionId: "hasStandardContracts",
+          sourceKey: `generated:${document.id}`,
+          label,
+          kind: "generated",
+          confidence: "high",
+          reason:
+            "Ai deja un contract-cadru generat în CompliAI, deci există un baseline contractual pregătit pentru relațiile comerciale standard.",
+          source: "document_memory",
+        },
+      ]
     default:
       return []
   }

@@ -7,6 +7,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import type { ScanFinding } from "@/lib/compliance/types"
+import { DOCUMENT_ADOPTION_LABELS, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
 import {
   getFindingAgeLabel,
   getSuggestedDocumentLabel,
@@ -17,6 +18,7 @@ import { buildCockpitRecipe, type CockpitRecipe } from "@/lib/compliscan/finding
 
 type LinkedGeneratedDocumentMeta = {
   id?: string
+  documentType?: string
   title: string
   generatedAtISO: string
   approvalStatus?: "draft" | "approved_as_evidence"
@@ -24,6 +26,8 @@ type LinkedGeneratedDocumentMeta = {
   validatedAtISO?: string
   approvedAtISO?: string
   approvedByEmail?: string
+  adoptionStatus?: DocumentAdoptionStatus
+  adoptionUpdatedAtISO?: string
   nextReviewDateISO?: string
   expiresAtISO?: string
 }
@@ -501,6 +505,14 @@ export function FindingExecutionCard({
                 {linkedGeneratedDocument?.approvedAtISO ? (
                   <p className="mt-1 text-xs text-eos-text-tertiary">
                     Aprobat {new Date(linkedGeneratedDocument.approvedAtISO).toLocaleString("ro-RO")}
+                  </p>
+                ) : null}
+                {linkedGeneratedDocument?.adoptionStatus ? (
+                  <p className="mt-1 text-xs text-eos-text-tertiary">
+                    Urmă de adoptare: {DOCUMENT_ADOPTION_LABELS[linkedGeneratedDocument.adoptionStatus]}
+                    {linkedGeneratedDocument.adoptionUpdatedAtISO
+                      ? ` · ${new Date(linkedGeneratedDocument.adoptionUpdatedAtISO).toLocaleString("ro-RO")}`
+                      : ""}
                   </p>
                 ) : null}
                 {!linkedGeneratedDocument ? (

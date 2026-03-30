@@ -10,6 +10,7 @@ import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
 
 const AICompliancePackSummaryCard = dynamic(
@@ -485,6 +486,11 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
                     {doc.approvalStatus === "draft" && (
                       <span className="rounded-full bg-eos-warning-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-warning">
                         draft
+                      </span>
+                    )}
+                    {doc.adoptionStatus && (
+                      <span className="rounded-full bg-eos-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-primary">
+                        {DOCUMENT_ADOPTION_LABELS[doc.adoptionStatus]}
                       </span>
                     )}
                   </div>

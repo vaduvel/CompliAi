@@ -183,7 +183,12 @@ function normalizeGeneratedDocuments(
         item.documentType === "dpa" ||
         item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
-        item.documentType === "ai-governance"
+        item.documentType === "ai-governance" ||
+        item.documentType === "job-description" ||
+        item.documentType === "hr-internal-procedures" ||
+        item.documentType === "reges-correction-brief" ||
+        item.documentType === "contract-template" ||
+        item.documentType === "deletion-attestation"
           ? item.documentType
           : null
       const title = typeof item.title === "string" ? item.title.trim() : ""
@@ -238,6 +243,18 @@ function normalizeGeneratedDocuments(
         typeof item.evidenceNote === "string" && item.evidenceNote.trim()
           ? item.evidenceNote.trim()
           : undefined
+      const adoptionStatus =
+        item.adoptionStatus === "reviewed_internally" ||
+        item.adoptionStatus === "sent_for_signature" ||
+        item.adoptionStatus === "signed" ||
+        item.adoptionStatus === "active"
+          ? item.adoptionStatus
+          : undefined
+      const adoptionUpdatedAtISO = isValidIso(item.adoptionUpdatedAtISO) ? item.adoptionUpdatedAtISO : undefined
+      const adoptionEvidenceNote =
+        typeof item.adoptionEvidenceNote === "string" && item.adoptionEvidenceNote.trim()
+          ? item.adoptionEvidenceNote.trim()
+          : undefined
       const expiresAtISO = isValidIso(item.expiresAtISO) ? item.expiresAtISO : undefined
       const nextReviewDateISO = isValidIso(item.nextReviewDateISO) ? item.nextReviewDateISO : undefined
       const refreshStatus =
@@ -270,6 +287,9 @@ function normalizeGeneratedDocuments(
           validationStatus,
           validatedAtISO,
           evidenceNote,
+          adoptionStatus,
+          adoptionUpdatedAtISO,
+          adoptionEvidenceNote,
           expiresAtISO,
           nextReviewDateISO,
           refreshStatus,

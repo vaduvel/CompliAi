@@ -8,6 +8,7 @@ import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ReportsPageSurface } from "@/components/compliscan/reports-page"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { getFindingAgeLabel } from "@/lib/compliscan/finding-cockpit"
+import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
 
 export function DosarPageSurface() {
   const cockpit = useCockpitData()
@@ -128,6 +129,11 @@ export function DosarPageSurface() {
                         {linkedDoc.approvalStatus === "approved_as_evidence" && (
                           <span className="ml-1 rounded-full bg-eos-success-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-success">
                             aprobat
+                          </span>
+                        )}
+                        {linkedDoc.adoptionStatus && (
+                          <span className="ml-1 rounded-full bg-eos-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-eos-primary">
+                            {DOCUMENT_ADOPTION_LABELS[linkedDoc.adoptionStatus]}
                           </span>
                         )}
                       </div>

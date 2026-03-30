@@ -31,6 +31,12 @@ export type GeneratedDocumentKind =
   | "contract-template"
   | "deletion-attestation"
 
+export type GeneratedDocumentAdoptionStatus =
+  | "reviewed_internally"
+  | "sent_for_signature"
+  | "signed"
+  | "active"
+
 export type WorkspaceContext = {
   orgId: string
   orgName: string
@@ -167,6 +173,9 @@ export type GeneratedDocumentRecord = {
   validationStatus?: "pending" | "passed"
   validatedAtISO?: string
   evidenceNote?: string
+  adoptionStatus?: GeneratedDocumentAdoptionStatus
+  adoptionUpdatedAtISO?: string
+  adoptionEvidenceNote?: string
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
   nextReviewDateISO?: string      // when to review this document

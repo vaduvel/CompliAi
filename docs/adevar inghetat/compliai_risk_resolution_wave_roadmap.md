@@ -365,6 +365,24 @@ Dificultate:
 - contracte
 - baseline juridic
 
+Status:
+
+- `v1 implementat în produs`
+- documentele `dpa` și `contract-template` au acum urmă de adoptare în:
+  - cockpit
+  - Dosar
+  - Vault
+- stările urmărite sunt:
+  - `revizuit intern`
+  - `trimis la semnare`
+  - `semnat`
+  - `pus în uz`
+- nu schimbăm încă gating-ul finding-ului și nu pretindem semnare externă automată
+- ce rămâne pentru `Wave 3 complet`:
+  - integrare e-sign / contrapartidă
+  - dovadă bilaterală mai strictă
+  - legare la vendor registry și contract baseline rollout
+
 ### 2. Integrare HR / registru angajați
 
 - import

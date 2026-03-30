@@ -84,8 +84,13 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 - ce există:
   - generator `dpa`
   - flow live confirmat
+  - urmă bilaterală v1 în cockpit / Dosar / Vault:
+    - `revizuit intern`
+    - `trimis la semnare`
+    - `semnat`
+    - `pus în uz`
 - ce mai lipsește până la 100%:
-  - circuit de semnare / urmărire semnături
+  - integrare reală cu e-sign sau vendor reply
   - legare automată mai bună la vendor registry
 
 ### 4. Vendor governance / documentație externă lipsă
@@ -231,13 +236,18 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
   - tip canonic dedicat `GDPR-020`
   - `Contracts Pack` în suprafața `Documente`
   - revenire automată în cockpit cu dovadă precompletată
+  - urmă bilaterală v1 în cockpit / Dosar / Vault:
+    - `revizuit intern`
+    - `trimis la semnare`
+    - `semnat`
+    - `pus în uz`
 - ce mai lipsește până la 100%:
   - NDA
   - client services template
   - supplier baseline
   - configurare pe B2B/B2C și tip business
 - ce ar urca riscul:
-  - semnare / adoptare bilaterală și rollout asistat
+  - integrare externă de semnare și rollout asistat
 
 ### 13. Înregistrare SPV lipsă
 

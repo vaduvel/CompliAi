@@ -12,6 +12,7 @@ import { readFreshState, writeState } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
+import { supportsDocumentAdoption } from "@/lib/compliance/document-adoption"
 import { DOCUMENT_TYPES, type DocumentType } from "@/lib/server/document-generator"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
 import {
@@ -428,6 +429,14 @@ export async function PATCH(
         approvedByUserId: session.userId,
         approvedByEmail: session.email,
         evidenceNote: body.evidenceNote?.trim() || preparedDocument.evidenceNote,
+        adoptionStatus:
+          supportsDocumentAdoption(preparedDocument.documentType)
+            ? preparedDocument.adoptionStatus ?? "reviewed_internally"
+            : preparedDocument.adoptionStatus,
+        adoptionUpdatedAtISO:
+          supportsDocumentAdoption(preparedDocument.documentType)
+            ? preparedDocument.adoptionUpdatedAtISO ?? nowISO
+            : preparedDocument.adoptionUpdatedAtISO,
       }
       const nextMonitoringDateISO =
         dossierDocument.nextReviewDateISO ??

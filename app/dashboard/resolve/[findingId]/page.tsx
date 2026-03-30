@@ -24,6 +24,7 @@ import {
   FindingDossierSuccessCard,
   FindingHeroAction,
 } from "@/components/compliscan/finding-cockpit-shared"
+import { DocumentAdoptionCard } from "@/components/compliscan/document-adoption-card"
 import {
   getFindingAgeLabel,
   isFindingResolvedLike,
@@ -32,6 +33,7 @@ import {
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { getCloseGatingRequirements } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
+import { supportsDocumentAdoption, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
 import type { DocumentType } from "@/lib/server/document-generator"
 
 const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
@@ -53,6 +55,7 @@ type FindingDetail = ScanFinding & {
 
 type LinkedGeneratedDocument = {
   id: string
+  documentType?: DocumentType
   title: string
   generatedAtISO: string
   approvalStatus?: "draft" | "approved_as_evidence"
@@ -62,6 +65,9 @@ type LinkedGeneratedDocument = {
   approvedByEmail?: string
   expiresAtISO?: string
   nextReviewDateISO?: string
+  adoptionStatus?: DocumentAdoptionStatus
+  adoptionUpdatedAtISO?: string
+  adoptionEvidenceNote?: string
 }
 
 type FindingDetailResponse = {
@@ -387,6 +393,12 @@ export default function FindingDetailPage() {
     hasGenerator &&
     preparedDocumentReady &&
     Boolean(linkedGeneratedDocument?.id)
+  const adoptionTrackingVisible = Boolean(
+    linkedGeneratedDocument &&
+    linkedGeneratedDocument.approvalStatus === "approved_as_evidence" &&
+    linkedGeneratedDocument.documentType &&
+    supportsDocumentAdoption(linkedGeneratedDocument.documentType)
+  )
   const closeGating = getCloseGatingRequirements(recipe.findingTypeId)
   const requiresOperationalEvidence =
     status === "confirmed" &&
@@ -537,6 +549,24 @@ export default function FindingDetailPage() {
     ? -1
     : PROGRESS_STEPS.findIndex((s) => s.id === status)
 
+  function handleLinkedDocumentAdoptionUpdated(payload: {
+    adoptionStatus: DocumentAdoptionStatus
+    adoptionUpdatedAtISO?: string
+    adoptionEvidenceNote?: string
+  }) {
+    setLinkedGeneratedDocument((current) =>
+      current
+        ? {
+            ...current,
+            adoptionStatus: payload.adoptionStatus,
+            adoptionUpdatedAtISO: payload.adoptionUpdatedAtISO,
+            adoptionEvidenceNote: payload.adoptionEvidenceNote,
+          }
+        : current
+    )
+    setStatusFeedback("Urma de adoptare a documentului a fost actualizată în Dosar.")
+  }
+
   return (
     <div className="space-y-4 px-1 sm:space-y-5 sm:px-0">
 
@@ -645,6 +675,18 @@ export default function FindingDetailPage() {
           primaryHref={dashboardRoutes.dosar}
           secondaryHref={dashboardRoutes.auditLog}
           feedbackMessage="Dovada a intrat la dosar și rămâne disponibilă pentru audit, handoff și reverificare. De aici înainte intră în monitorizare, nu dispare."
+        />
+      ) : null}
+
+      {adoptionTrackingVisible && linkedGeneratedDocument ? (
+        <DocumentAdoptionCard
+          documentId={linkedGeneratedDocument.id}
+          documentTitle={linkedGeneratedDocument.title}
+          documentType={linkedGeneratedDocument.documentType!}
+          adoptionStatus={linkedGeneratedDocument.adoptionStatus}
+          adoptionUpdatedAtISO={linkedGeneratedDocument.adoptionUpdatedAtISO}
+          adoptionEvidenceNote={linkedGeneratedDocument.adoptionEvidenceNote}
+          onUpdated={handleLinkedDocumentAdoptionUpdated}
         />
       ) : null}
 
