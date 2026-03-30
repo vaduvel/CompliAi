@@ -391,7 +391,11 @@ Notă de progres:
 - `EF-004` și `EF-005` nu mai trimit userul doar într-un protocol static; există și un jurnal de execuție cu urmă persistată și notă dinamică de handoff spre cockpit
 - încă nu pretindem retransmitere automată, recipise SPV sincronizate sau închidere autonomă a cazului fiscal
 - `vendor lifecycle v1` este acum vizibil direct în `Vendor Review`, cu radar pentru review-uri expirate, due soon și follow-up activ
-- încă nu pretindem remindere externe sau follow-up automat complet; v1 aduce prioritizare și notă de execuție, nu automatizare totală
+- `vendor lifecycle v2` adaugă follow-up programabil direct pe review-urile deschise:
+  - termen explicit
+  - notă de follow-up
+  - semnal due soon / overdue direct în radar
+- încă nu pretindem remindere externe sau follow-up automat complet; `v1 + v2` aduc prioritizare și următorul touch operațional, nu automatizare totală
 
 ## Reguli De Încredere
 

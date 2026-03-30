@@ -15,14 +15,14 @@ export function buildVendorLifecycleSummary(
   const now = Date.now()
   const dueSoonThreshold = now + dueSoonDays * 86_400_000
 
-  const overdue = reviews.filter((review) => {
+  const overdueClosed = reviews.filter((review) => {
     if (review.status === "overdue-review") return true
     if (review.status !== "closed" || !review.nextReviewDueISO) return false
     const dueAt = Date.parse(review.nextReviewDueISO)
     return !Number.isNaN(dueAt) && dueAt <= now
   })
 
-  const dueSoon = reviews.filter((review) => {
+  const dueSoonClosed = reviews.filter((review) => {
     if (review.status !== "closed" || !review.nextReviewDueISO) return false
     const dueAt = Date.parse(review.nextReviewDueISO)
     return !Number.isNaN(dueAt) && dueAt > now && dueAt <= dueSoonThreshold
@@ -35,6 +35,21 @@ export function buildVendorLifecycleSummary(
     review.status === "awaiting-evidence"
   )
 
+  const activeFollowUpDueSoon = activeFollowUp.filter((review) => {
+    if (!review.followUpDueISO) return false
+    const dueAt = Date.parse(review.followUpDueISO)
+    return !Number.isNaN(dueAt) && dueAt > now && dueAt <= dueSoonThreshold
+  })
+
+  const activeFollowUpOverdue = activeFollowUp.filter((review) => {
+    if (!review.followUpDueISO) return false
+    const dueAt = Date.parse(review.followUpDueISO)
+    return !Number.isNaN(dueAt) && dueAt <= now
+  })
+
+  const overdue = dedupeById([...overdueClosed, ...activeFollowUpOverdue])
+  const dueSoon = dedupeById([...dueSoonClosed, ...activeFollowUpDueSoon])
+
   const overdueNames = overdue.slice(0, 3).map((review) => review.vendorName)
   const dueSoonLabels = dueSoon.slice(0, 3).map((review) => {
     const dueLabel = review.nextReviewDueISO
@@ -42,6 +57,13 @@ export function buildVendorLifecycleSummary(
       : "fără termen"
     return `${review.vendorName} (${dueLabel})`
   })
+  const followUpLabels = activeFollowUpDueSoon.slice(0, 3).map((review) => {
+    const dueLabel = review.followUpDueISO
+      ? new Date(review.followUpDueISO).toLocaleDateString("ro-RO")
+      : "fără termen"
+    return `${review.vendorName} (${dueLabel})`
+  })
+  const overdueFollowUpNames = activeFollowUpOverdue.slice(0, 3).map((review) => review.vendorName)
 
   const reminderParts = [
     overdue.length > 0
@@ -49,6 +71,12 @@ export function buildVendorLifecycleSummary(
       : null,
     dueSoon.length > 0
       ? `${dueSoon.length} review-uri vendor expiră în următoarele ${dueSoonDays} zile${dueSoonLabels.length ? `: ${dueSoonLabels.join(", ")}` : ""}.`
+      : null,
+    activeFollowUpOverdue.length > 0
+      ? `${activeFollowUpOverdue.length} follow-up-uri active sunt deja depășite${overdueFollowUpNames.length ? `: ${overdueFollowUpNames.join(", ")}` : ""}.`
+      : null,
+    activeFollowUpDueSoon.length > 0
+      ? `${activeFollowUpDueSoon.length} follow-up-uri active ajung la termen în următoarele ${dueSoonDays} zile${followUpLabels.length ? `: ${followUpLabels.join(", ")}` : ""}.`
       : null,
     activeFollowUp.length > 0
       ? `${activeFollowUp.length} review-uri sunt încă în follow-up activ și au nevoie de context, validare sau dovadă.`
@@ -64,4 +92,8 @@ export function buildVendorLifecycleSummary(
     activeFollowUp,
     reminderNote: reminderParts.join(" "),
   }
+}
+
+function dedupeById(reviews: VendorReview[]) {
+  return Array.from(new Map(reviews.map((review) => [review.id, review])).values())
 }

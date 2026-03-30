@@ -436,6 +436,11 @@ Status:
   - review-urile care expiră în următoarele 30 de zile
   - review-urile rămase în follow-up activ
 - există și o notă de reminder gata de copiat pentru execuție operațională
+- `v2 implementat în produs`
+- review-urile deschise pot avea acum un `follow-up` programat explicit:
+  - termen
+  - notă de follow-up
+  - radarul lifecycle îl tratează ca semnal due soon / overdue
 - ce rămâne pentru `Wave 3 complet`:
   - remindere externe reale
   - follow-up automat mai strict

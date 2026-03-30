@@ -525,6 +525,80 @@ function PastClosuresViewer({ closures }: { closures: VendorReview["pastClosures
   )
 }
 
+function FollowUpScheduler({
+  review,
+  loading,
+  onSave,
+}: {
+  review: VendorReview
+  loading: boolean
+  onSave: (data: { followUpDueISO?: string; followUpNote?: string }) => void
+}) {
+  const [followUpDue, setFollowUpDue] = useState(review.followUpDueISO?.slice(0, 10) ?? "")
+  const [followUpNote, setFollowUpNote] = useState(review.followUpNote ?? "")
+
+  useEffect(() => {
+    setFollowUpDue(review.followUpDueISO?.slice(0, 10) ?? "")
+    setFollowUpNote(review.followUpNote ?? "")
+  }, [review.followUpDueISO, review.followUpNote, review.id])
+
+  return (
+    <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+          Următorul follow-up
+        </p>
+        <p className="mt-1 text-sm text-eos-text-muted">
+          Programezi următorul touch operațional pentru vendori care nu sunt încă închiși, ca radarul de lifecycle să nu rămână doar un istoric pasiv.
+        </p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-xs text-eos-text-tertiary">Termen follow-up</span>
+          <input
+            type="date"
+            value={followUpDue}
+            onChange={(event) => setFollowUpDue(event.target.value)}
+            className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs text-eos-text-tertiary">Notă follow-up</span>
+          <textarea
+            value={followUpNote}
+            onChange={(event) => setFollowUpNote(event.target.value)}
+            rows={3}
+            className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none"
+            placeholder="Ex: așteptăm DPA semnat / răspuns vendor / clarificare pe transfer."
+          />
+        </label>
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-eos-text-tertiary">
+          {review.followUpDueISO
+            ? `Termen curent: ${new Date(review.followUpDueISO).toLocaleDateString("ro-RO")}`
+            : "Nu există încă termen de follow-up salvat."}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={loading || (!followUpDue && !followUpNote.trim())}
+          onClick={() =>
+            onSave({
+              followUpDueISO: followUpDue ? new Date(followUpDue).toISOString() : undefined,
+              followUpNote: followUpNote.trim() || undefined,
+            })
+          }
+        >
+          Salvează follow-up
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 // ── Review detail panel ───────────────────────────────────────────────────────
 
 function ReviewPanel({
@@ -653,6 +727,14 @@ function ReviewPanel({
           </p>
         </div>
       )}
+
+      {review.status !== "closed" ? (
+        <FollowUpScheduler
+          review={review}
+          loading={actionLoading}
+          onSave={(data) => onAction(review.id, "schedule-follow-up", data)}
+        />
+      ) : null}
 
       {/* Status-based UI */}
       {review.status === "needs-context" && (
@@ -964,6 +1046,7 @@ export default function VendorReviewPage() {
         "add-evidence": "Dovadă adăugată.",
         reopen: "Review redeschis.",
         revalidate: "Revalidare pornită — completează contextul actualizat.",
+        "schedule-follow-up": "Follow-up vendor salvat.",
       }
       toast.success(messages[action] ?? "Actualizat.")
       await load()
@@ -1163,7 +1246,12 @@ export default function VendorReviewPage() {
                         {lifecycleSummary.overdue.slice(0, 4).map((review) => (
                           <li key={review.id} className="flex gap-2">
                             <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-error" />
-                            <span>{review.vendorName}</span>
+                            <span>
+                              {review.vendorName}
+                              {review.followUpDueISO || review.nextReviewDueISO
+                                ? ` · ${new Date(review.followUpDueISO ?? review.nextReviewDueISO!).toLocaleDateString("ro-RO")}`
+                                : ""}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -1183,8 +1271,8 @@ export default function VendorReviewPage() {
                             <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-warning" />
                             <span>
                               {review.vendorName}
-                              {review.nextReviewDueISO
-                                ? ` · ${new Date(review.nextReviewDueISO).toLocaleDateString("ro-RO")}`
+                              {review.followUpDueISO || review.nextReviewDueISO
+                                ? ` · ${new Date(review.followUpDueISO ?? review.nextReviewDueISO!).toLocaleDateString("ro-RO")}`
                                 : ""}
                             </span>
                           </li>
@@ -1204,7 +1292,12 @@ export default function VendorReviewPage() {
                         {lifecycleSummary.activeFollowUp.slice(0, 4).map((review) => (
                           <li key={review.id} className="flex gap-2">
                             <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-primary" />
-                            <span>{review.vendorName} · {REVIEW_STATUS_LABELS[review.status]}</span>
+                            <span>
+                              {review.vendorName} · {REVIEW_STATUS_LABELS[review.status]}
+                              {review.followUpDueISO
+                                ? ` · follow-up ${new Date(review.followUpDueISO).toLocaleDateString("ro-RO")}`
+                                : ""}
+                            </span>
                           </li>
                         ))}
                       </ul>

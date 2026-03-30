@@ -42,6 +42,7 @@ describe("buildVendorLifecycleSummary", () => {
         id: "vr-follow-up",
         vendorName: "HubSpot",
         status: "awaiting-evidence",
+        followUpDueISO: "2026-04-05T00:00:00.000Z",
       }),
     ])
 
@@ -50,6 +51,7 @@ describe("buildVendorLifecycleSummary", () => {
     expect(summary.activeFollowUp).toHaveLength(1)
     expect(summary.reminderNote).toContain("OpenAI")
     expect(summary.reminderNote).toContain("Stripe")
+    expect(summary.reminderNote).toContain("HubSpot")
 
     Date.now = originalNow
   })

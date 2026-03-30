@@ -66,6 +66,7 @@ export type VendorGovernancePack = {
 export type AuditAction =
   | "created"
   | "context-submitted"
+  | "follow-up-scheduled"
   | "review-generated"
   | "approved"
   | "rejected"
@@ -150,6 +151,8 @@ export type VendorReview = {
   reviewReason?: string
   reviewCount?: number // how many times this vendor was reviewed
   pastClosures?: PastClosure[]
+  followUpDueISO?: string
+  followUpNote?: string
 
   // Timestamps
   createdAtISO: string
