@@ -13,7 +13,6 @@ import {
   Plus,
   Radio,
   ShieldCheck,
-  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -22,12 +21,11 @@ import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
-import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
-import type { ETVADiscrepancy, ETVADiscrepancyType, ETVADiscrepancyStatus } from "@/lib/compliance/etva-discrepancy"
+import type { ETVADiscrepancy, ETVADiscrepancyType } from "@/lib/compliance/etva-discrepancy"
 import { ETVA_TYPE_LABELS, ETVA_STATUS_LABELS } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord, FilingType, FilingStatus, FilingDisciplineScore } from "@/lib/compliance/filing-discipline"
 import { FILING_TYPE_LABELS, FILING_STATUS_LABELS } from "@/lib/compliance/filing-discipline"

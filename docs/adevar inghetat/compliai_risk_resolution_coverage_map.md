@@ -241,16 +241,19 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 13. Înregistrare SPV lipsă
 
-- status azi: `asistat slab-mediu`
+- status azi: `asistat mediu-puternic`
 - clasă: `operational`
-- cât avem deja: `35%`
+- cât avem deja: `68%`
 - ce există:
   - client ANAF/SPV
   - suprafață fiscală
-- ce mai lipsește până la 100%:
   - `SPV Enrollment Guide`
-  - wizard cu pași clari
-  - dovadă de activare și verificare
+  - checklist clar de activare
+  - buton de portal + copy note pentru cockpit
+  - verificare SPV în aceeași suprafață
+- ce mai lipsește până la 100%:
+  - producer public mai clar pentru `EF-001` în smoke-uri live
+  - dovadă de activare mai strâns legată de integrarea ANAF
 - ce ar urca riscul:
   - rămâne `operational`, dar mult mai asistat
 
@@ -278,27 +281,33 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 ### 15. Factură blocată în prelucrare ANAF
 
-- status azi: `asistat mediu`
+- status azi: `asistat mediu-puternic`
 - clasă: `operational`
-- cât avem deja: `45%`
+- cât avem deja: `62%`
 - ce există:
   - fiscal state / checks
   - interpretare de risc
+  - `Fiscal Status Interpreter` în `/dashboard/fiscal?tab=status`
+  - protocol de verificare SPV + retry / escalare
+  - copy note pentru cockpit + return cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `Status Interpreter`
   - distincție clară între latență normală și blocaj real
-  - recomandare de retry / escalare
+  - urmărire mai automată a statusului după reverificare
+  - validare runtime finală pe aliasul public
 
 ### 16. Factură generată dar netransmisă spre SPV
 
-- status azi: `asistat mediu`
+- status azi: `asistat puternic`
 - clasă: `operational`
-- cât avem deja: `45%`
+- cât avem deja: `72%`
 - ce există:
   - fiscal checks
   - signal hardening
+  - `Fiscal Pre-Validator v1/v2` pentru XML
+  - `Fiscal Status Interpreter` pentru protocolul de transmitere
+  - handoff secundar spre validator XML și SPV Check
+  - copy note pentru cockpit + return cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - `Transmission Recovery Pack`
   - verificare recipisă / dovadă de transmitere
   - protocol de retransmitere
 - ce ar urca riscul:

@@ -312,6 +312,12 @@ Dificultate:
 
 - `medie`
 
+Status:
+
+- `livrat`
+- flow canonic: `EF-001 -> /dashboard/fiscal?tab=spv&findingId=... -> ghid SPV + copy notă + verificare -> return în cockpit`
+- live runtime validat pe aliasul public cu affordance-urile ghidului și fallback-ul de copiere
+
 ### 4. Fiscal Status Interpreter
 
 Țintă:
@@ -324,6 +330,18 @@ Ce livrăm:
 - interpretare clară de status
 - sugestie de retry / retransmitere / escalare
 - dovadă structurată
+
+Status:
+
+- `implementat în produs`
+- flow canonic: `EF-004 / EF-005 -> /dashboard/fiscal?tab=status&findingId=... -> protocol fiscal -> copy / return în cockpit`
+- protocolul fiscal expune:
+  - semnificația statusului
+  - pașii operaționali următori
+  - dovada cerută în cockpit
+  - nota pregătită pentru întoarcere
+  - handoff secundar spre `SPV Check` sau `Validator XML`
+- validarea runtime finală este încă `în curs`, pentru că deployul de probe este în coadă și repo-ul are build gates nelegate de sprintul fiscal
 
 Impact:
 
