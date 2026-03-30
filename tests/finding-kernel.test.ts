@@ -114,6 +114,32 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-011")
   })
 
+  it("mapează finding-ul intake ROPA missing → GDPR-004", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-gdpr-ropa-missing",
+        category: "GDPR",
+        title: "Registru de prelucrări lipsă (Art. 30)",
+        suggestedDocumentType: "ropa",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-004")
+    expect(result.framework).toBe("GDPR")
+  })
+
+  it("mapează finding-ul intake ROPA update → GDPR-006", () => {
+    const result = classifyFinding(
+      makeFinding({
+        id: "intake-gdpr-ropa-update",
+        category: "GDPR",
+        title: "Registru de prelucrări neactualizat",
+        suggestedDocumentType: "ropa",
+      })
+    )
+    expect(result.findingTypeId).toBe("GDPR-006")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează baseline-ul contractual din intake → GDPR-020", () => {
     const result = classifyFinding(
       makeFinding({

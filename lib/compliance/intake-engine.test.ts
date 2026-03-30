@@ -315,6 +315,7 @@ describe("intake-engine", () => {
         "hasInternalProcedures",
         "hasPrivacyPolicy",
         "hasDsarProcess",
+        "hasRopaRegistry",
         "hasVendorDpas",
         "hasRetentionSchedule",
         "aiUsesConfidentialData",
@@ -326,7 +327,7 @@ describe("intake-engine", () => {
         "collectsLeads",
       ])
     )
-    expect(visibleQuestions).toHaveLength(14)
+    expect(visibleQuestions).toHaveLength(15)
   })
 
   it("builds findings, document requests and next best action for a realistic intake path", () => {
@@ -343,6 +344,7 @@ describe("intake-engine", () => {
       hasInternalProcedures: "no",
       hasPrivacyPolicy: "no",
       hasDsarProcess: "no",
+      hasRopaRegistry: "no",
       hasVendorDpas: "no",
       hasRetentionSchedule: "no",
       aiUsesConfidentialData: "yes",
@@ -366,6 +368,7 @@ describe("intake-engine", () => {
         "intake-hr-procedures",
         "intake-gdpr-privacy-policy",
         "intake-gdpr-dsar",
+        "intake-gdpr-ropa-missing",
         "intake-gdpr-retention",
         "intake-ai-missing-policy",
         "intake-ai-confidential-data",
@@ -376,7 +379,7 @@ describe("intake-engine", () => {
         "intake-contracts-baseline",
       ])
     )
-    expect(findings).toHaveLength(14)
+    expect(findings).toHaveLength(15)
     expect(findings.find((finding) => finding.id === "intake-ai-missing-policy")).toEqual(
       expect.objectContaining({
         suggestedDocumentType: "ai-governance",
@@ -393,11 +396,12 @@ describe("intake-engine", () => {
         "job-descriptions",
         "ai-governance",
         "dsar-procedure",
+        "ropa",
         "retention-policy",
         "vendor-docs",
       ])
     )
-    expect(documentRequests).toHaveLength(10)
+    expect(documentRequests).toHaveLength(11)
 
     expect(nextBestAction).toEqual({
       label: "Generează prima politică GDPR",
@@ -490,6 +494,38 @@ describe("intake-engine", () => {
     })
   })
 
+  it("trimite registrul ROPA pe cockpit când politica există deja, dar registrul lipsește", () => {
+    const findings = buildInitialFindings({
+      sellsToConsumers: "no",
+      hasEmployees: "no",
+      processesPersonalData: "yes",
+      usesAITools: "no",
+      usesExternalVendors: "no",
+      hasSiteWithForms: "no",
+      hasStandardContracts: "yes",
+      hasPrivacyPolicy: "yes",
+      hasDsarProcess: "yes",
+      hasRopaRegistry: "no",
+      hasRetentionSchedule: "yes",
+    } as const)
+
+    const nextBestAction = buildNextBestAction(findings)
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "intake-gdpr-ropa-missing",
+          suggestedDocumentType: "ropa",
+        }),
+      ])
+    )
+    expect(nextBestAction).toEqual({
+      label: "Deschide registrul RoPA în cockpit",
+      href: "/dashboard/resolve/intake-gdpr-ropa-missing",
+      estimatedMinutes: 4,
+    })
+  })
+
   it("creează finding și document request pentru retenție când regula nu este clară", () => {
     const answers = {
       sellsToConsumers: "no",
@@ -501,6 +537,7 @@ describe("intake-engine", () => {
       hasStandardContracts: "yes",
       hasPrivacyPolicy: "yes",
       hasDsarProcess: "yes",
+      hasRopaRegistry: "partial",
       hasRetentionSchedule: "partial",
     } as const
 
@@ -510,6 +547,10 @@ describe("intake-engine", () => {
     expect(findings).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          id: "intake-gdpr-ropa-update",
+          suggestedDocumentType: "ropa",
+        }),
+        expect.objectContaining({
           id: "intake-gdpr-retention",
           suggestedDocumentType: "retention-policy",
         }),
@@ -517,6 +558,10 @@ describe("intake-engine", () => {
     )
     expect(documentRequests).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          id: "ropa",
+          priority: "required",
+        }),
         expect.objectContaining({
           id: "retention-policy",
           priority: "required",

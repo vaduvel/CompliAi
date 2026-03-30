@@ -1518,6 +1518,8 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "intake-hr-job-descriptions") return "GDPR-021"
   if (id === "intake-hr-procedures" || id === "hr-procedures") return "GDPR-022"
   if (id === "intake-hr-registry" || id === "hr-registry") return "GDPR-023"
+  if (id === "intake-gdpr-ropa-missing") return "GDPR-004"
+  if (id === "intake-gdpr-ropa-update") return "GDPR-006"
   if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"

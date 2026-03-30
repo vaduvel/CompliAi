@@ -21,6 +21,7 @@ describe("onboarding-steps", () => {
     expect(getQuestionIdsForIntakeFlowStep("intake-gdpr")).toEqual([
       "hasPrivacyPolicy",
       "hasDsarProcess",
+      "hasRopaRegistry",
       "hasVendorDpas",
       "hasRetentionSchedule",
     ])
