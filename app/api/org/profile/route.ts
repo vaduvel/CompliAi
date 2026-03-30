@@ -166,6 +166,8 @@ export async function POST(request: Request) {
           ? [...baseFindings, payTransparencyFinding]
           : baseFindings
 
+      console.error("[DEBUG] intakeAnswers=", intakeAnswers ? "present" : "ABSENT", "currentFindings=", current.findings?.length ?? 0, "allFindings=", allFindings.length)
+
       return {
         ...current,
         orgProfile,
