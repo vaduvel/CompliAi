@@ -59,12 +59,22 @@ export async function PATCH(
     if (!existing) return jsonError("Review-ul nu a fost găsit.", 404, "REVIEW_NOT_FOUND")
 
     const body = (await request.json()) as {
-      action?: "submit-context" | "approve" | "reject" | "close" | "reopen" | "add-evidence" | "revalidate"
+      action?:
+        | "submit-context"
+        | "approve"
+        | "reject"
+        | "close"
+        | "reopen"
+        | "add-evidence"
+        | "revalidate"
+        | "schedule-follow-up"
       context?: VendorReviewContext
       closureEvidence?: string
       // V5.3 — structured evidence
       evidenceType?: EvidenceType
       evidenceDescription?: string
+      followUpDueISO?: string
+      followUpNote?: string
     }
 
     // ── Submit context (V5.2 — branching + asset generation) ─────────────
@@ -204,6 +214,26 @@ export async function PATCH(
         reviewReason: "Revalidare periodică — review-ul anterior a expirat.",
         auditTrail: appendAudit(existing.auditTrail, "revalidation-triggered", session.email),
       })
+      return NextResponse.json({ review: updated })
+    }
+
+    if (body.action === "schedule-follow-up") {
+      const followUpDueISO =
+        typeof body.followUpDueISO === "string" && !Number.isNaN(Date.parse(body.followUpDueISO))
+          ? new Date(body.followUpDueISO).toISOString()
+          : undefined
+      const followUpNote = body.followUpNote?.trim() || undefined
+
+      if (!followUpDueISO && !followUpNote) {
+        return jsonError("Completează termenul sau nota de follow-up.", 400, "MISSING_FOLLOW_UP")
+      }
+
+      const updated = await updateReview(orgId, id, {
+        followUpDueISO,
+        followUpNote,
+        auditTrail: appendAudit(existing.auditTrail, "follow-up-scheduled", session.email, followUpDueISO ?? "notă actualizată"),
+      })
+
       return NextResponse.json({ review: updated })
     }
 

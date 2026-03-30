@@ -49,7 +49,7 @@ export const INTAKE_CONDITIONAL_STEP_DEFINITIONS: IntakeFlowStepDefinition[] = [
   {
     id: "intake-gdpr",
     label: INTAKE_FLOW_STEP_LABELS["intake-gdpr"],
-    questionIds: ["hasPrivacyPolicy", "hasDsarProcess", "hasVendorDpas", "hasRetentionSchedule"],
+    questionIds: ["hasPrivacyPolicy", "hasDsarProcess", "hasRopaRegistry", "hasVendorDpas", "hasRetentionSchedule"],
   },
   {
     id: "intake-ai",

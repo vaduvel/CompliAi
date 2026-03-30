@@ -346,10 +346,14 @@ function ProgressStep({
   results,
   anafResults,
   importing,
+  scanningCount,
+  totalToScan,
 }: {
   results: ImportExecuteResult[]
   anafResults: AnafPrefillResult[]
   importing: boolean
+  scanningCount: number
+  totalToScan: number
 }) {
   const successful = results.filter((r) => r.ok)
   const failed = results.filter((r) => !r.ok)
@@ -359,16 +363,28 @@ function ProgressStep({
       <div className="flex flex-col items-center gap-4 py-12">
         <Loader2 className="size-8 animate-spin text-eos-primary" strokeWidth={2} />
         <div className="text-center">
-          <p className="text-sm font-medium text-eos-text">Se importă firmele...</p>
-          <p className="mt-1 text-xs text-eos-text-muted">
-            {results.length > 0
-              ? `${successful.length} importate, ${failed.length} erori`
-              : "Se creează organizațiile și se rulează applicability..."}
+          <p className="text-sm font-medium text-eos-text">
+            {scanningCount > 0 ? `Se scanează firmele (${scanningCount}/${totalToScan})...` : "Se importă firmele..."}
           </p>
-          {anafResults.length > 0 && (
+          <p className="mt-1 text-xs text-eos-text-muted">
+            {scanningCount > 0 
+              ? "Pregătim baseline-ul de conformitate pentru fiecare firmă (ANAF, E-Factura, Website)."
+              : results.length > 0
+                ? `${successful.length} importate, ${failed.length} erori`
+                : "Se creează organizațiile și se rulează applicability..."}
+          </p>
+          {anafResults.length > 0 && scanningCount === 0 && (
             <p className="mt-1 text-xs text-eos-text-muted">
               ANAF prefill: {anafResults.filter((r) => r.status === "ok").length}/{anafResults.length} completat
             </p>
+          )}
+          {scanningCount > 0 && (
+            <div className="mx-auto mt-4 h-1.5 w-48 overflow-hidden rounded-full bg-eos-bg-inset">
+              <div 
+                className="h-full bg-eos-primary transition-all duration-500" 
+                style={{ width: `${(scanningCount / totalToScan) * 100}%` }}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -439,6 +455,8 @@ export function ImportWizard({
   const [importing, setImporting] = useState(false)
   const [importResults, setImportResults] = useState<ImportExecuteResult[]>([])
   const [anafResults, setAnafResults] = useState<AnafPrefillResult[]>([])
+  const [scanningCount, setScanningCount] = useState(0)
+  const [totalToScan, setTotalToScan] = useState(0)
 
   const handleFileSelected = useCallback(async (file: File) => {
     setLoading(true)
@@ -542,11 +560,39 @@ export function ImportWizard({
         error?: string
       }
 
+      let createdResults: ImportExecuteResult[] = []
       if (!response.ok) {
         const errMsg = data.error ?? `Eroare server (${response.status})`
-        setImportResults(confirmedRows.map((r) => ({ ok: false, orgName: r.orgName, error: errMsg })))
+        createdResults = confirmedRows.map((r) => ({ ok: false, orgName: r.orgName, error: errMsg }))
+        setImportResults(createdResults)
       } else {
-        setImportResults(data.results ?? [])
+        createdResults = data.results ?? []
+        setImportResults(createdResults)
+      }
+
+      // Phase 3: Sequential baseline scan — ANAF lookup + intake findings per org
+      const successfulOrgs = createdResults.filter(r => r.ok && r.orgId)
+      if (successfulOrgs.length > 0) {
+        setTotalToScan(successfulOrgs.length)
+        setScanningCount(0)
+
+        for (let i = 0; i < successfulOrgs.length; i++) {
+          const org = successfulOrgs[i]
+          const matchedRow = confirmedRows.find(r => r.orgName === org.orgName)
+          try {
+            setScanningCount(i + 1)
+            await fetch("/api/partner/import/baseline-scan", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orgId: org.orgId,
+                cui: matchedRow?.cui ?? null,
+              }),
+            })
+          } catch (e) {
+            console.error(`Baseline scan failed for ${org.orgName}`, e)
+          }
+        }
       }
     } catch {
       setImportResults([{ ok: false, orgName: "Import", error: "Eroare de rețea" }])
@@ -630,6 +676,8 @@ export function ImportWizard({
               results={importResults}
               anafResults={anafResults}
               importing={importing}
+              scanningCount={scanningCount}
+              totalToScan={totalToScan}
             />
           )}
         </div>

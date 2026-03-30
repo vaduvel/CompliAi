@@ -426,6 +426,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   "nis2-incident-response": "Plan IR NIS2",
   "dpa-agreement": "Acord DPA",
   "data-processing-record": "Registru Prelucrări",
+  "ropa": "Registru RoPA",
 }
 
 function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) {

@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
+import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
@@ -949,7 +950,13 @@ export default function FiscalPage() {
               label="Protocolul fiscal din această suprafață este disponibil momentan pentru cazurile EF-004 și EF-005."
             />
           ) : (
-            <FiscalStatusInterpreterCard guide={statusGuide} findingId={findingIdParam} />
+            <div className="space-y-4">
+              <FiscalStatusInterpreterCard guide={statusGuide} findingId={findingIdParam} />
+              <FiscalExecutionLogCard
+                findingId={findingIdParam}
+                findingTypeId={statusGuide.findingTypeId}
+              />
+            </div>
           )}
         </TabsContent>
 

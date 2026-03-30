@@ -21,6 +21,7 @@ export type DocumentType =
   | "reges-correction-brief"
   | "contract-template"
   | "deletion-attestation"
+  | "ropa"
 
 export type DocumentGenerationInput = {
   documentType: DocumentType
@@ -76,7 +77,7 @@ export type GeneratedDocument = {
 const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "privacy-policy": 24,
   "cookie-policy": 24,
-  "dpa": 12,
+  dpa: 12,
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
@@ -85,6 +86,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "reges-correction-brief": 6,
   "contract-template": 24,
   "deletion-attestation": 6,
+  ropa: 12,
 }
 
 // Review date = 30 days before expiry
@@ -148,6 +150,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   "deletion-attestation": {
     title: "Atestare Ștergere/Anonimizare Date",
     legalBasis: "GDPR Art. 5(1)(e), Art. 17",
+  },
+  ropa: {
+    title: "Registru de Prelucrări (RoPA)",
+    legalBasis: "GDPR Art. 30",
   },
 }
 
@@ -503,6 +509,31 @@ Cerințe:
 - Ton formal, operațional
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare și checkbox-uri
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    ropa: `
+Generează un Registru de Prelucrări (RoPA - Record of Processing Activities) complet în română conform GDPR Art. 30.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Tabel structurat cu coloane: Activitate, Scop, Categorii date, Temei legal, Persoane vizate, Destinatari, Transfer terțe țări, Perioadă retenție, Măsuri securitate
+- Pentru fiecare activitate de prelucrare:
+  * Denumire clară (ex: Facturare clienți, Newsletter marketing, Cookies site web)
+  * Scopul prelucrării (de ce)
+  * Categoriile de date personale (ce date)
+  * Temeiul legal GDPR (Art. 6(1)(a) consimțământ, (b) contract, (c) obligații legale, (f) interes legitim)
+  * Categoriile de persoane vizate (angajați, clienți, furnizori, vizitatori)
+  * Destinatarii sau categoriile de destinatari (interni și externi)
+  * Transferuri în țări terțe (da/nu, dacă da - care țară și ce garanții)
+  * Perioada de păstrare (cu criterii sau termen specific)
+  * Descrierea generală a măsurilor tehnice și organizatorice de securitate
+- Include secțiuni pentru: Operator, Reprezentant, Persoană de contact, DPO (dacă e desemnat)
+- Activitățile tipice pentru o firmă românească: Facturare, Contabilitate, HR/Angajări, Marketing (newsletter), Cookies site web, Relații clienți/Suport
+- Format Markdown cu tabele clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
   }
@@ -869,6 +900,41 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       reviewWarning,
     ].join("\n"),
+    ropa: [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Informații despre Operator",
+      `**Denumire:** ${input.orgName}`,
+      `**CUI:** ${input.orgCui ?? "_______________"}`,
+      `**Adresă:** _______________`,
+      `**Contact DPO:** ${input.dpoEmail ?? "Nu este desemnat DPO"}`,
+      "",
+      "## Registru de Prelucrări",
+      "",
+      "| # | Activitate | Scop | Categorii date | Temei legal | Persoane vizate | Destinatari | Transfer | Retenție | Măsuri |",
+      "|---|-----------|------|--------------|-------------|----------------|------------|---------|---------|--------|",
+      "| 1 | Facturare clienți | Executarea contractelor | Nume, adresă, CUI, IBAN | Art. 6(1)(b) | Clienți | Contabil, ANAF, Bancă | Nu | 10 ani | Criptare, acces restrict |",
+      "| 2 | Newsletter marketing | Informare oferte | Email, nume | Art. 6(1)(a) | Clienți, Lead-uri | Platforma email | DA (SUA-SCC) | Până la retragere | Criptare, double opt-in |",
+      "| 3 | Cookies site web | Funcționare site, analiză | IP, cookies | Art. 6(1)(a) | Vizitatori | Analytics | DA (SUA-SCC) | Conform cookie | Anonimizare IP |",
+      "| 4 | Relații clienți | Suport | Nume, email, telefon | Art. 6(1)(b) | Clienți | Personal intern | Nu | 5 ani | Acces restrict, log |",
+      "",
+      "## Legenda",
+      "**Temei legal:** Art. 6(1)(a) Consimțământ, (b) Contract, (c) Obligație legală, (f) Interes legitim",
+      "**Transfer:** DA/NU, țara dacă e cazul",
+      "**Retenție:** Termenul sau criteriul de determinare",
+      "**Măsuri:** Descrierea generală a măsurilor de securitate",
+      "",
+      "## Notă",
+      "Completează tabelul cu activitățile specifice organizației tale. Fiecare rând reprezintă o activitate distinctă de prelucrare a datelor personale.",
+      "",
+      reviewWarning,
+    ].join("\n"),
   }
 
   const content = contentMap[input.documentType]
@@ -1057,5 +1123,12 @@ export const DOCUMENT_TYPES: Array<{
     description: "Formular de atestare a execuției ștergerii sau anonimizării datelor personale conform GDPR.",
     free: false,
     legalBasis: "GDPR Art. 5(1)(e), Art. 17",
+  },
+  {
+    id: "ropa",
+    label: "Registru de Prelucrări (RoPA)",
+    description: "Registru obligatoriu conform GDPR Art. 30 cu toate activitățile de prelucrare a datelor personale.",
+    free: true,
+    legalBasis: "GDPR Art. 30",
   },
 ]

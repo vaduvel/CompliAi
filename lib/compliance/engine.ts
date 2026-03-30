@@ -26,6 +26,7 @@ import {
   buildFindingConfidenceReason,
   inferFindingConfidence,
 } from "@/lib/compliance/finding-confidence"
+import { normalizeFiscalProtocols } from "@/lib/compliance/fiscal-protocol"
 import { normalizeHrRegistryReconciliations } from "@/lib/compliance/hr-registry-reconciliation"
 import { detectComplianceSignals } from "@/lib/compliance/signal-detection"
 import {
@@ -52,6 +53,7 @@ export const initialComplianceState: ComplianceState = {
   aiSystems: [],
   detectedAISystems: [],
   efacturaValidations: [],
+  fiscalProtocols: {},
   driftRecords: [],
   driftSettings: {
     severityOverrides: {},
@@ -79,6 +81,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const aiSystems = normalizeAISystems(state.aiSystems)
   const detectedAISystems = normalizeDetectedAISystems(state.detectedAISystems)
   const efacturaValidations = normalizeEFacturaValidations(state.efacturaValidations)
+  const fiscalProtocols = normalizeFiscalProtocols(state.fiscalProtocols)
   const driftRecords = normalizeDriftRecords(state.driftRecords)
   const driftSettings = normalizeDriftSettings(state.driftSettings)
   const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
@@ -96,6 +99,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     aiSystems,
     detectedAISystems,
     efacturaValidations,
+    fiscalProtocols,
     driftRecords,
     driftSettings,
     snapshotHistory,
@@ -114,6 +118,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     aiSystems,
     detectedAISystems,
     efacturaValidations,
+    fiscalProtocols,
     driftRecords,
     driftSettings,
     snapshotHistory,
@@ -162,6 +167,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     aiSystems,
     detectedAISystems,
     efacturaValidations,
+    fiscalProtocols,
     driftRecords,
     snapshotHistory,
     hrRegistryReconciliations,
@@ -194,7 +200,8 @@ function normalizeGeneratedDocuments(
         item.documentType === "hr-internal-procedures" ||
         item.documentType === "reges-correction-brief" ||
         item.documentType === "contract-template" ||
-        item.documentType === "deletion-attestation"
+        item.documentType === "deletion-attestation" ||
+        item.documentType === "ropa"
           ? item.documentType
           : null
       const title = typeof item.title === "string" ? item.title.trim() : ""

@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, BriefcaseBusiness, FolderOpen, Loader2, Sparkles 
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import { CookieBannerCard } from "@/components/compliscan/cookie-banner-card"
 import { HrRegesReconciliationCard } from "@/components/compliscan/hr-reges-reconciliation-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -25,6 +26,7 @@ const QUICK_DOC_TYPES = [
   { id: "dpa", label: "Acord DPA", desc: "GDPR Art. 28 — cu procesatorii", icon: "🤝" },
   { id: "nis2-incident-response", label: "Plan Incidente NIS2", desc: "NIS2 + GDPR Art. 33–34", icon: "🛡️" },
   { id: "ai-governance", label: "Politică Guvernanță AI", desc: "EU AI Act Art. 9, 17", icon: "🤖" },
+  { id: "ropa", label: "Registru RoPA", desc: "GDPR Art. 30 — obligatoriu", icon: "📋" },
 ] as const
 
 type PreparedPack = HrPreparedPack | ContractsPreparedPack
@@ -354,6 +356,7 @@ export function DocumentsPageSurface() {
 
         <TabsContent value="generate">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <CookieBannerCard />
             {QUICK_DOC_TYPES.map((doc) => (
               <Link
                 key={doc.id}

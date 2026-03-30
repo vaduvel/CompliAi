@@ -97,6 +97,51 @@ describe("normalizeComplianceState", () => {
     expect(normalized.generatedDocuments[0]?.adoptionEvidenceNote).toBe("Trimis la semnare către client.")
   })
 
+  it("păstrează documentele ROPA în generatedDocuments", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [
+        {
+          id: "doc-ropa-1",
+          documentType: "ropa",
+          title: "Registru de Prelucrări (RoPA)",
+          generatedAtISO: "2026-03-30T16:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-ropa-1",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-30T16:05:00.000Z",
+        },
+      ],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.generatedDocuments).toHaveLength(1)
+    expect(normalized.generatedDocuments[0]?.documentType).toBe("ropa")
+    expect(normalized.generatedDocuments[0]?.sourceFindingId).toBe("finding-ropa-1")
+  })
+
   it("normalizează reconcilierea REGES și elimină intrările goale", () => {
     const normalized = normalizeComplianceState({
       highRisk: 0,
@@ -146,6 +191,69 @@ describe("normalizeComplianceState", () => {
         rosterSnapshot: "Ana Popescu — CIM activ",
         registryChecklistText: "Verifică modificarea salarială din martie",
         updatedAtISO: "2026-03-30T14:00:00.000Z",
+      },
+    })
+  })
+
+  it("normalizează protocolul fiscal și păstrează doar intrările utile", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      fiscalProtocols: {
+        "finding-ef-005": {
+          findingId: "finding-ef-005",
+          findingTypeId: "EF-005",
+          invoiceRef: "INV-2026-204",
+          actionStatus: "transmitted",
+          spvReference: "MSG-7788",
+          receiptStatus: "received",
+          receiptReceivedAtISO: "2026-03-30T14:15:00.000Z",
+          evidenceLocation: "Dosar/Fiscal/aprilie-2026",
+          updatedAtISO: "2026-03-30T14:10:00.000Z",
+        },
+        empty: {
+          findingId: "empty",
+          findingTypeId: "EF-005",
+          invoiceRef: "   ",
+          updatedAtISO: "2026-03-30T14:10:00.000Z",
+        },
+      },
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.fiscalProtocols).toEqual({
+      "finding-ef-005": {
+        findingId: "finding-ef-005",
+        findingTypeId: "EF-005",
+        invoiceRef: "INV-2026-204",
+        actionStatus: "transmitted",
+        spvReference: "MSG-7788",
+        receiptStatus: "received",
+        receiptReceivedAtISO: "2026-03-30T14:15:00.000Z",
+        evidenceLocation: "Dosar/Fiscal/aprilie-2026",
+        updatedAtISO: "2026-03-30T14:10:00.000Z",
       },
     })
   })

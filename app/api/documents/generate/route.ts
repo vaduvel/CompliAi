@@ -11,6 +11,7 @@ import { RequestValidationError } from "@/lib/server/request-validation"
 import {
   generateDocument,
   DOCUMENT_TYPES,
+  getGeneratedDocumentTitle,
   type DocumentType,
   type DocumentGenerationInput,
 } from "@/lib/server/document-generator"
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as Partial<DocumentGenerationInput> & {
       sourceFindingId?: string
+      /** For RoPA: pre-generated markdown content from structured form */
+      pregeneratedContent?: string
     }
 
     const documentType = body.documentType
@@ -55,10 +58,25 @@ export async function POST(request: Request) {
           : undefined,
     }
 
-    const result = await generateDocument(input)
-    const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
     const sourceFindingId = body.sourceFindingId?.trim() || undefined
     const approvalStatus = sourceFindingId ? ("draft" as const) : undefined
+
+    let result: Awaited<ReturnType<typeof generateDocument>>
+    if (documentType === "ropa" && typeof body.pregeneratedContent === "string" && body.pregeneratedContent.trim()) {
+      result = {
+        documentType: documentType as DocumentType,
+        title: getGeneratedDocumentTitle(input),
+        content: body.pregeneratedContent.trim(),
+        generatedAtISO: new Date().toISOString(),
+        llmUsed: false,
+        expiresAtISO: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        nextReviewDateISO: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      }
+    } else {
+      result = await generateDocument(input)
+    }
+
+    const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
 
     await mutateState((current) => ({
       ...current,

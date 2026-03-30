@@ -230,6 +230,8 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "GDPR-001",
   "GDPR-002",
   "GDPR-003",
+  "GDPR-004",
+  "GDPR-006",
   "GDPR-010",
   "GDPR-016",
   "AI-005",
@@ -270,6 +272,8 @@ const CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, Generat
   "GDPR-001": "privacy-policy",
   "GDPR-002": "privacy-policy",
   "GDPR-003": "cookie-policy",
+  "GDPR-004": "ropa",
+  "GDPR-006": "ropa",
   "GDPR-010": "dpa",
   "GDPR-016": "retention-policy",
   "GDPR-020": "contract-template",
@@ -391,6 +395,36 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["generated_document", "public_link"],
     autoRecheck: "partial",
     closingRule: "document + link / screenshot",
+  },
+  "GDPR-004": {
+    findingTypeId: "GDPR-004",
+    framework: "GDPR",
+    title: "Registru de prelucrări lipsă (Art. 30)",
+    category: "Registru GDPR",
+    typicalSeverity: "high",
+    signalTypes: ["direct"],
+    resolutionModes: ["in_app_guided"],
+    primaryActors: ["user"],
+    compliCapabilities: ["generează draft", "precompletează pe baza activităților firmei", "leagă artefactul de finding"],
+    userResponsibilities: ["completează activitățile de prelucrare", "confirmă", "salvează"],
+    requiredEvidenceKinds: ["generated_document", "confirmation"],
+    autoRecheck: "partial",
+    closingRule: "document generat, confirmat și salvat la dosar",
+  },
+  "GDPR-006": {
+    findingTypeId: "GDPR-006",
+    framework: "GDPR",
+    title: "Registru de prelucrări neactualizat",
+    category: "Registru GDPR",
+    typicalSeverity: "medium",
+    signalTypes: ["direct"],
+    resolutionModes: ["in_app_guided"],
+    primaryActors: ["user"],
+    compliCapabilities: ["marchează zonele lipsă", "propune actualizare"],
+    userResponsibilities: ["completează activitățile noi sau modificate"],
+    requiredEvidenceKinds: ["generated_document", "confirmation"],
+    autoRecheck: "partial",
+    closingRule: "document actualizat și confirmat",
   },
   "GDPR-005": {
     findingTypeId: "GDPR-005",
@@ -962,6 +996,34 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Document publicat și salvat.",
     revalidationTriggers: ["trackere noi", "site schimbat"],
   },
+  "GDPR-004": {
+    findingTypeId: "GDPR-004",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Deschide registrul",
+    secondaryCTA: "Vezi ce pregătește",
+    whatUserSees:
+      "Nu avem încă un registru de prelucrări potrivit pentru activitatea firmei tale.",
+    whatCompliDoes:
+      "Deschide editorul RoPA, precompletează structura registrului și leagă documentul final de finding.",
+    whatUserMustDo:
+      "Confirmă findingul, completezi activitățile de prelucrare reale și salvezi registrul la dosar.",
+    closeCondition: "Registru RoPA completat, confirmat și salvat la dosar.",
+    revalidationTriggers: ["proces nou", "vendor nou", "sistem nou", "review periodic"],
+  },
+  "GDPR-006": {
+    findingTypeId: "GDPR-006",
+    initialFlowState: "ready_to_generate",
+    primaryCTA: "Actualizează registrul",
+    secondaryCTA: "Vezi ce lipsește",
+    whatUserSees:
+      "Registrul de prelucrări existent nu mai reflectă complet activitatea firmei.",
+    whatCompliDoes:
+      "Deschide editorul RoPA și pregătește actualizarea registrului cu activitățile noi sau schimbate.",
+    whatUserMustDo:
+      "Confirmă findingul, completezi modificările reale și salvezi registrul actualizat la dosar.",
+    closeCondition: "Registru RoPA actualizat, confirmat și salvat la dosar.",
+    revalidationTriggers: ["proces nou", "vendor nou", "sistem nou", "review periodic"],
+  },
   "GDPR-005": {
     findingTypeId: "GDPR-005",
     initialFlowState: "external_action_required",
@@ -1484,6 +1546,8 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "intake-hr-job-descriptions") return "GDPR-021"
   if (id === "intake-hr-procedures" || id === "hr-procedures") return "GDPR-022"
   if (id === "intake-hr-registry" || id === "hr-registry") return "GDPR-023"
+  if (id === "intake-gdpr-ropa-missing") return "GDPR-004"
+  if (id === "intake-gdpr-ropa-update") return "GDPR-006"
   if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
@@ -1719,6 +1783,7 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   // Document type mappings — these override generic framework fallbacks
   if (docType === "privacy-policy") return "GDPR-001"
   if (docType === "cookie-policy") return "GDPR-003"
+  if (docType === "ropa") return "GDPR-004"
   if (docType === "dpa") return "GDPR-010"
   if (docType === "retention-policy") return "GDPR-016"
   if (docType === "nis2-incident-response") return "NIS2-015"

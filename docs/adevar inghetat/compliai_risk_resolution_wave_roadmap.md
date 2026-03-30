@@ -407,11 +407,49 @@ Status:
 - status live mai bogat
 - retransmitere orchestrată
 
+Status:
+
+- `v1 implementat în produs`
+- pentru `EF-004` și `EF-005`, tabul `Protocol fiscal` include acum un jurnal de execuție persistat:
+  - referință factură / mesaj urmărit
+  - status operațional
+  - referință SPV
+  - locația dovezii
+  - notă operator / contabil
+- întoarcerea în cockpit poate folosi o notă dinamică bazată pe execuția reală, nu doar pe protocolul static
+- `v2 implementat în produs`
+- jurnalul fiscal urmărește acum și recipisa SPV în mod structurat:
+  - status recipisă
+  - momentul primirii
+  - includere explicită în nota de handoff spre cockpit
+- ce rămâne pentru `Wave 3 complet`:
+  - legare mai strânsă cu retransmiterea efectivă / recipisele SPV sincronizate automat
+  - interpretare mai bogată a codurilor și statusurilor fiscale
+  - dovadă fiscală și mai strictă după retransmitere / acceptare finală
+
 ### 4. Vendor lifecycle
 
 - expirări
 - remindere
 - follow-up automat
+
+Status:
+
+- `v1 implementat în produs`
+- `Vendor Review` are acum un `Radar lifecycle vendor` care face vizibile:
+  - review-urile expirate
+  - review-urile care expiră în următoarele 30 de zile
+  - review-urile rămase în follow-up activ
+- există și o notă de reminder gata de copiat pentru execuție operațională
+- `v2 implementat în produs`
+- review-urile deschise pot avea acum un `follow-up` programat explicit:
+  - termen
+  - notă de follow-up
+  - radarul lifecycle îl tratează ca semnal due soon / overdue
+- ce rămâne pentru `Wave 3 complet`:
+  - remindere externe reale
+  - follow-up automat mai strict
+  - legare cu expirările documentelor vendor / DPA
 
 ## Tabel Prioritate / Impact / Dificultate
 

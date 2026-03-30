@@ -30,6 +30,7 @@ export type GeneratedDocumentKind =
   | "reges-correction-brief"
   | "contract-template"
   | "deletion-attestation"
+  | "ropa"
 
 export type GeneratedDocumentAdoptionStatus =
   | "reviewed_internally"
@@ -332,6 +333,35 @@ export type EFacturaXmlRepairRecord = {
   createdAtISO: string
 }
 
+export type FiscalProtocolFindingType = "EF-004" | "EF-005"
+
+export type FiscalProtocolActionStatus =
+  | "checked_pending"
+  | "transmitted"
+  | "retransmitted"
+  | "ok"
+  | "rejected"
+  | "escalated"
+
+export type FiscalProtocolReceiptStatus =
+  | "missing"
+  | "received"
+  | "accepted"
+  | "rejected"
+
+export type FiscalProtocolRecord = {
+  findingId: string
+  findingTypeId: FiscalProtocolFindingType
+  invoiceRef?: string
+  actionStatus?: FiscalProtocolActionStatus
+  spvReference?: string
+  receiptStatus?: FiscalProtocolReceiptStatus
+  receiptReceivedAtISO?: string
+  evidenceLocation?: string
+  operatorNote?: string
+  updatedAtISO: string
+}
+
 export type PersistedTaskStatus = "todo" | "done"
 
 export type PersistedTaskState = {
@@ -453,6 +483,7 @@ export type ComplianceState = {
   aiSystems: AISystemRecord[]
   detectedAISystems: DetectedAISystemRecord[]
   efacturaValidations: EFacturaValidationRecord[]
+  fiscalProtocols?: Record<string, FiscalProtocolRecord>
   driftRecords: ComplianceDriftRecord[]
   driftSettings: ComplianceDriftSettings
   snapshotHistory: CompliScanSnapshot[]

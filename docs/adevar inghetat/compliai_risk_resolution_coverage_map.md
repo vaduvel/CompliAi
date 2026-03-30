@@ -301,6 +301,7 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
   - interpretare de risc
   - `Fiscal Status Interpreter` în `/dashboard/fiscal?tab=status`
   - protocol de verificare SPV + retry / escalare
+  - jurnal fiscal cu recipisă SPV structurată
   - copy note pentru cockpit + return cu dovadă precompletată
 - ce mai lipsește până la 100%:
   - distincție clară între latență normală și blocaj real
@@ -317,10 +318,11 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
   - signal hardening
   - `Fiscal Pre-Validator v1/v2` pentru XML
   - `Fiscal Status Interpreter` pentru protocolul de transmitere
+  - jurnal fiscal cu status recipisă + momentul primirii
   - handoff secundar spre validator XML și SPV Check
   - copy note pentru cockpit + return cu dovadă precompletată
 - ce mai lipsește până la 100%:
-  - verificare recipisă / dovadă de transmitere
+  - verificare recipisă sincronizată automat / dovadă de transmitere
   - protocol de retransmitere
 - ce ar urca riscul:
   - mutare în `operational-assisted`
@@ -384,6 +386,19 @@ Impact estimat:
 - integrare HR / registru angajați
 - integrare fiscală mai adâncă
 - remindere și expirări vendor
+
+Notă de progres:
+
+- `integrare fiscală mai adâncă v1` este acum pornită în produs
+- `EF-004` și `EF-005` nu mai trimit userul doar într-un protocol static; există și un jurnal de execuție cu urmă persistată și notă dinamică de handoff spre cockpit
+- jurnalul urmărește acum și recipisa SPV în mod structurat: status + momentul primirii
+- încă nu pretindem retransmitere automată, recipise SPV sincronizate sau închidere autonomă a cazului fiscal
+- `vendor lifecycle v1` este acum vizibil direct în `Vendor Review`, cu radar pentru review-uri expirate, due soon și follow-up activ
+- `vendor lifecycle v2` adaugă follow-up programabil direct pe review-urile deschise:
+  - termen explicit
+  - notă de follow-up
+  - semnal due soon / overdue direct în radar
+- încă nu pretindem remindere externe sau follow-up automat complet; `v1 + v2` aduc prioritizare și următorul touch operațional, nu automatizare totală
 
 ## Reguli De Încredere
 

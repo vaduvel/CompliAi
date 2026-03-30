@@ -35,6 +35,7 @@ export type ConditionalAnswers = {
   // Q3=yes/probably → GDPR
   hasPrivacyPolicy?: IntakeAnswer
   hasDsarProcess?: IntakeAnswer
+  hasRopaRegistry?: IntakeAnswer
   hasVendorDpas?: IntakeAnswer
   hasRetentionSchedule?: IntakeAnswer
   // Q4=yes/probably → AI
@@ -226,6 +227,18 @@ export const CONDITIONAL_QUESTIONS: IntakeQuestion[] = [
     options: [
       { value: "yes", label: "Da" },
       { value: "no", label: "Nu" },
+      { value: "unknown", label: "Nu știu" },
+    ],
+  },
+  {
+    id: "hasRopaRegistry",
+    text: "Aveți registrul de prelucrări (RoPA) actualizat?",
+    conditional: true,
+    showWhen: (a) => isPositive(a.processesPersonalData),
+    options: [
+      { value: "yes", label: "Da" },
+      { value: "no", label: "Nu" },
+      { value: "partial", label: "Parțial" },
       { value: "unknown", label: "Nu știu" },
     ],
   },
@@ -732,6 +745,38 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
         )
       )
     }
+    if (answers.hasRopaRegistry !== "yes") {
+      const isPartialRopa = answers.hasRopaRegistry === "partial"
+      findings.push(
+        makeFinding(
+          isPartialRopa ? "gdpr-ropa-update" : "gdpr-ropa-missing",
+          isPartialRopa
+            ? "Registru de prelucrări neactualizat"
+            : "Registru de prelucrări lipsă (Art. 30)",
+          isPartialRopa
+            ? "Registrul RoPA există doar parțial sau este depășit și nu mai reflectă activitățile reale de prelucrare."
+            : "Prelucrarea datelor personale cere un registru RoPA conform GDPR Art. 30, cu activitățile reale de prelucrare și măsurile de bază.",
+          "GDPR",
+          isPartialRopa ? "medium" : "high",
+          {
+            remediationHint: "Completează registrul RoPA în CompliAI și confirmă activitățile reale de prelucrare.",
+            suggestedDocumentType: "ropa",
+            resolution: {
+              problem: isPartialRopa
+                ? "Registrul RoPA nu este actualizat cu activitățile reale de prelucrare."
+                : "Lipsește registrul RoPA cerut de GDPR Art. 30.",
+              impact: isPartialRopa
+                ? "Auditul nu poate demonstra ce prelucrări există azi și cine primește datele."
+                : "Lipsește o evidență centrală a prelucrărilor de date personale, cu risc GDPR și audit slab.",
+              action: "Completează sau actualizează registrul RoPA direct din CompliAI.",
+              generatedAsset: "Registru de Prelucrări (RoPA)",
+              humanStep: "Confirmă că activitățile, categoriile de date, temeiurile și destinatarii reflectă situația reală.",
+              closureEvidence: "Registrul RoPA completat, confirmat și salvat la dosar.",
+            },
+          }
+        )
+      )
+    }
     if (answers.hasRetentionSchedule !== "yes") {
       findings.push(
         makeFinding(
@@ -960,6 +1005,14 @@ export function buildDocumentRequests(answers: FullIntakeAnswers): DocumentReque
 
   if (isPositive(answers.processesPersonalData)) {
     docs.push({ id: "dsar-procedure", label: "Procedură DSAR", priority: "recommended", category: "GDPR" })
+    if (answers.hasRopaRegistry !== "yes") {
+      docs.push({
+        id: "ropa",
+        label: "Registru de prelucrări (RoPA)",
+        priority: "required",
+        category: "GDPR",
+      })
+    }
     if (answers.hasRetentionSchedule !== "yes") {
       docs.push({
         id: "retention-policy",
@@ -987,6 +1040,9 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
       f.id === "intake-site-privacy-policy" ||
       f.id === "intake-b2c-privacy"
   )
+  const ropaFinding = findings.find(
+    (f) => f.id === "intake-gdpr-ropa-missing" || f.id === "intake-gdpr-ropa-update"
+  )
   const aiFinding = findings.find((f) => f.id === "intake-ai-missing-policy")
   const vendorDpaFinding = findings.find((f) => f.id === "intake-vendor-no-dpa")
   const vendorPackFinding = findings.find((f) => f.id === "intake-vendor-missing-docs")
@@ -997,6 +1053,14 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
       label: "Generează prima politică GDPR",
       href: `${dashboardRoutes.resolve}/${privacyFinding.id}?action=generate`,
       estimatedMinutes: 3,
+    }
+  }
+
+  if (ropaFinding) {
+    return {
+      label: "Deschide registrul RoPA în cockpit",
+      href: `${dashboardRoutes.resolve}/${ropaFinding.id}`,
+      estimatedMinutes: 4,
     }
   }
 
