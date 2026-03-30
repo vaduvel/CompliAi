@@ -73,6 +73,14 @@ describe("classifyFinding", () => {
     expect(result.findingTypeId).toBe("GDPR-010")
   })
 
+  it("mapează GDPR + ropa → GDPR-004", () => {
+    const result = classifyFinding(
+      makeFinding({ category: "GDPR", suggestedDocumentType: "ropa" })
+    )
+    expect(result.findingTypeId).toBe("GDPR-004")
+    expect(result.framework).toBe("GDPR")
+  })
+
   it("mapează finding-ul intake privacy policy → GDPR-001", () => {
     const result = classifyFinding(
       makeFinding({
@@ -157,6 +165,10 @@ describe("classifyFinding", () => {
     )
     expect(result.findingTypeId).toBe("GDPR-021")
     expect(result.framework).toBe("GDPR")
+  })
+
+  it("tratează GDPR-004 ca finding documentar", () => {
+    expect(getSmartResolveExecutionClass("GDPR-004")).toBe("documentary")
   })
 
   it("mapează un vendor cunoscut din text pentru flow DPA", () => {

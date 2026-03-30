@@ -194,6 +194,22 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("ropaFlow") === "done") {
+      const ropaDocId = searchParams.get("ropaDocId")
+      const ropaNote = searchParams.get("evidenceNote") ?? ""
+      const ropaChecklist = searchParams.get("checklist")?.split(",").filter(Boolean) ?? []
+      if (ropaDocId) {
+        void updateStatus("resolved", {
+          generatedDocumentId: ropaDocId,
+          evidenceNote: decodeURIComponent(ropaNote) || undefined,
+          confirmationChecklist: ropaChecklist.length > 0 ? ropaChecklist : undefined,
+        })
+      } else {
+        setStatusFeedback(
+          "Ai revenit din RoPA. Revizuiește dovada precompletată și închide cazul doar dacă registrul de prelucrări reflectă situația reală."
+        )
+      }
+    }
     if (searchParams.get("assessmentFlow") === "done") {
       setStatusFeedback(
         "Ai revenit din evaluarea NIS2. Revizuiește dovada precompletată și închide cazul doar dacă assessment-ul salvat reflectă situația reală."
@@ -312,6 +328,7 @@ export default function FindingDetailPage() {
       revalidationConfirmed?: boolean
       newReviewDateISO?: string
       generatedDocumentId?: string
+      confirmationChecklist?: string[]
     }
   ) {
     if (!finding) return
@@ -329,6 +346,7 @@ export default function FindingDetailPage() {
           evidenceNote: options?.evidenceNote,
           revalidationConfirmed: options?.revalidationConfirmed,
           newReviewDateISO: options?.newReviewDateISO,
+          confirmationChecklist: options?.confirmationChecklist,
         }),
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
@@ -1013,6 +1031,30 @@ export default function FindingDetailPage() {
       )}
 
       {documentaryGeneratorVisible && generatorDocumentType ? (
+        generatorDocumentType === "ropa" ? (
+          <Card className="border-eos-primary/25 bg-eos-surface-variant">
+            <CardContent className="px-5 py-5 sm:px-6 sm:py-6 space-y-4">
+              <div className="flex items-center gap-2 text-base font-semibold text-eos-text">
+                <FileText className="size-4 text-eos-primary" strokeWidth={2} />
+                Registru de Prelucrări (RoPA)
+              </div>
+              <p className="text-sm text-eos-text-muted">
+                Completezi registrul de prelucrări în pagină dedicată, apoi te întorci în cockpit cu dovada atașată.
+              </p>
+              <Button
+                className="gap-2"
+                onClick={() => {
+                  router.push(
+                    `/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/resolve/${encodeURIComponent(finding.id)}`)}`
+                  )
+                }}
+              >
+                <FileText className="size-3.5" strokeWidth={2} />
+                Deschide RoPA
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <GeneratorDrawer
           open
           findingStatus={status}
@@ -1048,6 +1090,7 @@ export default function FindingDetailPage() {
             refetchFinding()
           }}
         />
+        )
       ) : null}
 
 

@@ -16,6 +16,7 @@ export const dashboardRoutes = {
   nis2Dnsc: "/dashboard/nis2/inregistrare-dnsc",
   agents: "/dashboard/agents",
   dsar: "/dashboard/dsar",
+  ropa: "/dashboard/ropa",
   fiscal: "/dashboard/fiscal",
   vendorReview: "/dashboard/vendor-review",
   // Dosar unificat — Wave 1 cleanup
@@ -63,6 +64,7 @@ export const dashboardRouteGroups = {
     dashboardRoutes.policies,
     dashboardRoutes.trustCenter,
     dashboardRoutes.generator,
+    dashboardRoutes.ropa,
   ],
   settings: [dashboardRoutes.settings],
 } as const

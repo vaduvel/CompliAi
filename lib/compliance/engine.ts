@@ -200,7 +200,8 @@ function normalizeGeneratedDocuments(
         item.documentType === "hr-internal-procedures" ||
         item.documentType === "reges-correction-brief" ||
         item.documentType === "contract-template" ||
-        item.documentType === "deletion-attestation"
+        item.documentType === "deletion-attestation" ||
+        item.documentType === "ropa"
           ? item.documentType
           : null
       const title = typeof item.title === "string" ? item.title.trim() : ""

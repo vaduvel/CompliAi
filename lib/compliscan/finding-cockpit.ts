@@ -20,6 +20,7 @@ export const FINDING_DOCUMENT_LABELS: Record<string, string> = {
   "reges-correction-brief": "Brief corecție REGES",
   "contract-template": "Contract-cadru",
   "deletion-attestation": "Atestare ștergere / anonimizare",
+  "ropa": "Registru de Prelucrări (RoPA)",
 }
 
 export function getSuggestedDocumentLabel(documentType?: string | null) {

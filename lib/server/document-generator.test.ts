@@ -96,4 +96,27 @@ describe("document generator fallback", () => {
 
     expect(validation.status).toBe("valid")
   })
+
+  it("returns a valid ropa fallback when Gemini is unavailable", async () => {
+    delete process.env.GEMINI_API_KEY
+
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
+      documentType: "ropa",
+      orgName: "CompliAI Test SRL",
+      orgCui: "RO12345678",
+      dpoEmail: "dpo@example.com",
+    })
+
+    expect(document.llmUsed).toBe(false)
+
+    const validation = validateGeneratedDocumentEvidence({
+      documentType: "ropa",
+      title: document.title,
+      content: document.content,
+      orgName: "CompliAI Test SRL",
+    })
+
+    expect(validation.status).toBe("valid")
+  })
 })

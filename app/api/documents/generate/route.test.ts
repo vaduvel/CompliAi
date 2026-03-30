@@ -42,7 +42,9 @@ vi.mock("@/lib/server/document-generator", () => ({
     { id: "dpa" },
     { id: "nis2-incident-response" },
     { id: "ai-governance" },
+    { id: "ropa" },
   ],
+  getGeneratedDocumentTitle: vi.fn((input: { orgName: string }) => `Registru de Prelucrări (RoPA) — ${input.orgName}`),
   generateDocument: mocks.generateDocumentMock,
 }))
 
@@ -160,5 +162,40 @@ describe("POST /api/documents/generate", () => {
     expect(body.code).toBe("INVALID_DOCUMENT_TYPE")
     expect(mocks.generateDocumentMock).not.toHaveBeenCalled()
     expect(mocks.mutateStateMock).not.toHaveBeenCalled()
+  })
+
+  it("acceptă conținutul pre-generat pentru ROPA fără să mai cheme generatorul LLM", async () => {
+    let saved: unknown = null
+    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
+      saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
+      return saved
+    })
+
+    const markdown = "# Registru de Prelucrări (RoPA)\n\n| Activitate | Scop |\n| --- | --- |\n| Facturare | Executare contract |"
+
+    const res = await POST(
+      makeRequest({
+        documentType: "ropa",
+        orgName: "CompliScan SRL",
+        sourceFindingId: "finding-ropa-1",
+        pregeneratedContent: markdown,
+      })
+    )
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.title).toBe("Registru de Prelucrări (RoPA) — CompliScan SRL")
+    expect(body.content).toBe(markdown)
+    expect(mocks.generateDocumentMock).not.toHaveBeenCalled()
+    expect((saved as { generatedDocuments: Array<Record<string, unknown>> }).generatedDocuments[0]).toEqual(
+      expect.objectContaining({
+        documentType: "ropa",
+        title: "Registru de Prelucrări (RoPA) — CompliScan SRL",
+        content: markdown,
+        sourceFindingId: "finding-ropa-1",
+        approvalStatus: "draft",
+        validationStatus: "pending",
+      })
+    )
   })
 })

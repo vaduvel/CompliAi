@@ -40,6 +40,7 @@ export type DashboardNavId =
   | "partner"
   | "whistleblowing"
   | "dora"
+  | "ropa"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -200,6 +201,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     items: [
       { id: "politici", label: "Politici interne", href: dashboardRoutes.policies, icon: BookOpen },
       { id: "generator", label: "Drafturi asistate", href: dashboardRoutes.generator, icon: Sparkles },
+      { id: "ropa", label: "Registru RoPA", href: dashboardRoutes.ropa, icon: FileSearch, matchers: [dashboardRoutes.ropa] },
     ],
   },
   {

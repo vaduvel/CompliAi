@@ -97,6 +97,51 @@ describe("normalizeComplianceState", () => {
     expect(normalized.generatedDocuments[0]?.adoptionEvidenceNote).toBe("Trimis la semnare către client.")
   })
 
+  it("păstrează documentele ROPA în generatedDocuments", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [
+        {
+          id: "doc-ropa-1",
+          documentType: "ropa",
+          title: "Registru de Prelucrări (RoPA)",
+          generatedAtISO: "2026-03-30T16:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-ropa-1",
+          validationStatus: "passed",
+          validatedAtISO: "2026-03-30T16:05:00.000Z",
+        },
+      ],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.generatedDocuments).toHaveLength(1)
+    expect(normalized.generatedDocuments[0]?.documentType).toBe("ropa")
+    expect(normalized.generatedDocuments[0]?.sourceFindingId).toBe("finding-ropa-1")
+  })
+
   it("normalizează reconcilierea REGES și elimină intrările goale", () => {
     const normalized = normalizeComplianceState({
       highRisk: 0,
