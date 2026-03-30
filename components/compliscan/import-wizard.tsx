@@ -538,10 +538,16 @@ export function ImportWizard({
       })
 
       const data = (await response.json()) as {
-        results: Array<{ ok: boolean; orgId?: string; orgName: string; tags?: string[]; error?: string }>
+        results?: Array<{ ok: boolean; orgId?: string; orgName: string; tags?: string[]; error?: string }>
+        error?: string
       }
 
-      setImportResults(data.results ?? [])
+      if (!response.ok) {
+        const errMsg = data.error ?? `Eroare server (${response.status})`
+        setImportResults(confirmedRows.map((r) => ({ ok: false, orgName: r.orgName, error: errMsg })))
+      } else {
+        setImportResults(data.results ?? [])
+      }
     } catch {
       setImportResults([{ ok: false, orgName: "Import", error: "Eroare de rețea" }])
     } finally {

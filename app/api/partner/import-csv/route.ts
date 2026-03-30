@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     }
 
     const activeMemberships = (await listUserMemberships(session.userId)).filter(
-      (membership) => membership.status === "active"
+      (membership) => membership.status === "active" && membership.role === "partner_manager"
     )
     const activeOrgIds = Array.from(new Set(activeMemberships.map((membership) => membership.orgId)))
     const partnerPlanStatus = await getPartnerAccountPlanStatus({

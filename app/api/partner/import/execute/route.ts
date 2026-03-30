@@ -53,9 +53,10 @@ export async function POST(request: Request) {
       return jsonError("Maximum 50 de firme per import.", 400, "TOO_MANY_ROWS")
     }
 
-    // Plan capacity check
+    // Plan capacity check — only count client orgs (partner_manager), not the
+    // partner's own org (owner), which shouldn't consume the client portfolio limit.
     const activeMemberships = (await listUserMemberships(session.userId)).filter(
-      (m) => m.status === "active"
+      (m) => m.status === "active" && m.role === "partner_manager"
     )
     const activeOrgIds = Array.from(new Set(activeMemberships.map((m) => m.orgId)))
     const planStatus = await getPartnerAccountPlanStatus({
