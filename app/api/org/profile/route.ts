@@ -183,7 +183,7 @@ export async function POST(request: Request) {
     // Auto A — write orgKnowledge from org profile (sector + tools)
     const profileSavedAtISO = orgProfile.completedAtISO
     const profileDateLabel = new Date(profileSavedAtISO).toLocaleDateString("ro-RO")
-    void mutateState((s) => {
+    await mutateState((s) => {
       const items = s.orgKnowledge?.items ?? []
       const newItems = []
       const sectorLabel = SECTOR_LABELS[orgProfile.sector] ?? orgProfile.sector

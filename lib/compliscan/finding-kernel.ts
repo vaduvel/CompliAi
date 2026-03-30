@@ -2393,14 +2393,24 @@ function getWorkflowLink(
         label: "Validează și repară XML-ul",
       }
     }
-    case "EF-005": {
+    case "EF-004": {
       const search = new URLSearchParams({
-        tab: "validator",
+        tab: "status",
         findingId: record.id,
       })
       return {
         href: `/dashboard/fiscal?${search.toString()}`,
-        label: "Validează XML-ul înainte de transmitere",
+        label: "Deschide protocolul fiscal",
+      }
+    }
+    case "EF-005": {
+      const search = new URLSearchParams({
+        tab: "status",
+        findingId: record.id,
+      })
+      return {
+        href: `/dashboard/fiscal?${search.toString()}`,
+        label: "Deschide protocolul fiscal",
       }
     }
     default:

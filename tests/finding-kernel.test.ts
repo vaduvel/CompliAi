@@ -496,9 +496,9 @@ describe("getResolveFlowRecipe", () => {
     )
 
     expect(recipe.findingTypeId).toBe("EF-005")
-    expect(recipe.workflowLink?.href).toContain("/dashboard/fiscal?tab=validator")
+    expect(recipe.workflowLink?.href).toContain("/dashboard/fiscal?tab=status")
     expect(recipe.workflowLink?.href).toContain("findingId=efactura-risk-unsubmitted-001")
-    expect(recipe.workflowLink?.label).toBe("Validează XML-ul înainte de transmitere")
+    expect(recipe.workflowLink?.label).toBe("Deschide protocolul fiscal")
   })
 
   it("returnează handoff real pentru NIS2-001 către wizardul de eligibilitate", () => {

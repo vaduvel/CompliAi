@@ -73,4 +73,27 @@ describe("document generator fallback", () => {
 
     expect(validation.status).toBe("valid")
   })
+
+  it("returns a valid retention-policy fallback when Gemini is unavailable", async () => {
+    delete process.env.GEMINI_API_KEY
+
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
+      documentType: "retention-policy",
+      orgName: "CompliAI Test SRL",
+      dpoEmail: "dpo@example.com",
+      dataFlows: "lead-uri 12 luni, clienti activi 3 ani dupa contract, loguri suport 90 zile",
+    })
+
+    expect(document.llmUsed).toBe(false)
+
+    const validation = validateGeneratedDocumentEvidence({
+      documentType: "retention-policy",
+      title: document.title,
+      content: document.content,
+      orgName: "CompliAI Test SRL",
+    })
+
+    expect(validation.status).toBe("valid")
+  })
 })

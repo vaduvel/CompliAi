@@ -24,12 +24,15 @@ import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
+import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
+import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import type { ETVADiscrepancy, ETVADiscrepancyType, ETVADiscrepancyStatus } from "@/lib/compliance/etva-discrepancy"
 import { ETVA_TYPE_LABELS, ETVA_STATUS_LABELS } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord, FilingType, FilingStatus, FilingDisciplineScore } from "@/lib/compliance/filing-discipline"
 import { FILING_TYPE_LABELS, FILING_STATUS_LABELS } from "@/lib/compliance/filing-discipline"
-import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
+import { buildFiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
+import type { EFacturaValidationRecord, EFacturaXmlRepairRecord, ScanFinding } from "@/lib/compliance/types"
 
 // ── Severity badge helpers ───────────────────────────────────────────────────
 
@@ -728,8 +731,32 @@ export default function FiscalPage() {
   const [validatorBusy, setValidatorBusy] = useState(false)
   const [repairBusy, setRepairBusy] = useState(false)
   const [validations, setValidations] = useState<EFacturaValidationRecord[]>([])
-  const fromCockpit = (tabParam === "spv" || tabParam === "validator") && Boolean(findingIdParam)
-  const defaultTab = tabParam === "spv" || tabParam === "validator" ? tabParam : "discrepante"
+  const [statusFinding, setStatusFinding] = useState<ScanFinding | null>(null)
+  const [statusLoading, setStatusLoading] = useState(false)
+  const fromCockpit = (tabParam === "spv" || tabParam === "validator" || tabParam === "status") && Boolean(findingIdParam)
+  const defaultTab = tabParam === "spv" || tabParam === "validator" || tabParam === "status" ? tabParam : "discrepante"
+
+  useEffect(() => {
+    if (tabParam !== "status" || !findingIdParam) {
+      setStatusFinding(null)
+      return
+    }
+
+    setStatusLoading(true)
+    fetch(`/api/findings/${encodeURIComponent(findingIdParam)}`, { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Nu am putut încărca finding-ul fiscal.")
+        return response.json() as Promise<{ finding: ScanFinding }>
+      })
+      .then((payload) => {
+        setStatusFinding(payload.finding)
+      })
+      .catch(() => {
+        setStatusFinding(null)
+        toast.error("Nu am putut încărca protocolul fiscal.")
+      })
+      .finally(() => setStatusLoading(false))
+  }, [findingIdParam, tabParam])
 
   async function handleValidateXml(input: { documentName: string; xml: string }) {
     setValidatorBusy(true)
@@ -803,6 +830,12 @@ export default function FiscalPage() {
     }
   }
 
+  const statusRecipe = statusFinding ? buildCockpitRecipe(statusFinding) : null
+  const statusGuide =
+    statusFinding && statusRecipe
+      ? buildFiscalStatusInterpreterGuide(statusRecipe.findingTypeId, statusFinding)
+      : null
+
   return (
     <div className="space-y-8">
       {fromCockpit && (
@@ -815,6 +848,8 @@ export default function FiscalPage() {
             <p className="mt-0.5 text-xs text-eos-text-muted">
               {tabParam === "validator"
                 ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliAI când revii în finding cu confirmarea retransmiterii și statusul SPV."
+                : tabParam === "status"
+                  ? "Urmează protocolul fiscal de mai jos, apoi revino în cockpit cu nota pregătită și dovada finală din SPV."
                 : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
             </p>
           </div>
@@ -863,6 +898,13 @@ export default function FiscalPage() {
             SPV Check
           </TabsTrigger>
           <TabsTrigger
+            value="status"
+            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+          >
+            <Clock className="mr-1.5 size-3.5" />
+            Protocol fiscal
+          </TabsTrigger>
+          <TabsTrigger
             value="validator"
             className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
           >
@@ -888,6 +930,29 @@ export default function FiscalPage() {
 
         <TabsContent value="spv">
           <SpvCheckTab />
+        </TabsContent>
+
+        <TabsContent value="status">
+          {statusLoading ? (
+            <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted">
+              <Loader2 className="size-4 animate-spin" />
+              Se încarcă protocolul fiscal...
+            </div>
+          ) : !findingIdParam ? (
+            <EmptyState
+              icon={Clock}
+              title="Deschide protocolul fiscal dintr-un finding"
+              label="Tab-ul acesta se folosește când vii din cockpit pentru EF-004 sau EF-005."
+            />
+          ) : !statusGuide ? (
+            <EmptyState
+              icon={AlertTriangle}
+              title="Protocol indisponibil pentru finding-ul curent"
+              label="Protocolul fiscal din această suprafață este disponibil momentan pentru cazurile EF-004 și EF-005."
+            />
+          ) : (
+            <FiscalStatusInterpreterCard guide={statusGuide} findingId={findingIdParam} />
+          )}
         </TabsContent>
 
         <TabsContent value="validator">

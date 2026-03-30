@@ -386,12 +386,18 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
 
   async function handleGenerateAuditPack() {
     await withBusyOperation(async () => {
-      const response = await fetch("/api/exports/audit-pack/client", { cache: "no-store" })
+      const response = await fetch("/api/exports/audit-pack/pdf", { cache: "no-store" })
       if (!response.ok) throw new Error("Nu am putut genera Audit Pack-ul.")
-      const html = await response.text()
-      openHtmlPreview(html)
-      toast.success("Audit Pack deschis", {
-        description: "Poti folosi print din browser pentru PDF si distribuire catre stakeholderi.",
+      
+      const blob = await response.blob()
+      const fileName =
+        getFileNameFromDisposition(response.headers.get("Content-Disposition")) ||
+        "audit-pack-dosar.pdf"
+
+      downloadBlob(blob, fileName)
+      
+      toast.success("Audit Pack PDF Descarcat", {
+        description: "Dosarul complet a fost arhivat ca PDF pentru trimiterea catre autoritati.",
       })
     }).catch((err) => {
       toast.error("Export Audit Pack esuat", {

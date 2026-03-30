@@ -83,4 +83,36 @@ Text suficient pentru lungime auditabilă, dar fără numele procesatorului.
     expect(result.status).toBe("invalid")
     expect(result.checks.find((check) => check.id === "specific-context")?.passed).toBe(false)
   })
+
+  it("acceptă un draft de retenție când headingul are variații minore față de titlul canonic", () => {
+    const result = validateGeneratedDocumentEvidence({
+      documentType: "retention-policy",
+      title: "Politică și Matrice de Retenție a Datelor",
+      orgName: "Smoke Retention SRL",
+      content: `# Politica și Matricea de Retenție a Datelor – Smoke Retention SRL
+
+**Ultima actualizare:** 29 martie 2026
+
+## Politica Generală de Retenție
+Smoke Retention SRL păstrează datele doar atât cât este necesar și documentează orice excepție de la termenul standard.
+
+## Matrice orientativă
+Clienți activi, lead-uri, HR, contabilitate și loguri operaționale au termene distincte și trigger de ștergere sau anonimizare.
+
+## Execuție și dovadă operațională
+Ștergerea sau anonimizarea lasă urmă prin job executat, export de control, verificare periodică și persoană responsabilă.
+
+## Excepții
+Litigiile, investigațiile și arhivarea legală suspendă termenul standard doar dacă sunt documentate separat și aprobate.
+
+⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială.
+
+## Notă suplimentară
+Acest paragraf există pentru a păstra draftul suficient de lung și de clar încât verificarea rapidă să-l poată trata drept o dovadă auditabilă în contextul unui flow asistat operațional.
+`,
+    })
+
+    expect(result.status).toBe("valid")
+    expect(result.checks.find((check) => check.id === "structure")?.passed).toBe(true)
+  })
 })

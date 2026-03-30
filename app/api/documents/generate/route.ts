@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     if (input.documentType === "privacy-policy" && input.dataFlows) {
       const knowledgeAtISO = result.generatedAtISO
       const dateLabel = new Date(knowledgeAtISO).toLocaleDateString("ro-RO")
-      void mutateState((s) => {
+      await mutateState((s) => {
         const knowledgeItems = s.orgKnowledge?.items ?? []
         const item = makeKnowledgeItem(
           "processing-purposes",

@@ -12,7 +12,7 @@ import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { FeedbackPrompt } from "@/components/compliscan/feedback-prompt"
-import { useCockpitData } from "@/components/compliscan/use-cockpit"
+import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 import { DOCUMENT_TYPES, type DocumentType, type GeneratedDocument } from "@/lib/server/document-generator"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
@@ -204,6 +204,7 @@ function DocumentPreview({ content }: { content: string }) {
 
 export default function GeneratorPage() {
   const cockpit = useCockpitData()
+  const { reloadDashboard } = useCockpitMutations()
   const router = useRouter()
   const searchParams = useSearchParams()
   const findingId = searchParams.get("findingId")
@@ -366,6 +367,7 @@ export default function GeneratorPage() {
         )
       }
       toast.success(`${doc.title} generat`)
+      void reloadDashboard()
     } catch (err) {
       toast.error("Eroare la generare", {
         description: err instanceof Error ? err.message : "Încearcă din nou.",

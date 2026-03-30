@@ -251,6 +251,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("fiscalStatusFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din protocolul fiscal. Revizuiește nota precompletată și închide cazul doar dacă verificarea SPV, transmiterea sau retransmiterea sunt documentate clar."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
     if (searchParams.get("jobDescriptionPackFlow") === "done") {
       setStatusFeedback(
         "Ai revenit din pachetul HR. Revizuiește dovada precompletată și închide cazul doar dacă modelul de fișă, inventarul de roluri și planul de rollout sunt clare pentru rolurile reale din firmă."
@@ -727,8 +736,10 @@ export default function FindingDetailPage() {
                 ? "Confirmă și scanează site-ul"
                 : recipe.findingTypeId === "EF-003"
                   ? "Confirmă și deschide validatorul XML"
+                  : recipe.findingTypeId === "EF-004"
+                    ? "Confirmă și deschide protocolul fiscal"
                   : recipe.findingTypeId === "EF-005"
-                    ? "Confirmă și validează XML-ul"
+                    ? "Confirmă și pregătește transmiterea"
                 : recipe.findingTypeId === "GDPR-019"
                   ? "Confirmă și deschide breach flow"
                   : recipe.findingTypeId === "NIS2-015"

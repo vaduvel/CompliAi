@@ -31,6 +31,38 @@ function normalizeHostname(value: string) {
     .toLowerCase()
 }
 
+function normalizeLooseText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(si|de|a|al|ale|la|cu|din)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function hasAuditTitleAnchor(content: string, title: string) {
+  const normalizedTitle = normalizeLooseText(title)
+  if (!normalizedTitle) return false
+
+  const normalizedContent = normalizeLooseText(content)
+  if (normalizedContent.includes(normalizedTitle)) {
+    return true
+  }
+
+  const firstHeading = content.match(/^#\s+(.+)$/m)?.[1] ?? ""
+  const normalizedHeading = normalizeLooseText(firstHeading)
+  if (!normalizedHeading) return false
+
+  const titleTokens = normalizedTitle
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 4)
+
+  return titleTokens.length > 0 && titleTokens.every((token) => normalizedHeading.includes(token))
+}
+
 function buildSpecificContextCheck(input: GeneratedDocumentValidationInput) {
   const content = input.content.toLowerCase()
 
@@ -65,7 +97,6 @@ export function validateGeneratedDocumentEvidence(
 ): GeneratedDocumentValidationResult {
   const normalizedContent = input.content.trim()
   const contentLower = normalizedContent.toLowerCase()
-  const titleLower = input.title.trim().toLowerCase()
   const orgLower = input.orgName.trim().toLowerCase()
 
   const checks: GeneratedDocumentValidationCheck[] = [
@@ -76,7 +107,7 @@ export function validateGeneratedDocumentEvidence(
       passed:
         normalizedContent.length >= 400 &&
         /^#\s+/m.test(normalizedContent) &&
-        contentLower.includes(titleLower),
+        hasAuditTitleAnchor(normalizedContent, input.title),
     },
     {
       id: "dating",

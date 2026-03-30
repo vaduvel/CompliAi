@@ -149,7 +149,7 @@ export async function PATCH(
 
       // MULT B — write vendor name to orgKnowledge when review is closed
       const dateLabel = new Date(closedAtISO).toLocaleDateString("ro-RO")
-      void mutateState((s) => {
+      await mutateState((s) => {
         const knowledgeItems = s.orgKnowledge?.items ?? []
         const vendorItem = makeKnowledgeItem(
           "vendors",
