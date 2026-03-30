@@ -284,7 +284,7 @@ describe("POST /api/org/profile — CUI", () => {
     expect(findings.filter((finding) => finding.id.startsWith("intake-")).length).toBeGreaterThan(0)
   })
 
-  it("curăță findings-urile intake vechi când profilul se salvează fără intakeAnswers", async () => {
+  it("păstrează toate findings-urile (inclusiv intake) când profilul se salvează fără intakeAnswers", async () => {
     let saved: unknown = null
     let callCount = 0
     vi.mocked(mutateState).mockImplementation(async (fn) => {
@@ -309,12 +309,13 @@ describe("POST /api/org/profile — CUI", () => {
 
     const state = saved as {
       findings: { id: string }[]
-      intakeAnswers?: Record<string, unknown>
-      intakeCompletedAtISO?: string
+      intakeAnswers?: Record<string, unknown> | null
     }
-    expect(state.findings).toEqual([{ id: "manual-existing" }])
+    expect(state.findings).toEqual([
+      { id: "intake-old-a" },
+      { id: "manual-existing" },
+    ])
     expect(state.intakeAnswers).toBeUndefined()
-    expect(state.intakeCompletedAtISO).toBeUndefined()
   })
 
   it("păstrează prefill-ul doar când CUI-ul salvat se potrivește cu lookup-ul anterior", async () => {

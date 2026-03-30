@@ -154,8 +154,17 @@ export async function POST(request: Request) {
           ? (current.orgProfilePrefill as OrgProfilePrefill)
           : undefined
 
-      const baseFindings = intakeAnswers ? [...previousFindings, ...initialFindings] : previousFindings
-      const allFindings = payTransparencyFinding ? [...baseFindings, payTransparencyFinding] : baseFindings
+      const baseFindings = intakeAnswers
+        ? [...previousFindings, ...initialFindings]
+        : current.findings ?? []
+      const hasPayTransparency = (current.findings ?? []).some(
+        (f) => f.id === PAY_TRANSPARENCY_FINDING_ID
+      )
+      const allFindings = hasPayTransparency
+        ? baseFindings
+        : payTransparencyFinding
+          ? [...baseFindings, payTransparencyFinding]
+          : baseFindings
 
       return {
         ...current,
