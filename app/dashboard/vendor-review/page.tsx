@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ShieldAlert,
+  ClipboardCheck,
   ChevronRight,
   ChevronDown,
   Clock,
@@ -46,6 +47,7 @@ import {
   VENDOR_CATEGORY_LABELS,
   type VendorFingerprint,
 } from "@/lib/compliance/vendor-library"
+import { buildVendorLifecycleSummary } from "@/lib/compliance/vendor-review-lifecycle"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1003,11 +1005,21 @@ export default function VendorReviewPage() {
   const existingVendorIds = new Set(
     reviews.filter((r) => r.status !== "closed").map((r) => r.vendorId),
   )
+  const lifecycleSummary = buildVendorLifecycleSummary(reviews)
   const canReturnFromPack =
     Boolean(returnTo) &&
     packChecklist.length > 0 &&
     packChecklist.every(Boolean) &&
     reviews.length > 0
+
+  async function handleCopyLifecycleNote() {
+    try {
+      await navigator.clipboard.writeText(lifecycleSummary.reminderNote)
+      toast.success("Nota de follow-up vendor a fost copiată.")
+    } catch {
+      toast.error("Nu am putut copia nota de follow-up vendor.")
+    }
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -1119,6 +1131,103 @@ export default function VendorReviewPage() {
               </CardContent>
             </Card>
           </div>
+
+          {reviews.length > 0 ? (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Radar lifecycle vendor</CardTitle>
+                <p className="text-sm text-eos-text-muted">
+                  Aici vezi rapid ce review-uri au expirat, ce expiră curând și ce follow-up-uri au rămas încă active după pachetul inițial.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={lifecycleSummary.overdue.length > 0 ? "destructive" : "outline"}>
+                    {lifecycleSummary.overdue.length} expirate
+                  </Badge>
+                  <Badge variant={lifecycleSummary.dueSoon.length > 0 ? "warning" : "outline"}>
+                    {lifecycleSummary.dueSoon.length} expiră în 30 zile
+                  </Badge>
+                  <Badge variant={lifecycleSummary.activeFollowUp.length > 0 ? "secondary" : "outline"}>
+                    {lifecycleSummary.activeFollowUp.length} în follow-up
+                  </Badge>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                      Expirate
+                    </p>
+                    {lifecycleSummary.overdue.length > 0 ? (
+                      <ul className="space-y-1 text-sm text-eos-text-muted">
+                        {lifecycleSummary.overdue.slice(0, 4).map((review) => (
+                          <li key={review.id} className="flex gap-2">
+                            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-error" />
+                            <span>{review.vendorName}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-eos-text-muted">Niciun review expirat.</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                      Expiră curând
+                    </p>
+                    {lifecycleSummary.dueSoon.length > 0 ? (
+                      <ul className="space-y-1 text-sm text-eos-text-muted">
+                        {lifecycleSummary.dueSoon.slice(0, 4).map((review) => (
+                          <li key={review.id} className="flex gap-2">
+                            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-warning" />
+                            <span>
+                              {review.vendorName}
+                              {review.nextReviewDueISO
+                                ? ` · ${new Date(review.nextReviewDueISO).toLocaleDateString("ro-RO")}`
+                                : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-eos-text-muted">Niciun review cu termen apropiat.</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                      Follow-up activ
+                    </p>
+                    {lifecycleSummary.activeFollowUp.length > 0 ? (
+                      <ul className="space-y-1 text-sm text-eos-text-muted">
+                        {lifecycleSummary.activeFollowUp.slice(0, 4).map((review) => (
+                          <li key={review.id} className="flex gap-2">
+                            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-eos-primary" />
+                            <span>{review.vendorName} · {REVIEW_STATUS_LABELS[review.status]}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-eos-text-muted">Nu există follow-up-uri active.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Notă de reminder</p>
+                  <p className="mt-2 text-sm text-eos-text-muted">{lifecycleSummary.reminderNote}</p>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void handleCopyLifecycleNote()}>
+                    <ClipboardCheck className="size-3.5" strokeWidth={2} />
+                    Copiază nota de follow-up
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {/* Vendor picker */}
           {showPicker && (

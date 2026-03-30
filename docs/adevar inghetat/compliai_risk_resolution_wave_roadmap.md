@@ -428,6 +428,19 @@ Status:
 - remindere
 - follow-up automat
 
+Status:
+
+- `v1 implementat în produs`
+- `Vendor Review` are acum un `Radar lifecycle vendor` care face vizibile:
+  - review-urile expirate
+  - review-urile care expiră în următoarele 30 de zile
+  - review-urile rămase în follow-up activ
+- există și o notă de reminder gata de copiat pentru execuție operațională
+- ce rămâne pentru `Wave 3 complet`:
+  - remindere externe reale
+  - follow-up automat mai strict
+  - legare cu expirările documentelor vendor / DPA
+
 ## Tabel Prioritate / Impact / Dificultate
 
 | Inițiativă | Riscuri țintite | Impact | Dificultate | Reutilizare cod | Prioritate |
