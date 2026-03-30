@@ -60,6 +60,8 @@ const VALID_INTAKE_ANSWERS: IntakeAnswer[] = [
 
 type OrgProfileRequestBody = Partial<OrgProfile> & {
   intakeAnswers?: Partial<FullIntakeAnswers>
+  dpoEmail?: string
+  certifications?: string[]
 }
 
 export async function GET(request: Request) {
@@ -110,6 +112,15 @@ export async function POST(request: Request) {
       ? currentPrefill
       : undefined
 
+    const dpoEmail =
+      typeof body.dpoEmail === "string" && body.dpoEmail.trim()
+        ? body.dpoEmail.trim()
+        : undefined
+    const certifications =
+      Array.isArray(body.certifications) && body.certifications.length > 0
+        ? (body.certifications as string[]).filter((c) => typeof c === "string" && c.trim())
+        : undefined
+
     const orgProfile: OrgProfile = {
       sector: body.sector,
       employeeCount: body.employeeCount,
@@ -120,6 +131,8 @@ export async function POST(request: Request) {
         : {}),
       ...(cui ? { cui } : {}),
       ...(website ? { website } : {}),
+      ...(dpoEmail ? { dpoEmail } : {}),
+      ...(certifications ? { certifications } : {}),
       completedAtISO: new Date().toISOString(),
     }
 

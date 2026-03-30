@@ -70,6 +70,7 @@ type Props = {
   onBackToModeSelection?: () => void
   completionLabel?: string
   completionHint?: string
+  userMode?: "solo" | "compliance"
 }
 
 const SECTORS = Object.entries(ORG_SECTOR_LABELS) as [OrgSector, string][]
@@ -161,7 +162,15 @@ export function ApplicabilityWizard({
   onBackToModeSelection,
   completionLabel = "Salvează și intră în dashboard",
   completionHint = "La final intri direct în suprafața principală potrivită rolului tău.",
+  userMode = "solo",
 }: Props) {
+  const isCompliance = userMode === "compliance"
+  const accentColor = isCompliance ? "text-eos-success" : "text-eos-primary"
+  const accentBg = isCompliance ? "bg-eos-success" : "bg-eos-primary"
+  const accentBgSoft = isCompliance ? "bg-eos-success-soft border-eos-success/20" : "bg-eos-primary-soft border-eos-border"
+  const accentBorder = isCompliance ? "border-eos-success/20" : "border-eos-border"
+  const accentHoverBg = isCompliance ? "hover:bg-eos-success-soft hover:text-eos-text" : "hover:bg-eos-primary-soft hover:text-eos-text"
+  const accentButtonBg = isCompliance ? "bg-eos-success hover:bg-eos-success" : "bg-eos-primary hover:bg-eos-primary"
   const { track, trackOnce } = useTrackEvent()
   const completedRef = useRef(false)
 
@@ -182,6 +191,8 @@ export function ApplicabilityWizard({
     usesAITools: null,
     requiresEfactura: null,
   })
+  const [dpoEmail, setDpoEmail] = useState("")
+  const [certifications, setCertifications] = useState<string[]>([])
   const [intakeAnswers, setIntakeAnswers] = useState<FullIntakeAnswers>({
     usesAITools: "unknown",
   })
@@ -434,12 +445,15 @@ export function ApplicabilityWizard({
     setSaving(true)
     setError(null)
     try {
+      const trimmedDpoEmail = dpoEmail.trim()
       const res = await fetch("/api/org/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...profileSnapshot,
           intakeAnswers,
+          ...(trimmedDpoEmail ? { dpoEmail: trimmedDpoEmail } : {}),
+          ...(certifications.length > 0 ? { certifications } : {}),
         }),
       })
       if (!res.ok) throw new Error("save failed")
@@ -458,7 +472,7 @@ export function ApplicabilityWizard({
       <div className="px-5 py-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Shield className="h-4 w-4 shrink-0 text-eos-primary" strokeWidth={1.5} />
+            <Shield className={`h-4 w-4 shrink-0 ${accentColor}`} strokeWidth={1.5} />
             <p className="text-sm font-medium text-eos-text-muted">
               {WIZARD_PROGRESS_LABELS[step]}
             </p>
@@ -478,7 +492,7 @@ export function ApplicabilityWizard({
         <div className="mt-4 space-y-1.5">
           <div className="h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
             <div
-              className="h-full bg-eos-primary transition-all duration-300"
+              className={`h-full ${accentBg} transition-all duration-300`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -490,12 +504,16 @@ export function ApplicabilityWizard({
         <div className="mt-5">
           {step === "cui" && (
             <div className="space-y-4">
-              <div className="rounded-eos-lg border border-eos-border bg-eos-primary-soft px-4 py-3">
+              <div className={`rounded-eos-lg border px-4 py-3 ${accentBgSoft}`}>
                 <p className="text-sm font-medium text-eos-text">
-                  CUI-ul sau website-ul precompletează automat profilul și reduc întrebările manuale.
+                  {isCompliance
+                    ? "CUI-ul este obligatoriu pentru analiza de conformitate a organizației."
+                    : "CUI-ul sau website-ul precompletează automat profilul și reduc întrebările manuale."}
                 </p>
                 <p className="mt-1 text-xs text-eos-text-tertiary">
-                  Nu sunt obligatorii, dar scurtează flow-ul și cresc precizia primelor findings.
+                  {isCompliance
+                    ? "Adaugă și website-ul pentru detectarea automată a semnalelor publice."
+                    : "Nu sunt obligatorii, dar scurtează flow-ul și cresc precizia primelor findings."}
                 </p>
               </div>
 
@@ -595,10 +613,29 @@ export function ApplicabilityWizard({
                 </div>
               ) : null}
 
+              {isCompliance && (
+                <div className="space-y-1.5">
+                  <p className="text-sm font-medium text-eos-text">
+                    Email responsabil protecție date (DPO){" "}
+                    <span className="font-normal text-eos-text-tertiary">(opțional)</span>
+                  </p>
+                  <input
+                    type="email"
+                    value={dpoEmail}
+                    onChange={(e) => setDpoEmail(e.target.value)}
+                    placeholder="dpo@organizatia.ro"
+                    className="h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-success/50 transition-colors"
+                  />
+                  <p className="text-xs text-eos-text-tertiary">
+                    Precompletat în Politica de Confidențialitate, DPA-uri și documentele GDPR generate.
+                  </p>
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={() => void handleCuiContinue()}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3 text-sm font-semibold text-eos-text transition hover:bg-eos-primary disabled:opacity-50"
+                className={`flex w-full items-center justify-center gap-2 rounded-eos-lg ${accentButtonBg} py-3 text-sm font-semibold text-eos-text transition disabled:opacity-50`}
               >
                 {prefillLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Continuă
@@ -610,11 +647,11 @@ export function ApplicabilityWizard({
             <div className="flex flex-col items-center justify-center py-14">
               <div className="relative mb-8">
                 <div className="absolute inset-0 rounded-full bg-eos-primary/20 blur-xl" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-eos-border bg-eos-primary-soft">
-                  <Loader2 className="h-7 w-7 animate-spin text-eos-primary" strokeWidth={1.5} />
+                <div className={`relative flex h-16 w-16 items-center justify-center rounded-full border border-eos-border ${accentBgSoft.split(" ")[0]}`}>
+                  <Loader2 className={`h-7 w-7 animate-spin ${accentColor}`} strokeWidth={1.5} />
                 </div>
                 <Sparkles
-                  className="absolute -right-1 -top-1 h-5 w-5 animate-pulse text-eos-primary"
+                  className={`absolute -right-1 -top-1 h-5 w-5 animate-pulse ${accentColor}`}
                   strokeWidth={2}
                 />
               </div>
@@ -864,7 +901,7 @@ export function ApplicabilityWizard({
                   type="button"
                   onClick={handleIntakeStepContinue}
                   disabled={unansweredCurrentStepQuestions.length > 0}
-                  className="rounded-eos-md bg-eos-primary px-4 py-1.5 text-sm font-medium text-eos-text transition hover:bg-eos-primary disabled:opacity-40"
+                  className={`rounded-eos-md ${accentButtonBg} px-4 py-1.5 text-sm font-medium text-eos-text transition disabled:opacity-40`}
                 >
                   Continuă
                 </button>
@@ -894,7 +931,7 @@ export function ApplicabilityWizard({
                 </div>
                 <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
                   <div
-                    className="h-full bg-eos-primary transition-all duration-300"
+                    className={`h-full ${accentBg} transition-all duration-300`}
                     style={{
                       width: `${visibleQuestionCount === 0 ? 100 : (answeredQuestionCount / visibleQuestionCount) * 100}%`,
                     }}
@@ -926,6 +963,46 @@ export function ApplicabilityWizard({
                 </div>
               )}
 
+              {isCompliance && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-eos-text">
+                    Certificări de securitate existente{" "}
+                    <span className="font-normal text-eos-text-tertiary">(opțional)</span>
+                  </p>
+                  <p className="text-xs text-eos-text-tertiary">
+                    Reduce findings-urile redundante pentru ce aveți deja implementat.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["ISO 27001", "SOC 2 Type II", "ISO 9001", "CIS Controls", "TISAX", "Altele"].map((cert) => {
+                      const checked = certifications.includes(cert)
+                      return (
+                        <label
+                          key={cert}
+                          className={[
+                            "flex cursor-pointer items-center gap-2.5 rounded-eos-lg border px-3 py-2.5 text-sm transition-colors",
+                            checked
+                              ? "border-eos-success/30 bg-eos-success-soft text-eos-text"
+                              : "border-eos-border bg-eos-surface-variant text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text",
+                          ].join(" ")}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setCertifications((current) =>
+                                checked ? current.filter((c) => c !== cert) : [...current, cert]
+                              )
+                            }
+                            className="h-3.5 w-3.5 rounded border-eos-border accent-eos-success"
+                          />
+                          {cert}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="rounded-eos-lg border border-yellow-500/20 bg-yellow-500/[0.06] px-4 py-3 text-sm text-yellow-400/80">
                   {error}
@@ -936,7 +1013,7 @@ export function ApplicabilityWizard({
                 type="button"
                 onClick={() => void handleSubmit()}
                 disabled={saving || unansweredQuestions.length > 0}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary disabled:opacity-40"
+                className={`flex w-full items-center justify-center gap-2 rounded-eos-lg ${accentButtonBg} py-3.5 text-sm font-semibold text-eos-text shadow-lg transition disabled:opacity-40`}
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {completionLabel}

@@ -462,6 +462,12 @@ export type ComplianceState = {
   orgKnowledge?: import("@/lib/compliance/org-knowledge").OrgKnowledge
   // ── Fix #7: Async site scan jobs ─────────────────────────────────────────
   siteScanJobs?: Record<string, SiteScanJob>
+  // ── Partner workspace ────────────────────────────────────────────────────
+  partnerWorkspace?: {
+    orgName?: string
+    clientScale?: "1-5" | "5-20" | "20+"
+    configuredAtISO: string
+  }
 }
 
 export type SiteScanSummary = {

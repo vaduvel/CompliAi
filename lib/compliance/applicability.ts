@@ -25,6 +25,8 @@ export type OrgProfile = {
   vatRegistered?: boolean     // semnal fiscal din prefill/ANAF, dacă este disponibil
   cui?: string                // CUI fiscal (opțional) — ex: "RO12345678" sau "12345678"
   website?: string            // website public (opțional) — ex: "https://exemplu.ro"
+  dpoEmail?: string           // email DPO / responsabil protecție date (compliance mode)
+  certifications?: string[]   // certificări existente: "ISO 27001", "SOC 2", etc.
   completedAtISO: string
 }
 
