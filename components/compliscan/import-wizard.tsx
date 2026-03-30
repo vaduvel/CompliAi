@@ -570,27 +570,27 @@ export function ImportWizard({
         setImportResults(createdResults)
       }
 
-      // Phase 3: TRIGGER SEQUENTIAL SCAN (The Smart Part for Consultants)
-      // Only scan firms that were successfully created
+      // Phase 3: Sequential baseline scan — ANAF lookup + intake findings per org
       const successfulOrgs = createdResults.filter(r => r.ok && r.orgId)
       if (successfulOrgs.length > 0) {
         setTotalToScan(successfulOrgs.length)
         setScanningCount(0)
 
-        // Process one by one to avoid hitting Vercel timeouts or API rate limits
-        for (const org of successfulOrgs) {
+        for (let i = 0; i < successfulOrgs.length; i++) {
+          const org = successfulOrgs[i]
+          const matchedRow = confirmedRows.find(r => r.orgName === org.orgName)
           try {
-            setScanningCount(prev => prev + 1)
-            // Trigger the deep scan (CUI + E-Factura + Site)
-            await fetch(`/api/scan?orgId=${org.orgId}`, { 
+            setScanningCount(i + 1)
+            await fetch("/api/partner/import/baseline-scan", {
               method: "POST",
-              headers: { "Content-Type": "application/json" }
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orgId: org.orgId,
+                cui: matchedRow?.cui ?? null,
+              }),
             })
-            // We don't wait for the scan to be 100% finished if it's long, 
-            // but the API endpoint usually kicks off the background job.
-            // If the endpoint is synchronous, the sequence ensures stability.
           } catch (e) {
-            console.error(`Failed to trigger scan for ${org.orgName}`, e)
+            console.error(`Baseline scan failed for ${org.orgName}`, e)
           }
         }
       }
