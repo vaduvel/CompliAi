@@ -389,6 +389,19 @@ Status:
 - comparație
 - reconcilieri
 
+Status:
+
+- `v1 implementat în produs`
+- `REGES` are acum o suprafață de reconciliere în `Documente`:
+  - snapshot intern al angajaților / contractelor
+  - checklist concret pentru verificarea în registrul real
+  - notă de handoff mai bună întoarsă automat în cockpit
+- nu pretindem încă integrare externă cu registrul sau import automat dintr-un HRIS
+- ce rămâne pentru `Wave 3 complet`:
+  - import / upload roster mai structurat
+  - comparație automată între snapshot și registrul exportat
+  - dovadă mai strictă după operarea corecțiilor
+
 ### 3. Integrări fiscale mai adânci
 
 - status live mai bogat

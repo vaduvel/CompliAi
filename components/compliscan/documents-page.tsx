@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, BriefcaseBusiness, FolderOpen, Loader2, Sparkles 
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import { HrRegesReconciliationCard } from "@/components/compliscan/hr-reges-reconciliation-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -67,12 +68,12 @@ const PREPARED_PACK_FALLBACKS: Record<
   "reges-correction": {
     title: "Pachet minim corecție REGES",
     summary:
-      "Pregătim brief-ul de corecție, checklistul pentru contabil / HR și mesajul de handoff, ca remedierea reală să nu pornească de la zero.",
+      "Pregătim brief-ul de corecție, checklistul pentru contabil / HR, reconcilierea snapshotului intern și mesajul de handoff, ca remedierea reală să nu pornească de la zero.",
     generatorDocumentType: "reges-correction-brief",
     generatorLabel: "Generează brief-ul",
     loadingLabel: "Încărcăm pachetul pregătit pentru corecția REGES.",
     returnEvidenceNote:
-      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
+      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   },
   "contracts-baseline": {
     title: "Pachet minim baseline contractual",
@@ -94,6 +95,7 @@ export function DocumentsPageSurface() {
   const [preparedPack, setPreparedPack] = useState<PreparedPack | null>(null)
   const [preparedPackLoading, setPreparedPackLoading] = useState(false)
   const [preparedPackError, setPreparedPackError] = useState<string | null>(null)
+  const [preparedPackEvidenceNote, setPreparedPackEvidenceNote] = useState<string | null>(null)
   const focusedPack = searchParams.get("focus")
   const preparedPackKind =
     focusedPack === "job-descriptions" ||
@@ -107,6 +109,7 @@ export function DocumentsPageSurface() {
   const returnTo = searchParams.get("returnTo")
 
   useEffect(() => {
+    setPreparedPackEvidenceNote(null)
     if (!preparedPackKind) {
       setPreparedPack(null)
       setPreparedPackError(null)
@@ -153,7 +156,7 @@ export function DocumentsPageSurface() {
     return () => {
       cancelled = true
     }
-  }, [preparedPackKind])
+  }, [preparedPackKind, findingId])
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
 
@@ -186,7 +189,10 @@ export function DocumentsPageSurface() {
     )
     target.searchParams.set(
       "evidenceNote",
-      preparedPack?.returnEvidenceNote ?? preparedPackFallback?.returnEvidenceNote ?? ""
+      preparedPackEvidenceNote ??
+        preparedPack?.returnEvidenceNote ??
+        preparedPackFallback?.returnEvidenceNote ??
+        ""
     )
     if (findingId) {
       target.searchParams.set("sourceFindingId", findingId)
@@ -304,6 +310,13 @@ export function DocumentsPageSurface() {
                     </Card>
                   ))}
                 </div>
+
+                {preparedPackKind === "reges-correction" ? (
+                  <HrRegesReconciliationCard
+                    findingId={findingId}
+                    onEvidenceNoteChange={setPreparedPackEvidenceNote}
+                  />
+                ) : null}
 
                 <Card className="border-eos-border bg-eos-surface">
                   <CardHeader className="border-b border-eos-border-subtle pb-3">

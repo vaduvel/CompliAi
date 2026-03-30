@@ -197,16 +197,18 @@ Acest document fixează adevărul operațional pentru cele `16` familii reale de
 
 - status azi: `specialist_handoff real`
 - clasă: `specialist_handoff`
-- cât avem deja: `60%`
+- cât avem deja: `70%`
 - ce există:
   - finding de intake
   - tip canonic dedicat `GDPR-023`
   - `REGES Correction Brief` în suprafața `Documente`
+  - suprafață de reconciliere `snapshot intern vs REGES`
   - revenire automată în cockpit cu dovadă precompletată
+  - notă de handoff dinamică atunci când snapshotul intern și checklistul sunt salvate
 - ce mai lipsește până la 100%:
-  - import/export și comparație minimă
-  - pachet pentru HR/contabil
-  - checklist de confirmare după operare
+  - import/export structurat și comparație minimă
+  - dovadă mai strictă după operarea în registrul real
+  - confirmare mai clară pe diferențe rezolvate
 - ce ar urca riscul:
   - integrare mai adâncă HR / registru angajați
 

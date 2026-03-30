@@ -309,7 +309,7 @@ export function generateRegesCorrectionPack(
     kind: "reges-correction",
     title: "Pachet minim corecție REGES",
     summary:
-      "CompliAI pregătește brief-ul de corecție, checklistul pentru HR / contabil și mesajul de handoff. Firma tot trebuie să opereze remedierea reală în REGES și să păstreze exportul sau confirmarea rezultată.",
+      "CompliAI pregătește brief-ul de corecție, checklistul pentru HR / contabil, reconcilierea snapshotului intern și mesajul de handoff. Firma tot trebuie să opereze remedierea reală în REGES și să păstreze exportul sau confirmarea rezultată.",
     assets: [
       {
         id: "reges-correction-brief",
@@ -385,6 +385,7 @@ Mulțumesc.`,
       },
     ],
     completionChecklist: [
+      "Ai completat snapshotul intern al angajaților / contractelor pe care le urmărești în reconciliere.",
       "Ai trimis brief-ul sau ai pornit clar handoff-ul către contabil / HR.",
       "Ai stabilit ce dovadă finală trebuie să se întoarcă în cockpit: export, captură sau confirmare scrisă.",
       "Știi unde va fi salvată urma finală pentru audit ITM / HR.",
@@ -392,6 +393,6 @@ Mulțumesc.`,
     generatorDocumentType: "reges-correction-brief",
     generatorLabel: "Generează brief-ul",
     returnEvidenceNote:
-      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
+      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   }
 }

@@ -626,8 +626,8 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     signalTypes: ["direct", "inferred"],
     resolutionModes: ["in_app_guided", "external_action"],
     primaryActors: ["user", "owner"],
-    compliCapabilities: ["pregătește brief-ul REGES", "deschide suprafața Documente", "orientează spre generatorul de brief"],
-    userResponsibilities: ["trimite handoff-ul către contabil sau HR", "verifică registrul real", "păstrează exportul sau confirmarea de corecție"],
+    compliCapabilities: ["pregătește brief-ul REGES", "salvează reconcilierea snapshotului intern", "deschide suprafața Documente"],
+    userResponsibilities: ["completează snapshotul intern", "trimite handoff-ul către contabil sau HR", "păstrează exportul sau confirmarea de corecție"],
     requiredEvidenceKinds: ["uploaded_file", "note"],
     autoRecheck: "partial",
     closingRule: "brief-ul REGES este revizuit și există urmă clară despre verificarea sau corecția registrului real",
@@ -1129,9 +1129,9 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     whatUserSees:
       "Nu avem încă o urmă clară că evidența contractelor este verificată și corectată în registrul real.",
     whatCompliDoes:
-      "Deschide suprafața Documente cu brief-ul REGES pregătit: checklistul pentru contabil / HR, mesajul de handoff și pașii minimi pentru dovada finală.",
+      "Deschide suprafața Documente cu brief-ul REGES pregătit: checklistul pentru contabil / HR, reconcilierea snapshotului intern, mesajul de handoff și pașii minimi pentru dovada finală.",
     whatUserMustDo:
-      "Revizuiești brief-ul, pornești handoff-ul către contabil sau HR și revii doar după ce ai exportul sau confirmarea clară a corecției din registrul real.",
+      "Revizuiești brief-ul, completezi snapshotul intern, pornești handoff-ul către contabil sau HR și revii doar după ce ai exportul sau confirmarea clară a corecției din registrul real.",
     closeCondition: "Brief-ul REGES este revizuit și există urmă clară despre verificarea sau corecția registrului real.",
     revalidationTriggers: ["angajare nouă", "plecare", "modificare contractuală", "review HR periodic"],
   },
@@ -2520,10 +2520,10 @@ export function getSpecialistHandoffContract(
         targetReturnMode: "automatic",
         runtimeReturnMode: "automatic",
         runtimeStatusNote:
-          "După ce brief-ul REGES este revizuit și handoff-ul către contabil sau HR este clar, suprafața Documente te readuce automat în același cockpit pentru închidere.",
+          "După ce brief-ul REGES este revizuit, snapshotul intern este reconciliat și handoff-ul către contabil sau HR este clar, suprafața Documente te readuce automat în același cockpit pentru închidere.",
         returnEvidenceLabel: "Brief REGES pregătit",
         returnEvidenceInstruction:
-          "Cockpitul trebuie să primească dovada că brief-ul, checklistul și handoff-ul către contabil sau HR sunt pregătite și că știi ce export sau confirmare trebuie să se întoarcă înapoi.",
+          "Cockpitul trebuie să primească dovada că brief-ul, snapshotul intern, checklistul și handoff-ul către contabil sau HR sunt pregătite și că știi ce export sau confirmare trebuie să se întoarcă înapoi.",
       }
     case "vendor_review_pack":
       return {

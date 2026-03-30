@@ -26,6 +26,7 @@ import {
   buildFindingConfidenceReason,
   inferFindingConfidence,
 } from "@/lib/compliance/finding-confidence"
+import { normalizeHrRegistryReconciliations } from "@/lib/compliance/hr-registry-reconciliation"
 import { detectComplianceSignals } from "@/lib/compliance/signal-detection"
 import {
   isDriftLifecycleOpen,
@@ -58,6 +59,7 @@ export const initialComplianceState: ComplianceState = {
   snapshotHistory: [],
   validatedBaselineSnapshotId: undefined,
   events: [],
+  hrRegistryReconciliations: {},
 }
 
 export function normalizeComplianceState(state: ComplianceState): ComplianceState {
@@ -81,6 +83,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const driftSettings = normalizeDriftSettings(state.driftSettings)
   const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
   const events = normalizeEvents(state.events)
+  const hrRegistryReconciliations = normalizeHrRegistryReconciliations(state.hrRegistryReconciliations)
   const resolvedFindingIds = getResolvedFindingIds({
     ...state,
     alerts: rawAlerts,
@@ -97,6 +100,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     driftSettings,
     snapshotHistory,
     events,
+    hrRegistryReconciliations,
   })
   const alerts = applyTaskResolutionToAlerts({
     ...state,
@@ -114,6 +118,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     driftSettings,
     snapshotHistory,
     events,
+    hrRegistryReconciliations,
   })
 
   const unresolvedFindings = findings.filter((finding) => !resolvedFindingIds.has(finding.id))
@@ -159,6 +164,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     efacturaValidations,
     driftRecords,
     snapshotHistory,
+    hrRegistryReconciliations,
     validatedBaselineSnapshotId:
       typeof state.validatedBaselineSnapshotId === "string" &&
       snapshotHistory.some((snapshot) => snapshot.snapshotId === state.validatedBaselineSnapshotId)

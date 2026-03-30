@@ -37,6 +37,13 @@ export type GeneratedDocumentAdoptionStatus =
   | "signed"
   | "active"
 
+export type HrRegistryReconciliationRecord = {
+  findingId: string
+  rosterSnapshot: string
+  registryChecklistText: string
+  updatedAtISO: string
+}
+
 export type WorkspaceContext = {
   orgId: string
   orgName: string
@@ -471,6 +478,7 @@ export type ComplianceState = {
   orgKnowledge?: import("@/lib/compliance/org-knowledge").OrgKnowledge
   // ── Fix #7: Async site scan jobs ─────────────────────────────────────────
   siteScanJobs?: Record<string, SiteScanJob>
+  hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
   // ── Partner workspace ────────────────────────────────────────────────────
   partnerWorkspace?: {
     orgName?: string
