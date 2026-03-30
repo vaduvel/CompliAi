@@ -343,12 +343,20 @@ export type FiscalProtocolActionStatus =
   | "rejected"
   | "escalated"
 
+export type FiscalProtocolReceiptStatus =
+  | "missing"
+  | "received"
+  | "accepted"
+  | "rejected"
+
 export type FiscalProtocolRecord = {
   findingId: string
   findingTypeId: FiscalProtocolFindingType
   invoiceRef?: string
   actionStatus?: FiscalProtocolActionStatus
   spvReference?: string
+  receiptStatus?: FiscalProtocolReceiptStatus
+  receiptReceivedAtISO?: string
   evidenceLocation?: string
   operatorNote?: string
   updatedAtISO: string

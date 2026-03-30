@@ -17,6 +17,8 @@ type FiscalProtocolBody = {
   invoiceRef?: string
   actionStatus?: FiscalProtocolRecord["actionStatus"]
   spvReference?: string
+  receiptStatus?: FiscalProtocolRecord["receiptStatus"]
+  receiptReceivedAtISO?: string
   evidenceLocation?: string
   operatorNote?: string
 }
@@ -32,6 +34,15 @@ function normalizeActionStatus(value: unknown): FiscalProtocolRecord["actionStat
     value === "ok" ||
     value === "rejected" ||
     value === "escalated"
+    ? value
+    : undefined
+}
+
+function normalizeReceiptStatus(value: unknown): FiscalProtocolRecord["receiptStatus"] {
+  return value === "missing" ||
+    value === "received" ||
+    value === "accepted" ||
+    value === "rejected"
     ? value
     : undefined
 }
@@ -92,11 +103,24 @@ export async function PATCH(request: Request) {
 
     const invoiceRef = body?.invoiceRef?.trim() ?? ""
     const spvReference = body?.spvReference?.trim() ?? ""
+    const receiptStatus = normalizeReceiptStatus(body?.receiptStatus)
+    const receiptReceivedAtISO =
+      typeof body?.receiptReceivedAtISO === "string" && !Number.isNaN(Date.parse(body.receiptReceivedAtISO))
+        ? new Date(body.receiptReceivedAtISO).toISOString()
+        : undefined
     const evidenceLocation = body?.evidenceLocation?.trim() ?? ""
     const operatorNote = body?.operatorNote?.trim() ?? ""
     const actionStatus = normalizeActionStatus(body?.actionStatus)
 
-    if (!invoiceRef && !spvReference && !evidenceLocation && !operatorNote && !actionStatus) {
+    if (
+      !invoiceRef &&
+      !spvReference &&
+      (!receiptStatus || receiptStatus === "missing") &&
+      !receiptReceivedAtISO &&
+      !evidenceLocation &&
+      !operatorNote &&
+      !actionStatus
+    ) {
       return jsonError(
         "Completează măcar un câmp înainte să salvezi protocolul fiscal.",
         400,
@@ -115,6 +139,8 @@ export async function PATCH(request: Request) {
         invoiceRef: invoiceRef || undefined,
         actionStatus,
         spvReference: spvReference || undefined,
+        receiptStatus,
+        receiptReceivedAtISO,
         evidenceLocation: evidenceLocation || undefined,
         operatorNote: operatorNote || undefined,
         updatedAtISO: nowISO,
@@ -139,6 +165,7 @@ export async function PATCH(request: Request) {
                 findingId,
                 findingTypeId,
                 actionStatus: actionStatus ?? "unset",
+                receiptStatus: receiptStatus ?? "unset",
               },
             },
             {

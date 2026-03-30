@@ -11,9 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-
 import { Textarea } from "@/components/evidence-os/Textarea"
 import {
   FISCAL_PROTOCOL_ACTION_LABELS,
+  FISCAL_PROTOCOL_RECEIPT_LABELS,
   type FiscalProtocolDerived,
 } from "@/lib/compliance/fiscal-protocol"
-import type { FiscalProtocolActionStatus, FiscalProtocolFindingType, FiscalProtocolRecord } from "@/lib/compliance/types"
+import type {
+  FiscalProtocolActionStatus,
+  FiscalProtocolFindingType,
+  FiscalProtocolReceiptStatus,
+  FiscalProtocolRecord,
+} from "@/lib/compliance/types"
 
 type FiscalProtocolResponse = {
   findingId: string
@@ -48,6 +54,20 @@ function copyWithFallback(text: string) {
   })
 }
 
+function isoToLocalDateTime(value?: string) {
+  if (!value) return ""
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ""
+
+  const year = parsed.getFullYear()
+  const month = `${parsed.getMonth() + 1}`.padStart(2, "0")
+  const day = `${parsed.getDate()}`.padStart(2, "0")
+  const hours = `${parsed.getHours()}`.padStart(2, "0")
+  const minutes = `${parsed.getMinutes()}`.padStart(2, "0")
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -55,6 +75,8 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
   const [invoiceRef, setInvoiceRef] = useState("")
   const [actionStatus, setActionStatus] = useState<FiscalProtocolActionStatus>("checked_pending")
   const [spvReference, setSpvReference] = useState("")
+  const [receiptStatus, setReceiptStatus] = useState<FiscalProtocolReceiptStatus>("missing")
+  const [receiptReceivedAt, setReceiptReceivedAt] = useState("")
   const [evidenceLocation, setEvidenceLocation] = useState("")
   const [operatorNote, setOperatorNote] = useState("")
   const [derived, setDerived] = useState<FiscalProtocolDerived | null>(null)
@@ -90,6 +112,8 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
         setInvoiceRef(data.protocol?.invoiceRef ?? "")
         setActionStatus(data.protocol?.actionStatus ?? "checked_pending")
         setSpvReference(data.protocol?.spvReference ?? "")
+        setReceiptStatus(data.protocol?.receiptStatus ?? "missing")
+        setReceiptReceivedAt(isoToLocalDateTime(data.protocol?.receiptReceivedAtISO))
         setEvidenceLocation(data.protocol?.evidenceLocation ?? "")
         setOperatorNote(data.protocol?.operatorNote ?? "")
         setDerived(data.derived)
@@ -131,6 +155,8 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
           invoiceRef,
           actionStatus,
           spvReference,
+          receiptStatus,
+          receiptReceivedAtISO: receiptReceivedAt ? new Date(receiptReceivedAt).toISOString() : undefined,
           evidenceLocation,
           operatorNote,
         }),
@@ -209,6 +235,9 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
               <Badge variant="outline" className="normal-case tracking-normal">
                 {derived?.actionStatusLabel ?? FISCAL_PROTOCOL_ACTION_LABELS.checked_pending}
               </Badge>
+              <Badge variant="outline" className="normal-case tracking-normal">
+                {derived?.receiptStatusLabel ?? FISCAL_PROTOCOL_RECEIPT_LABELS.missing}
+              </Badge>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
@@ -248,6 +277,33 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                   onChange={(event) => setSpvReference(event.target.value)}
                   placeholder="Ex: MSG-ANAF-2026-00412"
                   className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                />
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-eos-text">Status recipisă / răspuns SPV</span>
+                <select
+                  value={receiptStatus}
+                  onChange={(event) => setReceiptStatus(event.target.value as FiscalProtocolReceiptStatus)}
+                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                >
+                  {(Object.entries(FISCAL_PROTOCOL_RECEIPT_LABELS) as [FiscalProtocolReceiptStatus, string][]).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-eos-text">Recipisă primită la</span>
+                <input
+                  type="datetime-local"
+                  value={receiptReceivedAt}
+                  onChange={(event) => setReceiptReceivedAt(event.target.value)}
+                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
                 />
               </label>
 

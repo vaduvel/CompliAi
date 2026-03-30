@@ -3,12 +3,14 @@ import type {
   FiscalProtocolActionStatus,
   FiscalProtocolFindingType,
   FiscalProtocolRecord,
+  FiscalProtocolReceiptStatus,
 } from "@/lib/compliance/types"
 
 export type FiscalProtocolDerived = {
   findingId: string
   findingTypeId: FiscalProtocolFindingType
   actionStatusLabel: string
+  receiptStatusLabel: string
   readiness: "draft" | "ready"
   readinessLabel: string
   invoiceRefLabel: string
@@ -25,6 +27,13 @@ export const FISCAL_PROTOCOL_ACTION_LABELS: Record<FiscalProtocolActionStatus, s
   ok: "confirmat ok în SPV",
   rejected: "respins din nou",
   escalated: "escaladat către contabil / ERP / ANAF",
+}
+
+export const FISCAL_PROTOCOL_RECEIPT_LABELS: Record<FiscalProtocolReceiptStatus, string> = {
+  missing: "recipisă încă lipsă",
+  received: "recipisă primită",
+  accepted: "acceptată în SPV",
+  rejected: "respinsă în SPV",
 }
 
 export function getFiscalProtocolKey(findingId?: string | null) {
@@ -54,11 +63,23 @@ export function normalizeFiscalProtocols(
 
     const invoiceRef = normalizeOptionalText(entry.invoiceRef)
     const spvReference = normalizeOptionalText(entry.spvReference)
+    const receiptStatus = normalizeReceiptStatus(entry.receiptStatus)
+    const receiptReceivedAtISO = isValidIso(entry.receiptReceivedAtISO)
+      ? entry.receiptReceivedAtISO
+      : undefined
     const evidenceLocation = normalizeOptionalText(entry.evidenceLocation)
     const operatorNote = normalizeOptionalText(entry.operatorNote)
     const actionStatus = normalizeActionStatus(entry.actionStatus)
 
-    if (!invoiceRef && !spvReference && !evidenceLocation && !operatorNote && !actionStatus) {
+    if (
+      !invoiceRef &&
+      !spvReference &&
+      (!receiptStatus || receiptStatus === "missing") &&
+      !receiptReceivedAtISO &&
+      !evidenceLocation &&
+      !operatorNote &&
+      !actionStatus
+    ) {
       return acc
     }
 
@@ -68,6 +89,8 @@ export function normalizeFiscalProtocols(
       invoiceRef,
       actionStatus,
       spvReference,
+      receiptStatus,
+      receiptReceivedAtISO,
       evidenceLocation,
       operatorNote,
       updatedAtISO: entry.updatedAtISO,
@@ -89,6 +112,8 @@ export function buildFiscalProtocolDerived(
   const actionStatus = record?.actionStatus ?? "checked_pending"
   const invoiceRef = record?.invoiceRef?.trim() ?? ""
   const spvReference = record?.spvReference?.trim() ?? ""
+  const receiptStatus = record?.receiptStatus ?? "missing"
+  const receiptReceivedAtISO = record?.receiptReceivedAtISO?.trim() ?? ""
   const evidenceLocation = record?.evidenceLocation?.trim() ?? ""
   const operatorNote = record?.operatorNote?.trim() ?? ""
 
@@ -104,6 +129,7 @@ export function buildFiscalProtocolDerived(
       : [
           "notează factura care trebuia transmisă în SPV",
           "confirmă transmiterea sau retransmiterea manuală",
+          "confirmă recipisa sau verdictul final din SPV după transmitere",
           "salvează recipisa SPV ori locul exact unde rămâne dovada finală",
         ]
 
@@ -113,6 +139,18 @@ export function buildFiscalProtocolDerived(
   }
   if (actionStatus === "checked_pending") {
     missingItems.push("statusul acțiunii efective din SPV")
+  }
+  if (
+    (actionStatus === "transmitted" ||
+      actionStatus === "retransmitted" ||
+      actionStatus === "ok" ||
+      actionStatus === "rejected") &&
+    receiptStatus === "missing"
+  ) {
+    missingItems.push("statusul recipisei / răspunsului SPV după transmitere")
+  }
+  if (receiptStatus !== "missing" && !receiptReceivedAtISO) {
+    missingItems.push("momentul în care a fost primită recipisa sau răspunsul SPV")
   }
   if (!spvReference && !evidenceLocation && !operatorNote) {
     missingItems.push("urma de dovadă: referință SPV, locația dovezii sau nota operatorului")
@@ -132,6 +170,9 @@ export function buildFiscalProtocolDerived(
     invoiceRef ? `${invoiceRefLabel}: ${invoiceRef}.` : null,
     `Status operațional: ${FISCAL_PROTOCOL_ACTION_LABELS[actionStatus]}.`,
     spvReference ? `Referință SPV: ${spvReference}.` : null,
+    receiptStatus !== "missing"
+      ? `Recipisă SPV: ${FISCAL_PROTOCOL_RECEIPT_LABELS[receiptStatus]}${receiptReceivedAtISO ? ` la ${new Date(receiptReceivedAtISO).toLocaleString("ro-RO")}` : ""}.`
+      : null,
     evidenceLocation ? `Dovada este salvată la: ${evidenceLocation}.` : null,
     operatorNote ? `Notă operator: ${operatorNote}.` : null,
   ].filter(Boolean)
@@ -140,6 +181,7 @@ export function buildFiscalProtocolDerived(
     findingId: record?.findingId ?? context.findingId,
     findingTypeId,
     actionStatusLabel: FISCAL_PROTOCOL_ACTION_LABELS[actionStatus],
+    receiptStatusLabel: FISCAL_PROTOCOL_RECEIPT_LABELS[receiptStatus],
     readiness,
     readinessLabel,
     invoiceRefLabel,
@@ -161,6 +203,15 @@ function normalizeActionStatus(value: unknown): FiscalProtocolActionStatus | und
     value === "ok" ||
     value === "rejected" ||
     value === "escalated"
+    ? value
+    : undefined
+}
+
+function normalizeReceiptStatus(value: unknown): FiscalProtocolReceiptStatus | undefined {
+  return value === "missing" ||
+    value === "received" ||
+    value === "accepted" ||
+    value === "rejected"
     ? value
     : undefined
 }

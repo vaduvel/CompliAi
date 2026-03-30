@@ -54,6 +54,8 @@ describe("fiscal protocol route", () => {
           invoiceRef: "INV-2026-114",
           actionStatus: "retransmitted",
           spvReference: "MSG-2231",
+          receiptStatus: "accepted",
+          receiptReceivedAtISO: "2026-03-30T10:15:00.000Z",
           evidenceLocation: "Dosar/Fiscal/martie-2026",
           operatorNote: "Retransmis din ERP.",
           updatedAtISO: "2026-03-30T10:00:00.000Z",
@@ -78,6 +80,7 @@ describe("fiscal protocol route", () => {
     expect(payload.protocol.findingId).toBe("finding-ef-004")
     expect(payload.derived.readiness).toBe("ready")
     expect(payload.derived.handoffEvidenceNote).toContain("Referință SPV: MSG-2231")
+    expect(payload.derived.handoffEvidenceNote).toContain("Recipisă SPV: acceptată în SPV")
   })
 
   it("salvează protocolul fiscal și întoarce feedbackul de readiness", async () => {
@@ -93,6 +96,8 @@ describe("fiscal protocol route", () => {
           invoiceRef: "INV-2026-204",
           actionStatus: "transmitted",
           spvReference: "MSG-7788",
+          receiptStatus: "received",
+          receiptReceivedAtISO: "2026-03-30T11:45:00.000Z",
           evidenceLocation: "Dosar/Fiscal/aprilie-2026",
         }),
       })

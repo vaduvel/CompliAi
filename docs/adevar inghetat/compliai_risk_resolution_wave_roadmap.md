@@ -417,8 +417,13 @@ Status:
   - locația dovezii
   - notă operator / contabil
 - întoarcerea în cockpit poate folosi o notă dinamică bazată pe execuția reală, nu doar pe protocolul static
+- `v2 implementat în produs`
+- jurnalul fiscal urmărește acum și recipisa SPV în mod structurat:
+  - status recipisă
+  - momentul primirii
+  - includere explicită în nota de handoff spre cockpit
 - ce rămâne pentru `Wave 3 complet`:
-  - legare mai strânsă cu retransmiterea efectivă / recipisele SPV
+  - legare mai strânsă cu retransmiterea efectivă / recipisele SPV sincronizate automat
   - interpretare mai bogată a codurilor și statusurilor fiscale
   - dovadă fiscală și mai strictă după retransmitere / acceptare finală
 
