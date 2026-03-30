@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, RotateCw, Sparkles } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, Maximize2, RotateCw, Sparkles, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -118,6 +118,7 @@ export function GeneratorDrawer({
   const [validationRunAtISO, setValidationRunAtISO] = useState<string | null>(null)
   const [documentConfirmed, setDocumentConfirmed] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
+  const [previewExpanded, setPreviewExpanded] = useState(false)
 
   const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
   const siteScanDrivenDocument =
@@ -366,76 +367,99 @@ export function GeneratorDrawer({
 
   if (!open) return null
 
+  // Compact step indicator state
+  const activeStepIdx = drawerSteps.findIndex((s) => s.active && !s.done)
+  const currentStepNum = activeStepIdx === -1
+    ? (drawerSteps.every((s) => s.done) ? drawerSteps.length : 1)
+    : activeStepIdx + 1
+  const currentStepLabel = activeStepIdx === -1
+    ? (drawerSteps.every((s) => s.done) ? "Finalizat" : drawerSteps[0]?.label)
+    : drawerSteps[activeStepIdx]?.label
+
   return (
-    <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-bg-inset/30">
+    <>
+      {/* ── Full-screen document preview modal ──────────────────────────── */}
+      {previewExpanded && result && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8 overflow-y-auto"
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewExpanded(false) }}
+        >
+          <div className="relative w-full max-w-3xl rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+            {/* Modal header */}
+            <div className="flex items-center justify-between gap-4 border-b border-eos-border px-6 py-4">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <FileText className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
+                <p className="text-sm font-semibold text-eos-text truncate">{result.title}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 rounded-eos-md border border-eos-border px-3 py-1.5 text-xs text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+                >
+                  <Copy className="size-3" strokeWidth={2} />
+                  Copiază
+                </button>
+                <button
+                  onClick={() => setPreviewExpanded(false)}
+                  className="flex size-7 items-center justify-center rounded-eos-md border border-eos-border text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+                  aria-label="Închide preview"
+                >
+                  <X className="size-4" strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+            {/* Modal content */}
+            <div className="px-6 py-6">
+              <div className="text-sm leading-7 text-eos-text whitespace-pre-wrap font-[var(--font-sans)]">
+                {result.content}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-surface-variant">
       <CardContent className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
-        <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
-              Zonă de generare pentru rezolvare
-            </p>
+
+        {/* ── Header: doc type + compact step indicator ─────────────────── */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1 min-w-0">
             <p className="flex items-center gap-2 text-base font-semibold text-eos-text">
-              <FileText className="size-4 text-eos-primary" strokeWidth={2} />
+              <FileText className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
               {docTypeLabel}
             </p>
-            <p className="text-sm text-eos-text-muted">
-              {findingTitle}
+            <p className="text-sm text-eos-text-muted truncate">{findingTitle}</p>
+          </div>
+          {/* Compact step indicator */}
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <div className="flex items-center gap-1">
+              {drawerSteps.map((step) => (
+                <div
+                  key={step.id}
+                  className={[
+                    "h-1.5 rounded-full transition-all duration-300",
+                    step.done
+                      ? "w-5 bg-eos-success"
+                      : step.active
+                        ? "w-6 bg-eos-primary"
+                        : "w-4 bg-eos-border",
+                  ].join(" ")}
+                />
+              ))}
+            </div>
+            <p className="text-[11px] text-eos-text-tertiary whitespace-nowrap">
+              Pasul {currentStepNum} din {drawerSteps.length}
+              {currentStepLabel ? ` · ${currentStepLabel}` : ""}
             </p>
+          </div>
         </div>
 
         <div className="flex-1 space-y-4">
-          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-4">
-            <ol className="grid gap-3 lg:grid-cols-5">
-              {drawerSteps.map((step, index) => {
-                const stepDone = step.done
-                const stepActive = step.active
-                return (
-                  <li key={step.id} className="flex items-start gap-3 lg:flex-col lg:gap-2">
-                    <div className="flex w-full items-center gap-3">
-                      <span
-                        className={[
-                          "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                          stepDone
-                            ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
-                            : stepActive
-                              ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
-                              : "border-eos-border bg-eos-surface text-eos-text-muted",
-                        ].join(" ")}
-                      >
-                        {stepDone ? <CheckCircle2 className="size-4" strokeWidth={2} /> : index + 1}
-                      </span>
-                      {index < drawerSteps.length - 1 ? (
-                        <span
-                          className={[
-                            "hidden h-px flex-1 lg:block",
-                            stepDone ? "bg-eos-success/35" : "bg-eos-border",
-                          ].join(" ")}
-                        />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0">
-                      <p
-                        className={[
-                          "text-sm font-medium",
-                          stepDone || stepActive ? "text-eos-text" : "text-eos-text-muted",
-                        ].join(" ")}
-                      >
-                        {step.label}
-                      </p>
-                      <p className="mt-1 text-xs leading-relaxed text-eos-text-muted">{step.hint}</p>
-                    </div>
-                  </li>
-                )
-              })}
-            </ol>
-          </div>
 
           {lockedUntilConfirmed ? (
-            <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
-                Pasul 1
-              </p>
-              <p className="mt-1 text-sm text-eos-text">
-                Confirmă findingul din blocul de sus. Imediat după confirmare poți completa datele și genera documentul aici, în același cockpit.
+            <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+              <p className="text-sm text-eos-text-muted">
+                Confirmă findingul mai sus — imediat după confirmare poți completa datele și genera documentul.
               </p>
             </div>
           ) : null}
@@ -558,22 +582,32 @@ export function GeneratorDrawer({
           {/* ── Preview + sequential actions ── */}
           {result && (
             <div ref={previewRef} className="space-y-4">
-              {/* Document preview */}
-              <div data-testid="generated-document-preview" className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <div className="mb-3 flex items-center justify-between">
+              {/* Document preview — full width, expandable */}
+              <div data-testid="generated-document-preview" className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-bg-inset">
+                <div className="flex items-center justify-between gap-3 border-b border-eos-border-subtle px-4 py-2.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
                     Preview draft
                   </p>
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 rounded-eos-sm px-2 py-1 text-[11px] text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
-                    title="Copiază în clipboard"
-                  >
-                    <Copy className="size-3" strokeWidth={2} />
-                    Copiază
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 rounded-eos-sm px-2.5 py-1 text-[11px] text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
+                      title="Copiază în clipboard"
+                    >
+                      <Copy className="size-3" strokeWidth={2} />
+                      Copiază
+                    </button>
+                    <button
+                      onClick={() => setPreviewExpanded(true)}
+                      className="flex items-center gap-1.5 rounded-eos-sm px-2.5 py-1 text-[11px] text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
+                      title="Deschide în preview complet"
+                    >
+                      <Maximize2 className="size-3" strokeWidth={2} />
+                      Expandează
+                    </button>
+                  </div>
                 </div>
-                <div className="max-h-80 overflow-y-auto text-sm leading-relaxed text-eos-text whitespace-pre-wrap">
+                <div className="h-[480px] overflow-y-auto p-4 text-sm leading-7 text-eos-text whitespace-pre-wrap scrollbar-thin scrollbar-track-transparent scrollbar-thumb-eos-border">
                   {result.content}
                 </div>
               </div>
@@ -670,5 +704,6 @@ export function GeneratorDrawer({
         </div>
       </CardContent>
     </Card>
+    </>
   )
 }

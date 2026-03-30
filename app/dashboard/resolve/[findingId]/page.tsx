@@ -11,8 +11,6 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Breadcrumb } from "@/components/evidence-os/Breadcrumb"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
@@ -531,12 +529,58 @@ export default function FindingDetailPage() {
     : PROGRESS_STEPS.findIndex((s) => s.id === status)
 
   return (
-    <div className="space-y-4 px-1 sm:space-y-6 sm:px-0">
-      <Breadcrumb items={[{ label: "De rezolvat", href: dashboardRoutes.resolve }, { label: finding.title }]} />
+    <div className="space-y-4 px-1 sm:space-y-5 sm:px-0">
 
-      {/* Status progression rail */}
+      {/* ── Compact case header ──────────────────────────────────────────── */}
+      <div className="space-y-3">
+        {/* Back nav + meta row */}
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href={dashboardRoutes.resolve}
+            className="flex items-center gap-1.5 text-sm text-eos-text-muted transition-colors hover:text-eos-text"
+          >
+            <ArrowLeft className="size-3.5" strokeWidth={2} />
+            De rezolvat
+          </Link>
+          <div className="flex items-center gap-2 text-xs text-eos-text-tertiary">
+            <span>{getFindingAgeLabel(finding.createdAtISO)}</span>
+            {finding.sourceDocument && (
+              <span className="text-eos-border">·</span>
+            )}
+            {finding.sourceDocument && (
+              <span>Sursă: {finding.sourceDocument}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Title + badges */}
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
+            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-eos-text-tertiary">
+              {finding.category.replace(/_/g, " ")}
+            </span>
+            <Badge variant="outline" className="normal-case tracking-normal text-xs">
+              {getExecutionClassLabel(recipe)}
+            </Badge>
+            <Badge variant={statusCfg.variant} className="normal-case tracking-normal text-xs">
+              {statusCfg.label}
+            </Badge>
+          </div>
+          <h1 className="mt-2.5 text-xl font-semibold leading-snug text-eos-text">
+            {finding.title}
+          </h1>
+          {introDescription && (
+            <p className="mt-1.5 text-sm leading-relaxed text-eos-text-muted">
+              {introDescription}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Status progression rail ──────────────────────────────────────── */}
       {status !== "dismissed" && (
-        <div className="flex items-center gap-0 overflow-x-auto rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
+        <div className="flex items-center gap-0 overflow-x-auto rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
           {PROGRESS_STEPS.map((step, i) => {
             const isPast    = i < currentStepIdx
             const isCurrent = i === currentStepIdx
@@ -544,14 +588,14 @@ export default function FindingDetailPage() {
               <div key={step.id} className="flex flex-1 items-center">
                 <div className="flex flex-col items-center gap-1.5 shrink-0">
                   <div className={[
-                    "size-6 rounded-full border-2 grid place-items-center transition-all",
-                    isPast    ? "border-eos-success bg-eos-success"             : "",
-                    isCurrent ? "border-eos-primary bg-eos-primary/15"          : "",
+                    "size-5 rounded-full border-2 grid place-items-center transition-all",
+                    isPast    ? "border-eos-success bg-eos-success"    : "",
+                    isCurrent ? "border-eos-primary bg-eos-primary/15" : "",
                     !isPast && !isCurrent ? "border-eos-border-subtle bg-eos-surface-variant" : "",
                   ].join(" ")}>
                     {isPast
-                      ? <CheckCircle2 className="size-3.5 text-white" strokeWidth={2.5} />
-                      : <div className={["size-2 rounded-full", isCurrent ? "bg-eos-primary" : "bg-eos-border"].join(" ")} />
+                      ? <CheckCircle2 className="size-3 text-white" strokeWidth={2.5} />
+                      : <div className={["size-1.5 rounded-full", isCurrent ? "bg-eos-primary" : "bg-eos-border"].join(" ")} />
                     }
                   </div>
                   <span className={[
@@ -563,7 +607,7 @@ export default function FindingDetailPage() {
                 </div>
                 {i < PROGRESS_STEPS.length - 1 && (
                   <div className={[
-                    "h-[2px] flex-1 mx-2 mb-4 rounded-full transition-all",
+                    "h-px flex-1 mx-2 mb-4 rounded-full transition-all",
                     i < currentStepIdx ? "bg-eos-success" : "bg-eos-border-subtle",
                   ].join(" ")} />
                 )}
@@ -572,36 +616,6 @@ export default function FindingDetailPage() {
           })}
         </div>
       )}
-
-      <PageIntro
-        eyebrow={`Caz · ${finding.category.replace("_", " ")}`}
-        title={finding.title}
-        description={introDescription}
-        badges={
-          <>
-            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {getExecutionClassLabel(recipe)}
-            </Badge>
-            <Badge variant={statusCfg.variant} className="normal-case tracking-normal">
-              {statusCfg.label}
-            </Badge>
-          </>
-        }
-        aside={
-          <div className="space-y-2 text-right">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Detectat
-            </p>
-            <p className="text-sm text-eos-text-muted">{getFindingAgeLabel(finding.createdAtISO)}</p>
-            {finding.sourceDocument && (
-              <p className="text-xs text-eos-text-muted">
-                Sursă: {finding.sourceDocument}
-              </p>
-            )}
-          </div>
-        }
-      />
 
       {finding.reopenedFromISO && status === "open" ? (
         <Card className="border-eos-warning-border bg-eos-warning-soft/30">
