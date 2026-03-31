@@ -206,7 +206,10 @@ export async function POST(request: Request) {
           completedAtISO: new Date().toISOString(),
           ...(cui ? { cui } : {}),
         }
+        console.log("[import-csv] Profile for", orgName, ":", JSON.stringify(profile))
+        
         const applicability = evaluateApplicability(profile)
+        console.log("[import-csv] Applicability for", orgName, ":", JSON.stringify(applicability))
 
         results.push({
           ok: true,

@@ -78,12 +78,19 @@ export async function POST(request: Request) {
       const intakeAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
       const findings = buildInitialFindings(intakeAnswers)
 
+      console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
+      console.log("[baseline-scan] Profile:", JSON.stringify(updatedProfile))
+      console.log("[baseline-scan] Intake answers:", JSON.stringify(intakeAnswers).slice(0, 500))
+
       if (findings.length > 0) {
         // Merge findings — don't duplicate if already exist
         const existingIds = new Set(state.findings.map((f) => f.id))
         const newFindings = findings.filter((f) => !existingIds.has(f.id))
+        console.log("[baseline-scan] New findings (no duplicates):", newFindings.length)
         state.findings = [...state.findings, ...newFindings]
       }
+    } else {
+      console.log("[baseline-scan] No updatedProfile, skipping findings generation")
     }
 
     await writeStateForOrg(body.orgId, state)
