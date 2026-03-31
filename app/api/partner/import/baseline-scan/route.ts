@@ -18,6 +18,10 @@ import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
+import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
+import { hasSupabaseConfig } from "@/lib/server/supabase-rest"
+import { shouldUseSupabaseOrgStateAsPrimary } from "@/lib/server/supabase-org-state"
+import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallback-policy"
 
 type BaselineScanBody = {
   orgId: string
@@ -32,15 +36,30 @@ export async function POST(request: Request) {
       throw new AuthzError("Baseline scan disponibil doar în modul partner.", 403, "PORTFOLIO_FORBIDDEN")
     }
 
+    // Debug: log Supabase configuration
+    const dataBackend = getConfiguredDataBackend()
+    const supabaseConfig = hasSupabaseConfig()
+    const supabasePrimary = shouldUseSupabaseOrgStateAsPrimary()
+    const localFallback = isLocalFallbackAllowedForCloudPrimary()
+    console.log("[baseline-scan] Config:", {
+      dataBackend,
+      supabaseConfig,
+      supabasePrimary,
+      localFallback,
+      nodeEnv: process.env.NODE_ENV
+    })
+
     const body = (await request.json()) as BaselineScanBody
     if (!body.orgId) {
       return jsonError("orgId lipsă.", 400, "MISSING_ORG_ID")
     }
 
     const state = await readStateForOrg(body.orgId)
+    console.log("[baseline-scan] Loaded state for", body.orgId, "exists:", !!state)
     if (!state) {
       return jsonError("Organizația nu a fost găsită.", 404, "ORG_NOT_FOUND")
     }
+    console.log("[baseline-scan] Initial findings count:", state.findings?.length ?? 0)
 
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
@@ -95,6 +114,8 @@ export async function POST(request: Request) {
 
     await writeStateForOrg(body.orgId, state)
 
+    console.log("[baseline-scan] State saved successfully. Findings count:", state.findings.length)
+
     return NextResponse.json({
       ok: true,
       findingsCount: state.findings.length,
@@ -102,6 +123,7 @@ export async function POST(request: Request) {
       companyName: prefill?.companyName ?? null,
     })
   } catch (error) {
+    console.error("[baseline-scan] Error:", error)
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la baseline scan.", 500, "BASELINE_SCAN_FAILED")
   }
