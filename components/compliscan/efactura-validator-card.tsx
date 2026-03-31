@@ -21,6 +21,44 @@ type EFacturaValidatorCardProps = {
   }) => Promise<EFacturaXmlRepairRecord | null>
 }
 
+type DiffLine = { type: "same" | "removed" | "added"; text: string; lineNo: number }
+
+function computeXmlDiff(original: string, repaired: string): DiffLine[] {
+  const origLines = original.split("\n")
+  const repLines = repaired.split("\n")
+  const result: DiffLine[] = []
+  const maxLen = Math.max(origLines.length, repLines.length)
+
+  // Simple line-by-line comparison (sufficient for field-level repairs)
+  let oi = 0
+  let ri = 0
+  while (oi < origLines.length || ri < repLines.length) {
+    const oLine = oi < origLines.length ? origLines[oi] : undefined
+    const rLine = ri < repLines.length ? repLines[ri] : undefined
+
+    if (oLine === rLine) {
+      result.push({ type: "same", text: rLine!, lineNo: ri + 1 })
+      oi++
+      ri++
+    } else if (rLine !== undefined && (oLine === undefined || !origLines.slice(oi).includes(rLine))) {
+      result.push({ type: "added", text: rLine, lineNo: ri + 1 })
+      ri++
+    } else if (oLine !== undefined && (rLine === undefined || !repLines.slice(ri).includes(oLine))) {
+      result.push({ type: "removed", text: oLine, lineNo: oi + 1 })
+      oi++
+    } else {
+      // Both exist but differ — show as remove + add
+      result.push({ type: "removed", text: oLine!, lineNo: oi + 1 })
+      result.push({ type: "added", text: rLine!, lineNo: ri + 1 })
+      oi++
+      ri++
+    }
+
+    if (result.length > maxLen + 200) break // safety
+  }
+  return result
+}
+
 export function EFacturaValidatorCard({
   validations,
   busy,
@@ -31,6 +69,7 @@ export function EFacturaValidatorCard({
   const [documentName, setDocumentName] = useState("factura-anaf.xml")
   const [xml, setXml] = useState("")
   const [repairResult, setRepairResult] = useState<EFacturaXmlRepairRecord | null>(null)
+  const [showDiff, setShowDiff] = useState(false)
   const latestValidation = validations[0] ?? null
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -325,14 +364,53 @@ export function EFacturaValidatorCard({
                       ))}
 
                       <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">XML reparat</p>
-                        <textarea
-                          data-testid="repaired-xml-output"
-                          readOnly
-                          value={repairResult.repairedXml}
-                          rows={8}
-                          className="mt-3 min-h-[180px] w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-xs text-eos-text outline-none"
-                        />
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                            {showDiff ? "Diff original vs reparat" : "XML reparat"}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowDiff(!showDiff)}
+                            className="gap-1.5 text-xs"
+                          >
+                            <FileCode2 className="size-3" />
+                            {showDiff ? "Vezi XML final" : "Vezi diff"}
+                          </Button>
+                        </div>
+
+                        {showDiff ? (
+                          <div className="mt-3 max-h-[320px] overflow-auto rounded-eos-md border border-eos-border bg-eos-bg-inset font-mono text-[11px] leading-5">
+                            {computeXmlDiff(xml, repairResult.repairedXml).map((line, i) => (
+                              <div
+                                key={i}
+                                className={
+                                  line.type === "removed"
+                                    ? "bg-eos-danger/10 text-eos-danger"
+                                    : line.type === "added"
+                                      ? "bg-eos-success/10 text-eos-success"
+                                      : "text-eos-text-muted"
+                                }
+                              >
+                                <span className="inline-block w-8 select-none px-2 text-right text-eos-text-tertiary">
+                                  {line.lineNo}
+                                </span>
+                                <span className="inline-block w-4 select-none text-center">
+                                  {line.type === "removed" ? "-" : line.type === "added" ? "+" : " "}
+                                </span>
+                                <span className="whitespace-pre-wrap">{line.text}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <textarea
+                            data-testid="repaired-xml-output"
+                            readOnly
+                            value={repairResult.repairedXml}
+                            rows={8}
+                            className="mt-3 min-h-[180px] w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-xs text-eos-text outline-none"
+                          />
+                        )}
                       </div>
 
                       <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">

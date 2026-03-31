@@ -550,6 +550,26 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function patchAISystem(input: { id: string; approvalStatus?: string; policyAttestationStatus?: string }) {
+    await withBusyOperation(async () => {
+      try {
+        const response = await fetch("/api/ai-systems", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        })
+        const payload = (await response.json()) as DashboardPayload & { error?: string }
+        if (!response.ok) throw new Error(payload.error || "Nu am putut actualiza sistemul AI.")
+        applyDashboardPayload(payload)
+        toast.success("Sistem AI actualizat")
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Eroare la actualizarea sistemului."
+        toast.error("Actualizare esuata", { description: message })
+        throw err
+      }
+    })
+  }
+
   async function discoverAISystemsFromManifest(input: { documentName: string; content: string }) {
     await withBusyOperation(async () => {
       const response = await fetch("/api/ai-systems/discover", {
@@ -1149,6 +1169,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleTaskExport,
     handleSandbox,
     addAISystem,
+    patchAISystem,
     discoverAISystemsFromManifest,
     removeAISystem,
     updateDetectedAISystem,
@@ -1244,6 +1265,7 @@ export type CockpitActionSlice = Pick<
   | "handleTaskExport"
   | "handleSandbox"
   | "addAISystem"
+  | "patchAISystem"
   | "discoverAISystemsFromManifest"
   | "removeAISystem"
   | "updateDetectedAISystem"
@@ -1408,6 +1430,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleTaskExport,
     handleSandbox,
     addAISystem,
+    patchAISystem,
     discoverAISystemsFromManifest,
     removeAISystem,
     updateDetectedAISystem,
@@ -1450,6 +1473,7 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleTaskExport,
     handleSandbox,
     addAISystem,
+    patchAISystem,
     discoverAISystemsFromManifest,
     removeAISystem,
     updateDetectedAISystem,

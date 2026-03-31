@@ -27,11 +27,19 @@ export type CookieBannerInput = {
   trackers: BannerTrackerInput[]
 }
 
+export type ScriptBlockingGuide = {
+  trackerName: string
+  category: string
+  originalPattern: string
+  blockedPattern: string
+}
+
 export type CookieBannerResult = {
   html: string
   categories: BannerCategory[]
   trackerCount: number
   hasConsentRequired: boolean
+  integrationGuide: ScriptBlockingGuide[]
 }
 
 // ── Category mapping ──────────────────────────────────────────────────────────
@@ -204,6 +212,22 @@ export function generateCookieBannerSnippet(input: CookieBannerInput): CookieBan
     var data = { accepted: accepted, timestamp: new Date().toISOString(), version: 1 };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     document.dispatchEvent(new CustomEvent('cc:consent', { detail: data }));
+    enableScripts(accepted);
+  }
+
+  // Script-blocking: activates <script type="text/plain" data-cc-category="analytics|advertising|functional">
+  function enableScripts(accepted) {
+    document.querySelectorAll('script[type="text/plain"][data-cc-category]').forEach(function(el) {
+      var cat = el.getAttribute('data-cc-category');
+      if (cat === 'necessary' || (accepted && accepted.indexOf(cat) !== -1)) {
+        var newScript = document.createElement('script');
+        if (el.src) newScript.src = el.src;
+        else newScript.textContent = el.textContent;
+        newScript.type = 'text/javascript';
+        el.parentNode.insertBefore(newScript, el.nextSibling);
+        el.remove();
+      }
+    });
   }
 
   window.compliCC = {
@@ -235,14 +259,18 @@ export function generateCookieBannerSnippet(input: CookieBannerInput): CookieBan
       document.getElementById('cc-prefs').classList.add('cc-hidden');
       document.getElementById('cc-banner').classList.add('cc-hidden');
     },
+    enableScripts: function(cats) { enableScripts(cats || (getConsent() || {}).accepted || []); },
     reset: function() {
       localStorage.removeItem(STORAGE_KEY);
       location.reload();
     }
   };
 
-  // Show banner if no consent stored
-  if (!getConsent()) {
+  // On page load: enable already-consented scripts or show banner
+  var existing = getConsent();
+  if (existing && existing.accepted) {
+    enableScripts(existing.accepted);
+  } else {
     setTimeout(function() {
       document.getElementById('cc-banner').classList.remove('cc-hidden');
     }, 300);
@@ -256,10 +284,53 @@ export function generateCookieBannerSnippet(input: CookieBannerInput): CookieBan
 </script>
 <!-- Sfârşit Cookie Banner — ${new Date().toISOString().slice(0, 10)} -->`.trim()
 
+  // Build integration guide: how to block each tracker script
+  const integrationGuide: ScriptBlockingGuide[] = buildIntegrationGuide(input.trackers)
+
   return {
     html,
     categories,
     trackerCount: input.trackers.length,
     hasConsentRequired: consentRequired,
+    integrationGuide,
   }
+}
+
+// ── Script-blocking patterns ──────────────────────────────────────────────────
+
+const TRACKER_SCRIPT_PATTERNS: Record<string, string> = {
+  "Google Analytics 4": '<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXX"></script>',
+  "Google Tag Manager": '<script src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXXX"></script>',
+  "Meta Pixel": '<script>!function(f,b,e,v,n,t,s){...}("fbevents.js")</script>',
+  "Hotjar": '<script>(function(h,o,t,j,a,r){h.hj=...})(window,...,"HJID")</script>',
+  "Microsoft Clarity": '<script>(function(c,l,a,r,i,t,y){...})(window,...,"PROJECT_ID")</script>',
+  "TikTok Pixel": '<script>!function(w,d,t){...}(window,document,"ttq")</script>',
+  "LinkedIn Insight": '<script src="https://snap.licdn.com/li.lms-analytics/insight.min.js"></script>',
+  HubSpot: '<script src="//js.hs-scripts.com/XXXXX.js"></script>',
+  Intercom: '<script>window.intercomSettings={...}</script>',
+  Crisp: '<script>window.$crisp=[];$crisp.push(["do","chat:show"])</script>',
+}
+
+function mapTrackerCategory(cat: BannerTrackerInput["category"]): string {
+  if (cat === "analytics") return "analytics"
+  if (cat === "advertising" || cat === "social") return "advertising"
+  return "functional"
+}
+
+function buildIntegrationGuide(trackers: BannerTrackerInput[]): ScriptBlockingGuide[] {
+  return trackers
+    .filter((t) => t.requiresConsent)
+    .map((t) => {
+      const category = mapTrackerCategory(t.category)
+      const pattern = TRACKER_SCRIPT_PATTERNS[t.name] ?? `<script src="...${t.name.toLowerCase().replace(/\s+/g, "-")}..."></script>`
+      return {
+        trackerName: t.name,
+        category,
+        originalPattern: pattern,
+        blockedPattern: pattern.replace(
+          /^<script/,
+          `<script type="text/plain" data-cc-category="${category}"`
+        ),
+      }
+    })
 }

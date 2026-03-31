@@ -269,6 +269,7 @@ export default function SistemePage() {
               busy={cockpit.busy}
               onSubmit={cockpitActions.addAISystem}
               onRemove={cockpitActions.removeAISystem}
+              onPatch={cockpitActions.patchAISystem}
             />
           }
           compliancePack={data.compliancePack ?? null}

@@ -4,20 +4,24 @@ import { useState } from "react"
 import {
   Bot,
   BrainCircuit,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   Download,
   Loader2,
   ShieldAlert,
   ShieldCheck,
   ShieldMinus,
   Trash2,
+  XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import { classifyAISystem, formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { AISystemDraft } from "@/lib/compliance/ai-inventory"
 import { classifyAISystem as classifyForExplain } from "@/lib/compliance/ai-act-classifier"
+import { fingerprintMatch } from "@/lib/compliance/vendor-library"
 import type { AISystemPurpose, AISystemRecord } from "@/lib/compliance/types"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -31,6 +35,7 @@ type AIInventoryPanelProps = {
   busy: boolean
   onSubmit: (input: AISystemDraft) => Promise<void>
   onRemove: (id: string) => Promise<void>
+  onPatch?: (input: { id: string; approvalStatus?: string; policyAttestationStatus?: string }) => Promise<void>
 }
 
 type InventoryFlowStep = 1 | 2 | 3 | 4
@@ -122,7 +127,7 @@ const STEP_LABELS: Record<InventoryFlowStep, string> = {
   4: "Clasificare",
 }
 
-export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInventoryPanelProps) {
+export function AIInventoryPanel({ systems, busy, onSubmit, onRemove, onPatch }: AIInventoryPanelProps) {
   const [step, setStep] = useState<InventoryFlowStep>(1)
   const [name, setName] = useState("")
   const [vendor, setVendor] = useState("")
@@ -463,6 +468,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
               const tone = riskTone(system.riskLevel)
               const Icon = tone.icon
               const explanation = classifyForExplain(system.purpose)
+              const vendorMatch = fingerprintMatch(system.vendor)
 
               const inventoryBorderL =
                 system.riskLevel === "high"
@@ -518,6 +524,22 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                         <Badge className="border-eos-border bg-transparent text-eos-text-muted">
                           {system.hasHumanReview ? "Cu review uman" : "Fara review uman"}
                         </Badge>
+                        {vendorMatch?.vendor.dpaUrl ? (
+                          <a
+                            href={vendorMatch.vendor.dpaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full border border-eos-success-border bg-eos-success-soft px-2 py-0.5 text-xs text-eos-success transition hover:opacity-80"
+                          >
+                            <CheckCircle2 className="size-3" strokeWidth={2} />
+                            DPA public
+                          </a>
+                        ) : vendorMatch && !vendorMatch.vendor.dpaUrl ? (
+                          <Badge className="border-eos-warning-border bg-eos-warning-soft text-eos-warning">
+                            <ShieldAlert className="mr-0.5 size-3" strokeWidth={2} />
+                            DPA nedisponibil
+                          </Badge>
+                        ) : null}
                       </div>
                       <div className="flex gap-2">
                         {system.riskLevel === "high" && (
@@ -549,6 +571,72 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove }: AIInvent
                       </div>
                     </div>
                   </div>
+
+                  {/* Approval + Attestation */}
+                  {onPatch && (
+                    <div className="mt-4 flex flex-wrap items-center gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-eos-text-muted">Aprobare:</span>
+                        {system.approvalStatus === "approved" ? (
+                          <Badge className="border-eos-success-border bg-eos-success-soft text-eos-success">
+                            <CheckCircle2 className="mr-1 size-3" strokeWidth={2} />
+                            Aprobat
+                          </Badge>
+                        ) : system.approvalStatus === "rejected" ? (
+                          <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                            <XCircle className="mr-1 size-3" strokeWidth={2} />
+                            Respins
+                          </Badge>
+                        ) : (
+                          <div className="flex gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 gap-1.5 border-eos-success-border bg-eos-success-soft/50 px-2.5 text-xs text-eos-success hover:bg-eos-success-soft"
+                              disabled={busy}
+                              onClick={() => void onPatch({ id: system.id, approvalStatus: "approved" })}
+                            >
+                              <CheckCircle2 className="size-3" strokeWidth={2} />
+                              Aproba
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 gap-1.5 border-eos-error-border bg-eos-error-soft/50 px-2.5 text-xs text-eos-error hover:bg-eos-error-soft"
+                              disabled={busy}
+                              onClick={() => void onPatch({ id: system.id, approvalStatus: "rejected" })}
+                            >
+                              <XCircle className="size-3" strokeWidth={2} />
+                              Respinge
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="h-5 w-px bg-eos-border-subtle" />
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-eos-text-muted">Atestare politica AI:</span>
+                        {system.policyAttestationStatus === "attested" ? (
+                          <Badge className="border-eos-success-border bg-eos-success-soft text-eos-success">
+                            <ClipboardCheck className="mr-1 size-3" strokeWidth={2} />
+                            Atestat
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1.5 border-eos-border px-2.5 text-xs text-eos-text-muted hover:bg-eos-surface-active"
+                            disabled={busy}
+                            onClick={() => void onPatch({ id: system.id, policyAttestationStatus: "attested" })}
+                          >
+                            <ClipboardCheck className="size-3" strokeWidth={2} />
+                            Atesta conformitate
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                     <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">

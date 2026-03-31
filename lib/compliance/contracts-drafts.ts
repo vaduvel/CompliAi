@@ -66,8 +66,9 @@ export function generateContractsBaselinePack(
 | --- | --- | --- | --- | --- |
 | Clienți B2B | Contract-cadru prestări servicii / furnizare | [completează] | [completează] | Draft |
 | Furnizori / colaboratori | Contract furnizor / comandă fermă / termeni standard | [completează] | [completează] | Draft |
-| Confidențialitate | NDA sau clauză de confidențialitate | [completează] | [completează] | Draft |
-| Date personale | DPA separat sau anexă contractuală | [completează] | [completează] | Draft |
+| Confidențialitate | NDA bilateral (generează din CompliAI → „Acord NDA") | [completează] | [completează] | Draft |
+| Date personale | DPA separat sau anexă contractuală (generează din CompliAI → „Acord DPA") | [completează] | [completează] | Draft |
+| Furnizori | Contract-cadru furnizor (generează din CompliAI → „Contract Furnizor") | [completează] | [completează] | Draft |
 
 ## Reguli practice
 

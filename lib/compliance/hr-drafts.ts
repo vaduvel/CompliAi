@@ -283,10 +283,47 @@ ${params.hasAiTools ? "- Utilizarea uneltelor AI se face doar conform politicii 
 - Ai clar cine răspunde de actualizările viitoare?
 - Știi unde intră dovada în Dosar pentru audit ITM / HR?`,
       },
+      {
+        id: "distribution-register",
+        title: "Registru distribuire internă",
+        summary: "Tabelul în care confirmi cine a luat la cunoștință regulamentul intern.",
+        content: `# Registru distribuire regulament intern — ${orgName}
+
+## Scop
+
+Acest registru confirmă că regulamentul intern a fost comunicat angajaților și că există dovadă de luare la cunoștință. Este necesar pentru orice control ITM sau audit intern.
+
+## Tabel de distribuire
+
+| Nr. | Nume angajat | Funcție | Departament | Data comunicării | Tip confirmare | Semnat? |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | [completează] | [completează] | [completează] | [completează] | ☐ Semnătură ☐ Email ☐ PV | ☐ Da ☐ Nu |
+| 2 | [completează] | [completează] | [completează] | [completează] | ☐ Semnătură ☐ Email ☐ PV | ☐ Da ☐ Nu |
+| 3 | [completează] | [completează] | [completează] | [completează] | ☐ Semnătură ☐ Email ☐ PV | ☐ Da ☐ Nu |
+
+## Tipuri de confirmare acceptate
+
+- **Semnătură fizică** pe exemplarul tipărit al regulamentului
+- **Email intern** cu confirmare de primire sau reply explicit
+- **Proces-verbal** de informare colectivă cu lista participanților și semnăturile
+
+## Unde arhivezi
+
+- Copie în dosarul de personal al fiecărui angajat
+- Tabelul completat salvat în folderul HR / arhiva de audit
+- Copie digitală în sistemul de evidență (dacă există)
+
+## Reguli
+
+- Angajații noi primesc regulamentul la onboarding, înainte de începerea activității.
+- La fiecare actualizare majoră, se redistribuie cu confirmare nouă.
+- Perioada de completare: cel târziu 5 zile lucrătoare de la aprobarea versiunii finale.`,
+      },
     ],
     completionChecklist: [
       "Ai revizuit structura regulamentului intern și știi ce capitole trebuie personalizate pentru firmă.",
       "Ai stabilit cum comunici documentul către angajați și ce dovadă păstrezi pentru luarea la cunoștință.",
+      "Ai completat registrul de distribuire sau ai confirmat că procesul de colectare a dovezilor este pornit.",
       "Ai clar unde se salvează versiunea finală și cine răspunde de actualizările ulterioare.",
     ],
     generatorDocumentType: "hr-internal-procedures",

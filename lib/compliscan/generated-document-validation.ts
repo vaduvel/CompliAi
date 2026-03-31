@@ -92,6 +92,87 @@ function buildSpecificContextCheck(input: GeneratedDocumentValidationInput) {
   return null
 }
 
+// ── GDPR Art. 13/14 Privacy Policy Completeness ─────────────────────────────
+
+type GdprRequirement = {
+  id: string
+  label: string
+  help: string
+  keywords: string[]
+}
+
+const GDPR_PRIVACY_REQUIREMENTS: GdprRequirement[] = [
+  {
+    id: "gdpr-identity",
+    label: "Art. 13(1)(a) — Identitatea operatorului",
+    help: "Politica trebuie să conțină identitatea și datele de contact ale operatorului de date.",
+    keywords: ["operator", "titular", "date de contact", "sediu"],
+  },
+  {
+    id: "gdpr-dpo",
+    label: "Art. 13(1)(b) — Contact DPO / responsabil",
+    help: "Trebuie indicat DPO-ul sau persoana responsabilă de protecția datelor.",
+    keywords: ["responsabil", "dpo", "protecția datelor", "protectia datelor"],
+  },
+  {
+    id: "gdpr-purposes",
+    label: "Art. 13(1)(c) — Scopurile prelucrării",
+    help: "Trebuie enumerate scopurile pentru care sunt prelucrate datele personale.",
+    keywords: ["scop", "prelucrare", "procesare", "colectare"],
+  },
+  {
+    id: "gdpr-legal-basis",
+    label: "Art. 13(1)(c) — Temeiul juridic",
+    help: "Trebuie specificat temeiul legal al prelucrării (consimțământ, contract, interes legitim etc.).",
+    keywords: ["temei", "baza legala", "bază legală", "consimtamant", "consimțământ", "interes legitim", "obligatie legala"],
+  },
+  {
+    id: "gdpr-recipients",
+    label: "Art. 13(1)(e) — Destinatari / categorii de destinatari",
+    help: "Trebuie menționați destinatarii sau categoriile de destinatari ai datelor.",
+    keywords: ["destinatar", "impartasire", "împărtășire", "partener", "furnizor", "tert", "terț"],
+  },
+  {
+    id: "gdpr-retention",
+    label: "Art. 13(2)(a) — Perioada de stocare",
+    help: "Trebuie precizată perioada de stocare sau criteriile folosite pentru stabilirea ei.",
+    keywords: ["stocare", "retentie", "retenție", "pastrare", "păstrare", "durata", "perioada"],
+  },
+  {
+    id: "gdpr-rights",
+    label: "Art. 13(2)(b) — Drepturile persoanei vizate",
+    help: "Trebuie enumerate drepturile: acces, rectificare, ștergere, portabilitate, opoziție.",
+    keywords: ["drept", "acces", "rectificare", "stergere", "ștergere", "portabilitate", "opozitie", "opoziție"],
+  },
+  {
+    id: "gdpr-withdraw",
+    label: "Art. 13(2)(c) — Retragere consimțământ",
+    help: "Dacă prelucrarea se bazează pe consimțământ, trebuie menționat dreptul de retragere.",
+    keywords: ["retragere", "revocare", "retrage consimtamant", "retrage consimțământ"],
+  },
+  {
+    id: "gdpr-complaint",
+    label: "Art. 13(2)(d) — Plângere la autoritatea de supraveghere",
+    help: "Trebuie menționat dreptul de a depune plângere la ANSPDCP.",
+    keywords: ["plangere", "plângere", "anspdcp", "autoritate", "supraveghere"],
+  },
+  {
+    id: "gdpr-transfers",
+    label: "Art. 13(1)(f) — Transferuri internaționale",
+    help: "Dacă există transferuri în afara SEE, trebuie menționate garanțiile adecvate.",
+    keywords: ["transfer", "international", "internațional", "see", "eea", "tara terta", "țară terță", "garantii adecvate"],
+  },
+]
+
+function checkPrivacyPolicyCompleteness(contentLower: string): GeneratedDocumentValidationCheck[] {
+  return GDPR_PRIVACY_REQUIREMENTS.map((req) => ({
+    id: req.id,
+    label: req.label,
+    help: req.help,
+    passed: req.keywords.some((kw) => contentLower.includes(kw)),
+  }))
+}
+
 export function validateGeneratedDocumentEvidence(
   input: GeneratedDocumentValidationInput
 ): GeneratedDocumentValidationResult {
@@ -137,6 +218,12 @@ export function validateGeneratedDocumentEvidence(
   const specificContextCheck = buildSpecificContextCheck(input)
   if (specificContextCheck) {
     checks.push(specificContextCheck)
+  }
+
+  // GDPR Art. 13/14 completeness check for privacy policies
+  if (input.documentType === "privacy-policy") {
+    const gdprChecks = checkPrivacyPolicyCompleteness(contentLower)
+    checks.push(...gdprChecks)
   }
 
   const failedChecks = checks.filter((check) => !check.passed)

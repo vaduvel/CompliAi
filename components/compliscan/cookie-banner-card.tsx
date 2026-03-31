@@ -15,11 +15,19 @@ type BannerCategory = {
   trackers: string[]
 }
 
+type ScriptBlockingGuide = {
+  trackerName: string
+  category: string
+  originalPattern: string
+  blockedPattern: string
+}
+
 type GenerateResult = {
   html: string
   categories: BannerCategory[]
   trackerCount: number
   hasConsentRequired: boolean
+  integrationGuide: ScriptBlockingGuide[]
 }
 
 const CATEGORY_ICONS: Record<BannerCategory["id"], string> = {
@@ -211,6 +219,36 @@ export function CookieBannerCard() {
                 Regenerează
               </Button>
             </div>
+
+            {/* Script-blocking integration guide */}
+            {result.integrationGuide && result.integrationGuide.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-eos-text">
+                  <ShieldCheck className="mr-1 inline size-3" />
+                  Blocarea scripturilor (obligatoriu ePrivacy)
+                </p>
+                <p className="text-[11px] text-eos-text-muted">
+                  Schimb&#259; <code className="rounded bg-eos-canvas px-1 text-eos-text">type=&quot;text/javascript&quot;</code> cu <code className="rounded bg-eos-canvas px-1 text-eos-text">type=&quot;text/plain&quot;</code> pe
+                  fiecare script de tracking. Banner-ul le activeaz&#259; automat dup&#259; consim&#539;&#259;m&#226;nt.
+                </p>
+                <div className="space-y-1.5">
+                  {result.integrationGuide.map((g) => (
+                    <div
+                      key={g.trackerName}
+                      className="rounded-eos-md border border-eos-border bg-eos-canvas px-3 py-2"
+                    >
+                      <p className="text-[11px] font-medium text-eos-text">
+                        {g.trackerName}
+                        <span className="ml-1.5 text-eos-text-tertiary">({g.category})</span>
+                      </p>
+                      <pre className="mt-1 overflow-auto text-[10px] leading-4 text-eos-text-muted">
+                        {g.blockedPattern}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

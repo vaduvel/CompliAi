@@ -29,6 +29,8 @@ export type GeneratedDocumentKind =
   | "hr-internal-procedures"
   | "reges-correction-brief"
   | "contract-template"
+  | "nda"
+  | "supplier-contract"
   | "deletion-attestation"
   | "ropa"
 
@@ -272,6 +274,9 @@ export type TraceabilityReviewOverride = {
   updatedAtISO: string
 }
 
+export type AISystemApprovalStatus = "pending" | "approved" | "rejected"
+export type AISystemAttestationStatus = "not-attested" | "attested"
+
 export type AISystemRecord = {
   id: string
   name: string
@@ -286,6 +291,12 @@ export type AISystemRecord = {
   annexIIIHint?: string
   recommendedActions: string[]
   createdAtISO: string
+  approvalStatus?: AISystemApprovalStatus
+  approvedAtISO?: string
+  approvedByEmail?: string
+  policyAttestationStatus?: AISystemAttestationStatus
+  policyAttestedAtISO?: string
+  policyAttestedByEmail?: string
 }
 
 export type DetectedAISystemRecord = AISystemRecord & {

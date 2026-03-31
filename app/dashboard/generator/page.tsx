@@ -218,6 +218,16 @@ export default function GeneratorPage() {
   const [orgCui, setOrgCui] = useState("")
   const [dpoEmail, setDpoEmail] = useState("")
   const [dataFlows, setDataFlows] = useState("")
+  // Job-description per-role fields
+  const [jobTitle, setJobTitle] = useState("")
+  const [department, setDepartment] = useState("")
+  const [contractType, setContractType] = useState("")
+  const [specificDuties, setSpecificDuties] = useState("")
+  // HR procedures fields
+  const [workSchedule, setWorkSchedule] = useState("")
+  // Contracts fields
+  const [serviceDescription, setServiceDescription] = useState("")
+  const [paymentTerms, setPaymentTerms] = useState("")
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<GeneratedDocumentResponse | null>(null)
   const [copied, setCopied] = useState(false)
@@ -335,6 +345,16 @@ export default function GeneratorPage() {
           dpoEmail: dpoEmail || undefined,
           dataFlows: dataFlows || undefined,
           sourceFindingId: findingId || undefined,
+          // Per-role job description
+          jobTitle: jobTitle || undefined,
+          department: department || undefined,
+          contractType: contractType || undefined,
+          specificDuties: specificDuties || undefined,
+          // HR procedures
+          workSchedule: workSchedule || undefined,
+          // Contracts
+          serviceDescription: serviceDescription || undefined,
+          paymentTerms: paymentTerms || undefined,
         }),
       })
 
@@ -655,6 +675,103 @@ export default function GeneratorPage() {
                   className={textareaClass}
                 />
               </Field>
+
+              {/* ── Conditional: Job Description per rol ── */}
+              {selectedType === "job-description" && (
+                <div className="space-y-4 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.04] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                    Detalii rol
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Titlu rol" hint="(ex. Contabil senior)">
+                      <input
+                        type="text"
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
+                        placeholder="Denumirea postului"
+                        className={inputClass}
+                      />
+                    </Field>
+                    <Field label="Departament">
+                      <input
+                        type="text"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        placeholder="ex. Financiar, IT, Operațiuni"
+                        className={inputClass}
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Tip contract">
+                    <select
+                      value={contractType}
+                      onChange={(e) => setContractType(e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">— alege —</option>
+                      <option value="nedeterminat">Nedeterminat</option>
+                      <option value="determinat">Determinat</option>
+                      <option value="part-time">Part-time</option>
+                      <option value="colaborare PFA/SRL">Colaborare PFA / SRL</option>
+                      <option value="internship">Internship / stagiu</option>
+                    </select>
+                  </Field>
+                  <Field label="Atribuții specifice" hint="(opțional — AI completează restul)">
+                    <textarea
+                      value={specificDuties}
+                      onChange={(e) => setSpecificDuties(e.target.value)}
+                      rows={3}
+                      placeholder="ex. Gestionează facturile furnizorilor, reconciliază contul de bancă, pregătește declarațiile fiscale lunare."
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+              )}
+
+              {/* ── Conditional: HR Procedures ── */}
+              {selectedType === "hr-internal-procedures" && (
+                <div className="space-y-4 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.04] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                    Detalii regulament intern
+                  </p>
+                  <Field label="Program de lucru standard">
+                    <input
+                      type="text"
+                      value={workSchedule}
+                      onChange={(e) => setWorkSchedule(e.target.value)}
+                      placeholder="ex. L-V 09:00-18:00, hibrid 3 zile birou"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              )}
+
+              {/* ── Conditional: Contract Template ── */}
+              {selectedType === "contract-template" && (
+                <div className="space-y-4 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.04] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                    Detalii contract
+                  </p>
+                  <Field label="Descrierea serviciilor / obiectul">
+                    <textarea
+                      value={serviceDescription}
+                      onChange={(e) => setServiceDescription(e.target.value)}
+                      rows={2}
+                      placeholder="ex. Servicii de contabilitate lunară, declarații fiscale, raportări financiare."
+                      className={textareaClass}
+                    />
+                  </Field>
+                  <Field label="Termeni de plată">
+                    <input
+                      type="text"
+                      value={paymentTerms}
+                      onChange={(e) => setPaymentTerms(e.target.value)}
+                      placeholder="ex. 30 zile de la facturare, transfer bancar"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              )}
 
               <Button
                 onClick={() => void handleGenerate()}

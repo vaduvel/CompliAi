@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, Maximize2, RotateCw, Sparkles, X } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, Maximize2, Plus, RotateCw, Sparkles, Trash2, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -119,6 +119,35 @@ export function GeneratorDrawer({
   const [documentConfirmed, setDocumentConfirmed] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
   const [previewExpanded, setPreviewExpanded] = useState(false)
+
+  // Retention matrix wizard state
+  type RetentionRow = { category: string; period: string; trigger: string; basis: string }
+  const [retentionRows, setRetentionRows] = useState<RetentionRow[]>([
+    { category: "", period: "", trigger: "", basis: "" },
+  ])
+  const showRetentionWizard = documentType === "retention-policy"
+
+  function addRetentionRow() {
+    setRetentionRows((prev) => [...prev, { category: "", period: "", trigger: "", basis: "" }])
+  }
+
+  function removeRetentionRow(idx: number) {
+    setRetentionRows((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  function updateRetentionRow(idx: number, field: keyof RetentionRow, value: string) {
+    setRetentionRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)))
+  }
+
+  function applyRetentionMatrix() {
+    const filled = retentionRows.filter((r) => r.category.trim())
+    if (filled.length === 0) return
+    const lines = filled.map(
+      (r) =>
+        `${r.category.trim()}: ${r.period.trim() || "nedefinit"}${r.trigger.trim() ? `, trigger: ${r.trigger.trim()}` : ""}${r.basis.trim() ? `, bază legală: ${r.basis.trim()}` : ""}`
+    )
+    setDataFlows(lines.join("\n"))
+  }
 
   const docTypeLabel = FINDING_DOCUMENT_LABELS[documentType] ?? documentType
   const siteScanDrivenDocument =
@@ -551,6 +580,69 @@ export function GeneratorDrawer({
                   </p>
                 </div>
               ) : null}
+
+              {showRetentionWizard && !lockedUntilConfirmed && (
+                <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                  <p className="text-xs font-semibold text-eos-text">
+                    Matrice retenție — completează categoriile de date
+                  </p>
+                  <div className="space-y-2">
+                    {retentionRows.map((row, idx) => (
+                      <div key={idx} className="grid grid-cols-[1fr_0.7fr_0.8fr_0.8fr_auto] items-center gap-2">
+                        <input
+                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          placeholder="Categorie date"
+                          value={row.category}
+                          onChange={(e) => updateRetentionRow(idx, "category", e.target.value)}
+                        />
+                        <input
+                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          placeholder="Perioadă"
+                          value={row.period}
+                          onChange={(e) => updateRetentionRow(idx, "period", e.target.value)}
+                        />
+                        <input
+                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          placeholder="Trigger ștergere"
+                          value={row.trigger}
+                          onChange={(e) => updateRetentionRow(idx, "trigger", e.target.value)}
+                        />
+                        <input
+                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          placeholder="Bază legală"
+                          value={row.basis}
+                          onChange={(e) => updateRetentionRow(idx, "basis", e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeRetentionRow(idx)}
+                          disabled={retentionRows.length <= 1}
+                          className="rounded p-1 text-eos-text-muted hover:bg-eos-surface-variant hover:text-eos-error disabled:opacity-30"
+                        >
+                          <Trash2 className="size-3.5" strokeWidth={2} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={addRetentionRow}
+                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border px-2.5 py-1.5 text-xs text-eos-text-muted hover:bg-eos-surface-variant"
+                    >
+                      <Plus className="size-3" strokeWidth={2} />
+                      Adaugă categorie
+                    </button>
+                    <button
+                      type="button"
+                      onClick={applyRetentionMatrix}
+                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-primary/30 bg-eos-primary/10 px-2.5 py-1.5 text-xs font-medium text-eos-primary hover:bg-eos-primary/20"
+                    >
+                      Aplică în context
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <Field label={contextFieldLabel} hint={contextFieldHint}>
                 <textarea

@@ -13,21 +13,31 @@ describe("validateGeneratedDocumentEvidence", () => {
 
 **Ultima actualizare:** 27 martie 2026
 
-Demo SRL operează site-ul demo.ro și explică aici ce date prelucrează.
+## 1. Identitatea operatorului
+Demo SRL, cu sediu social în București, operează site-ul demo.ro. Datele de contact ale operatorului sunt disponibile la office@demo.ro.
 
-## Ce date colectăm
-Colectăm date de contact, date contractuale și date de suport.
+## 2. Responsabilul cu protecția datelor (DPO)
+Pentru orice întrebare legată de protecția datelor, contactați responsabilul cu protecția datelor la dpo@demo.ro.
 
-## Drepturile persoanelor vizate
-Acces, rectificare, ștergere, opoziție, portabilitate.
+## 3. Scopurile și temeiul juridic al prelucrării
+Colectăm și prelucrăm date personale în următoarele scopuri: furnizarea serviciilor contractuale, suport tehnic și analiză statistică. Temeiul juridic este consimțământul dumneavoastră, executarea contractului sau interesul nostru legitim.
 
-## Transferuri și retenție
-Transferurile sunt limitate, iar retenția se face după politicile interne.
+## 4. Destinatari
+Datele pot fi împărtășite cu furnizori tehnici (hosting, email) și parteneri contractuali, sub obligație de confidențialitate.
+
+## 5. Perioada de stocare
+Datele sunt păstrate pe durata retenției stabilite intern, de regulă 3 ani de la ultima interacțiune, sau conform obligațiilor legale.
+
+## 6. Drepturile persoanelor vizate
+Aveți dreptul de acces, rectificare, ștergere, portabilitate, opoziție și restricționare. Dacă prelucrarea se bazează pe consimțământ, aveți dreptul de retragere a consimțământului în orice moment.
+
+## 7. Plângeri
+Aveți dreptul de a depune o plângere la ANSPDCP (autoritatea de supraveghere din România).
+
+## 8. Transferuri internaționale
+Transferurile de date în afara SEE se realizează doar cu garanții adecvate (clauze contractuale standard).
 
 ⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială.
-
-## Informații suplimentare
-Acest paragraf există doar pentru a asigura o lungime auditabilă și pentru a păstra contextul complet în draftul folosit la testare.
 `,
     })
 

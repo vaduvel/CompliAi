@@ -20,6 +20,8 @@ export type DocumentType =
   | "hr-internal-procedures"
   | "reges-correction-brief"
   | "contract-template"
+  | "nda"
+  | "supplier-contract"
   | "deletion-attestation"
   | "ropa"
 
@@ -85,6 +87,8 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "hr-internal-procedures": 24,
   "reges-correction-brief": 6,
   "contract-template": 24,
+  nda: 24,
+  "supplier-contract": 24,
   "deletion-attestation": 6,
   ropa: 12,
 }
@@ -145,6 +149,14 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   },
   "contract-template": {
     title: "Contract-Cadru Prestări Servicii",
+    legalBasis: "Codul Civil Art. 1166–1323, GDPR Art. 28",
+  },
+  nda: {
+    title: "Acord de Confidențialitate (NDA)",
+    legalBasis: "Codul Civil Art. 1169–1170, GDPR Art. 28, 32",
+  },
+  "supplier-contract": {
+    title: "Contract-Cadru Furnizor",
     legalBasis: "Codul Civil Art. 1166–1323, GDPR Art. 28",
   },
   "deletion-attestation": {
@@ -477,6 +489,66 @@ Cerințe:
 - Art. 12: Litigii — tentativă amiabilă, instanță competentă
 - Art. 13: Dispoziții finale — modificări prin act adițional, exemplare
 - Câmpuri de semnătură: Prestator, Beneficiar, Data, Semnătura
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    nda: `
+Generează un Acord de Confidențialitate (NDA) bilateral complet în română.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.counterpartyName ? `Contrapartidă vizată: ${input.counterpartyName}.` : ""}
+${input.serviceDescription ? `Context colaborare: ${input.serviceDescription}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Art. 1: Părțile — placeholdere pentru ambele părți (Partea Divulgantă, Partea Receptoare)
+- Art. 2: Definiții — Informație Confidențială (include: date tehnice, comerciale, financiare, liste clienți, strategii, date personale)
+- Art. 3: Excepții — informații publice, dezvoltate independent, primite legal de la terți, impuse de lege
+- Art. 4: Obligații — nedivulgare, restricție de utilizare (doar scopul colaborării), protecție rezonabilă, limitare acces la "need to know"
+- Art. 5: Durata confidențialității — minim 3 ani după încetarea acordului
+- Art. 6: Restituirea/distrugerea informațiilor la cerere sau la încetarea acordului
+- Art. 7: Proprietate intelectuală — NDA nu transferă drepturi de PI
+- Art. 8: Protecția datelor personale — trimitere la GDPR dacă informațiile conțin date personale
+- Art. 9: Penalități pentru încălcare — clauză penală orientativă
+- Art. 10: Legea aplicabilă și jurisdicția — legea română, instanțele competente
+- Art. 11: Dispoziții finale — modificări doar prin act adițional scris, limba oficială, exemplare
+- Câmpuri de semnătură: Partea 1, Partea 2, Reprezentant, Data, Semnătura
+- Bilateral: protejează ambele părți, nu doar una
+- Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "supplier-contract": `
+Generează un Contract-Cadru cu Furnizorul complet în română — perspectiva beneficiarului care primește servicii/produse.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+${input.counterpartyName ? `Furnizor vizat: ${input.counterpartyName}.` : ""}
+${input.serviceDescription ? `Servicii/produse furnizate: ${input.serviceDescription}.` : ""}
+${input.paymentTerms ? `Condiții de plată: ${input.paymentTerms}.` : ""}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Art. 1: Părțile — Beneficiar (organizația) și Furnizor (cu placeholdere: CUI, adresă, reprezentant)
+- Art. 2: Obiectul contractului — serviciile/produsele furnizate
+- Art. 3: Durata — perioadă, condiții de prelungire sau încetare
+- Art. 4: Prețul și plata — valoare, termen de plată, monedă, penalități de întârziere
+- Art. 5: Obligațiile furnizorului — calitate, termen de livrare, garanție, SLA dacă e cazul
+- Art. 6: Obligațiile beneficiarului — plata la termen, furnizare informații, acces
+- Art. 7: Confidențialitate — clauză de confidențialitate integrată
+- Art. 8: Protecția datelor personale — dacă furnizorul procesează date personale, trimite la DPA
+- Art. 9: Sub-contractarea — condiții în care furnizorul poate folosi sub-contractanți
+- Art. 10: Răspundere — limitarea răspunderii, forță majoră, caz fortuit
+- Art. 11: Reziliere — neexecutare, notificare prealabilă (minim 30 zile)
+- Art. 12: Proprietate intelectuală — ce rămâne la cine
+- Art. 13: Litigii — tentativă amiabilă, instanța competentă
+- Art. 14: Dispoziții finale — modificări prin act adițional, exemplare
+- Câmpuri de semnătură: Beneficiar, Furnizor, Data, Semnătura
+- Perspectiva este a beneficiarului care își protejează interesele
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
@@ -864,6 +936,115 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       reviewWarning,
     ].join("\n"),
+    nda: [
+      `# Acord de Confidențialitate (NDA) — ${input.orgName}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Partea 1:** ${input.orgName}`,
+      `**Partea 2:** ${input.counterpartyName ?? "[Completează contrapartida]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Art. 1 — Părțile",
+      `**Partea 1 (Divulgantă/Receptoare):** ${input.orgName}, CUI: ${input.orgCui ?? "________"}, cu sediul în ________, reprezentat prin ________.`,
+      `**Partea 2 (Divulgantă/Receptoare):** ${input.counterpartyName ?? "[Completează]"}, CUI: ________, cu sediul în ________, reprezentat prin ________.`,
+      "",
+      "## Art. 2 — Definiții",
+      "**Informație Confidențială** înseamnă orice informație transmisă de o Parte celeilalte, incluzând dar fără a se limita la: date tehnice, comerciale, financiare, liste de clienți, strategii de business, date personale, know-how, software, procese interne.",
+      "",
+      "## Art. 3 — Excepții",
+      "Nu constituie Informație Confidențială informațiile care: (a) erau publice la momentul divulgării; (b) au fost dezvoltate independent; (c) au fost primite legal de la terți fără obligație de confidențialitate; (d) trebuie divulgate în baza unei obligații legale.",
+      "",
+      "## Art. 4 — Obligații de confidențialitate",
+      "Fiecare Parte se obligă să: (a) nu divulge Informația Confidențială niciunui terț; (b) o utilizeze exclusiv în scopul colaborării; (c) o protejeze cu cel puțin aceeași diligență cu care își protejează propriile informații; (d) limiteze accesul doar la persoanele care au nevoie reală ('need to know').",
+      "",
+      "## Art. 5 — Durata confidențialității",
+      "Obligațiile de confidențialitate rămân în vigoare pe toată durata acordului și 3 (trei) ani după încetarea acestuia.",
+      "",
+      "## Art. 6 — Restituire/distrugere",
+      "La cererea oricărei Părți sau la încetarea acordului, Partea Receptoare restituie sau distruge toate materialele care conțin Informații Confidențiale, cu excepția copiilor impuse de lege.",
+      "",
+      "## Art. 7 — Proprietate intelectuală",
+      "Prezentul NDA nu transferă niciun drept de proprietate intelectuală. Fiecare Parte rămâne titulară a propriilor drepturi.",
+      "",
+      "## Art. 8 — Protecția datelor personale",
+      "Dacă Informațiile Confidențiale includ date personale, Părțile se obligă să respecte GDPR și legislația națională aplicabilă.",
+      "",
+      "## Art. 9 — Penalități",
+      "Încălcarea obligațiilor de confidențialitate dă dreptul Părții prejudiciate la daune-interese. Clauza penală orientativă: _______ EUR per incident, fără a limita dreptul la despăgubiri suplimentare.",
+      "",
+      "## Art. 10 — Legea aplicabilă și jurisdicția",
+      "Prezentul acord este guvernat de legea română. Litigiile se soluționează pe cale amiabilă. În caz contrar, competența revine instanțelor de la sediul Părții 1.",
+      "",
+      "## Art. 11 — Dispoziții finale",
+      "Modificări doar prin act adițional scris, semnat de ambele Părți. Prezentul acord se încheie în 2 exemplare originale.",
+      "",
+      "## Semnături",
+      "| Partea 1 | Partea 2 |",
+      "| --- | --- |",
+      "| Reprezentant: _________ | Reprezentant: _________ |",
+      "| Data: _________ | Data: _________ |",
+      "| Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "supplier-contract": [
+      `# Contract-Cadru cu Furnizorul — ${input.orgName}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Beneficiar:** ${input.orgName}`,
+      `**Furnizor:** ${input.counterpartyName ?? "[Completează furnizorul]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Art. 1 — Părțile contractante",
+      `**Beneficiarul:** ${input.orgName}, CUI: ${input.orgCui ?? "________"}, cu sediul în ________, reprezentat prin ________.`,
+      `**Furnizorul:** ${input.counterpartyName ?? "[Completează]"}, CUI: ________, cu sediul în ________, reprezentat prin ________.`,
+      "",
+      "## Art. 2 — Obiectul contractului",
+      `${input.serviceDescription ?? "Furnizorul se obligă să livreze serviciile/produsele descrise în [Anexa 1 / specificațiile tehnice]."}`,
+      "",
+      "## Art. 3 — Durata",
+      "Contractul intră în vigoare la data semnării și este valabil pe o perioadă de _____ luni/ani.",
+      "",
+      "## Art. 4 — Preț și plată",
+      `${input.paymentTerms ?? "Prețul este de _______ RON + TVA. Plata se face în termen de 30 de zile de la recepția facturii."} Penalități de întârziere: 0.1% pe zi din suma restantă.`,
+      "",
+      "## Art. 5 — Obligațiile furnizorului",
+      "Furnizorul se obligă să: (a) livreze serviciile/produsele la calitatea convenită; (b) respecte termenele de livrare; (c) acorde garanție conform legislației și specificațiilor; (d) comunice imediat orice întârziere sau impediment.",
+      "",
+      "## Art. 6 — Obligațiile beneficiarului",
+      "Beneficiarul se obligă să: (a) achite prețul la termen; (b) furnizeze informațiile necesare executării; (c) asigure accesul necesar la locații/sisteme.",
+      "",
+      "## Art. 7 — Confidențialitate",
+      "Părțile păstrează confidențialitatea informațiilor primite pe durata contractului și 2 ani după încetare.",
+      "",
+      "## Art. 8 — Protecția datelor",
+      "Dacă Furnizorul procesează date personale ale Beneficiarului, se încheie un DPA conform GDPR Art. 28.",
+      "",
+      "## Art. 9 — Sub-contractare",
+      "Furnizorul nu poate sub-contracta fără acordul scris prealabil al Beneficiarului.",
+      "",
+      "## Art. 10 — Răspundere",
+      "Răspunderea fiecărei părți se limitează la daunele directe, previzibile. Forța majoră exonerează de răspundere.",
+      "",
+      "## Art. 11 — Reziliere",
+      "Rezilierea: (a) de drept, în caz de neexecutare substanțială, după notificare de 15 zile; (b) prin acord, cu notificare de 30 zile.",
+      "",
+      "## Art. 12 — Litigii",
+      "Litigiile se rezolvă amiabil. În caz contrar, competența revine instanțelor de la sediul Beneficiarului.",
+      "",
+      "## Semnături",
+      "| Beneficiar | Furnizor |",
+      "| --- | --- |",
+      "| Reprezentant: _________ | Reprezentant: _________ |",
+      "| Data: _________ | Data: _________ |",
+      "| Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
     "deletion-attestation": [
       `# ${title}`,
       "",
@@ -1114,6 +1295,20 @@ export const DOCUMENT_TYPES: Array<{
     id: "contract-template",
     label: "Contract-Cadru Prestări Servicii",
     description: "Contract standard B2B cu clauze de confidențialitate, GDPR și protecție proprietate intelectuală.",
+    free: false,
+    legalBasis: "Codul Civil Art. 1166–1323",
+  },
+  {
+    id: "nda",
+    label: "Acord de Confidențialitate (NDA)",
+    description: "NDA bilateral cu definiții, excepții, penalități și protecție GDPR — gata de semnat.",
+    free: false,
+    legalBasis: "Codul Civil Art. 1169–1170",
+  },
+  {
+    id: "supplier-contract",
+    label: "Contract-Cadru Furnizor",
+    description: "Contract din perspectiva beneficiarului — obligații furnizor, sub-contractare, reziliere, DPA.",
     free: false,
     legalBasis: "Codul Civil Art. 1166–1323",
   },

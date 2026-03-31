@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import type { AISystemPurpose, ComplianceAlert } from "@/lib/compliance/types"
+import type { AISystemApprovalStatus, AISystemAttestationStatus, AISystemPurpose, ComplianceAlert } from "@/lib/compliance/types"
 import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
@@ -149,5 +149,107 @@ export async function DELETE(request: Request) {
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),
     message: "Sistemul AI a fost eliminat din inventar.",
+  })
+}
+
+type PatchPayload = {
+  id?: string
+  approvalStatus?: AISystemApprovalStatus
+  policyAttestationStatus?: AISystemAttestationStatus
+}
+
+function isApprovalStatus(v: unknown): v is AISystemApprovalStatus {
+  return ["pending", "approved", "rejected"].includes(String(v))
+}
+
+function isAttestationStatus(v: unknown): v is AISystemAttestationStatus {
+  return ["not-attested", "attested"].includes(String(v))
+}
+
+export async function PATCH(request: Request) {
+  try {
+    requireRole(request, WRITE_ROLES, "actualizarea sistemului AI")
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    throw error
+  }
+
+  const body = (await request.json()) as PatchPayload
+  const actor = await resolveOptionalEventActor(request)
+
+  if (!body.id) {
+    return NextResponse.json({ error: "ID-ul sistemului este obligatoriu." }, { status: 400 })
+  }
+
+  const hasApproval = body.approvalStatus !== undefined
+  const hasAttestation = body.policyAttestationStatus !== undefined
+
+  if (!hasApproval && !hasAttestation) {
+    return NextResponse.json({ error: "Nicio modificare trimisă." }, { status: 400 })
+  }
+
+  if (hasApproval && !isApprovalStatus(body.approvalStatus)) {
+    return NextResponse.json({ error: "Status aprobare invalid." }, { status: 400 })
+  }
+
+  if (hasAttestation && !isAttestationStatus(body.policyAttestationStatus)) {
+    return NextResponse.json({ error: "Status atestare invalid." }, { status: 400 })
+  }
+
+  const nowISO = new Date().toISOString()
+  const actorEmail = actor?.label ?? "necunoscut"
+  const events: ReturnType<typeof createComplianceEvent>[] = []
+
+  const nextState = await mutateState((current) => {
+    const idx = current.aiSystems.findIndex((s) => s.id === body.id)
+    if (idx === -1) return current
+
+    const system = { ...current.aiSystems[idx] }
+
+    if (hasApproval) {
+      system.approvalStatus = body.approvalStatus
+      system.approvedAtISO = nowISO
+      system.approvedByEmail = actorEmail
+      events.push(
+        createComplianceEvent({
+          type: "system.updated",
+          entityType: "system",
+          entityId: system.id,
+          message: `Sistem AI „${system.name}" — aprobare: ${body.approvalStatus}.`,
+          createdAtISO: nowISO,
+          metadata: { approvalStatus: body.approvalStatus ?? "pending" },
+        }, actor)
+      )
+    }
+
+    if (hasAttestation) {
+      system.policyAttestationStatus = body.policyAttestationStatus
+      system.policyAttestedAtISO = nowISO
+      system.policyAttestedByEmail = actorEmail
+      events.push(
+        createComplianceEvent({
+          type: "system.updated",
+          entityType: "system",
+          entityId: system.id,
+          message: `Sistem AI „${system.name}" — atestare politică: ${body.policyAttestationStatus}.`,
+          createdAtISO: nowISO,
+          metadata: { policyAttestationStatus: body.policyAttestationStatus ?? "not-attested" },
+        }, actor)
+      )
+    }
+
+    const aiSystems = [...current.aiSystems]
+    aiSystems[idx] = system
+
+    return {
+      ...current,
+      aiSystems,
+      events: appendComplianceEvents(current, events),
+    }
+  })
+
+  return NextResponse.json({
+    ...(await buildDashboardPayload(nextState)),
+    message: "Sistemul AI a fost actualizat.",
   })
 }

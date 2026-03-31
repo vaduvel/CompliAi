@@ -27,6 +27,8 @@ const QUICK_DOC_TYPES = [
   { id: "nis2-incident-response", label: "Plan Incidente NIS2", desc: "NIS2 + GDPR Art. 33–34", icon: "🛡️" },
   { id: "ai-governance", label: "Politică Guvernanță AI", desc: "EU AI Act Art. 9, 17", icon: "🤖" },
   { id: "ropa", label: "Registru RoPA", desc: "GDPR Art. 30 — obligatoriu", icon: "📋" },
+  { id: "nda", label: "Acord NDA", desc: "Confidențialitate bilaterală", icon: "🔐" },
+  { id: "supplier-contract", label: "Contract Furnizor", desc: "Cadru cu furnizori B2B", icon: "📦" },
 ] as const
 
 type PreparedPack = HrPreparedPack | ContractsPreparedPack

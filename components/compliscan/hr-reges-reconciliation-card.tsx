@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { ClipboardList, Loader2, Users } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { ClipboardList, Download, Loader2, Upload, Users } from "lucide-react"
 import { toast } from "sonner"
 
 import type { HrRegistryReconciliationDerived } from "@/lib/compliance/hr-registry-reconciliation"
@@ -120,6 +120,93 @@ export function HrRegesReconciliationCard({ findingId, onEvidenceNoteChange }: P
     }
   }
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleImportCsv(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const text = e.target?.result
+      if (typeof text !== "string") return
+
+      const lines = text.split(/\r?\n/).filter((l) => l.trim())
+      if (lines.length < 2) {
+        toast.error("Fișierul CSV nu conține date suficiente.")
+        return
+      }
+
+      const header = lines[0].split(/[,;\t]/).map((h) => h.trim().toLowerCase().replace(/"/g, ""))
+
+      // Detect relevant columns by fuzzy Romanian header names
+      const nameIdx = header.findIndex((h) => /^(nume$|nume\s|family|last)/.test(h))
+      const firstNameIdx = header.findIndex((h) => /^(prenume|first|given)/.test(h))
+      const roleIdx = header.findIndex((h) => /^(functie|funcție|post|rol|job|position)/.test(h))
+      const contractIdx = header.findIndex((h) => /^(tip\s*contract|contract|type)/.test(h))
+      const dateIdx = header.findIndex((h) => /^(data\s*(angaj|incep|încep)|hire|start)/.test(h))
+
+      const entries: string[] = []
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/[,;\t]/).map((c) => c.trim().replace(/^"|"$/g, ""))
+        const parts: string[] = []
+
+        const fullName = [
+          nameIdx >= 0 ? cols[nameIdx] : "",
+          firstNameIdx >= 0 ? cols[firstNameIdx] : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+
+        if (fullName) parts.push(fullName)
+        if (roleIdx >= 0 && cols[roleIdx]) parts.push(cols[roleIdx])
+        if (contractIdx >= 0 && cols[contractIdx]) parts.push(cols[contractIdx])
+        if (dateIdx >= 0 && cols[dateIdx]) parts.push(`din ${cols[dateIdx]}`)
+
+        if (parts.length > 0) {
+          entries.push(`- ${parts.join(" — ")}`)
+        }
+      }
+
+      if (entries.length === 0) {
+        toast.error("Nu am putut extrage intrări din CSV.")
+        return
+      }
+
+      setRosterSnapshot((prev) => (prev.trim() ? `${prev.trim()}\n${entries.join("\n")}` : entries.join("\n")))
+      toast.success(`${entries.length} intrări importate din CSV.`)
+    }
+    reader.readAsText(file)
+
+    // Reset so same file can be re-imported
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  function handleExportCsv() {
+    const lines = rosterSnapshot
+      .split("\n")
+      .map((l) => l.replace(/^[-•]\s*/, "").trim())
+      .filter(Boolean)
+
+    if (lines.length === 0) {
+      toast.error("Snapshotul este gol.")
+      return
+    }
+
+    const csvHeader = "Nr.crt,Intrare"
+    const csvRows = lines.map((line, idx) => `${idx + 1},"${line.replace(/"/g, '""')}"`)
+    const csvContent = [csvHeader, ...csvRows].join("\n")
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `reges-snapshot-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("CSV exportat.")
+  }
+
   return (
     <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="border-b border-eos-border-subtle pb-3">
@@ -162,12 +249,42 @@ export function HrRegesReconciliationCard({ findingId, onEvidenceNoteChange }: P
 
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-eos-text">
-                  <Users className="size-4 text-eos-primary" />
-                  Snapshot intern angajați / contracte active
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-eos-text">
+                    <Users className="size-4 text-eos-primary" />
+                    Snapshot intern angajați / contracte active
+                  </div>
+                  <div className="flex gap-1.5">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".csv,.txt"
+                      className="hidden"
+                      onChange={handleImportCsv}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border px-2 py-1 text-[11px] text-eos-text-muted hover:bg-eos-surface-variant"
+                      title="Import din CSV REGES"
+                    >
+                      <Upload className="size-3" strokeWidth={2} />
+                      Import CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportCsv}
+                      disabled={!rosterSnapshot.trim()}
+                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border px-2 py-1 text-[11px] text-eos-text-muted hover:bg-eos-surface-variant disabled:opacity-30"
+                      title="Export snapshot ca CSV"
+                    >
+                      <Download className="size-3" strokeWidth={2} />
+                      Export CSV
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-eos-text-muted">
-                  Pune câte o intrare pe linie: nume, rol, tip contract sau alt identificator intern.
+                  Pune câte o intrare pe linie, sau importă direct un CSV exportat din REGES.
                 </p>
                 <Textarea
                   value={rosterSnapshot}

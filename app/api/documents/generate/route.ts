@@ -56,6 +56,16 @@ export async function POST(request: Request) {
         typeof body.counterpartyReferenceUrl === "string"
           ? body.counterpartyReferenceUrl.trim() || undefined
           : undefined,
+      // Per-role job description fields
+      jobTitle: typeof body.jobTitle === "string" ? body.jobTitle.trim() || undefined : undefined,
+      department: typeof body.department === "string" ? body.department.trim() || undefined : undefined,
+      contractType: typeof body.contractType === "string" ? body.contractType.trim() || undefined : undefined,
+      specificDuties: typeof body.specificDuties === "string" ? body.specificDuties.trim() || undefined : undefined,
+      // HR procedures
+      workSchedule: typeof body.workSchedule === "string" ? body.workSchedule.trim() || undefined : undefined,
+      // Contracts
+      serviceDescription: typeof body.serviceDescription === "string" ? body.serviceDescription.trim() || undefined : undefined,
+      paymentTerms: typeof body.paymentTerms === "string" ? body.paymentTerms.trim() || undefined : undefined,
     }
 
     const sourceFindingId = body.sourceFindingId?.trim() || undefined
