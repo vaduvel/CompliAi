@@ -92,7 +92,7 @@ function LoginContent() {
             ? "Te ducem direct în configurarea inițială a organizației."
             : undefined,
       })
-      router.push(destination)
+      window.location.href = destination
     } catch {
       setError("Eroare de rețea. Încearcă din nou.")
     } finally {
