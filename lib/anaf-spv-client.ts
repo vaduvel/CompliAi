@@ -21,6 +21,7 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const ANAF_AUTHORIZE_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/authorize"
 const ANAF_TOKEN_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/token"
 const CALLBACK_PATH = "/api/anaf/callback"
+const ANAF_REDIRECT_URI = process.env.ANAF_REDIRECT_URI ?? `${NEXT_PUBLIC_URL}${CALLBACK_PATH}`
 
 // ── Rate Limiter (S1.3) ────────────────────────────────────────────────────
 // ANAF APIs have undocumented rate limits. We enforce a simple sliding-window
@@ -92,12 +93,12 @@ export type TokenExpiryAlert = {
  * User must have a qualified digital certificate installed in their browser.
  */
 export function buildAuthorizeUrl(orgId: string, state?: string): string | null {
-  if (!ANAF_CLIENT_ID) return null
+  if (!ANAF_CLIENT_ID || !ANAF_CLIENT_SECRET) return null
 
   const params = new URLSearchParams({
     response_type: "code",
     client_id: ANAF_CLIENT_ID,
-    redirect_uri: `${NEXT_PUBLIC_URL}${CALLBACK_PATH}`,
+    redirect_uri: ANAF_REDIRECT_URI,
     scope: "SPV",
     state: state ?? orgId,
   })
@@ -126,7 +127,7 @@ export async function exchangeCodeForTokens(
         code,
         client_id: ANAF_CLIENT_ID,
         client_secret: ANAF_CLIENT_SECRET,
-        redirect_uri: `${NEXT_PUBLIC_URL}${CALLBACK_PATH}`,
+        redirect_uri: ANAF_REDIRECT_URI,
       }).toString(),
     })
 

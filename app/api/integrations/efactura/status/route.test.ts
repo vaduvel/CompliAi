@@ -7,7 +7,17 @@ const mocks = vi.hoisted(() => ({
   getAnafModeMock: vi.fn(),
   getAnafEnvironmentMock: vi.fn(),
   isAnafProductionUnlockedMock: vi.fn(),
+  loadTokenFromSupabaseMock: vi.fn(),
+  readFreshSessionFromRequestMock: vi.fn(),
   readStateMock: vi.fn(),
+}))
+
+vi.mock("@/lib/anaf-spv-client", () => ({
+  loadTokenFromSupabase: mocks.loadTokenFromSupabaseMock,
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
 }))
 
 vi.mock("@/lib/server/efactura-anaf-client", () => ({
@@ -32,18 +42,21 @@ describe("GET /api/integrations/efactura/status", () => {
     mocks.getAnafModeMock.mockReturnValue("mock")
     mocks.getAnafEnvironmentMock.mockReturnValue("test")
     mocks.isAnafProductionUnlockedMock.mockReturnValue(false)
+    mocks.readFreshSessionFromRequestMock.mockResolvedValue({ orgId: "org-1" })
+    mocks.loadTokenFromSupabaseMock.mockResolvedValue(null)
     delete process.env.ANAF_CLIENT_ID
     delete process.env.ANAF_CLIENT_SECRET
     delete process.env.ANAF_CUI
   })
 
   it("returnează mode=mock când lipsesc credențialele", async () => {
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body.mode).toBe("mock")
     expect(body.ready).toBe(false)
+    expect(body.tokenState).toBe("missing")
     expect(body.missingConfig).toContain("ANAF_CLIENT_ID")
     expect(body.missingConfig).toContain("ANAF_CLIENT_SECRET")
   })
@@ -56,7 +69,7 @@ describe("GET /api/integrations/efactura/status", () => {
     mocks.getAnafEnvironmentMock.mockReturnValue("prod")
     mocks.isAnafProductionUnlockedMock.mockReturnValue(true)
 
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body = await res.json()
 
     expect(body.mode).toBe("real")
@@ -72,7 +85,7 @@ describe("GET /api/integrations/efactura/status", () => {
     mocks.getAnafModeMock.mockReturnValue("test")
     mocks.getAnafEnvironmentMock.mockReturnValue("test")
 
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body = await res.json()
 
     expect(body.mode).toBe("test")
@@ -87,16 +100,27 @@ describe("GET /api/integrations/efactura/status", () => {
       efacturaConnected: true,
       efacturaSyncedAtISO: "2026-03-17T10:00:00.000Z",
     })
+    mocks.loadTokenFromSupabaseMock.mockResolvedValue({
+      orgId: "org-1",
+      accessToken: "token",
+      refreshToken: "refresh",
+      expiresAtISO: "2099-03-17T10:00:00.000Z",
+      tokenType: "Bearer",
+      scope: "SPV",
+      createdAtISO: "2026-03-17T09:00:00.000Z",
+      lastUsedAtISO: null,
+    })
 
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body = await res.json()
 
     expect(body.connected).toBe(true)
     expect(body.syncedAtISO).toBe("2026-03-17T10:00:00.000Z")
+    expect(body.tokenState).toBe("active")
   })
 
   it("include mesaj clar pentru fiecare mod", async () => {
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body = await res.json()
     expect(body.message).toContain("demo")
 
@@ -106,7 +130,7 @@ describe("GET /api/integrations/efactura/status", () => {
     process.env.ANAF_CLIENT_ID = "x"
     process.env.ANAF_CLIENT_SECRET = "y"
     process.env.ANAF_CUI = "z"
-    const res2 = await GET()
+    const res2 = await GET(new Request("http://localhost/api/integrations/efactura/status"))
     const body2 = await res2.json()
     expect(body2.message).toContain("real")
   })

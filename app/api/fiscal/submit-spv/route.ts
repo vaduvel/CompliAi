@@ -14,11 +14,11 @@ const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, [...WRITE_ROLES], "transmitere ANAF SPV")
+    const session = requireRole(request, [...WRITE_ROLES], "transmitere ANAF SPV")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const userId = request.headers.get("x-compliscan-user-id") ?? ""
-    const userEmail = request.headers.get("x-compliscan-user-email") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const userId = request.headers.get("x-compliscan-user-id") ?? session.userId
+    const userEmail = request.headers.get("x-compliscan-user-email") ?? session.email
 
     const body = (await request.json()) as {
       xmlContent?: string
@@ -84,9 +84,9 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, [...WRITE_ROLES, "reviewer"], "lista transmisii ANAF")
+    const session = requireRole(request, [...WRITE_ROLES, "reviewer"], "lista transmisii ANAF")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const submissions = await listSubmissions(orgId)
 
     return NextResponse.json({ submissions })

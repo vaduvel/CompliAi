@@ -1,7 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Cloud, Database, FileCode2, KeyRound, ShieldCheck } from "lucide-react"
+import { Cloud, Database, ExternalLink, FileCode2, KeyRound, RefreshCw, ShieldCheck } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -21,6 +22,20 @@ import {
   type SupabaseOperationalStatus,
 } from "@/components/compliscan/settings/settings-shared"
 
+type EFacturaIntegrationStatus = {
+  mode: "mock" | "test" | "real"
+  environment: "test" | "prod"
+  productionUnlocked: boolean
+  connected: boolean
+  syncedAtISO: string | null
+  tokenState: "missing" | "active" | "expired"
+  tokenExpiresAtISO: string | null
+  ready: boolean
+  productionReady: boolean
+  missingConfig: string[]
+  message: string
+}
+
 function formatRepoSyncOperationalState(repoSyncStatus: RepoSyncStatus) {
   if (!repoSyncStatus) return "Se incarca"
   if (repoSyncStatus.requiresKey) return "Protejat cu cheie"
@@ -39,12 +54,204 @@ export function SettingsIntegrationsTab({
   supabaseStatusLoading: boolean
   supabaseStatusError: string | null
 }) {
+  const [efacturaStatus, setEfacturaStatus] = useState<EFacturaIntegrationStatus | null>(null)
+  const [efacturaLoading, setEfacturaLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setEfacturaLoading(true)
+    fetch("/api/integrations/efactura/status", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled) setEfacturaStatus(data)
+      })
+      .catch(() => {
+        if (!cancelled) setEfacturaStatus(null)
+      })
+      .finally(() => {
+        if (!cancelled) setEfacturaLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <div className="space-y-6">
       <SettingsTabIntro
         title="Integrări"
         description="Status operațional pentru traseele externe și acțiunile utile de administrare."
       />
+
+      <Card className="border-eos-border bg-eos-surface">
+        <CardHeader>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <CardTitle className="text-base">ANAF / e-Factura</CardTitle>
+                <Badge
+                  variant={
+                    efacturaLoading
+                      ? "outline"
+                      : efacturaStatus?.mode === "real"
+                        ? "success"
+                        : efacturaStatus?.mode === "test"
+                          ? "outline"
+                          : "secondary"
+                  }
+                >
+                  {efacturaLoading
+                    ? "Se verifică"
+                    : efacturaStatus?.mode === "real"
+                      ? "Producție"
+                      : efacturaStatus?.mode === "test"
+                        ? "Sandbox ANAF"
+                        : "Demo local"}
+                </Badge>
+              </div>
+              <p className="max-w-2xl text-sm text-eos-text-muted">
+                Conectezi aplicația la ANAF și vezi clar dacă suntem în sandbox sau în producție. Producția rămâne blocată până la unlock explicit.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" size="default">
+                <a href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere">
+                  Conectează ANAF
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="default">
+                <Link href="/dashboard/fiscal?tab=transmitere">
+                  Deschide Fiscal
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {efacturaLoading ? (
+            <OperationalLoadingCard>
+              Verificăm starea ANAF, token-ul OAuth și mediul curent de transmitere...
+            </OperationalLoadingCard>
+          ) : efacturaStatus ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <SettingsTile
+                  icon={ShieldCheck}
+                  label="Mod"
+                  value={
+                    efacturaStatus.mode === "real"
+                      ? "Producție"
+                      : efacturaStatus.mode === "test"
+                        ? "Sandbox ANAF"
+                        : "Demo local"
+                  }
+                />
+                <SettingsTile
+                  icon={KeyRound}
+                  label="Token OAuth"
+                  value={
+                    efacturaStatus.tokenState === "active"
+                      ? "Activ"
+                      : efacturaStatus.tokenState === "expired"
+                        ? "Expirat"
+                        : "Lipsă"
+                  }
+                />
+                <SettingsTile
+                  icon={Cloud}
+                  label="Mediu ANAF"
+                  value={efacturaStatus.environment === "prod" ? "prod" : "test"}
+                />
+                <SettingsTile
+                  icon={RefreshCw}
+                  label="Ultim sync"
+                  value={
+                    efacturaStatus.syncedAtISO
+                      ? new Date(efacturaStatus.syncedAtISO).toLocaleDateString("ro-RO")
+                      : "Încă nu există"
+                  }
+                />
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+                <SettingsStatusBlock
+                  eyebrow="Stare curentă"
+                  title={
+                    efacturaStatus.mode === "real"
+                      ? "ANAF este conectat în producție."
+                      : efacturaStatus.mode === "test"
+                        ? "ANAF este conectat în sandbox."
+                        : "ANAF nu este încă autorizat."
+                  }
+                  description={efacturaStatus.message}
+                >
+                  <div className="space-y-2 text-sm text-eos-text-muted">
+                    <p>
+                      Token:{" "}
+                      <span className="font-semibold text-eos-text">{efacturaStatus.tokenState}</span>
+                    </p>
+                    <p>
+                      Submit real:{" "}
+                      <span className="font-semibold text-eos-text">
+                        {efacturaStatus.productionUnlocked ? "deblocat" : "blocat"}
+                      </span>
+                    </p>
+                    {efacturaStatus.tokenExpiresAtISO && (
+                      <p>
+                        Expirare token:{" "}
+                        <span className="font-semibold text-eos-text">
+                          {new Date(efacturaStatus.tokenExpiresAtISO).toLocaleString("ro-RO")}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                </SettingsStatusBlock>
+
+                <SettingsStatusBlock
+                  eyebrow="Acțiune recomandată"
+                  title={
+                    efacturaStatus.tokenState === "active"
+                      ? "Poți testa fluxul în sandbox."
+                      : "Autorizează aplicația în ANAF."
+                  }
+                  description={
+                    efacturaStatus.tokenState === "active"
+                      ? "Continuă în Fiscal → Transmitere ANAF și lucrează doar cu mediul de test."
+                      : "După autorizare te trimitem direct în Fiscal → Transmitere ANAF."
+                  }
+                >
+                  <div className="space-y-2 text-xs text-eos-text-muted">
+                    <p>Callback activ: <code>/api/anaf/callback</code></p>
+                    <p>Connect flow: <code>/api/anaf/connect</code></p>
+                    {efacturaStatus.missingConfig.length > 0 && (
+                      <p>Lipsesc: <span className="font-semibold text-eos-text">{efacturaStatus.missingConfig.join(", ")}</span></p>
+                    )}
+                  </div>
+                </SettingsStatusBlock>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <a href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere">
+                    <ShieldCheck className="mr-1.5 size-3.5" />
+                    {efacturaStatus.tokenState === "active" ? "Reautentifică ANAF" : "Autentifică ANAF"}
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/dashboard/fiscal?tab=transmitere">
+                    <ExternalLink className="mr-1.5 size-3.5" />
+                    Deschide tab-ul de transmitere
+                  </Link>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
+              Nu am putut citi statusul integrării ANAF.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="border-eos-border bg-eos-surface">
         <CardHeader>

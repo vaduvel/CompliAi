@@ -13,9 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, [...READ_ROLES], "verificare status transmitere ANAF")
+    const session = requireRole(request, [...READ_ROLES], "verificare status transmitere ANAF")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const { id: submissionId } = await params
 
     // First just get the submission

@@ -76,7 +76,7 @@ function buildMissingSpvFinding(cui: string, nowISO: string): ScanFinding {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, [...WRITE_ROLES], "verificare SPV")
+    const session = requireRole(request, [...WRITE_ROLES], "verificare SPV")
 
     const state = await readState()
     const cui = state.orgProfile?.cui
@@ -84,8 +84,8 @@ export async function POST(request: Request) {
       return jsonError("CUI-ul organizației nu este configurat. Completează profilul mai întâi.", 400, "NO_CUI")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const orgName = request.headers.get("x-compliscan-org-name") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const orgName = request.headers.get("x-compliscan-org-name") ?? session.orgName
     const nowISO = new Date().toISOString()
 
     // Try to use ANAF OAuth token for full SPV check

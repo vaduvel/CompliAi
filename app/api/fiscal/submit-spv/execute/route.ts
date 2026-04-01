@@ -10,9 +10,9 @@ const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, [...WRITE_ROLES], "executare transmitere ANAF")
+    const session = requireRole(request, [...WRITE_ROLES], "executare transmitere ANAF")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
 
     const body = (await request.json()) as {
       submissionId?: string

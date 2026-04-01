@@ -39,6 +39,20 @@ import type { EFacturaValidationRecord, EFacturaXmlRepairRecord, ScanFinding } f
 import type { SPVSubmission } from "@/lib/server/anaf-submit-flow"
 import { SPV_STATUS_LABELS } from "@/lib/server/anaf-submit-flow"
 
+type EFacturaIntegrationStatus = {
+  mode: "mock" | "test" | "real"
+  environment: "test" | "prod"
+  productionUnlocked: boolean
+  connected: boolean
+  syncedAtISO: string | null
+  tokenState: "missing" | "active" | "expired"
+  tokenExpiresAtISO: string | null
+  ready: boolean
+  productionReady: boolean
+  missingConfig: string[]
+  message: string
+}
+
 // ── Severity badge helpers ───────────────────────────────────────────────────
 
 const SEVERITY_VARIANT: Record<string, "destructive" | "default" | "secondary"> = {
@@ -741,6 +755,7 @@ const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "seconda
 
 function SubmitSpvTab() {
   const [submissions, setSubmissions] = useState<SPVSubmission[]>([])
+  const [integrationStatus, setIntegrationStatus] = useState<EFacturaIntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [executing, setExecuting] = useState<string | null>(null)
@@ -755,6 +770,11 @@ function SubmitSpvTab() {
       .then((data: { submissions?: SPVSubmission[] }) => setSubmissions(data.submissions ?? []))
       .catch(() => toast.error("Nu am putut încărca transmisiile."))
       .finally(() => setLoading(false))
+
+    fetch("/api/integrations/efactura/status", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: EFacturaIntegrationStatus) => setIntegrationStatus(data))
+      .catch(() => {})
   }, [])
 
   async function handleInitiate() {
@@ -845,6 +865,95 @@ function SubmitSpvTab() {
           </p>
         </div>
       </div>
+
+      {integrationStatus && (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="space-y-3 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-eos-text">Conexiune ANAF pentru transmitere</p>
+                  <Badge
+                    variant={
+                      integrationStatus.mode === "real"
+                        ? "default"
+                        : integrationStatus.mode === "test"
+                          ? "outline"
+                          : "secondary"
+                    }
+                    className="text-[10px] normal-case tracking-normal"
+                  >
+                    {integrationStatus.mode === "real"
+                      ? "Producție"
+                      : integrationStatus.mode === "test"
+                        ? "Sandbox ANAF"
+                        : "Demo local"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-eos-text-muted">{integrationStatus.message}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
+                  className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                >
+                  <ShieldCheck className="size-3" />
+                  {integrationStatus.tokenState === "active" ? "Reautentifică ANAF" : "Conectează ANAF"}
+                </a>
+                <a
+                  href="/dashboard/settings"
+                  className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                >
+                  <ExternalLink className="size-3" />
+                  Setări
+                </a>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">Token</p>
+                <p className="mt-1 text-sm font-medium text-eos-text">
+                  {integrationStatus.tokenState === "active"
+                    ? "Activ"
+                    : integrationStatus.tokenState === "expired"
+                      ? "Expirat"
+                      : "Lipsă"}
+                </p>
+                {integrationStatus.tokenExpiresAtISO && (
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    Expiră: {new Date(integrationStatus.tokenExpiresAtISO).toLocaleString("ro-RO")}
+                  </p>
+                )}
+              </div>
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">Mediu</p>
+                <p className="mt-1 text-sm font-medium text-eos-text">
+                  {integrationStatus.environment === "prod" ? "ANAF prod" : "ANAF test"}
+                </p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  {integrationStatus.productionUnlocked
+                    ? "Producția este deblocată explicit."
+                    : "Submitul real rămâne blocat."}
+                </p>
+              </div>
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">Ultim sync</p>
+                <p className="mt-1 text-sm font-medium text-eos-text">
+                  {integrationStatus.syncedAtISO
+                    ? new Date(integrationStatus.syncedAtISO).toLocaleString("ro-RO")
+                    : "Încă nu există"}
+                </p>
+                {integrationStatus.missingConfig.length > 0 && (
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    Lipsesc: {integrationStatus.missingConfig.join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions row */}
       <div className="flex items-center justify-between">
@@ -957,7 +1066,7 @@ function SubmitSpvTab() {
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={executing === s.id}
+                        disabled={executing === s.id || integrationStatus?.tokenState !== "active" || integrationStatus?.mode === "mock"}
                         onClick={() => void handleExecute(s.id)}
                         className="gap-1.5"
                       >
@@ -998,13 +1107,46 @@ export default function FiscalPage() {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get("tab")
   const findingIdParam = searchParams.get("findingId")
+  const anafStatusParam = searchParams.get("anaf")
+  const anafModeParam = searchParams.get("mode")
   const [validatorBusy, setValidatorBusy] = useState(false)
   const [repairBusy, setRepairBusy] = useState(false)
   const [validations, setValidations] = useState<EFacturaValidationRecord[]>([])
   const [statusFinding, setStatusFinding] = useState<ScanFinding | null>(null)
   const [statusLoading, setStatusLoading] = useState(false)
   const fromCockpit = (tabParam === "spv" || tabParam === "validator" || tabParam === "status") && Boolean(findingIdParam)
-  const defaultTab = tabParam === "spv" || tabParam === "validator" || tabParam === "status" ? tabParam : "discrepante"
+  const defaultTab =
+    tabParam === "spv" ||
+    tabParam === "validator" ||
+    tabParam === "status" ||
+    tabParam === "transmitere" ||
+    tabParam === "semnale"
+      ? tabParam
+      : "discrepante"
+
+  useEffect(() => {
+    if (!anafStatusParam) return
+    if (anafStatusParam === "connected") {
+      toast.success("ANAF conectat", {
+        description:
+          anafModeParam === "real"
+            ? "Conexiunea a fost autorizată pentru producție."
+            : "Conexiunea a fost autorizată pentru sandbox-ul oficial ANAF.",
+      })
+      return
+    }
+
+    const descriptions: Record<string, string> = {
+      "missing-config": "Lipsesc variabilele ANAF pentru a porni conectarea.",
+      "missing-code": "ANAF nu a returnat codul de autorizare.",
+      "missing-org": "Nu am putut lega autorizarea de organizația curentă.",
+      "token-failed": "Schimbul de token ANAF a eșuat.",
+      "oauth-error": "Autorizarea a fost anulată sau respinsă în portalul ANAF.",
+    }
+    toast.error("Conectare ANAF eșuată", {
+      description: descriptions[anafStatusParam] ?? "Autorizarea ANAF nu a putut fi finalizată.",
+    })
+  }, [anafModeParam, anafStatusParam])
 
   useEffect(() => {
     if (tabParam !== "status" || !findingIdParam) {
