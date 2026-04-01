@@ -223,6 +223,14 @@ export async function listReviewCycles(
     .map(rowToCycle)
 }
 
+export async function getReviewCycle(
+  orgId: string,
+  cycleId: string
+): Promise<ReviewCycle | null> {
+  const cycles = await listReviewCycles(orgId, { limit: 200 })
+  return cycles.find((cycle) => cycle.id === cycleId) ?? null
+}
+
 export async function listDueReviewCycles(nowISO: string): Promise<ReviewCycle[]> {
   if (hasSupabaseConfig()) {
     const rows = await supabaseSelect<ReviewCycleRow>(

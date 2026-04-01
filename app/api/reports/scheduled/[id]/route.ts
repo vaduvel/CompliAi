@@ -26,7 +26,7 @@ export async function GET(
       throw new AuthzError("Modul partner necesar.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const { id } = await params
 
     const report = await getScheduledReport(orgId, id)
@@ -50,7 +50,7 @@ export async function PATCH(
       throw new AuthzError("Modul partner necesar.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const { id } = await params
 
     const body = (await request.json()) as {
@@ -83,7 +83,7 @@ export async function DELETE(
       throw new AuthzError("Modul partner necesar.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const { id } = await params
 
     await deleteScheduledReport(orgId, id)

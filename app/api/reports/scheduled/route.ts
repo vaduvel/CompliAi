@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import {
   createScheduledReport,
   listScheduledReports,
@@ -22,10 +23,30 @@ export async function GET(request: Request) {
       throw new AuthzError("Rapoartele programate sunt disponibile doar în modul partner.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const reports = await listScheduledReports(orgId)
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const [reports, state] = await Promise.all([
+      listScheduledReports(orgId),
+      readStateForOrg(orgId),
+    ])
+    const recentRuns = (state?.events ?? [])
+      .filter((event) => event.type === "report.scheduled_run" || event.type === "report.scheduled_run_failed")
+      .map((event) => ({
+        id: event.id,
+        scheduledReportId: String(event.metadata?.scheduledReportId ?? ""),
+        reportType: String(event.metadata?.reportType ?? ""),
+        status:
+          event.type === "report.scheduled_run_failed"
+            ? "failed"
+            : Boolean(event.metadata?.approvalQueued)
+              ? "queued_for_approval"
+              : "auto_executed",
+        createdAtISO: event.createdAtISO,
+        message: event.message,
+      }))
+      .sort((left, right) => right.createdAtISO.localeCompare(left.createdAtISO))
+      .slice(0, 30)
 
-    return NextResponse.json({ reports })
+    return NextResponse.json({ reports, recentRuns })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la citirea rapoartelor.", 500, "REPORTS_LIST_FAILED")
@@ -40,8 +61,8 @@ export async function POST(request: Request) {
       throw new AuthzError("Rapoartele programate sunt disponibile doar în modul partner.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const userId = request.headers.get("x-compliscan-user-id") ?? ""
+    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const userId = request.headers.get("x-compliscan-user-id") ?? session.userId
 
     const body = (await request.json()) as {
       reportType?: ScheduledReportType

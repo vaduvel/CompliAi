@@ -6,6 +6,7 @@
 
 import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import {
   getDueReports,
   markReportRun,
@@ -13,6 +14,7 @@ import {
   FREQUENCY_LABELS,
 } from "@/lib/server/scheduled-reports"
 import { createPendingAction } from "@/lib/server/approval-queue"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 
 const CRON_SECRET = process.env.CRON_SECRET
 
@@ -64,8 +66,54 @@ export async function GET(request: Request) {
 
         // Mark report as run and compute next_run_at
         await markReportRun(report.orgId, report.id, report.frequency)
+        const orgState = await readStateForOrg(report.orgId)
+        if (orgState) {
+          await writeStateForOrg(report.orgId, {
+            ...orgState,
+            events: appendComplianceEvents(orgState, [
+              createComplianceEvent({
+                type: "report.scheduled_run",
+                entityType: "task",
+                entityId: report.id,
+                message: report.requiresApproval
+                  ? `${REPORT_TYPE_LABELS[report.reportType]} a intrat în Approval Queue pentru trimitere programată.`
+                  : `${REPORT_TYPE_LABELS[report.reportType]} a fost executat automat din raportarea programată.`,
+                createdAtISO: nowISO,
+                metadata: {
+                  scheduledReportId: report.id,
+                  reportType: report.reportType,
+                  frequency: report.frequency,
+                  approvalQueued: report.requiresApproval,
+                  recipientCount: report.recipientEmails.length,
+                  clientCount: report.clientOrgIds.length,
+                },
+              }),
+            ]),
+          })
+        }
         processed++
       } catch (err) {
+        const orgState = await readStateForOrg(report.orgId).catch(() => null)
+        if (orgState) {
+          await writeStateForOrg(report.orgId, {
+            ...orgState,
+            events: appendComplianceEvents(orgState, [
+              createComplianceEvent({
+                type: "report.scheduled_run_failed",
+                entityType: "task",
+                entityId: report.id,
+                message: `${REPORT_TYPE_LABELS[report.reportType]} a eșuat la rularea programată.`,
+                createdAtISO: nowISO,
+                metadata: {
+                  scheduledReportId: report.id,
+                  reportType: report.reportType,
+                  frequency: report.frequency,
+                  approvalQueued: false,
+                },
+              }),
+            ]),
+          }).catch(() => {})
+        }
         errors.push(`${report.id}: ${err instanceof Error ? err.message : "unknown"}`)
       }
     }

@@ -188,6 +188,16 @@ export default function CalendarPage() {
             )}
           </>
         }
+        actions={
+          <>
+            <Button asChild variant="outline" className="gap-2">
+              <Link href="/dashboard/review">Review-uri programate</Link>
+            </Button>
+            <Button asChild className="gap-2">
+              <Link href="/dashboard/settings/scheduled-reports">Rapoarte programate</Link>
+            </Button>
+          </>
+        }
       />
 
       {loading && (
@@ -243,6 +253,8 @@ export default function CalendarPage() {
             <div>NIS2 · Art. 23 (24h/72h)</div>
             <div>ANSPDCP · GDPR Art. 33</div>
             <div>Vendor Review DPA</div>
+            <div>Review cycles · monitorizare</div>
+            <div>Scheduled reports · handoff partener</div>
           </CardContent>
         </Card>
       )}
