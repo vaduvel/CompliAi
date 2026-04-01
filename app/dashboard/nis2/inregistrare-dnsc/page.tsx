@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -50,6 +50,7 @@ function stepIndex(step: WizardStep) {
 }
 
 export default function DnscRegistrationPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const cockpit = useCockpitData()
   const [step, setStep] = useState<WizardStep>("eligibility")
@@ -65,6 +66,7 @@ export default function DnscRegistrationPage() {
   const [newEntry, setNewEntry] = useState({ date: new Date().toISOString().slice(0, 10), direction: "received" as "sent" | "received", summary: "" })
   const [savingEntry, setSavingEntry] = useState(false)
   const sourceFindingId = searchParams.get("findingId") ?? undefined
+  const returnTo = searchParams.get("returnTo") ?? undefined
   const fromCockpit = searchParams.get("source") === "cockpit" && Boolean(sourceFindingId)
 
   useEffect(() => {
@@ -209,11 +211,41 @@ export default function DnscRegistrationPage() {
     URL.revokeObjectURL(url)
   }
 
+  function buildDnscReturnEvidence(nextStatus: DnscRegistrationStatus) {
+    const statusLabel =
+      nextStatus === "confirmed"
+        ? "confirmată"
+        : nextStatus === "submitted"
+          ? "trimisă și în așteptare confirmare"
+          : "în curs"
+
+    const noteParts = [
+      `Înregistrarea DNSC a fost actualizată ca ${statusLabel}.`,
+      registrationNumber.trim()
+        ? `Număr de înregistrare: ${registrationNumber.trim()}.`
+        : "Numărul de înregistrare nu este încă salvat.",
+    ]
+
+    if (correspondence.length > 0) {
+      noteParts.push(`Există ${correspondence.length} înregistr${correspondence.length === 1 ? "are" : "ări"} de corespondență DNSC salvate.`)
+    }
+
+    return noteParts.join(" ")
+  }
+
   async function handleConfirmed() {
     await saveStatus("confirmed")
     toast.success("Înregistrare marcată ca trimisă!", {
       description: "Statusul a fost actualizat. DNSC va procesa notificarea.",
     })
+
+    if (fromCockpit && sourceFindingId && returnTo) {
+      const params = new URLSearchParams({
+        dnscFlow: "done",
+        evidenceNote: buildDnscReturnEvidence("confirmed"),
+      })
+      router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+    }
   }
 
   // ── Bară progress ──────────────────────────────────────────────────────────
@@ -233,7 +265,7 @@ export default function DnscRegistrationPage() {
             </p>
           </div>
           <Link
-            href={`/dashboard/resolve/${sourceFindingId}`}
+            href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
             className="shrink-0 text-xs text-eos-primary hover:underline"
           >
             Înapoi la finding
@@ -639,6 +671,22 @@ export default function DnscRegistrationPage() {
                   DNSC va procesa înregistrarea și vă va confirma prin email. Păstrați numărul de
                   înregistrare primit.
                 </p>
+                {fromCockpit && returnTo ? (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          dnscFlow: "done",
+                          evidenceNote: buildDnscReturnEvidence("confirmed"),
+                        })
+                        router.push(`${returnTo}${returnTo.includes("?") ? "&" : "?"}${params.toString()}`)
+                      }}
+                    >
+                      Revino în cockpit
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             ) : (
               <div className="space-y-4">

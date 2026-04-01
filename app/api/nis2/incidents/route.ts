@@ -11,6 +11,7 @@ import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/an
 import { mutateFreshState } from "@/lib/server/mvp-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function GET(request: Request) {
   try {
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
       measuresTaken: body.measuresTaken?.trim(),
       involvesPersonalData: body.involvesPersonalData,
     })
+    const nextNis2State = await readNis2State(orgId)
 
     // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP
     if (incident.involvesPersonalData) {
@@ -86,12 +88,21 @@ export async function POST(request: Request) {
       if (finding) {
         await mutateFreshState((s) => ({
           ...s,
-          findings: [
-            ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
-            preserveRuntimeStateForSingleFinding(s.findings, finding),
-          ],
+          findings: mergeNis2PackageFindings(
+            [
+              ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+              preserveRuntimeStateForSingleFinding(s.findings, finding),
+            ],
+            nextNis2State,
+            new Date().toISOString()
+          ),
         }))
       }
+    } else {
+      await mutateFreshState((s) => ({
+        ...s,
+        findings: mergeNis2PackageFindings(s.findings, nextNis2State, new Date().toISOString()),
+      }))
     }
 
     // Event trigger: compliance_monitor imediat după creare (fire-and-forget)

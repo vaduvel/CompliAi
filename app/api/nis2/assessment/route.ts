@@ -10,9 +10,9 @@ import { scoreNis2Assessment, convertNIS2GapsToFindings, type Nis2Answers, type 
 import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
 import { mutateFreshState } from "@/lib/server/mvp-store"
 import {
-  preserveRuntimeStateForRegeneratedFindings,
   preserveRuntimeStateForSingleFinding,
 } from "@/lib/server/preserve-finding-runtime-state"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function GET(request: Request) {
   try {
@@ -58,34 +58,22 @@ export async function POST(request: Request) {
 
     // Sync NIS2 gaps into the central remediation board.
     // Replaces any existing NIS2 findings so re-runs don't accumulate duplicates.
-    if (result.gaps.length > 0) {
-      const nis2Findings = convertNIS2GapsToFindings(result.gaps, body.sector, now)
-      await mutateFreshState((current) => ({
+    const nis2State = await readNis2State(orgId)
+    const nis2Findings = convertNIS2GapsToFindings(result.gaps, body.sector, now)
+    await mutateFreshState((current) => {
+      const mergedAssessmentFindings = [
+        ...current.findings.filter(
+          (finding) => !finding.id.startsWith("nis2-finding-") && finding.id !== DNSC_RESCUE_FINDING_ID
+        ),
+        ...nis2Findings.map((finding) => preserveRuntimeStateForSingleFinding(current.findings, finding)),
+        ...(rescueFinding ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)] : []),
+      ]
+
+      return {
         ...current,
-        findings: [
-          ...current.findings.filter(
-            (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
-          ),
-          ...preserveRuntimeStateForRegeneratedFindings(current.findings, nis2Findings),
-          ...(rescueFinding
-            ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)]
-            : []),
-        ],
-      }))
-    } else {
-      // No gaps — clear gap findings but keep/update the rescue finding
-      await mutateFreshState((current) => ({
-        ...current,
-        findings: [
-          ...current.findings.filter(
-            (f) => f.category !== "NIS2" && f.id !== DNSC_RESCUE_FINDING_ID
-          ),
-          ...(rescueFinding
-            ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)]
-            : []),
-        ],
-      }))
-    }
+        findings: mergeNis2PackageFindings(mergedAssessmentFindings, nis2State, now),
+      }
+    })
 
     return NextResponse.json({ result })
   } catch (error) {

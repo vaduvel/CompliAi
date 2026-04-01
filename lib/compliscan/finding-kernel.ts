@@ -202,6 +202,7 @@ export type SpecialistHandoffSurface =
   | "dsar_access"
   | "dsar_erasure"
   | "anspdcp_breach"
+  | "nis2_dnsc_registration"
   | "nis2_eligibility"
   | "nis2_assessment"
   | "nis2_incident"
@@ -1599,6 +1600,8 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     return "EF-001"
   }
   if (id.startsWith("saft-")) return "EF-GENERIC"
+  if (id === "nis2-assessment-gap") return "NIS2-005"
+  if (id === "nis2-open-incident") return "NIS2-015"
   if (id === "nis2-finding-eligibility") return "NIS2-001"
   if (id.startsWith("nis2-finding-") && docType !== "nis2-incident-response") return "NIS2-005"
 
@@ -2287,6 +2290,17 @@ function getWorkflowLink(
       }
     }
     case "NIS2-GENERIC": {
+      if (record.id === "nis2-dnsc-registration") {
+        return {
+          href: `/dashboard/nis2/inregistrare-dnsc?${new URLSearchParams({
+            findingId: record.id,
+            source: "cockpit",
+            returnTo: `/dashboard/resolve/${record.id}`,
+          }).toString()}`,
+          label: "Deschide înregistrarea DNSC",
+        }
+      }
+
       const governanceFocus = deriveNis2GovernanceFocus(record)
       if (governanceFocus) {
         return {
@@ -2304,12 +2318,12 @@ function getWorkflowLink(
       }
 
       const maturityFocus = deriveNis2MaturityFocus(record)
-      if (maturityFocus) {
+      if (maturityFocus || record.id === "nis2-maturity-low") {
         return {
           href: `/dashboard/nis2/maturitate?${new URLSearchParams({
             findingId: record.id,
             source: "cockpit",
-            focus: maturityFocus,
+            ...(maturityFocus ? { focus: maturityFocus } : {}),
             returnTo: `/dashboard/resolve/${record.id}`,
           }).toString()}`,
           label: "Deschide evaluarea de maturitate",
@@ -2513,11 +2527,13 @@ function getSpecialistHandoffSurface(
     case "NIS2-015":
       return "nis2_incident"
     case "NIS2-GENERIC": {
+      if (record.id === "nis2-dnsc-registration") return "nis2_dnsc_registration"
+
       const governanceFocus = deriveNis2GovernanceFocus(record)
       if (governanceFocus) return "nis2_governance"
 
       const maturityFocus = deriveNis2MaturityFocus(record)
-      if (maturityFocus) return "nis2_maturity"
+      if (maturityFocus || record.id === "nis2-maturity-low") return "nis2_maturity"
 
       if (isNis2SupplyChainFinding(record)) return "nis2_vendor_registry"
       return null
@@ -2654,6 +2670,19 @@ export function getSpecialistHandoffContract(
         returnEvidenceLabel: "Dovadă ANSPDCP sau raționament documentat",
         returnEvidenceInstruction:
           "Cockpitul trebuie să primească numărul de înregistrare ANSPDCP sau raționamentul complet documentat pentru ne-notificare.",
+      }
+    case "nis2_dnsc_registration":
+      return {
+        surface,
+        startHref: workflowLink.href,
+        startLabel: workflowLink.label,
+        targetReturnMode: "automatic",
+        runtimeReturnMode: "automatic",
+        runtimeStatusNote:
+          "După ce actualizezi stadiul DNSC și confirmi depunerea sau numărul de înregistrare, wizardul te readuce automat în același cockpit pentru închidere.",
+        returnEvidenceLabel: "Dovadă DNSC salvată",
+        returnEvidenceInstruction:
+          "Cockpitul trebuie să primească statusul DNSC actualizat și numărul de înregistrare, recipisa sau nota de handoff salvată în wizard.",
       }
     case "nis2_eligibility":
       return {

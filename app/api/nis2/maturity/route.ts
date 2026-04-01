@@ -7,12 +7,13 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
-import { saveMaturityAssessment, readMaturityAssessment } from "@/lib/server/nis2-store"
+import { saveMaturityAssessment, readMaturityAssessment, readNis2State } from "@/lib/server/nis2-store"
 import type { MaturityAssessment } from "@/lib/server/nis2-store"
 import { scoreMaturity, convertMaturityGapsToFindings } from "@/lib/compliance/nis2-maturity"
 import type { MaturityAnswers } from "@/lib/compliance/nis2-maturity"
 import { mutateFreshState } from "@/lib/server/mvp-store"
-import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
+import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function GET(request: Request) {
   try {
@@ -63,13 +64,16 @@ export async function POST(request: Request) {
 
     // Auto-generate findings for domains with score < 50%
     const maturityFindings = convertMaturityGapsToFindings(result.domains, now)
-    await mutateFreshState((current) => ({
+    await mutateFreshState(async (current) => ({
       ...current,
-      findings: [
-        // Remove previous maturity findings, keep everything else
-        ...current.findings.filter((f) => !f.id.startsWith("nis2-maturity-")),
-        ...preserveRuntimeStateForRegeneratedFindings(current.findings, maturityFindings),
-      ],
+      findings: mergeNis2PackageFindings(
+        [
+          ...current.findings.filter((f) => !f.id.startsWith("nis2-maturity-")),
+          ...maturityFindings.map((finding) => preserveRuntimeStateForSingleFinding(current.findings, finding)),
+        ],
+        await readNis2State(orgId),
+        now
+      ),
     }))
 
     return NextResponse.json({ assessment, result })

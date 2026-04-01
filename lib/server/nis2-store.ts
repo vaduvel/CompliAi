@@ -3,6 +3,8 @@
 // Sprint 9: usa storage-adapter în loc de fs direct → migrare Supabase ușoară.
 
 import type { Nis2Answers, Nis2AnswersMeta, Nis2Sector } from "@/lib/compliance/nis2-rules"
+import { makeResolution } from "@/lib/compliance/finding-resolution"
+import type { ScanFinding } from "@/lib/compliance/types"
 import type {
   Nis2EmployeeRange,
   Nis2RevenueRange,
@@ -239,6 +241,276 @@ export type Nis2OrgState = {
   maturityAssessment?: MaturityAssessment           // Sprint 2.6
   boardMembers?: BoardMember[]                      // Sprint 2.7
   eligibility?: Nis2EligibilityRecord | null        // Faza 2 TASK 8
+}
+
+export type Nis2PackageGap = {
+  area: string
+  finding: string
+  priority: "critical" | "high" | "medium"
+}
+
+export type Nis2PackageSection = {
+  applicable: boolean
+  dnscStatus: DnscRegistrationStatus
+  assessmentScore: number | null
+  openIncidents: number
+  criticalVendors: number
+  maturityScore: number | null
+  gaps: Nis2PackageGap[]
+  handoffNote: string
+}
+
+export const NIS2_PACKAGE_FINDING_IDS = [
+  "nis2-dnsc-registration",
+  "nis2-assessment-gap",
+  "nis2-open-incident",
+  "nis2-vendor-review-overdue",
+  "nis2-maturity-low",
+] as const
+
+function hasNis2Signal(state: Nis2OrgState | null | undefined) {
+  if (!state) return false
+  return Boolean(
+    state.assessment ||
+      state.maturityAssessment ||
+      state.incidents.length > 0 ||
+      state.vendors.length > 0 ||
+      state.boardMembers?.length ||
+      state.dnscRegistrationStatus ||
+      (state.eligibility && state.eligibility.result !== "nu_intri")
+  )
+}
+
+export function isNis2Applicable(state: Nis2OrgState | null | undefined) {
+  if (!state) return false
+  if (state.eligibility?.result && state.eligibility.result !== "nu_intri") return true
+  return hasNis2Signal(state)
+}
+
+function buildNis2PackageFinding(params: {
+  id: (typeof NIS2_PACKAGE_FINDING_IDS)[number]
+  title: string
+  detail: string
+  severity: "critical" | "high" | "medium"
+  legalReference: string
+  remediationHint: string
+  resolution: ScanFinding["resolution"]
+  nowISO: string
+}): ScanFinding {
+  return {
+    id: params.id,
+    title: params.title,
+    detail: params.detail,
+    category: "NIS2",
+    severity: params.severity,
+    risk: params.severity === "critical" || params.severity === "high" ? "high" : "low",
+    principles: ["accountability", "oversight", "robustness"],
+    createdAtISO: params.nowISO,
+    sourceDocument: "NIS2 package",
+    legalReference: params.legalReference,
+    remediationHint: params.remediationHint,
+    resolution: params.resolution,
+  }
+}
+
+export function buildNis2Findings(
+  nis2State: Nis2OrgState | null | undefined,
+  nowISO: string
+): ScanFinding[] {
+  if (!isNis2Applicable(nis2State) || !nis2State) return []
+
+  const findings: ScanFinding[] = []
+  const nowMs = new Date(nowISO).getTime()
+  const dnscStatus = nis2State.dnscRegistrationStatus ?? "not-started"
+  const overdueOpenIncidents = nis2State.incidents.filter(
+    (incident) =>
+      incident.status === "open" &&
+      new Date(incident.detectedAtISO).getTime() + 72 * 3600_000 < nowMs
+  )
+  const overdueVendorReviews = nis2State.vendors.filter(
+    (vendor) => vendor.nextReviewDue && vendor.nextReviewDue.localeCompare(nowISO) < 0
+  )
+
+  if (dnscStatus !== "confirmed") {
+    findings.push(
+      buildNis2PackageFinding({
+        id: "nis2-dnsc-registration",
+        title: "Înregistrare DNSC neconfirmată",
+        detail:
+          dnscStatus === "not-started"
+            ? "Firma are semnale NIS2 active, dar înregistrarea DNSC nu a fost pornită."
+            : `Firma are semnale NIS2 active, iar înregistrarea DNSC este încă în status "${dnscStatus}".`,
+        severity: dnscStatus === "not-started" ? "high" : "medium",
+        legalReference: "NIS2 Art. 27 / OUG 155/2024 Art. 22",
+        remediationHint: "Finalizează înregistrarea DNSC și arhivează confirmarea sau numărul de înregistrare.",
+        resolution: makeResolution(
+          "Înregistrarea DNSC este neconfirmată pentru o entitate care intră sau poate intra sub NIS2.",
+          "Fără confirmare DNSC, organizația rămâne expusă la sancțiuni și la un audit fără urmă formală de înscriere.",
+          "Finalizează înregistrarea DNSC și salvează confirmarea în Dosar.",
+          {
+            humanStep: "Trimite formularul în portalul DNSC și notează numărul de înregistrare sau dovada depunerii.",
+            closureEvidence: "Confirmare DNSC, recipisă sau număr de înregistrare.",
+            revalidation: "Verificare anuală a statusului și la orice schimbare de date legale.",
+          }
+        ),
+        nowISO,
+      })
+    )
+  }
+
+  if (nis2State.assessment && nis2State.assessment.score < 50) {
+    findings.push(
+      buildNis2PackageFinding({
+        id: "nis2-assessment-gap",
+        title: "Scor NIS2 sub pragul minim",
+        detail: `Assessment-ul NIS2 este completat, dar scorul actual este ${nis2State.assessment.score}%, sub pragul de 50%.`,
+        severity: "high",
+        legalReference: "NIS2 Art. 21 / OUG 155/2024",
+        remediationHint: "Reia assessment-ul, completează gap-urile critice și salvează planul de remediere.",
+        resolution: makeResolution(
+          "Scorul assessment-ului NIS2 rămâne sub pragul minim de readiness.",
+          "Un scor sub 50% arată că lipsesc controale de bază și crește riscul de neconformitate la audit sau incident.",
+          "Corectează controalele slabe și refă assessment-ul până când scorul urcă peste prag.",
+          {
+            generatedAsset: "Assessment NIS2 și plan de remediere",
+            humanStep: "Confirmați fiecare răspuns și atașați dovezile reale pentru controalele cu impact mare.",
+            closureEvidence: "Assessment actualizat, scor salvat și plan de remediere aprobat.",
+          }
+        ),
+        nowISO,
+      })
+    )
+  }
+
+  if (overdueOpenIncidents.length > 0) {
+    findings.push(
+      buildNis2PackageFinding({
+        id: "nis2-open-incident",
+        title: "Incident NIS2 deschis peste 72h",
+        detail: `${overdueOpenIncidents.length} incident${overdueOpenIncidents.length === 1 ? "" : "e"} este/sunt încă în status open după pragul de 72h.`,
+        severity: "critical",
+        legalReference: "NIS2 Art. 23",
+        remediationHint: "Actualizează incidentul cu early warning / raport 72h și adaugă urma de notificare.",
+        resolution: makeResolution(
+          "Există incidente NIS2 deschise care au depășit pragul operațional de 72h fără progres formal.",
+          "Depășirea termenului crește riscul de întârziere de notificare către DNSC și arată lipsă de control operațional în postură de incident.",
+          "Intră în timeline-ul incidentului, marchează stadiul corect și atașează urma de notificare sau justificarea întârzierii.",
+          {
+            humanStep: "Confirmați statusul fiecărui incident și completați raportarea 24h/72h/final unde lipsește.",
+            closureEvidence: "Incident actualizat cu stadiul corect și dovadă de notificare / raport salvată.",
+            revalidation: "Reverificare zilnică până la închiderea incidentului.",
+          }
+        ),
+        nowISO,
+      })
+    )
+  }
+
+  if (overdueVendorReviews.length > 0) {
+    findings.push(
+      buildNis2PackageFinding({
+        id: "nis2-vendor-review-overdue",
+        title: "Revizuire vendor NIS2 depășită",
+        detail: `${overdueVendorReviews.length} vendor${overdueVendorReviews.length === 1 ? "" : "i"} are/au review contractual sau de securitate depășit.`,
+        severity: "medium",
+        legalReference: "NIS2 Art. 21(2)(d)",
+        remediationHint: "Actualizează review-ul vendorilor și marchează noua dată de revizuire în registru.",
+        resolution: makeResolution(
+          "Revizuirile periodice pentru vendorii NIS2 nu mai sunt la zi.",
+          "Furnizorii nerevăzuiți pot ascunde gap-uri contractuale sau de securitate care afectează lanțul de aprovizionare.",
+          "Revizuiește vendorii cu termen depășit, actualizează clauzele și notează noua dată de review.",
+          {
+            humanStep: "Verifică DPA-ul, clauzele de securitate și notificarea incidentelor pentru vendorii marcați.",
+            closureEvidence: "Registru vendor actualizat cu dată nouă de review și dovada revizuirii.",
+          }
+        ),
+        nowISO,
+      })
+    )
+  }
+
+  if (nis2State.maturityAssessment && nis2State.maturityAssessment.overallScore < 40) {
+    findings.push(
+      buildNis2PackageFinding({
+        id: "nis2-maturity-low",
+        title: "Maturitate NIS2 scăzută",
+        detail: `Auto-evaluarea de maturitate DNSC este la ${nis2State.maturityAssessment.overallScore}%, sub pragul de 40%.`,
+        severity: "medium",
+        legalReference: "NIS2 Art. 21 / OUG 155/2024 Art. 18",
+        remediationHint: "Prioritizează domeniile slabe din maturity assessment și atașează planul de remediere.",
+        resolution: makeResolution(
+          "Scorul general de maturitate NIS2 rămâne prea scăzut pentru un audit confortabil.",
+          "Un scor mic indică lipsa unor practici minime de guvernanță și control, ceea ce poate reaprinde rapid findingurile după un incident.",
+          "Parcurge domeniile slabe, salvează un plan de remediere și reia assessment-ul după implementare.",
+          {
+            generatedAsset: "Auto-evaluare maturitate DNSC",
+            humanStep: "Confirmați domeniile slabe și stabiliți owner + termen pentru fiecare măsură.",
+            closureEvidence: "Assessment de maturitate actualizat și plan de remediere salvat.",
+          }
+        ),
+        nowISO,
+      })
+    )
+  }
+
+  return findings
+}
+
+export function buildNis2Package(
+  nis2State: Nis2OrgState | null | undefined,
+  nowISO: string
+): Nis2PackageSection {
+  const applicable = isNis2Applicable(nis2State)
+  const findings = buildNis2Findings(nis2State, nowISO)
+
+  if (!nis2State) {
+    return {
+      applicable,
+      dnscStatus: "not-started",
+      assessmentScore: null,
+      openIncidents: 0,
+      criticalVendors: 0,
+      maturityScore: null,
+      gaps: [],
+      handoffNote: "Nu există încă date NIS2 suficiente pentru pachetul de handoff.",
+    }
+  }
+
+  const openIncidents = nis2State.incidents.filter((incident) => incident.status !== "closed").length
+  const criticalVendors = nis2State.vendors.filter((vendor) => vendor.riskLevel === "critical").length
+  const gaps: Nis2PackageGap[] = findings.map((finding) => ({
+    area:
+      finding.id === "nis2-dnsc-registration"
+        ? "DNSC"
+        : finding.id === "nis2-assessment-gap"
+          ? "Assessment"
+          : finding.id === "nis2-open-incident"
+            ? "Incidente"
+            : finding.id === "nis2-vendor-review-overdue"
+              ? "Vendori"
+              : "Maturitate",
+    finding: finding.title,
+    priority: finding.severity === "critical" ? "critical" : finding.severity === "high" ? "high" : "medium",
+  }))
+
+  const handoffNote =
+    findings.length === 0
+      ? "Pachetul NIS2 nu are gap-uri critice. Poate fi folosit ca rezumat de readiness pentru audit sau handoff extern."
+      : `Pachetul NIS2 are ${findings.length} gap${findings.length === 1 ? "" : "-uri"} active. Prioritizează ${findings
+          .slice(0, 2)
+          .map((finding) => `"${finding.title}"`)
+          .join(" și ")} înainte de handoff extern.`
+
+  return {
+    applicable,
+    dnscStatus: nis2State.dnscRegistrationStatus ?? "not-started",
+    assessmentScore: nis2State.assessment?.score ?? null,
+    openIncidents,
+    criticalVendors,
+    maturityScore: nis2State.maturityAssessment?.overallScore ?? null,
+    gaps,
+    handoffNote,
+  }
 }
 
 function emptyState(): Nis2OrgState {

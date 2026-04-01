@@ -27,6 +27,8 @@ import {
 } from "@/lib/compliance/pay-transparency-rule"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import { trackEvent } from "@/lib/server/analytics"
+import { getOrgContext } from "@/lib/server/org-context"
+import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
@@ -138,7 +140,12 @@ export async function POST(request: Request) {
 
     const applicability = evaluateApplicability(orgProfile)
     const intakeAnswers = normalizeIntakeAnswers(body.intakeAnswers)
-    const initialFindings = intakeAnswers ? buildInitialFindings(intakeAnswers) : []
+    const { orgId } = await getOrgContext()
+    const nis2State = await readNis2State(orgId)
+    const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
+    const initialFindings = intakeAnswers
+      ? buildInitialFindings(intakeAnswers, { supplementalFindings: nis2Findings })
+      : nis2Findings
     const documentRequests = intakeAnswers ? buildDocumentRequests(intakeAnswers) : []
     const nextBestAction = intakeAnswers ? buildNextBestAction(initialFindings) : null
     const intakeCompletedAtISO = intakeAnswers ? new Date().toISOString() : undefined

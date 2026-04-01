@@ -11,6 +11,8 @@ import {
 import { detectEntityType } from "@/lib/compliance/nis2-rules"
 import { buildDnscRescueFinding, DNSC_RESCUE_FINDING_ID } from "@/lib/compliance/nis2-rescue"
 import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 
 const VALID_STATUSES: DnscRegistrationStatus[] = [
   "not-started",
@@ -58,10 +60,14 @@ export async function PUT(req: Request) {
 
   await mutateFreshState((current) => ({
     ...current,
-    findings: [
-      ...current.findings.filter((f) => f.id !== DNSC_RESCUE_FINDING_ID),
-      ...(rescueFinding ? [rescueFinding] : []),
-    ],
+    findings: mergeNis2PackageFindings(
+      [
+        ...current.findings.filter((f) => f.id !== DNSC_RESCUE_FINDING_ID),
+        ...(rescueFinding ? [preserveRuntimeStateForSingleFinding(current.findings, rescueFinding)] : []),
+      ],
+      nis2State,
+      now
+    ),
   }))
 
   return NextResponse.json({ status: state.dnscRegistrationStatus })

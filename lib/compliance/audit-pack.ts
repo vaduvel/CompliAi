@@ -288,6 +288,20 @@ export type AuditPackV2 = {
       certExpired: number
     }
   }
+  nis2Package: {
+    applicable: boolean
+    dnscStatus: string
+    assessmentScore: number | null
+    openIncidents: number
+    criticalVendors: number
+    maturityScore: number | null
+    gaps: Array<{
+      area: string
+      finding: string
+      priority: "critical" | "high" | "medium"
+    }>
+    handoffNote: string
+  }
   appendix: {
     snapshot: CompliScanSnapshot | null
     validatedBaseline: CompliScanSnapshot | null

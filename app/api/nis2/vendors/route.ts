@@ -11,6 +11,8 @@ import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { createReview } from "@/lib/server/vendor-review-store"
 import { appendAudit } from "@/lib/compliance/vendor-review-engine"
 import { randomBytes } from "node:crypto"
+import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function GET(request: Request) {
   try {
@@ -79,6 +81,12 @@ export async function POST(request: Request) {
       createdAtISO: now,
       updatedAtISO: now,
     }).catch(() => {/* non-blocking */})
+
+    const nextNis2State = await readNis2State(orgId)
+    await mutateFreshState((current) => ({
+      ...current,
+      findings: mergeNis2PackageFindings(current.findings, nextNis2State, now),
+    }))
 
     // Event trigger: run vendor_risk after new vendor is added (fire-and-forget).
     void executeAgent(orgId, "vendor_risk").catch(() => {/* non-blocking */})

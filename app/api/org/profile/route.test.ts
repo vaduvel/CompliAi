@@ -28,7 +28,17 @@ vi.mock("@/lib/server/api-response", () => ({
   ),
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: vi.fn(async () => ({ orgId: "org-1" })),
+}))
+
+vi.mock("@/lib/server/nis2-store", () => ({
+  readNis2State: vi.fn(async () => ({ assessment: null, incidents: [], vendors: [] })),
+}))
+
 import { mutateState, readState } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
+import { readNis2State } from "@/lib/server/nis2-store"
 import { GET, POST } from "./route"
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -53,6 +63,8 @@ const validBase = {
 describe("POST /api/org/profile — CUI", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(getOrgContext).mockResolvedValue({ orgId: "org-1" })
+    vi.mocked(readNis2State).mockResolvedValue({ assessment: null, incidents: [], vendors: [] } as never)
     vi.mocked(readState).mockResolvedValue({
       orgProfile: null,
       applicability: null,
@@ -242,6 +254,45 @@ describe("POST /api/org/profile — CUI", () => {
     expect(state.intakeAnswers.sellsToConsumers).toBe("yes")
     expect(state.intakeCompletedAtISO).toBeTruthy()
     expect(state.findings.some((finding) => finding.id.startsWith("intake-"))).toBe(true)
+  })
+
+  it("adaugă findings NIS2 suplimentare în intake când există semnal din modulul NIS2", async () => {
+    let saved: unknown = null
+    let callCount = 0
+    vi.mocked(readNis2State).mockResolvedValue({
+      assessment: { score: 32 },
+      incidents: [],
+      vendors: [],
+      dnscRegistrationStatus: "not-started",
+    } as never)
+    vi.mocked(mutateState).mockImplementation(async (fn) => {
+      callCount++
+      if (callCount === 1) {
+        saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
+        return saved
+      }
+      return fn({ orgKnowledge: { items: [] } } as any)
+    })
+
+    const res = await POST(
+      makeRequest({
+        ...validBase,
+        intakeAnswers: {
+          sellsToConsumers: "yes",
+          hasEmployees: "no",
+          processesPersonalData: "yes",
+          usesExternalVendors: "no",
+          hasSiteWithForms: "no",
+          hasStandardContracts: "yes",
+          hasPrivacyPolicy: "yes",
+        },
+      })
+    )
+
+    expect(res.status).toBe(200)
+    const findings = (saved as { findings: { id: string }[] }).findings
+    expect(findings.some((finding) => finding.id === "nis2-dnsc-registration")).toBe(true)
+    expect(findings.some((finding) => finding.id === "nis2-assessment-gap")).toBe(true)
   })
 
   it("înlocuiește findings-urile intake vechi, fără să le dubleze", async () => {

@@ -600,7 +600,10 @@ function makeFinding(
  * Generate initial findings from intake answers.
  * Maps directly from blueprint section 10.
  */
-export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] {
+export function buildInitialFindings(
+  answers: FullIntakeAnswers,
+  opts?: { supplementalFindings?: ScanFinding[] }
+): ScanFinding[] {
   const findings: ScanFinding[] = []
 
   // ── B2C = Da → privacy / consumer-facing docs
@@ -965,7 +968,12 @@ export function buildInitialFindings(answers: FullIntakeAnswers): ScanFinding[] 
     )
   }
 
-  return findings
+  const merged = [...findings, ...(opts?.supplementalFindings ?? [])]
+  const deduped = new Map<string, ScanFinding>()
+  for (const finding of merged) {
+    deduped.set(finding.id, finding)
+  }
+  return Array.from(deduped.values())
 }
 
 // ── Document request list ───────────────────────────────────────────────────

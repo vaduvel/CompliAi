@@ -12,6 +12,7 @@ import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
 import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 import type {
   Nis2Incident,
   Nis2EarlyWarningReport,
@@ -135,14 +136,23 @@ export async function PATCH(
         incident.anspdcpNotification?.status,
         new Date().toISOString()
       )
-      await mutateFreshState((s) => ({
+      await mutateFreshState(async (s) => ({
         ...s,
-        findings: finding
-          ? [
-              ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
-              preserveRuntimeStateForSingleFinding(s.findings, finding),
-            ]
-          : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+        findings: mergeNis2PackageFindings(
+          finding
+            ? [
+                ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+                preserveRuntimeStateForSingleFinding(s.findings, finding),
+              ]
+            : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+          await readNis2State(orgId),
+          new Date().toISOString()
+        ),
+      }))
+    } else {
+      await mutateFreshState(async (s) => ({
+        ...s,
+        findings: mergeNis2PackageFindings(s.findings, await readNis2State(orgId), new Date().toISOString()),
       }))
     }
 
@@ -164,6 +174,15 @@ export async function DELETE(
     const { orgId } = await getOrgContext()
     const deleted = await deleteIncident(orgId, id)
     if (!deleted) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
+
+    await mutateFreshState(async (s) => ({
+      ...s,
+      findings: mergeNis2PackageFindings(
+        s.findings.filter((finding) => finding.id !== anspdcpFindingId(id)),
+        await readNis2State(orgId),
+        new Date().toISOString()
+      ),
+    }))
 
     return NextResponse.json({ ok: true })
   } catch (error) {

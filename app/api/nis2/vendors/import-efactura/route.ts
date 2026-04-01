@@ -10,8 +10,9 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { collectSupplierImports } from "@/lib/server/efactura-vendor-signals"
 import { readState, mutateState } from "@/lib/server/mvp-store"
-import { upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
+import { readNis2State, upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
 import { EFACTURA_MOCK_VENDORS } from "@/lib/server/efactura-mock-data"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function POST(request: Request) {
   try {
@@ -56,6 +57,12 @@ export async function POST(request: Request) {
         return { ...s, alerts: [...newAlerts, ...s.alerts] }
       })
     }
+
+    const nis2State = await readNis2State(orgId)
+    await mutateState((s: ComplianceState) => ({
+      ...s,
+      findings: mergeNis2PackageFindings(s.findings, nis2State, new Date().toISOString()),
+    }))
 
     const addedLabel = result.added !== 1 ? "furnizori importați" : "furnizor importat"
     const message = isDemoMode

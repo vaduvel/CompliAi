@@ -10,7 +10,8 @@ import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { Nis2Vendor } from "@/lib/server/nis2-store"
 import { buildVendorRiskFindings } from "@/lib/compliance/vendor-risk"
 import { mutateFreshState } from "@/lib/server/mvp-store"
-import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
+import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
+import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function PATCH(
   request: Request,
@@ -38,10 +39,14 @@ export async function PATCH(
     const riskFindings = buildVendorRiskFindings(nis2State.vendors, new Date().toISOString())
     await mutateFreshState((current) => ({
       ...current,
-      findings: [
-        ...current.findings.filter((f) => !f.id.startsWith("nis2-vendor-risk-")),
-        ...preserveRuntimeStateForRegeneratedFindings(current.findings, riskFindings),
-      ],
+      findings: mergeNis2PackageFindings(
+        [
+          ...current.findings.filter((f) => !f.id.startsWith("nis2-vendor-risk-")),
+          ...riskFindings.map((finding) => preserveRuntimeStateForSingleFinding(current.findings, finding)),
+        ],
+        nis2State,
+        new Date().toISOString()
+      ),
     }))
 
     return NextResponse.json({ vendor })
@@ -62,6 +67,15 @@ export async function DELETE(
     const { orgId } = await getOrgContext()
     const deleted = await deleteVendor(orgId, id)
     if (!deleted) return jsonError("Furnizorul nu a fost găsit.", 404, "NOT_FOUND")
+
+    await mutateFreshState(async (current) => ({
+      ...current,
+      findings: mergeNis2PackageFindings(
+        current.findings.filter((finding) => finding.id !== `nis2-vendor-risk-${id}`),
+        await readNis2State(orgId),
+        new Date().toISOString()
+      ),
+    }))
 
     return NextResponse.json({ ok: true })
   } catch (error) {

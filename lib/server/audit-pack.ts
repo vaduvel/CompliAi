@@ -12,7 +12,7 @@ import type {
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { CompliScanSnapshot } from "@/lib/compliscan/schema"
 import { buildComplianceTraceRecords } from "@/lib/server/compliance-trace"
-import type { Nis2OrgState } from "@/lib/server/nis2-store"
+import { buildNis2Package, type Nis2OrgState } from "@/lib/server/nis2-store"
 
 type BuildAuditPackInput = {
   state: ComplianceState
@@ -211,6 +211,7 @@ export function buildAuditPack({
       })),
     traceabilityMatrix,
     nis2Report: buildNis2Report(nis2State),
+    nis2Package: buildNis2Package(nis2State, generatedAt),
     appendix: {
       snapshot,
       validatedBaseline,

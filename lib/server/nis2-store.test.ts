@@ -25,6 +25,8 @@ import {
   deleteVendor,
   saveNis2Assessment,
   upsertVendorsFromEfactura,
+  buildNis2Findings,
+  buildNis2Package,
 } from "./nis2-store"
 
 const EMPTY_STATE = {
@@ -373,5 +375,72 @@ describe("nis2-store", () => {
     expect(saved.assessment.sector).toBe("banking")
     expect(saved.assessment.score).toBe(72)
     expect(saved.assessment.maturityLabel).toBe("partial")
+  })
+
+  // ── buildNis2Findings / buildNis2Package ───────────────────────────────────
+
+  it("genereaza findings NIS2 pachetate din DNSC, assessment, incidente, vendori si maturitate", () => {
+    const findings = buildNis2Findings(
+      {
+        assessment: { score: 41, completedAtISO: "2026-03-17T10:00:00.000Z" } as never,
+        incidents: [
+          {
+            id: "inc-1",
+            status: "open",
+            severity: "high",
+            title: "Atac ransomware",
+            detectedAtISO: "2026-03-10T10:00:00.000Z",
+          },
+        ] as never,
+        vendors: [
+          {
+            id: "vendor-1",
+            name: "Cloud Corp",
+            riskLevel: "critical",
+            nextReviewDue: "2026-03-01T00:00:00.000Z",
+          },
+        ] as never,
+        dnscRegistrationStatus: "not-started",
+        maturityAssessment: { overallScore: 28 } as never,
+      } as never,
+      "2026-03-20T10:00:00.000Z"
+    )
+
+    expect(findings.map((finding) => finding.id)).toEqual(
+      expect.arrayContaining([
+        "nis2-dnsc-registration",
+        "nis2-assessment-gap",
+        "nis2-open-incident",
+        "nis2-vendor-review-overdue",
+        "nis2-maturity-low",
+      ])
+    )
+  })
+
+  it("construiește secțiunea nis2Package pentru audit pack", () => {
+    const pkg = buildNis2Package(
+      {
+        assessment: { score: 64, completedAtISO: "2026-03-17T10:00:00.000Z" } as never,
+        incidents: [
+          { id: "inc-open", status: "open", severity: "medium", title: "Mail outage", detectedAtISO: "2026-03-19T08:00:00.000Z" },
+          { id: "inc-closed", status: "closed", severity: "low", title: "Resolved", detectedAtISO: "2026-03-18T08:00:00.000Z" },
+        ] as never,
+        vendors: [
+          { id: "vendor-1", name: "Cloud Corp", riskLevel: "critical", nextReviewDue: "2026-03-01T00:00:00.000Z" },
+          { id: "vendor-2", name: "SOC Partner", riskLevel: "medium" },
+        ] as never,
+        dnscRegistrationStatus: "confirmed",
+        maturityAssessment: { overallScore: 55 } as never,
+      } as never,
+      "2026-03-20T10:00:00.000Z"
+    )
+
+    expect(pkg.applicable).toBe(true)
+    expect(pkg.dnscStatus).toBe("confirmed")
+    expect(pkg.assessmentScore).toBe(64)
+    expect(pkg.openIncidents).toBe(1)
+    expect(pkg.criticalVendors).toBe(1)
+    expect(pkg.maturityScore).toBe(55)
+    expect(pkg.handoffNote).toContain("gap")
   })
 })

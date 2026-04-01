@@ -15,6 +15,7 @@ import {
   buildInitialFindings,
   buildInitialIntakeAnswers,
 } from "@/lib/compliance/intake-engine"
+import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
@@ -139,7 +140,9 @@ export async function POST(request: Request) {
 
       // Merge: conservative answers take precedence (more findings)
       const mergedAnswers = { ...prefillAnswers, ...conservativeAnswers }
-      const findings = buildInitialFindings(mergedAnswers)
+      const nis2State = await readNis2State(body.orgId)
+      const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
+      const findings = buildInitialFindings(mergedAnswers, { supplementalFindings: nis2Findings })
 
       console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
 

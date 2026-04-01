@@ -252,6 +252,15 @@ export default function FindingDetailPage() {
         resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
       }, 50)
     }
+    if (searchParams.get("dnscFlow") === "done") {
+      setStatusFeedback(
+        "Ai revenit din wizardul DNSC. Revizuiește dovada precompletată și închide cazul doar dacă statusul, recipisa sau numărul de înregistrare sunt documentate clar."
+      )
+      setTimeout(() => {
+        const resolveButton = document.querySelector<HTMLElement>('[data-testid="mark-finding-resolved"]')
+        resolveButton?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
     if (searchParams.get("incidentFlow") === "done") {
       setStatusFeedback(
         "Ai revenit din timeline-ul NIS2. Revizuiește nota precompletată și închide cazul doar dacă early warning-ul DNSC este documentat clar în incident."

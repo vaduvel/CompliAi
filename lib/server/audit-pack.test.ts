@@ -421,4 +421,26 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.controlsMatrix[0].auditDecision).toBe("review")
     expect(auditPack.controlsMatrix[0].auditGateCodes).toContain("pending_validation")
   })
+
+  it("include secțiunea nis2Package structurată când primește stare NIS2", () => {
+    const auditPack = buildAuditPack({
+      state: createState(),
+      remediationPlan: [],
+      workspace: createWorkspace(),
+      compliancePack: createCompliancePack(),
+      snapshot: null,
+      nis2State: {
+        assessment: { score: 44, completedAtISO: "2026-03-13T10:00:00.000Z" },
+        incidents: [],
+        vendors: [],
+        dnscRegistrationStatus: "not-started",
+        updatedAtISO: "2026-03-13T10:00:00.000Z",
+      } as never,
+    })
+
+    expect(auditPack.nis2Package.applicable).toBe(true)
+    expect(auditPack.nis2Package.dnscStatus).toBe("not-started")
+    expect(auditPack.nis2Package.assessmentScore).toBe(44)
+    expect(auditPack.nis2Package.gaps.map((gap) => gap.finding)).toContain("Înregistrare DNSC neconfirmată")
+  })
 })

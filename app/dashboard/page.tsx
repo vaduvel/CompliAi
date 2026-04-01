@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
+import { Nis2CockpitCard } from "@/components/compliscan/nis2-cockpit-card"
 import { ErrorScreen } from "@/components/compliscan/route-sections"
 import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
 import { SiteScanCard } from "@/components/compliscan/site-scan-card"
@@ -364,6 +365,8 @@ export default function DashboardPage() {
         activeRiskCount={activeRiskCount}
         onResolve={() => router.push(dashboardRoutes.resolve)}
       />
+
+      <Nis2CockpitCard />
 
       {/* ── Framework-uri + Cazuri active — 2 col, vizual distincte ─────── */}
       <div className="grid gap-4 xl:grid-cols-2">
