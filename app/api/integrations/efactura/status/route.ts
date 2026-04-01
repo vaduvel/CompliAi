@@ -5,22 +5,31 @@
 
 import { NextResponse } from "next/server"
 
-import { getAnafMode } from "@/lib/server/efactura-anaf-client"
+import {
+  getAnafEnvironment,
+  getAnafMode,
+  isAnafProductionUnlocked,
+} from "@/lib/server/efactura-anaf-client"
 import { readState } from "@/lib/server/mvp-store"
 
 export async function GET() {
   const mode = getAnafMode()
+  const environment = getAnafEnvironment()
   const state = await readState()
 
   const isLive = mode === "real"
+  const isSandbox = mode === "test"
   const hasCui = !!process.env.ANAF_CUI
 
   return NextResponse.json({
     mode,
+    environment,
+    productionUnlocked: isAnafProductionUnlocked(),
     connected: state.efacturaConnected,
     syncedAtISO: state.efacturaSyncedAtISO ?? null,
     // Guidance pentru UI
-    ready: isLive && hasCui,
+    ready: mode !== "mock" && hasCui,
+    productionReady: isLive && hasCui,
     missingConfig: [
       !process.env.ANAF_CLIENT_ID && "ANAF_CLIENT_ID",
       !process.env.ANAF_CLIENT_SECRET && "ANAF_CLIENT_SECRET",
@@ -28,6 +37,8 @@ export async function GET() {
     ].filter(Boolean) as string[],
     message: isLive
       ? "Mod real ANAF activ. Verificați periodicitatea sync-ului."
-      : "Mod demo activ. Setați ANAF_CLIENT_ID, ANAF_CLIENT_SECRET și ANAF_CUI pentru date reale.",
+      : isSandbox
+        ? "Mod ANAF TEST activ. Transmiterea reală este blocată până la unlock explicit de producție."
+        : "Mod demo activ. Setați ANAF_CLIENT_ID, ANAF_CLIENT_SECRET și ANAF_CUI pentru conectarea la sandbox-ul ANAF.",
   })
 }

@@ -1,9 +1,13 @@
 // F4 — ANAF OAuth2 + SPV Client (implementat ULTIMUL)
 // OAuth2 flow: logincert.anaf.ro/anaf-oauth2/v1/authorize → token
-// SPV endpoint: api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura
+// SPV endpoint is selected centrally from the ANAF environment guard:
+//   test -> https://webserviceapl.anaf.ro/test/FCTEL/rest
+//   prod -> https://webserviceapl.anaf.ro/prod/FCTEL/rest
 // Tokens stored in Supabase anaf_tokens table (encrypted)
 // User notified 7 days and 24h before token expiry
 // NOTĂ: necesită certificat digital calificat al utilizatorului
+
+import { getAnafFctelBaseUrl } from "@/lib/server/efactura-anaf-client"
 
 const ANAF_CLIENT_ID = process.env.ANAF_CLIENT_ID
 const ANAF_CLIENT_SECRET = process.env.ANAF_CLIENT_SECRET
@@ -16,7 +20,6 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 const ANAF_AUTHORIZE_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/authorize"
 const ANAF_TOKEN_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/token"
-const ANAF_SPV_BASE = "https://api.anaf.ro/prod/FCTEL/rest"
 const CALLBACK_PATH = "/api/anaf/callback"
 
 // ── Rate Limiter (S1.3) ────────────────────────────────────────────────────
@@ -229,7 +232,7 @@ export async function fetchSpvMessages(
   try {
     if (!checkAnafRateLimit()) throw new AnafRateLimitError()
 
-    const url = `${ANAF_SPV_BASE}/listaMesajeFactura?cif=${encodeURIComponent(cif)}&zile=${zile}`
+    const url = `${getAnafFctelBaseUrl()}/listaMesajeFactura?cif=${encodeURIComponent(cif)}&zile=${zile}`
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -257,7 +260,7 @@ export async function downloadSpvMessage(
   try {
     if (!checkAnafRateLimit()) throw new AnafRateLimitError()
 
-    const url = `${ANAF_SPV_BASE}/descarcare?id=${encodeURIComponent(messageId)}`
+    const url = `${getAnafFctelBaseUrl()}/descarcare?id=${encodeURIComponent(messageId)}`
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

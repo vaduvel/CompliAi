@@ -4,8 +4,8 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import { getAnafEnvironment, getAnafMode } from "@/lib/server/efactura-anaf-client"
 import { mutateState } from "@/lib/server/mvp-store"
-import { getAnafMode } from "@/lib/server/efactura-anaf-client"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const nowISO = new Date().toISOString()
     const actor = await resolveOptionalEventActor(request)
     const mode = getAnafMode()
+    const environment = getAnafEnvironment()
 
     const nextState = await mutateState((current) => ({
       ...current,
@@ -27,10 +28,12 @@ export async function POST(request: Request) {
           entityType: "integration",
           entityId: "efactura",
           message: mode === "real"
-            ? "Sync e-Factura cu ANAF SPV initiat."
-            : "Sync e-Factura pornit in mod local (mock).",
+            ? "Sync e-Factura cu ANAF SPV initiat in producție."
+            : mode === "test"
+              ? "Sync e-Factura pornit in sandbox-ul oficial ANAF."
+              : "Sync e-Factura pornit in mod local (mock).",
           createdAtISO: nowISO,
-          metadata: { connected: true, mode },
+          metadata: { connected: true, mode, environment },
         }, actor),
       ]),
     }))
@@ -38,9 +41,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ...(await buildDashboardPayload(nextState)),
       mode,
+      environment,
       message: mode === "real"
-        ? "Conexiunea cu ANAF SPV a fost stabilita. Verifica uman inainte de depunere."
-        : "Integrarea e-Factura a fost actualizata in modul local. Seteaza ANAF_CLIENT_ID si ANAF_CLIENT_SECRET pentru modul real.",
+        ? "Conexiunea cu ANAF SPV a fost stabilită în producție. Verifică uman înainte de depunere."
+        : mode === "test"
+          ? "Conexiunea cu ANAF SPV folosește sandbox-ul oficial. Trimiterile reale rămân blocate."
+          : "Integrarea e-Factura a fost actualizată în modul local. Setează ANAF_CLIENT_ID și ANAF_CLIENT_SECRET pentru sandbox-ul ANAF.",
     }, withRequestIdHeaders(undefined, context))
   } catch (error) {
     await logRouteError(context, error, {

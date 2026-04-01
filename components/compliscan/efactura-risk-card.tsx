@@ -16,10 +16,11 @@ import { summarizeEFacturaSignals } from "@/lib/compliance/efactura-risk"
 
 type SignalsPayload = {
   signals: EFacturaInvoiceSignal[]
-  mode: "mock" | "real"
+  mode: "mock" | "test" | "real"
   connected: boolean
   syncedAtISO: string | null
   demo: boolean
+  sandbox?: boolean
 }
 
 const STATUS_LABELS: Record<EFacturaInvoiceSignal["status"], string> = {
@@ -112,9 +113,14 @@ export function EFacturaRiskCard() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <CardTitle className="text-base">Semnale risc e-Factura</CardTitle>
-              {payload?.demo && (
+              {payload?.mode === "mock" && (
                 <Badge variant="outline" className="text-[10px]">
                   Demo
+                </Badge>
+              )}
+              {payload?.mode === "test" && (
+                <Badge variant="outline" className="text-[10px]">
+                  Sandbox ANAF
                 </Badge>
               )}
             </div>

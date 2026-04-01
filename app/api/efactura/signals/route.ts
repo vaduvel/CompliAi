@@ -28,6 +28,7 @@ export async function GET() {
       connected: state.efacturaConnected,
       syncedAtISO: state.efacturaSyncedAtISO ?? null,
       demo: mode === "mock",
+      sandbox: mode === "test",
     })
   } catch {
     return jsonError("Nu am putut incarca semnalele e-Factura.", 500, "EFACTURA_SIGNALS_READ_FAILED")

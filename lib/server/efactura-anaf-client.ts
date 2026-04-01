@@ -1,23 +1,54 @@
 // ANAF SPV e-Factura client.
-// Operates in two modes controlled by environment variables:
-//   mock  — current behaviour (no ANAF credentials configured)
-//   real  — live ANAF SPV API calls when ANAF_CLIENT_ID + ANAF_CLIENT_SECRET are set
+// Operates in three explicit modes controlled by environment variables:
+//   mock  — no ANAF credentials configured
+//   test  — ANAF OAuth active, but all FCTEL calls go to the official ANAF test endpoints
+//   real  — ANAF OAuth active and FCTEL calls go to production, only when explicitly unlocked
 //
 // OAuth2 token endpoint: https://logincert.anaf.ro/anaf-oauth2/v1/token
-// Upload endpoint:       https://api.anaf.ro/prod/FCTEL/rest/upload
-// Status endpoint:       https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=...
+// Upload endpoints:
+//   test: https://webserviceapl.anaf.ro/test/FCTEL/rest/upload
+//   prod: https://webserviceapl.anaf.ro/prod/FCTEL/rest/upload
+// Status endpoints:
+//   test: https://webserviceapl.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=...
+//   prod: https://webserviceapl.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=...
 
 const ANAF_CLIENT_ID = process.env.ANAF_CLIENT_ID
 const ANAF_CLIENT_SECRET = process.env.ANAF_CLIENT_SECRET
-const ANAF_REDIRECT_URI = process.env.ANAF_REDIRECT_URI ?? "https://app.compliscan.ro/api/integrations/efactura/callback"
+const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"
+const ANAF_REDIRECT_URI = process.env.ANAF_REDIRECT_URI ?? `${NEXT_PUBLIC_URL}/api/anaf/callback`
+const ANAF_ENV = normalizeAnafEnvironment(process.env.ANAF_ENV)
+const ANAF_ALLOW_REAL_SUBMIT = process.env.ANAF_ALLOW_REAL_SUBMIT === "true"
 const ANAF_TOKEN_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/token"
-const ANAF_UPLOAD_URL = "https://api.anaf.ro/prod/FCTEL/rest/upload"
-const ANAF_STATUS_URL = "https://api.anaf.ro/prod/FCTEL/rest/stareMesaj"
+const ANAF_FCTEL_BASE_URLS = {
+  test: "https://webserviceapl.anaf.ro/test/FCTEL/rest",
+  prod: "https://webserviceapl.anaf.ro/prod/FCTEL/rest",
+} as const
 
-export type AnafMode = "mock" | "real"
+export type AnafMode = "mock" | "test" | "real"
+export type AnafEnvironment = "test" | "prod"
 
 export function getAnafMode(): AnafMode {
-  return ANAF_CLIENT_ID && ANAF_CLIENT_SECRET ? "real" : "mock"
+  if (!ANAF_CLIENT_ID || !ANAF_CLIENT_SECRET) {
+    return "mock"
+  }
+
+  if (ANAF_ENV === "prod" && ANAF_ALLOW_REAL_SUBMIT) {
+    return "real"
+  }
+
+  return "test"
+}
+
+export function getAnafEnvironment(): AnafEnvironment {
+  return ANAF_ENV
+}
+
+export function isAnafProductionUnlocked(): boolean {
+  return getAnafMode() === "real"
+}
+
+export function getAnafFctelBaseUrl(): string {
+  return ANAF_FCTEL_BASE_URLS[isAnafProductionUnlocked() ? "prod" : "test"]
 }
 
 // ── OAuth2 token management ──────────────────────────────────────────────────
@@ -32,7 +63,7 @@ export type AnafTokenResponse = {
 
 /** Exchange an authorization code for an access token. */
 export async function exchangeAnafCode(code: string): Promise<AnafTokenResponse> {
-  assertRealMode()
+  assertConfiguredMode()
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -59,7 +90,7 @@ export async function exchangeAnafCode(code: string): Promise<AnafTokenResponse>
 
 /** Refresh an expired access token. */
 export async function refreshAnafToken(refreshToken: string): Promise<AnafTokenResponse> {
-  assertRealMode()
+  assertConfiguredMode()
 
   const body = new URLSearchParams({
     grant_type: "refresh_token",
@@ -112,7 +143,7 @@ export async function uploadInvoiceToAnaf(params: {
     return { uploadIndex: "mock-0000000001", rawResponse: "mock", mock: true }
   }
 
-  const url = `${ANAF_UPLOAD_URL}?standard=UBL&cif=${params.cif}`
+  const url = `${getAnafFctelBaseUrl()}/upload?standard=UBL&cif=${params.cif}`
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -177,7 +208,7 @@ export async function getInvoiceStatus(params: {
     }
   }
 
-  const url = `${ANAF_STATUS_URL}?id_incarcare=${params.uploadIndex}`
+  const url = `${getAnafFctelBaseUrl()}/stareMesaj?id_incarcare=${params.uploadIndex}`
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${params.accessToken}` },
     cache: "no-store",
@@ -228,13 +259,21 @@ export class AnafClientError extends Error {
   }
 }
 
-function assertRealMode() {
-  if (getAnafMode() !== "real") {
+function assertConfiguredMode() {
+  if (getAnafMode() === "mock") {
     throw new AnafClientError(
       "ANAF_CLIENT_ID și ANAF_CLIENT_SECRET nu sunt configurate.",
       "E002"
     )
   }
+}
+
+function normalizeAnafEnvironment(value: string | undefined): AnafEnvironment {
+  const normalized = value?.trim().toLowerCase()
+  if (normalized === "prod" || normalized === "production" || normalized === "live") {
+    return "prod"
+  }
+  return "test"
 }
 
 function extractXmlValue(xml: string, tag: string): string | null {
