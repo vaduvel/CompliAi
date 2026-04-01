@@ -11,6 +11,12 @@ export function getConfiguredDataBackend(): DataBackend {
   const value = process.env.COMPLISCAN_DATA_BACKEND?.trim().toLowerCase()
   if (value === "supabase") return "supabase"
   if (value === "hybrid") return "hybrid"
+  if (value === "local") return "local"
+  // On serverless platforms (Vercel), auto-use Supabase when credentials are present
+  // so state persists across serverless instances without explicit env var
+  if (process.env.VERCEL && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return "supabase"
+  }
   return "local"
 }
 
