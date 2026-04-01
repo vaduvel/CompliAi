@@ -24,6 +24,12 @@ import {
   normalizeFindingSuggestedDocumentType,
 } from "@/lib/compliscan/finding-kernel"
 import type { ScanFinding } from "@/lib/compliance/types"
+import { materializeFindingTruth } from "@/lib/compliscan/finding-truth"
+import { getEvidenceSummary } from "@/lib/compliscan/evidence-validator"
+import { buildEvidenceLinks, getEvidenceCompleteness } from "@/lib/compliscan/evidence-linker"
+import { createPendingAction } from "@/lib/server/approval-queue"
+import { resolvePolicy } from "@/lib/server/autonomy-resolver"
+import type { RiskLevel } from "@/lib/server/approval-queue"
 
 const VALID_DOC_TYPES: DocumentType[] = DOCUMENT_TYPES.map(({ id }) => id)
 
@@ -66,12 +72,22 @@ export async function GET(
     if (!finding) {
       return jsonError("Finding inexistent.", 404, "NOT_FOUND")
     }
-    const runtimeFinding = normalizeFindingSuggestedDocumentType(finding)
+    const runtimeFinding = materializeFindingTruth(normalizeFindingSuggestedDocumentType(finding))
 
     const linkedGeneratedDocument =
       [...(state.generatedDocuments ?? [])]
         .filter((document) => document.sourceFindingId === id)
         .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
+
+    const { orgId } = await getOrgContext()
+    const allDocs = state.generatedDocuments ?? []
+    const evidenceSummary = getEvidenceSummary({
+      finding: runtimeFinding,
+      linkedDocument: linkedGeneratedDocument,
+      orgName: state.orgProfilePrefill?.companyName ?? orgId,
+    })
+    const evidenceLinks = buildEvidenceLinks(runtimeFinding, allDocs)
+    const evidenceCompleteness = getEvidenceCompleteness(runtimeFinding, allDocs)
 
     return NextResponse.json({
       finding: runtimeFinding,
@@ -80,6 +96,9 @@ export async function GET(
         getRuntimeCockpitDocumentType(runtimeFinding) ?? undefined,
         linkedGeneratedDocument?.approvalStatus
       ),
+      evidenceSummary,
+      evidenceLinks,
+      evidenceCompleteness,
     })
   } catch {
     return jsonError("Eroare la citirea finding-ului.", 500)
@@ -138,12 +157,66 @@ export async function PATCH(
       | "resolved"
       | "under_monitoring"
 
+    // P0-3: Approval gate — resolve/close actions go through approval queue if policy demands
+    if (
+      (newStatus === "resolved" || newStatus === "under_monitoring") &&
+      finding.findingStatus !== "resolved" &&
+      finding.findingStatus !== "under_monitoring"
+    ) {
+      const severityToRisk: Record<string, RiskLevel> = {
+        critical: "critical",
+        high: "high",
+        medium: "medium",
+        low: "low",
+      }
+      const riskLevel = severityToRisk[finding.severity] ?? "medium"
+
+      try {
+        const policy = await resolvePolicy({
+          userId: session.userId,
+          orgId,
+          actionType: "resolve_finding",
+          riskLevel,
+        })
+
+        if (policy === "manual" || policy === "semi") {
+          const pendingAction = await createPendingAction({
+            orgId,
+            userId: session.userId,
+            actionType: "resolve_finding",
+            riskLevel,
+            originalData: { findingId, currentStatus: finding.findingStatus },
+            proposedData: { targetStatus: newStatus, evidenceNote: body.evidenceNote },
+            diffSummary: `${finding.title} — ${finding.findingStatus ?? "open"} → ${newStatus}`,
+            explanation: `Rezolvare finding "${finding.title}" (${finding.severity}) — necesită aprobare.`,
+            sourceFindingId: findingId,
+            expiresInHours: policy === "semi" ? 24 : undefined,
+          })
+
+          return NextResponse.json({
+            ok: true,
+            pendingApproval: true,
+            actionId: pendingAction.id,
+            findingId,
+            feedbackMessage:
+              policy === "semi"
+                ? "Acțiunea a intrat în coada de aprobări. Se aprobă automat în 24h dacă nu e respinsă."
+                : "Acțiunea a intrat în coada de aprobări. Așteaptă aprobarea explicită.",
+          })
+        }
+        // policy === "auto" → fall through to immediate execution
+      } catch {
+        // If approval queue fails, fall through to direct execution
+        console.error(`[findings] Approval policy check failed for ${findingId}, executing directly`)
+      }
+    }
+
     // Update finding status (B2)
-    const updatedFinding = {
+    const updatedFinding = materializeFindingTruth({
       ...finding,
       findingStatus: storedStatus,
       findingStatusUpdatedAtISO: nowISO,
-    }
+    })
 
     const updatedFindings = [...state.findings]
     let taskCandidateSummary: {
@@ -163,7 +236,7 @@ export async function PATCH(
           : "Finding închis și trecut în monitorizare."
 
     if (newStatus === "open") {
-      updatedFindings[findingIdx] = {
+      updatedFindings[findingIdx] = materializeFindingTruth({
         ...finding,
         findingStatus: "open",
         findingStatusUpdatedAtISO: nowISO,
@@ -172,7 +245,7 @@ export async function PATCH(
             ? finding.findingStatusUpdatedAtISO ?? nowISO
             : finding.reopenedFromISO,
         nextMonitoringDateISO: undefined,
-      }
+      })
 
       await writeState({
         ...state,

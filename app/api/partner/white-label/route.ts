@@ -1,0 +1,61 @@
+// P2 — White-label config API for partner orgs.
+// GET: returns current white-label config.
+// PATCH: updates config fields.
+
+import { NextResponse } from "next/server"
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
+import { getWhiteLabelConfig, saveWhiteLabelConfig } from "@/lib/server/white-label"
+
+export async function GET(request: Request) {
+  try {
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "white-label config")
+    const userMode = await resolveUserMode(session)
+    if (userMode !== "partner") {
+      throw new AuthzError("White-label e disponibil doar în modul partner.", 403, "PORTFOLIO_FORBIDDEN")
+    }
+
+    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const config = await getWhiteLabelConfig(orgId)
+
+    return NextResponse.json({ ok: true, config })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la citirea configurației white-label.", 500, "WHITE_LABEL_GET_FAILED")
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await requireFreshRole(request, ["owner", "partner_manager"], "white-label config")
+    const userMode = await resolveUserMode(session)
+    if (userMode !== "partner") {
+      throw new AuthzError("White-label e disponibil doar în modul partner.", 403, "PORTFOLIO_FORBIDDEN")
+    }
+
+    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const body = await request.json() as {
+      partnerName?: string
+      tagline?: string | null
+      logoUrl?: string | null
+      brandColor?: string
+    }
+
+    // Validate brandColor format if provided
+    if (body.brandColor && !/^#[0-9a-fA-F]{6}$/.test(body.brandColor)) {
+      return jsonError("brandColor trebuie să fie un hex color valid (#rrggbb).", 400, "INVALID_BRAND_COLOR")
+    }
+
+    const config = await saveWhiteLabelConfig(orgId, {
+      ...(body.partnerName !== undefined && { partnerName: body.partnerName }),
+      ...(body.tagline !== undefined && { tagline: body.tagline }),
+      ...(body.logoUrl !== undefined && { logoUrl: body.logoUrl }),
+      ...(body.brandColor !== undefined && { brandColor: body.brandColor }),
+    })
+
+    return NextResponse.json({ ok: true, config })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Eroare la salvarea configurației white-label.", 500, "WHITE_LABEL_SAVE_FAILED")
+  }
+}

@@ -1,6 +1,6 @@
 import { fetchWithOperationalGuard } from "@/lib/server/http-client"
 
-type HttpMethod = "GET" | "POST" | "PATCH"
+type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -55,6 +55,14 @@ export async function supabaseUpdate<TResult>(
     schema,
     prefer: "return=representation",
   })
+}
+
+export async function supabaseDelete(
+  table: string,
+  queryString: string,
+  schema = "compliscan"
+): Promise<void> {
+  await request<unknown>("DELETE", table, { queryString, schema })
 }
 
 async function request<T>(

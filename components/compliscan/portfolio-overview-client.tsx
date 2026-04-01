@@ -11,17 +11,24 @@ import {
   ChevronUp,
   Download,
   ExternalLink,
+  FileText,
+  Loader2,
   RefreshCw,
   Search,
+  ScanLine,
   Upload,
   Users,
+  X,
+  Zap,
 } from "lucide-react"
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
+import { toast } from "sonner"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { PARTNER_ACCOUNT_PLAN_LABELS, type PartnerAccountPlan } from "@/lib/shared/plan-constants"
 import type { PortfolioOverviewClientSummary } from "@/lib/server/portfolio"
+import { BATCH_ACTION_LABELS, type BatchActionType, type BatchResult } from "@/lib/compliance/batch-actions"
 
 type ScoreFilter = "all" | "under50" | "50to75" | "over75"
 type AlertFilter = "all" | "withAlerts"
@@ -96,16 +103,20 @@ function SortHeader({
 function ClientRow({
   client,
   onDrillDown,
+  selected,
+  onToggleSelect,
 }: {
   client: PortfolioOverviewClientSummary
   onDrillDown: (id: string) => void
+  selected: boolean
+  onToggleSelect: (id: string) => void
 }) {
   const c = client.compliance
   const hasData = c?.hasData ?? false
 
   return (
     <div
-      className="group flex cursor-pointer flex-wrap items-center gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-eos-surface-variant"
+      className={`group flex cursor-pointer flex-wrap items-center gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-eos-surface-variant ${selected ? "bg-eos-primary/5" : ""}`}
       onClick={() => onDrillDown(client.orgId)}
       role="button"
       tabIndex={0}
@@ -116,6 +127,17 @@ function ClientRow({
       }}
       aria-label={`Deschide ${client.orgName}`}
     >
+      {/* ── Checkbox ── */}
+      <div onClick={(e) => { e.stopPropagation(); onToggleSelect(client.orgId) }}>
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect(client.orgId)}
+          className="size-4 rounded border-eos-border accent-eos-primary"
+          aria-label={`Selectează ${client.orgName}`}
+        />
+      </div>
+
       {/* ── Org name + last scan ── */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -236,6 +258,126 @@ function ClientRow({
   )
 }
 
+// ── BatchToolbar ──────────────────────────────────────────────────────────────
+
+function BatchToolbar({
+  count,
+  onClear,
+  onAction,
+  loading,
+}: {
+  count: number
+  onClear: () => void
+  onAction: (type: BatchActionType) => void
+  loading: boolean
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-eos-xl border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex size-6 items-center justify-center rounded-full bg-eos-primary text-xs font-semibold text-white">
+          {count}
+        </span>
+        <span className="text-sm font-medium text-eos-text">
+          {count === 1 ? "firmă selectată" : "firme selectate"}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-wrap gap-2">
+        {(Object.entries(BATCH_ACTION_LABELS) as [BatchActionType, string][]).map(([type, label]) => (
+          <button
+            key={type}
+            type="button"
+            disabled={loading}
+            onClick={() => onAction(type)}
+            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="size-3 animate-spin" /> : <Zap className="size-3" />}
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onClear}
+        className="flex items-center gap-1 text-xs text-eos-text-tertiary hover:text-eos-text-muted"
+      >
+        <X className="size-3.5" />
+        Deselectează
+      </button>
+    </div>
+  )
+}
+
+// ── BatchResultsModal ─────────────────────────────────────────────────────────
+
+function BatchResultsModal({
+  results,
+  action,
+  onClose,
+}: {
+  results: BatchResult[]
+  action: BatchActionType
+  onClose: () => void
+}) {
+  const success = results.filter((r) => r.status === "success").length
+  const pending = results.filter((r) => r.status === "pending_approval").length
+  const failed = results.filter((r) => r.status === "failed").length
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-eos-text">{BATCH_ACTION_LABELS[action]}</p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">Rezultate per firmă</p>
+          </div>
+          <button onClick={onClose} className="text-eos-text-tertiary hover:text-eos-text-muted">
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="mb-4 flex gap-3 text-xs">
+          {success > 0 && <span className="font-medium text-eos-success">{success} reusite</span>}
+          {pending > 0 && (
+            <a href="/dashboard/approvals" className="font-medium text-eos-warning hover:underline">
+              {pending} necesită aprobare →
+            </a>
+          )}
+          {failed > 0 && <span className="font-medium text-eos-error">{failed} eșuate</span>}
+        </div>
+
+        <div className="max-h-60 space-y-1.5 overflow-y-auto">
+          {results.map((r) => (
+            <div
+              key={r.orgId}
+              className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${
+                r.status === "success"
+                  ? "border-eos-success/20 bg-eos-success-soft text-eos-success"
+                  : r.status === "pending_approval"
+                    ? "border-eos-warning/20 bg-eos-warning/5 text-eos-warning"
+                    : "border-eos-error/20 bg-eos-error-soft text-eos-error"
+              }`}
+            >
+              <span className="flex-1 font-medium">{r.orgName}</span>
+              <span className="text-[10px] opacity-80">
+                {r.status === "success" ? "✓ OK" : r.status === "pending_approval" ? "⏳ Aprobare" : `✗ ${r.error ?? "eroare"}`}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={onClose}
+          className="mt-4 w-full rounded-eos-md border border-eos-border bg-eos-surface-active py-2 text-sm font-medium text-eos-text-muted hover:text-eos-text"
+        >
+          Închide
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }) {
   const active = clients.filter((c) => c.status === "active")
   const withData = active.filter((c) => c.compliance?.hasData)
@@ -277,6 +419,10 @@ export function PortfolioOverviewClient() {
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [search, setSearch] = useState("")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchLoading, setBatchLoading] = useState(false)
+  const [batchResults, setBatchResults] = useState<BatchResult[] | null>(null)
+  const [batchAction, setBatchAction] = useState<BatchActionType | null>(null)
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all")
   const [alertFilter, setAlertFilter] = useState<AlertFilter>("all")
   const [sortKey, setSortKey] = useState<SortKey>("alerts")
@@ -313,18 +459,9 @@ export function PortfolioOverviewClient() {
     void fetchPlanData()
   }, [])
 
-  async function handleDrillDown(orgId: string) {
-    const response = await fetch("/api/auth/select-workspace", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workspaceMode: "org", orgId }),
-    })
-    if (!response.ok) {
-      const payload = (await response.json()) as { error?: string }
-      setError(payload.error ?? "Nu am putut intra în firma selectată.")
-      return
-    }
-    window.location.assign("/dashboard")
+  // P2: drilldown navigates to client context page (stays in portfolio mode)
+  function handleDrillDown(orgId: string) {
+    window.location.assign(`/portfolio/client/${orgId}`)
   }
 
   function handleSort(key: SortKey) {
@@ -356,6 +493,54 @@ export function PortfolioOverviewClient() {
     anchor.download = `portfolio-overview-${dateLabel}.csv`
     anchor.click()
     URL.revokeObjectURL(url)
+  }
+
+  function handleToggleSelect(orgId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(orgId)) next.delete(orgId)
+      else next.add(orgId)
+      return next
+    })
+  }
+
+  function handleSelectAll(ids: string[]) {
+    setSelectedIds((prev) => {
+      if (ids.every((id) => prev.has(id))) {
+        const next = new Set(prev)
+        ids.forEach((id) => next.delete(id))
+        return next
+      }
+      return new Set([...prev, ...ids])
+    })
+  }
+
+  async function handleBatchAction(type: BatchActionType) {
+    if (selectedIds.size === 0) return
+    setBatchLoading(true)
+    try {
+      const res = await fetch("/api/portfolio/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actionType: type, orgIds: Array.from(selectedIds) }),
+      })
+      const data = (await res.json()) as { results?: BatchResult[]; error?: string; message?: string }
+      if (!res.ok) throw new Error(data.error ?? "Eroare la batch.")
+      const results = data.results ?? []
+      setBatchResults(results)
+      setBatchAction(type)
+      setSelectedIds(new Set())
+      const pendingCount = results.filter((r) => r.status === "pending_approval").length
+      if (pendingCount > 0) {
+        toast.info(`${pendingCount} acțiuni necesită aprobare.`)
+      } else {
+        toast.success(`${results.length} acțiuni rulate cu succes.`)
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Eroare la batch.")
+    } finally {
+      setBatchLoading(false)
+    }
   }
 
   const activeClients = clients.filter((c) => c.status === "active")
@@ -528,8 +713,27 @@ export function PortfolioOverviewClient() {
         )
       })()}
 
+      {/* ── Batch results modal ── */}
+      {batchResults && batchAction && (
+        <BatchResultsModal
+          results={batchResults}
+          action={batchAction}
+          onClose={() => { setBatchResults(null); setBatchAction(null) }}
+        />
+      )}
+
       {/* ── Summary strip ── */}
       <SummaryStrip clients={activeClients} />
+
+      {/* ── Batch toolbar ── */}
+      {selectedIds.size > 0 && (
+        <BatchToolbar
+          count={selectedIds.size}
+          onClear={() => setSelectedIds(new Set())}
+          onAction={(type) => void handleBatchAction(type)}
+          loading={batchLoading}
+        />
+      )}
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-3">
@@ -579,6 +783,13 @@ export function PortfolioOverviewClient() {
           <>
             {/* Table header */}
             <div className="flex flex-wrap items-center gap-4 border-b border-eos-border-subtle bg-eos-surface-variant px-5 py-2.5">
+              <input
+                type="checkbox"
+                className="size-4 rounded border-eos-border accent-eos-primary"
+                checked={filteredClients.length > 0 && filteredClients.every((c) => selectedIds.has(c.orgId))}
+                onChange={() => handleSelectAll(filteredClients.map((c) => c.orgId))}
+                aria-label="Selectează toate"
+              />
               <div className="flex-1">
                 <SortHeader label="Organizație" sortKey="orgName" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
               </div>
@@ -600,6 +811,8 @@ export function PortfolioOverviewClient() {
                   key={client.orgId}
                   client={client}
                   onDrillDown={(id) => void handleDrillDown(id)}
+                  selected={selectedIds.has(client.orgId)}
+                  onToggleSelect={handleToggleSelect}
                 />
               ))}
             </div>

@@ -70,11 +70,21 @@ type LinkedGeneratedDocument = {
   adoptionEvidenceNote?: string
 }
 
+type EvidenceCompletenessItem = { label: string; done: boolean }
+
 type FindingDetailResponse = {
   finding: FindingDetail
   linkedGeneratedDocument?: LinkedGeneratedDocument | null
   documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
   feedbackMessage?: string
+  pendingApproval?: boolean
+  actionId?: string
+  evidenceCompleteness?: {
+    total: number
+    completed: number
+    percentage: number
+    items: EvidenceCompletenessItem[]
+  }
 }
 
 function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
@@ -115,6 +125,8 @@ export default function FindingDetailPage() {
   const [statusFeedback, setStatusFeedback] = useState<string | null>(null)
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
+  const [evidenceCompleteness, setEvidenceCompleteness] = useState<FindingDetailResponse["evidenceCompleteness"]>(undefined)
+  const [pendingApprovalId, setPendingApprovalId] = useState<string | null>(null)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
   const processedRopaFlowRef = useRef<string | null>(null)
   const { reloadDashboard } = useCockpitMutations()
@@ -127,6 +139,10 @@ export default function FindingDetailPage() {
     setStatusFeedback(data.feedbackMessage ?? null)
     setRevalidationConfirmed(false)
     setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+    setEvidenceCompleteness(data.evidenceCompleteness)
+    if (data.pendingApproval && data.actionId) {
+      setPendingApprovalId(data.actionId)
+    }
   }, [])
 
   const refetchFinding = useCallback(() => {
@@ -359,6 +375,19 @@ export default function FindingDetailPage() {
       })
       if (!res.ok) throw new Error("Eroare la actualizare.")
       const payload = (await res.json()) as FindingDetailResponse
+
+      // P0-4: Handle pending approval response
+      if (payload.pendingApproval && payload.actionId) {
+        setPendingApprovalId(payload.actionId)
+        setStatusFeedback(payload.feedbackMessage ?? "Acțiunea a intrat în coada de aprobări.")
+        toast.info("Acțiune în așteptare", {
+          description: payload.feedbackMessage ?? "Rezolvarea necesită aprobare.",
+          duration: 5000,
+        })
+        setActionLoading(false)
+        return
+      }
+
       setFinding(
         payload.finding ?? {
           ...finding,
@@ -372,6 +401,8 @@ export default function FindingDetailPage() {
       setOperationalEvidenceNote(payload.finding?.operationalEvidenceNote ?? "")
       setNextReviewDateISO(payload.finding?.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
       setRevalidationConfirmed(false)
+      setEvidenceCompleteness(payload.evidenceCompleteness)
+      setPendingApprovalId(null)
       if (options?.redirectTo) {
         router.push(options.redirectTo)
       }
@@ -1098,6 +1129,62 @@ export default function FindingDetailPage() {
       ) : null}
 
 
+
+      {/* ── Pending approval banner ─────────────────────────────────────── */}
+      {pendingApprovalId && (
+        <Card className="border-eos-warning/30 bg-eos-warning/5">
+          <CardContent className="flex items-center gap-3 px-5 py-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-eos-warning/10">
+              <CheckCircle2 className="h-4 w-4 text-eos-warning" strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-eos-text">Acțiune în așteptare</p>
+              <p className="mt-0.5 text-xs text-eos-text-tertiary">
+                Rezolvarea a intrat în coada de aprobări. Verifică sau aprobă din{" "}
+                <Link href="/dashboard/approvals" className="font-medium text-eos-primary hover:underline">
+                  Aprobări
+                </Link>.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Evidence completeness ────────────────────────────────────────── */}
+      {evidenceCompleteness && evidenceCompleteness.total > 0 && status !== "under_monitoring" && (
+        <Card>
+          <CardContent className="px-5 py-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+                Dovadă — {evidenceCompleteness.completed}/{evidenceCompleteness.total}
+              </p>
+              <span className="text-xs font-semibold tabular-nums text-eos-text-tertiary">
+                {evidenceCompleteness.percentage}%
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-active">
+              <div
+                className="h-full rounded-full bg-eos-primary transition-all"
+                style={{ width: `${evidenceCompleteness.percentage}%` }}
+              />
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {evidenceCompleteness.items.map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-xs">
+                  {item.done ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" strokeWidth={2} />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={1.5} />
+                  )}
+                  <span className={item.done ? "text-eos-text-muted" : "text-eos-text-tertiary"}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 text-xs text-eos-text-muted">

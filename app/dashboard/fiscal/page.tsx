@@ -7,12 +7,16 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  ExternalLink,
   FileCode2,
   FileText,
   Loader2,
   Plus,
   Radio,
+  RefreshCw,
+  Send,
   ShieldCheck,
+  Upload,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -32,6 +36,8 @@ import type { FilingRecord, FilingType, FilingStatus, FilingDisciplineScore } fr
 import { FILING_TYPE_LABELS, FILING_STATUS_LABELS } from "@/lib/compliance/filing-discipline"
 import { buildFiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord, ScanFinding } from "@/lib/compliance/types"
+import type { SPVSubmission } from "@/lib/server/anaf-submit-flow"
+import { SPV_STATUS_LABELS } from "@/lib/server/anaf-submit-flow"
 
 // ── Severity badge helpers ───────────────────────────────────────────────────
 
@@ -721,6 +727,271 @@ function EFacturaSignalsTab() {
   )
 }
 
+// ── Submit ANAF Tab ───────────────────────────────────────────────────────────
+
+const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
+  pending_approval: "outline",
+  approved: "secondary",
+  submitting: "secondary",
+  submitted: "default",
+  ok: "default",
+  nok: "destructive",
+  error: "destructive",
+}
+
+function SubmitSpvTab() {
+  const [submissions, setSubmissions] = useState<SPVSubmission[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [executing, setExecuting] = useState<string | null>(null)
+  const [polling, setPolling] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [xml, setXml] = useState("")
+  const [invoiceId, setInvoiceId] = useState("")
+
+  useEffect(() => {
+    fetch("/api/fiscal/submit-spv", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { submissions?: SPVSubmission[] }) => setSubmissions(data.submissions ?? []))
+      .catch(() => toast.error("Nu am putut încărca transmisiile."))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleInitiate() {
+    if (!xml.trim()) return
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/fiscal/submit-spv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ xmlContent: xml, invoiceId: invoiceId || undefined }),
+      })
+      const data = (await res.json()) as { ok?: boolean; submission?: SPVSubmission; error?: string; message?: string }
+      if (!res.ok) throw new Error(data.error ?? "Eroare la inițierea transmiterii.")
+      if (data.submission) setSubmissions((prev) => [data.submission!, ...prev])
+      setXml("")
+      setInvoiceId("")
+      setShowForm(false)
+      toast.success("Transmitere creată", {
+        description: "Aprobă din pagina Aprobări pentru a trimite la ANAF.",
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Eroare necunoscută.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleExecute(submissionId: string) {
+    setExecuting(submissionId)
+    try {
+      const res = await fetch("/api/fiscal/submit-spv/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId }),
+      })
+      const data = (await res.json()) as { ok?: boolean; submission?: SPVSubmission; error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Eroare la transmitere.")
+      if (data.submission) {
+        setSubmissions((prev) => prev.map((s) => (s.id === submissionId ? data.submission! : s)))
+        toast.success("Transmis la ANAF", {
+          description: data.submission.indexDescarcare
+            ? `Index: ${data.submission.indexDescarcare}`
+            : "Verifică statusul în câteva minute.",
+        })
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Eroare la transmitere.")
+    } finally {
+      setExecuting(null)
+    }
+  }
+
+  async function handlePollStatus(submissionId: string) {
+    setPolling(submissionId)
+    try {
+      const res = await fetch(`/api/fiscal/submit-spv/${encodeURIComponent(submissionId)}/status`, { cache: "no-store" })
+      const data = (await res.json()) as { submission?: SPVSubmission; changed?: boolean }
+      if (!res.ok) throw new Error("Eroare la verificarea statusului.")
+      if (data.submission) {
+        setSubmissions((prev) => prev.map((s) => (s.id === submissionId ? data.submission! : s)))
+        if (data.changed) {
+          const s = data.submission
+          if (s.status === "ok") toast.success("Acceptat ANAF!", { description: s.anafMessage ?? "" })
+          if (s.status === "nok") toast.error("Respins ANAF", { description: s.anafMessage ?? "" })
+        } else {
+          toast.info("Status neschimbat — mai încearcă în câteva minute.")
+        }
+      }
+    } catch {
+      toast.error("Nu am putut verifica statusul.")
+    } finally {
+      setPolling(null)
+    }
+  }
+
+  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
+
+  return (
+    <div className="space-y-4">
+      {/* Info banner */}
+      <div className="flex items-start gap-3 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 px-4 py-3">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-primary" />
+        <div className="min-w-0 flex-1 text-sm">
+          <p className="font-medium text-eos-text">Transmitere ANAF cu dublu aprobare</p>
+          <p className="mt-0.5 text-xs text-eos-text-muted">
+            Orice transmitere necesită aprobare manuală înainte de upload. Aprobă din{" "}
+            <a href="/dashboard/approvals" className="text-eos-primary hover:underline">pagina Aprobări</a>.
+          </p>
+        </div>
+      </div>
+
+      {/* Actions row */}
+      <div className="flex items-center justify-between">
+        <Badge variant="outline" className="normal-case tracking-normal">
+          {submissions.filter((s) => s.status === "pending_approval").length} așteaptă aprobare
+        </Badge>
+        <Button size="sm" className="gap-1.5" onClick={() => setShowForm((v) => !v)}>
+          <Upload className="size-3.5" /> Transmite factură
+        </Button>
+      </div>
+
+      {/* Submit form */}
+      {showForm && (
+        <Card className="border-eos-border bg-eos-surface">
+          <CardContent className="space-y-3 py-4">
+            <label className="block">
+              <span className="text-xs font-medium text-eos-text">ID factură (opțional)</span>
+              <input
+                className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                placeholder="ex: FAC-2026-001"
+                value={invoiceId}
+                onChange={(e) => setInvoiceId(e.target.value)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-medium text-eos-text">XML UBL factură</span>
+              <textarea
+                className="mt-1 h-40 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 font-mono text-xs text-eos-text outline-none"
+                placeholder="<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#10;<Invoice xmlns=&quot;urn:oasis:names:specification:ubl:schema:xsd:Invoice-2&quot;>..."
+                value={xml}
+                onChange={(e) => setXml(e.target.value)}
+              />
+            </label>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Anulează</Button>
+              <Button
+                size="sm"
+                disabled={submitting || !xml.trim()}
+                onClick={() => void handleInitiate()}
+                className="gap-1.5"
+              >
+                {submitting ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+                Inițiază transmitere
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Submissions list */}
+      {submissions.length === 0 ? (
+        <EmptyState
+          icon={Send}
+          title="Nicio transmitere"
+          label="Apasă «Transmite factură» pentru a iniția un submit ANAF cu aprobare obligatorie."
+        />
+      ) : (
+        <div className="space-y-2">
+          {submissions.map((s) => {
+            const isOk = s.status === "ok"
+            const isNok = s.status === "nok" || s.status === "error"
+            const borderColor = isOk
+              ? "border-l-eos-success"
+              : isNok
+                ? "border-l-eos-error"
+                : s.status === "pending_approval"
+                  ? "border-l-eos-warning"
+                  : "border-l-eos-primary"
+
+            return (
+              <Card key={s.id} className={`border border-l-[3px] ${borderColor} border-eos-border bg-eos-surface`}>
+                <CardContent className="space-y-2 py-3 px-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-eos-text">{s.invoiceId}</p>
+                    <Badge
+                      variant={SUBMIT_STATUS_VARIANT[s.status] ?? "outline"}
+                      className={`text-[10px] normal-case tracking-normal ${isOk ? "bg-eos-success-soft text-eos-success" : ""}`}
+                    >
+                      {SPV_STATUS_LABELS[s.status]}
+                    </Badge>
+                    <span className="text-xs text-eos-text-muted">CIF: {s.cif}</span>
+                  </div>
+
+                  {s.indexDescarcare && (
+                    <p className="font-mono text-xs text-eos-text-muted">
+                      Index ANAF: {s.indexDescarcare}
+                    </p>
+                  )}
+                  {s.anafMessage && (
+                    <p className="text-xs text-eos-text-muted">{s.anafMessage}</p>
+                  )}
+                  {s.errorDetail && (
+                    <p className="text-xs text-eos-error">{s.errorDetail}</p>
+                  )}
+                  <p className="text-xs text-eos-text-muted">
+                    {new Date(s.createdAtISO).toLocaleString("ro-RO")}
+                    {s.submittedAtISO && <> · Transmis: {new Date(s.submittedAtISO).toLocaleString("ro-RO")}</>}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {s.status === "pending_approval" && (
+                      <a
+                        href="/dashboard/approvals"
+                        className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                      >
+                        <ExternalLink className="size-3" /> Aprobă
+                      </a>
+                    )}
+                    {s.status === "approved" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={executing === s.id}
+                        onClick={() => void handleExecute(s.id)}
+                        className="gap-1.5"
+                      >
+                        {executing === s.id
+                          ? <Loader2 className="size-3.5 animate-spin" />
+                          : <Send className="size-3.5" />}
+                        Trimite la ANAF
+                      </Button>
+                    )}
+                    {s.status === "submitted" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={polling === s.id}
+                        onClick={() => void handlePollStatus(s.id)}
+                        className="gap-1.5"
+                      >
+                        {polling === s.id
+                          ? <Loader2 className="size-3.5 animate-spin" />
+                          : <RefreshCw className="size-3.5" />}
+                        Verifică status
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function FiscalPage() {
@@ -917,6 +1188,13 @@ export default function FiscalPage() {
             <Radio className="mr-1.5 size-3.5" />
             Semnale e-Factura
           </TabsTrigger>
+          <TabsTrigger
+            value="transmitere"
+            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+          >
+            <Send className="mr-1.5 size-3.5" />
+            Transmitere ANAF
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discrepante">
@@ -972,6 +1250,10 @@ export default function FiscalPage() {
 
         <TabsContent value="semnale">
           <EFacturaSignalsTab />
+        </TabsContent>
+
+        <TabsContent value="transmitere">
+          <SubmitSpvTab />
         </TabsContent>
       </Tabs>
     </div>

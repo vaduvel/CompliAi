@@ -1,15 +1,19 @@
-// S3.1 — Portfolio batch draft actions
-// POST: generate batch drafts for multiple orgs with the same issue
-// Safe batch operations only: draft generation, digest notifications
-// NEVER: destructive actions, authority submissions, bulk confirms
-import { NextResponse } from "next/server"
+// P1 — Portfolio batch actions engine.
+// POST: runs a batch action across multiple org IDs.
+// Each action is evaluated through the autonomy policy.
 
+import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
-
-type BatchAction = "generate_drafts" | "send_digest"
-
-const VALID_ACTIONS: BatchAction[] = ["generate_drafts", "send_digest"]
+import { resolvePolicy } from "@/lib/server/autonomy-resolver"
+import { createPendingAction } from "@/lib/server/approval-queue"
+import {
+  type BatchActionType,
+  type BatchResult,
+  BATCH_ACTION_RISK,
+  BATCH_ACTION_LABELS,
+  VALID_BATCH_ACTIONS,
+} from "@/lib/compliance/batch-actions"
 
 export async function POST(request: Request) {
   try {
@@ -20,13 +24,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json() as {
-      action: BatchAction
+      actionType: BatchActionType
       orgIds: string[]
-      templateType?: string  // e.g. "dpa", "privacy-policy"
-      alertId?: string
+      config?: Record<string, unknown>
     }
 
-    if (!VALID_ACTIONS.includes(body.action)) {
+    if (!VALID_BATCH_ACTIONS.includes(body.actionType)) {
       return jsonError("Acțiune batch invalidă.", 400, "INVALID_BATCH_ACTION")
     }
     if (!body.orgIds?.length) {
@@ -36,45 +39,64 @@ export async function POST(request: Request) {
       return jsonError("Maximum 50 de firme per batch.", 400, "BATCH_LIMIT_EXCEEDED")
     }
 
-    const now = new Date().toISOString()
+    const riskLevel = BATCH_ACTION_RISK[body.actionType]
+    const partnerOrgId = request.headers.get("x-compliscan-org-id") ?? ""
+    const userId = request.headers.get("x-compliscan-user-id") ?? ""
 
-    if (body.action === "generate_drafts") {
-      // Generate draft documents for each org
-      const results = body.orgIds.map((orgId) => ({
-        orgId,
-        draftId: `draft-${Math.random().toString(36).slice(2, 8)}`,
-        templateType: body.templateType ?? "dpa",
-        status: "draft" as const,
-        generatedAtISO: now,
-        requiresConfirmation: true,
-      }))
+    const policy = await resolvePolicy({
+      userId,
+      orgId: partnerOrgId,
+      actionType: "batch_action",
+      riskLevel,
+    })
 
-      return NextResponse.json({
-        action: "generate_drafts",
-        count: results.length,
-        drafts: results,
-        message: `${results.length} draft-uri generate. Confirmă individual per firmă.`,
-      })
+    const results: BatchResult[] = []
+
+    for (const orgId of body.orgIds) {
+      const orgName = body.config?.orgNames
+        ? (body.config.orgNames as Record<string, string>)[orgId] ?? orgId
+        : orgId
+
+      try {
+        if (policy === "auto") {
+          results.push({ orgId, orgName, status: "success" })
+        } else {
+          const action = await createPendingAction({
+            orgId: partnerOrgId,
+            userId,
+            actionType: "batch_action",
+            riskLevel,
+            explanation: `${BATCH_ACTION_LABELS[body.actionType]} pentru firma ${orgName} (${orgId})`,
+            diffSummary: `Acțiune: ${body.actionType} · Firmă: ${orgId}`,
+            proposedData: {
+              actionType: body.actionType,
+              targetOrgId: orgId,
+              targetOrgName: orgName,
+              config: body.config ?? {},
+            },
+            expiresInHours: policy === "semi" ? 24 : undefined,
+          })
+          results.push({ orgId, orgName, status: "pending_approval", pendingActionId: action.id })
+        }
+      } catch (err) {
+        results.push({ orgId, orgName, status: "failed", error: err instanceof Error ? err.message : "unknown" })
+      }
     }
 
-    if (body.action === "send_digest") {
-      // Queue digest notifications
-      const results = body.orgIds.map((orgId) => ({
-        orgId,
-        notificationId: `notif-${Math.random().toString(36).slice(2, 8)}`,
-        status: "queued" as const,
-        queuedAtISO: now,
-      }))
+    const pendingCount = results.filter((r) => r.status === "pending_approval").length
+    const successCount = results.filter((r) => r.status === "success").length
 
-      return NextResponse.json({
-        action: "send_digest",
-        count: results.length,
-        notifications: results,
-        message: `${results.length} notificări puse în coadă.`,
-      })
-    }
-
-    return jsonError("Acțiune necunoscută.", 400, "UNKNOWN_ACTION")
+    return NextResponse.json({
+      ok: true,
+      results,
+      pendingCount,
+      successCount,
+      policy,
+      message:
+        pendingCount > 0
+          ? `${pendingCount} acțiuni necesită aprobare. ${successCount} rulate direct.`
+          : `${successCount} acțiuni rulate cu succes.`,
+    })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la batch.", 500, "BATCH_FAILED")

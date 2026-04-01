@@ -145,6 +145,14 @@ export type ScanFinding = {
   reasoning?: string                 // Gemini's reasoning for the finding
   sourceParagraph?: string           // exact text excerpt that triggered the finding
   suggestedDocumentType?: string     // suggested document to generate (dpa, privacy-policy, etc.)
+  // P0-3 — Findings truth model (materialized from finding-kernel)
+  findingTypeId?: string             // canonical type from classifyFinding()
+  resolutionLocus?: "in_app" | "hybrid" | "external_controlled"
+  resolutionMode?: "in_app_guided" | "in_app_full" | "external_action" | "user_attestation"
+  closeCondition?: string            // human-readable close condition from kernel
+  requiredEvidenceKinds?: string[]   // accepted evidence list from kernel
+  reviewState?: "unreviewed" | "confirmed" | "evidence_attached" | "closed" | "monitoring"
+  truthMaterializedAtISO?: string    // when truth fields were last stamped
 }
 
 export type ScanRecord = {

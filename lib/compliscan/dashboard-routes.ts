@@ -28,6 +28,7 @@ export const dashboardRoutes = {
   policies: "/dashboard/reports/policies",
   trustCenter: "/dashboard/reports/trust-center",
   generator: "/dashboard/generator",
+  approvals: "/dashboard/approvals",
   settings: "/dashboard/settings",
   settingsBilling: "/dashboard/settings/abonament",
   whistleblowing: "/dashboard/whistleblowing",
@@ -43,6 +44,7 @@ export const dashboardRouteGroups = {
   scan: [dashboardRoutes.scan, dashboardRoutes.documents],
   resolve: [
     dashboardRoutes.resolve,
+    dashboardRoutes.approvals,
     dashboardRoutes.calendar,
     dashboardRoutes.aiSystems,
     dashboardRoutes.drifts,

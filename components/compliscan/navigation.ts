@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  CheckCircle,
   FileSearch,
   Flag,
   FolderOpen,
@@ -41,6 +42,7 @@ export type DashboardNavId =
   | "whistleblowing"
   | "dora"
   | "ropa"
+  | "approvals"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -209,6 +211,13 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     label: "Partner",
     items: [
       { id: "partner", label: "Portofoliu firme", href: "/portfolio", icon: Building2 },
+    ],
+  },
+  {
+    id: "automatizare",
+    label: "Automatizare",
+    items: [
+      { id: "approvals", label: "Aprobări", href: dashboardRoutes.approvals, icon: CheckCircle, matchers: [dashboardRoutes.approvals] },
     ],
   },
   {

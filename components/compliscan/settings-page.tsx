@@ -25,6 +25,39 @@ import {
 } from "@/components/compliscan/settings/settings-shared"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-preferences-store"
+import type { AutonomyPolicy } from "@/lib/server/autonomy-resolver"
+import { ACTION_TYPE_LABELS } from "@/lib/server/approval-queue"
+import type { PendingActionType } from "@/lib/server/approval-queue"
+
+const AUTONOMY_POLICY_OPTIONS: Array<{ value: AutonomyPolicy; label: string; desc: string }> = [
+  { value: "auto", label: "Automat", desc: "Se execută imediat, fără aprobare" },
+  { value: "semi", label: "Semi-automat", desc: "Se execută dacă nu e respins în 24h" },
+  { value: "manual", label: "Manual", desc: "Așteaptă aprobarea ta explicită" },
+]
+
+const AUTONOMY_RISK_FIELDS: Array<{ key: "lowRiskPolicy" | "mediumRiskPolicy" | "highRiskPolicy"; label: string; locked?: boolean }> = [
+  { key: "lowRiskPolicy", label: "Risc scăzut" },
+  { key: "mediumRiskPolicy", label: "Risc mediu" },
+  { key: "highRiskPolicy", label: "Risc ridicat" },
+]
+
+const AUTONOMY_CATEGORY_OVERRIDES: PendingActionType[] = [
+  "repair_efactura",
+  "generate_document",
+  "resolve_finding",
+  "submit_anaf",
+  "vendor_merge",
+  "auto_remediation",
+  "classify_ai_system",
+  "publish_trust_center",
+]
+
+type AutonomyFormState = {
+  lowRiskPolicy: AutonomyPolicy
+  mediumRiskPolicy: AutonomyPolicy
+  highRiskPolicy: AutonomyPolicy
+  categoryOverrides: Partial<Record<PendingActionType, AutonomyPolicy>>
+}
 
 const DRIFT_OVERRIDE_OPTIONS = [
   { value: "default", label: "Politica implicita" },
@@ -158,6 +191,11 @@ const SETTINGS_VIEW_TABS = [
     description: "Abonament, upgrade și facturi.",
   },
   {
+    value: "autonomie",
+    label: "Autonomie",
+    description: "Control acțiuni automate per risc.",
+  },
+  {
     value: "avansat",
     label: "Avansat",
     description: "Politici locale și resetare.",
@@ -200,7 +238,7 @@ export function SettingsPageSurface() {
     currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
   const isSolo = runtime?.userMode === "solo"
   const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) =>
-    isSolo ? ["workspace", "acces", "notificari", "facturare"].includes(tab.value) : true
+    isSolo ? ["workspace", "acces", "notificari", "facturare", "autonomie"].includes(tab.value) : true
   )
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
@@ -215,6 +253,57 @@ export function SettingsPageSurface() {
   const [alertPrefs, setAlertPrefs] = useState<AlertPreferences | null>(null)
   const [alertPrefsLoading, setAlertPrefsLoading] = useState(true)
   const [alertPrefsSaving, setAlertPrefsSaving] = useState(false)
+
+  // ── Autonomy settings state ──────────────────────────────────────────────
+  const [autonomyForm, setAutonomyForm] = useState<AutonomyFormState>({
+    lowRiskPolicy: "auto",
+    mediumRiskPolicy: "semi",
+    highRiskPolicy: "manual",
+    categoryOverrides: {},
+  })
+  const [autonomyLoading, setAutonomyLoading] = useState(true)
+  const [autonomySaving, setAutonomySaving] = useState(false)
+
+  useEffect(() => {
+    if (activeTab !== "autonomie") return
+    let cancelled = false
+    setAutonomyLoading(true)
+    fetch("/api/settings/autonomy")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.settings) return
+        const s = data.settings
+        setAutonomyForm({
+          lowRiskPolicy: s.lowRiskPolicy ?? "auto",
+          mediumRiskPolicy: s.mediumRiskPolicy ?? "semi",
+          highRiskPolicy: s.highRiskPolicy ?? "manual",
+          categoryOverrides: s.categoryOverrides ?? {},
+        })
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setAutonomyLoading(false) })
+    return () => { cancelled = true }
+  }, [activeTab])
+
+  async function saveAutonomy() {
+    setAutonomySaving(true)
+    try {
+      const res = await fetch("/api/settings/autonomy", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(autonomyForm),
+      })
+      if (res.ok) {
+        toast.success("Setări autonomie salvate.")
+      } else {
+        toast.error("Eroare la salvarea setărilor.")
+      }
+    } catch {
+      toast.error("Eroare de rețea.")
+    } finally {
+      setAutonomySaving(false)
+    }
+  }
 
   useEffect(() => {
     let active = true
@@ -979,6 +1068,153 @@ export function SettingsPageSurface() {
         {activeTab === "facturare" && (
           <div className="space-y-6">
             <SettingsBillingEmbed />
+          </div>
+        )}
+
+        {/* Tab: Autonomie */}
+        {activeTab === "autonomie" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Autonomie acțiuni</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">
+                Controlezi cât de mult poate face sistemul singur per nivel de risc.
+                Acțiunile critice rămân întotdeauna manuale.
+              </p>
+            </div>
+
+            {autonomyLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-eos-text-tertiary" strokeWidth={2} />
+              </div>
+            ) : (
+              <>
+                {/* Risk level policies */}
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                    <h3 className="text-base font-semibold text-eos-text-muted">Politici per nivel de risc</h3>
+                    <p className="mt-1 text-sm text-eos-text-tertiary">
+                      Implicit: scăzut = automat, mediu = semi-automat (24h), ridicat = manual.
+                      Riscul <span className="font-semibold text-eos-error">critic</span> este întotdeauna manual.
+                    </p>
+                  </div>
+                  <div className="px-5 py-5 space-y-4">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      {AUTONOMY_RISK_FIELDS.map((field) => (
+                        <label key={field.key} className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+                          <span className="text-sm font-medium text-eos-text-muted">{field.label}</span>
+                          <select
+                            className="mt-3 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            value={autonomyForm[field.key]}
+                            onChange={(e) =>
+                              setAutonomyForm((prev) => ({
+                                ...prev,
+                                [field.key]: e.target.value as AutonomyPolicy,
+                              }))
+                            }
+                          >
+                            {AUTONOMY_POLICY_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label} — {opt.desc}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ))}
+                      {/* Critical — always locked */}
+                      <label className="rounded-eos-lg border border-eos-error/20 bg-eos-error/5 p-4 opacity-70">
+                        <span className="text-sm font-medium text-eos-error">Risc critic</span>
+                        <select
+                          className="mt-3 h-9 w-full rounded-eos-lg border border-eos-error/20 bg-eos-surface-active px-3 text-sm text-eos-text-tertiary outline-none cursor-not-allowed"
+                          value="manual"
+                          disabled
+                        >
+                          <option value="manual">Manual — blocat, nu se poate schimba</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category overrides */}
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                    <h3 className="text-base font-semibold text-eos-text-muted">Excepții pe tip de acțiune</h3>
+                    <p className="mt-1 text-sm text-eos-text-tertiary">
+                      Suprascrie politica de risc pentru tipuri specifice.
+                      &quot;Transmitere ANAF SPV&quot; este întotdeauna manual.
+                    </p>
+                  </div>
+                  <div className="px-5 py-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {AUTONOMY_CATEGORY_OVERRIDES.map((type) => {
+                        const isLocked = type === "submit_anaf"
+                        return (
+                          <label
+                            key={type}
+                            className={`rounded-eos-lg border p-4 ${
+                              isLocked
+                                ? "border-eos-error/20 bg-eos-error/5 opacity-70"
+                                : "border-eos-border-subtle bg-eos-surface-variant"
+                            }`}
+                          >
+                            <span className={`text-sm font-medium ${isLocked ? "text-eos-error" : "text-eos-text-muted"}`}>
+                              {ACTION_TYPE_LABELS[type]}
+                            </span>
+                            <select
+                              className={`mt-3 h-9 w-full rounded-eos-lg border px-3 text-sm outline-none transition-all ${
+                                isLocked
+                                  ? "border-eos-error/20 bg-eos-surface-active text-eos-text-tertiary cursor-not-allowed"
+                                  : "border-eos-border bg-eos-surface-active text-eos-text focus:border-eos-border-strong"
+                              }`}
+                              value={isLocked ? "manual" : (autonomyForm.categoryOverrides[type] ?? "")}
+                              disabled={isLocked}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setAutonomyForm((prev) => {
+                                  const overrides = { ...prev.categoryOverrides }
+                                  if (!val) {
+                                    delete overrides[type]
+                                  } else {
+                                    overrides[type] = val as AutonomyPolicy
+                                  }
+                                  return { ...prev, categoryOverrides: overrides }
+                                })
+                              }}
+                            >
+                              {isLocked ? (
+                                <option value="manual">Manual — blocat</option>
+                              ) : (
+                                <>
+                                  <option value="">Folosește politica de risc</option>
+                                  {AUTONOMY_POLICY_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </>
+                              )}
+                            </select>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save button */}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    disabled={autonomySaving}
+                    onClick={() => void saveAutonomy()}
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {autonomySaving && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
+                    Salvează setările de autonomie
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
