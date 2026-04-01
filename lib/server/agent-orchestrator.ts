@@ -14,6 +14,7 @@ import { runVendorRiskAgent } from "@/lib/compliance/agent-vendor-risk"
 import { runRegulatoryRadar } from "@/lib/compliance/agent-regulatory-radar"
 import { listPendingActions, markAutoExecuted } from "@/lib/server/approval-queue"
 import { resolvePolicy } from "@/lib/server/autonomy-resolver"
+import { dispatchAutoExecutedAction } from "@/lib/server/semi-auto-dispatcher"
 import type { EurLexDocument } from "@/lib/server/eurlex-client"
 import type { DnscAnnouncement } from "@/lib/server/dnsc-monitor"
 import type { AgentType, AgentOutput } from "@/lib/compliance/agentic-engine"
@@ -336,9 +337,14 @@ export async function sweepSemiAutoActions(orgId: string): Promise<number> {
 
       if (policy !== "semi") continue
 
+      // Dispatch the real side-effect (resolve finding, etc.)
+      const dispatchResult = await dispatchAutoExecutedAction(action)
+
       await markAutoExecuted(orgId, action.id, {
         reason: "Semi-auto window elapsed without rejection",
         sweptAtISO: nowISO,
+        dispatched: dispatchResult.executed,
+        dispatchDetail: dispatchResult.detail,
       })
 
       // Notify the org owner
@@ -347,7 +353,8 @@ export async function sweepSemiAutoActions(orgId: string): Promise<number> {
         title: `Acțiune auto-executată: ${action.actionType}`,
         message:
           `"${action.diffSummary ?? action.explanation ?? action.actionType}" ` +
-          `a fost executată automat după 24h fără respingere.`,
+          `a fost executată automat după 24h fără respingere.` +
+          (dispatchResult.executed ? ` Rezultat: ${dispatchResult.detail}` : ""),
         linkTo: "/dashboard/approvals",
       }).catch(() => {})
 
