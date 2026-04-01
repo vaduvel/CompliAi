@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { ArrowRight, Download } from "lucide-react"
 
@@ -176,10 +177,10 @@ export function AIActEvidencePackCard() {
                 Descarcă Evidence Pack
               </Button>
               <Button asChild variant="outline">
-                <a href="/dashboard/resolve">
+                <Link href="/dashboard/resolve">
                   Vezi cazurile AI Act
                   <ArrowRight className="size-4" strokeWidth={2} />
-                </a>
+                </Link>
               </Button>
             </div>
           </>

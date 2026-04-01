@@ -133,9 +133,8 @@ export async function PATCH(request: Request) {
     const { orgId, orgName } = await getOrgContext()
     const currentState = await readState()
     const previousProtocol = currentState.fiscalProtocols?.[findingId] ?? null
-    let savedProtocol: FiscalProtocolRecord | null = null
 
-    await mutateState((current) => {
+    const nextState = await mutateState((current) => {
       const protocol: FiscalProtocolRecord = {
         findingId,
         findingTypeId,
@@ -148,7 +147,6 @@ export async function PATCH(request: Request) {
         operatorNote: operatorNote || undefined,
         updatedAtISO: nowISO,
       }
-      savedProtocol = protocol
 
       return {
         ...current,
@@ -181,6 +179,8 @@ export async function PATCH(request: Request) {
         ]),
       }
     })
+
+    const savedProtocol = nextState.fiscalProtocols?.[findingId] ?? null
 
     const derived = buildFiscalProtocolDerived(savedProtocol, {
       findingId,

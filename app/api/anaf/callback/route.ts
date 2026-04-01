@@ -63,8 +63,8 @@ export async function GET(request: Request) {
             createdAtISO: nowISO,
             metadata: {
               mode: getAnafMode(),
-              tokenType: token.token_type,
-              expiresIn: token.expires_in,
+              tokenType: token.tokenType,
+              expiresAtISO: token.expiresAtISO,
             },
           },
           actor

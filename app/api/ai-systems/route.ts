@@ -206,7 +206,6 @@ export async function PATCH(request: Request) {
   const nowISO = new Date().toISOString()
   const actorEmail = actor?.label ?? "necunoscut"
   const events: ReturnType<typeof createComplianceEvent>[] = []
-  let approvedSystemForQueue: { id: string; name: string; purpose: AISystemPurpose } | null = null
 
   const nextState = await mutateState((current) => {
     const idx = current.aiSystems.findIndex((s) => s.id === body.id)
@@ -219,13 +218,6 @@ export async function PATCH(request: Request) {
       system.approvalStatus = body.approvalStatus
       system.approvedAtISO = nowISO
       system.approvedByEmail = actorEmail
-      if (body.approvalStatus === "approved" && previousApprovalStatus !== "approved") {
-        approvedSystemForQueue = {
-          id: system.id,
-          name: system.name,
-          purpose: system.purpose,
-        }
-      }
       events.push(
         createComplianceEvent({
           type: "system.updated",
@@ -284,6 +276,13 @@ export async function PATCH(request: Request) {
       detail: `Sistem AI ${body.id} actualizat (${detailParts.join(", ")})`,
     }).catch(() => {})
   }
+
+  const approvedSystemForQueue =
+    hasApproval && body.approvalStatus === "approved"
+      ? nextState.aiSystems.find((system) => system.id === body.id)?.approvalStatus === "approved"
+        ? nextState.aiSystems.find((system) => system.id === body.id)
+        : null
+      : null
 
   let pendingClassificationAction: PendingAction | null = null
   if (approvedSystemForQueue) {

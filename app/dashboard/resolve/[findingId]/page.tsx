@@ -368,12 +368,14 @@ export default function FindingDetailPage() {
       return
     }
 
+    const resolvedFindingId = finding.id
+    const resolvedFindingNextMonitoringDate = finding.nextMonitoringDateISO?.slice(0, 10) ?? null
     let cancelled = false
 
     async function loadReviewCycle() {
       setManualReviewLoading(true)
       try {
-        const response = await fetch(`/api/review-cycles?findingId=${encodeURIComponent(finding.id)}&limit=20`, {
+        const response = await fetch(`/api/review-cycles?findingId=${encodeURIComponent(resolvedFindingId)}&limit=20`, {
           cache: "no-store",
         })
         if (!response.ok) {
@@ -393,12 +395,12 @@ export default function FindingDetailPage() {
           (payload.items ?? []).find((item) => item.status !== "completed") ?? payload.items?.[0] ?? null
 
         setManualReviewCycleId(activeCycle?.id ?? null)
-        setManualReviewDate(activeCycle?.scheduledAt?.slice(0, 10) ?? finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        setManualReviewDate(activeCycle?.scheduledAt?.slice(0, 10) ?? resolvedFindingNextMonitoringDate ?? getDefaultReviewDateInput())
         setManualReviewNotes(activeCycle?.notes ?? "")
       } catch {
         if (cancelled) return
         setManualReviewCycleId(null)
-        setManualReviewDate(finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        setManualReviewDate(resolvedFindingNextMonitoringDate ?? getDefaultReviewDateInput())
         setManualReviewNotes("")
       } finally {
         if (!cancelled) {

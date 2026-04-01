@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server"
 
 import { buildAIActFindingId } from "@/lib/compliance/ai-act-classifier"
+import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateState } from "@/lib/server/mvp-store"
@@ -62,20 +63,22 @@ export async function POST(request: Request) {
     )
 
     const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
+    const generatedDocument: GeneratedDocumentRecord = {
+      id: generatedDocumentId,
+      documentType: "annex-iv",
+      title: doc.title,
+      content: doc.content,
+      generatedAtISO: doc.generatedAtISO,
+      llmUsed: false,
+      sourceFindingId: buildAIActFindingId(system.id, "technical-documentation"),
+      approvalStatus: "draft",
+      validationStatus: "pending",
+    }
+
     await mutateState((current) => ({
       ...current,
       generatedDocuments: [
-        {
-          id: generatedDocumentId,
-          documentType: "annex-iv",
-          title: doc.title,
-          content: doc.content,
-          generatedAtISO: doc.generatedAtISO,
-          llmUsed: false,
-          sourceFindingId: buildAIActFindingId(system.id, "technical-documentation"),
-          approvalStatus: "draft",
-          validationStatus: "pending",
-        },
+        generatedDocument,
         ...(current.generatedDocuments ?? []),
       ].slice(0, 150),
     }))
