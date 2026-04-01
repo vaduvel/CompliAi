@@ -14,6 +14,7 @@ import {
   BATCH_ACTION_LABELS,
   VALID_BATCH_ACTIONS,
 } from "@/lib/compliance/batch-actions"
+import { executeBatchActionForOrg } from "@/lib/server/batch-executor"
 
 export async function POST(request: Request) {
   try {
@@ -59,7 +60,13 @@ export async function POST(request: Request) {
 
       try {
         if (policy === "auto") {
-          results.push({ orgId, orgName, status: "success" })
+          const execResult = await executeBatchActionForOrg(orgId, body.actionType, body.config)
+          results.push({
+            orgId,
+            orgName,
+            status: execResult.success ? "success" : "failed",
+            error: execResult.success ? undefined : execResult.detail,
+          })
         } else {
           const action = await createPendingAction({
             orgId: partnerOrgId,
