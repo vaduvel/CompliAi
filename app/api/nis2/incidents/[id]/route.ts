@@ -13,6 +13,7 @@ import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/an
 import { mutateFreshState } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 import type {
   Nis2Incident,
   Nis2EarlyWarningReport,
@@ -154,6 +155,14 @@ export async function PATCH(
         ...s,
         findings: mergeNis2PackageFindings(s.findings, await readNis2State(orgId), new Date().toISOString()),
       }))
+    }
+
+    if (current.status !== "closed" && incident.status === "closed") {
+      await fireDriftTrigger({
+        orgId,
+        trigger: "incident_closed",
+        detail: `Incident închis: ${incident.title}`,
+      }).catch(() => {})
     }
 
     return NextResponse.json({ incident })

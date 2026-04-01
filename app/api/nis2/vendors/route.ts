@@ -13,6 +13,7 @@ import { appendAudit } from "@/lib/compliance/vendor-review-engine"
 import { randomBytes } from "node:crypto"
 import { mutateFreshState } from "@/lib/server/mvp-store"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
 export async function GET(request: Request) {
   try {
@@ -87,6 +88,12 @@ export async function POST(request: Request) {
       ...current,
       findings: mergeNis2PackageFindings(current.findings, nextNis2State, now),
     }))
+
+    await fireDriftTrigger({
+      orgId,
+      trigger: "new_vendor_added",
+      detail: `Vendor nou: ${vendor.name} (${vendor.riskLevel})`,
+    }).catch(() => {})
 
     // Event trigger: run vendor_risk after new vendor is added (fire-and-forget).
     void executeAgent(orgId, "vendor_risk").catch(() => {/* non-blocking */})

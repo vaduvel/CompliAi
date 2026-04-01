@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
+import { DriftActiveCard } from "@/components/compliscan/drift-active-card"
 import { Nis2CockpitCard } from "@/components/compliscan/nis2-cockpit-card"
 import { ErrorScreen } from "@/components/compliscan/route-sections"
 import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
@@ -367,6 +368,7 @@ export default function DashboardPage() {
       />
 
       <Nis2CockpitCard />
+      <DriftActiveCard findings={state.findings} />
 
       {/* ── Framework-uri + Cazuri active — 2 col, vizual distincte ─────── */}
       <div className="grid gap-4 xl:grid-cols-2">

@@ -15,6 +15,7 @@ import { checkLegislationChanges } from "@/lib/legislation-monitor"
 import { isLegislationRelevant } from "@/lib/compliscan/feed-sources"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -53,6 +54,11 @@ export async function POST(request: Request) {
               title: `Schimbare legislativă: ${change.sursa}`,
               message: change.summary.slice(0, 300),
               linkTo: "/dashboard/scan",
+            }).catch(() => {})
+            await fireDriftTrigger({
+              orgId: org.id,
+              trigger: "legislation_change",
+              detail: `${change.sursa}: ${change.summary.slice(0, 180)}`,
             }).catch(() => {})
             notificationsSent++
           }

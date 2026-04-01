@@ -10,6 +10,7 @@ import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { VendorTrustPackCard } from "@/components/compliscan/vendor-trust-pack-card"
 import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
 
@@ -129,6 +130,8 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
         onExportCompliScanYaml={() => void cockpitActions.handleExportCompliScanYaml()}
         onShare={() => void cockpitActions.handleShareWithAccountant()}
       />
+
+      <VendorTrustPackCard />
 
       {/* Share token — vizibil deasupra fold pentru non-solo */}
       {!isSolo ? <PartnerCounselPack /> : null}
@@ -422,6 +425,8 @@ function PartnerCounselPack() {
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   "ai-governance": "Audit Pack",
+  "annex-iv": "Annex IV",
+  "pay-gap-report": "Raport Pay Transparency",
   "privacy-policy": "Politică de confidențialitate",
   "nis2-incident-response": "Plan IR NIS2",
   "dpa-agreement": "Acord DPA",

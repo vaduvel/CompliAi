@@ -196,11 +196,13 @@ function normalizeGeneratedDocuments(
         item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
         item.documentType === "ai-governance" ||
+        item.documentType === "annex-iv" ||
         item.documentType === "job-description" ||
         item.documentType === "hr-internal-procedures" ||
         item.documentType === "reges-correction-brief" ||
         item.documentType === "contract-template" ||
         item.documentType === "deletion-attestation" ||
+        item.documentType === "pay-gap-report" ||
         item.documentType === "ropa"
           ? item.documentType
           : null

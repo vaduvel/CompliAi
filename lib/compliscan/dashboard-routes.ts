@@ -19,6 +19,7 @@ export const dashboardRoutes = {
   ropa: "/dashboard/ropa",
   fiscal: "/dashboard/fiscal",
   vendorReview: "/dashboard/vendor-review",
+  payTransparency: "/dashboard/pay-transparency",
   // Dosar unificat — Wave 1 cleanup
   dosar: "/dashboard/dosar",
   // Păstrate pentru backward compat (accesibile din Dosar)
@@ -54,6 +55,7 @@ export const dashboardRouteGroups = {
     dashboardRoutes.agents,
     dashboardRoutes.fiscal,
     dashboardRoutes.vendorReview,
+    dashboardRoutes.payTransparency,
     dashboardRoutes.whistleblowing,
     dashboardRoutes.dora,
   ],

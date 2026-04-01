@@ -42,6 +42,7 @@ export type DashboardNavId =
   | "whistleblowing"
   | "dora"
   | "ropa"
+  | "pay-transparency"
   | "approvals"
 
 export type DashboardNavItem = {
@@ -204,6 +205,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
       { id: "politici", label: "Politici interne", href: dashboardRoutes.policies, icon: BookOpen },
       { id: "generator", label: "Drafturi asistate", href: dashboardRoutes.generator, icon: Sparkles },
       { id: "ropa", label: "Registru RoPA", href: dashboardRoutes.ropa, icon: FileSearch, matchers: [dashboardRoutes.ropa] },
+      { id: "pay-transparency", label: "Pay Transparency", href: dashboardRoutes.payTransparency, icon: FileSearch, matchers: [dashboardRoutes.payTransparency] },
     ],
   },
   {

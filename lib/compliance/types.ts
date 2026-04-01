@@ -25,6 +25,7 @@ export type GeneratedDocumentKind =
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
+  | "annex-iv"
   | "job-description"
   | "hr-internal-procedures"
   | "reges-correction-brief"
@@ -32,6 +33,7 @@ export type GeneratedDocumentKind =
   | "nda"
   | "supplier-contract"
   | "deletion-attestation"
+  | "pay-gap-report"
   | "ropa"
 
 export type GeneratedDocumentAdoptionStatus =
@@ -108,6 +110,17 @@ export type FindingResolution = {
   reviewedAtISO?: string   // Momentul ultimei confirmări explicite din cockpit
 }
 
+export type DriftTrigger =
+  | "time_elapsed"
+  | "legislation_change"
+  | "new_vendor_added"
+  | "ai_system_modified"
+  | "org_profile_change"
+  | "incident_closed"
+  | "efactura_status_change"
+
+export type FindingDriftStatus = "active" | "resolved" | "reopened"
+
 export type ScanFinding = {
   id: string
   title: string
@@ -139,6 +152,11 @@ export type ScanFinding = {
   nextMonitoringDateISO?: string
   reopenedFromISO?: string
   operationalEvidenceNote?: string
+  driftStatus?: FindingDriftStatus
+  driftTriggerType?: DriftTrigger
+  driftTriggerReason?: string
+  driftTriggeredAtISO?: string
+  driftGraceExpiresAtISO?: string
   // B1 — Gemini semantic engine fields
   confidenceScore?: number           // 0-100, from Gemini analysis
   requiresHumanReview?: boolean      // true if confidence < 80 or severity critical

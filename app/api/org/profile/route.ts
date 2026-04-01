@@ -29,6 +29,7 @@ import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-kno
 import { trackEvent } from "@/lib/server/analytics"
 import { getOrgContext } from "@/lib/server/org-context"
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
 const VALID_SECTORS: OrgSector[] = [
   "energy", "transport", "banking", "health", "digital-infrastructure",
@@ -221,6 +222,15 @@ export async function POST(request: Request) {
         : {}),
     })
 
+    const profileChangeDetail = buildOrgProfileChangeDetail(currentState.orgProfile, orgProfile)
+    if (profileChangeDetail) {
+      await fireDriftTrigger({
+        orgId,
+        trigger: "org_profile_change",
+        detail: profileChangeDetail,
+      }).catch(() => {})
+    }
+
     return NextResponse.json({
       orgProfile,
       applicability,
@@ -270,4 +280,30 @@ function normalizeIntakeAnswers(raw: Partial<FullIntakeAnswers> | undefined): Fu
   }
 
   return Object.keys(normalized).length > 0 ? (normalized as FullIntakeAnswers) : undefined
+}
+
+function buildOrgProfileChangeDetail(previous: OrgProfile | undefined, next: OrgProfile) {
+  if (!previous) return null
+
+  const changes: string[] = []
+  if (previous.employeeCount !== next.employeeCount) {
+    changes.push(`angajați: ${previous.employeeCount} → ${next.employeeCount}`)
+  }
+  if (previous.sector !== next.sector) {
+    changes.push(`sector: ${previous.sector} → ${next.sector}`)
+  }
+  if (previous.usesAITools !== next.usesAITools) {
+    changes.push(`AI tools: ${previous.usesAITools ? "da" : "nu"} → ${next.usesAITools ? "da" : "nu"}`)
+  }
+  if (previous.requiresEfactura !== next.requiresEfactura) {
+    changes.push(`e-Factura: ${previous.requiresEfactura ? "da" : "nu"} → ${next.requiresEfactura ? "da" : "nu"}`)
+  }
+  if ((previous.cui ?? null) !== (next.cui ?? null)) {
+    changes.push(`CUI: ${previous.cui ?? "—"} → ${next.cui ?? "—"}`)
+  }
+  if ((previous.website ?? null) !== (next.website ?? null)) {
+    changes.push(`website: ${previous.website ?? "—"} → ${next.website ?? "—"}`)
+  }
+
+  return changes.length > 0 ? changes.join("; ") : null
 }

@@ -5,8 +5,10 @@
 
 import { NextResponse } from "next/server"
 
+import { buildAIActFindingId } from "@/lib/compliance/ai-act-classifier"
 import { jsonError } from "@/lib/server/api-response"
 import { getOrgContext } from "@/lib/server/org-context"
+import { mutateState } from "@/lib/server/mvp-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
 import { buildAnnexIVDocument } from "@/lib/compliance/ai-conformity-assessment"
@@ -59,11 +61,31 @@ export async function POST(request: Request) {
       orgName
     )
 
+    const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
+    await mutateState((current) => ({
+      ...current,
+      generatedDocuments: [
+        {
+          id: generatedDocumentId,
+          documentType: "annex-iv",
+          title: doc.title,
+          content: doc.content,
+          generatedAtISO: doc.generatedAtISO,
+          llmUsed: false,
+          sourceFindingId: buildAIActFindingId(system.id, "technical-documentation"),
+          approvalStatus: "draft",
+          validationStatus: "pending",
+        },
+        ...(current.generatedDocuments ?? []),
+      ].slice(0, 150),
+    }))
+
     return NextResponse.json({
       ok: true,
       title: doc.title,
       content: doc.content,
       generatedAtISO: doc.generatedAtISO,
+      recordId: generatedDocumentId,
     })
   } catch {
     return jsonError("Eroare la generarea Anexei IV.", 500, "ANNEX_IV_FAILED")

@@ -1,7 +1,8 @@
 // S4.2 — AI Act risk classification auto-detect
 // Clasificare automată pe baza Annex III + Art. 5 + Art. 50
 
-import type { AISystemPurpose } from "@/lib/compliance/types"
+import { severityToLegacyRisk } from "@/lib/compliance/constitution"
+import type { AISystemPurpose, AISystemRecord, ScanFinding } from "@/lib/compliance/types"
 
 export type AIActRiskLevel =
   | "prohibited"    // Art. 5 — interzis
@@ -18,6 +19,15 @@ export type AIActClassification = {
   autoDetected: boolean
   confirmedByHuman: boolean
 }
+
+export type AIActObligationId =
+  | "register-eu-database"
+  | "technical-documentation"
+  | "human-oversight"
+  | "conformity-assessment"
+  | "stop-system"
+  | "manual-classification"
+  | "disclosure"
 
 // Clasificare automată pentru tipuri cunoscute (din canon)
 const KNOWN_CLASSIFICATIONS: Record<AISystemPurpose, {
@@ -112,6 +122,167 @@ export function classifyAISystem(purpose: AISystemPurpose): AIActClassification 
     autoDetected: true,
     confirmedByHuman: false,
   }
+}
+
+const OBLIGATION_DEFINITIONS: Record<
+  AIActObligationId,
+  {
+    suffix: string
+    label: string
+    severity: "critical" | "high" | "medium"
+    title: string
+    legalReference: string
+    principles: ScanFinding["principles"]
+    evidenceRequired: string
+    remediationHint: string
+  }
+> = {
+  "register-eu-database": {
+    suffix: "eu-db",
+    label: "Înregistrare EU Database",
+    severity: "high",
+    title: "Înregistrare EU AI Database lipsă",
+    legalReference: "EU AI Act Art. 49",
+    principles: ["accountability", "transparency"],
+    evidenceRequired: "JSON-ul de pregătire EU Database sau dovada înregistrării.",
+    remediationHint:
+      "Pregătește intrarea pentru EU AI Database și salvează dovada trimiterii sau a review-ului intern.",
+  },
+  "technical-documentation": {
+    suffix: "annex-iv",
+    label: "Documentație tehnică (Annex IV)",
+    severity: "high",
+    title: "Documentație Annex IV lipsă",
+    legalReference: "EU AI Act Annex IV",
+    principles: ["accountability", "robustness", "transparency"],
+    evidenceRequired: "Draftul Annex IV generat și aprobat ca dovadă.",
+    remediationHint:
+      "Generează draftul Annex IV, verifică datele tehnice și aprobă documentul ca dovadă în Dosar.",
+  },
+  "human-oversight": {
+    suffix: "oversight",
+    label: "Human oversight",
+    severity: "medium",
+    title: "Human oversight neconfirmat",
+    legalReference: "EU AI Act Art. 14",
+    principles: ["oversight", "accountability"],
+    evidenceRequired: "Regulile de oversight și persoanele responsabile confirmate.",
+    remediationHint:
+      "Definește cine aprobă, verifică și poate opri sistemul în scenarii sensibile.",
+  },
+  "conformity-assessment": {
+    suffix: "conformity",
+    label: "Evaluare conformitate",
+    severity: "high",
+    title: "Evaluare de conformitate lipsă",
+    legalReference: "EU AI Act Art. 43",
+    principles: ["accountability", "robustness"],
+    evidenceRequired: "Raportul intern sau referința evaluării de conformitate.",
+    remediationHint:
+      "Documentează evaluarea de conformitate și lasă nota operațională în cockpit.",
+  },
+  "stop-system": {
+    suffix: "stop-system",
+    label: "Oprire imediată a sistemului",
+    severity: "critical",
+    title: "Sistem AI interzis — măsură de oprire",
+    legalReference: "EU AI Act Art. 5",
+    principles: ["oversight", "accountability"],
+    evidenceRequired: "Dovada opririi sau a blocării utilizării în producție.",
+    remediationHint:
+      "Oprește utilizarea operațională și notează excepția legală doar dacă există bază validă.",
+  },
+  "manual-classification": {
+    suffix: "manual-classification",
+    label: "Evaluare manuală a nivelului de risc",
+    severity: "medium",
+    title: "Clasificare AI necesită validare manuală",
+    legalReference: "EU AI Act Art. 6 și Art. 50",
+    principles: ["accountability", "transparency"],
+    evidenceRequired: "Nota de clasificare validată intern sau prin expert.",
+    remediationHint:
+      "Confirmă manual încadrarea și consemnează de ce sistemul rămâne limited sau minimal risk.",
+  },
+  disclosure: {
+    suffix: "disclosure",
+    label: "Disclosure utilizator",
+    severity: "medium",
+    title: "Disclosure AI pentru utilizatori lipsă",
+    legalReference: "EU AI Act Art. 50",
+    principles: ["transparency", "accountability"],
+    evidenceRequired: "Textul de disclosure sau captura din interfață.",
+    remediationHint:
+      "Adaugă mesajul clar că utilizatorul interacționează cu un sistem AI și salvează dovada.",
+  },
+}
+
+function normalizeAIActRequiredAction(label: string): AIActObligationId | null {
+  const normalized = label.trim().toLowerCase()
+  if (normalized.includes("annex iv") || normalized.includes("documentație tehnică") || normalized.includes("documentatie tehnica")) {
+    return "technical-documentation"
+  }
+  if (normalized.includes("conformitate")) return "conformity-assessment"
+  if (normalized.includes("eu database")) return "register-eu-database"
+  if (normalized.includes("human oversight")) return "human-oversight"
+  if (normalized.includes("oprire imediată") || normalized.includes("oprire imediata")) return "stop-system"
+  if (normalized.includes("evaluare manuală") || normalized.includes("evaluare manuala")) {
+    return "manual-classification"
+  }
+  if (normalized.includes("disclosure") || normalized.includes("interacționează cu ai") || normalized.includes("interactioneaza cu ai")) {
+    return "disclosure"
+  }
+  return null
+}
+
+export function getAIActRequiredActionIds(classification: AIActClassification): AIActObligationId[] {
+  const ids = classification.requiredActions
+    .map(normalizeAIActRequiredAction)
+    .filter((value): value is AIActObligationId => Boolean(value))
+
+  return [...new Set(ids)]
+}
+
+export function buildAIActFindingId(systemId: string, obligationId: AIActObligationId) {
+  return `ai-act-${systemId}-${OBLIGATION_DEFINITIONS[obligationId].suffix}`
+}
+
+export function buildAIActObligationFindings(
+  system: AISystemRecord,
+  classification: AIActClassification,
+  nowISO: string
+): ScanFinding[] {
+  return getAIActRequiredActionIds(classification).map((obligationId) => {
+    const obligation = OBLIGATION_DEFINITIONS[obligationId]
+    const detailLines = [
+      `Sistemul "${system.name}" este clasificat ca ${RISK_LEVEL_LABELS[classification.riskLevel].toLowerCase()} conform ${classification.article}.`,
+      classification.reason,
+      "",
+      `Obligație activă: ${obligation.label}.`,
+      classification.deadline ? `Deadline orientativ: ${classification.deadline}.` : null,
+    ].filter(Boolean)
+
+    return {
+      id: buildAIActFindingId(system.id, obligationId),
+      title: `${system.name} — ${obligation.title}`,
+      detail: detailLines.join("\n"),
+      category: "EU_AI_ACT",
+      severity: obligation.severity,
+      risk: severityToLegacyRisk(obligation.severity),
+      principles: obligation.principles,
+      createdAtISO: nowISO,
+      sourceDocument: "EU AI Act",
+      legalReference: `${obligation.legalReference}${classification.article ? ` · ${classification.article}` : ""}`,
+      impactSummary:
+        classification.riskLevel === "prohibited"
+          ? "Folosirea sistemului fără măsura corectă poate crea expunere legală imediată."
+          : "Obligațiile AI Act rămân deschise până când există dovadă clară și urmă în Dosar.",
+      remediationHint: obligation.remediationHint,
+      evidenceRequired: obligation.evidenceRequired,
+      suggestedDocumentType: obligationId === "human-oversight" ? "ai-governance" : undefined,
+      findingStatus: "open",
+      findingStatusUpdatedAtISO: nowISO,
+    }
+  })
 }
 
 export const RISK_LEVEL_LABELS: Record<AIActRiskLevel, string> = {

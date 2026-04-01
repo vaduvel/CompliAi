@@ -10,6 +10,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateState, readState } from "@/lib/server/mvp-store"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
 type FiscalProtocolBody = {
   findingId?: string
@@ -129,7 +130,9 @@ export async function PATCH(request: Request) {
     }
 
     const nowISO = new Date().toISOString()
-    const { orgName } = await getOrgContext()
+    const { orgId, orgName } = await getOrgContext()
+    const currentState = await readState()
+    const previousProtocol = currentState.fiscalProtocols?.[findingId] ?? null
     let savedProtocol: FiscalProtocolRecord | null = null
 
     await mutateState((current) => {
@@ -184,6 +187,22 @@ export async function PATCH(request: Request) {
       findingTypeId,
       orgName,
     })
+
+    if (
+      previousProtocol?.actionStatus !== savedProtocol?.actionStatus ||
+      previousProtocol?.receiptStatus !== savedProtocol?.receiptStatus
+    ) {
+      const statusParts = [
+        savedProtocol?.actionStatus ? `acțiune: ${savedProtocol.actionStatus}` : null,
+        savedProtocol?.receiptStatus ? `recipisă: ${savedProtocol.receiptStatus}` : null,
+      ].filter(Boolean)
+
+      await fireDriftTrigger({
+        orgId,
+        trigger: "efactura_status_change",
+        detail: `${findingId} actualizat (${statusParts.join(", ")})`,
+      }).catch(() => {})
+    }
 
     return NextResponse.json({
       ok: true,

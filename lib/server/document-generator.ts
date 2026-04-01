@@ -16,6 +16,7 @@ export type DocumentType =
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
+  | "annex-iv"
   | "job-description"
   | "hr-internal-procedures"
   | "reges-correction-brief"
@@ -23,6 +24,7 @@ export type DocumentType =
   | "nda"
   | "supplier-contract"
   | "deletion-attestation"
+  | "pay-gap-report"
   | "ropa"
 
 export type DocumentGenerationInput = {
@@ -83,6 +85,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
+  "annex-iv": 12,
   "job-description": 12,
   "hr-internal-procedures": 24,
   "reges-correction-brief": 6,
@@ -90,6 +93,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   nda: 24,
   "supplier-contract": 24,
   "deletion-attestation": 6,
+  "pay-gap-report": 12,
   ropa: 12,
 }
 
@@ -135,6 +139,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
     title: "Politică de Guvernanță AI",
     legalBasis: "EU AI Act (Regulamentul UE 2024/1689) Art. 9, 17",
   },
+  "annex-iv": {
+    title: "Documentație tehnică Annex IV",
+    legalBasis: "EU AI Act Annex IV",
+  },
   "job-description": {
     title: "Fișă de Post",
     legalBasis: "Codul Muncii Art. 17, 39 (Legea 53/2003)",
@@ -162,6 +170,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   "deletion-attestation": {
     title: "Atestare Ștergere/Anonimizare Date",
     legalBasis: "GDPR Art. 5(1)(e), Art. 17",
+  },
+  "pay-gap-report": {
+    title: "Raport Pay Transparency",
+    legalBasis: "Directiva (UE) 2023/970",
   },
   ropa: {
     title: "Registru de Prelucrări (RoPA)",
@@ -382,6 +394,20 @@ Cerințe:
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
+    "annex-iv": `
+Generează o documentație tehnică Annex IV în română pentru un sistem AI high-risk.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Structură tehnică pentru scop, risc, date folosite, monitorizare, human oversight și limitări
+- Ton formal, orientat spre audit și review de conformitate
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
     "job-description": `
 Generează o Fișă de Post completă în română conform Codului Muncii.
 Baza legală: ${meta.legalBasis}.
@@ -581,6 +607,20 @@ Cerințe:
 - Ton formal, operațional
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare și checkbox-uri
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "pay-gap-report": `
+Generează un raport Pay Transparency în română.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Rezumat executiv, gap general, gap pe roluri, recomandări și pași următori
+- Ton formal și orientat spre aprobare internă
+- Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
     ropa: `
@@ -789,6 +829,29 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       "## Monitoring și registru",
       "Organizația trebuie să mențină un registru al sistemelor AI, să urmărească incidentele și să revizuiască periodic politica, trainingul și controalele aplicate.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "annex-iv": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Descriere sistem",
+      "Completează denumirea sistemului, scopul urmărit, utilizatorii afectați și contextul operațional.",
+      "",
+      "## Date și guvernanță",
+      "Descrie sursele de date, controalele de calitate, limitările și rolurile care validează folosirea sistemului.",
+      "",
+      "## Human oversight",
+      "Documentează cine poate opri, corecta sau revizui deciziile generate de sistemul AI.",
+      "",
+      "## Monitorizare și incidente",
+      "Păstrează jurnalul incidentelor, reviziile periodice și măsurile de remediere pentru schimbări de risc.",
       "",
       reviewWarning,
     ].join("\n"),
@@ -1090,6 +1153,31 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "| Nume: _________ | Nume: _________ |",
       "| Data: _________ | Data: _________ |",
       "| Semnătura: _____ | Semnătura: _____ |",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "pay-gap-report": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Rezumat executiv",
+      "Acest draft rezumă ecartul salarial de gen și recomandările de remediere conform Directivei (UE) 2023/970.",
+      "",
+      "## Gap general",
+      "Completează media salariilor brute și gap-ul calculat pe eșantionul intern validat.",
+      "",
+      "## Gap pe roluri",
+      "Documentează rolurile unde ecartul este material și explică criteriile obiective de remunerare.",
+      "",
+      "## Recomandări",
+      "- revizuire criterii salariale",
+      "- documentare metodologie",
+      "- traseu de aprobare și publicare internă",
       "",
       reviewWarning,
     ].join("\n"),

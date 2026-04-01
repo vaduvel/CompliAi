@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import { classifyAISystem } from "@/lib/compliance/ai-act-classifier"
 import type { AISystemApprovalStatus, AISystemAttestationStatus, AISystemPurpose, ComplianceAlert } from "@/lib/compliance/types"
 import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
+import { createPendingAction, type PendingAction } from "@/lib/server/approval-queue"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateState } from "@/lib/server/mvp-store"
+import { removeAIActObligationFindings, syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
+import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
@@ -167,8 +171,11 @@ function isAttestationStatus(v: unknown): v is AISystemAttestationStatus {
 }
 
 export async function PATCH(request: Request) {
+  let session:
+    | ReturnType<typeof requireRole>
+    | undefined
   try {
-    requireRole(request, WRITE_ROLES, "actualizarea sistemului AI")
+    session = requireRole(request, WRITE_ROLES, "actualizarea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -199,6 +206,7 @@ export async function PATCH(request: Request) {
   const nowISO = new Date().toISOString()
   const actorEmail = actor?.label ?? "necunoscut"
   const events: ReturnType<typeof createComplianceEvent>[] = []
+  let approvedSystemForQueue: { id: string; name: string; purpose: AISystemPurpose } | null = null
 
   const nextState = await mutateState((current) => {
     const idx = current.aiSystems.findIndex((s) => s.id === body.id)
@@ -207,9 +215,17 @@ export async function PATCH(request: Request) {
     const system = { ...current.aiSystems[idx] }
 
     if (hasApproval) {
+      const previousApprovalStatus = system.approvalStatus
       system.approvalStatus = body.approvalStatus
       system.approvedAtISO = nowISO
       system.approvedByEmail = actorEmail
+      if (body.approvalStatus === "approved" && previousApprovalStatus !== "approved") {
+        approvedSystemForQueue = {
+          id: system.id,
+          name: system.name,
+          purpose: system.purpose,
+        }
+      }
       events.push(
         createComplianceEvent({
           type: "system.updated",
@@ -241,15 +257,65 @@ export async function PATCH(request: Request) {
     const aiSystems = [...current.aiSystems]
     aiSystems[idx] = system
 
-    return {
+    let nextState = {
       ...current,
       aiSystems,
       events: appendComplianceEvents(current, events),
     }
+
+    if (hasApproval && body.approvalStatus === "approved") {
+      nextState = syncAIActObligationFindings(nextState, system, nowISO)
+    } else if (hasApproval && body.approvalStatus === "rejected") {
+      nextState = removeAIActObligationFindings(nextState, system.id)
+    }
+
+    return nextState
   })
+
+  if (hasApproval || hasAttestation) {
+    const detailParts = [
+      hasApproval ? `aprobare: ${body.approvalStatus}` : null,
+      hasAttestation ? `atestare: ${body.policyAttestationStatus}` : null,
+    ].filter(Boolean)
+
+    await fireDriftTrigger({
+      orgId: session!.orgId,
+      trigger: "ai_system_modified",
+      detail: `Sistem AI ${body.id} actualizat (${detailParts.join(", ")})`,
+    }).catch(() => {})
+  }
+
+  let pendingClassificationAction: PendingAction | null = null
+  if (approvedSystemForQueue) {
+    const classification = classifyAISystem(approvedSystemForQueue.purpose)
+    if (classification.riskLevel === "high_risk" || classification.riskLevel === "prohibited") {
+      try {
+        pendingClassificationAction = await createPendingAction({
+          orgId: session!.orgId,
+          userId: session!.userId,
+          actionType: "classify_ai_system",
+          riskLevel: "high",
+          proposedData: {
+            systemId: approvedSystemForQueue.id,
+            systemName: approvedSystemForQueue.name,
+            riskClass: classification.riskLevel,
+            requiredActions: classification.requiredActions,
+            deadline: classification.deadline ?? null,
+          },
+          diffSummary: `${approvedSystemForQueue.name} → ${classification.riskLevel}`,
+          explanation: `Sistemul ${approvedSystemForQueue.name} este clasificat ${classification.riskLevel} per ${classification.article}.`,
+          sourceFindingId: `ai-act-${approvedSystemForQueue.id}-manual-classification`,
+          expiresInHours: 72,
+        })
+      } catch {
+        pendingClassificationAction = null
+      }
+    }
+  }
 
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),
     message: "Sistemul AI a fost actualizat.",
+    pendingClassificationAction,
   })
 }

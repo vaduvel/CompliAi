@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
+import { AIActEvidencePackCard } from "@/components/compliscan/ai-act-evidence-pack-card"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -855,6 +856,7 @@ function ControlSystemsWorkspace({
                 busy={busy}
                 onUpdateField={onUpdateCompliancePackField}
               />
+              <AIActEvidencePackCard />
               <HandoffCard
                 title="După review continui în Dovadă"
                 description="Compliance Pack rămâne review de control. Livrabilul final și exporturile rămân în Dovadă, nu în aceeași suprafață."

@@ -12,7 +12,7 @@
  *   buildCockpitRecipe(record, artifacts?) → CockpitRecipe
  */
 
-import type { GeneratedDocumentKind, ScanFinding } from "@/lib/compliance/types"
+import type { DriftTrigger, GeneratedDocumentKind, ScanFinding } from "@/lib/compliance/types"
 import type { FindingDocumentFlowState } from "@/lib/compliscan/finding-cockpit"
 import { fingerprintMatch, listLibraryVendors } from "@/lib/compliance/vendor-library"
 import { ANSPDCP_FINDING_PREFIX, getIncidentIdFromAnspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
@@ -32,6 +32,14 @@ export type ResolutionMode =
   | "user_attestation"
 
 export type AutoRecheckMode = "no" | "partial" | "yes"
+
+export type ReopenPolicySeverity = "auto_reopen" | "flag_only"
+
+export type ReopenPolicy = {
+  triggers: DriftTrigger[]
+  gracePeriodDays: number
+  severity: ReopenPolicySeverity
+}
 
 export type FindingTypeDefinition = {
   findingTypeId: string
@@ -236,6 +244,7 @@ const DOCUMENTARY_FINDING_TYPE_IDS = new Set([
   "GDPR-010",
   "GDPR-016",
   "AI-005",
+  "PAY-001",
   "HR-001",
   "HR-002",
   "HR-003",
@@ -279,6 +288,7 @@ const CANONICAL_DOCUMENT_TYPE_BY_FINDING_TYPE_ID: Partial<Record<string, Generat
   "GDPR-016": "retention-policy",
   "GDPR-020": "contract-template",
   "AI-005": "ai-governance",
+  "PAY-001": "pay-gap-report",
   "HR-001": "job-description",
   "HR-002": "hr-internal-procedures",
   "HR-003": "reges-correction-brief",
@@ -726,6 +736,21 @@ const FINDING_TYPE_DEFINITIONS: Record<string, FindingTypeDefinition> = {
     requiredEvidenceKinds: ["uploaded_file", "note"],
     autoRecheck: "partial",
     closingRule: "măsura AI este aplicată și urmă clară este salvată la dosar",
+  },
+  "PAY-001": {
+    findingTypeId: "PAY-001",
+    framework: "Codul Muncii",
+    title: "Raport Pay Transparency lipsă",
+    category: "People / remuneration",
+    typicalSeverity: "high",
+    signalTypes: ["direct", "inferred"],
+    resolutionModes: ["in_app_guided"],
+    primaryActors: ["owner", "hr"],
+    compliCapabilities: ["primește datele salariale", "calculează gap-ul", "pregătește raportul"],
+    userResponsibilities: ["încarcă date corecte", "aprobă raportul"],
+    requiredEvidenceKinds: ["generated_document", "confirmation"],
+    autoRecheck: "partial",
+    closingRule: "raportul Pay Transparency este aprobat și salvat la dosar",
   },
   "EF-001": {
     findingTypeId: "EF-001",
@@ -1276,6 +1301,17 @@ const RESOLVE_FLOW_RECIPES: Record<string, ResolveFlowRecipe> = {
     closeCondition: "Dovada operațională este salvată în cockpit.",
     revalidationTriggers: ["tool nou", "schimbare de proces", "review periodic"],
   },
+  "PAY-001": {
+    findingTypeId: "PAY-001",
+    initialFlowState: "need_your_input",
+    primaryCTA: "Calculează gap salarial",
+    secondaryCTA: "Vezi cerințele",
+    whatUserSees: "Organizația intră în aria Pay Transparency și trebuie să pregătească raportul salarial.",
+    whatCompliDoes: "Primește datele salariale, calculează gap-ul și pregătește raportul pentru Dosar.",
+    whatUserMustDo: "Încarcă datele, verifică rezultatele și aprobă raportul final.",
+    closeCondition: "Raportul Pay Transparency este aprobat și trimis în Dosar.",
+    revalidationTriggers: ["structură salarială schimbată", "număr angajați schimbat", "review anual"],
+  },
   "EF-001": {
     findingTypeId: "EF-001",
     initialFlowState: "external_action_required",
@@ -1551,6 +1587,9 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
   if (id === "intake-gdpr-ropa-update") return "GDPR-006"
   if (id === "intake-vendor-missing-docs") return "GDPR-011"
   if (id.startsWith(ANSPDCP_FINDING_PREFIX)) return "GDPR-019"
+  if (id === "pay-transparency-2026") return "PAY-001"
+  if (id.startsWith("ai-act-") && id.endsWith("-oversight")) return "AI-005"
+  if (id.startsWith("ai-act-")) return "AI-OPS"
   if (ruleId === "GDPR-RET-001") return "GDPR-016"
   if (
     id === "intake-b2c-privacy" ||
@@ -2289,6 +2328,15 @@ function getWorkflowLink(
         label: incidentId ? "Deschide timeline-ul incidentului" : "Deschide flow-ul de incident",
       }
     }
+    case "PAY-001":
+      return {
+        href: `/dashboard/pay-transparency?${new URLSearchParams({
+          findingId: record.id,
+          source: "cockpit",
+          returnTo: `/dashboard/resolve/${record.id}`,
+        }).toString()}`,
+        label: "Deschide Pay Transparency",
+      }
     case "NIS2-GENERIC": {
       if (record.id === "nis2-dnsc-registration") {
         return {
@@ -2802,6 +2850,8 @@ function getClosureCTA(
       return "Marchează măsura aplicată"
     case "AI-OPS":
       return "Marchează regula AI aplicată"
+    case "PAY-001":
+      return "Marchează raportul salarial aprobat"
     case "EF-001":
       return "Confirmă activarea SPV"
     default:
@@ -2833,6 +2883,7 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "AI-001": 180,
   "AI-005": 180,
   "AI-OPS": 180,
+  "PAY-001": 180,
   "EF-001": 30,
   "EF-003": 7,
   "EF-004": 2,
@@ -2845,6 +2896,69 @@ const MONITORING_INTERVAL_DAYS: Record<string, number | null> = {
   "EF-GENERIC": 30,
   "AI-GENERIC": 180,
   "CROSS-GENERIC": 90,
+}
+
+const REOPEN_POLICIES: Partial<Record<string, ReopenPolicy>> = {
+  "GDPR-004": {
+    triggers: ["org_profile_change"],
+    gracePeriodDays: 30,
+    severity: "flag_only",
+  },
+  "GDPR-006": {
+    triggers: ["org_profile_change"],
+    gracePeriodDays: 30,
+    severity: "flag_only",
+  },
+  "GDPR-011": {
+    triggers: ["new_vendor_added"],
+    gracePeriodDays: 30,
+    severity: "flag_only",
+  },
+  "NIS2-001": {
+    triggers: ["org_profile_change", "legislation_change"],
+    gracePeriodDays: 14,
+    severity: "flag_only",
+  },
+  "NIS2-005": {
+    triggers: ["legislation_change", "org_profile_change", "incident_closed", "new_vendor_added"],
+    gracePeriodDays: 14,
+    severity: "auto_reopen",
+  },
+  "NIS2-015": {
+    triggers: ["incident_closed", "legislation_change"],
+    gracePeriodDays: 7,
+    severity: "auto_reopen",
+  },
+  "AI-005": {
+    triggers: ["ai_system_modified"],
+    gracePeriodDays: 14,
+    severity: "flag_only",
+  },
+  "AI-OPS": {
+    triggers: ["ai_system_modified"],
+    gracePeriodDays: 14,
+    severity: "flag_only",
+  },
+  "PAY-001": {
+    triggers: ["org_profile_change"],
+    gracePeriodDays: 30,
+    severity: "flag_only",
+  },
+  "EF-001": {
+    triggers: ["efactura_status_change"],
+    gracePeriodDays: 7,
+    severity: "flag_only",
+  },
+  "EF-004": {
+    triggers: ["efactura_status_change"],
+    gracePeriodDays: 3,
+    severity: "auto_reopen",
+  },
+  "EF-005": {
+    triggers: ["efactura_status_change"],
+    gracePeriodDays: 3,
+    severity: "auto_reopen",
+  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3236,6 +3350,10 @@ export function computeNextMonitoringDateISO(
   return nextDate.toISOString()
 }
 
+export function getReopenPolicy(findingTypeId: string): ReopenPolicy | null {
+  return REOPEN_POLICIES[findingTypeId] ?? null
+}
+
 /**
  * Derivă CockpitUIState din starea persistată + flow recipe + documentFlowState.
  * NU persistă — se calculează la runtime.
@@ -3356,6 +3474,20 @@ export function buildCockpitRecipe(
   if (record.reopenedFromISO) {
     signals.push(
       `Caz redeschis după închidere din ${new Date(record.reopenedFromISO).toLocaleDateString("ro-RO")}`
+    )
+  }
+  if (record.driftStatus === "active") {
+    signals.push(
+      record.driftTriggerReason
+        ? `Necesită reverificare: ${record.driftTriggerReason}`
+        : "Necesită reverificare după o schimbare nouă."
+    )
+  }
+  if (record.driftStatus === "reopened") {
+    signals.push(
+      record.driftTriggerReason
+        ? `Caz redeschis automat: ${record.driftTriggerReason}`
+        : "Caz redeschis automat după expirarea perioadei de grație."
     )
   }
   const monitoringSignals = Array.from(new Set(signals)).slice(0, 5)

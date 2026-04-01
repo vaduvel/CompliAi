@@ -30,6 +30,7 @@ import { buildEvidenceLinks, getEvidenceCompleteness } from "@/lib/compliscan/ev
 import { createPendingAction } from "@/lib/server/approval-queue"
 import { resolvePolicy } from "@/lib/server/autonomy-resolver"
 import type { RiskLevel } from "@/lib/server/approval-queue"
+import { upsertMonitoringReviewCycle } from "@/lib/server/review-cycle-store"
 
 const VALID_DOC_TYPES: DocumentType[] = DOCUMENT_TYPES.map(({ id }) => id)
 
@@ -245,6 +246,7 @@ export async function PATCH(
             ? finding.findingStatusUpdatedAtISO ?? nowISO
             : finding.reopenedFromISO,
         nextMonitoringDateISO: undefined,
+        driftStatus: finding.driftStatus ? "reopened" : finding.driftStatus,
       })
 
       await writeState({
@@ -650,6 +652,19 @@ export async function PATCH(
     }
 
     await writeState(updatedState)
+
+    if (storedStatus === "under_monitoring") {
+      const monitoringDateISO = updatedFindings[findingIdx]?.nextMonitoringDateISO
+      if (monitoringDateISO) {
+        await upsertMonitoringReviewCycle({
+          orgId,
+          findingId,
+          findingTypeId,
+          scheduledAt: monitoringDateISO,
+          notes: `Review programat automat pentru ${updatedFindings[findingIdx]?.title ?? finding.title}.`,
+        }).catch(() => {})
+      }
+    }
 
     if (newStatus === "resolved" && updatedFindings[findingIdx]?.category === "E_FACTURA") {
       const fiscalNotification = buildFiscalMonitoringNotification(updatedFindings[findingIdx])

@@ -9,6 +9,7 @@ import {
   findDetectedSystem,
   updateDetectedSystem,
 } from "@/lib/server/detected-ai-systems"
+import { syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
 import { mutateState } from "@/lib/server/mvp-store"
 
 type CandidateAction = "review" | "confirm" | "reject" | "restore" | "edit"
@@ -83,7 +84,7 @@ export async function PATCH(
 
       if (body.action === "confirm") {
         const aiSystem = confirmDetectedSystem(candidate, nowISO)
-        return {
+        return syncAIActObligationFindings({
           ...current,
           aiSystems: [aiSystem, ...current.aiSystems].slice(0, 50),
           detectedAISystems: current.detectedAISystems.map((item) =>
@@ -107,7 +108,7 @@ export async function PATCH(
               },
             }, actor),
           ]),
-        }
+        }, aiSystem, nowISO)
       }
 
       const nextStatus =
