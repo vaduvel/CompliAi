@@ -12,13 +12,17 @@ import {
   getAnafMode,
   isAnafProductionUnlocked,
 } from "@/lib/server/efactura-anaf-client"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   const session = await readFreshSessionFromRequest(request)
   const mode = getAnafMode()
   const environment = getAnafEnvironment()
-  const state = await readState()
+  const state =
+    session == null
+      ? normalizeComplianceState(initialComplianceState)
+      : (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
   const token = session ? await loadTokenFromSupabase(session.orgId) : null
 
   const isLive = mode === "real"
