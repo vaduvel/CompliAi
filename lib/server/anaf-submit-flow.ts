@@ -34,6 +34,7 @@ import {
   type PendingAction,
 } from "./approval-queue"
 import { hasSupabaseConfig, supabaseInsert, supabaseSelect, supabaseUpdate } from "./supabase-rest"
+import { readStateForOrg, writeStateForOrg } from "./mvp-store"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -376,6 +377,17 @@ export async function checkSubmitStatus(params: {
     }
 
     const updated = await getSubmission(orgId, submissionId)
+
+    // Gate D: resolve or reopen the linked finding when ANAF gives a final verdict
+    if (changed && (newStatus === "ok" || newStatus === "nok")) {
+      const finalSubmission = updated ?? submission
+      if (newStatus === "ok") {
+        await resolveLinkedFinding(orgId, finalSubmission)
+      } else {
+        await reopenLinkedFinding(orgId, finalSubmission)
+      }
+    }
+
     return { submission: updated ?? submission, anafResult, changed }
   } catch {
     return { submission, anafResult: null, changed: false }
@@ -464,6 +476,69 @@ function emptySubmission(id: string): SPVSubmission {
     resolvedAtISO: null,
     sourceFindingId: null,
     errorDetail: "Submission not found.",
+  }
+}
+
+// ── Finding resolution after ANAF verdict ────────────────────────────────────
+
+async function resolveLinkedFinding(orgId: string, submission: SPVSubmission): Promise<void> {
+  if (!submission.sourceFindingId) return
+  try {
+    const state = await readStateForOrg(orgId)
+    if (!state) return
+    const idx = state.findings.findIndex((f) => f.id === submission.sourceFindingId)
+    if (idx === -1) return
+    const now = new Date().toISOString()
+    const finding = state.findings[idx]
+    const updatedFindings = [...state.findings]
+    updatedFindings[idx] = {
+      ...finding,
+      findingStatus: "under_monitoring",
+      findingStatusUpdatedAtISO: now,
+      nextMonitoringDateISO: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+      resolution: {
+        problem: finding.resolution?.problem ?? finding.detail,
+        impact: finding.resolution?.impact ?? "Factură transmisă și acceptată la ANAF.",
+        action: finding.resolution?.action ?? "E-Factura a fost transmisă în SPV.",
+        closureEvidence: `Factură acceptată ANAF. Index încărcare: ${submission.indexDescarcare ?? "N/A"}. Transmis: ${submission.submittedAtISO ?? now}.`,
+        humanStep: "Factură aprobată și transmisă la ANAF prin fluxul complet de aprobare.",
+        revalidation: "Reverificare trimestrială a statusului în SPV.",
+        reviewedAtISO: now,
+      },
+    }
+    await writeStateForOrg(orgId, { ...state, findings: updatedFindings })
+  } catch {
+    // Don't fail status check if finding update fails
+  }
+}
+
+async function reopenLinkedFinding(orgId: string, submission: SPVSubmission): Promise<void> {
+  if (!submission.sourceFindingId) return
+  try {
+    const state = await readStateForOrg(orgId)
+    if (!state) return
+    const idx = state.findings.findIndex((f) => f.id === submission.sourceFindingId)
+    if (idx === -1) return
+    const now = new Date().toISOString()
+    const finding = state.findings[idx]
+    const updatedFindings = [...state.findings]
+    updatedFindings[idx] = {
+      ...finding,
+      findingStatus: "open",
+      findingStatusUpdatedAtISO: now,
+      reopenedFromISO: finding.findingStatusUpdatedAtISO ?? now,
+      resolution: {
+        ...finding.resolution,
+        problem: finding.resolution?.problem ?? finding.detail,
+        impact: finding.resolution?.impact ?? "Factura a fost respinsă de ANAF și trebuie corectată.",
+        action: finding.resolution?.action ?? "Corectează factura și retransmite.",
+        closureEvidence: `Factură respinsă ANAF. Eroare: ${submission.anafMessage ?? submission.errorDetail ?? "Necunoscută"}. Corectează și retransmite.`,
+        reviewedAtISO: now,
+      },
+    }
+    await writeStateForOrg(orgId, { ...state, findings: updatedFindings })
+  } catch {
+    // Don't fail status check if finding update fails
   }
 }
 
