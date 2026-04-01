@@ -113,7 +113,7 @@ function buildObligationStatus(input: {
   findings: ScanFinding[]
   documents: GeneratedDocumentRecord[]
   nowISO: string
-}) {
+}): AIActEvidencePack["systems"][number]["obligations"][number] {
   const findingId = buildAIActFindingId(input.system.id, input.obligationId)
   const finding = input.findings.find((candidate) => candidate.id === findingId)
   const linkedDocs = input.documents.filter((document) => document.sourceFindingId === findingId)

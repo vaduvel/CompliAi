@@ -7,6 +7,7 @@ export const dashboardRoutes = {
   documentsHub: "/dashboard/documente",
   resolve: "/dashboard/resolve",
   resolveSupport: "/dashboard/resolve/support",
+  reviewCycles: "/dashboard/review",
   calendar: "/dashboard/calendar",
   aiSystems: "/dashboard/sisteme",
   aiConformity: "/dashboard/conformitate",
@@ -31,6 +32,7 @@ export const dashboardRoutes = {
   generator: "/dashboard/generator",
   approvals: "/dashboard/approvals",
   settings: "/dashboard/settings",
+  settingsScheduledReports: "/dashboard/settings/scheduled-reports",
   settingsBilling: "/dashboard/settings/abonament",
   whistleblowing: "/dashboard/whistleblowing",
   dora: "/dashboard/dora",
@@ -46,6 +48,7 @@ export const dashboardRouteGroups = {
   resolve: [
     dashboardRoutes.resolve,
     dashboardRoutes.approvals,
+    dashboardRoutes.reviewCycles,
     dashboardRoutes.calendar,
     dashboardRoutes.aiSystems,
     dashboardRoutes.drifts,
@@ -70,7 +73,7 @@ export const dashboardRouteGroups = {
     dashboardRoutes.generator,
     dashboardRoutes.ropa,
   ],
-  settings: [dashboardRoutes.settings],
+  settings: [dashboardRoutes.settings, dashboardRoutes.settingsScheduledReports],
 } as const
 
 export function matchesDashboardRoute(pathname: string, matcher: string) {
