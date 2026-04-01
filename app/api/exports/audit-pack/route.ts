@@ -7,6 +7,7 @@ import { buildAuditPack } from "@/lib/server/audit-pack"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { requirePlan, PlanError } from "@/lib/server/plan"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export async function GET(request: Request) {
   try {
@@ -14,7 +15,11 @@ export async function GET(request: Request) {
     await requirePlan(request, "pro", "Audit Pack complet")
 
     const { orgId } = await getOrgContext()
-    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const [state, nis2State, whiteLabel] = await Promise.all([
+      readState(),
+      readNis2State(orgId),
+      getWhiteLabelConfig(orgId).catch(() => null),
+    ])
     const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({
@@ -25,13 +30,22 @@ export async function GET(request: Request) {
       snapshot,
       nis2State,
     })
+    const branding = whiteLabel?.partnerName
+      ? {
+          partnerName: whiteLabel.partnerName,
+          tagline: whiteLabel.tagline ?? null,
+          brandColor: whiteLabel.brandColor,
+          logoUrl: whiteLabel.logoUrl ?? null,
+        }
+      : null
     const dateLabel = auditPack.generatedAt.slice(0, 10)
     const fileName = `audit-pack-v2-1-${payload.workspace.orgName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")}-${dateLabel}.json`
 
-    return new Response(JSON.stringify(auditPack, null, 2), {
+    const output = branding ? { ...auditPack, branding } : auditPack
+    return new Response(JSON.stringify(output, null, 2), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Disposition": `attachment; filename="${fileName}"`,

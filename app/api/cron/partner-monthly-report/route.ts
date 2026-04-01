@@ -10,6 +10,7 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { loadUsers, listUserMemberships } from "@/lib/server/auth"
 import { readStateForOrg } from "@/lib/server/mvp-store"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 import {
   normalizeComplianceState,
   computeDashboardSummary,
@@ -33,8 +34,12 @@ type ClientReportEntry = {
 function buildPartnerMonthlyHtml(
   consultantEmail: string,
   clients: ClientReportEntry[],
-  month: string
+  month: string,
+  branding?: { partnerName: string; brandColor: string; tagline: string | null }
 ): string {
+  const headerBg = branding?.brandColor ?? "#1e293b"
+  const headerTitle = branding?.partnerName ? `${branding.partnerName} · Raport lunar` : "CompliAI · Raport lunar portofoliu"
+  const headerSub = branding?.tagline ?? `${month} · ${clients.length} clienți`
   const urgent = clients.filter(
     (c) => c.openAlerts > 0 || (c.scoreDelta30d !== null && c.scoreDelta30d < -5)
   )
@@ -74,9 +79,9 @@ function buildPartnerMonthlyHtml(
 <html>
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:700px;margin:0 auto;padding:24px">
-  <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">CompliAI · Raport lunar portofoliu</h1>
-    <p style="color:#94a3b8;margin:4px 0 0;font-size:13px">${month} · ${clients.length} clienți</p>
+  <div style="background:${headerBg};padding:16px 24px;border-radius:8px 8px 0 0">
+    <h1 style="color:#fff;margin:0;font-size:18px">${headerTitle}</h1>
+    <p style="color:rgba(255,255,255,0.65);margin:4px 0 0;font-size:13px">${headerSub}</p>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
 
@@ -161,6 +166,13 @@ export async function POST(request: Request) {
 
     for (const { user, memberships } of partners) {
       try {
+        const wl = user.orgId
+          ? await getWhiteLabelConfig(user.orgId).catch(() => null)
+          : null
+        const branding = wl?.partnerName
+          ? { partnerName: wl.partnerName, brandColor: wl.brandColor, tagline: wl.tagline }
+          : undefined
+
         const clientEntries: ClientReportEntry[] = await Promise.all(
           memberships.slice(0, 30).map(async (m) => {
             const state = await readStateForOrg(m.orgId)
@@ -202,7 +214,7 @@ export async function POST(request: Request) {
           continue
         }
 
-        const html = buildPartnerMonthlyHtml(user.email, clientEntries, month)
+        const html = buildPartnerMonthlyHtml(user.email, clientEntries, month, branding)
 
         const apiKey = process.env.RESEND_API_KEY
         if (apiKey) {
