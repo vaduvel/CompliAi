@@ -12,11 +12,11 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import type {
   PendingAction,
   PendingActionStatus,
-  PendingActionType,
   RiskLevel,
 } from "@/lib/server/approval-queue"
 import { ACTION_TYPE_LABELS, RISK_LEVEL_LABELS } from "@/lib/server/approval-queue"
@@ -190,7 +190,21 @@ function ActionDetailPanel({
     setDeciding(true)
     const ok = await decideAction(action.id, decision, note || undefined)
     setDeciding(false)
-    if (ok) onDecided()
+    if (ok) {
+      toast.success(
+        decision === "approved" ? "Aprobare salvată." : "Acțiunea a fost respinsă.",
+        {
+          description:
+            action.actionType === "submit_anaf" && decision === "approved"
+              ? "Transmiterea fiscală poate continua din tabul Fiscal."
+              : undefined,
+        }
+      )
+      onDecided()
+      return
+    }
+
+    toast.error("Nu am putut salva decizia.")
   }
 
   return (

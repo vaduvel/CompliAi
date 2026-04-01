@@ -41,6 +41,7 @@ import { readStateForOrg, writeStateForOrg } from "./mvp-store"
 export type SPVSubmissionStatus =
   | "pending_approval"
   | "approved"
+  | "rejected"
   | "submitting"
   | "submitted"
   | "ok"
@@ -400,19 +401,20 @@ export async function listSubmissions(
   orgId: string,
   limit = 20
 ): Promise<SPVSubmission[]> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<SPVSubmissionRow>(
-      "spv_submissions",
-      `select=*&org_id=eq.${orgId}&order=created_at.desc&limit=${limit}`,
-      "public"
-    )
-    return rows.map(rowToSubmission)
-  }
+  const submissions = hasSupabaseConfig()
+    ? (
+        await supabaseSelect<SPVSubmissionRow>(
+          "spv_submissions",
+          `select=*&org_id=eq.${orgId}&order=created_at.desc&limit=${limit}`,
+          "public"
+        )
+      ).map(rowToSubmission)
+    : getLocalSubmissions(orgId)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, limit)
+        .map(rowToSubmission)
 
-  return getLocalSubmissions(orgId)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, limit)
-    .map(rowToSubmission)
+  return Promise.all(submissions.map((submission) => reconcileSubmissionApprovalState(submission)))
 }
 
 // ── Get single submission ───────────────────────────────────────────────────
@@ -427,14 +429,99 @@ export async function getSubmission(
       `select=*&org_id=eq.${orgId}&id=eq.${submissionId}&limit=1`,
       "public"
     )
-    return rows[0] ? rowToSubmission(rows[0]) : null
+    return rows[0] ? reconcileSubmissionApprovalState(rowToSubmission(rows[0])) : null
   }
 
   const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
+  return row ? reconcileSubmissionApprovalState(rowToSubmission(row)) : null
+}
+
+export async function syncSubmissionApprovalDecision(params: {
+  orgId: string
+  approvalActionId: string
+  decision: "approved" | "rejected"
+  note?: string
+}): Promise<SPVSubmission | null> {
+  const submission = await getSubmissionByApprovalActionId(params.orgId, params.approvalActionId)
+  if (!submission) return null
+
+  if (params.decision === "approved") {
+    await updateSubmissionStatus(params.orgId, submission.id, "approved", {
+      error_detail: null,
+    })
+    return {
+      ...submission,
+      status: "approved",
+      errorDetail: null,
+    }
+  }
+
+  const errorDetail = params.note?.trim() || "Transmiterea a fost respinsă în coada de aprobare."
+  await updateSubmissionStatus(params.orgId, submission.id, "rejected", {
+    error_detail: errorDetail,
+    resolved_at: new Date().toISOString(),
+  })
+
+  return {
+    ...submission,
+    status: "rejected",
+    errorDetail,
+    resolvedAtISO: new Date().toISOString(),
+  }
+}
+
+async function getSubmissionByApprovalActionId(
+  orgId: string,
+  approvalActionId: string
+): Promise<SPVSubmission | null> {
+  if (hasSupabaseConfig()) {
+    const rows = await supabaseSelect<SPVSubmissionRow>(
+      "spv_submissions",
+      `select=*&org_id=eq.${orgId}&approval_action_id=eq.${approvalActionId}&limit=1`,
+      "public"
+    )
+    return rows[0] ? rowToSubmission(rows[0]) : null
+  }
+
+  const row = getLocalSubmissions(orgId).find((r) => r.approval_action_id === approvalActionId)
   return row ? rowToSubmission(row) : null
 }
 
 // ── Internal helpers ────────────────────────────────────────────────────────
+
+async function reconcileSubmissionApprovalState(submission: SPVSubmission): Promise<SPVSubmission> {
+  if (submission.status !== "pending_approval") return submission
+
+  const action = await getPendingAction(submission.orgId, submission.approvalActionId)
+  if (!action) return submission
+
+  if (action.status === "approved") {
+    await updateSubmissionStatus(submission.orgId, submission.id, "approved", {
+      error_detail: null,
+    })
+    return {
+      ...submission,
+      status: "approved",
+      errorDetail: null,
+    }
+  }
+
+  if (action.status === "rejected") {
+    const errorDetail = action.decisionNote?.trim() || "Transmiterea a fost respinsă în coada de aprobare."
+    await updateSubmissionStatus(submission.orgId, submission.id, "rejected", {
+      error_detail: errorDetail,
+      resolved_at: action.decidedAt ?? new Date().toISOString(),
+    })
+    return {
+      ...submission,
+      status: "rejected",
+      errorDetail,
+      resolvedAtISO: action.decidedAt ?? submission.resolvedAtISO,
+    }
+  }
+
+  return submission
+}
 
 async function updateSubmissionStatus(
   orgId: string,
@@ -547,6 +634,7 @@ async function reopenLinkedFinding(orgId: string, submission: SPVSubmission): Pr
 export const SPV_STATUS_LABELS: Record<SPVSubmissionStatus, string> = {
   pending_approval: "Așteaptă aprobare",
   approved: "Aprobat",
+  rejected: "Respins la aprobare",
   submitting: "Se transmite…",
   submitted: "Transmis — în prelucrare",
   ok: "Acceptat ANAF",

@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       ok: true,
       submission,
       approvalActionId: pendingAction.id,
-      message: "Transmiterea a fost creată și așteaptă aprobare. Aprobă din pagina Aprobări.",
+      message: "Transmiterea a fost creată și așteaptă aprobare. O poți aproba direct din tabul Fiscal sau din pagina Aprobări.",
     })
   } catch (error) {
     if (error && typeof error === "object" && "status" in error) {

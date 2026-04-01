@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server"
 
 import { decidePendingAction, getPendingAction, markExecuted } from "@/lib/server/approval-queue"
+import { syncSubmissionApprovalDecision } from "@/lib/server/anaf-submit-flow"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -64,19 +65,32 @@ export async function PATCH(
       return jsonError("Acțiunea nu a fost găsită sau nu mai este pending.", 404, "ACTION_NOT_PENDING")
     }
 
-    // If approved, execute the action
-    if (body.decision === "approved") {
+    let executed = false
+
+    if (updated.actionType === "submit_anaf") {
+      await syncSubmissionApprovalDecision({
+        orgId,
+        approvalActionId: id,
+        decision: body.decision,
+        note: body.note,
+      })
+    } else if (body.decision === "approved") {
       try {
         // TODO: dispatch execution based on action type
         // For now, just mark as executed
         await markExecuted(orgId, id, { executedBy: "approval-api" })
+        executed = true
       } catch {
         // Execution failed — action is still approved but not executed
         console.error(`[approvals] Execution failed for ${id}`)
       }
     }
 
-    return NextResponse.json({ action: updated, executed: body.decision === "approved" })
+    return NextResponse.json({
+      action: updated,
+      executed,
+      synced: updated.actionType === "submit_anaf",
+    })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la procesarea deciziei.", 500, "APPROVAL_DECIDE_FAILED")

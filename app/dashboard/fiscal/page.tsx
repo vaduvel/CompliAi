@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
@@ -746,6 +746,7 @@ function EFacturaSignalsTab() {
 const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
   pending_approval: "outline",
   approved: "secondary",
+  rejected: "destructive",
   submitting: "secondary",
   submitted: "default",
   ok: "default",
@@ -758,24 +759,59 @@ function SubmitSpvTab() {
   const [integrationStatus, setIntegrationStatus] = useState<EFacturaIntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [approving, setApproving] = useState<string | null>(null)
   const [executing, setExecuting] = useState<string | null>(null)
   const [polling, setPolling] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [xml, setXml] = useState("")
   const [invoiceId, setInvoiceId] = useState("")
 
-  useEffect(() => {
-    fetch("/api/fiscal/submit-spv", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data: { submissions?: SPVSubmission[] }) => setSubmissions(data.submissions ?? []))
-      .catch(() => toast.error("Nu am putut încărca transmisiile."))
-      .finally(() => setLoading(false))
+  const refreshTab = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
+    try {
+      const [submissionsRes, statusRes] = await Promise.all([
+        fetch("/api/fiscal/submit-spv", { cache: "no-store" }),
+        fetch("/api/integrations/efactura/status", { cache: "no-store" }),
+      ])
 
-    fetch("/api/integrations/efactura/status", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data: EFacturaIntegrationStatus) => setIntegrationStatus(data))
-      .catch(() => {})
+      const submissionsData = (await submissionsRes.json()) as { submissions?: SPVSubmission[] }
+      if (!submissionsRes.ok) {
+        throw new Error("Nu am putut încărca transmisiile.")
+      }
+      setSubmissions(submissionsData.submissions ?? [])
+
+      if (statusRes.ok) {
+        const statusData = (await statusRes.json()) as EFacturaIntegrationStatus
+        setIntegrationStatus(statusData)
+      }
+    } catch (error) {
+      if (!silent) {
+        toast.error(error instanceof Error ? error.message : "Nu am putut încărca transmisiile.")
+      }
+    } finally {
+      if (!silent) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    void refreshTab()
+
+    const handleFocusRefresh = () => {
+      void refreshTab(true)
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshTab(true)
+      }
+    }
+
+    window.addEventListener("focus", handleFocusRefresh)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    return () => {
+      window.removeEventListener("focus", handleFocusRefresh)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [refreshTab])
 
   async function handleInitiate() {
     if (!xml.trim()) return
@@ -793,12 +829,34 @@ function SubmitSpvTab() {
       setInvoiceId("")
       setShowForm(false)
       toast.success("Transmitere creată", {
-        description: "Aprobă din pagina Aprobări pentru a trimite la ANAF.",
+        description: "Poți aproba direct aici sau din pagina Aprobări.",
       })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare necunoscută.")
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleApprove(submission: SPVSubmission) {
+    setApproving(submission.id)
+    try {
+      const res = await fetch(`/api/approvals/${encodeURIComponent(submission.approvalActionId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: "approved" }),
+      })
+      const data = (await res.json()) as { error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Nu am putut aproba transmiterea.")
+
+      await refreshTab(true)
+      toast.success("Transmitere aprobată", {
+        description: "Poți trimite acum factura la ANAF.",
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Nu am putut aproba transmiterea.")
+    } finally {
+      setApproving(null)
     }
   }
 
@@ -860,7 +918,7 @@ function SubmitSpvTab() {
         <div className="min-w-0 flex-1 text-sm">
           <p className="font-medium text-eos-text">Transmitere ANAF cu dublu aprobare</p>
           <p className="mt-0.5 text-xs text-eos-text-muted">
-            Orice transmitere necesită aprobare manuală înainte de upload. Aprobă din{" "}
+            Orice transmitere necesită aprobare manuală înainte de upload. Poți aproba direct din acest tab sau din{" "}
             <a href="/dashboard/approvals" className="text-eos-primary hover:underline">pagina Aprobări</a>.
           </p>
         </div>
@@ -1055,12 +1113,26 @@ function SubmitSpvTab() {
 
                   <div className="flex flex-wrap gap-2 pt-1">
                     {s.status === "pending_approval" && (
-                      <a
-                        href="/dashboard/approvals"
-                        className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
-                      >
-                        <ExternalLink className="size-3" /> Aprobă
-                      </a>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={approving === s.id}
+                          onClick={() => void handleApprove(s)}
+                          className="gap-1.5"
+                        >
+                          {approving === s.id
+                            ? <Loader2 className="size-3.5 animate-spin" />
+                            : <ShieldCheck className="size-3.5" />}
+                          Aprobă acum
+                        </Button>
+                        <a
+                          href="/dashboard/approvals"
+                          className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                        >
+                          <ExternalLink className="size-3" /> Deschide aprobări
+                        </a>
+                      </>
                     )}
                     {s.status === "approved" && (
                       <Button
