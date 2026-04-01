@@ -3,12 +3,13 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Bell, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "lucide-react"
+import { ArrowRight, Bell, CalendarClock, Download, Loader2, MailWarning, ShieldX, Trash2, Webhook } from "lucide-react"
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { Input } from "@/components/evidence-os/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/evidence-os/Select"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import {
   CurrentUser,
@@ -19,7 +20,6 @@ import {
   ReleaseReadinessStatus,
   RepoSyncStatus,
   SettingsSummaryResponse,
-  SettingsTabIntro,
   SupabaseOperationalStatus,
   ApplicationHealthStatus,
 } from "@/components/compliscan/settings/settings-shared"
@@ -486,6 +486,54 @@ export function SettingsPageSurface() {
       </div>
 
       <div className="space-y-6">
+        <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+          <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+            <h2 className="text-lg font-semibold text-eos-text-muted">Automatizări recurente</h2>
+            <p className="mt-2 text-sm text-eos-text-tertiary">
+              De aici intri direct în reverificări și rapoarte recurente, fără să cauți prin portofoliu sau calendar.
+            </p>
+          </div>
+          <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Review-uri programate</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Vezi ce intră la reverificare, reprogramezi și închizi review-urile fără să ieși din workspace.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href={dashboardRoutes.reviewCycles}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Deschide Review-uri
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Rapoarte programate</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Configurezi livrabile recurente, firmele incluse, aprobarea și urmărești istoricul rulărilor.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href={dashboardRoutes.settingsScheduledReports}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Deschide Rapoarte programate
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Tab navigation */}
         <div className="space-y-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Zone Setari</p>

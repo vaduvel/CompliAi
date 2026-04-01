@@ -414,7 +414,7 @@ export default function HomePage() {
           <LegalDisclaimer variant="short" />
           <div className="mt-4 flex flex-wrap gap-5 text-xs text-eos-text-tertiary">
             <Link href="/terms" className="hover:text-eos-text-muted transition-colors">Termeni și condiții</Link>
-            <Link href="/privacy" className="hover:text-eos-text-muted transition-colors">Politica de confidențialitate</Link>
+            <Link href="/privacy" className="hover:text-eos-text-muted transition-colors">Privacy / Confidențialitate</Link>
             <Link href="/dpa" className="hover:text-eos-text-muted transition-colors">DPA</Link>
             <Link href="/pricing" className="hover:text-eos-text-muted transition-colors">Prețuri</Link>
           </div>

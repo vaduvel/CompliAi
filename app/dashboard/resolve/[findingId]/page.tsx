@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft,
+  CalendarClock,
   CheckCircle2,
   FileText,
   XCircle,
@@ -128,6 +129,11 @@ export default function FindingDetailPage() {
   const [evidenceCompleteness, setEvidenceCompleteness] = useState<FindingDetailResponse["evidenceCompleteness"]>(undefined)
   const [pendingApprovalId, setPendingApprovalId] = useState<string | null>(null)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
+  const [manualReviewCycleId, setManualReviewCycleId] = useState<string | null>(null)
+  const [manualReviewDate, setManualReviewDate] = useState(getDefaultReviewDateInput())
+  const [manualReviewNotes, setManualReviewNotes] = useState("")
+  const [manualReviewLoading, setManualReviewLoading] = useState(false)
+  const [manualReviewSaving, setManualReviewSaving] = useState(false)
   const processedRopaFlowRef = useRef<string | null>(null)
   const { reloadDashboard } = useCockpitMutations()
 
@@ -353,6 +359,61 @@ export default function FindingDetailPage() {
     }
   }, [finding, searchParams])
 
+  useEffect(() => {
+    if (!finding || !isFindingResolvedLike(finding.findingStatus)) {
+      setManualReviewCycleId(null)
+      setManualReviewDate(getDefaultReviewDateInput())
+      setManualReviewNotes("")
+      setManualReviewLoading(false)
+      return
+    }
+
+    let cancelled = false
+
+    async function loadReviewCycle() {
+      setManualReviewLoading(true)
+      try {
+        const response = await fetch(`/api/review-cycles?findingId=${encodeURIComponent(finding.id)}&limit=20`, {
+          cache: "no-store",
+        })
+        if (!response.ok) {
+          throw new Error("Nu am putut încărca review-urile programate.")
+        }
+        const payload = (await response.json()) as {
+          items?: Array<{
+            id: string
+            status: "upcoming" | "due" | "overdue" | "completed"
+            scheduledAt: string
+            notes?: string | null
+          }>
+        }
+        if (cancelled) return
+
+        const activeCycle =
+          (payload.items ?? []).find((item) => item.status !== "completed") ?? payload.items?.[0] ?? null
+
+        setManualReviewCycleId(activeCycle?.id ?? null)
+        setManualReviewDate(activeCycle?.scheduledAt?.slice(0, 10) ?? finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        setManualReviewNotes(activeCycle?.notes ?? "")
+      } catch {
+        if (cancelled) return
+        setManualReviewCycleId(null)
+        setManualReviewDate(finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
+        setManualReviewNotes("")
+      } finally {
+        if (!cancelled) {
+          setManualReviewLoading(false)
+        }
+      }
+    }
+
+    void loadReviewCycle()
+
+    return () => {
+      cancelled = true
+    }
+  }, [finding])
+
   async function updateStatus(
     status: "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring",
     options?: {
@@ -420,6 +481,54 @@ export default function FindingDetailPage() {
       setError("Nu s-a putut actualiza statusul.")
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  async function saveManualReviewCycle() {
+    if (!finding || !manualReviewDate) return
+
+    setManualReviewSaving(true)
+    try {
+      const scheduledAt = new Date(`${manualReviewDate}T09:00:00.000Z`).toISOString()
+      const response = await fetch(
+        manualReviewCycleId
+          ? `/api/review-cycles/${encodeURIComponent(manualReviewCycleId)}`
+          : "/api/review-cycles",
+        {
+          method: manualReviewCycleId ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            manualReviewCycleId
+              ? {
+                  scheduledAt,
+                  notes: manualReviewNotes.trim() || undefined,
+                }
+              : {
+                  findingId: finding.id,
+                  findingTypeId: recipe.findingTypeId ?? null,
+                  scheduledAt,
+                  reviewType: "manual",
+                  notes: manualReviewNotes.trim() || undefined,
+                }
+          ),
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Nu am putut salva review-ul programat.")
+      }
+      const payload = (await response.json()) as { item?: { id?: string; scheduledAt?: string; notes?: string | null } }
+      setManualReviewCycleId(payload.item?.id ?? manualReviewCycleId)
+      setManualReviewDate(payload.item?.scheduledAt?.slice(0, 10) ?? manualReviewDate)
+      setManualReviewNotes(payload.item?.notes ?? manualReviewNotes)
+      toast.success(
+        manualReviewCycleId
+          ? "Review-ul programat a fost actualizat."
+          : "Review-ul programat a fost creat."
+      )
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nu am putut salva review-ul programat.")
+    } finally {
+      setManualReviewSaving(false)
     }
   }
 
@@ -769,17 +878,90 @@ export default function FindingDetailPage() {
       ) : null}
 
       {isFindingResolvedLike(status) ? (
-        <div className="flex flex-wrap gap-3">
-          <Button
-            data-testid="reopen-finding"
-            variant="outline"
-            onClick={() => updateStatus("open")}
-            disabled={actionLoading}
-            className="gap-1.5"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={2} />
-            Redeschide cazul
-          </Button>
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <Button
+              data-testid="reopen-finding"
+              variant="outline"
+              onClick={() => updateStatus("open")}
+              disabled={actionLoading}
+              className="gap-1.5"
+            >
+              <ArrowLeft className="size-3.5" strokeWidth={2} />
+              Redeschide cazul
+            </Button>
+          </div>
+
+          <Card className="border-eos-border bg-eos-surface">
+            <CardContent className="space-y-4 px-5 py-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-primary/20 bg-eos-primary-soft text-eos-primary">
+                    <CalendarClock className="size-5" strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+                      Review programat
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-eos-text">
+                      Păstrezi finding-ul pe aceeași urmă de monitorizare și reverificare
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+                      {manualReviewCycleId
+                        ? "Există deja un review activ pentru acest finding. Îl poți reprograma sau actualiza fără să ieși din cockpit."
+                        : "Dacă vrei o reverificare explicită, o programezi aici și o vezi apoi în Review-uri programate."}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant={manualReviewCycleId ? "outline" : "secondary"} className="normal-case tracking-normal">
+                  {manualReviewCycleId ? "review activ" : "fără review explicit"}
+                </Badge>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+                <label className="space-y-1.5 text-sm">
+                  <span className="font-medium text-eos-text">Data review-ului</span>
+                  <input
+                    type="date"
+                    value={manualReviewDate}
+                    onChange={(event) => setManualReviewDate(event.target.value)}
+                    className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  />
+                </label>
+                <label className="space-y-1.5 text-sm">
+                  <span className="font-medium text-eos-text">Notă de reverificare</span>
+                  <input
+                    value={manualReviewNotes}
+                    onChange={(event) => setManualReviewNotes(event.target.value)}
+                    placeholder="Ex: reverificăm recipisa SPV, expirarea DPA sau răspunsul vendorului."
+                    className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  data-testid="save-manual-review-cycle"
+                  onClick={() => void saveManualReviewCycle()}
+                  disabled={manualReviewSaving || manualReviewLoading || !manualReviewDate}
+                  className="gap-1.5"
+                >
+                  <CalendarClock className="size-3.5" strokeWidth={2} />
+                  {manualReviewSaving
+                    ? "Se salvează..."
+                    : manualReviewCycleId
+                      ? "Actualizează review-ul"
+                      : "Programează review"}
+                </Button>
+                <Link
+                  href={dashboardRoutes.reviewCycles}
+                  className={buttonVariants({ variant: "outline", className: "gap-1.5" })}
+                >
+                  Vezi toate review-urile
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ) : null}
 
