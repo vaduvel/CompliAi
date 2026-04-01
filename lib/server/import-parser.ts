@@ -10,7 +10,7 @@ import type { OrgEmployeeCount, OrgSector } from "@/lib/compliance/applicability
 
 // ── Column definitions ───────────────────────────────────────────────────────
 
-export type ImportColumnId = "orgName" | "cui" | "sector" | "employeeCount" | "email"
+export type ImportColumnId = "orgName" | "cui" | "sector" | "employeeCount" | "email" | "website"
 
 type ColumnDef = {
   id: ImportColumnId
@@ -59,6 +59,14 @@ const COLUMN_DEFS: ColumnDef[] = [
     aliases: [
       "email", "e-mail", "mail", "contact", "email_contact", "contact_email",
       "email contact", "adresa email",
+    ],
+  },
+  {
+    id: "website",
+    required: false,
+    aliases: [
+      "website", "website_url", "websiteurl", "site", "url", "web", "site url",
+      "site web", "website url", "link", "pagina web", "adresa web", "domeniu",
     ],
   },
 ]
@@ -157,6 +165,7 @@ export function detectColumnMapping(headers: string[]): {
     sector: null,
     employeeCount: null,
     email: null,
+    website: null,
   }
 
   const usedIndices = new Set<number>()
@@ -225,6 +234,7 @@ export type ImportRowParsed = {
   employeeCount: OrgEmployeeCount | null
   employeeCountRaw: string | null
   email: string | null
+  website: string | null
   warnings: string[]
   errors: string[]
   isDuplicate: boolean
@@ -362,6 +372,12 @@ export function parseImportFile(
       warnings.push(`Email „${email}" nu pare valid.`)
     }
 
+    // website
+    const websiteRaw = getValue("website") || null
+    const website = websiteRaw
+      ? (websiteRaw.startsWith("http") ? websiteRaw : `https://${websiteRaw}`)
+      : null
+
     // Duplicate detection
     let isDuplicate = false
     if (orgName && existingNamesLower.has(orgName.toLowerCase())) {
@@ -395,6 +411,7 @@ export function parseImportFile(
       employeeCount,
       employeeCountRaw,
       email,
+      website,
       warnings,
       errors,
       isDuplicate,

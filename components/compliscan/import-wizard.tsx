@@ -44,6 +44,7 @@ const COLUMN_LABELS: Record<ImportColumnId, string> = {
   sector: "Sector / Domeniu",
   employeeCount: "Nr. angajați",
   email: "Email contact",
+  website: "Website",
 }
 
 // ── Step 1: Upload ───────────────────────────────────────────────────────────
@@ -448,6 +449,7 @@ export function ImportWizard({
     sector: null,
     employeeCount: null,
     email: null,
+    website: null,
   })
   const [excluded, setExcluded] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -546,6 +548,7 @@ export function ImportWizard({
       sector: row.sector,
       employeeCount: row.employeeCount,
       email: row.email,
+      website: row.website,
     }))
 
     try {
@@ -587,6 +590,7 @@ export function ImportWizard({
               body: JSON.stringify({
                 orgId: org.orgId,
                 cui: matchedRow?.cui ?? null,
+                website: matchedRow?.website ?? null,
               }),
             })
           } catch (e) {

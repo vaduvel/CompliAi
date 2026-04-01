@@ -3,13 +3,14 @@
  * Called sequentially by the import wizard after org creation.
  *
  * POST /api/partner/import/baseline-scan
- * Body: { orgId: string, cui?: string | null }
+ * Body: { orgId: string, cui?: string | null, website?: string | null }
  * Returns: { ok, findingsCount, sector?, companyName? }
  */
 import { NextResponse } from "next/server"
 
 import { evaluateApplicability } from "@/lib/compliance/applicability"
 import type { OrgProfile } from "@/lib/compliance/applicability"
+import type { FullIntakeAnswers } from "@/lib/compliance/intake-engine"
 import {
   buildInitialFindings,
   buildInitialIntakeAnswers,
@@ -26,6 +27,7 @@ import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallba
 type BaselineScanBody = {
   orgId: string
   cui?: string | null
+  website?: string | null
 }
 
 export async function POST(request: Request) {
@@ -64,6 +66,12 @@ export async function POST(request: Request) {
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
 
+    // Store website in profile if provided and not already set
+    if (body.website && updatedProfile && !updatedProfile.website) {
+      updatedProfile = { ...updatedProfile, website: body.website }
+      state.orgProfile = updatedProfile
+    }
+
     // Phase A: ANAF lookup if CUI provided
     if (body.cui) {
       try {
@@ -92,24 +100,55 @@ export async function POST(request: Request) {
       }
     }
 
-    // Phase B: Generate initial findings from intake engine
+    // Phase B: Generate findings — use conservative assumptions for partner import
+    // For imported firms, assume worst-case: every company needs compliance review.
+    // The partner will then verify/dismiss each finding with the client.
     if (updatedProfile) {
-      const intakeAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
-      const findings = buildInitialFindings(intakeAnswers)
+      const hasWebsite = !!(updatedProfile.website || body.website)
+      const hasEmployees = updatedProfile.employeeCount !== "1-9"
+
+      // Build aggressive intake answers: assume "no" for all compliance artifacts
+      // so that findings are generated for everything that needs checking.
+      const conservativeAnswers: FullIntakeAnswers = {
+        // Core questions — assume positive (company does these things)
+        sellsToConsumers: "unknown",
+        hasEmployees: hasEmployees ? "yes" : "unknown",
+        processesPersonalData: "probably",
+        usesAITools: updatedProfile.usesAITools ? "yes" : "no",
+        usesExternalVendors: "probably",
+        hasSiteWithForms: hasWebsite ? "probably" : "unknown",
+        hasStandardContracts: "probably",
+        // Conditional answers — assume "no" / missing (generates findings)
+        hasJobDescriptions: hasEmployees ? "no" : undefined,
+        hasEmployeeRegistry: hasEmployees ? "no" : undefined,
+        hasInternalProcedures: hasEmployees ? "no" : undefined,
+        hasPrivacyPolicy: "no",
+        hasDsarProcess: "no",
+        hasRopaRegistry: "no",
+        hasVendorDpas: "no",
+        hasRetentionSchedule: "no",
+        hasAiPolicy: updatedProfile.usesAITools ? "no" : undefined,
+        hasVendorDocumentation: "no",
+        vendorsSendPersonalData: "probably",
+        hasSitePrivacyPolicy: hasWebsite ? "no" : undefined,
+        hasCookiesConsent: hasWebsite ? "no" : undefined,
+      }
+
+      // Also generate from prefill-aware engine for any ANAF-enriched suggestions
+      const prefillAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
+
+      // Merge: conservative answers take precedence (more findings)
+      const mergedAnswers = { ...prefillAnswers, ...conservativeAnswers }
+      const findings = buildInitialFindings(mergedAnswers)
 
       console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
-      console.log("[baseline-scan] Profile:", JSON.stringify(updatedProfile))
-      console.log("[baseline-scan] Intake answers:", JSON.stringify(intakeAnswers).slice(0, 500))
 
       if (findings.length > 0) {
         // Merge findings — don't duplicate if already exist
         const existingIds = new Set(state.findings.map((f) => f.id))
         const newFindings = findings.filter((f) => !existingIds.has(f.id))
-        console.log("[baseline-scan] New findings (no duplicates):", newFindings.length)
         state.findings = [...state.findings, ...newFindings]
       }
-    } else {
-      console.log("[baseline-scan] No updatedProfile, skipping findings generation")
     }
 
     await writeStateForOrg(body.orgId, state)

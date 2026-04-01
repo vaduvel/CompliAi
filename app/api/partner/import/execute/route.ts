@@ -25,6 +25,7 @@ type ConfirmedRow = {
   sector: OrgSector | null
   employeeCount: OrgEmployeeCount | null
   email: string | null
+  website: string | null
   skip?: boolean
 }
 
@@ -124,6 +125,7 @@ export async function POST(request: Request) {
           requiresEfactura: false,
           completedAtISO: new Date().toISOString(),
           ...(row.cui ? { cui: row.cui } : {}),
+          ...(row.website ? { website: row.website } : {}),
         }
 
         const applicability = evaluateApplicability(profile)
