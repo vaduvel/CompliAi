@@ -17,15 +17,11 @@ import {
   uploadInvoiceToAnaf,
   getInvoiceStatus,
   getAnafMode,
-  type AnafUploadResult,
-  type AnafUploadMockResult,
   type AnafStatusResult,
   AnafClientError,
 } from "./efactura-anaf-client"
 import {
   ensureValidToken,
-  loadTokenFromSupabase,
-  type AnafTokenRecord,
 } from "@/lib/anaf-spv-client"
 import {
   createPendingAction,
@@ -65,6 +61,14 @@ export type SPVSubmission = {
   resolvedAtISO: string | null
   sourceFindingId: string | null
   errorDetail: string | null
+}
+
+type SubmissionApprovalPayload = {
+  invoiceId?: string
+  cif?: string
+  xmlLength?: number
+  mode?: string
+  xmlContent?: string
 }
 
 type SPVSubmissionRow = {
@@ -144,13 +148,12 @@ function getLocalSubmissions(orgId: string): SPVSubmissionRow[] {
 export async function initiateSubmit(params: {
   orgId: string
   userId: string
-  userEmail: string
   invoiceId: string
   xmlContent: string
   cif: string
   sourceFindingId?: string
 }): Promise<{ submission: SPVSubmission; pendingAction: PendingAction }> {
-  const { orgId, userId, userEmail, invoiceId, xmlContent, cif, sourceFindingId } = params
+  const { orgId, userId, invoiceId, xmlContent, cif, sourceFindingId } = params
   const now = new Date().toISOString()
   const id = crypto.randomUUID()
 
@@ -167,6 +170,7 @@ export async function initiateSubmit(params: {
       cif,
       xmlLength: xmlContent.length,
       mode: getAnafMode(),
+      xmlContent,
     },
     sourceFindingId,
     expiresInHours: 72, // 3 days to approve
@@ -241,8 +245,13 @@ export async function executeSubmit(params: {
     return { success: false, submission, error: "Approval not yet granted or was rejected." }
   }
 
-  // Get XML from cache
-  const xmlContent = xmlCache.get(submissionId)
+  // Get XML from durable approval payload first, then memory cache as fallback.
+  const proposedData = (action.proposedData ?? null) as SubmissionApprovalPayload | null
+  const xmlFromApproval =
+    proposedData && typeof proposedData.xmlContent === "string" && proposedData.xmlContent.trim().length > 0
+      ? proposedData.xmlContent
+      : null
+  const xmlContent = xmlFromApproval ?? xmlCache.get(submissionId) ?? null
   if (!xmlContent) {
     await updateSubmissionStatus(orgId, submissionId, "error", {
       error_detail: "XML-ul nu mai este disponibil. Reinițiază transmiterea.",

@@ -18,8 +18,6 @@ export async function POST(request: Request) {
 
     const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
     const userId = request.headers.get("x-compliscan-user-id") ?? session.userId
-    const userEmail = request.headers.get("x-compliscan-user-email") ?? session.email
-
     const body = (await request.json()) as {
       xmlContent?: string
       invoiceId?: string
@@ -57,7 +55,6 @@ export async function POST(request: Request) {
     const { submission, pendingAction } = await initiateSubmit({
       orgId,
       userId,
-      userEmail,
       invoiceId,
       xmlContent: body.xmlContent,
       cif: cui,
