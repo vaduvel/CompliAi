@@ -10,7 +10,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { loadOrganizations } from "@/lib/server/auth"
-import { executeAgents } from "@/lib/server/agent-orchestrator"
+import { executeAgents, sweepSemiAutoActions } from "@/lib/server/agent-orchestrator"
 import type { AgentType } from "@/lib/compliance/agentic-engine"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
     for (const org of orgsToProcess) {
       try {
         const result = await executeAgents(org.id, DAILY_AGENTS)
+        // Sweep semi-auto pending actions whose 24h window has elapsed
+        await sweepSemiAutoActions(org.id).catch(() => {})
         results.push({
           orgId: org.id,
           totalActions: result.totalActions,

@@ -328,6 +328,44 @@ export async function markExecuted(
   }
 }
 
+/**
+ * Mark an action as auto_executed (semi-auto: elapsed 24h without rejection).
+ * Distinct from markExecuted (user-initiated) — used only by the semi-auto sweeper.
+ */
+export async function markAutoExecuted(
+  orgId: string,
+  actionId: string,
+  result?: Record<string, unknown>
+): Promise<void> {
+  const now = new Date().toISOString()
+
+  if (hasSupabaseConfig()) {
+    const current = await getPendingAction(orgId, actionId)
+    const trail: AuditEntry[] = [
+      ...(current?.auditTrail ?? []),
+      { action: "auto_executed", by: "system", at: now, detail: "Semi-auto: 24h window elapsed without rejection" },
+    ]
+    await supabaseUpdate(
+      "pending_actions",
+      `org_id=eq.${orgId}&id=eq.${actionId}`,
+      {
+        status: "auto_executed",
+        executed_at: now,
+        execution_result: result ?? null,
+        audit_trail: trail,
+      },
+      "public"
+    )
+  } else {
+    const row = getLocalActions(orgId).find((a) => a.id === actionId)
+    if (row) {
+      row.status = "auto_executed"
+      row.executed_at = now
+      row.execution_result = result ?? null
+    }
+  }
+}
+
 export async function expireOldActions(orgId?: string): Promise<number> {
   const now = new Date().toISOString()
 
