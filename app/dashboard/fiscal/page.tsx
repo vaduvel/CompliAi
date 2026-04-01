@@ -743,9 +743,9 @@ function EFacturaSignalsTab() {
 
 // ── Submit ANAF Tab ───────────────────────────────────────────────────────────
 
-const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
+const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "secondary" | "outline" | "success"> = {
   pending_approval: "outline",
-  approved: "secondary",
+  approved: "success",
   rejected: "destructive",
   submitting: "secondary",
   submitted: "default",
@@ -1075,6 +1075,8 @@ function SubmitSpvTab() {
             const isNok = s.status === "nok" || s.status === "error"
             const borderColor = isOk
               ? "border-l-eos-success"
+              : s.status === "approved"
+                ? "border-l-eos-success"
               : isNok
                 ? "border-l-eos-error"
                 : s.status === "pending_approval"
@@ -1088,12 +1090,18 @@ function SubmitSpvTab() {
                     <p className="text-sm font-semibold text-eos-text">{s.invoiceId}</p>
                     <Badge
                       variant={SUBMIT_STATUS_VARIANT[s.status] ?? "outline"}
-                      className={`text-[10px] normal-case tracking-normal ${isOk ? "bg-eos-success-soft text-eos-success" : ""}`}
+                      className={`text-[10px] normal-case tracking-normal ${(isOk || s.status === "approved") ? "bg-eos-success-soft text-eos-success" : ""}`}
                     >
                       {SPV_STATUS_LABELS[s.status]}
                     </Badge>
                     <span className="text-xs text-eos-text-muted">CIF: {s.cif}</span>
                   </div>
+
+                  {s.status === "approved" && (
+                    <p className="text-xs font-medium text-eos-success">
+                      Aprobarea este gata. Următorul pas este trimiterea efectivă la ANAF.
+                    </p>
+                  )}
 
                   {s.indexDescarcare && (
                     <p className="font-mono text-xs text-eos-text-muted">
@@ -1136,11 +1144,11 @@ function SubmitSpvTab() {
                     )}
                     {s.status === "approved" && (
                       <Button
-                        size="sm"
-                        variant="outline"
+                        size="default"
+                        variant="default"
                         disabled={executing === s.id || integrationStatus?.tokenState !== "active" || integrationStatus?.mode === "mock"}
                         onClick={() => void handleExecute(s.id)}
-                        className="gap-1.5"
+                        className="gap-1.5 shadow-sm"
                       >
                         {executing === s.id
                           ? <Loader2 className="size-3.5 animate-spin" />
