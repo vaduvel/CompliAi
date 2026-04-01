@@ -200,6 +200,11 @@ const SETTINGS_VIEW_TABS = [
     label: "Avansat",
     description: "Politici locale și resetare.",
   },
+  {
+    value: "branding",
+    label: "Branding",
+    description: "White-label: nume, culori, logo partner.",
+  },
 ] as const
 
 export function SettingsPageSurface() {
@@ -237,9 +242,12 @@ export function SettingsPageSurface() {
   const canViewClaimStatus =
     currentUser?.role === "owner" || currentUser?.role === "partner_manager" || currentUser?.role === "compliance"
   const isSolo = runtime?.userMode === "solo"
-  const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) =>
-    isSolo ? ["workspace", "acces", "notificari", "facturare", "autonomie"].includes(tab.value) : true
-  )
+  const isPartner = runtime?.userMode === "partner"
+  const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) => {
+    if (tab.value === "branding") return isPartner
+    if (isSolo && !["workspace", "integrari", "acces", "notificari", "facturare", "autonomie"].includes(tab.value)) return false
+    return true
+  })
 
   // ── GDPR rights state ──────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<string>("workspace")
@@ -263,6 +271,58 @@ export function SettingsPageSurface() {
   })
   const [autonomyLoading, setAutonomyLoading] = useState(true)
   const [autonomySaving, setAutonomySaving] = useState(false)
+
+  // ── White-label state ────────────────────────────────────────────────────
+  const [wlPartnerName, setWlPartnerName] = useState("")
+  const [wlTagline, setWlTagline] = useState("")
+  const [wlBrandColor, setWlBrandColor] = useState("#6366f1")
+  const [wlLogoUrl, setWlLogoUrl] = useState("")
+  const [wlLoading, setWlLoading] = useState(false)
+  const [wlSaving, setWlSaving] = useState(false)
+
+  useEffect(() => {
+    if (activeTab !== "branding") return
+    let cancelled = false
+    setWlLoading(true)
+    fetch("/api/partner/white-label")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.config) return
+        const c = data.config
+        setWlPartnerName(c.partnerName ?? "")
+        setWlTagline(c.tagline ?? "")
+        setWlBrandColor(c.brandColor ?? "#6366f1")
+        setWlLogoUrl(c.logoUrl ?? "")
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setWlLoading(false) })
+    return () => { cancelled = true }
+  }, [activeTab])
+
+  async function saveWhiteLabel() {
+    setWlSaving(true)
+    try {
+      const res = await fetch("/api/partner/white-label", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partnerName: wlPartnerName,
+          tagline: wlTagline || null,
+          brandColor: wlBrandColor,
+          logoUrl: wlLogoUrl || null,
+        }),
+      })
+      if (res.ok) {
+        toast.success("Branding salvat.")
+      } else {
+        toast.error("Eroare la salvarea brandingului.")
+      }
+    } catch {
+      toast.error("Eroare de rețea.")
+    } finally {
+      setWlSaving(false)
+    }
+  }
 
   useEffect(() => {
     if (activeTab !== "autonomie") return
@@ -1502,6 +1562,126 @@ export function SettingsPageSurface() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Tab: Branding (partner only) */}
+        {activeTab === "branding" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-eos-text-muted">Branding partner</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">
+                Personalizează cum apare brandul tău în rapoartele și documentele generate pentru clienți.
+              </p>
+            </div>
+
+            {wlLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-eos-text-tertiary" strokeWidth={2} />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Preview strip */}
+                <div
+                  className="flex items-center gap-4 rounded-eos-xl border px-5 py-4"
+                  style={{ borderColor: wlBrandColor + "33", backgroundColor: wlBrandColor + "0d" }}
+                >
+                  <div
+                    className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                    style={{ backgroundColor: wlBrandColor }}
+                  >
+                    {wlPartnerName ? wlPartnerName.charAt(0).toUpperCase() : "P"}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-eos-text">
+                      {wlPartnerName || "Numele firmei tale"}
+                    </p>
+                    <p className="truncate text-xs text-eos-text-muted">
+                      {wlTagline || "Tagline partner"}
+                    </p>
+                  </div>
+                  <div
+                    className="ml-auto shrink-0 rounded-full px-3 py-0.5 text-xs font-semibold text-white"
+                    style={{ backgroundColor: wlBrandColor }}
+                  >
+                    Preview
+                  </div>
+                </div>
+
+                {/* Form */}
+                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                  <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
+                    <h3 className="text-base font-semibold text-eos-text-muted">Identitate vizuală</h3>
+                  </div>
+                  <div className="space-y-5 px-5 py-5">
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-medium text-eos-text-muted">Nume partner</span>
+                        <input
+                          className="mt-2 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                          placeholder="ex: Acme Consulting"
+                          value={wlPartnerName}
+                          onChange={(e) => setWlPartnerName(e.target.value)}
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-medium text-eos-text-muted">Tagline (opțional)</span>
+                        <input
+                          className="mt-2 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                          placeholder="ex: Conformitate simplă"
+                          value={wlTagline}
+                          onChange={(e) => setWlTagline(e.target.value)}
+                        />
+                      </label>
+                    </div>
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-medium text-eos-text-muted">Culoare brand (hex)</span>
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="color"
+                            className="h-9 w-12 cursor-pointer rounded-eos-md border border-eos-border bg-transparent p-0.5"
+                            value={wlBrandColor}
+                            onChange={(e) => setWlBrandColor(e.target.value)}
+                          />
+                          <input
+                            className="h-9 flex-1 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 font-mono text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            placeholder="#6366f1"
+                            value={wlBrandColor}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setWlBrandColor(v)
+                            }}
+                          />
+                        </div>
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-medium text-eos-text-muted">URL logo (opțional)</span>
+                        <input
+                          className="mt-2 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                          placeholder="https://..."
+                          value={wlLogoUrl}
+                          onChange={(e) => setWlLogoUrl(e.target.value)}
+                        />
+                        <p className="mt-1 text-xs text-eos-text-tertiary">URL public accesibil — apare în antetul rapoartelor exportate.</p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    disabled={wlSaving}
+                    onClick={() => void saveWhiteLabel()}
+                    className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {wlSaving && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
+                    Salvează branding
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
