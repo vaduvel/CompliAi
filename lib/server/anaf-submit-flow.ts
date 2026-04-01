@@ -21,6 +21,11 @@ import {
   AnafClientError,
 } from "./efactura-anaf-client"
 import {
+  SPV_STATUS_LABELS,
+  type SPVSubmission,
+  type SPVSubmissionStatus,
+} from "@/lib/fiscal/spv-submission"
+import {
   ensureValidToken,
 } from "@/lib/anaf-spv-client"
 import {
@@ -33,35 +38,6 @@ import { hasSupabaseConfig, supabaseInsert, supabaseSelect, supabaseUpdate } fro
 import { readStateForOrg, writeStateForOrg } from "./mvp-store"
 
 // ── Types ────────────────────────────────────────────────────────────────────
-
-export type SPVSubmissionStatus =
-  | "pending_approval"
-  | "approved"
-  | "rejected"
-  | "submitting"
-  | "submitted"
-  | "ok"
-  | "nok"
-  | "error"
-
-export type SPVSubmission = {
-  id: string
-  orgId: string
-  invoiceId: string
-  xmlSnippet: string // first 200 chars for audit (full XML NOT stored after submit)
-  cif: string
-  approvalActionId: string
-  status: SPVSubmissionStatus
-  indexDescarcare: string | null
-  anafStatus: string | null
-  anafMessage: string | null
-  downloadId: string | null
-  createdAtISO: string
-  submittedAtISO: string | null
-  resolvedAtISO: string | null
-  sourceFindingId: string | null
-  errorDetail: string | null
-}
 
 type SubmissionApprovalPayload = {
   invoiceId?: string
@@ -638,15 +614,4 @@ async function reopenLinkedFinding(orgId: string, submission: SPVSubmission): Pr
   }
 }
 
-// ── Status labels (Romanian) ────────────────────────────────────────────────
-
-export const SPV_STATUS_LABELS: Record<SPVSubmissionStatus, string> = {
-  pending_approval: "Așteaptă aprobare",
-  approved: "Aprobat",
-  rejected: "Respins la aprobare",
-  submitting: "Se transmite…",
-  submitted: "Transmis — în prelucrare",
-  ok: "Acceptat ANAF",
-  nok: "Respins ANAF",
-  error: "Eroare",
-}
+export { SPV_STATUS_LABELS }

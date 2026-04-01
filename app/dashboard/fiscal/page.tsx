@@ -36,8 +36,7 @@ import type { FilingRecord, FilingType, FilingStatus, FilingDisciplineScore } fr
 import { FILING_TYPE_LABELS, FILING_STATUS_LABELS } from "@/lib/compliance/filing-discipline"
 import { buildFiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord, ScanFinding } from "@/lib/compliance/types"
-import type { SPVSubmission } from "@/lib/server/anaf-submit-flow"
-import { SPV_STATUS_LABELS } from "@/lib/server/anaf-submit-flow"
+import { SPV_STATUS_LABELS, type SPVSubmission } from "@/lib/fiscal/spv-submission"
 
 type EFacturaIntegrationStatus = {
   mode: "mock" | "test" | "real"
