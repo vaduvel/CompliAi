@@ -16,8 +16,8 @@ const mocks = vi.hoisted(() => ({
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
-  requireRoleMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/compliscan-export", () => ({
@@ -34,11 +34,11 @@ vi.mock("@/lib/server/org-context", () => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/audit-pack", () => ({
@@ -54,7 +54,7 @@ import { GET } from "./route"
 describe("GET /api/exports/audit-pack/client", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -70,7 +70,7 @@ describe("GET /api/exports/audit-pack/client", () => {
       workspaceInitials: "IP",
       userRole: "viewer",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({})
+    mocks.readFreshStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         snapshotHistory: [],
@@ -118,7 +118,7 @@ describe("GET /api/exports/audit-pack/client", () => {
     const body = await response.text()
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
     expect(mocks.buildDashboardPayloadMock).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
@@ -151,7 +151,7 @@ describe("GET /api/exports/audit-pack/client", () => {
   })
 
   it("respinge exportul pentru rol nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
 import { buildVendorTrustPack, buildVendorTrustPackMarkdown } from "@/lib/server/vendor-trust-pack"
 import { readNis2State } from "@/lib/server/nis2-store"
@@ -20,7 +20,7 @@ function slugify(value: string) {
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "export Vendor Trust Pack"
@@ -29,7 +29,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const format = searchParams.get("format")
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const [resolvedState, nis2State] = await Promise.all([
       Promise.resolve(state),
       readNis2State(session.orgId),

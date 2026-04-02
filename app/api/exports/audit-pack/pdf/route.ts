@@ -2,32 +2,40 @@ import { buildAuditPack } from "@/lib/server/audit-pack"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { generateAuditPackPdfBuffer } from "@/lib/server/audit-pack-pdf"
 import { NextResponse } from "next/server"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { getOrgContext } from "@/lib/server/org-context"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/exports/audit-pack/pdf")
 
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance"],
       "exportul Audit Pack PDF Native"
     )
 
     const rawState =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const [state, nis2State] = await Promise.all([
       Promise.resolve(rawState),
       readNis2State(session.orgId),
     ])
-    const payload = await buildDashboardPayload(state)
+    const workspaceOverride = {
+      ...(await getOrgContext({ request })),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
+    const payload = await buildDashboardPayload(state, workspaceOverride)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({
       state: payload.state,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildAIActEvidencePack } from "@/lib/server/ai-act-evidence-pack"
 
 function slugify(value: string) {
@@ -15,7 +15,7 @@ function slugify(value: string) {
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "exportul AI Act Evidence Pack"

@@ -3,9 +3,9 @@ import { buildClientAuditPackDocument } from "@/lib/server/audit-pack-client"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -15,13 +15,14 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/exports/audit-pack/client")
 
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack client-facing")
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack client-facing")
 
     const rawState =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const [state, nis2State] = await Promise.all([Promise.resolve(rawState), readNis2State(session.orgId)])
     const workspaceOverride = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
       userRole: session.role,

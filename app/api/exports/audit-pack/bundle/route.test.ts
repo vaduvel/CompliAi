@@ -15,10 +15,11 @@ const mocks = vi.hoisted(() => ({
   buildAuditPackBundleMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   requirePlanMock: vi.fn(),
   readNis2StateMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/compliscan-export", () => ({
@@ -29,13 +30,17 @@ vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/nis2-store", () => ({
@@ -63,7 +68,7 @@ import { GET } from "./route"
 describe("GET /api/exports/audit-pack/bundle", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -71,8 +76,16 @@ describe("GET /api/exports/audit-pack/bundle", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-fallback",
+      orgName: "Workspace Fallback",
+      workspaceLabel: "Workspace local",
+      workspaceOwner: "Ion Popescu",
+      workspaceInitials: "IP",
+      userRole: "viewer",
+    })
     mocks.requirePlanMock.mockResolvedValue("pro")
-    mocks.readStateForOrgMock.mockResolvedValue({})
+    mocks.readFreshStateForOrgMock.mockResolvedValue({})
     mocks.readNis2StateMock.mockResolvedValue({
       assessment: { score: 72 },
       incidents: [{ id: "incident-1", severity: "high" }],
@@ -126,7 +139,16 @@ describe("GET /api/exports/audit-pack/bundle", () => {
     const body = Buffer.from(await response.arrayBuffer())
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
+    expect(mocks.buildDashboardPayloadMock).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        orgId: "org-1",
+        orgName: "Org Demo",
+        workspaceLabel: "Workspace local",
+        userRole: "owner",
+      })
+    )
     expect(response.headers.get("content-type")).toContain("application/zip")
     expect(response.headers.get("content-disposition")).toContain(
       'attachment; filename="audit-pack-dossier-magazin-online-s-r-l-2026-03-13.zip"'
@@ -154,7 +176,7 @@ describe("GET /api/exports/audit-pack/bundle", () => {
   })
 
   it("respinge exportul pentru rol nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

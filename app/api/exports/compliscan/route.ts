@@ -6,19 +6,27 @@ import {
   buildCompliScanSnapshot,
   serializeCompliScanYaml,
 } from "@/lib/server/compliscan-export"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { getOrgContext } from "@/lib/server/org-context"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul CompliScan")
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "exportul CompliScan")
 
     const format = request.nextUrl.searchParams.get("format") === "yaml" ? "yaml" : "json"
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
-    const payload = await buildDashboardPayload(state)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
+    const workspaceOverride = {
+      ...(await getOrgContext({ request })),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
+    const payload = await buildDashboardPayload(state, workspaceOverride)
     const snapshot = buildCompliScanSnapshot(payload)
     snapshot.drift = payload.state.driftRecords.map((item) => ({
       id: item.id,

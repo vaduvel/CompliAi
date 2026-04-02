@@ -3,13 +3,12 @@
 // Stores thumbs up/down + context in analytics_events.
 
 import { NextResponse } from "next/server"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return NextResponse.json({ ok: false }, { status: 401 })
+    const session = await requireFreshAuthenticatedSession(request, "trimiterea feedback-ului")
 
     const body = (await request.json()) as { context?: string; value?: string }
     const context = typeof body.context === "string" ? body.context : "general"
@@ -21,7 +20,10 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ ok: true })
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ ok: false, code: error.code }, { status: error.status })
+    }
     return NextResponse.json({ ok: false }, { status: 500 })
   }
 }

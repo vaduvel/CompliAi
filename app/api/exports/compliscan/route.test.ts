@@ -16,8 +16,9 @@ const mocks = vi.hoisted(() => ({
   buildCompliScanFileNameMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
-  requireRoleMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   serializeCompliScanYamlMock: vi.fn(),
 }))
 
@@ -31,13 +32,17 @@ vi.mock("@/lib/server/compliscan-export", () => ({
   serializeCompliScanYaml: mocks.serializeCompliScanYamlMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 import { GET } from "./route"
@@ -45,7 +50,7 @@ import { GET } from "./route"
 describe("GET /api/exports/compliscan", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -53,7 +58,15 @@ describe("GET /api/exports/compliscan", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
-    mocks.readStateForOrgMock.mockResolvedValue({})
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-fallback",
+      orgName: "Workspace Fallback",
+      workspaceLabel: "Workspace local",
+      workspaceOwner: "Ion Popescu",
+      workspaceInitials: "IP",
+      userRole: "viewer",
+    })
+    mocks.readFreshStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         driftRecords: [
@@ -90,7 +103,16 @@ describe("GET /api/exports/compliscan", () => {
     const response = await GET(new NextRequest("http://localhost/api/exports/compliscan"))
     const body = await response.json()
 
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
+    expect(mocks.buildDashboardPayloadMock).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        orgId: "org-1",
+        orgName: "Org Demo",
+        workspaceLabel: "Workspace local",
+        userRole: "owner",
+      })
+    )
     expect(response.headers.get("content-type")).toContain("application/json")
     expect(response.headers.get("content-disposition")).toContain('filename="compliscan-export.json"')
     expect(body.drift).toHaveLength(1)
@@ -115,7 +137,7 @@ describe("GET /api/exports/compliscan", () => {
   })
 
   it("respinge exportul pentru rol nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 
