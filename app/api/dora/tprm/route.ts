@@ -4,8 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import { createTprmEntry } from "@/lib/server/dora-store"
 import type { TprmCriticality, TprmStatus } from "@/lib/server/dora-store"
@@ -19,8 +18,7 @@ async function readJsonBody<T>(request: Request): Promise<T> {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "adăugarea unui furnizor ICT")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, WRITE_ROLES, "adăugarea unui furnizor ICT")
     const body = await readJsonBody<{
       providerName?: string
       serviceType?: string
@@ -39,7 +37,7 @@ export async function POST(request: Request) {
       return jsonError("Datele contractului sunt obligatorii.", 400, "MISSING_CONTRACT_DATES")
     }
 
-    const entry = await createTprmEntry(orgId, {
+    const entry = await createTprmEntry(session.orgId, {
       providerName: body.providerName.trim(),
       serviceType: body.serviceType.trim(),
       criticality: body.criticality,

@@ -26,11 +26,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireFreshRole(request, ["owner", "compliance", "partner_manager"], "vendor brief export")
-    const { orgId, orgName } = await getOrgContext()
+    const session = await requireFreshRole(
+      request,
+      ["owner", "compliance", "partner_manager"],
+      "vendor brief export"
+    )
+    const workspace = await getOrgContext({ request })
     const { id: reviewId } = await params
 
-    const review = await getReview(orgId, reviewId)
+    const review = await getReview(session.orgId, reviewId)
     if (!review) {
       return jsonError("Review nu a fost găsit.", 404, "NOT_FOUND")
     }
@@ -41,7 +45,7 @@ export async function GET(
 
     const lines: string[] = [
       `# Brief Vendor Review — ${review.vendorName}`,
-      `**Organizație:** ${orgName || orgId}`,
+      `**Organizație:** ${workspace.orgName || session.orgName || session.orgId}`,
       `**Data generării:** ${now}`,
       `**Review ID:** ${review.id}`,
       "",

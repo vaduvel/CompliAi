@@ -4,12 +4,12 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -33,7 +33,7 @@ import { POST } from "./route"
 describe("POST /api/compliance-pack/fields", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-pack",
       orgName: "Org Pack",

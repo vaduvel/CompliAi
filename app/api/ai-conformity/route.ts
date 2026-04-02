@@ -2,9 +2,10 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
-import { requireRole, AuthzError } from "@/lib/server/auth"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { requireFreshRole, AuthzError } from "@/lib/server/auth"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { getOrgContext } from "@/lib/server/org-context"
 import {
   scoreAssessment,
   type AssessmentAnswers,
@@ -17,9 +18,8 @@ import {
 const CONFORMITY_FIELD = "conformity_assessment"
 
 export async function GET(request: Request) {
-  let session: ReturnType<typeof requireRole>
   try {
-    session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "conformitate AI"
@@ -33,7 +33,8 @@ export async function GET(request: Request) {
     }
 
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
 
     const raw = state.aiComplianceFieldOverrides?.[systemId]?.[CONFORMITY_FIELD]?.value
     const answers: AssessmentAnswers = raw ? (JSON.parse(raw) as AssessmentAnswers) : {}
@@ -47,9 +48,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  let session: ReturnType<typeof requireRole>
   try {
-    session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance"],
       "salvare evaluare conformitate AI"
@@ -88,12 +88,19 @@ export async function POST(request: Request) {
       }
     }, session.orgName)
 
+    const workspaceOverride = {
+      ...(await getOrgContext({ request })),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
+
     return NextResponse.json({
       systemId,
       answers,
       result,
       savedAt: now,
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspaceOverride)),
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

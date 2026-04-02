@@ -6,10 +6,15 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, deactivateOrganizationMember, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
+import {
+  AuthzError,
+  deactivateOrganizationMember,
+  requireFreshAuthenticatedSession,
+  listUserMemberships,
+} from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
 import type { VendorReviewStatus, VendorReviewUrgency } from "@/lib/compliance/vendor-review-engine"
 
@@ -18,10 +23,10 @@ export async function GET(
   { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) {
-      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-    }
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "vizualizarea detaliilor clientului din portofoliu"
+    )
 
     const { orgId } = await params
 
@@ -33,7 +38,7 @@ export async function GET(
     }
 
     // Citește starea de conformitate
-    const rawState = await readStateForOrg(orgId)
+    const rawState = await readFreshStateForOrg(orgId, membership.orgName)
     let complianceSummary = null
     let openFindings: { id: string; title: string; category: string; severity: string }[] = []
 
@@ -118,8 +123,10 @@ export async function DELETE(
   { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "eliminarea unei firme din portofoliu"
+    )
 
     const { orgId } = await params
 

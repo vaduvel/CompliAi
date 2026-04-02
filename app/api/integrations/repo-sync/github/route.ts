@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const workspace = await getOrgContext()
+    const workspace = await getOrgContext({ request })
     const { nextState, fileCount } = await executeRepoSync({
       ...normalized,
       files,

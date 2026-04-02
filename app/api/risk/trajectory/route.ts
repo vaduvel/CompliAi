@@ -4,9 +4,8 @@
 import { NextResponse } from "next/server"
 
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { getAgentLog } from "@/lib/server/agent-run-store"
 import { calculateRiskTrajectory } from "@/lib/compliance/risk-trajectory"
@@ -17,17 +16,15 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/risk/trajectory")
 
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
-      "risk trajectory",
+      "risk trajectory"
     )
-    const { orgId } = await getOrgContext()
-    void session
 
     const [rawState, agentLog] = await Promise.all([
-      readStateForOrg(orgId),
-      getAgentLog(orgId),
+      readFreshStateForOrg(session.orgId, session.orgName),
+      getAgentLog(session.orgId),
     ])
 
     if (!rawState) {

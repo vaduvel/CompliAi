@@ -3,8 +3,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import { updateTprmEntry } from "@/lib/server/dora-store"
 import type { TprmStatus } from "@/lib/server/dora-store"
@@ -14,9 +13,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "actualizarea furnizorului ICT")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea furnizorului ICT")
     const { id } = await params
-    const { orgId } = await getOrgContext()
     const body = await request.json() as {
       status?: TprmStatus
       riskLevel?: "low" | "medium" | "high"
@@ -31,7 +29,7 @@ export async function PATCH(
     if (body.nextAssessmentISO !== undefined) patch.nextAssessmentISO = body.nextAssessmentISO
     if (body.notes !== undefined) patch.notes = body.notes
 
-    const entry = await updateTprmEntry(orgId, id, patch)
+    const entry = await updateTprmEntry(session.orgId, id, patch)
     if (!entry) return jsonError("Furnizorul nu a fost găsit.", 404, "NOT_FOUND")
     return NextResponse.json({ entry })
   } catch (error) {

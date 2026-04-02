@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readDsarState, updateDsar } from "@/lib/server/dsar-store"
 import { generateDsarDraft } from "@/lib/compliance/dsar-drafts"
 import { WRITE_ROLES } from "@/lib/server/rbac"
@@ -16,11 +15,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "generare draft DSAR")
-    const { orgId, orgName } = await getOrgContext()
+    const session = await requireFreshRole(request, WRITE_ROLES, "generare draft DSAR")
     const { id } = await params
 
-    const state = await readDsarState(orgId)
+    const state = await readDsarState(session.orgId)
     const dsarReq = state.requests.find((r) => r.id === id)
     if (!dsarReq) {
       return jsonError("Cererea DSAR nu a fost găsită.", 404, "NOT_FOUND")
@@ -29,11 +27,11 @@ export async function GET(
     const draft = generateDsarDraft({
       requestType: dsarReq.requestType,
       requesterName: dsarReq.requesterName,
-      orgName: orgName || orgId,
+      orgName: session.orgName || session.orgId,
     })
 
     // Mark draft as generated
-    await updateDsar(orgId, id, { draftResponseGenerated: true })
+    await updateDsar(session.orgId, id, { draftResponseGenerated: true })
 
     return NextResponse.json({ draft })
   } catch (error) {

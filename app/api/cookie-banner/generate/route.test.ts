@@ -12,17 +12,17 @@ const mocks = vi.hoisted(() => ({
     }
   },
   generateCookieBannerSnippetMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/cookie-banner-generator", () => ({
@@ -34,14 +34,14 @@ import { POST } from "./route"
 describe("POST /api/cookie-banner/generate", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-cookie",
       orgName: "Marketing Growth Hub SRL",
       email: "owner@example.com",
       role: "owner",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       orgProfile: {
         website: "https://marketinghub.ro",
       },
@@ -74,7 +74,10 @@ describe("POST /api/cookie-banner/generate", () => {
 
     expect(response.status).toBe(200)
     expect(payload).toEqual({ html: "<div>banner</div>" })
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-cookie")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith(
+      "org-cookie",
+      "Marketing Growth Hub SRL"
+    )
     expect(mocks.generateCookieBannerSnippetMock).toHaveBeenCalledWith({
       orgName: "Marketing Growth Hub SRL",
       orgWebsite: "https://marketinghub.ro",
@@ -87,7 +90,7 @@ describe("POST /api/cookie-banner/generate", () => {
   })
 
   it("propagă erorile de autorizare coerent", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Interzis", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

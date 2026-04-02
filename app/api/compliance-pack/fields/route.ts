@@ -4,7 +4,7 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import type { AICompliancePackFieldKey } from "@/lib/compliance/ai-compliance-pack"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { requireRole } from "@/lib/server/auth"
+import { requireFreshRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
@@ -30,7 +30,7 @@ const ALLOWED_FIELDS = new Set<AICompliancePackFieldKey>([
 ])
 
 export async function POST(request: Request) {
-  const session = requireRole(
+  const session = await requireFreshRole(
     request,
     ["owner", "partner_manager", "compliance", "reviewer"],
     "actualizarea AI Compliance Pack"
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
   }, session.orgName)
 
   const workspaceOverride = {
-    ...(await getOrgContext()),
+    ...(await getOrgContext({ request })),
     orgId: session.orgId,
     orgName: session.orgName,
     userRole: session.role,
