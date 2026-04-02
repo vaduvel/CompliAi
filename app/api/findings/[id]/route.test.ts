@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   createNotificationMock: vi.fn(),
   mapFindingToTaskMock: vi.fn(),
   readFreshSessionFromRequestMock: vi.fn(),
+  createPendingActionMock: vi.fn(),
+  resolvePolicyMock: vi.fn(),
+  upsertMonitoringReviewCycleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -22,6 +25,18 @@ vi.mock("@/lib/server/org-context", () => ({
 
 vi.mock("@/lib/server/auth", () => ({
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
+}))
+
+vi.mock("@/lib/server/approval-queue", () => ({
+  createPendingAction: mocks.createPendingActionMock,
+}))
+
+vi.mock("@/lib/server/autonomy-resolver", () => ({
+  resolvePolicy: mocks.resolvePolicyMock,
+}))
+
+vi.mock("@/lib/server/review-cycle-store", () => ({
+  upsertMonitoringReviewCycle: mocks.upsertMonitoringReviewCycleMock,
 }))
 
 vi.mock("@/lib/server/notifications-store", () => ({
@@ -42,6 +57,9 @@ describe("PATCH /api/findings/[id]", () => {
       userId: "user-1",
       email: "owner@example.com",
     })
+    mocks.resolvePolicyMock.mockResolvedValue("auto")
+    mocks.createPendingActionMock.mockResolvedValue({ id: "approval-1" })
+    mocks.upsertMonitoringReviewCycleMock.mockResolvedValue(undefined)
     const baseState = {
       findings: [
         {

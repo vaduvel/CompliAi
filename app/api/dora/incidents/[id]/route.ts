@@ -3,8 +3,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import { updateIncident } from "@/lib/server/dora-store"
 import type { DoraIncidentStatus } from "@/lib/server/dora-store"
@@ -18,9 +17,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "actualizarea incidentului DORA")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea incidentului DORA")
     const { id } = await params
-    const { orgId } = await getOrgContext()
     const body = await request.json() as {
       status?: DoraIncidentStatus
       rootCause?: string
@@ -40,7 +38,7 @@ export async function PATCH(
       patch.resolvedAtISO = body.resolvedAtISO ?? new Date().toISOString()
     }
 
-    const incident = await updateIncident(orgId, id, patch)
+    const incident = await updateIncident(session.orgId, id, patch)
     if (!incident) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
     return NextResponse.json({ incident })
   } catch (error) {

@@ -5,7 +5,8 @@ import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 
 type BaselineAction = "set" | "clear"
 
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     const action = body.action === "clear" ? "clear" : "set"
     const nowISO = new Date().toISOString()
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       if (action === "clear") {
         return {
           ...current,
@@ -53,10 +54,17 @@ export async function POST(request: Request) {
           }, actor),
         ]),
       }
-    })
+    }, session.orgName)
+
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message:
         action === "clear"
           ? "Baseline-ul validat a fost eliminat. Drift-ul va compara din nou cu ultimul snapshot."

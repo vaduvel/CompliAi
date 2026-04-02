@@ -3,25 +3,22 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readNis2State, createVendor } from "@/lib/server/nis2-store"
 import type { Nis2VendorRiskLevel } from "@/lib/server/nis2-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { createReview } from "@/lib/server/vendor-review-store"
 import { appendAudit } from "@/lib/compliance/vendor-review-engine"
 import { randomBytes } from "node:crypto"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
+import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-
-    const { orgId } = await getOrgContext()
-    const state = await readNis2State(orgId)
+    const session = await requireFreshRole(request, READ_ROLES, "citirea furnizorilor NIS2")
+    const state = await readNis2State(session.orgId)
     return NextResponse.json({ vendors: state.vendors })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -31,8 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, WRITE_ROLES, "crearea furnizorului NIS2")
 
     const body = (await request.json()) as {
       name?: string
@@ -52,8 +48,7 @@ export async function POST(request: Request) {
       return jsonError("Nivel de risc invalid.", 400, "INVALID_RISK_LEVEL")
     }
 
-    const { orgId } = await getOrgContext()
-    const vendor = await createVendor(orgId, {
+    const vendor = await createVendor(session.orgId, {
       name: body.name.trim(),
       service: (body.service ?? "").trim(),
       riskLevel: body.riskLevel,
@@ -68,7 +63,7 @@ export async function POST(request: Request) {
     const urgency = vendor.riskLevel === "critical" ? "critical"
       : vendor.riskLevel === "high" ? "high" : "medium"
     const now = new Date().toISOString()
-    void createReview(orgId, {
+    void createReview(session.orgId, {
       id: `vr-${randomBytes(8).toString("hex")}`,
       vendorId: vendor.id,
       vendorName: vendor.name,
@@ -83,20 +78,24 @@ export async function POST(request: Request) {
       updatedAtISO: now,
     }).catch(() => {/* non-blocking */})
 
-    const nextNis2State = await readNis2State(orgId)
-    await mutateFreshState((current) => ({
-      ...current,
-      findings: mergeNis2PackageFindings(current.findings, nextNis2State, now),
-    }))
+    const nextNis2State = await readNis2State(session.orgId)
+    await mutateFreshStateForOrg(
+      session.orgId,
+      (current) => ({
+        ...current,
+        findings: mergeNis2PackageFindings(current.findings, nextNis2State, now),
+      }),
+      session.orgName
+    )
 
     await fireDriftTrigger({
-      orgId,
+      orgId: session.orgId,
       trigger: "new_vendor_added",
       detail: `Vendor nou: ${vendor.name} (${vendor.riskLevel})`,
     }).catch(() => {})
 
     // Event trigger: run vendor_risk after new vendor is added (fire-and-forget).
-    void executeAgent(orgId, "vendor_risk").catch(() => {/* non-blocking */})
+    void executeAgent(session.orgId, "vendor_risk").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ vendor }, { status: 201 })
   } catch (error) {

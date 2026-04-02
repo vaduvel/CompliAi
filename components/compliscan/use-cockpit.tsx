@@ -328,7 +328,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       if (!response.ok) throw new Error("Nu am putut genera raportul.")
       const payload = (await response.json()) as { html: string }
       openHtmlPreview(payload.html)
-      toast.success("Raport PDF generat")
+      toast.success("Raport PDF generat", { description: "Previzualizarea s-a deschis într-un tab nou." })
     }).catch((err) => {
       toast.error("Export esuat", {
         description: err instanceof Error ? err.message : "Eroare la generarea raportului.",
@@ -1067,7 +1067,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
       { type: "text/plain;charset=utf-8" }
     )
     downloadBlob(blob, `${sanitizeFileName(task.title)}.txt`)
-    toast.success("Export generat")
+    toast.success("Export generat", { description: "Fișierul a fost descărcat." })
   }
 
   function handleSandbox() {

@@ -26,8 +26,8 @@ describe("resolveOnboardingDestination", () => {
   it("trimite compliance in dashboard-ul operational", () => {
     expect(resolveOnboardingDestination("compliance")).toEqual(
       expect.objectContaining({
-        clientHref: "/dashboard",
-        serverHref: "/dashboard",
+        clientHref: "/dashboard/resolve",
+        serverHref: "/dashboard/resolve",
         requiresPortfolioWorkspace: false,
       })
     )

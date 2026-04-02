@@ -2,7 +2,7 @@
 // Stores logo, brand color, partner name, tagline.
 // Used in report headers and exported documents.
 
-import { hasSupabaseConfig, supabaseSelect, supabaseUpdate } from "@/lib/server/supabase-rest"
+import { hasSupabaseConfig, supabaseSelect, supabaseUpsert } from "@/lib/server/supabase-rest"
 
 export type WhiteLabelConfig = {
   orgId: string
@@ -11,6 +11,8 @@ export type WhiteLabelConfig = {
   logoUrl: string | null
   brandColor: string
   updatedAtISO: string | null
+  storageBackend?: "supabase" | "local_fallback"
+  persistenceStatus?: "synced" | "fallback"
 }
 
 type WhiteLabelRow = {
@@ -32,6 +34,8 @@ function rowToConfig(row: WhiteLabelRow): WhiteLabelConfig {
     logoUrl: row.logo_url ?? null,
     brandColor: row.brand_color ?? DEFAULT_BRAND_COLOR,
     updatedAtISO: row.updated_at ?? null,
+    storageBackend: "supabase",
+    persistenceStatus: "synced",
   }
 }
 
@@ -62,6 +66,8 @@ export async function getWhiteLabelConfig(orgId: string): Promise<WhiteLabelConf
       logoUrl: null,
       brandColor: DEFAULT_BRAND_COLOR,
       updatedAtISO: null,
+      storageBackend: "local_fallback",
+      persistenceStatus: "fallback",
     }
   )
 }
@@ -76,6 +82,8 @@ export async function saveWhiteLabelConfig(
     ...patch,
     orgId,
     updatedAtISO: new Date().toISOString(),
+    storageBackend: hasSupabaseConfig() ? "supabase" : "local_fallback",
+    persistenceStatus: hasSupabaseConfig() ? "synced" : "fallback",
   }
 
   configCache.set(orgId, updated)
@@ -90,8 +98,10 @@ export async function saveWhiteLabelConfig(
         brand_color: updated.brandColor,
         updated_at: updated.updatedAtISO,
       }
-      await supabaseUpdate<WhiteLabelRow>("partner_white_label", `org_id=eq.${orgId}`, row)
+      await supabaseUpsert<WhiteLabelRow, WhiteLabelRow>("partner_white_label", row)
     } catch {
+      updated.storageBackend = "local_fallback"
+      updated.persistenceStatus = "fallback"
       // local cache already updated
     }
   }

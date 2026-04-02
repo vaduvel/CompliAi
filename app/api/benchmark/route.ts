@@ -3,9 +3,9 @@
 
 import { NextResponse } from "next/server"
 
+import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { getOrgContext } from "@/lib/server/org-context"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { getSectorBenchmark } from "@/lib/sector-benchmark"
 import type { OrgSector } from "@/lib/compliance/applicability"
@@ -25,12 +25,12 @@ const SECTOR_CAEN_MAP: Record<OrgSector, string> = {
   other: "82",
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const ctx = await getOrgContext()
-    if (!ctx?.orgId) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
 
-    const rawState = await readState()
+    const rawState = await readStateForOrg(session.orgId)
     if (!rawState) return NextResponse.json({ benchmark: null, reason: "no-state" })
 
     const state = normalizeComplianceState(rawState)
@@ -41,9 +41,12 @@ export async function GET() {
     const summary = computeDashboardSummary(state)
     const score = summary.score
 
-    const benchmark = await getSectorBenchmark(ctx.orgId, caenPrefix, score)
+    const benchmark = await getSectorBenchmark(session.orgId, caenPrefix, score)
     return NextResponse.json({ benchmark })
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
     return jsonError("Eroare la benchmark.", 500, "BENCHMARK_FAILED")
   }
 }

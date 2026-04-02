@@ -9,7 +9,8 @@ import type { ComplianceState } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { collectSupplierImports } from "@/lib/server/efactura-vendor-signals"
-import { readState, mutateState } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { readStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State, upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
 import { EFACTURA_MOCK_VENDORS } from "@/lib/server/efactura-mock-data"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
@@ -20,7 +21,8 @@ export async function POST(request: Request) {
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
     const orgId = session.orgId
-    const state = await readState()
+    const state =
+      (await readStateForOrg(orgId)) ?? normalizeComplianceState(initialComplianceState)
 
     // Extrage furnizorii unici din validările e-Factura
     const realSuppliers = collectSupplierImports(state.efacturaValidations)
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
 
     // Generează alerte în compliance state pentru tech vendors fără DPA
     if (result.techVendorsWithoutDpa.length > 0) {
-      await mutateState((s: ComplianceState) => {
+      await mutateStateForOrg(orgId, (s: ComplianceState) => {
         const now = new Date().toISOString()
         const newAlerts = result.techVendorsWithoutDpa.map((name) => ({
           id: `dpa-${Math.random().toString(36).slice(2, 10)}`,
@@ -55,14 +57,14 @@ export async function POST(request: Request) {
           createdAtISO: now,
         }))
         return { ...s, alerts: [...newAlerts, ...s.alerts] }
-      })
+      }, session.orgName)
     }
 
     const nis2State = await readNis2State(orgId)
-    await mutateState((s: ComplianceState) => ({
+    await mutateStateForOrg(orgId, (s: ComplianceState) => ({
       ...s,
       findings: mergeNis2PackageFindings(s.findings, nis2State, new Date().toISOString()),
-    }))
+    }), session.orgName)
 
     const addedLabel = result.added !== 1 ? "furnizori importați" : "furnizor importat"
     const message = isDemoMode

@@ -3,22 +3,34 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { POST } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
+  readSessionFromRequestMock: vi.fn(),
+  resolveOptionalEventActorMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/auth", () => ({
+  readSessionFromRequest: mocks.readSessionFromRequestMock,
+}))
+
+vi.mock("@/lib/server/event-actor", () => ({
+  resolveOptionalEventActor: mocks.resolveOptionalEventActorMock,
+}))
+
 describe("POST /api/scan/[id]/analyze", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.readSessionFromRequestMock.mockReturnValue({ orgId: "org-1", orgName: "Demo Org SRL" })
+    mocks.resolveOptionalEventActorMock.mockResolvedValue(undefined)
   })
 
   it("respinge payload-ul invalid", async () => {
@@ -38,7 +50,7 @@ describe("POST /api/scan/[id]/analyze", () => {
   })
 
   it("mapeaza scan not found", async () => {
-    mocks.mutateStateMock.mockRejectedValueOnce(new Error("SCAN_NOT_FOUND"))
+    mocks.mutateStateForOrgMock.mockRejectedValueOnce(new Error("SCAN_NOT_FOUND"))
 
     const response = await POST(
       new Request("http://localhost/api/scan/scan-1/analyze", {
@@ -56,7 +68,7 @@ describe("POST /api/scan/[id]/analyze", () => {
   })
 
   it("mapeaza scan deja analizat", async () => {
-    mocks.mutateStateMock.mockRejectedValueOnce(new Error("SCAN_ALREADY_ANALYZED"))
+    mocks.mutateStateForOrgMock.mockRejectedValueOnce(new Error("SCAN_ALREADY_ANALYZED"))
 
     const response = await POST(
       new Request("http://localhost/api/scan/scan-1/analyze", {
@@ -74,7 +86,7 @@ describe("POST /api/scan/[id]/analyze", () => {
   })
 
   it("returneaza succes pentru analiza valida", async () => {
-    mocks.mutateStateMock.mockResolvedValueOnce({
+    mocks.mutateStateForOrgMock.mockResolvedValueOnce({
       scans: [{ id: "scan-1" }],
       findings: [],
       alerts: [],
@@ -93,6 +105,11 @@ describe("POST /api/scan/[id]/analyze", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Demo Org SRL"
+    )
     expect(payload.message).toBe("Analiza a fost rulata pe textul revizuit.")
   })
 })

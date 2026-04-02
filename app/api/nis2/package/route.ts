@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { buildNis2Findings, buildNis2Package, readNis2State } from "@/lib/server/nis2-store"
 
 export async function GET(request: Request) {
@@ -11,11 +11,14 @@ export async function GET(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
-    const { orgId } = await getOrgContext()
-    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const [state, nis2State] = await Promise.all([
+      readStateForOrg(session.orgId),
+      readNis2State(session.orgId),
+    ])
     const nowISO = new Date().toISOString()
     const nis2Package = buildNis2Package(nis2State, nowISO)
-    const applicableFromApplicability = (state.applicability?.entries ?? []).some(
+    const runtimeState = state ?? normalizeComplianceState(initialComplianceState)
+    const applicableFromApplicability = (runtimeState.applicability?.entries ?? []).some(
       (entry) => entry.tag === "nis2" && entry.certainty !== "unlikely"
     )
     const applicable = nis2Package.applicable || applicableFromApplicability

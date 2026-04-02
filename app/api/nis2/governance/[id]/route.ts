@@ -5,24 +5,28 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { deleteBoardMember, updateBoardMember, readBoardMembers } from "@/lib/server/nis2-store"
 import type { BoardMember } from "@/lib/server/nis2-store"
 import { buildGovernanceFindings } from "@/lib/compliance/governance-findings"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
+import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
-async function refreshGovernanceFindings(orgId: string) {
+async function refreshGovernanceFindings(orgId: string, orgName?: string) {
   const allMembers = await readBoardMembers(orgId)
   const govFindings = buildGovernanceFindings(allMembers, new Date().toISOString())
-  await mutateFreshState((current) => ({
-    ...current,
-    findings: [
-      ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
-      ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
-    ],
-  }))
+  await mutateFreshStateForOrg(
+    orgId,
+    (current) => ({
+      ...current,
+      findings: [
+        ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
+        ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
+      ],
+    }),
+    orgName
+  )
 }
 
 export async function PATCH(
@@ -30,16 +34,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea guvernanței NIS2")
 
     const { id } = await params
     const body = (await request.json()) as Partial<BoardMember>
-    const { orgId } = await getOrgContext()
-    const updated = await updateBoardMember(orgId, id, body)
+    const updated = await updateBoardMember(session.orgId, id, body)
     if (!updated) return jsonError("Membrul nu a fost găsit.", 404, "NOT_FOUND")
 
-    await refreshGovernanceFindings(orgId)
+    await refreshGovernanceFindings(session.orgId, session.orgName)
     return NextResponse.json({ member: updated })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -52,15 +54,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, DELETE_ROLES, "ștergerea membrului de guvernanță NIS2")
 
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const ok = await deleteBoardMember(orgId, id)
+    const ok = await deleteBoardMember(session.orgId, id)
     if (!ok) return jsonError("Membrul nu a fost găsit.", 404, "NOT_FOUND")
 
-    await refreshGovernanceFindings(orgId)
+    await refreshGovernanceFindings(session.orgId, session.orgName)
     return NextResponse.json({ ok: true })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

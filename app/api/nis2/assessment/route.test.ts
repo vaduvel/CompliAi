@@ -3,14 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { GET, POST } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   saveNis2AssessmentMock: vi.fn(),
   getDnscRegistrationStatusMock: vi.fn(),
   scoreNis2AssessmentMock: vi.fn(),
   convertNIS2GapsToFindingsMock: vi.fn(),
-  mutateFreshStateMock: vi.fn(),
+  mutateFreshStateForOrgMock: vi.fn(),
   buildDnscRescueFindingMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
@@ -25,18 +24,18 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
-vi.mock("@/lib/server/nis2-store", () => ({
-  readNis2State: mocks.readNis2StateMock,
-  saveNis2Assessment: mocks.saveNis2AssessmentMock,
-  getDnscRegistrationStatus: mocks.getDnscRegistrationStatusMock,
-}))
+vi.mock("@/lib/server/nis2-store", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/server/nis2-store")>("@/lib/server/nis2-store")
+  return {
+    ...actual,
+    readNis2State: mocks.readNis2StateMock,
+    saveNis2Assessment: mocks.saveNis2AssessmentMock,
+    getDnscRegistrationStatus: mocks.getDnscRegistrationStatusMock,
+  }
+})
 
 vi.mock("@/lib/compliance/nis2-rules", () => ({
   scoreNis2Assessment: mocks.scoreNis2AssessmentMock,
@@ -44,7 +43,7 @@ vi.mock("@/lib/compliance/nis2-rules", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateFreshState: mocks.mutateFreshStateMock,
+  mutateFreshStateForOrg: mocks.mutateFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/nis2-rescue", () => ({
@@ -53,8 +52,6 @@ vi.mock("@/lib/compliance/nis2-rescue", () => ({
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1" }
-
 const MOCK_RESULT = {
   score: 65,
   maturityLabel: "partial",
@@ -67,8 +64,7 @@ const MOCK_RESULT = {
 describe("GET /api/nis2/assessment", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.readNis2StateMock.mockResolvedValue({ assessment: null, incidents: [], vendors: [] })
   })
 
@@ -100,7 +96,9 @@ describe("GET /api/nis2/assessment", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await GET(new Request("http://localhost/api/nis2/assessment"))
     expect(res.status).toBe(401)
   })
@@ -109,13 +107,14 @@ describe("GET /api/nis2/assessment", () => {
 describe("POST /api/nis2/assessment", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.scoreNis2AssessmentMock.mockReturnValue(MOCK_RESULT)
     mocks.saveNis2AssessmentMock.mockResolvedValue({})
     mocks.getDnscRegistrationStatusMock.mockResolvedValue("not-started")
     mocks.convertNIS2GapsToFindingsMock.mockReturnValue([])
-    mocks.mutateFreshStateMock.mockImplementation(async (fn: (s: unknown) => unknown) => fn({ findings: [] }))
+    mocks.mutateFreshStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (s: unknown) => unknown) => fn({ findings: [] })
+    )
     mocks.buildDnscRescueFindingMock.mockReturnValue(null)
   })
 
@@ -171,7 +170,9 @@ describe("POST /api/nis2/assessment", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await POST(
       new Request("http://localhost/api/nis2/assessment", {
         method: "POST",

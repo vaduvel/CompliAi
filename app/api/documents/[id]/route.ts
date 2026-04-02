@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole } from "@/lib/server/auth"
-import { readFreshState, mutateState } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 
 type Params = {
   params: Promise<{ id: string }>
@@ -14,7 +14,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"])
+    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"])
 
     const body = (await request.json()) as {
       validationStatus?: "pending" | "passed"
@@ -24,7 +24,10 @@ export async function PATCH(
       return jsonError("Doar validationStatus: 'passed' este acceptat.", 400, "INVALID_OPERATION")
     }
 
-    const state = await readFreshState()
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
+    if (!state) {
+      return jsonError("Nu există stare de conformitate pentru organizația selectată.", 404, "NO_STATE")
+    }
     const docs = state.generatedDocuments ?? []
     const documentIndex = docs.findIndex((d) => d.id === id)
 
@@ -32,15 +35,21 @@ export async function PATCH(
       return jsonError("Document inexistent.", 404, "NOT_FOUND")
     }
 
-    await mutateState((current) => {
-      const updatedDocs = [...(current.generatedDocuments ?? [])]
-      updatedDocs[documentIndex] = {
-        ...updatedDocs[documentIndex],
-        validationStatus: "passed",
-        validatedAtISO: new Date().toISOString(),
-      }
-      return { ...current, generatedDocuments: updatedDocs }
-    })
+    const updatedDocs = [...docs]
+    updatedDocs[documentIndex] = {
+      ...updatedDocs[documentIndex],
+      validationStatus: "passed",
+      validatedAtISO: new Date().toISOString(),
+    }
+
+    await writeStateForOrg(
+      session.orgId,
+      {
+        ...state,
+        generatedDocuments: updatedDocs,
+      },
+      session.orgName
+    )
 
     return NextResponse.json({ id, validationStatus: "passed" })
   } catch (error) {
@@ -48,4 +57,3 @@ export async function PATCH(
     return jsonError(message, 500, "DOCUMENT_UPDATE_FAILED")
   }
 }
-

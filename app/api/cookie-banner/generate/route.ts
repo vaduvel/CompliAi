@@ -1,18 +1,28 @@
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { generateCookieBannerSnippet } from "@/lib/server/cookie-banner-generator"
 import type { BannerTrackerInput } from "@/lib/server/cookie-banner-generator"
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "cookie banner generate")
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "cookie banner generate"
+    )
 
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ??
+      normalizeComplianceState(initialComplianceState)
 
-    const orgName = state.orgProfilePrefill?.companyName ?? state.orgProfile ? "Organizația dvs." : "Organizația dvs."
+    const orgName =
+      state.orgProfilePrefill?.companyName ??
+      session.orgName ??
+      "Organizația dvs."
 
     const orgWebsite =
       state.orgProfile?.website ??

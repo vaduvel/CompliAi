@@ -88,7 +88,12 @@ export function DashboardShell({
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" })
     toast.success("Deconectat")
-    router.push("/login")
+    const returnTo =
+      typeof window !== "undefined"
+        ? `${window.location.pathname}${window.location.search}`
+        : pathname
+    const next = returnTo.startsWith("/") ? `?next=${encodeURIComponent(returnTo)}` : ""
+    router.push(`/login${next}`)
   }
 
   async function handleSwitchWorkspaceMode(mode: WorkspaceMode, destinationHref?: string) {

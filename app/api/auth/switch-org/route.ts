@@ -1,10 +1,13 @@
 import {
   AuthzError,
   createSessionToken,
+  createWorkspacePreferenceToken,
   getSessionCookieOptions,
+  getWorkspacePreferenceCookieOptions,
   requireFreshAuthenticatedSession,
   resolveUserForMembership,
   SESSION_COOKIE,
+  WORKSPACE_PREF_COOKIE,
 } from "@/lib/server/auth"
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -50,6 +53,14 @@ export async function POST(request: Request) {
       message: `Organizatia activa a fost schimbata la ${user.orgName}.`,
     }, context)
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
+    response.cookies.set(
+      WORKSPACE_PREF_COOKIE,
+      createWorkspacePreferenceToken({
+        orgId: user.orgId,
+        workspaceMode: "org",
+      }),
+      getWorkspacePreferenceCookieOptions()
+    )
     return response
   } catch (error) {
     if (error instanceof AuthzError) {

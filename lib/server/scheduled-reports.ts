@@ -36,6 +36,8 @@ export type ScheduledReport = {
   lastRunAt: string | null
   createdAtISO: string
   updatedAtISO: string
+  storageBackend?: "supabase" | "local_fallback"
+  persistenceStatus?: "synced" | "fallback"
 }
 
 type ScheduledReportRow = {
@@ -70,6 +72,7 @@ export const FREQUENCY_LABELS: Record<ScheduledReportFrequency, string> = {
 // ── Mappers ──────────────────────────────────────────────────────────────────
 
 function rowToReport(row: ScheduledReportRow): ScheduledReport {
+  const usesSupabase = hasSupabaseConfig()
   return {
     id: row.id,
     orgId: row.org_id,
@@ -84,6 +87,8 @@ function rowToReport(row: ScheduledReportRow): ScheduledReport {
     lastRunAt: row.last_run_at,
     createdAtISO: row.created_at,
     updatedAtISO: row.updated_at,
+    storageBackend: usesSupabase ? "supabase" : "local_fallback",
+    persistenceStatus: usesSupabase ? "synced" : "fallback",
   }
 }
 

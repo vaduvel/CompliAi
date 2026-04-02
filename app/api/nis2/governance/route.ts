@@ -5,21 +5,18 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readBoardMembers, createBoardMember } from "@/lib/server/nis2-store"
 import type { BoardMember } from "@/lib/server/nis2-store"
 import { buildGovernanceFindings } from "@/lib/compliance/governance-findings"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForRegeneratedFindings } from "@/lib/server/preserve-finding-runtime-state"
+import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-
-    const { orgId } = await getOrgContext()
-    const members = await readBoardMembers(orgId)
+    const session = await requireFreshRole(request, READ_ROLES, "citirea guvernanței NIS2")
+    const members = await readBoardMembers(session.orgId)
     return NextResponse.json({ members })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -29,8 +26,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea guvernanței NIS2")
 
     const body = (await request.json()) as Partial<BoardMember>
 
@@ -38,8 +34,7 @@ export async function POST(request: Request) {
       return jsonError("Câmpuri obligatorii: name, role.", 400, "MISSING_FIELDS")
     }
 
-    const { orgId } = await getOrgContext()
-    const member = await createBoardMember(orgId, {
+    const member = await createBoardMember(session.orgId, {
       name: body.name.trim(),
       role: body.role.trim(),
       ...(body.nis2TrainingCompleted !== undefined && { nis2TrainingCompleted: body.nis2TrainingCompleted }),
@@ -49,15 +44,19 @@ export async function POST(request: Request) {
     })
 
     // Regenerate governance findings after member change
-    const allMembers = await readBoardMembers(orgId)
+    const allMembers = await readBoardMembers(session.orgId)
     const govFindings = buildGovernanceFindings(allMembers, new Date().toISOString())
-    await mutateFreshState((current) => ({
-      ...current,
-      findings: [
-        ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
-        ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
-      ],
-    }))
+    await mutateFreshStateForOrg(
+      session.orgId,
+      (current) => ({
+        ...current,
+        findings: [
+          ...current.findings.filter((f) => !f.id.startsWith("nis2-gov-")),
+          ...preserveRuntimeStateForRegeneratedFindings(current.findings, govFindings),
+        ],
+      }),
+      session.orgName
+    )
 
     return NextResponse.json({ member }, { status: 201 })
   } catch (error) {

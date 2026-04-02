@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { jsonError } from "@/lib/server/api-response"
+import { getOrgContext } from "@/lib/server/org-context"
 import { executeRepoSync } from "@/lib/server/repo-sync-executor"
 import {
   canUseRepoSync,
@@ -36,13 +37,16 @@ export async function POST(request: Request) {
       )
     }
 
+    const workspace = await getOrgContext()
     const { nextState, fileCount } = await executeRepoSync({
       ...normalized,
       files,
+      orgId: workspace.orgId,
+      orgName: workspace.orgName,
     })
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: `GitHub repo sync finalizat pentru ${fileCount} fisier${fileCount === 1 ? "" : "e"} relevante.`,
     })
   } catch (error) {

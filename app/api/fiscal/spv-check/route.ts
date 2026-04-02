@@ -8,7 +8,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole } from "@/lib/server/auth"
-import { readState, mutateState } from "@/lib/server/mvp-store"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { ensureValidToken, fetchSpvMessages, type SpvMessage } from "@/lib/anaf-spv-client"
 import type { ScanFinding } from "@/lib/compliance/types"
 
@@ -78,14 +78,14 @@ export async function POST(request: Request) {
   try {
     const session = requireRole(request, [...WRITE_ROLES], "verificare SPV")
 
-    const state = await readState()
-    const cui = state.orgProfile?.cui
+    const orgId = session.orgId
+    const orgName = session.orgName
+    const state = await readStateForOrg(orgId)
+    const cui = state?.orgProfile?.cui
     if (!cui) {
       return jsonError("CUI-ul organizației nu este configurat. Completează profilul mai întâi.", 400, "NO_CUI")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
-    const orgName = request.headers.get("x-compliscan-org-name") ?? session.orgName
     const nowISO = new Date().toISOString()
 
     // Try to use ANAF OAuth token for full SPV check
@@ -136,10 +136,14 @@ export async function POST(request: Request) {
         }
 
         if (newFindings.length > 0) {
-          await mutateState((s) => {
-            s.findings.push(...newFindings)
-            return s
-          })
+          await writeStateForOrg(
+            orgId,
+            {
+              ...state,
+              findings: [...state.findings, ...newFindings],
+            },
+            orgName
+          )
           result.newFindings = newFindings.length
         }
       }
@@ -171,10 +175,14 @@ export async function POST(request: Request) {
         const missingFinding = buildMissingSpvFinding(cui, nowISO)
         const existingIds = new Set(state.findings.map((f) => f.id))
         if (!existingIds.has(missingFinding.id)) {
-          await mutateState((s) => {
-            s.findings.push(missingFinding)
-            return s
-          })
+          await writeStateForOrg(
+            orgId,
+            {
+              ...state,
+              findings: [...state.findings, missingFinding],
+            },
+            orgName
+          )
           result.newFindings = 1
         }
       }

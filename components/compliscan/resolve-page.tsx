@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useDeferredValue, useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, ChevronRight, Clock, Search } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bell, Bot, CalendarClock, ChevronRight, Clock, Cpu, FileSearch, Search, Shield } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
@@ -480,6 +480,27 @@ export function ResolvePageSurface() {
           <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
           <p className="mt-0.5 text-sm text-eos-text">{nextActionLine}</p>
         </div>
+      </div>
+
+      {/* Quick-nav strip — makes orphaned features discoverable */}
+      <div className="flex flex-wrap items-center gap-2">
+        {[
+          { label: "Alerte", href: dashboardRoutes.drifts, icon: Bell },
+          { label: "Calendar", href: dashboardRoutes.calendar, icon: CalendarClock },
+          { label: "Sisteme AI", href: dashboardRoutes.aiSystems, icon: Cpu },
+          { label: "Conformitate AI", href: dashboardRoutes.aiConformity, icon: Shield },
+          { label: "Vendor Review", href: dashboardRoutes.vendorReview, icon: FileSearch },
+          { label: "Agenți", href: dashboardRoutes.agents, icon: Bot },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="inline-flex items-center gap-1.5 rounded-full border border-eos-border-subtle bg-eos-surface px-3 py-1.5 text-[11px] font-medium text-eos-text-muted transition-colors hover:bg-eos-surface-active hover:text-eos-text"
+          >
+            <item.icon className="size-3" strokeWidth={2} />
+            {item.label}
+          </Link>
+        ))}
       </div>
 
       {/* Header + Severity KPI row */}

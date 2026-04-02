@@ -4,7 +4,9 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import { validateEFacturaXml } from "@/lib/compliance/efactura-validator"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { readSessionFromRequest } from "@/lib/server/auth"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 type ValidationPayload = {
   documentName?: string
@@ -12,6 +14,10 @@ type ValidationPayload = {
 }
 
 export async function POST(request: Request) {
+  const session = readSessionFromRequest(request)
+  if (!session) {
+    return NextResponse.json({ error: "Autentificare necesară." }, { status: 401 })
+  }
   const body = (await request.json()) as ValidationPayload
   const actor = await resolveOptionalEventActor(request)
   const xml = body.xml?.trim() || ""
@@ -27,7 +33,7 @@ export async function POST(request: Request) {
     nowISO,
   })
 
-  const nextState = await mutateState((current) => ({
+  const nextState = await mutateStateForOrg(session.orgId, (current) => ({
     ...current,
     efacturaValidations: [result, ...current.efacturaValidations].slice(0, 25),
     events: appendComplianceEvents(current, [
@@ -46,10 +52,16 @@ export async function POST(request: Request) {
         },
       }, actor),
     ]),
-  }))
+  }), session.orgName)
+  const workspaceOverride = {
+    ...(await getOrgContext()),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspaceOverride)),
     validation: result,
     message: result.valid
       ? "XML-ul trece validarile structurale de baza pentru e-Factura."

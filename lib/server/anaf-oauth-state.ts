@@ -1,5 +1,7 @@
 import crypto from "node:crypto"
 
+import { sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
+
 export type AnafOauthState = {
   orgId: string
   returnTo: string
@@ -45,10 +47,7 @@ export function decodeAnafOauthState(value: string | null | undefined): AnafOaut
 }
 
 export function sanitizeInternalReturnTo(value: string | null | undefined): string {
-  const fallback = "/dashboard/fiscal?tab=transmitere"
-  if (!value) return fallback
-  if (!value.startsWith("/") || value.startsWith("//")) return fallback
-  return value
+  return sanitizeInternalRoute(value, "/dashboard/fiscal?tab=transmitere")
 }
 
 function signPayload(value: string): string {

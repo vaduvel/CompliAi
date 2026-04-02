@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   canUseRepoSyncMock: vi.fn(),
   executeRepoSyncMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   normalizeProviderRepoSyncPayloadMock: vi.fn(),
   normalizeRepoSyncFilesMock: vi.fn(),
   validateProviderRepoSyncPayloadMock: vi.fn(),
@@ -26,11 +27,23 @@ vi.mock("@/lib/server/repo-sync-executor", () => ({
   executeRepoSync: mocks.executeRepoSyncMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 describe("POST /api/integrations/repo-sync/github", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
     mocks.canUseRepoSyncMock.mockReturnValue(true)
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-sync",
+      orgName: "Org Sync",
+      workspaceLabel: "Org Sync",
+      workspaceOwner: "owner@example.com",
+      workspaceInitials: "OS",
+      userRole: "owner",
+    })
   })
 
   it("blocheaza request-urile neautorizate", async () => {
@@ -110,5 +123,12 @@ describe("POST /api/integrations/repo-sync/github", () => {
 
     expect(response.status).toBe(200)
     expect(payload.message).toBe("GitHub repo sync finalizat pentru 1 fisier relevante.")
+    expect(mocks.executeRepoSyncMock).toHaveBeenCalledWith({
+      provider: "github",
+      repository: "demo/repo",
+      files: [{ path: "compliscan.yaml", content: "version: 1" }],
+      orgId: "org-sync",
+      orgName: "Org Sync",
+    })
   })
 })

@@ -9,14 +9,12 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { getAutonomySettings, saveAutonomySettings } from "@/lib/server/autonomy-resolver"
-import { getOrgContext } from "@/lib/server/org-context"
 
 export async function GET(request: Request) {
   try {
     const session = await requireFreshRole(request, ["owner", "compliance"], "autonomy-get")
-    const { orgId } = await getOrgContext()
 
-    const settings = await getAutonomySettings(session.userId, orgId)
+    const settings = await getAutonomySettings(session.userId, session.orgId)
     return NextResponse.json({ settings })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -27,11 +25,10 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await requireFreshRole(request, ["owner", "compliance"], "autonomy-update")
-    const { orgId } = await getOrgContext()
 
     const body = await request.json()
 
-    const saved = await saveAutonomySettings(session.userId, orgId, {
+    const saved = await saveAutonomySettings(session.userId, session.orgId, {
       lowRiskPolicy: body.lowRiskPolicy,
       mediumRiskPolicy: body.mediumRiskPolicy,
       highRiskPolicy: body.highRiskPolicy,

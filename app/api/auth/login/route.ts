@@ -2,13 +2,22 @@ import { NextResponse } from "next/server"
 
 import {
   createSessionToken,
+  createWorkspacePreferenceToken,
   findUserById,
   findUserByEmail,
   getSessionCookieOptions,
+  getUserMode,
+  readLastRouteFromRequest,
+  getWorkspacePreferenceCookieOptions,
   linkUserToExternalIdentity,
+  listUserMemberships,
   hashPassword,
+  readWorkspacePreferenceFromRequest,
+  resolveUserForMembership,
   SESSION_COOKIE,
+  WORKSPACE_PREF_COOKIE,
 } from "@/lib/server/auth"
+import { sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -22,6 +31,7 @@ export async function POST(request: Request) {
     const body = requirePlainObject(await request.json())
     const email = asTrimmedString(body.email, 180)
     const password = asTrimmedString(body.password, 200)
+    const requestedNext = typeof body.next === "string" ? body.next.trim() : ""
 
     if (!email || !password) {
       return jsonError("Email si parola sunt obligatorii.", 400, "AUTH_REQUIRED_FIELDS", undefined, context)
@@ -59,26 +69,66 @@ export async function POST(request: Request) {
       return jsonError("Email sau parola incorecta.", 401, "AUTH_INVALID_CREDENTIALS", undefined, context)
     }
 
+    const preferredWorkspace = readWorkspacePreferenceFromRequest(request)
+    const userMode = await getUserMode(user.id)
+    const memberships = await listUserMemberships(user.id)
+
+    let sessionUser = user
+    if (preferredWorkspace?.orgId && preferredWorkspace.orgId !== user.orgId) {
+      const preferredMembership = memberships.find(
+        (membership) =>
+          membership.orgId === preferredWorkspace.orgId && membership.status === "active"
+      )
+      if (preferredMembership) {
+        try {
+          sessionUser = await resolveUserForMembership(user.id, preferredMembership.membershipId)
+        } catch {
+          sessionUser = user
+        }
+      }
+    }
+
+    const workspaceMode =
+      preferredWorkspace?.workspaceMode === "portfolio" && userMode === "partner"
+        ? "portfolio"
+        : "org"
+    const defaultDestination = workspaceMode === "portfolio" ? "/portfolio" : "/dashboard"
+    const destination = sanitizeInternalRoute(
+      requestedNext || readLastRouteFromRequest(request),
+      defaultDestination
+    )
+
     const token = createSessionToken({
-      userId: user.id,
-      orgId: user.orgId,
-      email: user.email,
-      orgName: user.orgName,
-      role: user.role,
-      membershipId: user.membershipId,
-      workspaceMode: "org",
+      userId: sessionUser.id,
+      orgId: sessionUser.orgId,
+      email: sessionUser.email,
+      orgName: sessionUser.orgName,
+      role: sessionUser.role,
+      userMode: userMode ?? undefined,
+      membershipId: sessionUser.membershipId,
+      workspaceMode,
     })
 
     const response = NextResponse.json(
       {
         ok: true,
-        orgId: user.orgId,
-        orgName: user.orgName,
-        role: user.role,
+        orgId: sessionUser.orgId,
+        orgName: sessionUser.orgName,
+        role: sessionUser.role,
+        workspaceMode,
+        destination,
       },
       withRequestIdHeaders(undefined, context)
     )
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
+    response.cookies.set(
+      WORKSPACE_PREF_COOKIE,
+      createWorkspacePreferenceToken({
+        orgId: sessionUser.orgId,
+        workspaceMode,
+      }),
+      getWorkspacePreferenceCookieOptions()
+    )
     return response
   } catch (error) {
     if (error instanceof RequestValidationError) {

@@ -14,16 +14,21 @@ const mocks = vi.hoisted(() => ({
   requireFreshAuthenticatedSessionMock: vi.fn(),
   resolveUserForMembershipMock: vi.fn(),
   createSessionTokenMock: vi.fn(),
+  createWorkspacePreferenceTokenMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
+  getWorkspacePreferenceCookieOptionsMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   SESSION_COOKIE: "compliscan_session",
+  WORKSPACE_PREF_COOKIE: "compliscan_workspace_pref",
   requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
   resolveUserForMembership: mocks.resolveUserForMembershipMock,
   createSessionToken: mocks.createSessionTokenMock,
+  createWorkspacePreferenceToken: mocks.createWorkspacePreferenceTokenMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getWorkspacePreferenceCookieOptions: mocks.getWorkspacePreferenceCookieOptionsMock,
 }))
 
 import { POST } from "./route"
@@ -48,7 +53,9 @@ describe("POST /api/auth/switch-org", () => {
       membershipId: "membership-2",
     })
     mocks.createSessionTokenMock.mockReturnValue("signed-token")
+    mocks.createWorkspacePreferenceTokenMock.mockReturnValue("workspace-pref")
     mocks.getSessionCookieOptionsMock.mockReturnValue({ path: "/", httpOnly: true })
+    mocks.getWorkspacePreferenceCookieOptionsMock.mockReturnValue({ path: "/", httpOnly: true })
   })
 
   it("schimba organizatia activa si rescrie sesiunea", async () => {

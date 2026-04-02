@@ -8,14 +8,17 @@ import {
 } from "@/lib/server/compliscan-export"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export async function GET(request: NextRequest) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul CompliScan")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul CompliScan")
 
     const format = request.nextUrl.searchParams.get("format") === "yaml" ? "yaml" : "json"
-    const payload = await buildDashboardPayload(await readState())
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+    const payload = await buildDashboardPayload(state)
     const snapshot = buildCompliScanSnapshot(payload)
     snapshot.drift = payload.state.driftRecords.map((item) => ({
       id: item.id,

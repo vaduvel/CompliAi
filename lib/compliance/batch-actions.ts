@@ -32,5 +32,8 @@ export type BatchResult = {
   orgName: string
   status: "success" | "pending_approval" | "failed"
   pendingActionId?: string
+  detail?: string
   error?: string
+  nextStep?: string
+  summary?: Record<string, string | number | boolean>
 }

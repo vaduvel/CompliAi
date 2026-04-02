@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { GET, POST } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   readDsarStateMock: vi.fn(),
   createDsarMock: vi.fn(),
   updateDsarMock: vi.fn(),
@@ -23,17 +22,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: vi.fn().mockReturnValue({ userId: "u1" }),
-  requireRole: mocks.requireRoleMock,
-}))
-
-vi.mock("@/lib/server/rbac", () => ({
-  WRITE_ROLES: ["owner", "compliance", "reviewer"],
-  DELETE_ROLES: ["owner", "compliance"],
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dsar-store", () => ({
@@ -47,8 +36,7 @@ vi.mock("@/lib/compliance/dsar-drafts", () => ({
   generateDsarProcessPack: mocks.generateDsarProcessPackMock,
 }))
 
-const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1", orgName: "Org Test SRL" }
+const SESSION = { userId: "user-1", orgId: "org-1", orgName: "Org Test SRL", email: "test@site.ro" }
 
 const SAMPLE_DSAR = {
   id: "dsar-abc123",
@@ -70,8 +58,7 @@ const SAMPLE_DSAR = {
 describe("GET /api/dsar", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.readDsarStateMock.mockResolvedValue({ requests: [SAMPLE_DSAR], updatedAtISO: "2026-03-20T10:00:00.000Z" })
     mocks.generateDsarProcessPackMock.mockReturnValue({
       title: "Pachet minim DSAR",
@@ -92,9 +79,9 @@ describe("GET /api/dsar", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.requireRoleMock.mockImplementation(() => {
-      throw new mocks.AuthzErrorMock("Neautorizat.", 401, "UNAUTHORIZED")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Neautorizat.", 401, "UNAUTHORIZED")
+    )
     const res = await GET(new Request("http://localhost/api/dsar"))
     expect(res.status).toBe(401)
   })
@@ -103,8 +90,7 @@ describe("GET /api/dsar", () => {
 describe("POST /api/dsar", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.createDsarMock.mockResolvedValue(SAMPLE_DSAR)
     mocks.updateDsarMock.mockResolvedValue({ ...SAMPLE_DSAR, draftResponseGenerated: true })
     mocks.generateDsarDraftMock.mockReturnValue({

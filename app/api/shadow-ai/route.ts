@@ -1,6 +1,9 @@
 // V3 P2.1 — Shadow AI Questionnaire API
 import { NextRequest, NextResponse } from "next/server"
-import { readState, mutateState } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import {
   SHADOW_AI_QUESTIONS,
   calculateShadowAiRisk,
@@ -9,17 +12,24 @@ import {
   type ShadowAiAnswer,
 } from "@/lib/compliance/shadow-ai"
 import type { ShadowAiAssessmentResult } from "@/lib/compliance/shadow-ai"
+import type { UserRole } from "@/lib/server/auth"
+import { WRITE_ROLES } from "@/lib/server/rbac"
+
+const SHADOW_AI_READ_ROLES: UserRole[] = ["owner", "partner_manager", "compliance", "reviewer", "viewer"]
 
 // GET — returns current answers + questions
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const state = await readState()
+    const session = requireRole(request, SHADOW_AI_READ_ROLES, "citirea evaluării Shadow AI")
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     return NextResponse.json({
       questions: SHADOW_AI_QUESTIONS,
       answers: state.shadowAiAnswers ?? [],
       completedAtISO: state.shadowAiCompletedAtISO ?? null,
     })
   } catch (err) {
+    if (err instanceof AuthzError) return jsonError(err.message, err.status, err.code)
     console.error("[shadow-ai] GET error:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
@@ -28,6 +38,7 @@ export async function GET() {
 // POST — save answers, compute risk, inject findings
 export async function POST(req: NextRequest) {
   try {
+    const session = requireRole(req, WRITE_ROLES, "salvarea evaluării Shadow AI")
     const body = await req.json() as { answers: ShadowAiAnswer[] }
     const { answers } = body
 
@@ -70,7 +81,7 @@ export async function POST(req: NextRequest) {
     const recommendations = buildShadowAiRecommendations(answers, riskLevel)
     const newFindings = buildShadowAiFindings({ riskLevel, detectedCategories }, nowISO)
 
-    await mutateState((state) => {
+    await mutateStateForOrg(session.orgId, (state) => {
       // Replace existing shadow AI findings
       const otherFindings = (state.findings ?? []).filter(
         (f) => !f.id.startsWith("shadow-ai-")
@@ -81,7 +92,7 @@ export async function POST(req: NextRequest) {
         shadowAiCompletedAtISO: nowISO,
         findings: [...otherFindings, ...newFindings],
       }
-    })
+    }, session.orgName)
 
     const result: ShadowAiAssessmentResult = {
       completedAtISO: nowISO,
@@ -94,6 +105,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result)
   } catch (err) {
+    if (err instanceof AuthzError) return jsonError(err.message, err.status, err.code)
     console.error("[shadow-ai] POST error:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }

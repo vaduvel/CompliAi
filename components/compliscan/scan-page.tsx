@@ -198,7 +198,7 @@ export function ScanPageSurface() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
               <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Findings
+                Constatări
               </p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
                 {latestDocumentFindings.length}
@@ -304,7 +304,7 @@ export function ScanPageSurface() {
               Scanarea alimentează cockpitul, nu îl dublează
             </p>
             <p className="mt-0.5 text-xs text-eos-text-tertiary">
-              {activeFindingsCount} finding-uri sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
+              {activeFindingsCount} constatări sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
             </p>
           </div>
           <Link

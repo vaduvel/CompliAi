@@ -7,6 +7,7 @@ import { ArrowRight, Bell, CalendarClock, Download, Loader2, MailWarning, Shield
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
+import { Badge } from "@/components/evidence-os/Badge"
 import { Input } from "@/components/evidence-os/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/evidence-os/Select"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -245,7 +246,6 @@ export function SettingsPageSurface() {
   const isPartner = runtime?.userMode === "partner"
   const visibleTabs = SETTINGS_VIEW_TABS.filter((tab) => {
     if (tab.value === "branding") return isPartner
-    if (isSolo && !["workspace", "integrari", "acces", "notificari", "facturare", "autonomie"].includes(tab.value)) return false
     return true
   })
 
@@ -279,6 +279,8 @@ export function SettingsPageSurface() {
   const [wlLogoUrl, setWlLogoUrl] = useState("")
   const [wlLoading, setWlLoading] = useState(false)
   const [wlSaving, setWlSaving] = useState(false)
+  const [wlStorageBackend, setWlStorageBackend] = useState<"supabase" | "local_fallback">("supabase")
+  const [wlPersistenceStatus, setWlPersistenceStatus] = useState<"synced" | "fallback">("synced")
 
   useEffect(() => {
     if (activeTab !== "branding") return
@@ -293,6 +295,8 @@ export function SettingsPageSurface() {
         setWlTagline(c.tagline ?? "")
         setWlBrandColor(c.brandColor ?? "#6366f1")
         setWlLogoUrl(c.logoUrl ?? "")
+        setWlStorageBackend(c.storageBackend ?? "supabase")
+        setWlPersistenceStatus(c.persistenceStatus ?? "synced")
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setWlLoading(false) })
@@ -313,6 +317,11 @@ export function SettingsPageSurface() {
         }),
       })
       if (res.ok) {
+        const data = (await res.json().catch(() => null)) as { config?: { storageBackend?: "supabase" | "local_fallback"; persistenceStatus?: "synced" | "fallback" } } | null
+        if (data?.config) {
+          setWlStorageBackend(data.config.storageBackend ?? "supabase")
+          setWlPersistenceStatus(data.config.persistenceStatus ?? "synced")
+        }
         toast.success("Branding salvat.")
       } else {
         toast.error("Eroare la salvarea brandingului.")
@@ -1573,6 +1582,14 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">
                 Personalizează cum apare brandul tău în rapoartele și documentele generate pentru clienți.
               </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant={wlPersistenceStatus === "fallback" ? "warning" : "success"} className="normal-case tracking-normal">
+                  {wlPersistenceStatus === "fallback" ? "fallback local" : "Supabase synced"}
+                </Badge>
+                <Badge variant="outline" className="normal-case tracking-normal">
+                  {wlStorageBackend === "supabase" ? "storage: supabase" : "storage: local"}
+                </Badge>
+              </div>
             </div>
 
             {wlLoading ? (
@@ -1581,6 +1598,13 @@ export function SettingsPageSurface() {
               </div>
             ) : (
               <div className="space-y-6">
+                {wlPersistenceStatus === "fallback" ? (
+                  <div className="rounded-eos-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-sm text-eos-text">
+                    Brandingul este disponibil, dar persistă momentan pe fallback local. Nu îl trata ca adevăr
+                    de producție până când traseul Supabase nu revine la `synced`.
+                  </div>
+                ) : null}
+
                 {/* Preview strip */}
                 <div
                   className="flex items-center gap-4 rounded-eos-xl border px-5 py-4"

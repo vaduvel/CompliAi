@@ -15,8 +15,9 @@ const mocks = vi.hoisted(() => ({
   buildClientAuditPackDocumentMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   requireRoleMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/compliscan-export", () => ({
@@ -27,13 +28,17 @@ vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   requireRole: mocks.requireRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/audit-pack", () => ({
@@ -57,7 +62,15 @@ describe("GET /api/exports/audit-pack/client", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
-    mocks.readStateMock.mockResolvedValue({})
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-fallback",
+      orgName: "Workspace Fallback",
+      workspaceLabel: "Workspace local",
+      workspaceOwner: "Ion Popescu",
+      workspaceInitials: "IP",
+      userRole: "viewer",
+    })
+    mocks.readStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         snapshotHistory: [],
@@ -105,6 +118,16 @@ describe("GET /api/exports/audit-pack/client", () => {
     const body = await response.text()
 
     expect(response.status).toBe(200)
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.buildDashboardPayloadMock).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        orgId: "org-1",
+        orgName: "Org Demo",
+        workspaceLabel: "Workspace local",
+        userRole: "owner",
+      })
+    )
     expect(response.headers.get("x-request-id")).toBeTruthy()
     expect(response.headers.get("content-type")).toContain("text/html")
     expect(response.headers.get("content-disposition")).toContain(

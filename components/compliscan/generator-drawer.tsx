@@ -294,7 +294,7 @@ export function GeneratorDrawer({
     if (!result?.content) return
     try {
       await navigator.clipboard.writeText(result.content)
-      toast.success("Copiat în clipboard")
+      toast.success("Document copiat în clipboard")
     } catch {
       toast.error("Nu am putut copia. Selectează textul manual.")
     }

@@ -12,7 +12,7 @@ import { eventActorFromSession } from "@/lib/server/event-actor"
 import { storePrivateEvidenceFile } from "@/lib/server/evidence-storage"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { getOrgContext } from "@/lib/server/org-context"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import {
   shouldUseSupabaseEvidenceAsRequired,
@@ -157,7 +157,7 @@ export async function POST(
     }
 
     const nowISO = new Date().toISOString()
-    const { orgId } = await getOrgContext()
+    const orgId = session.orgId
     const evidenceId = `evidence-${randomUUID()}`
     const safeFileName = sanitizeFileName(uploaded.name || `${kind}.bin`)
     const bytes = Buffer.from(await uploaded.arrayBuffer())
@@ -197,7 +197,7 @@ export async function POST(
       }
     }
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       if (!getPersistableTaskIds(current).has(id)) {
         throw new Error("TASK_NOT_FOUND")
       }
@@ -235,11 +235,18 @@ export async function POST(
           }, actor),
         ]),
       }
-    })
+    }, session.orgName)
+
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
 
     return jsonWithRequestContext(
       {
-        ...(await buildDashboardPayload(nextState)),
+        ...(await buildDashboardPayload(nextState, workspace)),
         message: "Dovada a fost încărcată.",
         evidence,
       },

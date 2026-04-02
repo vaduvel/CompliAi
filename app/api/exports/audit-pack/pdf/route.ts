@@ -3,22 +3,30 @@ import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
-import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { generateAuditPackPdfBuffer } from "@/lib/server/audit-pack-pdf"
 import { NextResponse } from "next/server"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/exports/audit-pack/pdf")
 
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack PDF Native")
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "exportul Audit Pack PDF Native"
+    )
 
-    const { orgId } = await getOrgContext()
-    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const rawState =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+    const [state, nis2State] = await Promise.all([
+      Promise.resolve(rawState),
+      readNis2State(session.orgId),
+    ])
     const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({

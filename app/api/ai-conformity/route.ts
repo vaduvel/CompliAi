@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole, AuthzError } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import {
   scoreAssessment,
@@ -16,8 +17,13 @@ import {
 const CONFORMITY_FIELD = "conformity_assessment"
 
 export async function GET(request: Request) {
+  let session: ReturnType<typeof requireRole>
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "conformitate AI")
+    session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
+      "conformitate AI"
+    )
 
     const { searchParams } = new URL(request.url)
     const systemId = searchParams.get("systemId")
@@ -26,8 +32,8 @@ export async function GET(request: Request) {
       return jsonError("systemId este obligatoriu.", 400, "SYSTEM_ID_REQUIRED")
     }
 
-    const { readState } = await import("@/lib/server/mvp-store")
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
 
     const raw = state.aiComplianceFieldOverrides?.[systemId]?.[CONFORMITY_FIELD]?.value
     const answers: AssessmentAnswers = raw ? (JSON.parse(raw) as AssessmentAnswers) : {}
@@ -41,8 +47,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let session: ReturnType<typeof requireRole>
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "salvare evaluare conformitate AI")
+    session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "salvare evaluare conformitate AI"
+    )
 
     const body = (await request.json()) as { systemId?: string; answers?: AssessmentAnswers }
     const { systemId, answers } = body
@@ -57,7 +68,7 @@ export async function POST(request: Request) {
     const result = scoreAssessment(answers)
     const now = new Date().toISOString()
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       const existing = current.aiComplianceFieldOverrides ?? {}
       const systemOverrides = existing[systemId] ?? {}
 
@@ -75,7 +86,7 @@ export async function POST(request: Request) {
           },
         },
       }
-    })
+    }, session.orgName)
 
     return NextResponse.json({
       systemId,

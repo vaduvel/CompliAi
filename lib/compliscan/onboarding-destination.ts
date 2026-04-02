@@ -22,10 +22,10 @@ export function resolveOnboardingDestination(
       }
     case "compliance":
       return {
-        clientHref: "/dashboard",
-        serverHref: "/dashboard",
-        submitLabel: "Salvează și vezi dashboard-ul",
-        summaryLabel: "dashboard-ul operațional",
+        clientHref: "/dashboard/resolve",
+        serverHref: "/dashboard/resolve",
+        submitLabel: "Salvează și vezi cazurile deschise",
+        summaryLabel: "cazurile de rezolvat",
         requiresPortfolioWorkspace: false,
       }
     case "viewer":

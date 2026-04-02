@@ -10,10 +10,11 @@ import {
   type FullIntakeAnswers,
   type IntakeAnswer,
 } from "@/lib/compliance/intake-engine"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { mutateState, readState } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import {
   evaluateApplicability,
@@ -27,7 +28,6 @@ import {
 } from "@/lib/compliance/pay-transparency-rule"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import { trackEvent } from "@/lib/server/analytics"
-import { getOrgContext } from "@/lib/server/org-context"
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
@@ -69,10 +69,10 @@ type OrgProfileRequestBody = Partial<OrgProfile> & {
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "citirea profilului organizației")
 
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     return NextResponse.json({
       orgProfile: state.orgProfile ?? null,
       applicability: state.applicability ?? null,
@@ -87,11 +87,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "salvarea profilului organizației")
 
     const body = (await request.json()) as OrgProfileRequestBody
-    const currentState = await readState()
+    const currentState =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
 
     if (!body.sector || !VALID_SECTORS.includes(body.sector)) {
       return jsonError("Câmp invalid: sector.", 400, "INVALID_SECTOR")
@@ -141,8 +141,7 @@ export async function POST(request: Request) {
 
     const applicability = evaluateApplicability(orgProfile)
     const intakeAnswers = normalizeIntakeAnswers(body.intakeAnswers)
-    const { orgId } = await getOrgContext()
-    const nis2State = await readNis2State(orgId)
+    const nis2State = await readNis2State(session.orgId)
     const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
     const initialFindings = intakeAnswers
       ? buildInitialFindings(intakeAnswers, { supplementalFindings: nis2Findings })
@@ -153,7 +152,7 @@ export async function POST(request: Request) {
 
     const payTransparencyFinding = buildPayTransparencyFinding(orgProfile.employeeCount, new Date().toISOString())
 
-    const stateAfterProfile = await mutateState((current) => {
+    const stateAfterProfile = await mutateStateForOrg(session.orgId, (current) => {
       const previousFindings = (current.findings ?? [])
         .filter((finding) => !finding.id.startsWith("intake-") && finding.id !== PAY_TRANSPARENCY_FINDING_ID)
       const fallbackPrefill = matchingPrefill
@@ -186,12 +185,12 @@ export async function POST(request: Request) {
         intakeAnswers,
         intakeCompletedAtISO,
       }
-    })
+    }, session.orgName)
 
     // Auto A — write orgKnowledge from org profile (sector + tools)
     const profileSavedAtISO = orgProfile.completedAtISO
     const profileDateLabel = new Date(profileSavedAtISO).toLocaleDateString("ro-RO")
-    await mutateState((s) => {
+    await mutateStateForOrg(session.orgId, (s) => {
       const items = s.orgKnowledge?.items ?? []
       const newItems = []
       const sectorLabel = SECTOR_LABELS[orgProfile.sector] ?? orgProfile.sector
@@ -209,7 +208,7 @@ export async function POST(request: Request) {
           lastUpdatedAtISO: profileSavedAtISO,
         },
       }
-    })
+    }, session.orgName)
 
     void trackEvent(session.orgId, "completed_applicability", {
       sector: orgProfile.sector,
@@ -225,7 +224,7 @@ export async function POST(request: Request) {
     const profileChangeDetail = buildOrgProfileChangeDetail(currentState.orgProfile, orgProfile)
     if (profileChangeDetail) {
       await fireDriftTrigger({
-        orgId,
+        orgId: session.orgId,
         trigger: "org_profile_change",
         detail: profileChangeDetail,
       }).catch(() => {})

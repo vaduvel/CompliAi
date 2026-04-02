@@ -5,8 +5,26 @@ import type { ComplianceState } from "@/lib/compliance/types"
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
+const mocks = vi.hoisted(() => ({
+  AuthzErrorClass: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 401, code = "AUTH_SESSION_REQUIRED") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: vi.fn(),
+  readStateForOrg: vi.fn(),
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: mocks.AuthzErrorClass,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/plan", () => ({
@@ -17,7 +35,7 @@ vi.mock("@/lib/server/plan", () => ({
   },
 }))
 
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { GET } from "./route"
 
 function makeRequest(): Request {
@@ -35,10 +53,16 @@ function makeState(overrides: Partial<ComplianceState> = {}): ComplianceState {
 describe("GET /api/health-check", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      orgId: "org-test",
+      orgName: "Test Org",
+      email: "owner@example.com",
+      role: "owner",
+    })
   })
 
   it("returnează structura HealthCheckResult validă", async () => {
-    vi.mocked(readState).mockResolvedValue(makeState())
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
 
     const res = await GET(makeRequest())
     expect(res.status).toBe(200)
@@ -52,7 +76,7 @@ describe("GET /api/health-check", () => {
   })
 
   it("returnează score între 0 și 100", async () => {
-    vi.mocked(readState).mockResolvedValue(makeState())
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
 
     const res = await GET(makeRequest())
     const body = await res.json()
@@ -62,7 +86,7 @@ describe("GET /api/health-check", () => {
   })
 
   it("fiecare item are status ok/warning/critical", async () => {
-    vi.mocked(readState).mockResolvedValue(makeState())
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
 
     const res = await GET(makeRequest())
     const body = await res.json()
@@ -74,7 +98,7 @@ describe("GET /api/health-check", () => {
   })
 
   it("returnează 500 la eroare internă", async () => {
-    vi.mocked(readState).mockRejectedValue(new Error("store error"))
+    vi.mocked(readStateForOrg).mockRejectedValue(new Error("store error"))
 
     const res = await GET(makeRequest())
     expect(res.status).toBe(500)
@@ -83,7 +107,7 @@ describe("GET /api/health-check", () => {
   })
 
   it("cu validatedBaselineSnapshotId setat, baseline check e ok", async () => {
-    vi.mocked(readState).mockResolvedValue(
+    vi.mocked(readStateForOrg).mockResolvedValue(
       makeState({ validatedBaselineSnapshotId: "snap-123" })
     )
 
@@ -95,7 +119,7 @@ describe("GET /api/health-check", () => {
   })
 
   it("fără baseline, item baseline e warning sau critical", async () => {
-    vi.mocked(readState).mockResolvedValue(
+    vi.mocked(readStateForOrg).mockResolvedValue(
       makeState({ validatedBaselineSnapshotId: undefined })
     )
 
@@ -104,5 +128,23 @@ describe("GET /api/health-check", () => {
 
     const baselineItem = body.items.find((i: { id: string }) => i.id === "hc-baseline")
     expect(["warning", "critical"]).toContain(baselineItem?.status)
+  })
+
+  it("apelează readStateForOrg cu orgId corect", async () => {
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
+
+    await GET(makeRequest())
+
+    expect(readStateForOrg).toHaveBeenCalledWith("org-test")
+  })
+
+  it("cere sesiune activă înainte de health check", async () => {
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorClass("Ai nevoie de sesiune activa pentru Health Check periodic.")
+    )
+
+    const res = await GET(makeRequest())
+
+    expect(res.status).toBe(401)
   })
 })

@@ -11,11 +11,9 @@ import {
   ChevronUp,
   Download,
   ExternalLink,
-  FileText,
   Loader2,
   RefreshCw,
   Search,
-  ScanLine,
   Trash2,
   Upload,
   Users,
@@ -375,47 +373,123 @@ function BatchResultsModal({
   const pending = results.filter((r) => r.status === "pending_approval").length
   const failed = results.filter((r) => r.status === "failed").length
 
+  function formatSummaryKey(key: string) {
+    switch (key) {
+      case "readiness":
+        return "readiness"
+      case "blockerCount":
+        return "blockers"
+      case "complianceScore":
+        return "score"
+      case "issuesFound":
+        return "issues"
+      case "policy":
+        return "policy"
+      case "riskLevel":
+        return "risk"
+      default:
+        return key.replace(/([A-Z])/g, " $1").replace(/_/g, " ").trim().toLowerCase()
+    }
+  }
+
+  function formatSummaryValue(value: string | number | boolean) {
+    if (typeof value === "boolean") return value ? "da" : "nu"
+    return String(value)
+  }
+
+  function resultTone(status: BatchResult["status"]) {
+    if (status === "success") {
+      return {
+        card: "border-eos-success/25 bg-eos-success-soft/60",
+        badge: "bg-eos-success/10 text-eos-success border-eos-success/30",
+        label: "Executat",
+      }
+    }
+    if (status === "pending_approval") {
+      return {
+        card: "border-eos-warning/25 bg-eos-warning-soft/50",
+        badge: "bg-eos-warning/10 text-eos-warning border-eos-warning/30",
+        label: "Așteaptă aprobare",
+      }
+    }
+    return {
+      card: "border-eos-error/25 bg-eos-error-soft/60",
+      badge: "bg-eos-error/10 text-eos-error border-eos-error/30",
+      label: "Necesită intervenție",
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
+      <div className="w-full max-w-2xl rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-eos-text">{BATCH_ACTION_LABELS[action]}</p>
-            <p className="mt-0.5 text-xs text-eos-text-muted">Rezultate per firmă</p>
+            <p className="mt-0.5 text-xs text-eos-text-muted">Rezultate operaționale per firmă, cu next step clar.</p>
           </div>
           <button onClick={onClose} className="text-eos-text-tertiary hover:text-eos-text-muted">
             <X className="size-4" />
           </button>
         </div>
 
-        <div className="mb-4 flex gap-3 text-xs">
-          {success > 0 && <span className="font-medium text-eos-success">{success} reusite</span>}
+        <div className="mb-4 flex flex-wrap gap-3 text-xs">
+          {success > 0 && <span className="font-medium text-eos-success">{success} executate</span>}
           {pending > 0 && (
-            <a href="/dashboard/approvals" className="font-medium text-eos-warning hover:underline">
+            <Link href="/dashboard/approvals" className="font-medium text-eos-warning hover:underline">
               {pending} necesită aprobare →
-            </a>
+            </Link>
           )}
           {failed > 0 && <span className="font-medium text-eos-error">{failed} eșuate</span>}
         </div>
 
-        <div className="max-h-60 space-y-1.5 overflow-y-auto">
-          {results.map((r) => (
-            <div
-              key={r.orgId}
-              className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${
-                r.status === "success"
-                  ? "border-eos-success/20 bg-eos-success-soft text-eos-success"
-                  : r.status === "pending_approval"
-                    ? "border-eos-warning/20 bg-eos-warning/5 text-eos-warning"
-                    : "border-eos-error/20 bg-eos-error-soft text-eos-error"
-              }`}
-            >
-              <span className="flex-1 font-medium">{r.orgName}</span>
-              <span className="text-[10px] opacity-80">
-                {r.status === "success" ? "✓ OK" : r.status === "pending_approval" ? "⏳ Aprobare" : `✗ ${r.error ?? "eroare"}`}
-              </span>
-            </div>
-          ))}
+        {pending > 0 && (
+          <div className="mb-4 rounded-eos-lg border border-eos-warning/20 bg-eos-warning/5 px-4 py-3 text-xs text-eos-text-muted">
+            Acțiunile care așteaptă aprobare nu sunt pierdute. Le poți confirma din acest modal sau din pagina Aprobări, apoi continui execuția pe firmă.
+          </div>
+        )}
+
+        <div className="max-h-[28rem] space-y-2 overflow-y-auto">
+          {results.map((r) => {
+            const tone = resultTone(r.status)
+            return (
+              <div
+                key={r.orgId}
+                className={`rounded-eos-lg border px-4 py-3 ${tone.card}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-eos-text">{r.orgName}</p>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${tone.badge}`}>
+                        {tone.label}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-eos-text-muted">{r.detail ?? r.error ?? "Fără detalii suplimentare."}</p>
+                  </div>
+                  <span className="text-[11px] font-medium text-eos-text-tertiary">{r.orgId}</span>
+                </div>
+
+                {r.summary && Object.keys(r.summary).length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {Object.entries(r.summary).map(([key, value]) => (
+                      <span
+                        key={`${r.orgId}-${key}`}
+                        className="rounded-full border border-eos-border bg-eos-surface px-2 py-1 text-[10px] font-medium text-eos-text-muted"
+                      >
+                        {formatSummaryKey(key)}: {formatSummaryValue(value)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {r.nextStep && (
+                  <div className="mt-3 rounded-eos-md border border-eos-border/70 bg-eos-surface/70 px-3 py-2 text-xs text-eos-text-muted">
+                    <span className="font-medium text-eos-text">Ce urmează:</span> {r.nextStep}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <button
@@ -570,10 +644,19 @@ export function PortfolioOverviewClient() {
     if (selectedIds.size === 0) return
     setBatchLoading(true)
     try {
+      const orgNames = Object.fromEntries(
+        clients
+          .filter((client) => selectedIds.has(client.orgId))
+          .map((client) => [client.orgId, client.orgName])
+      )
       const res = await fetch("/api/portfolio/batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ actionType: type, orgIds: Array.from(selectedIds) }),
+        body: JSON.stringify({
+          actionType: type,
+          orgIds: Array.from(selectedIds),
+          config: { orgNames },
+        }),
       })
       const data = (await res.json()) as { results?: BatchResult[]; error?: string; message?: string }
       if (!res.ok) throw new Error(data.error ?? "Eroare la batch.")
@@ -582,11 +665,11 @@ export function PortfolioOverviewClient() {
       setBatchAction(type)
       setSelectedIds(new Set())
       const pendingCount = results.filter((r) => r.status === "pending_approval").length
-      if (pendingCount > 0) {
-        toast.info(`${pendingCount} acțiuni necesită aprobare.`)
-      } else {
-        toast.success(`${results.length} acțiuni rulate cu succes.`)
-      }
+      const message = data.message ?? (pendingCount > 0
+        ? `${pendingCount} acțiuni necesită aprobare.`
+        : `${results.length} acțiuni rulate cu succes.`)
+      if (pendingCount > 0) toast.info(message)
+      else toast.success(message)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare la batch.")
     } finally {

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { computeDashboardSummary, initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { buildOnePageReport, buildOnePageReportHtml } from "@/lib/compliance/one-page-report"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -13,13 +13,19 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/reports")
 
   try {
-    const [state, { orgName }] = await Promise.all([readState(), getOrgContext()])
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
+      "generarea raportului executiv"
+    )
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)
     const remediationPlan = buildRemediationPlan(normalized)
     const nowISO = new Date().toISOString()
 
-    const report = buildOnePageReport(normalized, summary, remediationPlan, orgName, nowISO)
+    const report = buildOnePageReport(normalized, summary, remediationPlan, session.orgName, nowISO)
     const html = buildOnePageReportHtml(report)
 
     return NextResponse.json({ report, html }, withRequestIdHeaders(undefined, context))

@@ -20,7 +20,8 @@ const mocks = vi.hoisted(() => ({
     }
   },
   buildDashboardPayloadMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   requireRoleMock: vi.fn(),
 }))
 
@@ -28,8 +29,12 @@ vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/auth", () => ({
@@ -48,11 +53,19 @@ describe("POST /api/state/baseline", () => {
       role: "compliance",
       exp: Date.now() + 1000,
     })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-ctx",
+      orgName: "Workspace Org",
+      workspaceLabel: "Workspace",
+      workspaceOwner: "Owner",
+      workspaceInitials: "WO",
+      userRole: "compliance",
+    })
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
   })
 
   it("respinge set daca nu exista snapshot", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockBaselineState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockBaselineState) => unknown) =>
       updater({
         snapshotHistory: [],
         events: [],
@@ -74,7 +87,7 @@ describe("POST /api/state/baseline", () => {
   })
 
   it("seteaza baseline-ul pe snapshot-ul curent", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockBaselineState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockBaselineState) => unknown) =>
       updater({
         snapshotHistory: [{ snapshotId: "snap-1" }],
         events: [],
@@ -94,10 +107,11 @@ describe("POST /api/state/baseline", () => {
     expect(response.status).toBe(200)
     expect(payload.message).toContain("salvat ca baseline validat")
     expect(payload.state.validatedBaselineSnapshotId).toBe("snap-1")
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Function), "Org Demo")
   })
 
   it("permite clear pentru baseline-ul validat", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockBaselineState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockBaselineState) => unknown) =>
       updater({
         snapshotHistory: [{ snapshotId: "snap-1" }],
         validatedBaselineSnapshotId: "snap-1",

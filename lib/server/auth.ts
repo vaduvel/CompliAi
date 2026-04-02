@@ -3,6 +3,7 @@ import path from "node:path"
 import crypto from "node:crypto"
 
 import { writeFileSafe } from "@/lib/server/fs-safe"
+import { isWorkspaceRouteMemoryCandidate, sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
 import { isLocalFallbackAllowedForCloudPrimary } from "@/lib/server/cloud-fallback-policy"
 import {
   shouldUseSupabaseTenancyAsPrimary,
@@ -103,6 +104,10 @@ export type UserMembershipSummary = {
 }
 
 export type WorkspaceMode = "org" | "portfolio"
+export type WorkspacePreferencePayload = {
+  orgId: string
+  workspaceMode: WorkspaceMode
+}
 
 export type SessionPayload = {
   userId: string
@@ -129,7 +134,11 @@ export class AuthzError extends Error {
 }
 
 export const SESSION_COOKIE = "compliscan_session"
+export const WORKSPACE_PREF_COOKIE = "compliscan_workspace_pref"
+export const LAST_ROUTE_COOKIE = "compliscan_last_route"
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
+const WORKSPACE_PREF_TTL_MS = 180 * 24 * 60 * 60 * 1000
+const LAST_ROUTE_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 function resolveDataFilePath(envKey: string, fallbackFileName: string) {
   const explicit = process.env[envKey]?.trim()
@@ -1270,6 +1279,53 @@ export function readSessionFromRequest(request: Request): SessionPayload | null 
   return verifySessionToken(token)
 }
 
+export function createWorkspacePreferenceToken(payload: WorkspacePreferencePayload): string {
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url")
+  const signature = crypto.createHmac("sha256", getSecret()).update(encoded).digest("base64url")
+  return `${encoded}.${signature}`
+}
+
+export function verifyWorkspacePreferenceToken(value: string | null | undefined): WorkspacePreferencePayload | null {
+  try {
+    if (!value) return null
+    const dotIndex = value.lastIndexOf(".")
+    if (dotIndex === -1) return null
+
+    const encoded = value.slice(0, dotIndex)
+    const signature = value.slice(dotIndex + 1)
+    const expectedSignature = crypto
+      .createHmac("sha256", getSecret())
+      .update(encoded)
+      .digest("base64url")
+
+    if (signature !== expectedSignature) return null
+
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString()) as Partial<WorkspacePreferencePayload>
+    if (!payload || typeof payload !== "object" || !payload.orgId) return null
+
+    return {
+      orgId: payload.orgId,
+      workspaceMode: isWorkspaceMode(payload.workspaceMode) ? payload.workspaceMode : "org",
+    }
+  } catch {
+    return null
+  }
+}
+
+export function readWorkspacePreferenceFromRequest(
+  request: Request
+): WorkspacePreferencePayload | null {
+  const cookieStore = parseCookieHeader(request)
+  return verifyWorkspacePreferenceToken(cookieStore.get(WORKSPACE_PREF_COOKIE))
+}
+
+export function readLastRouteFromRequest(request: Request): string | null {
+  const cookieStore = parseCookieHeader(request)
+  const value = sanitizeInternalRoute(cookieStore.get(LAST_ROUTE_COOKIE), "")
+  if (!value || !isWorkspaceRouteMemoryCandidate(value)) return null
+  return value
+}
+
 function isDemoSession(session: SessionPayload): boolean {
   return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
 }
@@ -1421,6 +1477,26 @@ export function getSessionCookieOptions() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     maxAge: SESSION_TTL_MS / 1000,
+    path: "/",
+  }
+}
+
+export function getWorkspacePreferenceCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: WORKSPACE_PREF_TTL_MS / 1000,
+    path: "/",
+  }
+}
+
+export function getLastRouteCookieOptions() {
+  return {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: LAST_ROUTE_TTL_MS / 1000,
     path: "/",
   }
 }

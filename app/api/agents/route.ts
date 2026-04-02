@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { safeGetRecentRuns } from "@/lib/server/agent-run-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { AGENT_LABELS, AGENT_DESCRIPTIONS, type AgentType } from "@/lib/compliance/agentic-engine"
@@ -26,12 +25,9 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/agents")
 
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "vizualizare agenți")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "vizualizare agenți")
 
-    const recentRuns = await safeGetRecentRuns(orgId, 30)
-
-    void session
+    const recentRuns = await safeGetRecentRuns(session.orgId, 30)
 
     return NextResponse.json(
       {
@@ -61,8 +57,7 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/agents")
 
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "execuție agent manual")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "execuție agent manual")
 
     const body = (await request.json()) as { agentType?: string }
     const agentType = body.agentType as AgentType
@@ -77,8 +72,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const output = await executeAgent(orgId, agentType)
-    void session
+    const output = await executeAgent(session.orgId, agentType)
 
     return NextResponse.json({ output }, withRequestIdHeaders(undefined, context))
   } catch (error) {
@@ -96,8 +90,7 @@ export async function PATCH(request: Request) {
   const context = createRequestContext(request, "/api/agents")
 
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "feedback agent")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "feedback agent")
 
     const body = (await request.json()) as {
       agentType?: string
@@ -114,9 +107,7 @@ export async function PATCH(request: Request) {
       return jsonError("decision trebuie să fie approved, rejected sau ignored.", 400, "INVALID_DECISION", undefined, context)
     }
 
-    void session
-
-    await safeRecordFeedback(orgId, {
+    await safeRecordFeedback(session.orgId, {
       agentType: body.agentType as AgentType,
       actionType: (body.actionType ?? "finding_created") as import("@/lib/compliance/agentic-engine").AgentActionType,
       suggestionContext: {

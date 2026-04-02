@@ -8,8 +8,7 @@ import {
 import type { FiscalProtocolFindingType, FiscalProtocolRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
-import { mutateState, readState } from "@/lib/server/mvp-store"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 
 type FiscalProtocolBody = {
@@ -50,7 +49,7 @@ function normalizeReceiptStatus(value: unknown): FiscalProtocolRecord["receiptSt
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "protocolul fiscal")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "protocolul fiscal")
 
     const search = new URL(request.url).searchParams
     const findingId = getFiscalProtocolKey(search.get("findingId"))
@@ -60,7 +59,12 @@ export async function GET(request: Request) {
       return jsonError("Protocolul fiscal este disponibil doar pentru EF-004 și EF-005.", 400, "FISCAL_PROTOCOL_TYPE_INVALID")
     }
 
-    const [state, { orgName }] = await Promise.all([readState(), getOrgContext()])
+    const orgId = session.orgId
+    const orgName = session.orgName
+    const state = await readStateForOrg(orgId)
+    if (!state) {
+      return jsonError("Nu am putut încărca starea organizației active.", 500, "FISCAL_PROTOCOL_STATE_UNAVAILABLE")
+    }
     const protocol = state.fiscalProtocols?.[findingId] ?? null
     const derived = buildFiscalProtocolDerived(protocol, {
       findingId,
@@ -130,55 +134,58 @@ export async function PATCH(request: Request) {
     }
 
     const nowISO = new Date().toISOString()
-    const { orgId, orgName } = await getOrgContext()
-    const currentState = await readState()
+    const orgId = session.orgId
+    const orgName = session.orgName
+    const currentState = await readStateForOrg(orgId)
+    if (!currentState) {
+      return jsonError("Nu am putut încărca starea organizației active.", 500, "FISCAL_PROTOCOL_STATE_UNAVAILABLE")
+    }
     const previousProtocol = currentState.fiscalProtocols?.[findingId] ?? null
 
-    const nextState = await mutateState((current) => {
-      const protocol: FiscalProtocolRecord = {
-        findingId,
-        findingTypeId,
-        invoiceRef: invoiceRef || undefined,
-        actionStatus,
-        spvReference: spvReference || undefined,
-        receiptStatus,
-        receiptReceivedAtISO,
-        evidenceLocation: evidenceLocation || undefined,
-        operatorNote: operatorNote || undefined,
-        updatedAtISO: nowISO,
-      }
+    const protocol: FiscalProtocolRecord = {
+      findingId,
+      findingTypeId,
+      invoiceRef: invoiceRef || undefined,
+      actionStatus,
+      spvReference: spvReference || undefined,
+      receiptStatus,
+      receiptReceivedAtISO,
+      evidenceLocation: evidenceLocation || undefined,
+      operatorNote: operatorNote || undefined,
+      updatedAtISO: nowISO,
+    }
 
-      return {
-        ...current,
-        fiscalProtocols: {
-          ...(current.fiscalProtocols ?? {}),
-          [findingId]: protocol,
-        },
-        events: appendComplianceEvents(current, [
-          createComplianceEvent(
-            {
-              type: "fiscal.protocol-updated",
-              entityType: "integration",
-              entityId: findingId,
-              message: `Protocolul fiscal a fost actualizat pentru ${orgName}.`,
-              createdAtISO: nowISO,
-              metadata: {
-                findingId,
-                findingTypeId,
-                actionStatus: actionStatus ?? "unset",
-                receiptStatus: receiptStatus ?? "unset",
-              },
+    const nextState = {
+      ...currentState,
+      fiscalProtocols: {
+        ...(currentState.fiscalProtocols ?? {}),
+        [findingId]: protocol,
+      },
+      events: appendComplianceEvents(currentState, [
+        createComplianceEvent(
+          {
+            type: "fiscal.protocol-updated",
+            entityType: "integration",
+            entityId: findingId,
+            message: `Protocolul fiscal a fost actualizat pentru ${orgName}.`,
+            createdAtISO: nowISO,
+            metadata: {
+              findingId,
+              findingTypeId,
+              actionStatus: actionStatus ?? "unset",
+              receiptStatus: receiptStatus ?? "unset",
             },
-            {
-              id: session.userId,
-              label: session.email,
-              role: session.role,
-              source: "session",
-            }
-          ),
-        ]),
-      }
-    })
+          },
+          {
+            id: session.userId,
+            label: session.email,
+            role: session.role,
+            source: "session",
+          }
+        ),
+      ]),
+    }
+    await writeStateForOrg(orgId, nextState, orgName)
 
     const savedProtocol = nextState.fiscalProtocols?.[findingId] ?? null
 

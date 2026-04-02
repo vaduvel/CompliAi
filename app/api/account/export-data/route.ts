@@ -9,9 +9,9 @@ import { NextResponse } from "next/server"
 
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
+import { initialComplianceState, normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   try {
@@ -20,7 +20,8 @@ export async function GET(request: Request) {
       return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
     }
 
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     const nis2State = await readNis2State(session.orgId)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)

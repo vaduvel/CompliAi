@@ -2,8 +2,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { createDsar, readDsarState, updateDsar } from "@/lib/server/dsar-store"
 import { generateDsarDraft, generateDsarProcessPack } from "@/lib/compliance/dsar-drafts"
 import { WRITE_ROLES } from "@/lib/server/rbac"
@@ -15,12 +14,11 @@ const VALID_TYPES: DsarRequestType[] = [
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "vizualizarea cererilor DSAR")
-    const { orgId, orgName } = await getOrgContext()
-    const state = await readDsarState(orgId)
+    const session = await requireFreshRole(request, WRITE_ROLES, "vizualizarea cererilor DSAR")
+    const state = await readDsarState(session.orgId)
     return NextResponse.json({
       requests: state.requests,
-      processPack: generateDsarProcessPack({ orgName: orgName || orgId }),
+      processPack: generateDsarProcessPack({ orgName: session.orgName || session.orgId }),
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -30,7 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "crearea unei cereri DSAR")
+    const session = await requireFreshRole(request, WRITE_ROLES, "crearea unei cereri DSAR")
     const body = await request.json()
 
     const { requesterName, requesterEmail, requestType, receivedAtISO, notes } = body
@@ -38,8 +36,7 @@ export async function POST(request: Request) {
     if (!requesterEmail?.trim()) return jsonError("Email-ul solicitantului este obligatoriu.", 400, "MISSING_FIELD")
     if (!VALID_TYPES.includes(requestType)) return jsonError("Tip cerere invalid.", 400, "INVALID_TYPE")
 
-    const { orgId, orgName } = await getOrgContext()
-    const dsar = await createDsar(orgId, {
+    const dsar = await createDsar(session.orgId, {
       requesterName: requesterName.trim(),
       requesterEmail: requesterEmail.trim(),
       requestType,
@@ -51,9 +48,9 @@ export async function POST(request: Request) {
     const draft = generateDsarDraft({
       requestType: dsar.requestType,
       requesterName: dsar.requesterName,
-      orgName: orgName || orgId,
+      orgName: session.orgName || session.orgId,
     })
-    const updatedDsar = await updateDsar(orgId, dsar.id, { draftResponseGenerated: true })
+    const updatedDsar = await updateDsar(session.orgId, dsar.id, { draftResponseGenerated: true })
 
     return NextResponse.json({ request: updatedDsar ?? dsar, draft }, { status: 201 })
   } catch (error) {

@@ -2,23 +2,24 @@ import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { buildAuditPack } from "@/lib/server/audit-pack"
-import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { requirePlan, PlanError } from "@/lib/server/plan"
 import { getWhiteLabelConfig } from "@/lib/server/white-label"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack")
     await requirePlan(request, "pro", "Audit Pack complet")
 
-    const { orgId } = await getOrgContext()
+    const rawState =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     const [state, nis2State, whiteLabel] = await Promise.all([
-      readState(),
-      readNis2State(orgId),
-      getWhiteLabelConfig(orgId).catch(() => null),
+      Promise.resolve(rawState),
+      readNis2State(session.orgId),
+      getWhiteLabelConfig(session.orgId).catch(() => null),
     ])
     const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)

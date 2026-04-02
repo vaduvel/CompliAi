@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { trackEvent } from "@/lib/server/analytics"
 import type { OrgProfile } from "@/lib/compliance/applicability"
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       completedAtISO: new Date().toISOString(),
     }
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       orgProfile,
       // Store partner workspace metadata separately for future use
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         clientScale: body.clientScale,
         configuredAtISO: new Date().toISOString(),
       },
-    }))
+    }), session.orgName)
 
     void trackEvent(session.orgId, "completed_partner_workspace", {
       clientScale: body.clientScale,

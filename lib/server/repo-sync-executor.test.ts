@@ -4,11 +4,11 @@ import path from "node:path"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 import { executeRepoSync } from "@/lib/server/repo-sync-executor"
@@ -34,14 +34,15 @@ describe("repo-sync-executor", () => {
   it("genereaza scan, sistem detectat si evenimente pentru manifest", async () => {
     const manifest = readFixture("manifests", "package-openai.json")
 
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MinimalState) => unknown) =>
-      updater({
+    mocks.mutateStateForOrgMock.mockImplementationOnce(
+      async (_orgId: string, updater: (state: MinimalState) => unknown) =>
+        updater({
         scans: [],
         findings: [],
         alerts: [],
         detectedAISystems: [],
         events: [],
-      })
+        })
     )
 
     const result = await executeRepoSync({
@@ -49,6 +50,8 @@ describe("repo-sync-executor", () => {
       repository: "demo/repo",
       branch: "main",
       commitSha: "abc123",
+      orgId: "org-demo",
+      orgName: "Demo Org",
       files: [{ path: "package.json", content: manifest }],
     })
 
@@ -62,19 +65,25 @@ describe("repo-sync-executor", () => {
         (event: { type?: string }) => event.type === "integration.repo-sync.completed"
       )
     ).toBe(true)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-demo",
+      expect.any(Function),
+      "Demo Org"
+    )
   })
 
   it("trateaza compliscan.yaml ca sursa declarativa si pastreaza risk class", async () => {
     const yaml = readFixture("yaml", "compliscan-customer-support.yaml")
 
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MinimalState) => unknown) =>
-      updater({
+    mocks.mutateStateForOrgMock.mockImplementationOnce(
+      async (_orgId: string, updater: (state: MinimalState) => unknown) =>
+        updater({
         scans: [],
         findings: [],
         alerts: [],
         detectedAISystems: [],
         events: [],
-      })
+        })
     )
 
     const result = await executeRepoSync({
@@ -82,6 +91,8 @@ describe("repo-sync-executor", () => {
       repository: "demo/repo",
       branch: "main",
       commitSha: "def456",
+      orgId: "org-demo",
+      orgName: "Demo Org",
       files: [{ path: "compliscan.yaml", content: yaml }],
     })
 

@@ -1,11 +1,12 @@
 // V3 P1.3 — Inspector Mode API
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { runInspectorSimulation } from "@/lib/compliance/inspector-mode"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { requirePlan, PlanError } from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -14,15 +15,25 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/inspector")
 
   try {
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "Inspector Mode / Simulare Control"
+    )
     await requirePlan(request, "pro", "Inspector Mode / Simulare Control")
-    const { orgId } = await getOrgContext()
     const [state, nis2State] = await Promise.all([
-      readState(),
-      readNis2State(orgId),
+      readStateForOrg(session.orgId),
+      readNis2State(session.orgId),
     ])
-    const result = runInspectorSimulation(state, nis2State, new Date().toISOString())
+    const result = runInspectorSimulation(
+      state ?? normalizeComplianceState(initialComplianceState),
+      nis2State,
+      new Date().toISOString()
+    )
     return NextResponse.json(result, withRequestIdHeaders(undefined, context))
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code, undefined, context)
+    }
     if (error instanceof PlanError) {
       return jsonError(error.message, error.status, error.code, undefined, context)
     }

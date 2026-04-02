@@ -2,16 +2,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   createSessionTokenMock: vi.fn(),
+  createWorkspacePreferenceTokenMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
+  getWorkspacePreferenceCookieOptionsMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   setUserModeMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   createSessionToken: mocks.createSessionTokenMock,
+  createWorkspacePreferenceToken: mocks.createWorkspacePreferenceTokenMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getWorkspacePreferenceCookieOptions: mocks.getWorkspacePreferenceCookieOptionsMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
   SESSION_COOKIE: "compliscan_session",
+  WORKSPACE_PREF_COOKIE: "compliscan_workspace_pref",
   setUserMode: mocks.setUserModeMock,
 }))
 
@@ -25,7 +30,13 @@ describe("POST /api/auth/set-user-mode", () => {
       path: "/",
       sameSite: "lax",
     })
+    mocks.getWorkspacePreferenceCookieOptionsMock.mockReturnValue({
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    })
     mocks.createSessionTokenMock.mockReturnValue("signed-token")
+    mocks.createWorkspacePreferenceTokenMock.mockReturnValue("workspace-pref")
   })
 
   it("salveaza modul si rescrie sesiunea cu userMode", async () => {

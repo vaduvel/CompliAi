@@ -4,19 +4,24 @@
 
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { getAnafMode } from "@/lib/server/efactura-anaf-client"
-import { readState, mutateState } from "@/lib/server/mvp-store"
+import { readSessionFromRequest } from "@/lib/server/auth"
+import { readStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
 import {
   buildMockEFacturaSignals,
   buildEFacturaRiskFindings,
   EFACTURA_RISK_FINDING_PREFIX,
 } from "@/lib/compliance/efactura-risk"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
     const mode = getAnafMode()
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
 
     // In mock mode, return demo signals
     // In real mode, signals would come from ANAF SPV polling (future sprint)
@@ -35,13 +40,15 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
     const signals = buildMockEFacturaSignals()
     const nowISO = new Date().toISOString()
     const newFindings = buildEFacturaRiskFindings(signals, nowISO)
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       findings: [
         ...current.findings.filter(
@@ -49,7 +56,7 @@ export async function POST() {
         ),
         ...newFindings,
       ],
-    }))
+    }), session.orgName)
 
     return NextResponse.json({
       generated: newFindings.length,

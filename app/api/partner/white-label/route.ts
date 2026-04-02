@@ -15,8 +15,7 @@ export async function GET(request: Request) {
       throw new AuthzError("White-label e disponibil doar în modul partner.", 403, "PORTFOLIO_FORBIDDEN")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const config = await getWhiteLabelConfig(orgId)
+    const config = await getWhiteLabelConfig(session.orgId)
 
     return NextResponse.json({ ok: true, config })
   } catch (error) {
@@ -33,7 +32,6 @@ export async function PATCH(request: Request) {
       throw new AuthzError("White-label e disponibil doar în modul partner.", 403, "PORTFOLIO_FORBIDDEN")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? ""
     const body = await request.json() as {
       partnerName?: string
       tagline?: string | null
@@ -46,7 +44,7 @@ export async function PATCH(request: Request) {
       return jsonError("brandColor trebuie să fie un hex color valid (#rrggbb).", 400, "INVALID_BRAND_COLOR")
     }
 
-    const config = await saveWhiteLabelConfig(orgId, {
+    const config = await saveWhiteLabelConfig(session.orgId, {
       ...(body.partnerName !== undefined && { partnerName: body.partnerName }),
       ...(body.tagline !== undefined && { tagline: body.tagline }),
       ...(body.logoUrl !== undefined && { logoUrl: body.logoUrl }),

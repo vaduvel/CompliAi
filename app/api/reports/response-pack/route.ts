@@ -3,7 +3,7 @@
 
 import { NextResponse } from "next/server"
 
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { computeDashboardSummary, initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import type { EFacturaInvoiceSignal } from "@/lib/compliance/efactura-risk"
 import { buildFiscalSummary } from "@/lib/compliance/efactura-signal-hardening"
@@ -21,8 +21,8 @@ import {
   type ResponsePackVendorSummary,
 } from "@/lib/compliance/response-pack"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -31,13 +31,19 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/reports/response-pack")
 
   try {
-    const [state, { orgId, orgName }] = await Promise.all([readState(), getOrgContext()])
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
+      "generarea response pack-ului de conformitate"
+    )
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)
     const remediationPlan = buildRemediationPlan(normalized)
     const nowISO = new Date().toISOString()
 
-    const reviews = await safeListReviews(orgId)
+    const reviews = await safeListReviews(session.orgId)
     let vendorReviewSummary: ResponsePackVendorSummary | undefined
     if (reviews.length > 0) {
       vendorReviewSummary = {
@@ -115,7 +121,7 @@ export async function POST(request: Request) {
       normalized,
       summary,
       remediationPlan,
-      orgName,
+      session.orgName,
       nowISO,
       vendorReviewSummary,
       fiscalStatus

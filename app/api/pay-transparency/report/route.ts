@@ -4,7 +4,7 @@ import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-r
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { buildPayGapReport, buildPayGapReportMarkdown } from "@/lib/server/pay-transparency-store"
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const documentId = `pay-gap-doc-${report.id}`
     const generatedAtISO = report.generatedAtISO
 
-    await mutateState((current) => {
+    await mutateStateForOrg(session.orgId, (current) => {
       const nextDocument = {
         id: documentId,
         documentType: "pay-gap-report" as const,
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
           ),
         ]),
       }
-    })
+    }, session.orgName)
 
     return NextResponse.json({
       ok: true,

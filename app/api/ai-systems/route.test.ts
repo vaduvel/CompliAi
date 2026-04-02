@@ -27,8 +27,7 @@ vi.mock("@/lib/server/api-response", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: vi.fn(async (fn: (s: unknown) => unknown) => fn(makeBaseState())),
-  readState: vi.fn(async () => makeBaseState()),
+  mutateStateForOrg: vi.fn(async (_orgId: string, fn: (s: unknown) => unknown) => fn(makeBaseState())),
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -43,7 +42,7 @@ vi.mock("@/lib/server/org-context", () => ({
   getOrgContext: vi.fn(async () => ({ orgId: "org-1", userEmail: "test@test.com", orgName: "Test Org" })),
 }))
 
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -87,7 +86,14 @@ describe("POST /api/ai-systems", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Implicit: WRITE_ROLES — owner/compliance/reviewer trec prin RBAC
-    vi.mocked(requireRole).mockReturnValue(undefined as never)
+    vi.mocked(requireRole).mockReturnValue({
+      userId: "user-1",
+      email: "demo@test.com",
+      orgId: "org-1",
+      orgName: "Test Org",
+      role: "owner",
+      exp: Date.now() + 60_000,
+    } as never)
   })
 
   describe("RBAC — rol insuficient", () => {
@@ -105,7 +111,7 @@ describe("POST /api/ai-systems", () => {
     it("creează alertă DPA când vendor-ul este extern (non-Necunoscut)", async () => {
       let capturedState: ComplianceState | null = null
 
-      vi.mocked(mutateState).mockImplementation(async (fn) => {
+      vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
         capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
@@ -127,7 +133,7 @@ describe("POST /api/ai-systems", () => {
     it("NU creează alertă DPA când vendor-ul lipsește (Necunoscut implicit)", async () => {
       let capturedState: ComplianceState | null = null
 
-      vi.mocked(mutateState).mockImplementation(async (fn) => {
+      vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
         capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
@@ -141,7 +147,7 @@ describe("POST /api/ai-systems", () => {
     it("NU creează alertă DPA când vendor-ul este 'Necunoscut' explicit", async () => {
       let capturedState: ComplianceState | null = null
 
-      vi.mocked(mutateState).mockImplementation(async (fn) => {
+      vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
         capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })
@@ -155,7 +161,7 @@ describe("POST /api/ai-systems", () => {
     it("NU creează alertă DPA când vendor-ul este string gol", async () => {
       let capturedState: ComplianceState | null = null
 
-      vi.mocked(mutateState).mockImplementation(async (fn) => {
+      vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
         capturedState = fn(makeBaseState()) as ComplianceState
         return capturedState
       })

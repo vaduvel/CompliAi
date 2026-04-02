@@ -4,7 +4,8 @@ import type { ComplianceDriftChange, ComplianceDriftSeverity } from "@/lib/compl
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 
 type DriftSettingsPayload = {
   severityOverrides?: Partial<Record<ComplianceDriftChange, ComplianceDriftSeverity | "default">>
@@ -12,20 +13,27 @@ type DriftSettingsPayload = {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "actualizarea setarilor de drift")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "actualizarea setarilor de drift")
 
     const body = (await request.json().catch(() => ({}))) as DriftSettingsPayload
     const severityOverrides = sanitizeOverrides(body.severityOverrides)
 
-    const nextState = await mutateState((current) => ({
+    const nextState = await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       driftSettings: {
         severityOverrides,
       },
-    }))
+    }), session.orgName)
+
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: "Setarile de severitate pentru drift au fost actualizate.",
     })
   } catch (error) {

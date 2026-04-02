@@ -4,7 +4,7 @@ import { initialComplianceState } from "@/lib/compliance/engine"
 
 const mocks = vi.hoisted(() => ({
   requireAuthenticatedSessionMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   logRouteErrorMock: vi.fn(),
 }))
 
@@ -13,7 +13,7 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/operational-logger", () => ({
@@ -32,7 +32,7 @@ describe("POST /api/agent/commit", () => {
       email: "owner@site.ro",
       role: "owner",
     })
-    mocks.mutateStateMock.mockImplementation(async (updater: (state: typeof initialComplianceState) => unknown) => {
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) => {
       updater(structuredClone(initialComplianceState))
       return structuredClone(initialComplianceState)
     })
@@ -64,7 +64,7 @@ describe("POST /api/agent/commit", () => {
 
     expect(response.status).toBe(422)
     expect(payload.code).toBe("AGENT_REVIEW_REQUIRED")
-    expect(mocks.mutateStateMock).not.toHaveBeenCalled()
+    expect(mocks.mutateStateForOrgMock).not.toHaveBeenCalled()
   })
 
   it("respinge commitul daca nu a ramas nimic confirmat", async () => {
@@ -93,7 +93,7 @@ describe("POST /api/agent/commit", () => {
 
     expect(response.status).toBe(422)
     expect(payload.code).toBe("AGENT_NOTHING_CONFIRMED")
-    expect(mocks.mutateStateMock).not.toHaveBeenCalled()
+    expect(mocks.mutateStateForOrgMock).not.toHaveBeenCalled()
   })
 
   it("permite commitul doar dupa confirmare explicita", async () => {
@@ -144,6 +144,10 @@ describe("POST /api/agent/commit", () => {
 
     expect(response.status).toBe(200)
     expect(payload.success).toBe(true)
-    expect(mocks.mutateStateMock).toHaveBeenCalledTimes(1)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Org Demo"
+    )
   })
 })

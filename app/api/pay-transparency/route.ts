@@ -3,7 +3,8 @@ import { NextResponse } from "next/server"
 import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-rule"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { listPayGapReports, listSalaryRecords } from "@/lib/server/pay-transparency-store"
 
 export async function GET(request: Request) {
@@ -17,10 +18,11 @@ export async function GET(request: Request) {
     const [records, reports, state] = await Promise.all([
       listSalaryRecords(session.orgId),
       listPayGapReports(session.orgId),
-      readState(),
+      readStateForOrg(session.orgId),
     ])
+    const normalizedState = state ?? normalizeComplianceState(initialComplianceState)
 
-    const finding = state.findings.find((item) => item.id === PAY_TRANSPARENCY_FINDING_ID) ?? null
+    const finding = normalizedState.findings.find((item) => item.id === PAY_TRANSPARENCY_FINDING_ID) ?? null
 
     return NextResponse.json({
       records,

@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers"
 
 import type { WorkspaceContext } from "@/lib/compliance/types"
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/server/auth"
+import { readSessionFromRequest, SESSION_COOKIE, verifySessionToken } from "@/lib/server/auth"
 
 function initialsFromName(value: string) {
   const parts = value
@@ -14,49 +14,62 @@ function initialsFromName(value: string) {
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "CS"
 }
 
-export async function getOrgContext(): Promise<WorkspaceContext> {
-  let orgId: string | undefined
-  let orgName: string | undefined
-  let userEmail: string | undefined
+export type GetOrgContextOptions = {
+  request?: Request | null
+  allowHeaderFallback?: boolean
+}
+
+export async function getOrgContext(
+  options: GetOrgContextOptions = {}
+): Promise<WorkspaceContext> {
+  const allowHeaderFallback = options.allowHeaderFallback === true
+  let headerOrgId: string | undefined
+  let headerOrgName: string | undefined
+  let headerUserEmail: string | undefined
   let sessionOrgId: string | undefined
   let sessionOrgName: string | undefined
   let sessionEmail: string | undefined
   let sessionRole: WorkspaceContext["userRole"] = undefined  // Sprint 6
 
   try {
-    const h = await headers()
-    orgId = h.get("x-compliscan-org-id") ?? undefined
-    orgName = h.get("x-compliscan-org-name") ?? undefined
-    userEmail = h.get("x-compliscan-user-email") ?? undefined
-
-    const cookieStore = await cookies()
-    const sessionToken = cookieStore.get(SESSION_COOKIE)?.value
-    const session = sessionToken ? verifySessionToken(sessionToken) : null
+    let session = options.request ? readSessionFromRequest(options.request) : null
+    if (!session) {
+      const cookieStore = await cookies()
+      const sessionToken = cookieStore.get(SESSION_COOKIE)?.value
+      session = sessionToken ? verifySessionToken(sessionToken) : null
+    }
     sessionOrgId = session?.orgId
     sessionOrgName = session?.orgName
     sessionEmail = session?.email
     sessionRole = session?.role ?? undefined
+
+    if (allowHeaderFallback) {
+      const h = options.request ? options.request.headers : await headers()
+      headerOrgId = h.get("x-compliscan-org-id") ?? undefined
+      headerOrgName = h.get("x-compliscan-org-name") ?? undefined
+      headerUserEmail = h.get("x-compliscan-user-email") ?? undefined
+    }
   } catch {
     // Outside request context (e.g. build time)
   }
 
   const resolvedOrgName =
-    orgName ||
     sessionOrgName ||
+    headerOrgName ||
     process.env.COMPLISCAN_ORG_NAME?.trim() ||
     (process.env.NODE_ENV === "production"
       ? "Organizatie neconfigurata"
       : "Magazin Online S.R.L.")
   const workspaceOwner =
-    userEmail ||
     sessionEmail ||
+    headerUserEmail ||
     process.env.COMPLISCAN_WORKSPACE_OWNER?.trim() ||
     (process.env.NODE_ENV === "production" ? "Owner neconfigurat" : "Ion Popescu")
 
   return {
     orgId:
-      orgId ||
       sessionOrgId ||
+      headerOrgId ||
       process.env.COMPLISCAN_ORG_ID?.trim() ||
       (process.env.NODE_ENV === "production" ? "org-unconfigured" : "org-local-workspace"),
     orgName: resolvedOrgName,

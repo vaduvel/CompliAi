@@ -7,7 +7,9 @@ import { POST } from "./route"
 const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   createExtractedScanMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
+  readSessionFromRequestMock: vi.fn(),
+  resolveOptionalEventActorMock: vi.fn(),
   validateScanInputPayloadMock: vi.fn(),
 }))
 
@@ -16,7 +18,15 @@ vi.mock("@/lib/server/dashboard-response", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  readSessionFromRequest: mocks.readSessionFromRequestMock,
+}))
+
+vi.mock("@/lib/server/event-actor", () => ({
+  resolveOptionalEventActor: mocks.resolveOptionalEventActorMock,
 }))
 
 vi.mock("@/lib/server/scan-workflow", () => ({
@@ -28,6 +38,8 @@ describe("POST /api/scan/extract", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.readSessionFromRequestMock.mockReturnValue({ orgId: "org-1", orgName: "Demo Org SRL" })
+    mocks.resolveOptionalEventActorMock.mockResolvedValue(undefined)
   })
 
   it("mapeaza erorile de validare", async () => {
@@ -52,7 +64,7 @@ describe("POST /api/scan/extract", () => {
 
   it("returneaza 422 daca nu a fost extras text utilizabil", async () => {
     mocks.validateScanInputPayloadMock.mockReturnValueOnce({ manualText: "demo" })
-    mocks.mutateStateMock.mockRejectedValueOnce(new Error("Nu am extras text utilizabil din document."))
+    mocks.mutateStateForOrgMock.mockRejectedValueOnce(new Error("Nu am extras text utilizabil din document."))
 
     const response = await POST(
       new Request("http://localhost/api/scan/extract", {
@@ -70,8 +82,9 @@ describe("POST /api/scan/extract", () => {
 
   it("returneaza rezultatul extras si preview-ul", async () => {
     mocks.validateScanInputPayloadMock.mockReturnValueOnce({ manualText: "demo" })
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: unknown) => unknown) =>
-      updater({ scans: [], findings: [], alerts: [] })
+    mocks.mutateStateForOrgMock.mockImplementationOnce(
+      async (_orgId: string, updater: (state: unknown) => unknown) =>
+        updater({ scans: [], findings: [], alerts: [] })
     )
     mocks.createExtractedScanMock.mockResolvedValueOnce({
       nextState: { scans: [{ id: "scan-1" }], findings: [], alerts: [] },
@@ -94,6 +107,11 @@ describe("POST /api/scan/extract", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Demo Org SRL"
+    )
     expect(payload.message).toBe("Textul a fost extras. Revizuieste-l si porneste analiza.")
     expect(payload.scan.id).toBe("scan-1")
     expect(payload.extractedTextPreview).toBe("Primele randuri extrase")

@@ -1,21 +1,15 @@
 "use client"
 
 import { Suspense, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, Loader2, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
+import { sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
 
 type Mode = "login" | "register"
-
-function resolveSafeNextPath(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard"
-  }
-  return value
-}
 
 export default function LoginPage() {
   return (
@@ -26,9 +20,8 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const nextPath = resolveSafeNextPath(searchParams.get("next"))
+  const nextPath = sanitizeInternalRoute(searchParams.get("next"), "/dashboard")
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login"
   const [mode, setMode] = useState<Mode>(initialMode)
   const [orgName, setOrgName] = useState("")
@@ -61,7 +54,10 @@ function LoginContent() {
 
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register"
-      const body = mode === "login" ? { email, password } : { email, password, orgName }
+      const body =
+        mode === "login"
+          ? { email, password, next: searchParams.get("next") }
+          : { email, password, orgName }
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -69,7 +65,12 @@ function LoginContent() {
         body: JSON.stringify(body),
       })
 
-      const data = (await response.json()) as { ok?: boolean; error?: string; code?: string }
+      const data = (await response.json()) as {
+        ok?: boolean
+        error?: string
+        code?: string
+        destination?: string
+      }
 
       if (!response.ok) {
         if (mode === "register" && data.code === "AUTH_EMAIL_ALREADY_REGISTERED") {
@@ -84,7 +85,11 @@ function LoginContent() {
       }
 
       const destination =
-        mode === "register" && nextPath === "/dashboard" ? "/onboarding" : nextPath
+        mode === "login"
+          ? sanitizeInternalRoute(data.destination, nextPath)
+          : mode === "register" && nextPath === "/dashboard"
+            ? "/onboarding"
+            : nextPath
 
       toast.success(mode === "login" ? "Autentificat cu succes" : "Cont creat cu succes", {
         description:

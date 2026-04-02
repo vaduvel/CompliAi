@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import {
   generateRegesCorrectionPack,
   generateHrProcedurePack,
@@ -8,9 +9,8 @@ import {
 } from "@/lib/compliance/hr-drafts"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 
 export async function GET(request: Request) {
@@ -30,11 +30,12 @@ export async function GET(request: Request) {
       return jsonError("Tipul de pachet HR nu este suportat.", 400, "HR_PACK_KIND_INVALID", undefined, context)
     }
 
-    const { orgId, orgName } = await getOrgContext()
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ??
+      normalizeComplianceState(initialComplianceState)
     const orgProfile = state.orgProfile
     const packInput = {
-      orgName: orgName || orgId,
+      orgName: session.orgName || session.orgId,
       sector: orgProfile?.sector ?? null,
       employeeCount: orgProfile?.employeeCount ?? null,
       hasAiTools: Boolean(orgProfile?.usesAITools),

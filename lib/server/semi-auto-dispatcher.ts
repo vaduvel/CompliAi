@@ -5,9 +5,13 @@
 // IMPORTANT: submit_anaf is NEVER semi-auto (LOCKED_OVERRIDES in autonomy-resolver).
 // This file must NEVER touch ANAF submission logic.
 
+import type { BatchActionType } from "@/lib/compliance/batch-actions"
+import { executeBatchActionForOrg } from "@/lib/server/batch-executor"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import type { PendingAction } from "@/lib/server/approval-queue"
+import { markReportRun, type ScheduledReportFrequency, type ScheduledReportType } from "@/lib/server/scheduled-reports"
+import { executeScheduledReportDelivery } from "@/lib/server/scheduled-report-runtime"
 
 export type DispatchResult = {
   executed: boolean
@@ -37,7 +41,7 @@ export async function dispatchAutoExecutedAction(
     case "publish_trust_center":
       return { executed: true, detail: "Trust center publish approved." }
     case "batch_action":
-      return { executed: true, detail: "Batch action approved — queued for execution." }
+      return dispatchBatchAction(action)
     case "submit_anaf":
       // This should never happen (LOCKED_OVERRIDES), but guard anyway
       return { executed: false, detail: "submit_anaf cannot be auto-executed." }
@@ -110,5 +114,85 @@ async function resolveFindings(action: PendingAction): Promise<DispatchResult> {
       executed: false,
       detail: `Error: ${err instanceof Error ? err.message : "unknown"}`,
     }
+  }
+}
+
+async function dispatchBatchAction(action: PendingAction): Promise<DispatchResult> {
+  const proposed = action.proposedData ?? {}
+
+  const scheduledReportId =
+    typeof proposed.scheduledReportId === "string" ? proposed.scheduledReportId.trim() : ""
+
+  if (scheduledReportId) {
+    const reportType =
+      typeof proposed.reportType === "string" ? (proposed.reportType as ScheduledReportType) : null
+    const clientOrgIds = Array.isArray(proposed.clientOrgIds)
+      ? proposed.clientOrgIds.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+      : []
+    const recipientEmails = Array.isArray(proposed.recipientEmails)
+      ? proposed.recipientEmails.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+      : []
+    const frequency =
+      typeof proposed.frequency === "string"
+        ? (proposed.frequency as ScheduledReportFrequency)
+        : undefined
+
+    if (!reportType || clientOrgIds.length === 0 || recipientEmails.length === 0) {
+      return {
+        executed: false,
+        detail: "Scheduled report approval incomplet — lipsesc reportType, firmele sau destinatarii.",
+      }
+    }
+
+    const execution = await executeScheduledReportDelivery({
+      orgId: action.orgId,
+      orgName: action.orgId,
+      scheduledReportId,
+      reportType,
+      frequency,
+      clientOrgIds,
+      recipientEmails,
+      executionMode: "approved",
+    })
+
+    if (execution.success && frequency) {
+      await markReportRun(action.orgId, scheduledReportId, frequency).catch(() => {})
+    }
+
+    return {
+      executed: execution.success,
+      detail: execution.detail,
+    }
+  }
+
+  const targetOrgId = typeof proposed.targetOrgId === "string" ? proposed.targetOrgId.trim() : ""
+  const actionType =
+    typeof proposed.actionType === "string" ? (proposed.actionType as BatchActionType) : null
+
+  if (!targetOrgId || !actionType) {
+    return {
+      executed: false,
+      detail: "Batch action approval incomplet — lipsesc targetOrgId sau actionType.",
+    }
+  }
+
+  const execution = await executeBatchActionForOrg(
+    targetOrgId,
+    actionType,
+    (proposed.config as Record<string, unknown> | undefined) ?? {}
+  )
+
+  await createNotification(action.orgId, {
+    type: execution.success ? "info" : "vendor_risk",
+    title: execution.success ? "Acțiune batch executată" : "Acțiune batch eșuată",
+    message: execution.success
+      ? `${actionType} pentru ${typeof proposed.targetOrgName === "string" ? proposed.targetOrgName : targetOrgId}: ${execution.detail}`
+      : `${actionType} pentru ${typeof proposed.targetOrgName === "string" ? proposed.targetOrgName : targetOrgId} a eșuat: ${execution.detail}`,
+    linkTo: "/portfolio",
+  }).catch(() => {})
+
+  return {
+    executed: execution.success,
+    detail: execution.detail,
   }
 }

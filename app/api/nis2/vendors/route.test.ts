@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { GET, POST } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   createVendorMock: vi.fn(),
+  mutateFreshStateForOrgMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -20,20 +20,23 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
+vi.mock("@/lib/server/nis2-store", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/server/nis2-store")>("@/lib/server/nis2-store")
+  return {
+    ...actual,
+    readNis2State: mocks.readNis2StateMock,
+    createVendor: mocks.createVendorMock,
+  }
+})
 
-vi.mock("@/lib/server/nis2-store", () => ({
-  readNis2State: mocks.readNis2StateMock,
-  createVendor: mocks.createVendorMock,
+vi.mock("@/lib/server/mvp-store", () => ({
+  mutateFreshStateForOrg: mocks.mutateFreshStateForOrgMock,
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1" }
 
 const MOCK_VENDOR = {
   id: "nis2-vnd123",
@@ -51,8 +54,7 @@ const MOCK_VENDOR = {
 describe("GET /api/nis2/vendors", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.readNis2StateMock.mockResolvedValue({ assessment: null, incidents: [], vendors: [MOCK_VENDOR] })
   })
 
@@ -75,7 +77,9 @@ describe("GET /api/nis2/vendors", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await GET(new Request("http://localhost/api/nis2/vendors"))
     expect(res.status).toBe(401)
   })
@@ -84,9 +88,10 @@ describe("GET /api/nis2/vendors", () => {
 describe("POST /api/nis2/vendors", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.createVendorMock.mockResolvedValue(MOCK_VENDOR)
+    mocks.readNis2StateMock.mockResolvedValue({ assessment: null, incidents: [], vendors: [MOCK_VENDOR] })
+    mocks.mutateFreshStateForOrgMock.mockResolvedValue(undefined)
   })
 
   it("creeaza vendor valid si returneaza 201", async () => {
@@ -185,7 +190,9 @@ describe("POST /api/nis2/vendors", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await POST(
       new Request("http://localhost/api/nis2/vendors", {
         method: "POST",

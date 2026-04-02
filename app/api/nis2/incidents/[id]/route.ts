@@ -5,12 +5,11 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { updateIncident, deleteIncident, readNis2State } from "@/lib/server/nis2-store"
-import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
+import { DELETE_ROLES, READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
@@ -63,10 +62,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "vizualizarea incidentului")
+    const session = await requireFreshRole(request, READ_ROLES, "vizualizarea incidentului")
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const state = await readNis2State(orgId)
+    const state = await readNis2State(session.orgId)
     const incident = state.incidents.find((i) => i.id === id)
     if (!incident) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
     return NextResponse.json({ incident })
@@ -81,7 +79,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = requireRole(request, WRITE_ROLES, "actualizarea incidentului")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea incidentului")
 
     const { id } = await params
     const body = (await request.json()) as Partial<Nis2Incident> & {
@@ -97,10 +95,8 @@ export async function PATCH(
       return jsonError("Status invalid.", 400, "INVALID_STATUS")
     }
 
-    const { orgId } = await getOrgContext()
-
     // Citește incidentul curent pentru validare secvențială
-    const state = await readNis2State(orgId)
+    const state = await readNis2State(session.orgId)
     const current = state.incidents.find((i) => i.id === id)
     if (!current) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
 
@@ -124,7 +120,7 @@ export async function PATCH(
       return jsonError(sequenceError, 400, "STAGE_SEQUENCE_VIOLATION")
     }
 
-    const incident = await updateIncident(orgId, id, patch)
+    const incident = await updateIncident(session.orgId, id, patch)
     if (!incident) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
 
     // GOLD 6: sincronizează finding ANSPDCP în coada centrală la orice update
@@ -137,29 +133,41 @@ export async function PATCH(
         incident.anspdcpNotification?.status,
         new Date().toISOString()
       )
-      await mutateFreshState(async (s) => ({
-        ...s,
-        findings: mergeNis2PackageFindings(
-          finding
-            ? [
-                ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
-                preserveRuntimeStateForSingleFinding(s.findings, finding),
-              ]
-            : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
-          await readNis2State(orgId),
-          new Date().toISOString()
-        ),
-      }))
+      await mutateFreshStateForOrg(
+        session.orgId,
+        async (s) => ({
+          ...s,
+          findings: mergeNis2PackageFindings(
+            finding
+              ? [
+                  ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+                  preserveRuntimeStateForSingleFinding(s.findings, finding),
+                ]
+              : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+            await readNis2State(session.orgId),
+            new Date().toISOString()
+          ),
+        }),
+        session.orgName
+      )
     } else {
-      await mutateFreshState(async (s) => ({
-        ...s,
-        findings: mergeNis2PackageFindings(s.findings, await readNis2State(orgId), new Date().toISOString()),
-      }))
+      await mutateFreshStateForOrg(
+        session.orgId,
+        async (s) => ({
+          ...s,
+          findings: mergeNis2PackageFindings(
+            s.findings,
+            await readNis2State(session.orgId),
+            new Date().toISOString()
+          ),
+        }),
+        session.orgName
+      )
     }
 
     if (current.status !== "closed" && incident.status === "closed") {
       await fireDriftTrigger({
-        orgId,
+        orgId: session.orgId,
         trigger: "incident_closed",
         detail: `Incident închis: ${incident.title}`,
       }).catch(() => {})
@@ -177,21 +185,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, DELETE_ROLES, "ștergerea incidentului")
+    const session = await requireFreshRole(request, DELETE_ROLES, "ștergerea incidentului")
 
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const deleted = await deleteIncident(orgId, id)
+    const deleted = await deleteIncident(session.orgId, id)
     if (!deleted) return jsonError("Incidentul nu a fost găsit.", 404, "NOT_FOUND")
 
-    await mutateFreshState(async (s) => ({
-      ...s,
-      findings: mergeNis2PackageFindings(
-        s.findings.filter((finding) => finding.id !== anspdcpFindingId(id)),
-        await readNis2State(orgId),
-        new Date().toISOString()
-      ),
-    }))
+    await mutateFreshStateForOrg(
+      session.orgId,
+      async (s) => ({
+        ...s,
+        findings: mergeNis2PackageFindings(
+          s.findings.filter((finding) => finding.id !== anspdcpFindingId(id)),
+          await readNis2State(session.orgId),
+          new Date().toISOString()
+        ),
+      }),
+      session.orgName
+    )
 
     return NextResponse.json({ ok: true })
   } catch (error) {

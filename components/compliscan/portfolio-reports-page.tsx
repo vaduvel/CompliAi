@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Calendar, Check, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, Trash2, X } from "lucide-react"
+import { Calendar, Check, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { PortfolioReportRow } from "@/lib/server/portfolio"
@@ -22,6 +22,8 @@ type WhiteLabelConfig = {
   tagline: string | null
   logoUrl: string | null
   brandColor: string
+  storageBackend?: "supabase" | "local_fallback"
+  persistenceStatus?: "synced" | "fallback"
 }
 
 function WhiteLabelSection() {
@@ -59,6 +61,8 @@ function WhiteLabelSection() {
         toast.error(data.error ?? "Salvare eșuată.")
         return
       }
+      const data = (await res.json().catch(() => null)) as { config?: WhiteLabelConfig } | null
+      if (data?.config) setConfig(data.config)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
       toast.success("Configurație white-label salvată.")
@@ -86,8 +90,23 @@ function WhiteLabelSection() {
           <Paintbrush className="size-4 text-eos-primary" strokeWidth={2} />
           <p className="text-sm font-semibold text-eos-text">Branding partener (White-label)</p>
         </div>
-        <p className="text-xs text-eos-text-tertiary">Aplicat pe rapoarte și exporturi</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge
+            variant={config.persistenceStatus === "fallback" ? "warning" : "success"}
+            className="normal-case tracking-normal"
+          >
+            {config.persistenceStatus === "fallback" ? "fallback local" : "Supabase synced"}
+          </Badge>
+          <p className="text-xs text-eos-text-tertiary">Aplicat pe rapoarte și exporturi</p>
+        </div>
       </div>
+
+      {config.persistenceStatus === "fallback" ? (
+        <div className="rounded-eos-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-eos-text">
+          Brandingul este disponibil, dar persistă momentan pe fallback local. Nu îl trata ca
+          sursă finală până când traseul Supabase nu revine la `synced`.
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Partner name */}
@@ -537,4 +556,3 @@ export function PortfolioReportsPage() {
     </div>
   )
 }
-

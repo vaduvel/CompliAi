@@ -6,8 +6,7 @@ import { NextResponse } from "next/server"
 import { randomBytes } from "node:crypto"
 
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { safeListReviews, createReview } from "@/lib/server/vendor-review-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import {
@@ -23,14 +22,11 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/vendor-review")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
-
-    const { orgId, orgName } = await getOrgContext()
-    const reviews = await safeListReviews(orgId)
-    const nis2 = await readNis2State(orgId).catch(() => ({ vendors: [] }))
+    const session = await requireFreshAuthenticatedSession(request, "citirea vendor review-urilor")
+    const reviews = await safeListReviews(session.orgId)
+    const nis2 = await readNis2State(session.orgId).catch(() => ({ vendors: [] }))
     const pack = generateVendorGovernancePack({
-      orgName: orgName || orgId,
+      orgName: session.orgName || session.orgId,
       knownVendorCount: nis2.vendors?.length ?? 0,
     })
     return NextResponse.json({ reviews, pack }, withRequestIdHeaders(undefined, context))
@@ -49,8 +45,7 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/vendor-review")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
+    const session = await requireFreshAuthenticatedSession(request, "crearea vendor review-ului")
 
     const body = (await request.json()) as {
       vendorId?: string
@@ -61,10 +56,8 @@ export async function POST(request: Request) {
       return jsonError("vendorId este obligatoriu.", 400, "MISSING_VENDOR_ID", undefined, context)
     }
 
-    const { orgId } = await getOrgContext()
-
     // Find vendor in NIS2 registry
-    const nis2 = await readNis2State(orgId)
+    const nis2 = await readNis2State(session.orgId)
     const vendor = nis2.vendors.find((v) => v.id === body.vendorId)
     if (!vendor) {
       return jsonError("Vendorul nu a fost găsit.", 404, "VENDOR_NOT_FOUND", undefined, context)
@@ -105,7 +98,7 @@ export async function POST(request: Request) {
       updatedAtISO: now,
     }
 
-    const created = await createReview(orgId, review)
+    const created = await createReview(session.orgId, review)
     return NextResponse.json({ review: created }, withRequestIdHeaders({ status: 201 }, context))
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)

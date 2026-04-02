@@ -14,7 +14,11 @@ describe("lib/compliscan/nav-config", () => {
       role: "partner_manager",
     })
 
-    expect(sections.map((section) => section.label)).toEqual(["Portofoliu", "Firma activa"])
+    expect(sections.map((section) => section.label)).toEqual([
+      "Portofoliu",
+      "Firma activa",
+      "Module conformitate",
+    ])
     expect(sections[0]?.items[0]).toEqual(
       expect.objectContaining({
         label: "Portofoliu",
@@ -28,6 +32,10 @@ describe("lib/compliscan/nav-config", () => {
       "/portfolio/tasks",
       "/portfolio/vendors",
       "/portfolio/reports",
+    ])
+    expect(sections[2]?.items.map((item) => item.href)).toEqual([
+      "/dashboard/fiscal",
+      "/dashboard/nis2",
     ])
   })
 
@@ -51,7 +59,7 @@ describe("lib/compliscan/nav-config", () => {
       role: "owner",
     })
 
-    expect(sections).toHaveLength(1)
+    expect(sections).toHaveLength(2)
     expect(sections[0]?.label).toBe("Flux principal")
     expect(sections[0]?.items.some((item) => item.href === "/portfolio")).toBe(false)
     expect(sections[0]?.items.map((item) => item.href)).toEqual([
@@ -61,6 +69,7 @@ describe("lib/compliscan/nav-config", () => {
       "/dashboard/dosar",
       "/dashboard/settings",
     ])
+    expect(sections[1]?.label).toBe("Module conformitate")
   })
 
   it("restrange nav-ul viewer in org mode", () => {

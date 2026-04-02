@@ -2,7 +2,9 @@
 // GET: list + discipline score, POST: create, PATCH: update status
 
 import { NextRequest, NextResponse } from "next/server"
-import { readState, writeState } from "@/lib/server/mvp-store"
+import { jsonError } from "@/lib/server/api-response"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { FilingRecord, FilingType, FilingStatus } from "@/lib/compliance/filing-discipline"
 import {
@@ -14,14 +16,21 @@ import {
 import { computeSAFTHygiene } from "@/lib/compliance/saft-hygiene"
 
 type StateWithFilings = ComplianceState & { filingRecords?: FilingRecord[] }
+const READ_ROLES = ["owner", "partner_manager", "compliance", "reviewer"] as const
+const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
 
 function uid() {
   return `filing-${Math.random().toString(36).slice(2, 10)}`
 }
 
 // GET — list all filings + score + reminders
-export async function GET() {
-  const state = await readState() as StateWithFilings
+export async function GET(request: NextRequest) {
+  const session = requireRole(request, [...READ_ROLES], "depuneri fiscale")
+  const orgId = session.orgId
+  const state = await readStateForOrg(orgId) as StateWithFilings | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "FILING_STATE_UNAVAILABLE")
+  }
   const records = state.filingRecords ?? []
   const nowISO = new Date().toISOString()
 
@@ -43,6 +52,9 @@ export async function GET() {
 
 // POST — create new filing record
 export async function POST(request: NextRequest) {
+  const session = requireRole(request, [...WRITE_ROLES], "înregistrare depunere fiscală")
+  const orgId = session.orgId
+  const orgName = session.orgName
   const body = await request.json() as {
     type: FilingType
     period: string
@@ -70,15 +82,21 @@ export async function POST(request: NextRequest) {
     note: body.note,
   }
 
-  const state = await readState() as StateWithFilings
+  const state = await readStateForOrg(orgId) as StateWithFilings | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "FILING_STATE_UNAVAILABLE")
+  }
   state.filingRecords = [...(state.filingRecords ?? []), record]
-  await writeState(state)
+  await writeStateForOrg(orgId, state, orgName)
 
   return NextResponse.json({ record }, { status: 201 })
 }
 
 // PATCH — update filing status
 export async function PATCH(request: NextRequest) {
+  const session = requireRole(request, [...WRITE_ROLES], "actualizare depunere fiscală")
+  const orgId = session.orgId
+  const orgName = session.orgName
   const body = await request.json() as {
     id: string
     status?: FilingStatus
@@ -92,7 +110,10 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "id required" }, { status: 400 })
   }
 
-  const state = await readState() as StateWithFilings
+  const state = await readStateForOrg(orgId) as StateWithFilings | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "FILING_STATE_UNAVAILABLE")
+  }
   const records = state.filingRecords ?? []
   const idx = records.findIndex((r) => r.id === body.id)
   if (idx === -1) {
@@ -108,7 +129,7 @@ export async function PATCH(request: NextRequest) {
     ...(body.note !== undefined && { note: body.note }),
   }
   state.filingRecords = records
-  await writeState(state)
+  await writeStateForOrg(orgId, state, orgName)
 
   return NextResponse.json({ record: records[idx] })
 }

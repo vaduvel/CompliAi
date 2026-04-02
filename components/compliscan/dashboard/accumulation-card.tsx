@@ -86,6 +86,8 @@ export function AccumulationCard() {
     data.furnizoriMonitorizati > 0 ||
     data.ultimulAuditPackZile !== null
 
+  if (!hasAnyActivity) return null
+
   return (
     <div className="rounded-eos-xl border border-eos-border bg-eos-surface-secondary p-5">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-eos-text-muted">
@@ -104,11 +106,6 @@ export function AccumulationCard() {
           </li>
         ))}
       </ul>
-      {!hasAnyActivity ? (
-        <p className="mt-4 text-xs text-eos-text-muted">
-          Primele cifre apar după primul scan, document generat sau snapshot de audit.
-        </p>
-      ) : null}
     </div>
   )
 }

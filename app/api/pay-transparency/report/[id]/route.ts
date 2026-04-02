@@ -4,7 +4,7 @@ import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-r
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { materializeFindingTruth } from "@/lib/compliscan/finding-truth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { computeNextMonitoringDateISO } from "@/lib/compliscan/finding-kernel"
 import { upsertMonitoringReviewCycle } from "@/lib/server/review-cycle-store"
 import {
@@ -39,7 +39,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const nowISO = new Date().toISOString()
     const nextMonitoringDateISO = computeNextMonitoringDateISO("PAY-001", nowISO) ?? undefined
 
-    await mutateState((current) => {
+    await mutateStateForOrg(session.orgId, (current) => {
       const findings = current.findings.map((finding) =>
         finding.id === PAY_TRANSPARENCY_FINDING_ID
           ? materializeFindingTruth({
@@ -72,7 +72,7 @@ export async function PATCH(request: Request, { params }: Params) {
         findings,
         generatedDocuments,
       }
-    })
+    }, session.orgName)
 
     if (nextMonitoringDateISO) {
       await upsertMonitoringReviewCycle({

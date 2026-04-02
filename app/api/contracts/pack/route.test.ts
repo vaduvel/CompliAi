@@ -12,8 +12,7 @@ const mocks = vi.hoisted(() => ({
     }
   },
   readSessionFromRequestMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
   generateContractsBaselinePackMock: vi.fn(),
   logRouteErrorMock: vi.fn(),
 }))
@@ -23,12 +22,8 @@ vi.mock("@/lib/server/auth", () => ({
   readSessionFromRequest: mocks.readSessionFromRequestMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/contracts-drafts", () => ({
@@ -44,8 +39,7 @@ import { GET } from "./route"
 describe("GET /api/contracts/pack", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-demo-imm", orgName: "Demo Retail SRL" })
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       orgProfile: {
         sector: "retail",
         employeeCount: "10-49",
@@ -106,6 +100,7 @@ describe("GET /api/contracts/pack", () => {
       employeeCount: "10-49",
       hasAiTools: true,
     })
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-demo-imm")
   })
 
   it("respinge tipurile necunoscute", async () => {

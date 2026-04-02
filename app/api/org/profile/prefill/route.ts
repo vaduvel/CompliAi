@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server"
 
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { enrichOrgProfilePrefillWithAICompliancePack } from "@/lib/server/ai-compliance-pack-prefill-signals"
 import { enrichOrgProfilePrefillWithAiSignals } from "@/lib/server/ai-prefill-signals"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { enrichOrgProfilePrefillWithDocumentSignals } from "@/lib/server/document-prefill-signals"
 import { enrichOrgProfilePrefillWithVendorSignals } from "@/lib/server/efactura-vendor-signals"
-import { mutateState, readState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeWebsiteUrl, validateCUI } from "@/lib/server/request-validation"
 import { enrichOrgProfilePrefillWithWebsiteSignals } from "@/lib/server/website-prefill-signals"
 
@@ -19,8 +20,7 @@ type PrefillRequestBody = {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "pregătirea prefill-ului de profil")
 
     const body = (await request.json()) as PrefillRequestBody
     const hasCuiInput = typeof body?.cui === "string" && body.cui.trim().length > 0
@@ -33,7 +33,8 @@ export async function POST(request: Request) {
         : jsonError("Introdu un CUI valid sau website-ul public al firmei.", 400, "INVALID_PREFILL_INPUT")
     }
 
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     // Run ANAF lookup and website crawl in parallel — they're independent.
     const [cuiPrefill, websiteOnlyPrefill] = await Promise.all([
       cui ? lookupOrgProfilePrefillByCui(cui) : Promise.resolve(null),
@@ -75,10 +76,10 @@ export async function POST(request: Request) {
       generatedDocuments: state.generatedDocuments ?? [],
       scans: state.scans ?? [],
     })
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       orgProfilePrefill: prefill ?? undefined,
-    }))
+    }), session.orgName)
 
     return NextResponse.json({
       prefill: prefill ?? null,

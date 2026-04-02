@@ -9,7 +9,8 @@ import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 import { trackEvent } from "@/lib/server/analytics"
 import { validateTaskAgainstState } from "@/lib/compliance/task-validation"
 
@@ -69,7 +70,7 @@ export async function PATCH(
       return jsonError("Actiune invalida.", 400, "TASK_ACTION_INVALID")
     }
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       if (!getPersistableTaskIds(current).has(id)) {
         throw new Error("TASK_NOT_FOUND")
       }
@@ -291,15 +292,22 @@ export async function PATCH(
       }
 
       return nextState
-    })
+    }, session.orgName)
 
     // Track finding closure
     if (feedback?.status === "done" && feedback.closedAlerts > 0) {
       void trackEvent(session.orgId, "closed_first_finding", { taskId: id })
     }
 
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
+
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: "Task actualizat.",
       feedback,
     })

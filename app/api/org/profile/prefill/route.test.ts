@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
-  readStateMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
   enrichWebsitePrefillMock: vi.fn(async (prefill: unknown) => prefill),
   enrichAICompliancePackPrefillMock: vi.fn(async (prefill: unknown) => prefill),
-  mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
+  mutateStateForOrgMock: vi.fn(
+    async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => fn({})
+  ),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
     new Response(JSON.stringify({ error: message, code }), { status })
   ),
@@ -23,7 +25,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/api-response", () => ({
@@ -43,8 +45,8 @@ vi.mock("@/lib/server/ai-compliance-pack-prefill-signals", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
-  mutateState: mocks.mutateStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 import { POST } from "./route"
@@ -60,14 +62,21 @@ function makeRequest(body: Record<string, unknown>) {
 describe("POST /api/org/profile/prefill", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue({ orgId: "org-1", userId: "user-1" })
-    mocks.readStateMock.mockResolvedValue({ efacturaValidations: [] })
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      orgId: "org-1",
+      orgName: "Demo Org",
+      userId: "user-1",
+      email: "owner@test.ro",
+    })
+    mocks.readStateForOrgMock.mockResolvedValue({ efacturaValidations: [] })
     mocks.enrichWebsitePrefillMock.mockImplementation(async (prefill: unknown) => prefill)
     mocks.enrichAICompliancePackPrefillMock.mockImplementation(async (prefill: unknown) => prefill)
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const res = await POST(makeRequest({ cui: "RO14399840" }))
 
@@ -140,10 +149,12 @@ describe("POST /api/org/profile/prefill", () => {
 
   it("intoarce prefill-ul cand lookup-ul reuseste", async () => {
     let saved: unknown = null
-    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
-      saved = fn({ orgProfile: null }) as Record<string, unknown>
-      return saved
-    })
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => {
+        saved = fn({ orgProfile: null }) as Record<string, unknown>
+        return saved
+      }
+    )
     mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue({
       source: "anaf_vat_registry",
       fetchedAtISO: "2026-03-20T10:00:00.000Z",
@@ -166,7 +177,7 @@ describe("POST /api/org/profile/prefill", () => {
         },
       },
     })
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "Amazon Web Services EMEA SARL",
@@ -358,14 +369,16 @@ describe("POST /api/org/profile/prefill", () => {
 
   it("intoarce prefill null cand lookup-ul nu gaseste firma", async () => {
     let saved: unknown = null
-    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
-      saved = fn({
-        orgProfilePrefill: {
-          normalizedCui: "RO99999999",
-        },
-      }) as Record<string, unknown>
-      return saved
-    })
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => {
+        saved = fn({
+          orgProfilePrefill: {
+            normalizedCui: "RO99999999",
+          },
+        }) as Record<string, unknown>
+        return saved
+      }
+    )
     mocks.lookupOrgProfilePrefillByCuiMock.mockResolvedValue(null)
 
     const res = await POST(makeRequest({ cui: "RO12345678" }))

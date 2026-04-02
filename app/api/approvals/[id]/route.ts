@@ -11,15 +11,14 @@ import { syncSubmissionApprovalDecision } from "@/lib/server/anaf-submit-flow"
 import { dispatchAutoExecutedAction } from "@/lib/server/semi-auto-dispatcher"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "approval-detail")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "approval-detail")
+    const orgId = session.orgId
     const { id } = await params
 
     const action = await getPendingAction(orgId, id)
@@ -42,7 +41,7 @@ export async function PATCH(
       ["owner", "partner_manager", "compliance"],
       "approval-decide"
     )
-    const { orgId } = await getOrgContext()
+    const orgId = session.orgId
     const { id } = await params
 
     const body = (await request.json()) as {

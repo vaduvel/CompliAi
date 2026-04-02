@@ -23,14 +23,14 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   requireRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -81,11 +81,11 @@ describe("PATCH /api/drifts/[id]", () => {
 
     expect(response.status).toBe(400)
     expect(payload.code).toBe("INVALID_DRIFT_ACTION")
-    expect(mocks.mutateStateMock).not.toHaveBeenCalled()
+    expect(mocks.mutateStateForOrgMock).not.toHaveBeenCalled()
   })
 
   it("cere justificare pentru waive", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockDriftState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockDriftState) => unknown) =>
       updater({
         driftRecords: [
           {
@@ -115,7 +115,7 @@ describe("PATCH /api/drifts/[id]", () => {
   })
 
   it("respinge tranzitiile invalide de lifecycle", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockDriftState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockDriftState) => unknown) =>
       updater({
         driftRecords: [
           {
@@ -145,7 +145,7 @@ describe("PATCH /api/drifts/[id]", () => {
   })
 
   it("permite acknowledge pe drift deschis", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: MockDriftState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockDriftState) => unknown) =>
       updater({
         driftRecords: [
           {
@@ -174,6 +174,7 @@ describe("PATCH /api/drifts/[id]", () => {
     expect(payload.message).toBe("Drift preluat de owner.")
     expect(payload.state.driftRecords[0].lifecycleStatus).toBe("acknowledged")
     expect(payload.state.driftRecords[0].acknowledgedBy).toBe("demo@site.ro (compliance)")
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Function), "Org Demo")
   })
 
   it("respinge waive pentru rol nepermis", async () => {

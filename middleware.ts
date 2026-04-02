@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+import { isWorkspaceRouteMemoryCandidate, sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
+
 const SESSION_COOKIE = "compliscan_session"
+const LAST_ROUTE_COOKIE = "compliscan_last_route"
 
 // ── Rate limiting (in-memory, per Edge Runtime instance) ──────────────────────
 // NOTE: Multi-instance deployments need Redis/Upstash for cross-instance limiting.
@@ -100,6 +103,18 @@ async function verifyToken(
   }
 }
 
+function buildLoginRedirectUrl(request: NextRequest) {
+  const loginUrl = new URL("/login", request.url)
+  const returnTo = sanitizeInternalRoute(
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    "/dashboard"
+  )
+  if (returnTo !== "/login") {
+    loginUrl.searchParams.set("next", returnTo)
+  }
+  return loginUrl
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith("/api/")
@@ -114,7 +129,7 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE)
   if (!sessionCookie?.value) {
     if (isApiRoute) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    return NextResponse.redirect(new URL("/login", request.url))
+    return NextResponse.redirect(buildLoginRedirectUrl(request))
   }
 
   const session = await verifyToken(sessionCookie.value)
@@ -124,7 +139,7 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete(SESSION_COOKIE)
       return response
     }
-    const response = NextResponse.redirect(new URL("/login", request.url))
+    const response = NextResponse.redirect(buildLoginRedirectUrl(request))
     response.cookies.delete(SESSION_COOKIE)
     return response
   }
@@ -147,7 +162,24 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-compliscan-org-name", session.orgName)
   requestHeaders.set("x-compliscan-workspace-mode", session.workspaceMode)
 
-  return NextResponse.next({ request: { headers: requestHeaders } })
+  const response = NextResponse.next({ request: { headers: requestHeaders } })
+  if (!isApiRoute) {
+    const currentRoute = sanitizeInternalRoute(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      ""
+    )
+    if (isWorkspaceRouteMemoryCandidate(currentRoute)) {
+      response.cookies.set(LAST_ROUTE_COOKIE, currentRoute, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/",
+      })
+    }
+  }
+
+  return response
 }
 
 export const config = {

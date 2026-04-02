@@ -47,8 +47,8 @@ export function buildVendorLifecycleSummary(
     return !Number.isNaN(dueAt) && dueAt <= now
   })
 
-  const overdue = dedupeById([...overdueClosed, ...activeFollowUpOverdue])
-  const dueSoon = dedupeById([...dueSoonClosed, ...activeFollowUpDueSoon])
+  const overdue = dedupeById(overdueClosed)
+  const dueSoon = dedupeById(dueSoonClosed)
 
   const overdueNames = overdue.slice(0, 3).map((review) => review.vendorName)
   const dueSoonLabels = dueSoon.slice(0, 3).map((review) => {

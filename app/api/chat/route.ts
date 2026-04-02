@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server"
 
-import { computeDashboardSummary } from "@/lib/compliance/engine"
+import { computeDashboardSummary, initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import type { ChatMessage } from "@/lib/compliance/types"
+import { readSessionFromRequest } from "@/lib/server/auth"
 import { generateComplianceAnswer } from "@/lib/server/gemini"
-import { appendChat, readState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 
 type ChatPayload = {
   message?: string
 }
 
 export async function POST(request: Request) {
+  const session = readSessionFromRequest(request)
+  if (!session) {
+    return NextResponse.json(
+      { error: "Autentificarea este obligatorie." },
+      { status: 401 }
+    )
+  }
+
   const body = (await request.json()) as ChatPayload
   const message = (body.message ?? "").trim()
   if (!message) {
@@ -18,7 +28,9 @@ export async function POST(request: Request) {
     )
   }
 
-  const state = await readState()
+  const state =
+    (await readStateForOrg(session.orgId)) ??
+    normalizeComplianceState(initialComplianceState)
   const summary = computeDashboardSummary(state)
   const context = {
     score: summary.score,
@@ -44,7 +56,30 @@ export async function POST(request: Request) {
     answer = buildAssistantAnswer(message, context)
   }
 
-  await appendChat(message, answer)
+  await mutateStateForOrg(
+    session.orgId,
+    (current) => {
+      const now = new Date().toISOString()
+      const userEntry: ChatMessage = {
+        id: `chat-${crypto.randomUUID()}`,
+        role: "user",
+        content: message,
+        createdAtISO: now,
+      }
+      const assistantEntry: ChatMessage = {
+        id: `chat-${crypto.randomUUID()}`,
+        role: "assistant",
+        content: answer,
+        createdAtISO: now,
+      }
+
+      return {
+        ...current,
+        chat: [...current.chat, userEntry, assistantEntry].slice(-20),
+      }
+    },
+    session.orgName
+  )
   return NextResponse.json({ answer })
 }
 

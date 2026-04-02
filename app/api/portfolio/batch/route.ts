@@ -16,6 +16,40 @@ import {
 } from "@/lib/compliance/batch-actions"
 import { executeBatchActionForOrg } from "@/lib/server/batch-executor"
 
+function buildBatchNextStep(actionType: BatchActionType, status: BatchResult["status"]) {
+  if (status === "pending_approval") {
+    switch (actionType) {
+      case "generate_ropa":
+        return "Deschide Aprobări și confirmă generarea documentelor pentru client."
+      case "run_baseline_scan":
+        return "Deschide Aprobări și pornește scanarea baseline pentru client."
+      case "export_audit_pack":
+        return "Deschide Aprobări și confirmă evaluarea Audit Pack pentru client."
+      case "send_compliance_summary":
+        return "Deschide Aprobări și confirmă trimiterea sumarului de conformitate."
+      default:
+        return "Deschide Aprobări și confirmă acțiunea batch."
+    }
+  }
+
+  if (status === "success") {
+    switch (actionType) {
+      case "generate_ropa":
+        return "Intră în firmă și verifică documentele generate."
+      case "run_baseline_scan":
+        return "Intră în firmă și verifică noile cazuri sau taskuri deschise."
+      case "export_audit_pack":
+        return "Intră în firmă și deschide Audit Pack din Dovadă sau Reports."
+      case "send_compliance_summary":
+        return "Intră în firmă și verifică sumarul actualizat de conformitate."
+      default:
+        return "Intră în firmă și verifică rezultatul operațional."
+    }
+  }
+
+  return "Revizuiește eroarea și încearcă din nou după corectare."
+}
+
 export async function POST(request: Request) {
   try {
     const session = await requireFreshRole(request, ["owner", "partner_manager"], "batch operations")
@@ -41,8 +75,8 @@ export async function POST(request: Request) {
     }
 
     const riskLevel = BATCH_ACTION_RISK[body.actionType]
-    const partnerOrgId = request.headers.get("x-compliscan-org-id") ?? ""
-    const userId = request.headers.get("x-compliscan-user-id") ?? ""
+    const partnerOrgId = session.orgId
+    const userId = session.userId
 
     const policy = await resolvePolicy({
       userId,
@@ -65,7 +99,10 @@ export async function POST(request: Request) {
             orgId,
             orgName,
             status: execResult.success ? "success" : "failed",
+            detail: execResult.detail,
             error: execResult.success ? undefined : execResult.detail,
+            nextStep: buildBatchNextStep(body.actionType, execResult.success ? "success" : "failed"),
+            summary: execResult.summary,
           })
         } else {
           const action = await createPendingAction({
@@ -83,10 +120,28 @@ export async function POST(request: Request) {
             },
             expiresInHours: policy === "semi" ? 24 : undefined,
           })
-          results.push({ orgId, orgName, status: "pending_approval", pendingActionId: action.id })
+          results.push({
+            orgId,
+            orgName,
+            status: "pending_approval",
+            pendingActionId: action.id,
+            detail: `Așteaptă aprobarea pentru ${BATCH_ACTION_LABELS[body.actionType].toLowerCase()}.`,
+            nextStep: buildBatchNextStep(body.actionType, "pending_approval"),
+            summary: {
+              policy,
+              riskLevel,
+            },
+          })
         }
       } catch (err) {
-        results.push({ orgId, orgName, status: "failed", error: err instanceof Error ? err.message : "unknown" })
+        results.push({
+          orgId,
+          orgName,
+          status: "failed",
+          detail: err instanceof Error ? err.message : "Acțiunea nu a putut fi executată.",
+          error: err instanceof Error ? err.message : "unknown",
+          nextStep: buildBatchNextStep(body.actionType, "failed"),
+        })
       }
     }
 

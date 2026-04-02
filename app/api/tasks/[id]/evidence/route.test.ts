@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   getPersistableTaskIdsMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   requireRoleMock: vi.fn(),
   randomUUIDMock: vi.fn(),
   storePrivateEvidenceFileMock: vi.fn(),
@@ -35,7 +35,7 @@ vi.mock("@/lib/server/org-context", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/task-ids", () => ({
@@ -136,7 +136,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     form.set("file", new File(["png-bytes"], "proof.png", { type: "image/png" }))
 
     mocks.getPersistableTaskIdsMock.mockReturnValueOnce(new Set())
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: unknown) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: unknown) => unknown) =>
       updater({
         taskState: {},
         events: [],
@@ -163,7 +163,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     form.set("kind", "screenshot")
     form.set("file", new File(["png-bytes"], "proof final.PNG", { type: "image/png" }))
 
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: unknown) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: unknown) => unknown) =>
       updater({
         taskState: {},
         events: [],
@@ -192,6 +192,11 @@ describe("POST /api/tasks/[id]/evidence", () => {
         status: "weak",
         reasonCodes: expect.arrayContaining(["very_small_file"]),
       })
+    )
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-demo",
+      expect.any(Function),
+      "Org Demo"
     )
     expect(mocks.storePrivateEvidenceFileMock).toHaveBeenCalledTimes(1)
     expect(mocks.syncEvidenceObjectToSupabaseMock).toHaveBeenCalledTimes(1)

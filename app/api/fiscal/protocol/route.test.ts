@@ -12,9 +12,9 @@ const mocks = vi.hoisted(() => ({
     }
   },
   requireRoleMock: vi.fn(),
-  readStateMock: vi.fn(),
-  mutateStateMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
+  writeStateForOrgMock: vi.fn(),
+  fireDriftTriggerMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
@@ -23,12 +23,12 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
-  mutateState: mocks.mutateStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
+  writeStateForOrg: mocks.writeStateForOrgMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+vi.mock("@/lib/server/drift-trigger-engine", () => ({
+  fireDriftTrigger: mocks.fireDriftTriggerMock,
 }))
 
 import { GET, PATCH } from "./route"
@@ -41,12 +41,10 @@ describe("fiscal protocol route", () => {
       userId: "user-1",
       email: "owner@example.com",
       role: "owner",
-    })
-    mocks.getOrgContextMock.mockResolvedValue({
       orgId: "org-demo",
       orgName: "Demo Fiscal SRL",
     })
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       fiscalProtocols: {
         "finding-ef-004": {
           findingId: "finding-ef-004",
@@ -61,13 +59,9 @@ describe("fiscal protocol route", () => {
           updatedAtISO: "2026-03-30T10:00:00.000Z",
         },
       },
+      events: [],
     })
-    mocks.mutateStateMock.mockImplementation(async (updater: (state: Record<string, unknown>) => Record<string, unknown>) =>
-      updater({
-        fiscalProtocols: {},
-        events: [],
-      })
-    )
+    mocks.fireDriftTriggerMock.mockResolvedValue(undefined)
   })
 
   it("returnează protocolul fiscal salvat și nota derivată", async () => {
@@ -108,6 +102,17 @@ describe("fiscal protocol route", () => {
     expect(payload.ok).toBe(true)
     expect(payload.derived.readiness).toBe("ready")
     expect(payload.feedbackMessage).toContain("pregătit")
-    expect(mocks.mutateStateMock).toHaveBeenCalled()
+    expect(mocks.writeStateForOrgMock).toHaveBeenCalledWith(
+      "org-demo",
+      expect.objectContaining({
+        fiscalProtocols: expect.objectContaining({
+          "finding-ef-005": expect.objectContaining({
+            findingId: "finding-ef-005",
+            findingTypeId: "EF-005",
+          }),
+        }),
+      }),
+      "Demo Fiscal SRL"
+    )
   })
 })

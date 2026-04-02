@@ -7,7 +7,7 @@ import { buildAISystemRecord } from "@/lib/compliance/ai-inventory"
 import { createPendingAction, type PendingAction } from "@/lib/server/approval-queue"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { removeAIActObligationFindings, syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
 import { AuthzError, requireRole } from "@/lib/server/auth"
@@ -39,8 +39,9 @@ function isPurpose(value: unknown): value is AISystemPurpose {
 }
 
 export async function POST(request: Request) {
+  let session: ReturnType<typeof requireRole>
   try {
-    requireRole(request, WRITE_ROLES, "adăugarea sistemului AI")
+    session = requireRole(request, WRITE_ROLES, "adăugarea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
       }
     : null
 
-  const nextState = await mutateState((current) => ({
+  const nextState = await mutateStateForOrg(session.orgId, (current) => ({
     ...current,
     aiSystems: [record, ...current.aiSystems].slice(0, 50),
     alerts: dpaAlert
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
         },
       }, actor),
     ]),
-  }))
+  }), session.orgName)
 
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),
@@ -116,8 +117,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  let session: ReturnType<typeof requireRole>
   try {
-    requireRole(request, DELETE_ROLES, "ștergerea sistemului AI")
+    session = requireRole(request, DELETE_ROLES, "ștergerea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -131,7 +133,7 @@ export async function DELETE(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
-  const nextState = await mutateState((current) => {
+  const nextState = await mutateStateForOrg(session.orgId, (current) => {
     const exists = current.aiSystems.some((s) => s.id === id)
     if (!exists) return current
 
@@ -148,7 +150,7 @@ export async function DELETE(request: Request) {
         }, actor),
       ]),
     }
-  })
+  }, session.orgName)
 
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),
@@ -171,9 +173,7 @@ function isAttestationStatus(v: unknown): v is AISystemAttestationStatus {
 }
 
 export async function PATCH(request: Request) {
-  let session:
-    | ReturnType<typeof requireRole>
-    | undefined
+  let session: ReturnType<typeof requireRole>
   try {
     session = requireRole(request, WRITE_ROLES, "actualizarea sistemului AI")
   } catch (error) {
@@ -207,14 +207,13 @@ export async function PATCH(request: Request) {
   const actorEmail = actor?.label ?? "necunoscut"
   const events: ReturnType<typeof createComplianceEvent>[] = []
 
-  const nextState = await mutateState((current) => {
+  const nextState = await mutateStateForOrg(session.orgId, (current) => {
     const idx = current.aiSystems.findIndex((s) => s.id === body.id)
     if (idx === -1) return current
 
     const system = { ...current.aiSystems[idx] }
 
     if (hasApproval) {
-      const previousApprovalStatus = system.approvalStatus
       system.approvalStatus = body.approvalStatus
       system.approvedAtISO = nowISO
       system.approvedByEmail = actorEmail
@@ -260,9 +259,8 @@ export async function PATCH(request: Request) {
     } else if (hasApproval && body.approvalStatus === "rejected") {
       nextState = removeAIActObligationFindings(nextState, system.id)
     }
-
     return nextState
-  })
+  }, session.orgName)
 
   if (hasApproval || hasAttestation) {
     const detailParts = [
@@ -271,7 +269,7 @@ export async function PATCH(request: Request) {
     ].filter(Boolean)
 
     await fireDriftTrigger({
-      orgId: session!.orgId,
+      orgId: session.orgId,
       trigger: "ai_system_modified",
       detail: `Sistem AI ${body.id} actualizat (${detailParts.join(", ")})`,
     }).catch(() => {})
@@ -288,10 +286,10 @@ export async function PATCH(request: Request) {
   if (approvedSystemForQueue) {
     const classification = classifyAISystem(approvedSystemForQueue.purpose)
     if (classification.riskLevel === "high_risk" || classification.riskLevel === "prohibited") {
-      try {
-        pendingClassificationAction = await createPendingAction({
-          orgId: session!.orgId,
-          userId: session!.userId,
+          try {
+            pendingClassificationAction = await createPendingAction({
+          orgId: session.orgId,
+          userId: session.userId,
           actionType: "classify_ai_system",
           riskLevel: "high",
           proposedData: {

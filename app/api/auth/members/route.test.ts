@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   requireFreshRoleMock: vi.fn(),
   listOrganizationMembersMock: vi.fn(),
   addOrganizationMemberByEmailMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   appendComplianceEventsMock: vi.fn(),
   createComplianceEventMock: vi.fn(),
   eventActorFromSessionMock: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/event-actor", () => ({
@@ -63,7 +63,7 @@ describe("/api/auth/members", () => {
     mocks.formatEventActorLabelMock.mockReturnValue("owner@site.ro (owner)")
     mocks.createComplianceEventMock.mockReturnValue({ id: "evt-1" })
     mocks.appendComplianceEventsMock.mockReturnValue([{ id: "evt-1" }])
-    mocks.mutateStateMock.mockImplementation(async (updater: (current: { events: unknown[] }) => unknown) => {
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId, updater: (current: { events: unknown[] }) => unknown) => {
       updater({ events: [] })
       return { events: [] }
     })
@@ -131,7 +131,11 @@ describe("/api/auth/members", () => {
       "reviewer@site.ro",
       "reviewer"
     )
-    expect(mocks.mutateStateMock).toHaveBeenCalledTimes(1)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Org Demo"
+    )
     expect(mocks.createComplianceEventMock).toHaveBeenCalledTimes(1)
   })
 

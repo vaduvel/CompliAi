@@ -1,40 +1,52 @@
 import { NextResponse } from "next/server"
 
-import { getOrgContext } from "@/lib/server/org-context"
+import { jsonError } from "@/lib/server/api-response"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import {
   addDnscRegistrationCorrespondenceEntry,
   deleteDnscRegistrationCorrespondenceEntry,
 } from "@/lib/server/nis2-store"
+import { WRITE_ROLES } from "@/lib/server/rbac"
 
 export async function POST(req: Request) {
-  const { orgId } = await getOrgContext()
-  const body = (await req.json()) as { date?: string; direction?: string; summary?: string }
+  try {
+    const session = await requireFreshRole(req, WRITE_ROLES, "actualizarea corespondenței DNSC")
+    const body = (await req.json()) as { date?: string; direction?: string; summary?: string }
 
-  if (!body.date || !body.direction || !body.summary?.trim()) {
-    return NextResponse.json({ error: "Câmpuri lipsă: date, direction, summary" }, { status: 400 })
+    if (!body.date || !body.direction || !body.summary?.trim()) {
+      return jsonError("Câmpuri lipsă: date, direction, summary.", 400, "MISSING_DNSC_CORRESPONDENCE_FIELDS")
+    }
+    if (body.direction !== "sent" && body.direction !== "received") {
+      return jsonError("direction trebuie să fie 'sent' sau 'received'.", 400, "INVALID_DNSC_DIRECTION")
+    }
+
+    const correspondence = await addDnscRegistrationCorrespondenceEntry(session.orgId, {
+      date: body.date,
+      direction: body.direction,
+      summary: body.summary.trim(),
+    })
+
+    return NextResponse.json({ correspondence })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Nu am putut salva corespondența DNSC.", 500, "DNSC_CORRESPONDENCE_CREATE_FAILED")
   }
-  if (body.direction !== "sent" && body.direction !== "received") {
-    return NextResponse.json({ error: "direction trebuie să fie 'sent' sau 'received'" }, { status: 400 })
-  }
-
-  const correspondence = await addDnscRegistrationCorrespondenceEntry(orgId, {
-    date: body.date,
-    direction: body.direction,
-    summary: body.summary.trim(),
-  })
-
-  return NextResponse.json({ correspondence })
 }
 
 export async function DELETE(req: Request) {
-  const { orgId } = await getOrgContext()
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get("id")
+  try {
+    const session = await requireFreshRole(req, WRITE_ROLES, "ștergerea corespondenței DNSC")
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get("id")
 
-  if (!id) {
-    return NextResponse.json({ error: "id lipsă" }, { status: 400 })
+    if (!id) {
+      return jsonError("id lipsă.", 400, "MISSING_DNSC_CORRESPONDENCE_ID")
+    }
+
+    const correspondence = await deleteDnscRegistrationCorrespondenceEntry(session.orgId, id)
+    return NextResponse.json({ correspondence })
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    return jsonError("Nu am putut șterge corespondența DNSC.", 500, "DNSC_CORRESPONDENCE_DELETE_FAILED")
   }
-
-  const correspondence = await deleteDnscRegistrationCorrespondenceEntry(orgId, id)
-  return NextResponse.json({ correspondence })
 }

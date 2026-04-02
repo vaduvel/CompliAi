@@ -2,8 +2,10 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { readSessionFromRequest } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { analyzeExtractedScan } from "@/lib/server/scan-workflow"
 import { asTrimmedString, requirePlainObject, RequestValidationError } from "@/lib/server/request-validation"
 
@@ -12,13 +14,19 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = readSessionFromRequest(request)
+    const workspace = session
+      ? { orgId: session.orgId, orgName: session.orgName }
+      : await getOrgContext()
     const { id } = await context.params
     const body = requirePlainObject(await request.json())
     const reviewedContent = asTrimmedString(body.reviewedContent, 50_000)
     const actor = await resolveOptionalEventActor(request)
 
-    const nextState = await mutateState(async (current) =>
-      analyzeExtractedScan(current, id, reviewedContent, actor)
+    const nextState = await mutateStateForOrg(
+      workspace.orgId,
+      async (current) => analyzeExtractedScan(current, id, reviewedContent, actor),
+      workspace.orgName
     )
 
     return NextResponse.json({

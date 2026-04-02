@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   readSessionMock: vi.fn(),
-  readStateMock: vi.fn(),
-  mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) =>
+  readStateForOrgMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) =>
     fn({ alerts: [] })
   ),
+  readNis2StateMock: vi.fn(),
   upsertVendorsFromEfacturaMock: vi.fn(),
+  mergeNis2PackageFindingsMock: vi.fn(),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
     new Response(JSON.stringify({ error: message, code }), { status })
   ),
@@ -31,12 +33,21 @@ vi.mock("@/lib/server/api-response", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
-  mutateState: mocks.mutateStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
-vi.mock("@/lib/server/nis2-store", () => ({
-  upsertVendorsFromEfactura: mocks.upsertVendorsFromEfacturaMock,
+vi.mock("@/lib/server/nis2-store", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/server/nis2-store")>("@/lib/server/nis2-store")
+  return {
+    ...actual,
+    readNis2State: mocks.readNis2StateMock,
+    upsertVendorsFromEfactura: mocks.upsertVendorsFromEfacturaMock,
+  }
+})
+
+vi.mock("@/lib/server/nis2-package-sync", () => ({
+  mergeNis2PackageFindings: mocks.mergeNis2PackageFindingsMock,
 }))
 
 vi.mock("@/lib/server/efactura-mock-data", () => ({
@@ -51,12 +62,14 @@ import { POST } from "./route"
 describe("POST /api/nis2/vendors/import-efactura", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue({ orgId: "org-1", userId: "user-1" })
+    mocks.readSessionMock.mockReturnValue({ orgId: "org-1", orgName: "Org Demo", userId: "user-1" })
+    mocks.readNis2StateMock.mockResolvedValue({ assessment: null, incidents: [], vendors: [] })
     mocks.upsertVendorsFromEfacturaMock.mockResolvedValue({
       added: 1,
       skipped: 0,
       techVendorsWithoutDpa: [],
     })
+    mocks.mergeNis2PackageFindingsMock.mockImplementation((findings) => findings ?? [])
   })
 
   it("respinge accesul fara sesiune", async () => {
@@ -68,7 +81,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("dedupeaza furnizorii din validari dupa CUI si agregeaza invoiceCount", async () => {
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "Amazon Web Services EMEA SARL",
@@ -101,7 +114,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("cade in demo mode cand nu exista validari e-Factura reale", async () => {
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       efacturaValidations: [],
     })
 
@@ -117,7 +130,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("genereaza alerte cand sunt detectati tech vendors fara DPA", async () => {
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "OpenAI OpCo LLC",
@@ -134,6 +147,12 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
     const res = await POST(new Request("http://localhost/api/nis2/vendors/import-efactura", { method: "POST" }))
 
     expect(res.status).toBe(200)
-    expect(mocks.mutateStateMock).toHaveBeenCalledOnce()
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledTimes(2)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenNthCalledWith(
+      1,
+      "org-1",
+      expect.any(Function),
+      "Org Demo"
+    )
   })
 })

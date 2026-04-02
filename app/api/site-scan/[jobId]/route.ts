@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(
   request: Request,
@@ -18,7 +18,8 @@ export async function GET(
     const { jobId } = await params
     if (!jobId) return jsonError("jobId lipsă.", 400, "MISSING_JOB_ID")
 
-    const state = await readState()
+    const state = await readStateForOrg(session.orgId)
+    if (!state) return jsonError("Starea organizației nu a fost găsită.", 404, "ORG_STATE_NOT_FOUND")
     const job = state.siteScanJobs?.[jobId]
 
     if (!job) return jsonError("Job-ul nu a fost găsit.", 404, "JOB_NOT_FOUND")

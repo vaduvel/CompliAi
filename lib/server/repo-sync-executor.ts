@@ -1,17 +1,22 @@
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { mergeDetectedAISystems } from "@/lib/server/detected-ai-systems"
 import { discoverAISystemsFromManifest } from "@/lib/server/manifest-autodiscovery"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import type { NormalizedRepoSyncPayload } from "@/lib/server/repo-sync"
 
-export async function executeRepoSync(body: NormalizedRepoSyncPayload) {
+type RepoSyncExecutionPayload = NormalizedRepoSyncPayload & {
+  orgId: string
+  orgName?: string
+}
+
+export async function executeRepoSync(body: RepoSyncExecutionPayload) {
   const files = body.files
   if (!files || files.length === 0) {
     throw new Error("REPO_SYNC_FILES_REQUIRED")
   }
 
   const nowISO = new Date().toISOString()
-  const nextState = await mutateState((current) => {
+  const nextState = await mutateStateForOrg(body.orgId, (current) => {
     const syncedPaths = new Set(files.map((file) => file.path))
     const retainedFindings = current.findings.filter(
       (finding) => !finding.sourceDocument || !syncedPaths.has(finding.sourceDocument)
@@ -139,7 +144,7 @@ export async function executeRepoSync(body: NormalizedRepoSyncPayload) {
         ...generatedEvents,
       ]),
     }
-  })
+  }, body.orgName)
 
   return {
     nextState,

@@ -21,6 +21,7 @@ import {
   type RepoSyncStatus,
   type SupabaseOperationalStatus,
 } from "@/components/compliscan/settings/settings-shared"
+import { SPV_STATUS_LABELS } from "@/lib/fiscal/spv-submission"
 
 type EFacturaIntegrationStatus = {
   mode: "mock" | "test" | "real"
@@ -28,10 +29,25 @@ type EFacturaIntegrationStatus = {
   productionUnlocked: boolean
   connected: boolean
   syncedAtISO: string | null
-  tokenState: "missing" | "active" | "expired"
+  tokenState: "missing" | "present" | "expired"
   tokenExpiresAtISO: string | null
+  persistenceBackend: "supabase" | "local"
+  lastSubmissionStatus: keyof typeof SPV_STATUS_LABELS | null
+  lastSubmissionAtISO: string | null
+  lastSubmissionError: string | null
+  operationalState:
+    | "demo_only"
+    | "not_configured"
+    | "connect_required"
+    | "reauth_required"
+    | "authorized_pending_sync"
+    | "attention_required"
+    | "operational"
+  statusLabel: string
+  statusDetail: string
   ready: boolean
   productionReady: boolean
+  canAttemptUpload: boolean
   missingConfig: string[]
   message: string
 }
@@ -150,8 +166,10 @@ export function SettingsIntegrationsTab({
                   icon={KeyRound}
                   label="Token OAuth"
                   value={
-                    efacturaStatus.tokenState === "active"
-                      ? "Activ"
+                    efacturaStatus.tokenState === "present"
+                      ? efacturaStatus.operationalState === "reauth_required"
+                        ? "Prezent, dar respins"
+                        : "Prezent"
                       : efacturaStatus.tokenState === "expired"
                         ? "Expirat"
                         : "Lipsă"
@@ -161,6 +179,11 @@ export function SettingsIntegrationsTab({
                   icon={Cloud}
                   label="Mediu ANAF"
                   value={efacturaStatus.environment === "prod" ? "prod" : "test"}
+                />
+                <SettingsTile
+                  icon={RefreshCw}
+                  label="Stare oper."
+                  value={efacturaStatus.statusLabel}
                 />
                 <SettingsTile
                   icon={RefreshCw}
@@ -176,14 +199,8 @@ export function SettingsIntegrationsTab({
               <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
                 <SettingsStatusBlock
                   eyebrow="Stare curentă"
-                  title={
-                    efacturaStatus.mode === "real"
-                      ? "ANAF este conectat în producție."
-                      : efacturaStatus.mode === "test"
-                        ? "ANAF este conectat în sandbox."
-                        : "ANAF nu este încă autorizat."
-                  }
-                  description={efacturaStatus.message}
+                  title={efacturaStatus.statusLabel}
+                  description={efacturaStatus.statusDetail}
                 >
                   <div className="space-y-2 text-sm text-eos-text-muted">
                     <p>
@@ -196,6 +213,14 @@ export function SettingsIntegrationsTab({
                         {efacturaStatus.productionUnlocked ? "deblocat" : "blocat"}
                       </span>
                     </p>
+                    <p>
+                      Persistență:{" "}
+                      <span className="font-semibold text-eos-text">
+                        {efacturaStatus.persistenceBackend === "supabase"
+                          ? "durabilă (Supabase)"
+                          : "fallback local"}
+                      </span>
+                    </p>
                     {efacturaStatus.tokenExpiresAtISO && (
                       <p>
                         Expirare token:{" "}
@@ -204,20 +229,38 @@ export function SettingsIntegrationsTab({
                         </span>
                       </p>
                     )}
+                    {efacturaStatus.lastSubmissionStatus && (
+                      <p>
+                        Ultima execuție:{" "}
+                        <span className="font-semibold text-eos-text">
+                          {SPV_STATUS_LABELS[efacturaStatus.lastSubmissionStatus]}
+                        </span>
+                        {efacturaStatus.lastSubmissionAtISO
+                          ? ` · ${new Date(efacturaStatus.lastSubmissionAtISO).toLocaleString("ro-RO")}`
+                          : ""}
+                      </p>
+                    )}
+                    {efacturaStatus.lastSubmissionError && (
+                      <p className="text-eos-error">{efacturaStatus.lastSubmissionError}</p>
+                    )}
                   </div>
                 </SettingsStatusBlock>
 
                 <SettingsStatusBlock
                   eyebrow="Acțiune recomandată"
                   title={
-                    efacturaStatus.tokenState === "active"
+                    efacturaStatus.canAttemptUpload
                       ? "Poți testa fluxul în sandbox."
-                      : "Autorizează aplicația în ANAF."
+                      : efacturaStatus.tokenState === "missing"
+                        ? "Autorizează aplicația în ANAF."
+                        : "Revalidează conexiunea înainte de upload."
                   }
                   description={
-                    efacturaStatus.tokenState === "active"
+                    efacturaStatus.canAttemptUpload
                       ? "Continuă în Fiscal → Transmitere ANAF și lucrează doar cu mediul de test."
-                      : "După autorizare te trimitem direct în Fiscal → Transmitere ANAF."
+                      : efacturaStatus.tokenState === "missing"
+                        ? "După autorizare te trimitem direct în Fiscal → Transmitere ANAF."
+                        : "Tokenul este prezent, dar suprafața fiscală rămâne adevărul operațional pentru upload."
                   }
                 >
                   <div className="space-y-2 text-xs text-eos-text-muted">
@@ -234,7 +277,7 @@ export function SettingsIntegrationsTab({
                 <Button asChild variant="outline" size="sm">
                   <a href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere">
                     <ShieldCheck className="mr-1.5 size-3.5" />
-                    {efacturaStatus.tokenState === "active" ? "Reautentifică ANAF" : "Autentifică ANAF"}
+                    {efacturaStatus.tokenState === "missing" ? "Autentifică ANAF" : "Reautentifică ANAF"}
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="sm">

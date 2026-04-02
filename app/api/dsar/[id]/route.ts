@@ -3,8 +3,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { updateDsar, deleteDsar } from "@/lib/server/dsar-store"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import type { DsarStatus } from "@/lib/server/dsar-store"
@@ -33,7 +32,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "actualizarea cererii DSAR")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea cererii DSAR")
     const { id } = await params
     const body = await request.json()
 
@@ -50,8 +49,7 @@ export async function PATCH(
       return jsonError("Status invalid.", 400, "INVALID_STATUS")
     }
 
-    const { orgId } = await getOrgContext()
-    const updated = await updateDsar(orgId, id, updates)
+    const updated = await updateDsar(session.orgId, id, updates)
     if (!updated) return jsonError("Cererea DSAR nu a fost găsită.", 404, "NOT_FOUND")
 
     return NextResponse.json({ request: updated })
@@ -66,10 +64,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, DELETE_ROLES, "ștergerea cererii DSAR")
+    const session = await requireFreshRole(request, DELETE_ROLES, "ștergerea cererii DSAR")
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const deleted = await deleteDsar(orgId, id)
+    const deleted = await deleteDsar(session.orgId, id)
     if (!deleted) return jsonError("Cererea DSAR nu a fost găsită.", 404, "NOT_FOUND")
 
     return NextResponse.json({ ok: true })

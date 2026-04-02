@@ -2,7 +2,9 @@
 // GET: list discrepancies, POST: create, PATCH: transition
 
 import { NextRequest, NextResponse } from "next/server"
-import { readState, writeState } from "@/lib/server/mvp-store"
+import { jsonError } from "@/lib/server/api-response"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { ETVADiscrepancy, ETVADiscrepancyType, DiscrepancyTransition } from "@/lib/compliance/etva-discrepancy"
 import {
@@ -13,14 +15,21 @@ import {
 } from "@/lib/compliance/etva-discrepancy"
 
 type StateWithDiscrepancies = ComplianceState & { etvaDiscrepancies?: ETVADiscrepancy[] }
+const READ_ROLES = ["owner", "partner_manager", "compliance", "reviewer"] as const
+const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
 
 function uid() {
   return `etva-${Math.random().toString(36).slice(2, 10)}`
 }
 
 // GET — list all discrepancies
-export async function GET() {
-  const state = await readState() as StateWithDiscrepancies
+export async function GET(request: NextRequest) {
+  const session = requireRole(request, [...READ_ROLES], "discrepanțe e-TVA")
+  const orgId = session.orgId
+  const state = await readStateForOrg(orgId) as StateWithDiscrepancies | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "ETVA_STATE_UNAVAILABLE")
+  }
   const discrepancies = state.etvaDiscrepancies ?? []
   const nowISO = new Date().toISOString()
   const updated = detectOverdueDiscrepancies(discrepancies, nowISO)
@@ -29,6 +38,9 @@ export async function GET() {
 
 // POST — create new discrepancy
 export async function POST(request: NextRequest) {
+  const session = requireRole(request, [...WRITE_ROLES], "creare discrepanță e-TVA")
+  const orgId = session.orgId
+  const orgName = session.orgName
   const body = await request.json() as {
     type: ETVADiscrepancyType
     period: string
@@ -60,15 +72,21 @@ export async function POST(request: NextRequest) {
     ownerId: body.ownerId,
   }
 
-  const state = await readState() as StateWithDiscrepancies
+  const state = await readStateForOrg(orgId) as StateWithDiscrepancies | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "ETVA_STATE_UNAVAILABLE")
+  }
   state.etvaDiscrepancies = [...(state.etvaDiscrepancies ?? []), discrepancy]
-  await writeState(state)
+  await writeStateForOrg(orgId, state, orgName)
 
   return NextResponse.json({ discrepancy }, { status: 201 })
 }
 
 // PATCH — transition discrepancy status
 export async function PATCH(request: NextRequest) {
+  const session = requireRole(request, [...WRITE_ROLES], "actualizare discrepanță e-TVA")
+  const orgId = session.orgId
+  const orgName = session.orgName
   const body = await request.json() as {
     id: string
     transition: DiscrepancyTransition
@@ -78,7 +96,10 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "id and transition required" }, { status: 400 })
   }
 
-  const state = await readState() as StateWithDiscrepancies
+  const state = await readStateForOrg(orgId) as StateWithDiscrepancies | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "ETVA_STATE_UNAVAILABLE")
+  }
   const discrepancies = state.etvaDiscrepancies ?? []
   const idx = discrepancies.findIndex((d) => d.id === body.id)
   if (idx === -1) {
@@ -88,7 +109,7 @@ export async function PATCH(request: NextRequest) {
   const updated = applyDiscrepancyTransition(discrepancies[idx], body.transition)
   discrepancies[idx] = updated
   state.etvaDiscrepancies = discrepancies
-  await writeState(state)
+  await writeStateForOrg(orgId, state, orgName)
 
   return NextResponse.json({ discrepancy: updated })
 }

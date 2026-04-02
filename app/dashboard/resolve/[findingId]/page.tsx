@@ -1015,32 +1015,12 @@ export default function FindingDetailPage() {
           ) : recipe.workflowLink ? (
             <Button
               data-testid="confirm-and-open-workflow"
-              onClick={() =>
-                updateStatus("confirmed", {
-                  redirectTo: recipe.workflowLink?.href,
-                })
-              }
+              onClick={() => updateStatus("confirmed")}
               disabled={actionLoading}
               className="gap-1.5"
             >
               <FileText className="size-3.5" strokeWidth={2} />
-              {recipe.findingTypeId === "GDPR-005"
-                ? "Confirmă și scanează site-ul"
-                : recipe.findingTypeId === "EF-003"
-                  ? "Confirmă și deschide validatorul XML"
-                  : recipe.findingTypeId === "EF-004"
-                    ? "Confirmă și deschide protocolul fiscal"
-                  : recipe.findingTypeId === "EF-005"
-                    ? "Confirmă și pregătește transmiterea"
-                : recipe.findingTypeId === "GDPR-019"
-                  ? "Confirmă și deschide breach flow"
-                  : recipe.findingTypeId === "NIS2-015"
-                    ? "Confirmă și deschide timeline-ul"
-                  : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/maturitate")
-                    ? "Confirmă și deschide maturitatea"
-                  : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/governance")
-                    ? "Confirmă și deschide guvernanța"
-                  : "Confirmă și continuă"}
+              Confirmă findingul
             </Button>
           ) : (
             <Button
@@ -1074,15 +1054,16 @@ export default function FindingDetailPage() {
           {!hasGenerator ? (
             <>
               {recipe.workflowLink ? (
-                <Link href={recipe.workflowLink.href}>
+                <a href={recipe.workflowLink.href} target="_blank" rel="noopener noreferrer">
                   <Button
                     data-testid="open-workflow-link"
                     className="gap-1.5"
+                    variant="outline"
                   >
                     <FileText className="size-3.5" strokeWidth={2} />
-                    {recipe.workflowLink.label}
+                    {recipe.workflowLink.label} (tab nou)
                   </Button>
-                </Link>
+                </a>
               ) : null}
               <Button
                 data-testid="mark-finding-resolved"
@@ -1095,7 +1076,7 @@ export default function FindingDetailPage() {
                 }
                 disabled={resolveDisabled}
                 className="gap-1.5"
-                variant={recipe.workflowLink ? "outline" : "default"}
+                variant="default"
               >
                 <CheckCircle2 className="size-3.5" strokeWidth={2} />
                 {recipe.closureCTA ?? recipe.primaryCTA.label}
@@ -1331,12 +1312,13 @@ export default function FindingDetailPage() {
               <CheckCircle2 className="h-4 w-4 text-eos-warning" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-eos-text">Acțiune în așteptare</p>
+              <p className="text-sm font-semibold text-eos-text">Acțiune trimisă spre aprobare</p>
               <p className="mt-0.5 text-xs text-eos-text-tertiary">
-                Rezolvarea a intrat în coada de aprobări. Verifică sau aprobă din{" "}
+                Rezolvarea necesită aprobare explicită. Următorul pas:{" "}
                 <Link href="/dashboard/approvals" className="font-medium text-eos-primary hover:underline">
-                  Aprobări
-                </Link>.
+                  deschide coada de aprobări
+                </Link>{" "}
+                și aprobă sau respinge. Dacă politica e semi-auto, acțiunea se execută automat în 24h dacă nu este respinsă.
               </p>
             </div>
           </CardContent>

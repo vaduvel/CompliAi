@@ -67,6 +67,20 @@ type SPVSubmissionRow = {
   error_detail: string | null
 }
 
+export type AnafSubmissionErrorCategory =
+  | "reauth_required"
+  | "draft_missing"
+  | "service_unavailable"
+  | "payload_rejected"
+  | "unknown"
+
+export type AnafSubmissionDiagnosis = {
+  category: AnafSubmissionErrorCategory
+  userMessage: string
+  nextStep: string
+  reauthRequired: boolean
+}
+
 // ── Mappers ──────────────────────────────────────────────────────────────────
 
 function rowToSubmission(row: SPVSubmissionRow): SPVSubmission {
@@ -108,6 +122,56 @@ function submissionToRow(s: SPVSubmission): SPVSubmissionRow {
     resolved_at: s.resolvedAtISO,
     source_finding_id: s.sourceFindingId,
     error_detail: s.errorDetail,
+  }
+}
+
+export function diagnoseAnafSubmissionError(errorDetail: string | null | undefined): AnafSubmissionDiagnosis | null {
+  if (!errorDetail) return null
+
+  const normalized = errorDetail.toLowerCase()
+  if (
+    /401|unauthorized|token anaf expirat|token anaf.*lipsă|reconectează contul anaf/i.test(errorDetail)
+  ) {
+    return {
+      category: "reauth_required",
+      userMessage: "ANAF a refuzat tokenul curent pentru upload sau status.",
+      nextStep: "Reautentifică firma în ANAF înainte de o nouă transmitere.",
+      reauthRequired: true,
+    }
+  }
+
+  if (/xml-ul nu mai este disponibil|xml no longer cached/i.test(errorDetail)) {
+    return {
+      category: "draft_missing",
+      userMessage: "Transmiterea nu mai are XML-ul original atașat.",
+      nextStep: "Reinițiază transmiterea din formular și aprobă din nou draftul.",
+      reauthRequired: false,
+    }
+  }
+
+  if (/fetch failed|network|econn|timed out|timeout|503|502|service unavailable/i.test(normalized)) {
+    return {
+      category: "service_unavailable",
+      userMessage: "Serviciul ANAF sau conexiunea către el nu a răspuns stabil.",
+      nextStep: "Încearcă din nou mai târziu și verifică dacă ANAF are mentenanță.",
+      reauthRequired: false,
+    }
+  }
+
+  if (/upload failed 4|xml_erori|nok|payload/i.test(normalized)) {
+    return {
+      category: "payload_rejected",
+      userMessage: "ANAF a respins payloadul sau cererea curentă.",
+      nextStep: "Revizuiește XML-ul și configurația fiscală înainte de retransmitere.",
+      reauthRequired: false,
+    }
+  }
+
+  return {
+    category: "unknown",
+    userMessage: "Transmiterea ANAF a eșuat dintr-un motiv care cere verificare manuală.",
+    nextStep: "Verifică eroarea completă, apoi retrimite sau reautentifică dacă este necesar.",
+    reauthRequired: false,
   }
 }
 
@@ -422,8 +486,19 @@ export async function checkSubmitStatus(params: {
     }
 
     return { submission: updated ?? submission, anafResult, changed }
-  } catch {
-    return { submission, anafResult: null, changed: false }
+  } catch (err) {
+    const message = err instanceof AnafClientError
+      ? `ANAF error (${err.anafCode}): ${err.message}`
+      : err instanceof Error
+        ? err.message
+        : "Status check failed."
+
+    await updateSubmissionStatus(orgId, submissionId, submission.status, {
+      error_detail: message,
+      anaf_message: message,
+    })
+    const updated = await getSubmission(orgId, submissionId)
+    return { submission: updated ?? submission, anafResult: null, changed: false }
   }
 }
 
@@ -609,17 +684,21 @@ async function resolveLinkedFinding(orgId: string, submission: SPVSubmission): P
     if (idx === -1) return
     const now = new Date().toISOString()
     const finding = state.findings[idx]
+    const operationalEvidenceNote = `Factură acceptată ANAF. Index încărcare: ${submission.indexDescarcare ?? "N/A"}. ${
+      submission.downloadId ? `Download: ${submission.downloadId}. ` : ""
+    }Transmis: ${submission.submittedAtISO ?? now}.`
     const updatedFindings = [...state.findings]
     updatedFindings[idx] = {
       ...finding,
       findingStatus: "under_monitoring",
       findingStatusUpdatedAtISO: now,
       nextMonitoringDateISO: new Date(Date.now() + 90 * 86_400_000).toISOString(),
+      operationalEvidenceNote,
       resolution: {
         problem: finding.resolution?.problem ?? finding.detail,
         impact: finding.resolution?.impact ?? "Factură transmisă și acceptată la ANAF.",
         action: finding.resolution?.action ?? "E-Factura a fost transmisă în SPV.",
-        closureEvidence: `Factură acceptată ANAF. Index încărcare: ${submission.indexDescarcare ?? "N/A"}. Transmis: ${submission.submittedAtISO ?? now}.`,
+        closureEvidence: operationalEvidenceNote,
         humanStep: "Factură aprobată și transmisă la ANAF prin fluxul complet de aprobare.",
         revalidation: "Reverificare trimestrială a statusului în SPV.",
         reviewedAtISO: now,
@@ -640,18 +719,20 @@ async function reopenLinkedFinding(orgId: string, submission: SPVSubmission): Pr
     if (idx === -1) return
     const now = new Date().toISOString()
     const finding = state.findings[idx]
+    const operationalEvidenceNote = `Factură respinsă ANAF. Eroare: ${submission.anafMessage ?? submission.errorDetail ?? "Necunoscută"}. Corectează și retransmite.`
     const updatedFindings = [...state.findings]
     updatedFindings[idx] = {
       ...finding,
       findingStatus: "open",
       findingStatusUpdatedAtISO: now,
       reopenedFromISO: finding.findingStatusUpdatedAtISO ?? now,
+      operationalEvidenceNote,
       resolution: {
         ...finding.resolution,
         problem: finding.resolution?.problem ?? finding.detail,
         impact: finding.resolution?.impact ?? "Factura a fost respinsă de ANAF și trebuie corectată.",
         action: finding.resolution?.action ?? "Corectează factura și retransmite.",
-        closureEvidence: `Factură respinsă ANAF. Eroare: ${submission.anafMessage ?? submission.errorDetail ?? "Necunoscută"}. Corectează și retransmite.`,
+        closureEvidence: operationalEvidenceNote,
         reviewedAtISO: now,
       },
     }

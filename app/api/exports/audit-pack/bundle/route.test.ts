@@ -15,11 +15,10 @@ const mocks = vi.hoisted(() => ({
   buildAuditPackBundleMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
   requireRoleMock: vi.fn(),
   requirePlanMock: vi.fn(),
   readNis2StateMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/compliscan-export", () => ({
@@ -35,12 +34,8 @@ vi.mock("@/lib/server/auth", () => ({
   requireRole: mocks.requireRoleMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/nis2-store", () => ({
@@ -77,8 +72,7 @@ describe("GET /api/exports/audit-pack/bundle", () => {
       exp: Date.now() + 1000,
     })
     mocks.requirePlanMock.mockResolvedValue("pro")
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-1" })
-    mocks.readStateMock.mockResolvedValue({})
+    mocks.readStateForOrgMock.mockResolvedValue({})
     mocks.readNis2StateMock.mockResolvedValue({
       assessment: { score: 72 },
       incidents: [{ id: "incident-1", severity: "high" }],
@@ -132,6 +126,7 @@ describe("GET /api/exports/audit-pack/bundle", () => {
     const body = Buffer.from(await response.arrayBuffer())
 
     expect(response.status).toBe(200)
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
     expect(response.headers.get("content-type")).toContain("application/zip")
     expect(response.headers.get("content-disposition")).toContain(
       'attachment; filename="audit-pack-dossier-magazin-online-s-r-l-2026-03-13.zip"'

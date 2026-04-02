@@ -15,6 +15,7 @@ import {
 } from "@/lib/server/scheduled-reports"
 import { createPendingAction } from "@/lib/server/approval-queue"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
+import { executeScheduledReportDelivery } from "@/lib/server/scheduled-report-runtime"
 
 const CRON_SECRET = process.env.CRON_SECRET
 
@@ -59,15 +60,23 @@ export async function GET(request: Request) {
           })
           pendingCreated++
         } else {
-          // Auto-execute: in production would trigger actual email/export
-          // For now: log the execution (Supabase + notification system in Wave 3)
-          console.log(`[scheduled-reports] Auto-executing: ${report.reportType} for org ${report.orgId}`)
+          const execution = await executeScheduledReportDelivery({
+            orgId: report.orgId,
+            scheduledReportId: report.id,
+            reportType: report.reportType,
+            frequency: report.frequency,
+            clientOrgIds: report.clientOrgIds,
+            recipientEmails: report.recipientEmails,
+            executionMode: "auto",
+          })
+          if (!execution.success) {
+            throw new Error(execution.detail)
+          }
+          await markReportRun(report.orgId, report.id, report.frequency)
         }
 
-        // Mark report as run and compute next_run_at
-        await markReportRun(report.orgId, report.id, report.frequency)
         const orgState = await readStateForOrg(report.orgId)
-        if (orgState) {
+        if (orgState && report.requiresApproval) {
           await writeStateForOrg(report.orgId, {
             ...orgState,
             events: appendComplianceEvents(orgState, [
@@ -84,6 +93,7 @@ export async function GET(request: Request) {
                   reportType: report.reportType,
                   frequency: report.frequency,
                   approvalQueued: report.requiresApproval,
+                  executionMode: report.requiresApproval ? "queued" : "auto",
                   recipientCount: report.recipientEmails.length,
                   clientCount: report.clientOrgIds.length,
                 },

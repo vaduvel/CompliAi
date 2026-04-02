@@ -4,9 +4,10 @@
 
 import { NextResponse } from "next/server"
 
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { readState, mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import {
   makeKnowledgeItem,
   mergeKnowledgeItems,
@@ -19,7 +20,8 @@ export async function GET(request: Request) {
     const session = readSessionFromRequest(request)
     if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
 
-    const state = await readState()
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
     const knowledge = state.orgKnowledge ?? { items: [], lastUpdatedAtISO: new Date().toISOString() }
     const itemsWithStale = withStaleFlags(knowledge.items)
     const hasStale = itemsWithStale.some((i) => i.stale)
@@ -61,14 +63,14 @@ export async function POST(request: Request) {
       )
     )
 
-    const updated = await mutateState((state) => {
+    const updated = await mutateStateForOrg(session.orgId, (state) => {
       const existing = state.orgKnowledge?.items ?? []
       state.orgKnowledge = {
         items: mergeKnowledgeItems(existing, incoming),
         lastUpdatedAtISO: now.toISOString(),
       }
       return state
-    })
+    }, session.orgName)
 
     return NextResponse.json({ knowledge: updated.orgKnowledge })
   } catch (error) {
@@ -86,13 +88,13 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id")
     if (!id) return jsonError("id lipsește.", 400, "MISSING_ID")
 
-    await mutateState((state) => {
+    await mutateStateForOrg(session.orgId, (state) => {
       if (state.orgKnowledge) {
         state.orgKnowledge.items = state.orgKnowledge.items.filter((i) => i.id !== id)
         state.orgKnowledge.lastUpdatedAtISO = new Date().toISOString()
       }
       return state
-    })
+    }, session.orgName)
 
     return NextResponse.json({ ok: true })
   } catch (error) {

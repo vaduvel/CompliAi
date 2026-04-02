@@ -44,12 +44,59 @@ type EFacturaIntegrationStatus = {
   productionUnlocked: boolean
   connected: boolean
   syncedAtISO: string | null
-  tokenState: "missing" | "active" | "expired"
+  tokenState: "missing" | "present" | "expired"
   tokenExpiresAtISO: string | null
+  persistenceBackend: "supabase" | "local"
+  lastSubmissionStatus: keyof typeof SPV_STATUS_LABELS | null
+  lastSubmissionAtISO: string | null
+  lastSubmissionError: string | null
+  lastSubmissionErrorCategory:
+    | "reauth_required"
+    | "draft_missing"
+    | "service_unavailable"
+    | "payload_rejected"
+    | "unknown"
+    | null
+  lastSubmissionNextStep: string | null
+  operationalState:
+    | "demo_only"
+    | "not_configured"
+    | "connect_required"
+    | "reauth_required"
+    | "authorized_pending_sync"
+    | "attention_required"
+    | "operational"
+  statusLabel: string
+  statusDetail: string
   ready: boolean
   productionReady: boolean
+  canAttemptUpload: boolean
   missingConfig: string[]
   message: string
+}
+
+type SubmissionErrorCategory =
+  | "reauth_required"
+  | "draft_missing"
+  | "service_unavailable"
+  | "payload_rejected"
+  | "unknown"
+
+function diagnoseSubmissionError(errorDetail: string | null | undefined): SubmissionErrorCategory | null {
+  if (!errorDetail) return null
+  if (/401|unauthorized|token anaf expirat|reconectează contul anaf/i.test(errorDetail)) {
+    return "reauth_required"
+  }
+  if (/xml-ul nu mai este disponibil|xml no longer cached/i.test(errorDetail)) {
+    return "draft_missing"
+  }
+  if (/fetch failed|network|timeout|503|502|service unavailable/i.test(errorDetail.toLowerCase())) {
+    return "service_unavailable"
+  }
+  if (/upload failed 4|xml_erori|nok|payload/i.test(errorDetail.toLowerCase())) {
+    return "payload_rejected"
+  }
+  return "unknown"
 }
 
 // ── Severity badge helpers ───────────────────────────────────────────────────
@@ -753,17 +800,30 @@ const SUBMIT_STATUS_VARIANT: Record<string, "destructive" | "default" | "seconda
   error: "destructive",
 }
 
-function SubmitSpvTab() {
+function SubmitSpvTab({
+  sourceFindingId,
+  fromCockpit,
+  returnToFindingHref,
+}: {
+  sourceFindingId?: string | null
+  fromCockpit?: boolean
+  returnToFindingHref?: string | null
+}) {
   const [submissions, setSubmissions] = useState<SPVSubmission[]>([])
   const [integrationStatus, setIntegrationStatus] = useState<EFacturaIntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [approving, setApproving] = useState<string | null>(null)
+  const [rejecting, setRejecting] = useState<string | null>(null)
   const [executing, setExecuting] = useState<string | null>(null)
   const [polling, setPolling] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [xml, setXml] = useState("")
   const [invoiceId, setInvoiceId] = useState("")
+  const [draftSourceFindingId, setDraftSourceFindingId] = useState(sourceFindingId ?? "")
+  const anafConnectHref = sourceFindingId
+    ? `/api/anaf/connect?returnTo=${encodeURIComponent(`/dashboard/fiscal?tab=transmitere&findingId=${sourceFindingId}`)}`
+    : "/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
 
   const refreshTab = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -793,6 +853,10 @@ function SubmitSpvTab() {
   }, [])
 
   useEffect(() => {
+    setDraftSourceFindingId(sourceFindingId ?? "")
+  }, [sourceFindingId])
+
+  useEffect(() => {
     void refreshTab()
 
     const handleFocusRefresh = () => {
@@ -819,7 +883,11 @@ function SubmitSpvTab() {
       const res = await fetch("/api/fiscal/submit-spv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ xmlContent: xml, invoiceId: invoiceId || undefined }),
+        body: JSON.stringify({
+          xmlContent: xml,
+          invoiceId: invoiceId || undefined,
+          sourceFindingId: draftSourceFindingId || undefined,
+        }),
       })
       const data = (await res.json()) as { ok?: boolean; submission?: SPVSubmission; error?: string; message?: string }
       if (!res.ok) throw new Error(data.error ?? "Eroare la inițierea transmiterii.")
@@ -828,7 +896,9 @@ function SubmitSpvTab() {
       setInvoiceId("")
       setShowForm(false)
       toast.success("Transmitere creată", {
-        description: "Poți aproba direct aici sau din pagina Aprobări.",
+        description: fromCockpit
+          ? "Draftul rămâne legat de cazul fiscal curent și îl poți aproba direct aici."
+          : "Poți aproba direct aici sau din pagina Aprobări.",
       })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare necunoscută.")
@@ -859,6 +929,28 @@ function SubmitSpvTab() {
     }
   }
 
+  async function handleReject(submission: SPVSubmission) {
+    setRejecting(submission.id)
+    try {
+      const res = await fetch(`/api/approvals/${encodeURIComponent(submission.approvalActionId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: "rejected" }),
+      })
+      const data = (await res.json()) as { error?: string }
+      if (!res.ok) throw new Error(data.error ?? "Nu am putut respinge transmiterea.")
+
+      await refreshTab(true)
+      toast.info("Transmitere respinsă", {
+        description: "Draftul a rămas în istoric și poți crea imediat unul nou din acest tab.",
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Nu am putut respinge transmiterea.")
+    } finally {
+      setRejecting(null)
+    }
+  }
+
   async function handleExecute(submissionId: string) {
     setExecuting(submissionId)
     try {
@@ -871,6 +963,7 @@ function SubmitSpvTab() {
       if (!res.ok) throw new Error(data.error ?? "Eroare la transmitere.")
       if (data.submission) {
         setSubmissions((prev) => prev.map((s) => (s.id === submissionId ? data.submission! : s)))
+        await refreshTab(true)
         toast.success("Transmis la ANAF", {
           description: data.submission.indexDescarcare
             ? `Index: ${data.submission.indexDescarcare}`
@@ -892,6 +985,7 @@ function SubmitSpvTab() {
       if (!res.ok) throw new Error("Eroare la verificarea statusului.")
       if (data.submission) {
         setSubmissions((prev) => prev.map((s) => (s.id === submissionId ? data.submission! : s)))
+        await refreshTab(true)
         if (data.changed) {
           const s = data.submission
           if (s.status === "ok") toast.success("Acceptat ANAF!", { description: s.anafMessage ?? "" })
@@ -907,6 +1001,18 @@ function SubmitSpvTab() {
     }
   }
 
+  function openRetryDraft(submission: SPVSubmission) {
+    setInvoiceId(`${submission.invoiceId}-retry`)
+    setXml("")
+    setDraftSourceFindingId(submission.sourceFindingId ?? sourceFindingId ?? "")
+    setShowForm(true)
+  }
+
+  function toggleNewDraftForm() {
+    setDraftSourceFindingId(sourceFindingId ?? "")
+    setShowForm((current) => !current)
+  }
+
   if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
 
   return (
@@ -917,8 +1023,11 @@ function SubmitSpvTab() {
         <div className="min-w-0 flex-1 text-sm">
           <p className="font-medium text-eos-text">Transmitere ANAF cu dublu aprobare</p>
           <p className="mt-0.5 text-xs text-eos-text-muted">
-            Orice transmitere necesită aprobare manuală înainte de upload. Poți aproba direct din acest tab sau din{" "}
-            <a href="/dashboard/approvals" className="text-eos-primary hover:underline">pagina Aprobări</a>.
+            {fromCockpit
+              ? "Transmiterea rămâne legată de cazul fiscal din care ai venit. Poți aproba, respinge și trimite direct din acest tab, fără să pierzi contextul."
+              : <>Orice transmitere necesită aprobare manuală înainte de upload. Poți aproba direct din acest tab sau din{" "}
+                  <a href="/dashboard/approvals" className="text-eos-primary hover:underline">pagina Aprobări</a>.
+                </>}
           </p>
         </div>
       </div>
@@ -951,11 +1060,11 @@ function SubmitSpvTab() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <a
-                  href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
+                  href={anafConnectHref}
                   className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
                 >
                   <ShieldCheck className="size-3" />
-                  {integrationStatus.tokenState === "active" ? "Reautentifică ANAF" : "Conectează ANAF"}
+                  {integrationStatus.tokenState === "missing" ? "Conectează ANAF" : "Reautentifică ANAF"}
                 </a>
                 <a
                   href="/dashboard/settings"
@@ -967,12 +1076,14 @@ function SubmitSpvTab() {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-4">
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">Token</p>
                 <p className="mt-1 text-sm font-medium text-eos-text">
-                  {integrationStatus.tokenState === "active"
-                    ? "Activ"
+                  {integrationStatus.tokenState === "present"
+                    ? integrationStatus.operationalState === "reauth_required"
+                      ? "Prezent, dar respins"
+                      : "Prezent"
                     : integrationStatus.tokenState === "expired"
                       ? "Expirat"
                       : "Lipsă"}
@@ -993,6 +1104,16 @@ function SubmitSpvTab() {
                     ? "Producția este deblocată explicit."
                     : "Submitul real rămâne blocat."}
                 </p>
+                <p className="mt-1 text-xs text-eos-text-muted">
+                  Persistență: {integrationStatus.persistenceBackend === "supabase" ? "durabilă (Supabase)" : "fallback local"}
+                </p>
+              </div>
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">
+                  Stare operațională
+                </p>
+                <p className="mt-1 text-sm font-medium text-eos-text">{integrationStatus.statusLabel}</p>
+                <p className="mt-1 text-xs text-eos-text-muted">{integrationStatus.statusDetail}</p>
               </div>
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-eos-text-muted">Ultim sync</p>
@@ -1001,25 +1122,106 @@ function SubmitSpvTab() {
                     ? new Date(integrationStatus.syncedAtISO).toLocaleString("ro-RO")
                     : "Încă nu există"}
                 </p>
+                {integrationStatus.lastSubmissionStatus && (
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    Ultima execuție: {SPV_STATUS_LABELS[integrationStatus.lastSubmissionStatus]}
+                    {integrationStatus.lastSubmissionAtISO
+                      ? ` · ${new Date(integrationStatus.lastSubmissionAtISO).toLocaleString("ro-RO")}`
+                      : ""}
+                  </p>
+                )}
                 {integrationStatus.missingConfig.length > 0 && (
                   <p className="mt-1 text-xs text-eos-text-muted">
                     Lipsesc: {integrationStatus.missingConfig.join(", ")}
                   </p>
                 )}
+                {integrationStatus.lastSubmissionError && (
+                  <div className="mt-1 space-y-1">
+                    <p className="text-xs text-eos-error">{integrationStatus.lastSubmissionError}</p>
+                    {integrationStatus.lastSubmissionNextStep && (
+                      <p className="text-xs text-eos-warning">
+                        Următorul pas: {integrationStatus.lastSubmissionNextStep}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
+
+            {integrationStatus.lastSubmissionErrorCategory && integrationStatus.lastSubmissionNextStep && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-eos-text">Ultima execuție ANAF cere intervenție clară</p>
+                  <p className="mt-1 text-xs text-eos-text-muted">
+                    {integrationStatus.lastSubmissionNextStep}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {integrationStatus.lastSubmissionErrorCategory === "reauth_required" && (
+                    <a
+                      href={anafConnectHref}
+                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                    >
+                      <ShieldCheck className="size-3" />
+                      Reautentifică acum
+                    </a>
+                  )}
+                  {(integrationStatus.lastSubmissionErrorCategory === "draft_missing" ||
+                    integrationStatus.lastSubmissionErrorCategory === "payload_rejected") && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={toggleNewDraftForm}
+                    >
+                      <Upload className="size-3.5" />
+                      Creează draft nou
+                    </Button>
+                  )}
+                  {integrationStatus.lastSubmissionErrorCategory === "service_unavailable" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => void refreshTab(true)}
+                    >
+                      <RefreshCw className="size-3.5" />
+                      Reîncarcă starea
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* Actions row */}
       <div className="flex items-center justify-between">
-        <Badge variant="outline" className="normal-case tracking-normal">
-          {submissions.filter((s) => s.status === "pending_approval").length} așteaptă aprobare
-        </Badge>
-        <Button size="sm" className="gap-1.5" onClick={() => setShowForm((v) => !v)}>
-          <Upload className="size-3.5" /> Transmite factură
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="normal-case tracking-normal">
+            {submissions.filter((s) => s.status === "pending_approval").length} așteaptă aprobare
+          </Badge>
+          {fromCockpit && sourceFindingId && (
+            <Badge variant="secondary" className="normal-case tracking-normal">
+              Legat de cazul fiscal
+            </Badge>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {fromCockpit && returnToFindingHref && (
+            <a
+              href={returnToFindingHref}
+              className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+            >
+              <ArrowLeft className="size-3" />
+              Înapoi la finding
+            </a>
+          )}
+          <Button size="sm" className="gap-1.5" onClick={toggleNewDraftForm}>
+            <Upload className="size-3.5" /> Transmite factură
+          </Button>
+        </div>
       </div>
 
       {/* Submit form */}
@@ -1056,6 +1258,16 @@ function SubmitSpvTab() {
                 Inițiază transmitere
               </Button>
             </div>
+            {fromCockpit && sourceFindingId && (
+              <p className="text-xs text-eos-text-muted">
+                Draftul nou va rămâne legat de cazul fiscal curent și îl poți redeschide direct din această listă după aprobare sau verdict.
+              </p>
+            )}
+            {!fromCockpit && draftSourceFindingId && (
+              <p className="text-xs text-eos-text-muted">
+                Draftul nou păstrează legătura cu cazul fiscal inițial, pentru ca verdictul și dovada să revină în același cockpit.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -1072,6 +1284,9 @@ function SubmitSpvTab() {
           {submissions.map((s) => {
             const isOk = s.status === "ok"
             const isNok = s.status === "nok" || s.status === "error"
+            const hasFinalVerdict = s.status === "ok" || s.status === "nok"
+            const submissionErrorCategory = diagnoseSubmissionError(s.errorDetail)
+            const linkedFindingHref = s.sourceFindingId ? `/dashboard/resolve/${encodeURIComponent(s.sourceFindingId)}` : null
             const borderColor = isOk
               ? "border-l-eos-success"
               : s.status === "approved"
@@ -1101,21 +1316,53 @@ function SubmitSpvTab() {
                       Aprobarea este gata. Următorul pas este trimiterea efectivă la ANAF.
                     </p>
                   )}
+                  {s.status === "approved" && integrationStatus?.canAttemptUpload !== true && (
+                    <p className="text-xs text-eos-warning">
+                      Uploadul este blocat până când conexiunea ANAF devine operațională. Verifică starea de mai sus și reautentifică doar dacă este cerut explicit.
+                    </p>
+                  )}
+                  {hasFinalVerdict && linkedFindingHref && (
+                    <p className={`text-xs ${s.status === "ok" ? "text-eos-success" : "text-eos-warning"}`}>
+                      {s.status === "ok"
+                        ? "Verdict final primit. Cazul fiscal legat a fost mutat în monitorizare, iar dovada finală este salvată în rezoluția cazului."
+                        : "Verdict final primit. Cazul fiscal legat a fost redeschis cu eroarea ANAF și așteaptă corecție."}
+                    </p>
+                  )}
+                  {hasFinalVerdict && !linkedFindingHref && (
+                    <p className={`text-xs ${s.status === "ok" ? "text-eos-success" : "text-eos-warning"}`}>
+                      {s.status === "ok"
+                        ? "ANAF a acceptat transmiterea. Păstrează indexul și mesajul pentru audit."
+                        : "ANAF a respins transmiterea. Corectează factura și retransmite."}
+                    </p>
+                  )}
 
                   {s.indexDescarcare && (
                     <p className="font-mono text-xs text-eos-text-muted">
                       Index ANAF: {s.indexDescarcare}
                     </p>
                   )}
+                  {s.downloadId && (
+                    <p className="font-mono text-xs text-eos-text-muted">
+                      Download ANAF: {s.downloadId}
+                    </p>
+                  )}
                   {s.anafMessage && (
                     <p className="text-xs text-eos-text-muted">{s.anafMessage}</p>
                   )}
                   {s.errorDetail && (
-                    <p className="text-xs text-eos-error">{s.errorDetail}</p>
+                    <div className="space-y-1">
+                      <p className="text-xs text-eos-error">{s.errorDetail}</p>
+                      {integrationStatus?.lastSubmissionStatus === s.status && integrationStatus.lastSubmissionNextStep && (
+                        <p className="text-xs text-eos-warning">
+                          Următorul pas: {integrationStatus.lastSubmissionNextStep}
+                        </p>
+                      )}
+                    </div>
                   )}
                   <p className="text-xs text-eos-text-muted">
                     {new Date(s.createdAtISO).toLocaleString("ro-RO")}
                     {s.submittedAtISO && <> · Transmis: {new Date(s.submittedAtISO).toLocaleString("ro-RO")}</>}
+                    {s.resolvedAtISO && <> · Verdict: {new Date(s.resolvedAtISO).toLocaleString("ro-RO")}</>}
                   </p>
 
                   <div className="flex flex-wrap gap-2 pt-1">
@@ -1133,6 +1380,18 @@ function SubmitSpvTab() {
                             : <ShieldCheck className="size-3.5" />}
                           Aprobă acum
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={rejecting === s.id}
+                          onClick={() => void handleReject(s)}
+                          className="gap-1.5"
+                        >
+                          {rejecting === s.id
+                            ? <Loader2 className="size-3.5 animate-spin" />
+                            : <AlertTriangle className="size-3.5" />}
+                          Respinge
+                        </Button>
                         <a
                           href="/dashboard/approvals"
                           className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
@@ -1145,7 +1404,7 @@ function SubmitSpvTab() {
                       <Button
                         size="default"
                         variant="default"
-                        disabled={executing === s.id || integrationStatus?.tokenState !== "active" || integrationStatus?.mode === "mock"}
+                        disabled={executing === s.id || integrationStatus?.canAttemptUpload !== true}
                         onClick={() => void handleExecute(s.id)}
                         className="gap-1.5 shadow-sm"
                       >
@@ -1153,6 +1412,20 @@ function SubmitSpvTab() {
                           ? <Loader2 className="size-3.5 animate-spin" />
                           : <Send className="size-3.5" />}
                         Trimite la ANAF
+                      </Button>
+                    )}
+                    {s.status === "error" && submissionErrorCategory !== "draft_missing" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={executing === s.id || integrationStatus?.canAttemptUpload !== true}
+                        onClick={() => void handleExecute(s.id)}
+                        className="gap-1.5"
+                      >
+                        {executing === s.id
+                          ? <Loader2 className="size-3.5 animate-spin" />
+                          : <Send className="size-3.5" />}
+                        Retrimite la ANAF
                       </Button>
                     )}
                     {s.status === "submitted" && (
@@ -1168,6 +1441,49 @@ function SubmitSpvTab() {
                           : <RefreshCw className="size-3.5" />}
                         Verifică status
                       </Button>
+                    )}
+                    {(s.status === "error" || s.status === "rejected" || s.status === "nok") &&
+                      (submissionErrorCategory === "draft_missing" || submissionErrorCategory === "payload_rejected") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => openRetryDraft(s)}
+                        >
+                          <Upload className="size-3.5" />
+                          Creează draft nou
+                        </Button>
+                      )}
+                    {(s.status === "error" || s.status === "submitted") &&
+                      submissionErrorCategory === "reauth_required" && (
+                        <a
+                          href={anafConnectHref}
+                          className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                        >
+                          <ShieldCheck className="size-3" />
+                          Reautentifică acum
+                        </a>
+                      )}
+                    {(s.status === "error" || s.status === "submitted") &&
+                      submissionErrorCategory === "service_unavailable" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => void refreshTab(true)}
+                        >
+                          <RefreshCw className="size-3.5" />
+                          Reîncarcă starea
+                        </Button>
+                      )}
+                    {linkedFindingHref && (
+                      <a
+                        href={linkedFindingHref}
+                        className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
+                      >
+                        <ExternalLink className="size-3" />
+                        Deschide cazul fiscal
+                      </a>
                     )}
                   </div>
                 </CardContent>
@@ -1193,7 +1509,9 @@ export default function FiscalPage() {
   const [validations, setValidations] = useState<EFacturaValidationRecord[]>([])
   const [statusFinding, setStatusFinding] = useState<ScanFinding | null>(null)
   const [statusLoading, setStatusLoading] = useState(false)
-  const fromCockpit = (tabParam === "spv" || tabParam === "validator" || tabParam === "status") && Boolean(findingIdParam)
+  const fromCockpit =
+    (tabParam === "spv" || tabParam === "validator" || tabParam === "status" || tabParam === "transmitere") &&
+    Boolean(findingIdParam)
   const defaultTab =
     tabParam === "spv" ||
     tabParam === "validator" ||
@@ -1341,7 +1659,9 @@ export default function FiscalPage() {
                 ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliAI când revii în finding cu confirmarea retransmiterii și statusul SPV."
                 : tabParam === "status"
                   ? "Urmează protocolul fiscal de mai jos, apoi revino în cockpit cu nota pregătită și dovada finală din SPV."
-                : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
+                : tabParam === "transmitere"
+                  ? "Creezi și execuți draftul de transmitere pentru cazul fiscal curent. Draftul rămâne legat de finding și poți reveni aici după aprobare sau verdict."
+                  : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
             </p>
           </div>
           <a
@@ -1474,7 +1794,11 @@ export default function FiscalPage() {
         </TabsContent>
 
         <TabsContent value="transmitere">
-          <SubmitSpvTab />
+          <SubmitSpvTab
+            sourceFindingId={findingIdParam}
+            fromCockpit={tabParam === "transmitere" && Boolean(findingIdParam)}
+            returnToFindingHref={findingIdParam ? `/dashboard/resolve/${findingIdParam}` : null}
+          />
         </TabsContent>
       </Tabs>
     </div>

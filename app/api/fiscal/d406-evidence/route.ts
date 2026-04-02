@@ -3,18 +3,34 @@
 // GET  — verifică statusul curent
 
 import { NextResponse } from "next/server"
-import { readState, writeState } from "@/lib/server/mvp-store"
+import { jsonError } from "@/lib/server/api-response"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
-export async function GET() {
-  const state = (await readState()) as ComplianceState
+const READ_ROLES = ["owner", "partner_manager", "compliance", "reviewer"] as const
+const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
+
+export async function GET(request: Request) {
+  const session = requireRole(request, [...READ_ROLES], "status dovadă D406")
+  const orgId = session.orgId
+  const state = (await readStateForOrg(orgId)) as ComplianceState | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "D406_STATE_UNAVAILABLE")
+  }
   return NextResponse.json({
     d406EvidenceSubmitted: state.d406EvidenceSubmitted ?? false,
   })
 }
 
-export async function POST() {
-  const state = (await readState()) as ComplianceState
+export async function POST(request: Request) {
+  const session = requireRole(request, [...WRITE_ROLES], "marcare dovadă D406")
+  const orgId = session.orgId
+  const orgName = session.orgName
+  const state = (await readStateForOrg(orgId)) as ComplianceState | null
+  if (!state) {
+    return jsonError("Nu am putut încărca starea organizației active.", 500, "D406_STATE_UNAVAILABLE")
+  }
 
   const updated: ComplianceState = {
     ...state,
@@ -28,7 +44,7 @@ export async function POST() {
       : f,
   )
 
-  await writeState(updated)
+  await writeStateForOrg(orgId, updated, orgName)
 
   return NextResponse.json({ ok: true, d406EvidenceSubmitted: true })
 }

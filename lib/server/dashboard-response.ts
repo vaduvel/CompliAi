@@ -15,6 +15,8 @@ import {
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
 import { readDsarState } from "@/lib/server/dsar-store"
 
+type DashboardWorkspace = Awaited<ReturnType<typeof getOrgContext>>
+
 export type DsarDashboardSummary = {
   total: number
   urgent: number   // deadline ≤ 5 zile
@@ -25,7 +27,7 @@ export type DashboardPayload = {
   state: ComplianceState
   summary: ReturnType<typeof computeDashboardSummary>
   remediationPlan: ReturnType<typeof buildRemediationPlan>
-  workspace: Awaited<ReturnType<typeof getOrgContext>>
+  workspace: DashboardWorkspace
   compliancePack: AICompliancePack
   traceabilityMatrix: ComplianceTraceRecord[]
   evidenceLedger?: EvidenceRegistryEntry[]
@@ -36,13 +38,16 @@ export type DashboardCorePayload = {
   state: ComplianceState
   summary: ReturnType<typeof computeDashboardSummary>
   remediationPlan: ReturnType<typeof buildRemediationPlan>
-  workspace: Awaited<ReturnType<typeof getOrgContext>>
+  workspace: DashboardWorkspace
   snapshot: ReturnType<typeof buildCompliScanSnapshot>
   evidenceLedger?: EvidenceRegistryEntry[]
 }
 
-export async function buildDashboardCorePayload(state: ComplianceState): Promise<DashboardCorePayload> {
-  const workspace = await getOrgContext()
+export async function buildDashboardCorePayload(
+  state: ComplianceState,
+  workspaceOverride?: DashboardWorkspace
+): Promise<DashboardCorePayload> {
+  const workspace = workspaceOverride ?? (await getOrgContext())
   const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
   const evidenceLedger = await loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId })
 
@@ -81,8 +86,11 @@ export async function buildDashboardCorePayload(state: ComplianceState): Promise
   }
 }
 
-export async function buildDashboardPayload(state: ComplianceState) {
-  const core = await buildDashboardCorePayload(state)
+export async function buildDashboardPayload(
+  state: ComplianceState,
+  workspaceOverride?: DashboardWorkspace
+) {
+  const core = await buildDashboardCorePayload(state, workspaceOverride)
 
   // Fix #3 — aggregate DSAR summary for sidebar badge + dashboard widgets
   const dsarState = await readDsarState(core.workspace.orgId)

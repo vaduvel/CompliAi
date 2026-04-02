@@ -4,8 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import {
   readAlertPreferences,
   writeAlertPreferences,
@@ -14,11 +13,8 @@ import {
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-
-    const { orgId } = await getOrgContext()
-    const prefs = await readAlertPreferences(orgId)
+    const session = await requireFreshAuthenticatedSession(request, "citirea preferințelor de alertă")
+    const prefs = await readAlertPreferences(session.orgId)
     return NextResponse.json({ prefs })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -28,8 +24,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "salvarea preferințelor de alertă")
 
     const body = (await request.json()) as Partial<AlertPreferences>
 
@@ -45,8 +40,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { orgId } = await getOrgContext()
-    const current = await readAlertPreferences(orgId)
+    const current = await readAlertPreferences(session.orgId)
     const merged: AlertPreferences = {
       emailEnabled: body.emailEnabled ?? current.emailEnabled,
       emailAddress: (body.emailAddress ?? current.emailAddress).trim(),
@@ -56,7 +50,7 @@ export async function POST(request: Request) {
       updatedAtISO: new Date().toISOString(),
     }
 
-    const saved = await writeAlertPreferences(orgId, merged)
+    const saved = await writeAlertPreferences(session.orgId, merged)
     return NextResponse.json({ prefs: saved })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

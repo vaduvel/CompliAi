@@ -4,7 +4,7 @@ import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { getStoredEvidenceSignedUrl, readStoredEvidenceFile } from "@/lib/server/evidence-storage"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadTaskEvidenceObjectFromSupabase } from "@/lib/server/supabase-evidence-read"
 
 export const runtime = "nodejs"
@@ -21,7 +21,15 @@ export async function GET(
     )
 
     const { id, evidenceId } = await context.params
-    const state = await readState()
+    const state = await readStateForOrg(session.orgId)
+
+    if (!state) {
+      return jsonError(
+        "Nu am găsit starea organizației pentru acest task.",
+        404,
+        "ORG_STATE_NOT_FOUND"
+      )
+    }
 
     if (!getPersistableTaskIds(state).has(id)) {
       return jsonError("Task-ul nu mai există în starea curentă.", 404, "TASK_NOT_FOUND")

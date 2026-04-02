@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   canUseRepoSyncMock: vi.fn(),
   executeRepoSyncMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   normalizeRepoSyncFilesMock: vi.fn(),
   validateRepoSyncPayloadMock: vi.fn(),
 }))
@@ -24,11 +25,23 @@ vi.mock("@/lib/server/repo-sync-executor", () => ({
   executeRepoSync: mocks.executeRepoSyncMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 describe("POST /api/integrations/repo-sync", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
     mocks.canUseRepoSyncMock.mockReturnValue(true)
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-sync",
+      orgName: "Org Sync",
+      workspaceLabel: "Org Sync",
+      workspaceOwner: "owner@example.com",
+      workspaceInitials: "OS",
+      userRole: "owner",
+    })
   })
 
   it("blocheaza request-urile neautorizate", async () => {
@@ -128,6 +141,8 @@ describe("POST /api/integrations/repo-sync", () => {
       repository: "demo/repo",
       branch: "main",
       files: [{ path: "compliscan.yaml", content: "version: 1" }],
+      orgId: "org-sync",
+      orgName: "Org Sync",
     })
   })
 })

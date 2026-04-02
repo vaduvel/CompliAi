@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readDsarState } from "@/lib/server/dsar-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -50,8 +49,8 @@ function getGroup(days: number): CalendarEventGroup {
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "calendar deadline-uri")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, WRITE_ROLES, "calendar deadline-uri")
+    const orgId = session.orgId
 
     const events: CalendarEvent[] = []
 

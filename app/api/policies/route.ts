@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { READ_ROLES } from "@/lib/server/rbac"
 import { readPolicyAcknowledgments } from "@/lib/server/policy-store"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "vizualizarea politicilor")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, READ_ROLES, "vizualizarea politicilor")
     let acknowledgments = {}
 
     try {
-      acknowledgments = await readPolicyAcknowledgments(orgId)
+      acknowledgments = await readPolicyAcknowledgments(session.orgId)
     } catch {
       // Politicile trebuie să rămână vizibile chiar dacă storage-ul de confirmări
       // nu este încă provisionat în cloud.

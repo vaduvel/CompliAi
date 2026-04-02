@@ -5,7 +5,9 @@ import { repairEFacturaXml } from "@/lib/compliance/efactura-xml-repair"
 import type { EFacturaXmlRepairRecord } from "@/lib/compliance/types"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { readSessionFromRequest } from "@/lib/server/auth"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 type RepairPayload = {
   documentName?: string
@@ -25,6 +27,10 @@ function normalizeErrorCodes(errorCodes?: string[]) {
 }
 
 export async function POST(request: Request) {
+  const session = readSessionFromRequest(request)
+  if (!session) {
+    return NextResponse.json({ error: "Autentificare necesară." }, { status: 401 })
+  }
   const body = (await request.json()) as RepairPayload
   const actor = await resolveOptionalEventActor(request)
   const xml = body.xml?.trim() || ""
@@ -47,7 +53,7 @@ export async function POST(request: Request) {
     createdAtISO: nowISO,
   }
 
-  const nextState = await mutateState((current) => ({
+  const nextState = await mutateStateForOrg(session.orgId, (current) => ({
     ...current,
     events: appendComplianceEvents(current, [
       createComplianceEvent(
@@ -69,10 +75,16 @@ export async function POST(request: Request) {
         actor
       ),
     ]),
-  }))
+  }), session.orgName)
+  const workspaceOverride = {
+    ...(await getOrgContext()),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspaceOverride)),
     repair,
     message:
       repair.appliedFixes.length > 0

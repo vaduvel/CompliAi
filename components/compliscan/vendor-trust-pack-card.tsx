@@ -246,6 +246,7 @@ export function VendorTrustPackCard() {
                 variant="outline"
                 onClick={() => void downloadPack("json")}
                 disabled={downloading !== null}
+                title={downloading !== null ? "Descărcare în curs..." : undefined}
               >
                 {downloading === "json" ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
                 Descarcă JSON
@@ -255,6 +256,7 @@ export function VendorTrustPackCard() {
                 variant="outline"
                 onClick={() => void downloadPack("pdf")}
                 disabled={downloading !== null}
+                title={downloading !== null ? "Descărcare în curs..." : undefined}
               >
                 {downloading === "pdf" ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
                 Descarcă PDF

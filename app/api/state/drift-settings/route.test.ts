@@ -14,7 +14,8 @@ const mocks = vi.hoisted(() => ({
     }
   },
   buildDashboardPayloadMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   requireRoleMock: vi.fn(),
 }))
 
@@ -27,8 +28,12 @@ vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 describe("POST /api/state/drift-settings", () => {
@@ -42,8 +47,16 @@ describe("POST /api/state/drift-settings", () => {
       role: "compliance",
       exp: Date.now() + 1000,
     })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-ctx",
+      orgName: "Workspace Org",
+      workspaceLabel: "Workspace",
+      workspaceOwner: "Owner",
+      workspaceInitials: "WO",
+      userRole: "compliance",
+    })
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
-    mocks.mutateStateMock.mockImplementation(async (updater: (state: { driftSettings: object }) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId: string, updater: (state: { driftSettings: object }) => unknown) =>
       updater({ driftSettings: {} })
     )
   })
@@ -70,6 +83,7 @@ describe("POST /api/state/drift-settings", () => {
       model_changed: "high",
       purpose_changed: "critical",
     })
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Function), "Org Demo")
   })
 
   it("respinge rolul nepermis", async () => {

@@ -261,7 +261,7 @@ export const portfolioNavItems: DashboardNavItem[] = [
   },
   {
     id: "portfolio-tasks",
-    label: "Remediere",
+    label: "Remediere clienți",
     href: "/portfolio/tasks",
     icon: Flag,
     matchers: ["/portfolio/tasks"],

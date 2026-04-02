@@ -1,11 +1,14 @@
 import {
   createSessionToken,
+  createWorkspacePreferenceToken,
   getSessionCookieOptions,
+  getWorkspacePreferenceCookieOptions,
   listUserMemberships,
   readSessionFromRequest,
   resolveUserMode,
   resolveUserForMembership,
   SESSION_COOKIE,
+  WORKSPACE_PREF_COOKIE,
   type WorkspaceMode,
 } from "@/lib/server/auth"
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
@@ -68,6 +71,14 @@ export async function POST(request: Request) {
         role: session.role,
       }, context)
       response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
+      response.cookies.set(
+        WORKSPACE_PREF_COOKIE,
+        createWorkspacePreferenceToken({
+          orgId: session.orgId,
+          workspaceMode: "portfolio",
+        }),
+        getWorkspacePreferenceCookieOptions()
+      )
       return response
     }
 
@@ -117,6 +128,14 @@ export async function POST(request: Request) {
       membershipId: resolvedUser.membershipId,
     }, context)
     response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
+    response.cookies.set(
+      WORKSPACE_PREF_COOKIE,
+      createWorkspacePreferenceToken({
+        orgId: resolvedUser.orgId,
+        workspaceMode: "org",
+      }),
+      getWorkspacePreferenceCookieOptions()
+    )
     return response
   } catch (error) {
     if (error instanceof RequestValidationError) {

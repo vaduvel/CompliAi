@@ -3,23 +3,20 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-
-    const { orgId } = await getOrgContext()
-    const state = await readNis2State(orgId)
+    const session = await requireFreshRole(request, READ_ROLES, "citirea incidentelor NIS2")
+    const state = await readNis2State(session.orgId)
     return NextResponse.json({ incidents: state.incidents })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -29,8 +26,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, WRITE_ROLES, "crearea incidentului NIS2")
 
     const body = (await request.json()) as Partial<
       Pick<Nis2Incident,
@@ -60,8 +56,7 @@ export async function POST(request: Request) {
       return jsonError("Impact operațional invalid.", 400, "INVALID_OPERATIONAL_IMPACT")
     }
 
-    const { orgId } = await getOrgContext()
-    const incident = await createIncident(orgId, {
+    const incident = await createIncident(session.orgId, {
       title: body.title.trim(),
       description: (body.description ?? "").trim(),
       severity: body.severity,
@@ -74,7 +69,7 @@ export async function POST(request: Request) {
       measuresTaken: body.measuresTaken?.trim(),
       involvesPersonalData: body.involvesPersonalData,
     })
-    const nextNis2State = await readNis2State(orgId)
+    const nextNis2State = await readNis2State(session.orgId)
 
     // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP
     if (incident.involvesPersonalData) {
@@ -86,27 +81,35 @@ export async function POST(request: Request) {
         new Date().toISOString()
       )
       if (finding) {
-        await mutateFreshState((s) => ({
-          ...s,
-          findings: mergeNis2PackageFindings(
-            [
-              ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
-              preserveRuntimeStateForSingleFinding(s.findings, finding),
-            ],
-            nextNis2State,
-            new Date().toISOString()
-          ),
-        }))
+        await mutateFreshStateForOrg(
+          session.orgId,
+          (s) => ({
+            ...s,
+            findings: mergeNis2PackageFindings(
+              [
+                ...s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
+                preserveRuntimeStateForSingleFinding(s.findings, finding),
+              ],
+              nextNis2State,
+              new Date().toISOString()
+            ),
+          }),
+          session.orgName
+        )
       }
     } else {
-      await mutateFreshState((s) => ({
-        ...s,
-        findings: mergeNis2PackageFindings(s.findings, nextNis2State, new Date().toISOString()),
-      }))
+      await mutateFreshStateForOrg(
+        session.orgId,
+        (s) => ({
+          ...s,
+          findings: mergeNis2PackageFindings(s.findings, nextNis2State, new Date().toISOString()),
+        }),
+        session.orgName
+      )
     }
 
     // Event trigger: compliance_monitor imediat după creare (fire-and-forget)
-    void executeAgent(orgId, "compliance_monitor").catch(() => {/* non-blocking */})
+    void executeAgent(session.orgId, "compliance_monitor").catch(() => {/* non-blocking */})
 
     return NextResponse.json({ incident }, { status: 201 })
   } catch (error) {

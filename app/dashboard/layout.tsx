@@ -12,7 +12,8 @@ import {
   verifySessionToken,
 } from "@/lib/server/auth"
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
-import { loadOnboardingGateState } from "@/lib/server/onboarding-gate"
+import { getOrgContext } from "@/lib/server/org-context"
+import { loadOnboardingGateState, loadOnboardingGateStateForOrg } from "@/lib/server/onboarding-gate"
 
 function isDemoSession(session: { userId: string; orgId: string }) {
   return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
@@ -25,17 +26,17 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [{ state, hasCompletedOnboarding }, cookieStore] = await Promise.all([
-    loadOnboardingGateState(),
-    cookies(),
-  ])
-  const corePayload = await buildDashboardCorePayload(state)
+  const cookieStore = await cookies()
   const sessionToken = cookieStore.get(SESSION_COOKIE)?.value
   const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null
   const session = verifiedSession ? await refreshSessionPayload(verifiedSession) : null
 
+  const onboardingGate =
+    session && !isDemoSession(session)
+      ? await loadOnboardingGateStateForOrg(session.orgId)
+      : await loadOnboardingGateState()
   const userMode = session && !isDemoSession(session) ? await resolveUserMode(session) : null
-  const onboardingDone = Boolean(userMode && hasCompletedOnboarding)
+  const onboardingDone = Boolean(userMode && onboardingGate.hasCompletedOnboarding)
 
   if (session && !isDemoSession(session)) {
     if (!onboardingDone) {
@@ -45,6 +46,18 @@ export default async function DashboardLayout({
       redirect("/portfolio")
     }
   }
+
+  const workspaceOverride =
+    session == null
+      ? undefined
+      : {
+          ...(await getOrgContext()),
+          orgId: session.orgId,
+          orgName: session.orgName,
+          workspaceOwner: session.email,
+          userRole: session.role,
+        }
+  const corePayload = await buildDashboardCorePayload(onboardingGate.state, workspaceOverride)
   const memberships = session ? await listUserMemberships(session.userId) : []
   const initialCockpitData = {
     state: corePayload.state,

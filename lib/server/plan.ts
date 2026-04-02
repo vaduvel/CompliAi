@@ -3,6 +3,7 @@
 // Stocat în .data/plans.json (local) sau Supabase (cloud).
 
 import { createAdaptiveStorage } from "@/lib/server/storage-adapter"
+import { readSessionFromRequest } from "@/lib/server/auth"
 
 // Re-export client-safe constants so existing imports from lib/server/plan still work
 export {
@@ -259,8 +260,9 @@ export async function requirePlan(
   minPlan: OrgPlan,
   action?: string
 ): Promise<OrgPlan> {
-  // Citim orgId din header (setat de middleware)
-  const orgId = request.headers.get("x-compliscan-org-id")
+  // Session truth first. Header fallback remains only for internal/dev calls
+  // that still pass org context explicitly.
+  const orgId = readSessionFromRequest(request)?.orgId ?? request.headers.get("x-compliscan-org-id")
   if (!orgId) return minPlan // fallback graceful — nu blocăm în dev fără middleware
 
   const currentPlan = await getOrgPlan(orgId)

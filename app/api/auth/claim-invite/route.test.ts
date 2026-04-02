@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   requireFreshRoleMock: vi.fn(),
   getOrganizationOwnershipMock: vi.fn(),
   createClaimInviteMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   appendComplianceEventsMock: vi.fn(),
   createComplianceEventMock: vi.fn(),
   eventActorFromSessionMock: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock("@/lib/server/claim-ownership", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/events", () => ({
@@ -83,7 +83,7 @@ describe("POST /api/auth/claim-invite", () => {
     mocks.formatEventActorLabelMock.mockReturnValue("consultant@site.ro (partner_manager)")
     mocks.createComplianceEventMock.mockReturnValue({ id: "evt-claim" })
     mocks.appendComplianceEventsMock.mockReturnValue([{ id: "evt-claim" }])
-    mocks.mutateStateMock.mockImplementation(async (updater: (current: { events: unknown[] }) => unknown) => {
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId, updater: (current: { events: unknown[] }) => unknown) => {
       updater({ events: [] })
       return { events: [] }
     })
@@ -107,6 +107,11 @@ describe("POST /api/auth/claim-invite", () => {
         orgId: "org-1",
         invitedEmail: "ceo@client.ro",
       })
+    )
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Client SRL"
     )
   })
 

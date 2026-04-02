@@ -4,20 +4,24 @@ import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
-import { getOrgContext } from "@/lib/server/org-context"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { requirePlan, PlanError } from "@/lib/server/plan"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export const runtime = "nodejs"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack bundle")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack bundle")
     await requirePlan(request, "pro", "Audit Pack complet")
 
-    const { orgId } = await getOrgContext()
-    const [state, nis2State] = await Promise.all([readState(), readNis2State(orgId)])
+    const rawState =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+    const [state, nis2State] = await Promise.all([
+      Promise.resolve(rawState),
+      readNis2State(session.orgId),
+    ])
     const payload = await buildDashboardPayload(state)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
     const auditPack = buildAuditPack({

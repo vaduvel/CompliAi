@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { readState } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { getOrgContext } from "@/lib/server/org-context"
 import { loadEvidenceLedgerFromSupabase } from "@/lib/server/supabase-evidence-read"
 
 export const dynamic = "force-dynamic"
@@ -14,14 +16,19 @@ export type AccumulationData = {
   ultimulAuditPackZile: number | null // days since last audit pack (null = never)
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "indicatorii operaționali ai dashboardului"
+    )
+    const workspace = { orgId: session.orgId, orgName: session.orgName }
     const [state, nis2State, evidenceLedger] = await Promise.all([
-      readState(),
-      readNis2State(orgId).catch(() => ({ vendors: [], incidents: [] })),
-      loadEvidenceLedgerFromSupabase({ orgId }).catch(() => null),
+      readStateForOrg(workspace.orgId),
+      readNis2State(workspace.orgId).catch(() => ({ vendors: [], incidents: [] })),
+      loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId }).catch(() => null),
     ])
+    const normalizedState = state ?? normalizeComplianceState(initialComplianceState)
 
     // Dovezi: evidence ledger (Supabase) or generated documents as proxy
     const dovediiSalvate = evidenceLedger !== null
@@ -29,15 +36,15 @@ export async function GET() {
       : null
 
     // Rapoarte generate
-    const rapoarteGenerate = (state.generatedDocuments ?? []).length
+    const rapoarteGenerate = (normalizedState.generatedDocuments ?? []).length
 
     // Furnizori monitorizați (NIS2 vendors)
     const furnizoriMonitorizati = (nis2State.vendors ?? []).length
 
     // Luni de monitorizare — from oldest snapshot or first scan
     const allDates = [
-      ...(state.snapshotHistory ?? []).map((s) => s.generatedAt),
-      ...(state.scans ?? []).map((s) => s.createdAtISO),
+      ...(normalizedState.snapshotHistory ?? []).map((s) => s.generatedAt),
+      ...(normalizedState.scans ?? []).map((s) => s.createdAtISO),
     ].filter(Boolean).sort()
     const oldestDate = allDates[0]
     const luniMonitorizare = oldestDate
@@ -50,7 +57,7 @@ export async function GET() {
       : 0
 
     // Ultimul audit pack — days since last snapshot
-    const lastSnapshot = (state.snapshotHistory ?? []).sort(
+    const lastSnapshot = (normalizedState.snapshotHistory ?? []).sort(
       (a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()
     )[0]
     const ultimulAuditPackZile = lastSnapshot
@@ -66,7 +73,14 @@ export async function GET() {
     }
 
     return NextResponse.json(data)
-  } catch {
-    return NextResponse.json({ error: "unavailable" }, { status: 503 })
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
+    return jsonError(
+      error instanceof Error ? error.message : "Nu am putut încărca indicatorii dashboardului.",
+      503,
+      "DASHBOARD_ACCUMULATION_UNAVAILABLE"
+    )
   }
 }

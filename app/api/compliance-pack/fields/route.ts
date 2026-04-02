@@ -4,7 +4,9 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import type { AICompliancePackFieldKey } from "@/lib/compliance/ai-compliance-pack"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { requireRole } from "@/lib/server/auth"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 type FieldUpdateAction = "save" | "confirm" | "clear"
 
@@ -28,6 +30,11 @@ const ALLOWED_FIELDS = new Set<AICompliancePackFieldKey>([
 ])
 
 export async function POST(request: Request) {
+  const session = requireRole(
+    request,
+    ["owner", "partner_manager", "compliance", "reviewer"],
+    "actualizarea AI Compliance Pack"
+  )
   const body = (await request.json().catch(() => ({}))) as FieldUpdatePayload
 
   if (!body.systemId?.trim()) {
@@ -51,7 +58,7 @@ export async function POST(request: Request) {
 
   const nowISO = new Date().toISOString()
   const actor = await resolveOptionalEventActor(request)
-  const nextState = await mutateState((current) => {
+  const nextState = await mutateStateForOrg(session.orgId, (current) => {
     const currentSystem = current.aiSystems.find((item) => item.id === body.systemId)
     const detectedSystem = current.detectedAISystems.find((item) => item.id === body.systemId)
 
@@ -109,10 +116,17 @@ export async function POST(request: Request) {
         }, actor),
       ]),
     }
-  })
+  }, session.orgName)
+
+  const workspaceOverride = {
+    ...(await getOrgContext()),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspaceOverride)),
     message:
       action === "clear"
         ? "Override-ul de câmp a fost eliminat."

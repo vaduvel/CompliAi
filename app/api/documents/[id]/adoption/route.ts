@@ -8,7 +8,7 @@ import {
 } from "@/lib/compliance/document-adoption"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 type Params = {
   params: Promise<{
@@ -49,7 +49,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const nowISO = new Date().toISOString()
     let updatedDocument: Record<string, unknown> | null = null
 
-    await mutateState((current) => {
+    await mutateStateForOrg(session.orgId, (current) => {
       const documentIndex = current.generatedDocuments.findIndex((document) => document.id === documentId)
       if (documentIndex === -1) {
         throw new Error("DOCUMENT_NOT_FOUND")
@@ -96,7 +96,7 @@ export async function PATCH(request: Request, { params }: Params) {
           ),
         ]),
       }
-    })
+    }, session.orgName)
 
     return NextResponse.json({
       ok: true,

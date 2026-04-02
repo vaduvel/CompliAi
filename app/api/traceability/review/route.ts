@@ -2,9 +2,11 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
+import { AuthzError, requireRole } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 
 type TraceabilityReviewPayload = {
   scope?: "record" | "law_reference" | "family"
@@ -25,32 +27,42 @@ class TraceabilityReviewError extends Error {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as TraceabilityReviewPayload
-  const scope =
-    body.scope ?? (body.familyKey?.trim() ? "family" : body.lawReference?.trim() ? "law_reference" : "record")
-
-  if (scope === "record" && !body.traceId?.trim()) {
-    return NextResponse.json({ error: "Trace ID este obligatoriu." }, { status: 400 })
-  }
-
-  if (scope === "law_reference" && !body.lawReference?.trim()) {
-    return NextResponse.json({ error: "Referința legală este obligatorie." }, { status: 400 })
-  }
-
-  if (scope === "family" && !body.familyKey?.trim()) {
-    return NextResponse.json({ error: "Familia de controale este obligatorie." }, { status: 400 })
-  }
-
-  const action = body.action ?? "confirm"
-  const note = typeof body.note === "string" ? body.note.trim() || null : null
-  const nowISO = new Date().toISOString()
-  const actor = await resolveOptionalEventActor(request)
-  let affectedControls = 0
-  let nextState
-
   try {
-    nextState = await mutateState(async (current) => {
-      const payload = await buildDashboardPayload(current)
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer"],
+      "revizuirea traceability pentru audit"
+    )
+    const body = (await request.json().catch(() => ({}))) as TraceabilityReviewPayload
+    const scope =
+      body.scope ?? (body.familyKey?.trim() ? "family" : body.lawReference?.trim() ? "law_reference" : "record")
+
+    if (scope === "record" && !body.traceId?.trim()) {
+      return NextResponse.json({ error: "Trace ID este obligatoriu." }, { status: 400 })
+    }
+
+    if (scope === "law_reference" && !body.lawReference?.trim()) {
+      return NextResponse.json({ error: "Referința legală este obligatorie." }, { status: 400 })
+    }
+
+    if (scope === "family" && !body.familyKey?.trim()) {
+      return NextResponse.json({ error: "Familia de controale este obligatorie." }, { status: 400 })
+    }
+
+    const action = body.action ?? "confirm"
+    const note = typeof body.note === "string" ? body.note.trim() || null : null
+    const nowISO = new Date().toISOString()
+    const actor = await resolveOptionalEventActor(request)
+    let affectedControls = 0
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
+
+    const nextState = await mutateStateForOrg(session.orgId, async (current) => {
+      const payload = await buildDashboardPayload(current, workspace)
       const traceIds = resolveTraceIds(payload.traceabilityMatrix, scope, body)
 
       if (traceIds.length === 0) {
@@ -143,29 +155,32 @@ export async function POST(request: Request) {
           ),
         ]),
       }
+    }, session.orgName)
+
+    return NextResponse.json({
+      ...(await buildDashboardPayload(nextState, workspace)),
+      message:
+        scope === "law_reference"
+          ? action === "clear"
+            ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din grupul ${body.lawReference}.`
+            : `Au fost confirmate ${affectedControls} controale pentru articolul ${body.lawReference}.`
+          : scope === "family"
+            ? action === "clear"
+              ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din familia ${body.familyKey}.`
+              : `Au fost confirmate ${affectedControls} controale pentru familia ${body.familyKey}.`
+          : action === "clear"
+            ? "Confirmarea controlului a fost eliminată."
+            : "Controlul a fost confirmat pentru audit.",
     })
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+    }
     if (error instanceof TraceabilityReviewError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
     throw error
   }
-
-  return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
-    message:
-      scope === "law_reference"
-        ? action === "clear"
-          ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din grupul ${body.lawReference}.`
-          : `Au fost confirmate ${affectedControls} controale pentru articolul ${body.lawReference}.`
-        : scope === "family"
-          ? action === "clear"
-            ? `Confirmarea a fost eliminată pentru ${affectedControls} controale din familia ${body.familyKey}.`
-            : `Au fost confirmate ${affectedControls} controale pentru familia ${body.familyKey}.`
-        : action === "clear"
-          ? "Confirmarea controlului a fost eliminată."
-          : "Controlul a fost confirmat pentru audit.",
-  })
 }
 
 function isRecordAuditConfirmable(record: ComplianceTraceRecord) {

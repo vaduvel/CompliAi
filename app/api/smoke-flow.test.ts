@@ -19,13 +19,22 @@ const mocks = vi.hoisted(() => ({
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   createSessionTokenMock: vi.fn(),
+  createWorkspacePreferenceTokenMock: vi.fn(),
   findUserByEmailMock: vi.fn(),
+  findUserByIdMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
+  getUserModeMock: vi.fn(),
+  getWorkspacePreferenceCookieOptionsMock: vi.fn(),
   hashPasswordMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  linkUserToExternalIdentityMock: vi.fn(),
+  listUserMembershipsMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
+  readLastRouteFromRequestMock: vi.fn(),
   readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readWorkspacePreferenceFromRequestMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
+  resolveUserForMembershipMock: vi.fn(),
   resolveUserModeMock: vi.fn(),
   requireRoleMock: vi.fn(),
   serializeCompliScanYamlMock: vi.fn(),
@@ -34,19 +43,29 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
   createSessionToken: mocks.createSessionTokenMock,
+  createWorkspacePreferenceToken: mocks.createWorkspacePreferenceTokenMock,
   findUserByEmail: mocks.findUserByEmailMock,
+  findUserById: mocks.findUserByIdMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getUserMode: mocks.getUserModeMock,
+  getWorkspacePreferenceCookieOptions: mocks.getWorkspacePreferenceCookieOptionsMock,
   hashPassword: mocks.hashPasswordMock,
+  linkUserToExternalIdentity: mocks.linkUserToExternalIdentityMock,
+  listUserMemberships: mocks.listUserMembershipsMock,
+  readLastRouteFromRequest: mocks.readLastRouteFromRequestMock,
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
+  readWorkspacePreferenceFromRequest: mocks.readWorkspacePreferenceFromRequestMock,
+  resolveUserForMembership: mocks.resolveUserForMembershipMock,
   resolveUserMode: mocks.resolveUserModeMock,
   requireRole: mocks.requireRoleMock,
   SESSION_COOKIE: "compliscan_session",
+  WORKSPACE_PREF_COOKIE: "compliscan_workspace_pref",
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
-  readState: mocks.readStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -73,7 +92,13 @@ describe("api smoke flow", () => {
       path: "/",
       sameSite: "lax",
     })
+    mocks.getWorkspacePreferenceCookieOptionsMock.mockReturnValue({
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    })
     mocks.createSessionTokenMock.mockReturnValue("signed-token")
+    mocks.createWorkspacePreferenceTokenMock.mockReturnValue("workspace-pref")
     mocks.findUserByEmailMock.mockResolvedValue({
       id: "user-1",
       email: "demo@site.ro",
@@ -83,7 +108,12 @@ describe("api smoke flow", () => {
       orgName: "Org Demo",
       role: "owner",
     })
+    mocks.findUserByIdMock.mockResolvedValue(null)
+    mocks.getUserModeMock.mockResolvedValue("solo")
     mocks.hashPasswordMock.mockReturnValue("hashed")
+    mocks.linkUserToExternalIdentityMock.mockResolvedValue(null)
+    mocks.listUserMembershipsMock.mockResolvedValue([])
+    mocks.readLastRouteFromRequestMock.mockReturnValue(null)
     mocks.readSessionFromRequestMock.mockReturnValue({
       userId: "user-1",
       email: "demo@site.ro",
@@ -100,7 +130,9 @@ describe("api smoke flow", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.readWorkspacePreferenceFromRequestMock.mockReturnValue(null)
     mocks.resolveUserModeMock.mockResolvedValue(null)
+    mocks.resolveUserForMembershipMock.mockResolvedValue(null)
     mocks.requireRoleMock.mockReturnValue({
       userId: "user-1",
       email: "demo@site.ro",
@@ -109,10 +141,11 @@ describe("api smoke flow", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
-    mocks.mutateStateMock.mockImplementation(async (updater: (state: typeof initialComplianceState) => unknown) =>
-      updater(initialComplianceState)
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) =>
+        updater(initialComplianceState)
     )
-    mocks.readStateMock.mockResolvedValue({})
+    mocks.readStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({
       state: {
         driftRecords: [],
@@ -140,6 +173,7 @@ describe("api smoke flow", () => {
     expect(loginResponse.status).toBe(200)
     const sessionCookie = loginResponse.headers.get("set-cookie") || ""
     expect(sessionCookie).toContain("compliscan_session=signed-token")
+    expect(sessionCookie).toContain("compliscan_workspace_pref=workspace-pref")
 
     const meResponse = await meGET(
       new Request("http://localhost/api/auth/me", {

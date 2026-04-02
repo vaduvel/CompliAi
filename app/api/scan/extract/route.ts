@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { readSessionFromRequest } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import {
   createExtractedScan,
   type ExtractionResult,
@@ -12,15 +14,19 @@ import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
   try {
+    const session = readSessionFromRequest(request)
+    const workspace = session
+      ? { orgId: session.orgId, orgName: session.orgName }
+      : await getOrgContext()
     const body = validateScanInputPayload(await request.json())
     const actor = await resolveOptionalEventActor(request)
     let extractionResult: ExtractionResult | undefined
 
-    const nextState = await mutateState(async (current) => {
+    const nextState = await mutateStateForOrg(workspace.orgId, async (current) => {
       const extracted = await createExtractedScan(current, body, actor)
       extractionResult = extracted.result
       return extracted.nextState
-    })
+    }, workspace.orgName)
 
     if (!extractionResult) {
       throw new Error("Extragerea s-a terminat fara rezultat utilizabil.")

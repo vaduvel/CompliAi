@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readStateMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
+  requireRoleMock: vi.fn(),
   listReviewsMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
   computeDashboardSummaryMock: vi.fn(),
@@ -12,11 +12,11 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+vi.mock("@/lib/server/auth", () => ({
+  requireRole: mocks.requireRoleMock,
 }))
 
 vi.mock("@/lib/server/vendor-review-store", () => ({
@@ -57,8 +57,8 @@ describe("POST /api/reports/response-pack", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mocks.readStateMock.mockResolvedValue({ findings: [], alerts: [], efacturaConnected: false })
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-demo-imm", orgName: "Demo Retail SRL" })
+    mocks.readStateForOrgMock.mockResolvedValue({ findings: [], alerts: [], efacturaConnected: false })
+    mocks.requireRoleMock.mockReturnValue({ orgId: "org-demo-imm", orgName: "Demo Retail SRL" })
     mocks.listReviewsMock.mockResolvedValue([])
     mocks.normalizeComplianceStateMock.mockImplementation((value: unknown) => value)
     mocks.computeDashboardSummaryMock.mockReturnValue({ score: 72 })

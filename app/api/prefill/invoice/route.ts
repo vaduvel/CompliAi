@@ -5,13 +5,12 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { inferPrefillFromInvoices } from "@/lib/compliance/efactura-prefill-inference"
 
 export async function POST(request: Request) {
   try {
-    const ctx = await getOrgContext()
-    if (!ctx?.orgId) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
+    await requireFreshAuthenticatedSession(request, "inferența de prefill din facturi")
 
     const body = (await request.json()) as { invoiceItems?: string[] }
     const items = body.invoiceItems
@@ -22,7 +21,10 @@ export async function POST(request: Request) {
 
     const prefill = await inferPrefillFromInvoices(items)
     return NextResponse.json({ ok: true, prefill })
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
     return jsonError("Eroare la inferența din facturi.", 500, "PREFILL_FAILED")
   }
 }

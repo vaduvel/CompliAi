@@ -8,7 +8,7 @@ import {
 } from "@/lib/server/auth"
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { RequestValidationError, asTrimmedString, requirePlainObject } from "@/lib/server/request-validation"
@@ -33,7 +33,7 @@ export async function PATCH(
 
     const member = await updateOrganizationMemberRole(session.orgId, membershipId, nextRole)
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       events: appendComplianceEvents(current, [
         createComplianceEvent(
@@ -52,7 +52,7 @@ export async function PATCH(
           actor
         ),
       ]),
-    }))
+    }), session.orgName)
 
     return jsonWithRequestContext({
       ok: true,
@@ -140,7 +140,7 @@ export async function DELETE(
 
     const member = await deactivateOrganizationMember(session.orgId, membershipId)
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       events: appendComplianceEvents(current, [
         createComplianceEvent(
@@ -159,7 +159,7 @@ export async function DELETE(
           actor
         ),
       ]),
-    }))
+    }), session.orgName)
 
     return jsonWithRequestContext(
       {

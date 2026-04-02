@@ -5,23 +5,20 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { saveMaturityAssessment, readMaturityAssessment, readNis2State } from "@/lib/server/nis2-store"
 import type { MaturityAssessment } from "@/lib/server/nis2-store"
 import { scoreMaturity, convertMaturityGapsToFindings } from "@/lib/compliance/nis2-maturity"
 import type { MaturityAnswers } from "@/lib/compliance/nis2-maturity"
-import { mutateFreshState } from "@/lib/server/mvp-store"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-
-    const { orgId } = await getOrgContext()
-    const assessment = await readMaturityAssessment(orgId)
+    const session = await requireFreshRole(request, READ_ROLES, "citirea maturității NIS2")
+    const assessment = await readMaturityAssessment(session.orgId)
     return NextResponse.json({ assessment })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -31,8 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshRole(request, WRITE_ROLES, "salvarea maturității NIS2")
 
     const body = (await request.json()) as { answers: MaturityAnswers }
 
@@ -59,22 +55,25 @@ export async function POST(request: Request) {
       remediationPlanDue: remPlanDue,
     }
 
-    const { orgId } = await getOrgContext()
-    await saveMaturityAssessment(orgId, assessment)
+    await saveMaturityAssessment(session.orgId, assessment)
 
     // Auto-generate findings for domains with score < 50%
     const maturityFindings = convertMaturityGapsToFindings(result.domains, now)
-    await mutateFreshState(async (current) => ({
-      ...current,
-      findings: mergeNis2PackageFindings(
-        [
-          ...current.findings.filter((f) => !f.id.startsWith("nis2-maturity-")),
-          ...maturityFindings.map((finding) => preserveRuntimeStateForSingleFinding(current.findings, finding)),
-        ],
-        await readNis2State(orgId),
-        now
-      ),
-    }))
+    await mutateFreshStateForOrg(
+      session.orgId,
+      async (current) => ({
+        ...current,
+        findings: mergeNis2PackageFindings(
+          [
+            ...current.findings.filter((f) => !f.id.startsWith("nis2-maturity-")),
+            ...maturityFindings.map((finding) => preserveRuntimeStateForSingleFinding(current.findings, finding)),
+          ],
+          await readNis2State(session.orgId),
+          now
+        ),
+      }),
+      session.orgName
+    )
 
     return NextResponse.json({ assessment, result })
   } catch (error) {

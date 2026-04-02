@@ -11,23 +11,18 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  readSessionFromRequestMock: vi.fn(),
-  requireRoleMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   getReviewMock: vi.fn(),
   updateReviewMock: vi.fn(),
   deleteReviewMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
-  requireRole: mocks.requireRoleMock,
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/vendor-review-store", () => ({
@@ -37,26 +32,27 @@ vi.mock("@/lib/server/vendor-review-store", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
-import { PATCH } from "./route"
+import { DELETE, GET, PATCH } from "./route"
 
 describe("vendor review single route", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       email: "owner@example.com",
       role: "owner",
-    })
-    mocks.requireRoleMock.mockReturnValue({
-      userId: "user-1",
-      email: "owner@example.com",
-      role: "owner",
-    })
-    mocks.getOrgContextMock.mockResolvedValue({
       orgId: "org-demo",
+      orgName: "Org Demo",
+    })
+    mocks.requireFreshRoleMock.mockResolvedValue({
+      userId: "user-1",
+      email: "owner@example.com",
+      role: "owner",
+      orgId: "org-demo",
+      orgName: "Org Demo",
     })
     mocks.getReviewMock.mockResolvedValue({
       id: "vr-1",
@@ -85,6 +81,12 @@ describe("vendor review single route", () => {
       auditTrail: [],
       ...patch,
     }))
+    mocks.mutateStateForOrgMock.mockResolvedValue({
+      orgKnowledge: {
+        items: [],
+        lastUpdatedAtISO: null,
+      },
+    })
   })
 
   it("salvează termenul și nota de follow-up", async () => {
@@ -107,6 +109,34 @@ describe("vendor review single route", () => {
     expect(response.status).toBe(200)
     expect(payload.review.followUpDueISO).toBe("2026-04-07T00:00:00.000Z")
     expect(payload.review.followUpNote).toBe("Așteptăm DPA semnat.")
-    expect(mocks.updateReviewMock).toHaveBeenCalled()
+    expect(mocks.updateReviewMock).toHaveBeenCalledWith(
+      "org-demo",
+      "vr-1",
+      expect.objectContaining({
+        followUpDueISO: "2026-04-07T00:00:00.000Z",
+      })
+    )
+  })
+
+  it("citește review-ul din org-ul sesiunii", async () => {
+    const response = await GET(
+      new Request("http://localhost/api/vendor-review/vr-1"),
+      { params: Promise.resolve({ id: "vr-1" }) }
+    )
+
+    expect(response.status).toBe(200)
+    expect(mocks.getReviewMock).toHaveBeenCalledWith("org-demo", "vr-1")
+  })
+
+  it("șterge review-ul din org-ul sesiunii", async () => {
+    mocks.deleteReviewMock.mockResolvedValueOnce(true)
+
+    const response = await DELETE(
+      new Request("http://localhost/api/vendor-review/vr-1", { method: "DELETE" }),
+      { params: Promise.resolve({ id: "vr-1" }) }
+    )
+
+    expect(response.status).toBe(200)
+    expect(mocks.deleteReviewMock).toHaveBeenCalledWith("org-demo", "vr-1")
   })
 })

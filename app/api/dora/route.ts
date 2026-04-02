@@ -4,9 +4,8 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
-import { WRITE_ROLES } from "@/lib/server/rbac"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { readDoraState, createIncident } from "@/lib/server/dora-store"
 import type { DoraIncidentSeverity } from "@/lib/server/dora-store"
 
@@ -14,9 +13,8 @@ const VALID_SEVERITIES: DoraIncidentSeverity[] = ["major", "significant", "minor
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer", "viewer"], "vizualizare DORA")
-    const { orgId } = await getOrgContext()
-    const state = await readDoraState(orgId)
+    const session = await requireFreshRole(request, READ_ROLES, "vizualizare DORA")
+    const state = await readDoraState(session.orgId)
     return NextResponse.json(state)
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -26,8 +24,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "crearea unui incident DORA")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, WRITE_ROLES, "crearea unui incident DORA")
     const body = await request.json() as {
       title?: string
       description?: string
@@ -45,7 +42,7 @@ export async function POST(request: Request) {
     if (!body.occurredAtISO) return jsonError("Data producerii este obligatorie.", 400, "MISSING_OCCURRED_AT")
     if (!body.detectedAtISO) return jsonError("Data detectării este obligatorie.", 400, "MISSING_DETECTED_AT")
 
-    const incident = await createIncident(orgId, {
+    const incident = await createIncident(session.orgId, {
       title: body.title.trim(),
       description: body.description.trim(),
       severity: body.severity,

@@ -6,7 +6,7 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole, AuthzError } from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { RequestValidationError } from "@/lib/server/request-validation"
 import {
   generateDocument,
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       generatedDocuments: [
         {
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
           }
         ),
       ]),
-    }))
+    }), session.orgName)
 
     void trackEvent(session.orgId, "generated_first_document", { docType: input.documentType })
 
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
     if (input.documentType === "privacy-policy" && input.dataFlows) {
       const knowledgeAtISO = result.generatedAtISO
       const dateLabel = new Date(knowledgeAtISO).toLocaleDateString("ro-RO")
-      await mutateState((s) => {
+      await mutateStateForOrg(session.orgId, (s) => {
         const knowledgeItems = s.orgKnowledge?.items ?? []
         const item = makeKnowledgeItem(
           "processing-purposes",
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
             lastUpdatedAtISO: knowledgeAtISO,
           },
         }
-      })
+      }, session.orgName)
     }
 
     return NextResponse.json({

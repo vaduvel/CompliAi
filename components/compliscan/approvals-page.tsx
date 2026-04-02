@@ -76,6 +76,23 @@ function statusBadge(status: PendingActionStatus) {
   }
 }
 
+function buildApprovalContinuation(action: PendingAction) {
+  if (action.actionType !== "submit_anaf") {
+    return null
+  }
+
+  const fiscalHref = action.sourceFindingId
+    ? `/dashboard/fiscal?tab=transmitere&findingId=${encodeURIComponent(action.sourceFindingId)}`
+    : "/dashboard/fiscal?tab=transmitere"
+
+  return {
+    fiscalHref,
+    findingHref: action.sourceFindingId
+      ? `/dashboard/resolve/${encodeURIComponent(action.sourceFindingId)}`
+      : null,
+  }
+}
+
 // ── Data hook ────────────────────────────────────────────────────────────────
 
 function useApprovals() {
@@ -185,6 +202,7 @@ function ActionDetailPanel({
   const [deciding, setDeciding] = useState(false)
   const badge = statusBadge(action.status)
   const isPending = action.status === "pending"
+  const continuation = buildApprovalContinuation(action)
 
   async function handleDecision(decision: "approved" | "rejected") {
     setDeciding(true)
@@ -196,7 +214,9 @@ function ActionDetailPanel({
         {
           description:
             action.actionType === "submit_anaf" && decision === "approved"
-              ? "Transmiterea fiscală poate continua din tabul Fiscal."
+              ? action.sourceFindingId
+                ? "Transmiterea fiscală poate continua din tabul Fiscal și rămâne legată de cazul curent."
+                : "Transmiterea fiscală poate continua din tabul Fiscal."
               : undefined,
         }
       )
@@ -270,6 +290,33 @@ function ActionDetailPanel({
               <pre className="whitespace-pre-wrap text-xs font-mono text-eos-text-muted">
                 {JSON.stringify(action.proposedData, null, 2)}
               </pre>
+            </div>
+          </div>
+        )}
+
+        {continuation && (
+          <div className="rounded-eos-lg border border-eos-primary/20 bg-eos-primary/5 px-4 py-3">
+            <p className="text-sm font-medium text-eos-text">Continuarea nu se pierde după aprobare</p>
+            <p className="mt-1 text-xs text-eos-text-tertiary">
+              După decizie, execuția merge mai departe din tabul Fiscal. Dacă există un caz legat, te poți întoarce direct în cockpit-ul lui.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={continuation.fiscalHref}
+                className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-active"
+              >
+                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+                Continuă în Fiscal
+              </a>
+              {continuation.findingHref && (
+                <a
+                  href={continuation.findingHref}
+                  className="flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-active"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+                  Deschide cazul fiscal
+                </a>
+              )}
             </div>
           </div>
         )}

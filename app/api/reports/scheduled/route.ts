@@ -6,6 +6,7 @@ import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
 import { readStateForOrg } from "@/lib/server/mvp-store"
+import { hasSupabaseConfig } from "@/lib/server/supabase-rest"
 import {
   createScheduledReport,
   listScheduledReports,
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
       throw new AuthzError("Rapoartele programate sunt disponibile doar în modul partner.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const orgId = session.orgId
     const [reports, state] = await Promise.all([
       listScheduledReports(orgId),
       readStateForOrg(orgId),
@@ -37,6 +38,8 @@ export async function GET(request: Request) {
         status:
           event.type === "report.scheduled_run_failed"
             ? "failed"
+            : event.metadata?.executionMode === "approved"
+              ? "approved_then_executed"
             : Boolean(event.metadata?.approvalQueued)
               ? "queued_for_approval"
               : "auto_executed",
@@ -46,7 +49,12 @@ export async function GET(request: Request) {
       .sort((left, right) => right.createdAtISO.localeCompare(left.createdAtISO))
       .slice(0, 30)
 
-    return NextResponse.json({ reports, recentRuns })
+    const runtimeStatus = {
+      storageBackend: hasSupabaseConfig() ? "supabase" : "local_fallback",
+      persistenceStatus: hasSupabaseConfig() ? "synced" : "fallback",
+    }
+
+    return NextResponse.json({ reports, recentRuns, runtimeStatus })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la citirea rapoartelor.", 500, "REPORTS_LIST_FAILED")
@@ -61,8 +69,8 @@ export async function POST(request: Request) {
       throw new AuthzError("Rapoartele programate sunt disponibile doar în modul partner.", 403, "PARTNER_ONLY")
     }
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
-    const userId = request.headers.get("x-compliscan-user-id") ?? session.userId
+    const orgId = session.orgId
+    const userId = session.userId
 
     const body = (await request.json()) as {
       reportType?: ScheduledReportType

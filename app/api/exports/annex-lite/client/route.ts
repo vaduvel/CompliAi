@@ -2,13 +2,16 @@ import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { buildClientAnnexLiteDocument } from "@/lib/server/annex-lite-client"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Annex IV lite")
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "exportul Annex IV lite")
 
-    const payload = await buildDashboardPayload(await readState())
+    const state =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+    const payload = await buildDashboardPayload(state)
     const document = buildClientAnnexLiteDocument(payload.compliancePack)
 
     return new Response(document.html, {

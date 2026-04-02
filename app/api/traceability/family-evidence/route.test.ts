@@ -1,19 +1,40 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
+  AuthzErrorMock: class AuthzError extends Error {
+    status: number
+    code: string
+
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
   buildDashboardPayloadMock: vi.fn(),
-  mutateStateMock: vi.fn(),
-  readStateMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
+  requireRoleMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: mocks.AuthzErrorMock,
+  requireRole: mocks.requireRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
-  readState: mocks.readStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/event-actor", () => ({
@@ -25,6 +46,22 @@ import { POST } from "./route"
 describe("POST /api/traceability/family-evidence", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.requireRoleMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-1",
+      email: "demo@site.ro",
+      orgName: "Org Demo",
+      role: "reviewer",
+      exp: Date.now() + 1000,
+    })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-ctx",
+      orgName: "Workspace Org",
+      workspaceLabel: "Workspace",
+      workspaceOwner: "Owner",
+      workspaceInitials: "WO",
+      userRole: "reviewer",
+    })
     mocks.resolveOptionalEventActorMock.mockResolvedValue({
       actorId: "user-1",
       actorLabel: "Ion Popescu",
@@ -122,7 +159,7 @@ describe("POST /api/traceability/family-evidence", () => {
       },
     ]
 
-    mocks.readStateMock.mockResolvedValue(currentState)
+    mocks.readStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock
       .mockResolvedValueOnce({
         state: hydratedState,
@@ -135,7 +172,7 @@ describe("POST /api/traceability/family-evidence", () => {
         traceabilityMatrix,
       }))
 
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: typeof currentState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: typeof currentState) => unknown) =>
       updater(currentState)
     )
 
@@ -157,6 +194,7 @@ describe("POST /api/traceability/family-evidence", () => {
       "org/source/proof.png"
     )
     expect(payload.message).toContain("Dovada a fost reutilizată")
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Function), "Org Demo")
   })
 
   it("blocheaza reuse-ul cand dovada sursa este marcata ca slaba", async () => {
@@ -187,7 +225,7 @@ describe("POST /api/traceability/family-evidence", () => {
       driftRecords: [],
     }
 
-    mocks.readStateMock.mockResolvedValue(currentState)
+    mocks.readStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: currentState,
       remediationPlan: [
@@ -311,7 +349,7 @@ describe("POST /api/traceability/family-evidence", () => {
       },
     ]
 
-    mocks.readStateMock.mockResolvedValue(currentState)
+    mocks.readStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: currentState,
       remediationPlan,

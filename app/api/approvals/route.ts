@@ -10,12 +10,11 @@ import type { PendingActionStatus, PendingActionType, RiskLevel } from "@/lib/se
 import { getApprovalCounts, listPendingActions } from "@/lib/server/approval-queue"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
 
 export async function GET(request: Request) {
   try {
-    await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "approvals-list")
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "approvals-list")
+    const orgId = session.orgId
 
     const url = new URL(request.url)
     const statusParam = url.searchParams.get("status")

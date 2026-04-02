@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   requireRoleMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
   serializeCompliScanYamlMock: vi.fn(),
 }))
 
@@ -37,7 +37,7 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 import { GET } from "./route"
@@ -53,7 +53,7 @@ describe("GET /api/exports/compliscan", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
-    mocks.readStateMock.mockResolvedValue({})
+    mocks.readStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         driftRecords: [
@@ -90,6 +90,7 @@ describe("GET /api/exports/compliscan", () => {
     const response = await GET(new NextRequest("http://localhost/api/exports/compliscan"))
     const body = await response.json()
 
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
     expect(response.headers.get("content-type")).toContain("application/json")
     expect(response.headers.get("content-disposition")).toContain('filename="compliscan-export.json"')
     expect(body.drift).toHaveLength(1)

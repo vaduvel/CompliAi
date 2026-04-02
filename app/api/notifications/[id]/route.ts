@@ -4,8 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { markNotificationRead } from "@/lib/server/notifications-store"
 
 export async function PATCH(
@@ -13,12 +12,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "marcarea notificării ca citită")
 
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const notif = await markNotificationRead(orgId, id)
+    const notif = await markNotificationRead(session.orgId, id)
     if (!notif) return jsonError("Notificarea nu a fost găsită.", 404, "NOT_FOUND")
 
     return NextResponse.json({ notification: notif })

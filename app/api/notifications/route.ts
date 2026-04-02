@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { safeListNotifications, safeCountUnread, safeMarkAllRead } from "@/lib/server/notifications-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -15,13 +14,10 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/notifications")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
-
-    const { orgId } = await getOrgContext()
+    const session = await requireFreshAuthenticatedSession(request, "citirea notificărilor")
     const [notifications, unread] = await Promise.all([
-      safeListNotifications(orgId),
-      safeCountUnread(orgId),
+      safeListNotifications(session.orgId),
+      safeCountUnread(session.orgId),
     ])
 
     return NextResponse.json({ notifications, unread }, withRequestIdHeaders(undefined, context))
@@ -40,16 +36,14 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/notifications")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
+    const session = await requireFreshAuthenticatedSession(request, "actualizarea notificărilor")
 
     const body = (await request.json()) as { action?: string }
     if (body.action !== "mark-all-read") {
       return jsonError("Acțiune necunoscută.", 400, "INVALID_ACTION", undefined, context)
     }
 
-    const { orgId } = await getOrgContext()
-    await safeMarkAllRead(orgId)
+    await safeMarkAllRead(session.orgId)
     return NextResponse.json({ ok: true }, withRequestIdHeaders(undefined, context))
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)

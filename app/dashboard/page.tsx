@@ -191,7 +191,7 @@ export default function DashboardPage() {
   const findingsSummary =
     activeFindings.length === 0
       ? "Nicio problemă activă."
-      : `${activeFindings.length} cazuri active · ${openAlerts.length} alerte · ${activeDrifts.length} drift`
+      : `${activeFindings.length} cazuri active · ${openAlerts.length} alerte · ${activeDrifts.length} modificări`
   const nextActionSummary = nextBestAction
     ? nextBestAction.title
     : "Intră în De rezolvat și lucrează pe cazul prioritar."
@@ -323,7 +323,7 @@ export default function DashboardPage() {
           activeDrifts.length > 0 ? "border-eos-warning/25" : "border-eos-border"
         }`}>
           {activeDrifts.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-warning" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Drift activ</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Modificări detectate</p>
           <div className="mt-3 flex items-end justify-between">
             <span className={`text-4xl font-semibold tabular-nums leading-none ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
               {activeDrifts.length}
@@ -371,7 +371,12 @@ export default function DashboardPage() {
       <Nis2CockpitCard />
       <DriftActiveCard findings={state.findings} />
 
-      {/* ── Framework-uri + Cazuri active — 2 col, vizual distincte ─────── */}
+      {/* ── Framework-uri + Cazuri active — 2 col, collapsible on mobile ── */}
+      <details className="group/details md:open" open>
+        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="size-3.5 transition-transform group-open/details:rotate-90" strokeWidth={2.5} />
+          Detalii framework-uri și cazuri
+        </summary>
       <div className="grid gap-4 xl:grid-cols-2">
 
         {/* Framework-uri — cu mini progress bars (Drata pattern) */}
@@ -473,8 +478,14 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+      </details>
 
-      {/* ── Activitate recentă — pill badges per tip ─────────────────────── */}
+      {/* ── Activitate recentă — pill badges per tip, collapsible mobile ── */}
+      <details className="group/activity md:open" open>
+        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="size-3.5 transition-transform group-open/activity:rotate-90" strokeWidth={2.5} />
+          Activitate recentă
+        </summary>
       <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
         <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
           <div className="flex items-center gap-2">
@@ -516,6 +527,7 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      </details>
 
       {/* ── Valoare acumulată ─────────────────────────────────────────────── */}
       <section

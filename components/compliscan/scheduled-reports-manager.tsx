@@ -20,7 +20,7 @@ type RecentRun = {
   id: string
   scheduledReportId: string
   reportType: string
-  status: "queued_for_approval" | "auto_executed" | "failed"
+  status: "queued_for_approval" | "auto_executed" | "approved_then_executed" | "failed"
   createdAtISO: string
   message: string
 }
@@ -28,6 +28,10 @@ type RecentRun = {
 type ScheduledReportsPayload = {
   reports: ScheduledReport[]
   recentRuns?: RecentRun[]
+  runtimeStatus?: {
+    storageBackend: "supabase" | "local_fallback"
+    persistenceStatus: "synced" | "fallback"
+  }
 }
 
 const DEFAULT_FORM = {
@@ -49,38 +53,48 @@ export function ScheduledReportsManager() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-
-  async function load() {
-    setLoading(true)
-    try {
-      const [reportsResponse, portfolioResponse] = await Promise.all([
-        fetch("/api/reports/scheduled", { cache: "no-store" }),
-        fetch("/api/portfolio/reports", { cache: "no-store" }),
-      ])
-
-      const reportsPayload = reportsResponse.ok
-        ? ((await reportsResponse.json()) as ScheduledReportsPayload)
-        : { reports: [], recentRuns: [] }
-      const portfolioPayload = portfolioResponse.ok
-        ? ((await portfolioResponse.json()) as { reports: PortfolioReportRow[] })
-        : { reports: [] }
-
-      setReports(reportsPayload.reports ?? [])
-      setRecentRuns(reportsPayload.recentRuns ?? [])
-      setPortfolio(portfolioPayload.reports ?? [])
-      if (selectAllClients) {
-        setSelectedClients((portfolioPayload.reports ?? []).map((item) => item.orgId))
-      }
-    } catch {
-      toast.error("Nu am putut încărca rapoartele programate.")
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [runtimeStatus, setRuntimeStatus] = useState<
+    ScheduledReportsPayload["runtimeStatus"] | null
+  >(null)
 
   useEffect(() => {
-    void load()
-  }, [])
+    let cancelled = false
+
+    async function loadReports() {
+      setLoading(true)
+      try {
+        const [reportsResponse, portfolioResponse] = await Promise.all([
+          fetch("/api/reports/scheduled", { cache: "no-store" }),
+          fetch("/api/portfolio/reports", { cache: "no-store" }),
+        ])
+
+        const reportsPayload = reportsResponse.ok
+          ? ((await reportsResponse.json()) as ScheduledReportsPayload)
+          : { reports: [], recentRuns: [] }
+        const portfolioPayload = portfolioResponse.ok
+          ? ((await portfolioResponse.json()) as { reports: PortfolioReportRow[] })
+          : { reports: [] }
+
+        if (cancelled) return
+        setReports(reportsPayload.reports ?? [])
+        setRecentRuns(reportsPayload.recentRuns ?? [])
+        setRuntimeStatus(reportsPayload.runtimeStatus ?? null)
+        setPortfolio(portfolioPayload.reports ?? [])
+        if (selectAllClients) {
+          setSelectedClients((portfolioPayload.reports ?? []).map((item) => item.orgId))
+        }
+      } catch {
+        if (!cancelled) toast.error("Nu am putut încărca rapoartele programate.")
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    void loadReports()
+    return () => {
+      cancelled = true
+    }
+  }, [selectAllClients])
 
   useEffect(() => {
     if (selectAllClients) {
@@ -197,6 +211,14 @@ export function ScheduledReportsManager() {
             <Badge variant="outline" className="normal-case tracking-normal">
               {portfolio.length} firme în portofoliu
             </Badge>
+            <Badge
+              variant={runtimeStatus?.persistenceStatus === "fallback" ? "warning" : "success"}
+              className="normal-case tracking-normal"
+            >
+              {runtimeStatus?.persistenceStatus === "fallback"
+                ? "fallback local"
+                : "Supabase synced"}
+            </Badge>
           </>
         }
         actions={
@@ -206,6 +228,15 @@ export function ScheduledReportsManager() {
           </Button>
         }
       />
+
+      {runtimeStatus?.persistenceStatus === "fallback" ? (
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardContent className="pt-6 text-sm text-eos-text">
+            Rapoartele programate rulează momentan pe fallback local. Configurația rămâne utilizabilă,
+            dar nu o trata ca truth de producție până când traseul Supabase nu revine la `synced`.
+          </CardContent>
+        </Card>
+      ) : null}
 
       {showForm ? (
         <Card className="border-eos-border bg-eos-surface">
@@ -395,6 +426,8 @@ export function ScheduledReportsManager() {
                             ? "warning"
                             : run.status === "queued_for_approval"
                               ? "outline"
+                              : run.status === "approved_then_executed"
+                                ? "success"
                               : "success"
                         }
                         className="normal-case tracking-normal"
@@ -403,6 +436,8 @@ export function ScheduledReportsManager() {
                           ? "failed"
                           : run.status === "queued_for_approval"
                             ? "queued"
+                            : run.status === "approved_then_executed"
+                              ? "executat după aprobare"
                             : "executat"}
                       </Badge>
                       <span className="text-xs text-eos-text-muted">

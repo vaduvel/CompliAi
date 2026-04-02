@@ -5,15 +5,31 @@ import { buildDetectedAISystemRecord } from "@/lib/compliance/ai-inventory"
 
 const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
+  requireRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: class AuthzError extends Error {
+    status: number
+    code: string
+
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
+  requireRole: mocks.requireRoleMock,
+  readSessionFromRequest: vi.fn(() => null),
 }))
 
 import { PATCH } from "./route"
@@ -23,6 +39,14 @@ describe("PATCH /api/ai-systems/detected/[id]", () => {
     vi.clearAllMocks()
     vi.spyOn(Math, "random").mockReturnValue(0.123456789)
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.requireRoleMock.mockReturnValue({
+      userId: "user-1",
+      email: "demo@test.com",
+      orgId: "org-1",
+      orgName: "Test Org",
+      role: "owner",
+      exp: Date.now() + 60_000,
+    })
   })
 
   it("confirma detectia si o muta in inventarul oficial", async () => {
@@ -45,8 +69,8 @@ describe("PATCH /api/ai-systems/detected/[id]", () => {
       "2026-03-13T10:00:00.000Z"
     )
 
-    mocks.mutateStateMock.mockImplementationOnce(
-      async (updater: (state: typeof initialComplianceState) => unknown) =>
+    mocks.mutateStateForOrgMock.mockImplementationOnce(
+      async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) =>
         updater({
           ...initialComplianceState,
           detectedAISystems: [candidate],

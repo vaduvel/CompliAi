@@ -3,12 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DELETE, PATCH } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   updateVendorMock: vi.fn(),
   deleteVendorMock: vi.fn(),
   readNis2StateMock: vi.fn().mockResolvedValue({ assessment: null, incidents: [], vendors: [] }),
-  mutateFreshStateMock: vi.fn().mockResolvedValue(undefined),
+  mutateFreshStateForOrgMock: vi.fn().mockResolvedValue(undefined),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -22,7 +21,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/rbac", () => ({
@@ -30,18 +29,18 @@ vi.mock("@/lib/server/rbac", () => ({
   DELETE_ROLES: ["owner", "compliance"],
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
-vi.mock("@/lib/server/nis2-store", () => ({
-  updateVendor: mocks.updateVendorMock,
-  deleteVendor: mocks.deleteVendorMock,
-  readNis2State: mocks.readNis2StateMock,
-}))
+vi.mock("@/lib/server/nis2-store", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/server/nis2-store")>("@/lib/server/nis2-store")
+  return {
+    ...actual,
+    updateVendor: mocks.updateVendorMock,
+    deleteVendor: mocks.deleteVendorMock,
+    readNis2State: mocks.readNis2StateMock,
+  }
+})
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateFreshState: mocks.mutateFreshStateMock,
+  mutateFreshStateForOrg: mocks.mutateFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/vendor-risk", () => ({
@@ -49,7 +48,6 @@ vi.mock("@/lib/compliance/vendor-risk", () => ({
 }))
 
 const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1" }
 const VENDOR_ID = "nis2-vnd123"
 
 const MOCK_VENDOR = {
@@ -68,8 +66,7 @@ const MOCK_VENDOR = {
 describe("PATCH /api/nis2/vendors/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.updateVendorMock.mockResolvedValue(MOCK_VENDOR)
   })
 
@@ -121,9 +118,9 @@ describe("PATCH /api/nis2/vendors/[id]", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.requireRoleMock.mockImplementation(() => {
-      throw new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await PATCH(
       new Request(`http://localhost/api/nis2/vendors/${VENDOR_ID}`, {
         method: "PATCH",
@@ -139,8 +136,7 @@ describe("PATCH /api/nis2/vendors/[id]", () => {
 describe("DELETE /api/nis2/vendors/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.deleteVendorMock.mockResolvedValue(true)
   })
 
@@ -170,9 +166,9 @@ describe("DELETE /api/nis2/vendors/[id]", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.requireRoleMock.mockImplementation(() => {
-      throw new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await DELETE(
       new Request(`http://localhost/api/nis2/vendors/${VENDOR_ID}`, { method: "DELETE" }),
       { params: Promise.resolve({ id: VENDOR_ID }) }
@@ -181,9 +177,9 @@ describe("DELETE /api/nis2/vendors/[id]", () => {
   })
 
   it("respinge viewer-ul la DELETE (403)", async () => {
-    mocks.requireRoleMock.mockImplementation(() => {
-      throw new mocks.AuthzErrorMock("Rolul viewer nu poate efectua ștergerea furnizorului.", 403, "AUTH_ROLE_FORBIDDEN")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Rolul viewer nu poate efectua ștergerea furnizorului.", 403, "AUTH_ROLE_FORBIDDEN")
+    )
     const res = await DELETE(
       new Request(`http://localhost/api/nis2/vendors/${VENDOR_ID}`, { method: "DELETE" }),
       { params: Promise.resolve({ id: VENDOR_ID }) }

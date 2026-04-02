@@ -6,7 +6,6 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
 import { readDsarState } from "@/lib/server/dsar-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -29,8 +28,8 @@ function daysUntil(iso: string): number {
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "urgențe dashboard")
-    const { orgId } = await getOrgContext()
+    const session = requireRole(request, WRITE_ROLES, "urgențe dashboard")
+    const orgId = session.orgId
 
     const items: UrgencyItem[] = []
 

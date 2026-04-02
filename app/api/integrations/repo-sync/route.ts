@@ -9,6 +9,7 @@ import {
   validateRepoSyncPayload,
 } from "@/lib/server/repo-sync"
 import { executeRepoSync } from "@/lib/server/repo-sync-executor"
+import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -41,13 +42,16 @@ export async function POST(request: Request) {
       )
     }
 
+    const workspace = await getOrgContext()
     const { nextState, fileCount } = await executeRepoSync({
       ...body,
       files,
+      orgId: workspace.orgId,
+      orgName: workspace.orgName,
     })
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: `Repo sync finalizat pentru ${fileCount} fisier${fileCount === 1 ? "" : "e"} relevante.`,
     }, withRequestIdHeaders(undefined, context))
   } catch (error) {

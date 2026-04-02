@@ -7,11 +7,32 @@ import type { ComplianceState } from "@/lib/compliance/types"
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: vi.fn(),
-  mutateState: vi.fn(),
+  readStateForOrg: vi.fn(),
+  mutateStateForOrg: vi.fn(),
 }))
 
-import { readState, mutateState } from "@/lib/server/mvp-store"
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: class AuthzError extends Error {
+    status: number
+    code: string
+
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
+  requireRole: vi.fn(() => ({
+    userId: "user-1",
+    email: "demo@test.com",
+    orgId: "org-1",
+    orgName: "Test Org",
+    role: "owner",
+    exp: Date.now() + 60_000,
+  })),
+}))
+
+import { readStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
 import { GET, POST } from "./route"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -48,11 +69,11 @@ const highRiskAnswers = [
 describe("GET /api/shadow-ai", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(readState).mockResolvedValue(makeState())
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
   })
 
   it("returnează întrebările și răspunsurile curente", async () => {
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/shadow-ai"))
     expect(res.status).toBe(200)
 
     const body = await res.json()
@@ -65,14 +86,14 @@ describe("GET /api/shadow-ai", () => {
 
   it("returnează answers din state dacă există", async () => {
     const savedAnswers = [{ questionId: "sq-general-chatgpt", value: "no" }]
-    vi.mocked(readState).mockResolvedValue(
+    vi.mocked(readStateForOrg).mockResolvedValue(
       makeState({
         shadowAiAnswers: savedAnswers,
         shadowAiCompletedAtISO: "2026-03-10T12:00:00.000Z",
       })
     )
 
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/shadow-ai"))
     const body = await res.json()
 
     expect(body.answers).toEqual(savedAnswers)
@@ -80,7 +101,7 @@ describe("GET /api/shadow-ai", () => {
   })
 
   it("returnează arrays goale dacă state nu are shadow AI salvat", async () => {
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/shadow-ai"))
     const body = await res.json()
 
     expect(body.answers).toEqual([])
@@ -88,9 +109,9 @@ describe("GET /api/shadow-ai", () => {
   })
 
   it("returnează 500 la eroare internă", async () => {
-    vi.mocked(readState).mockRejectedValue(new Error("store error"))
+    vi.mocked(readStateForOrg).mockRejectedValue(new Error("store error"))
 
-    const res = await GET()
+    const res = await GET(new Request("http://localhost/api/shadow-ai"))
     expect(res.status).toBe(500)
   })
 })
@@ -98,7 +119,7 @@ describe("GET /api/shadow-ai", () => {
 describe("POST /api/shadow-ai", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(mutateState).mockImplementation(async (fn) => fn(makeState()) as ComplianceState)
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => fn(makeState()) as ComplianceState)
   })
 
   it("returnează 400 dacă answers nu e array", async () => {
@@ -173,11 +194,11 @@ describe("POST /api/shadow-ai", () => {
 
   it("mutateState este apelat pentru a persista answers", async () => {
     await POST(makePostRequest({ answers: lowRiskAnswers }))
-    expect(mutateState).toHaveBeenCalledTimes(1)
+    expect(mutateStateForOrg).toHaveBeenCalledTimes(1)
   })
 
   it("returnează 500 la eroare internă", async () => {
-    vi.mocked(mutateState).mockRejectedValue(new Error("write error"))
+    vi.mocked(mutateStateForOrg).mockRejectedValue(new Error("write error"))
 
     const res = await POST(makePostRequest({ answers: lowRiskAnswers }))
     expect(res.status).toBe(500)

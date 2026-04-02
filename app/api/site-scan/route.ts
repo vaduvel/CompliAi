@@ -7,7 +7,7 @@ import { randomBytes } from "crypto"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { scanSite } from "@/lib/compliance/site-scanner"
 import { knowledgeFromSiteScan, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import type { SiteScanJob } from "@/lib/compliance/types"
@@ -28,13 +28,13 @@ export async function POST(request: Request) {
     const createdAtISO = new Date().toISOString()
 
     // Store queued job immediately
-    await mutateState((s) => ({
+    await mutateStateForOrg(session.orgId, (s) => ({
       ...s,
       siteScanJobs: {
         ...(s.siteScanJobs ?? {}),
         [jobId]: { jobId, url: body.url!, status: "processing", createdAtISO } satisfies SiteScanJob,
       },
-    }))
+    }), session.orgName)
 
     // Run scan with 55s timeout
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), SCAN_TIMEOUT_MS))
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     if (!scanResult) {
       // Timeout
-      await mutateState((s) => ({
+      await mutateStateForOrg(session.orgId, (s) => ({
         ...s,
         siteScanJobs: {
           ...(s.siteScanJobs ?? {}),
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
             completedAtISO: new Date().toISOString(),
           } satisfies SiteScanJob,
         },
-      }))
+      }), session.orgName)
       return NextResponse.json({ jobId, status: "timeout", message: "Scanarea a depășit limita de timp. Reîncercați cu un site mai mic." })
     }
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     // Save profile + orgKnowledge if requested
     if (body.saveToProfile && scanResult.reachable) {
-      await mutateState((state) => {
+      await mutateStateForOrg(session.orgId, (state) => {
         state.siteScan = {
           scannedAtISO: scanResult.scannedAtISO,
           websiteUrl: scanResult.url,
@@ -84,11 +84,11 @@ export async function POST(request: Request) {
           }
         }
         return state
-      })
+      }, session.orgName)
     }
 
     // Store completed job with result
-    await mutateState((s) => ({
+    await mutateStateForOrg(session.orgId, (s) => ({
       ...s,
       siteScanJobs: {
         ...(s.siteScanJobs ?? {}),
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
           result: scanResult,
         } satisfies SiteScanJob,
       },
-    }))
+    }), session.orgName)
 
     return NextResponse.json({ jobId, status: "done", result: scanResult })
   } catch (error) {

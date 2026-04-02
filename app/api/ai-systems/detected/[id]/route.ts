@@ -10,7 +10,10 @@ import {
   updateDetectedSystem,
 } from "@/lib/server/detected-ai-systems"
 import { syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
-import { mutateState } from "@/lib/server/mvp-store"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { WRITE_ROLES } from "@/lib/server/rbac"
 
 type CandidateAction = "review" | "confirm" | "reject" | "restore" | "edit"
 type CandidateEditPayload = {
@@ -42,6 +45,14 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  let session: ReturnType<typeof requireRole>
+  try {
+    session = requireRole(request, WRITE_ROLES, "gestionarea sistemelor AI detectate")
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    throw error
+  }
+
   const { id } = await context.params
   const body = (await request.json()) as { action?: CandidateAction; updates?: CandidateEditPayload }
 
@@ -53,7 +64,7 @@ export async function PATCH(
   const actor = await resolveOptionalEventActor(request)
 
   try {
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       const candidate = findDetectedSystem(current, id)
       if (!candidate) throw new Error("DETECTED_SYSTEM_NOT_FOUND")
 
@@ -143,7 +154,7 @@ export async function PATCH(
           }, actor),
         ]),
       }
-    })
+    }, session.orgName)
 
     return NextResponse.json({
       ...(await buildDashboardPayload(nextState)),

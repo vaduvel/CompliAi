@@ -5,7 +5,7 @@
 import { NextResponse } from "next/server"
 import { jsonError } from "@/lib/server/api-response"
 import { requireRole } from "@/lib/server/auth"
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { initiateSubmit, listSubmissions, cacheXmlForSubmission } from "@/lib/server/anaf-submit-flow"
 import { validateEFacturaXml } from "@/lib/compliance/efactura-validator"
 import type { EFacturaValidationRecord } from "@/lib/compliance/types"
@@ -16,8 +16,8 @@ export async function POST(request: Request) {
   try {
     const session = requireRole(request, [...WRITE_ROLES], "transmitere ANAF SPV")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
-    const userId = request.headers.get("x-compliscan-user-id") ?? session.userId
+    const orgId = session.orgId
+    const userId = session.userId
     const body = (await request.json()) as {
       xmlContent?: string
       invoiceId?: string
@@ -29,8 +29,8 @@ export async function POST(request: Request) {
     }
 
     // Get CUI from org profile
-    const state = await readState()
-    const cui = state.orgProfile?.cui
+    const state = await readStateForOrg(orgId)
+    const cui = state?.orgProfile?.cui
     if (!cui) {
       return jsonError("CUI-ul organizației nu este configurat. Completează profilul mai întâi.", 400, "NO_CUI")
     }
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
   try {
     const session = requireRole(request, [...WRITE_ROLES, "reviewer"], "lista transmisii ANAF")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const orgId = session.orgId
     const submissions = await listSubmissions(orgId)
 
     return NextResponse.json({ submissions })

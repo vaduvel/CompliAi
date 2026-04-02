@@ -3,20 +3,22 @@
 
 import { NextResponse } from "next/server"
 
-import { jsonError } from "@/lib/server/api-response"
-import { getOrgContext } from "@/lib/server/org-context"
-import { readState } from "@/lib/server/mvp-store"
-import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
+import { initialComplianceState, normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { buildComplianceResponse, buildCounselBrief } from "@/lib/compliance/response-pack"
+import { jsonError } from "@/lib/server/api-response"
+import { requireRole } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const ctx = await getOrgContext()
-    if (!ctx?.orgId) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
-
-    const rawState = await readState()
-    if (!rawState) return jsonError("Nu există stare de conformitate.", 404, "NO_STATE")
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
+      "generarea legal brief-ului de counsel"
+    )
+    const rawState =
+      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
 
     const state = normalizeComplianceState(rawState)
     const summary = computeDashboardSummary(state)
@@ -26,7 +28,7 @@ export async function POST() {
       state,
       summary,
       plan,
-      ctx.orgName ?? "Organizație",
+      session.orgName ?? "Organizație",
       new Date().toISOString(),
     )
 

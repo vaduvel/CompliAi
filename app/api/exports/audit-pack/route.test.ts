@@ -14,8 +14,11 @@ const mocks = vi.hoisted(() => ({
   buildAuditPackMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
+  requirePlanMock: vi.fn(),
+  readNis2StateMock: vi.fn(),
+  getWhiteLabelConfigMock: vi.fn(),
   requireRoleMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/compliscan-export", () => ({
@@ -32,11 +35,27 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/audit-pack", () => ({
   buildAuditPack: mocks.buildAuditPackMock,
+}))
+
+vi.mock("@/lib/server/plan", () => ({
+  PlanError: class PlanError extends Error {
+    status = 402
+    code = "PLAN_REQUIRED"
+  },
+  requirePlan: mocks.requirePlanMock,
+}))
+
+vi.mock("@/lib/server/nis2-store", () => ({
+  readNis2State: mocks.readNis2StateMock,
+}))
+
+vi.mock("@/lib/server/white-label", () => ({
+  getWhiteLabelConfig: mocks.getWhiteLabelConfigMock,
 }))
 
 import { GET } from "./route"
@@ -52,7 +71,14 @@ describe("GET /api/exports/audit-pack", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
-    mocks.readStateMock.mockResolvedValue({})
+    mocks.readStateForOrgMock.mockResolvedValue({})
+    mocks.requirePlanMock.mockResolvedValue(undefined)
+    mocks.readNis2StateMock.mockResolvedValue({
+      assessment: null,
+      incidents: [],
+      vendors: [],
+    })
+    mocks.getWhiteLabelConfigMock.mockResolvedValue(null)
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: {
         snapshotHistory: [],
@@ -75,6 +101,7 @@ describe("GET /api/exports/audit-pack", () => {
     const response = await GET(new Request("http://localhost/api/exports/audit-pack"))
     const body = await response.text()
 
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
     expect(response.headers.get("content-type")).toContain("application/json")
     expect(response.headers.get("content-disposition")).toContain(
       'attachment; filename="audit-pack-v2-1-magazin-online-s-r-l-2026-03-13.json"'

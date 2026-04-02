@@ -154,7 +154,11 @@ describe("canonical runtime audit", () => {
     expect(meResponse.status).toBe(200)
     expect(mePayload.user.role).toBe("owner")
 
-    const dashboardCoreResponse = await getDashboardCore()
+    const dashboardCoreResponse = await getDashboardCore(
+      new Request("http://localhost/api/dashboard/core", {
+        headers: { cookie: cookie ?? "" },
+      })
+    )
     const dashboardCorePayload = await dashboardCoreResponse.json()
     expect(dashboardCoreResponse.status).toBe(200)
     expect(dashboardCorePayload.workspace.orgId).toBe(orgId)
@@ -163,14 +167,23 @@ describe("canonical runtime audit", () => {
     expect(dashboardCorePayload.compliancePack).toBeUndefined()
     expect(dashboardCorePayload.traceabilityMatrix).toBeUndefined()
 
-    const dashboardResponse = await getDashboard()
+    const dashboardResponse = await getDashboard(
+      new Request("http://localhost/api/dashboard", {
+        headers: { cookie: cookie ?? "" },
+      })
+    )
     const dashboardPayload = await dashboardResponse.json()
     expect(dashboardResponse.status).toBe(200)
     expect(dashboardPayload.compliancePack).toBeTruthy()
     expect(dashboardPayload.traceabilityMatrix.length).toBeGreaterThan(0)
     expect(dashboardPayload.remediationPlan.length).toBe(dashboardCorePayload.remediationPlan.length)
 
-    const reportsResponse = await buildReports(new Request("http://localhost/api/reports", { method: "POST" }))
+    const reportsResponse = await buildReports(
+      new Request("http://localhost/api/reports", {
+        method: "POST",
+        headers: { cookie: cookie ?? "" },
+      })
+    )
     const reportsPayload = await reportsResponse.json()
     expect(reportsResponse.status).toBe(200)
     expect(Array.isArray(reportsPayload.report.topActions)).toBe(true)

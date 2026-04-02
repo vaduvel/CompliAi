@@ -6,16 +6,30 @@ import type { Nis2OrgState } from "@/lib/server/nis2-store"
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
+const mocks = vi.hoisted(() => ({
+  AuthzErrorClass: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 401, code = "AUTH_SESSION_REQUIRED") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: vi.fn(),
+  readStateForOrg: vi.fn(),
 }))
 
 vi.mock("@/lib/server/nis2-store", () => ({
   readNis2State: vi.fn(),
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: vi.fn(async () => ({ orgId: "org-test", userEmail: "test@test.ro", orgName: "Test Org" })),
+vi.mock("@/lib/server/auth", () => ({
+  AuthzError: mocks.AuthzErrorClass,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/plan", () => ({
@@ -26,7 +40,7 @@ vi.mock("@/lib/server/plan", () => ({
   },
 }))
 
-import { readState } from "@/lib/server/mvp-store"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { GET } from "./route"
 
@@ -55,7 +69,13 @@ function makeNis2State(overrides: Partial<Nis2OrgState> = {}): Nis2OrgState {
 describe("GET /api/inspector", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(readState).mockResolvedValue(makeState())
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      orgId: "org-test",
+      orgName: "Test Org",
+      email: "owner@example.com",
+      role: "owner",
+    })
+    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
     vi.mocked(readNis2State).mockResolvedValue(makeNis2State())
   })
 
@@ -115,7 +135,7 @@ describe("GET /api/inspector", () => {
   })
 
   it("returnează 500 la eroare internă", async () => {
-    vi.mocked(readState).mockRejectedValue(new Error("store failure"))
+    vi.mocked(readStateForOrg).mockRejectedValue(new Error("store failure"))
 
     const res = await GET(makeRequest())
     expect(res.status).toBe(500)
@@ -126,5 +146,20 @@ describe("GET /api/inspector", () => {
   it("apelează readNis2State cu orgId corect", async () => {
     await GET(makeRequest())
     expect(readNis2State).toHaveBeenCalledWith("org-test")
+  })
+
+  it("apelează readStateForOrg cu orgId corect", async () => {
+    await GET(makeRequest())
+    expect(readStateForOrg).toHaveBeenCalledWith("org-test")
+  })
+
+  it("cere sesiune activă înainte de inspector", async () => {
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorClass("Ai nevoie de sesiune activa pentru Inspector Mode / Simulare Control.")
+    )
+
+    const res = await GET(makeRequest())
+
+    expect(res.status).toBe(401)
   })
 })

@@ -3,12 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DELETE, PATCH } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   updateIncidentMock: vi.fn(),
   deleteIncidentMock: vi.fn(),
-  mutateFreshStateMock: vi.fn().mockResolvedValue(undefined),
+  mutateFreshStateForOrgMock: vi.fn().mockResolvedValue(undefined),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -22,31 +21,24 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: vi.fn().mockReturnValue({ userId: "u1" }),
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
-vi.mock("@/lib/server/rbac", () => ({
-  WRITE_ROLES: ["owner", "compliance", "reviewer"],
-  DELETE_ROLES: ["owner", "compliance"],
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
-vi.mock("@/lib/server/nis2-store", () => ({
-  readNis2State: mocks.readNis2StateMock,
-  updateIncident: mocks.updateIncidentMock,
-  deleteIncident: mocks.deleteIncidentMock,
-}))
+vi.mock("@/lib/server/nis2-store", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/server/nis2-store")>("@/lib/server/nis2-store")
+  return {
+    ...actual,
+    readNis2State: mocks.readNis2StateMock,
+    updateIncident: mocks.updateIncidentMock,
+    deleteIncident: mocks.deleteIncidentMock,
+  }
+})
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateFreshState: mocks.mutateFreshStateMock,
+  mutateFreshStateForOrg: mocks.mutateFreshStateForOrgMock,
 }))
 
-const SESSION = { userId: "user-1", orgId: "org-1", email: "test@site.ro" }
-const ORG_CTX = { orgId: "org-1" }
+const SESSION = { userId: "user-1", orgId: "org-1", orgName: "Org Test", email: "test@site.ro" }
 const INCIDENT_ID = "nis2-abc123"
 
 const BASE_INCIDENT = {
@@ -103,8 +95,7 @@ function patchRequest(id: string, body: Record<string, unknown>) {
 describe("PATCH /api/nis2/incidents/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.readNis2StateMock.mockResolvedValue(makeState(BASE_INCIDENT))
     mocks.updateIncidentMock.mockImplementation(
       (_orgId: string, _id: string, patch: Record<string, unknown>) => ({
@@ -289,9 +280,9 @@ describe("PATCH /api/nis2/incidents/[id]", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.requireRoleMock.mockImplementation(() => {
-      throw new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
-    })
+    mocks.requireFreshRoleMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const res = await PATCH(
       patchRequest(INCIDENT_ID, { status: "reported-24h" }),
@@ -304,8 +295,7 @@ describe("PATCH /api/nis2/incidents/[id]", () => {
 describe("DELETE /api/nis2/incidents/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue(SESSION)
-    mocks.getOrgContextMock.mockResolvedValue(ORG_CTX)
+    mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
     mocks.deleteIncidentMock.mockResolvedValue(true)
   })
 

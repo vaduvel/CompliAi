@@ -18,7 +18,7 @@ import type {
 } from "@/lib/compliance/types"
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
 import { requireAuthenticatedSession } from "@/lib/server/auth"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -48,8 +48,9 @@ function inferCategory(bundle: AgentProposalBundle, lawReference?: string): Find
 
 export async function POST(request: NextRequest) {
   const context = createRequestContext(request, "/api/agent/commit")
+  let session: ReturnType<typeof requireAuthenticatedSession> | null = null
   try {
-    requireAuthenticatedSession(request, "salvarea propunerilor Agent OS")
+    session = requireAuthenticatedSession(request, "salvarea propunerilor Agent OS")
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unauthorized"
     await logRouteError(context, error, {
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     const nowISO = new Date().toISOString()
-    await mutateState((state) => {
+    await mutateStateForOrg(session.orgId, (state) => {
       // Deduplication sets to prevent data corruption on retries
       const existingSystemIds = new Set(state.detectedAISystems.map((s) => s.id))
       const existingFindingIds = new Set(state.findings.map((f) => f.id))
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
       }
 
       return state
-    })
+    }, session.orgName)
 
     // S2.2: Agent OS hardening — persist run metadata for repeatability
     const runId = `run-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`

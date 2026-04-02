@@ -4,7 +4,10 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { mergeDetectedAISystems } from "@/lib/server/detected-ai-systems"
 import { discoverAISystemsFromManifest } from "@/lib/server/manifest-autodiscovery"
-import { mutateState } from "@/lib/server/mvp-store"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/api-response"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { WRITE_ROLES } from "@/lib/server/rbac"
 
 type DiscoverPayload = {
   documentName?: string
@@ -12,6 +15,14 @@ type DiscoverPayload = {
 }
 
 export async function POST(request: Request) {
+  let session: ReturnType<typeof requireRole>
+  try {
+    session = requireRole(request, WRITE_ROLES, "autodiscovery sisteme AI")
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    throw error
+  }
+
   const body = (await request.json()) as DiscoverPayload
   const documentName = body.documentName?.trim() || "manifest.txt"
   const content = body.content?.trim() || ""
@@ -24,7 +35,7 @@ export async function POST(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
-  const nextState = await mutateState((current) => {
+  const nextState = await mutateStateForOrg(session.orgId, (current) => {
     const scanId = `scan-${Math.random().toString(36).slice(2, 10)}`
     const discovery = discoverAISystemsFromManifest({
       documentName,
@@ -100,7 +111,7 @@ export async function POST(request: Request) {
         ),
       ]),
     }
-  })
+  }, session.orgName)
 
   return NextResponse.json({
     ...(await buildDashboardPayload(nextState)),

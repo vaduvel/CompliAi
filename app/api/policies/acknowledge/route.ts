@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import { getOrgContext } from "@/lib/server/org-context"
 import { writePolicyAcknowledgment } from "@/lib/server/policy-store"
 import { eventActorFromSession } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 async function readJsonBody<T>(request: Request): Promise<T> {
   const rawBody = await request.text()
@@ -15,11 +14,9 @@ async function readJsonBody<T>(request: Request): Promise<T> {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "confirmarea politicilor")
-    const { orgId } = await getOrgContext()
-
-    const session = readSessionFromRequest(request)
-    const userEmail = session?.email ?? "unknown"
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "confirmarea politicilor")
+    const orgId = session.orgId
+    const userEmail = session.email
 
     const body = await readJsonBody<{ policyId?: string }>(request)
     const { policyId } = body
@@ -29,8 +26,8 @@ export async function POST(request: Request) {
 
     const acknowledgments = await writePolicyAcknowledgment(orgId, policyId, userEmail)
 
-    const actor = session ? eventActorFromSession(session) : undefined
-    await mutateState((state) => ({
+    const actor = eventActorFromSession(session)
+    await mutateStateForOrg(session.orgId, (state) => ({
       ...state,
       events: appendComplianceEvents(state, [
         createComplianceEvent(
@@ -44,7 +41,7 @@ export async function POST(request: Request) {
           actor
         ),
       ]),
-    }))
+    }), session.orgName)
 
     return NextResponse.json({ acknowledgments })
   } catch (error) {

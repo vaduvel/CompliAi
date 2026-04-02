@@ -5,7 +5,9 @@ import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getAnafEnvironment, getAnafMode } from "@/lib/server/efactura-anaf-client"
-import { mutateState } from "@/lib/server/mvp-store"
+import { readSessionFromRequest } from "@/lib/server/auth"
+import { getOrgContext } from "@/lib/server/org-context"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -13,12 +15,16 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/integrations/efactura/sync")
 
   try {
+    const session = readSessionFromRequest(request)
+    if (!session) {
+      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
+    }
     const nowISO = new Date().toISOString()
     const actor = await resolveOptionalEventActor(request)
     const mode = getAnafMode()
     const environment = getAnafEnvironment()
 
-    const nextState = await mutateState((current) => ({
+    const nextState = await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       efacturaConnected: true,
       efacturaSyncedAtISO: nowISO,
@@ -36,10 +42,16 @@ export async function POST(request: Request) {
           metadata: { connected: true, mode, environment },
         }, actor),
       ]),
-    }))
+    }), session.orgName)
+    const workspaceOverride = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspaceOverride)),
       mode,
       environment,
       message: mode === "real"

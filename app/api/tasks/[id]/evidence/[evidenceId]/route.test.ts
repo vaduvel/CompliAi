@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   },
   getPersistableTaskIdsMock: vi.fn(),
   loadTaskEvidenceObjectFromSupabaseMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
   readStoredEvidenceFileMock: vi.fn(),
   getStoredEvidenceSignedUrlMock: vi.fn(),
   requireRoleMock: vi.fn(),
@@ -29,7 +29,7 @@ vi.mock("@/lib/compliance/task-ids", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/evidence-storage", () => ({
@@ -55,7 +55,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
       exp: Date.now() + 1000,
     })
     mocks.getPersistableTaskIdsMock.mockReturnValue(new Set(["task-1"]))
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       taskState: {
         "task-1": {
           status: "todo",
@@ -117,7 +117,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   })
 
   it("redirijeaza controlat catre URL semnat pentru storage cloud", async () => {
-    mocks.readStateMock.mockResolvedValueOnce({
+    mocks.readStateForOrgMock.mockResolvedValueOnce({
       taskState: {
         "task-1": {
           status: "todo",
@@ -153,7 +153,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   })
 
   it("foloseste registrul cloud cand metadata locala lipseste, dar asocierea task-dovada exista in DB", async () => {
-    mocks.readStateMock.mockResolvedValueOnce({
+    mocks.readStateForOrgMock.mockResolvedValueOnce({
       taskState: {
         "task-1": {
           status: "todo",

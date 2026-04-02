@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   try {
     const session = requireRole(request, [...WRITE_ROLES], "executare transmitere ANAF")
 
-    const orgId = request.headers.get("x-compliscan-org-id") ?? session.orgId
+    const orgId = session.orgId
 
     const body = (await request.json()) as {
       submissionId?: string

@@ -1,12 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
+  readSessionFromRequestMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
   repairEFacturaXmlMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   appendComplianceEventsMock: vi.fn(),
   createComplianceEventMock: vi.fn(),
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  readSessionFromRequest: mocks.readSessionFromRequestMock,
+}))
+
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
 }))
 
 vi.mock("@/lib/server/event-actor", () => ({
@@ -18,7 +28,7 @@ vi.mock("@/lib/compliance/efactura-xml-repair", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -35,6 +45,21 @@ import { POST } from "./route"
 describe("POST /api/efactura/repair", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.readSessionFromRequestMock.mockReturnValue({
+      userId: "user-1",
+      orgId: "org-demo",
+      orgName: "Org Demo",
+      email: "owner@example.com",
+      role: "owner",
+    })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-fallback",
+      orgName: "Workspace Fallback",
+      workspaceLabel: "Workspace local",
+      workspaceOwner: "Ion Popescu",
+      workspaceInitials: "IP",
+      userRole: "viewer",
+    })
     mocks.resolveOptionalEventActorMock.mockResolvedValue(undefined)
     mocks.repairEFacturaXmlMock.mockReturnValue({
       originalXml: "<Invoice></Invoice>",
@@ -52,7 +77,7 @@ describe("POST /api/efactura/repair", () => {
     })
     mocks.createComplianceEventMock.mockImplementation((payload) => payload)
     mocks.appendComplianceEventsMock.mockImplementation((current, events) => [...(current.events ?? []), ...events])
-    mocks.mutateStateMock.mockImplementation(async (updater) =>
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId, updater) =>
       updater({
         events: [],
       })
@@ -98,6 +123,19 @@ describe("POST /api/efactura/repair", () => {
 
     expect(response.status).toBe(200)
     expect(mocks.repairEFacturaXmlMock).toHaveBeenCalledWith("<Invoice></Invoice>", ["T003", "V002"])
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-demo",
+      expect.any(Function),
+      "Org Demo"
+    )
+    expect(mocks.buildDashboardPayloadMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        orgId: "org-demo",
+        orgName: "Org Demo",
+        workspaceLabel: "Workspace local",
+      })
+    )
     expect(payload.repair.documentName).toBe("factura.xml")
     expect(payload.repair.requestedErrorCodes).toEqual(["T003", "V002"])
     expect(payload.repair.appliedFixes).toHaveLength(1)

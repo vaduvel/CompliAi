@@ -94,7 +94,7 @@ function ProductMock() {
             <span className="block h-3 w-3 rounded-full bg-[#28c840]" />
           </div>
           <div className="mx-auto rounded-eos-md bg-eos-surface-elevated px-4 py-1.5 text-[11px] text-eos-text-tertiary">
-            compliscanag.vercel.app/dashboard/resolve
+            app.compliscan.ro/dashboard/resolve
           </div>
         </div>
 
@@ -200,7 +200,7 @@ export default function HomePage() {
               href="/login?mode=register"
               className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-primary"
             >
-              Începe gratuit
+              Creează cont gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
             </Link>
           </div>
@@ -250,7 +250,7 @@ export default function HomePage() {
               href="/login?mode=register"
               className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/25 transition-all hover:bg-eos-primary hover:shadow-eos-primary/20/40"
             >
-              Începe gratuit
+              Creează cont gratuit
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
@@ -265,9 +265,27 @@ export default function HomePage() {
           <div className="relative mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[12px] text-eos-text-tertiary">
             <span>Fără card necesar</span>
             <span className="hidden sm:block">·</span>
-            <span>Primul snapshot în câteva minute</span>
+            <span>Primul snapshot în 3 minute</span>
             <span className="hidden sm:block">·</span>
-            <span>Onboarding ghidat</span>
+            <span>Date stocate în UE</span>
+          </div>
+
+          {/* Trust badges */}
+          <div className="relative mt-5 flex flex-wrap items-center justify-center gap-3">
+            {[
+              "Produs în România",
+              "GDPR compliant",
+              "5 regulamente europene",
+              "Fără date trimise în afara UE",
+            ].map((trust) => (
+              <span
+                key={trust}
+                className="inline-flex items-center gap-1.5 rounded-full border border-eos-success/20 bg-eos-success/5 px-3 py-1 text-[11px] font-medium text-eos-success"
+              >
+                <CheckCircle2 className="size-3" strokeWidth={2.5} />
+                {trust}
+              </span>
+            ))}
           </div>
 
           {/* Product mock */}
@@ -345,6 +363,23 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Metrics / social proof ── */}
+        <section className="px-6 py-16">
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 sm:grid-cols-4">
+            {[
+              { number: "5", label: "Regulamente europene acoperite" },
+              { number: "40+", label: "Tipuri de constatări detectate" },
+              { number: "< 3 min", label: "Timp prim snapshot" },
+              { number: "100%", label: "Date stocate în UE" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-3xl font-bold text-eos-text">{stat.number}</p>
+                <p className="mt-1 text-xs text-eos-text-tertiary">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ── Personas ── */}
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
@@ -394,7 +429,7 @@ export default function HomePage() {
                 href="/login?mode=register"
                 className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
               >
-                Încearcă gratuit
+                Creează cont gratuit
                 <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
               </Link>
               <Link

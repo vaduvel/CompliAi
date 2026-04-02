@@ -5,11 +5,11 @@ import {
   buildHrRegistryReconciliationDerived,
   getHrRegistryReconciliationKey,
 } from "@/lib/compliance/hr-registry-reconciliation"
+import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import type { HrRegistryReconciliationRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
-import { mutateState, readState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 
 type ReconciliationBody = {
   findingId?: string
@@ -19,14 +19,20 @@ type ReconciliationBody = {
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "reconcilierea HR / REGES")
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer"],
+      "reconcilierea HR / REGES"
+    )
 
     const requestedFindingId = new URL(request.url).searchParams.get("findingId")
     const reconciliationKey = getHrRegistryReconciliationKey(requestedFindingId)
-    const [state, { orgName }] = await Promise.all([readState(), getOrgContext()])
+    const state =
+      (await readStateForOrg(session.orgId)) ??
+      normalizeComplianceState(initialComplianceState)
     const reconciliation = state.hrRegistryReconciliations?.[reconciliationKey] ?? null
     const derived = buildHrRegistryReconciliationDerived(reconciliation, {
-      orgName,
+      orgName: session.orgName,
       employeeCount: state.orgProfile?.employeeCount ?? null,
     })
 
@@ -69,10 +75,10 @@ export async function PATCH(request: Request) {
     }
 
     const nowISO = new Date().toISOString()
-    const { orgName } = await getOrgContext()
+    const orgName = session.orgName
     let savedReconciliation: HrRegistryReconciliationRecord | null = null
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       const reconciliation: HrRegistryReconciliationRecord = {
         findingId: reconciliationKey,
         rosterSnapshot,
@@ -110,7 +116,7 @@ export async function PATCH(request: Request) {
           ),
         ]),
       }
-    })
+    }, session.orgName)
 
     const derived = buildHrRegistryReconciliationDerived(savedReconciliation, {
       orgName,

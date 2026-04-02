@@ -12,9 +12,8 @@ const mocks = vi.hoisted(() => ({
     }
   },
   requireRoleMock: vi.fn(),
-  readStateMock: vi.fn(),
-  mutateStateMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
@@ -23,12 +22,8 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
-  mutateState: mocks.mutateStateMock,
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+  readStateForOrg: mocks.readStateForOrgMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 import { GET, PATCH } from "./route"
@@ -41,12 +36,10 @@ describe("HR REGES reconciliation route", () => {
       userId: "user-1",
       email: "owner@example.com",
       role: "owner",
-    })
-    mocks.getOrgContextMock.mockResolvedValue({
       orgId: "org-demo",
       orgName: "Demo HR SRL",
     })
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       orgProfile: {
         sector: "professional-services",
         employeeCount: "10-49",
@@ -61,7 +54,7 @@ describe("HR REGES reconciliation route", () => {
         },
       },
     })
-    mocks.mutateStateMock.mockImplementation(async (updater: (state: Record<string, unknown>) => Record<string, unknown>) => {
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId: string, updater: (state: Record<string, unknown>) => Record<string, unknown>) => {
       const current = {
         orgProfile: {
           sector: "professional-services",
@@ -84,6 +77,7 @@ describe("HR REGES reconciliation route", () => {
     expect(payload.derived.rosterCount).toBe(2)
     expect(payload.derived.registryChecklistCount).toBe(2)
     expect(payload.derived.readiness).toBe("ready")
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-demo")
   })
 
   it("salvează reconcilierea și întoarce nota de handoff", async () => {
@@ -106,6 +100,10 @@ describe("HR REGES reconciliation route", () => {
     expect(payload.ok).toBe(true)
     expect(payload.derived.readiness).toBe("ready")
     expect(payload.derived.handoffEvidenceNote).toContain("snapshotul intern include 2 intrări")
-    expect(mocks.mutateStateMock).toHaveBeenCalled()
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-demo",
+      expect.any(Function),
+      "Demo HR SRL"
+    )
   })
 })

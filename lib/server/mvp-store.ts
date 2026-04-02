@@ -130,6 +130,25 @@ export async function readStateForOrg(orgId: string): Promise<ComplianceState | 
 }
 
 /**
+ * Force a fresh state read for a specific orgId — bypasses getOrgContext() and
+ * invalidates any cached copy first.
+ */
+export async function readFreshStateForOrg(orgId: string, orgName?: string): Promise<ComplianceState | null> {
+  initializedOrgs.delete(orgId)
+  memoryStates.delete(orgId)
+
+  try {
+    const loaded = await loadState(orgId, orgName)
+    const normalized = normalizeComplianceState(loaded)
+    memoryStates.set(orgId, normalized)
+    initializedOrgs.add(orgId)
+    return structuredClone(normalized)
+  } catch {
+    return null
+  }
+}
+
+/**
  * Write state for a specific orgId — bypasses getOrgContext().
  * Used by demo seed route to write state for demo orgs.
  */
@@ -138,6 +157,33 @@ export async function writeStateForOrg(orgId: string, state: ComplianceState, or
   memoryStates.set(orgId, normalized)
   initializedOrgs.add(orgId)
   await persistState(orgId, orgName, normalized)
+}
+
+/**
+ * Mutate state for a specific orgId — bypasses getOrgContext().
+ * Use in request paths that already know the org from session and should not
+ * rely on implicit context resolution.
+ */
+export async function mutateStateForOrg(
+  orgId: string,
+  updater: (current: ComplianceState) => ComplianceState | Promise<ComplianceState>,
+  orgName?: string
+): Promise<ComplianceState> {
+  const current = (await readStateForOrg(orgId)) ?? normalizeComplianceState(initialComplianceState)
+  const next = await updater(current)
+  await writeStateForOrg(orgId, next, orgName)
+  return (await readStateForOrg(orgId)) ?? normalizeComplianceState(initialComplianceState)
+}
+
+export async function mutateFreshStateForOrg(
+  orgId: string,
+  updater: (current: ComplianceState) => ComplianceState | Promise<ComplianceState>,
+  orgName?: string
+): Promise<ComplianceState> {
+  const current = (await readFreshStateForOrg(orgId, orgName)) ?? normalizeComplianceState(initialComplianceState)
+  const next = await updater(current)
+  await writeStateForOrg(orgId, next, orgName)
+  return (await readFreshStateForOrg(orgId, orgName)) ?? normalizeComplianceState(initialComplianceState)
 }
 
 export async function appendChat(

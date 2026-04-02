@@ -6,7 +6,8 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 import { normalizeOptionalNote, RequestValidationError, requirePlainObject } from "@/lib/server/request-validation"
 
 type DriftAction = "acknowledge" | "start" | "resolve" | "waive" | "reopen"
@@ -46,7 +47,7 @@ export async function PATCH(
     const actorLabel = formatEventActorLabel(actor)
     const nowISO = new Date().toISOString()
 
-    const nextState = await mutateState((current) => {
+    const nextState = await mutateStateForOrg(session.orgId, (current) => {
       const drift = current.driftRecords.find((item) => item.id === id)
       if (!drift) throw new Error("DRIFT_NOT_FOUND")
 
@@ -118,10 +119,17 @@ export async function PATCH(
           }, actor),
         ]),
       }
-    })
+    }, session.orgName)
+
+    const workspace = {
+      ...(await getOrgContext()),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: buildActionToast(action),
     })
   } catch (error) {

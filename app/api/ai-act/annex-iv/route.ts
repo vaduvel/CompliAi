@@ -8,34 +8,26 @@ import { NextResponse } from "next/server"
 import { buildAIActFindingId } from "@/lib/compliance/ai-act-classifier"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
-import { getOrgContext } from "@/lib/server/org-context"
-import { mutateState } from "@/lib/server/mvp-store"
-import { readStateForOrg } from "@/lib/server/mvp-store"
-import { loadOrganizations } from "@/lib/server/auth"
+import { AuthzError, requireRole } from "@/lib/server/auth"
+import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
 import { buildAnnexIVDocument } from "@/lib/compliance/ai-conformity-assessment"
 
 export async function POST(request: Request) {
   try {
-    const ctx = await getOrgContext()
-    if (!ctx?.orgId) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
+    const session = requireRole(
+      request,
+      ["owner", "partner_manager", "compliance", "reviewer"],
+      "generarea documentatiei Anexa IV"
+    )
 
     const body = (await request.json()) as { systemId?: string }
     const { systemId } = body
 
-    const state = await readStateForOrg(ctx.orgId)
+    const state = await readStateForOrg(session.orgId)
     if (!state) return jsonError("Stare indisponibilă.", 404, "STATE_NOT_FOUND")
 
     const system = state.aiSystems.find((s) => s.id === systemId)
     if (!system) return jsonError("Sistem AI negăsit.", 404, "SYSTEM_NOT_FOUND")
-
-    // Resolve org name for the document header
-    let orgName: string | undefined
-    try {
-      const orgs = await loadOrganizations()
-      orgName = orgs.find((o) => o.id === ctx.orgId)?.name
-    } catch {
-      // non-blocking
-    }
 
     const riskLevelMap: Record<string, string> = {
       high: "high",
@@ -59,7 +51,7 @@ export async function POST(request: Request) {
         createdAtISO: system.createdAtISO,
       },
       {}, // empty answers — template mode, user fills in the blanks
-      orgName
+      session.orgName
     )
 
     const generatedDocumentId = `generated-doc-${Math.random().toString(36).slice(2, 10)}`
@@ -75,13 +67,13 @@ export async function POST(request: Request) {
       validationStatus: "pending",
     }
 
-    await mutateState((current) => ({
+    await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       generatedDocuments: [
         generatedDocument,
         ...(current.generatedDocuments ?? []),
       ].slice(0, 150),
-    }))
+    }), session.orgName)
 
     return NextResponse.json({
       ok: true,
@@ -90,7 +82,10 @@ export async function POST(request: Request) {
       generatedAtISO: doc.generatedAtISO,
       recordId: generatedDocumentId,
     })
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
     return jsonError("Eroare la generarea Anexei IV.", 500, "ANNEX_IV_FAILED")
   }
 }

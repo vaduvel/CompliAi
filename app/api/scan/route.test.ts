@@ -4,15 +4,20 @@ import { initialComplianceState } from "@/lib/compliance/engine"
 
 const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
+  readSessionFromRequestMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
+}))
+
+vi.mock("@/lib/server/auth", () => ({
+  readSessionFromRequest: mocks.readSessionFromRequestMock,
 }))
 
 import { POST } from "./route"
@@ -21,6 +26,7 @@ describe("POST /api/scan", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.readSessionFromRequestMock.mockReturnValue({ orgId: "org-1", orgName: "Demo Org SRL" })
   })
 
   it("respinge payload-ul invalid", async () => {
@@ -40,7 +46,7 @@ describe("POST /api/scan", () => {
   })
 
   it("mapeaza lipsa de continut extras ca 422", async () => {
-    mocks.mutateStateMock.mockRejectedValueOnce(
+    mocks.mutateStateForOrgMock.mockRejectedValueOnce(
       new Error("Nu am extras continut util din fisier. Revizuieste OCR-ul sau adauga text manual.")
     )
 
@@ -60,8 +66,9 @@ describe("POST /api/scan", () => {
   })
 
   it("returneaza succes pentru scanare valida", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: typeof initialComplianceState) => unknown) =>
-      updater(initialComplianceState)
+    mocks.mutateStateForOrgMock.mockImplementationOnce(
+      async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) =>
+        updater(initialComplianceState)
     )
 
     const response = await POST(
@@ -78,6 +85,11 @@ describe("POST /api/scan", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Demo Org SRL"
+    )
     expect(response.headers.get("x-request-id")).toBe(payload.requestId)
     expect(payload.message).toContain("Scanare finalizată")
   })

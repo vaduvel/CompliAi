@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   readSessionMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
-  readStateMock: vi.fn(),
+  readStateForOrgMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
@@ -21,12 +20,8 @@ vi.mock("@/lib/server/auth", () => ({
   readSessionFromRequest: mocks.readSessionMock,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
-}))
-
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
+  readStateForOrg: mocks.readStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/nis2-store", async () => {
@@ -43,8 +38,7 @@ describe("GET /api/nis2/package", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.readSessionMock.mockReturnValue({ userId: "user-1", orgId: "org-1", email: "demo@site.ro" })
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-1" })
-    mocks.readStateMock.mockResolvedValue({
+    mocks.readStateForOrgMock.mockResolvedValue({
       applicability: { entries: [{ tag: "nis2", certainty: "certain" }] },
     })
     mocks.readNis2StateMock.mockResolvedValue({
@@ -64,6 +58,7 @@ describe("GET /api/nis2/package", () => {
     expect(body.applicable).toBe(true)
     expect(body.exportReady).toBe(false)
     expect(body.nis2Package.assessmentScore).toBe(42)
+    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
     expect(body.findings.map((finding: { id: string }) => finding.id)).toEqual(
       expect.arrayContaining(["nis2-dnsc-registration", "nis2-assessment-gap"])
     )

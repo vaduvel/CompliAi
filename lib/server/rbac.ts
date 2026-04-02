@@ -4,6 +4,9 @@
 
 import type { UserRole } from "@/lib/server/auth"
 
+/** Roluri care pot citi starea operațională a organizației */
+export const READ_ROLES: UserRole[] = ["owner", "partner_manager", "compliance", "reviewer", "viewer"]
+
 /** Roluri care pot efectua operații de scriere (creare, modificare) */
 export const WRITE_ROLES: UserRole[] = ["owner", "partner_manager", "compliance", "reviewer"]
 

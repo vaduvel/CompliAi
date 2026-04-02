@@ -2,10 +2,13 @@ import { NextResponse } from "next/server"
 
 import {
   createSessionToken,
+  createWorkspacePreferenceToken,
   getSessionCookieOptions,
+  getWorkspacePreferenceCookieOptions,
   readSessionFromRequest,
   SESSION_COOKIE,
   setUserMode,
+  WORKSPACE_PREF_COOKIE,
 } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -52,6 +55,14 @@ export async function POST(request: Request) {
         workspaceMode: session.workspaceMode ?? "org",
       }),
       getSessionCookieOptions()
+    )
+    response.cookies.set(
+      WORKSPACE_PREF_COOKIE,
+      createWorkspacePreferenceToken({
+        orgId: session.orgId,
+        workspaceMode: session.workspaceMode ?? "org",
+      }),
+      getWorkspacePreferenceCookieOptions()
     )
     return response
   } catch (error) {

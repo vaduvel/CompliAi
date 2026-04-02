@@ -11,8 +11,7 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  readSessionFromRequestMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   safeListReviewsMock: vi.fn(),
   createReviewMock: vi.fn(),
   readNis2StateMock: vi.fn(),
@@ -22,11 +21,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/vendor-review-store", () => ({
@@ -43,12 +38,18 @@ vi.mock("@/lib/compliance/vendor-review-engine", () => ({
   generateVendorGovernancePack: mocks.generateVendorGovernancePackMock,
 }))
 
-import { GET } from "./route"
+import { GET, POST } from "./route"
 
 describe("GET /api/vendor-review", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-demo-imm", orgName: "Demo Retail SRL" })
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      userId: "user-1",
+      orgId: "org-demo-imm",
+      orgName: "Demo Retail SRL",
+      email: "demo@demo-imm.compliscan.ro",
+      role: "owner",
+    })
     mocks.safeListReviewsMock.mockResolvedValue([])
     mocks.readNis2StateMock.mockResolvedValue({ vendors: [{ id: "vendor-1" }] })
     mocks.generateVendorGovernancePackMock.mockReturnValue({
@@ -60,7 +61,9 @@ describe("GET /api/vendor-review", () => {
   })
 
   it("cere autentificare cand nu exista sesiune", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const response = await GET(new Request("http://localhost/api/vendor-review"))
     const payload = await response.json()
@@ -70,14 +73,6 @@ describe("GET /api/vendor-review", () => {
   })
 
   it("returneaza lista vida cand vendor review storage nu are date disponibile", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValue({
-      userId: "user-1",
-      orgId: "org-demo-imm",
-      email: "demo@demo-imm.compliscan.ro",
-      orgName: "Demo Retail SRL",
-      role: "owner",
-    })
-
     const response = await GET(new Request("http://localhost/api/vendor-review"))
     const payload = await response.json()
 
@@ -96,5 +91,28 @@ describe("GET /api/vendor-review", () => {
       orgName: "Demo Retail SRL",
       knownVendorCount: 1,
     })
+  })
+
+  it("creează review-ul în org-ul sesiunii", async () => {
+    mocks.readNis2StateMock.mockResolvedValueOnce({
+      vendors: [
+        { id: "vendor-1", name: "OpenAI", techConfidence: "high", riskLevel: "high" },
+      ],
+    })
+    mocks.createReviewMock.mockImplementation(async (_orgId, review) => review)
+
+    const response = await POST(
+      new Request("http://localhost/api/vendor-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendorId: "vendor-1" }),
+      })
+    )
+
+    expect(response.status).toBe(201)
+    expect(mocks.createReviewMock).toHaveBeenCalledWith(
+      "org-demo-imm",
+      expect.objectContaining({ vendorId: "vendor-1", vendorName: "OpenAI" })
+    )
   })
 })

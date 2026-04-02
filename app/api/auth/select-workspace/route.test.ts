@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   createSessionTokenMock: vi.fn(),
+  createWorkspacePreferenceTokenMock: vi.fn(),
   getSessionCookieOptionsMock: vi.fn(),
+  getWorkspacePreferenceCookieOptionsMock: vi.fn(),
   listUserMembershipsMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   resolveUserModeMock: vi.fn(),
@@ -11,12 +13,15 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   createSessionToken: mocks.createSessionTokenMock,
+  createWorkspacePreferenceToken: mocks.createWorkspacePreferenceTokenMock,
   getSessionCookieOptions: mocks.getSessionCookieOptionsMock,
+  getWorkspacePreferenceCookieOptions: mocks.getWorkspacePreferenceCookieOptionsMock,
   listUserMemberships: mocks.listUserMembershipsMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
   resolveUserMode: mocks.resolveUserModeMock,
   resolveUserForMembership: mocks.resolveUserForMembershipMock,
   SESSION_COOKIE: "compliscan_session",
+  WORKSPACE_PREF_COOKIE: "compliscan_workspace_pref",
 }))
 
 import { POST } from "./route"
@@ -29,7 +34,13 @@ describe("POST /api/auth/select-workspace", () => {
       path: "/",
       sameSite: "lax",
     })
+    mocks.getWorkspacePreferenceCookieOptionsMock.mockReturnValue({
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    })
     mocks.createSessionTokenMock.mockReturnValue("new-signed-token")
+    mocks.createWorkspacePreferenceTokenMock.mockReturnValue("workspace-pref")
     mocks.readSessionFromRequestMock.mockReturnValue({
       userId: "user-1",
       orgId: "org-1",

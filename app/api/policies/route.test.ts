@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const requireRole = vi.fn()
-const getOrgContext = vi.fn()
+const requireFreshRole = vi.fn()
 const readPolicyAcknowledgments = vi.fn()
 const jsonError = vi.fn(
   (message: string, status: number, code?: string) =>
@@ -20,12 +19,12 @@ class MockAuthzError extends Error {
 }
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole,
+  requireFreshRole,
   AuthzError: MockAuthzError,
 }))
 
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext,
+vi.mock("@/lib/server/rbac", () => ({
+  READ_ROLES: ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
 }))
 
 vi.mock("@/lib/server/policy-store", () => ({
@@ -39,7 +38,7 @@ vi.mock("@/lib/server/api-response", () => ({
 describe("GET /api/policies", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    getOrgContext.mockResolvedValue({ orgId: "org-1" })
+    requireFreshRole.mockResolvedValue({ orgId: "org-1", orgName: "Org Test" })
   })
 
   it("returns acknowledgments when storage is healthy", async () => {
@@ -70,9 +69,7 @@ describe("GET /api/policies", () => {
   })
 
   it("returns auth errors unchanged", async () => {
-    requireRole.mockImplementation(() => {
-      throw new MockAuthzError("forbidden", 403, "AUTH_FORBIDDEN")
-    })
+    requireFreshRole.mockRejectedValueOnce(new MockAuthzError("forbidden", 403, "AUTH_FORBIDDEN"))
 
     const { GET } = await import("@/app/api/policies/route")
     const response = await GET(new Request("http://localhost/api/policies"))

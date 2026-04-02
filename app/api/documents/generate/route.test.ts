@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   requireRoleMock: vi.fn(),
-  mutateStateMock: vi.fn(async (fn: (state: Record<string, unknown>) => unknown) => fn({})),
+  mutateStateForOrgMock: vi.fn(
+    async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => fn({})
+  ),
   generateDocumentMock: vi.fn(),
   trackEventMock: vi.fn(),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
@@ -28,7 +30,7 @@ vi.mock("@/lib/server/api-response", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/analytics", () => ({
@@ -72,10 +74,12 @@ describe("POST /api/documents/generate", () => {
 
   it("persista metadata documentului generat in state si intoarce payload-ul", async () => {
     let saved: unknown = null
-    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
-      saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
-      return saved
-    })
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => {
+        saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
+        return saved
+      }
+    )
     mocks.generateDocumentMock.mockResolvedValue({
       documentType: "privacy-policy",
       title: "Politică de Confidențialitate",
@@ -117,10 +121,12 @@ describe("POST /api/documents/generate", () => {
 
   it("leaga draftul de finding cand vine din flow-ul ghidat", async () => {
     let saved: unknown = null
-    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
-      saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
-      return saved
-    })
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => {
+        saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
+        return saved
+      }
+    )
     mocks.generateDocumentMock.mockResolvedValue({
       documentType: "dpa",
       title: "Acord DPA",
@@ -161,15 +167,17 @@ describe("POST /api/documents/generate", () => {
     expect(res.status).toBe(400)
     expect(body.code).toBe("INVALID_DOCUMENT_TYPE")
     expect(mocks.generateDocumentMock).not.toHaveBeenCalled()
-    expect(mocks.mutateStateMock).not.toHaveBeenCalled()
+    expect(mocks.mutateStateForOrgMock).not.toHaveBeenCalled()
   })
 
   it("acceptă conținutul pre-generat pentru ROPA fără să mai cheme generatorul LLM", async () => {
     let saved: unknown = null
-    mocks.mutateStateMock.mockImplementation(async (fn: (state: Record<string, unknown>) => unknown) => {
-      saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
-      return saved
-    })
+    mocks.mutateStateForOrgMock.mockImplementation(
+      async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => {
+        saved = fn({ generatedDocuments: [], events: [] }) as Record<string, unknown>
+        return saved
+      }
+    )
 
     const markdown = "# Registru de Prelucrări (RoPA)\n\n| Activitate | Scop |\n| --- | --- |\n| Facturare | Executare contract |"
 

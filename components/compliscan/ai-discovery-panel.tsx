@@ -25,6 +25,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { SimpleTooltip } from "@/components/evidence-os/Tooltip"
 
 const PURPOSE_OPTIONS: { value: AISystemPurpose; label: string }[] = [
   { value: "support-chatbot", label: "Chatbot / suport" },
@@ -340,15 +341,21 @@ export function AIDiscoveryPanel({
               <FileCode2 className="size-4" strokeWidth={2} />
               {modeContent.pickerLabel}
             </Button>
-            <Button
-              onClick={() => void handleDiscover()}
-              disabled={!documentName.trim() || !content.trim() || busy}
-              size="lg"
-              className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+            <SimpleTooltip
+              content={busy ? "Analiză în curs..." : !documentName.trim() || !content.trim() ? "Completează numele și conținutul documentului" : ""}
             >
-              <SearchCode className="size-5" strokeWidth={2} />
-              {modeContent.buttonLabel}
-            </Button>
+              <span className="inline-flex">
+                <Button
+                  onClick={() => void handleDiscover()}
+                  disabled={!documentName.trim() || !content.trim() || busy}
+                  size="lg"
+                  className="gap-2 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover"
+                >
+                  <SearchCode className="size-5" strokeWidth={2} />
+                  {modeContent.buttonLabel}
+                </Button>
+              </span>
+            </SimpleTooltip>
           </div>
 
           <input

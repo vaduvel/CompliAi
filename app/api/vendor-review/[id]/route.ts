@@ -6,10 +6,9 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshAuthenticatedSession, requireFreshRole } from "@/lib/server/auth"
 import { getReview, updateReview, deleteReview } from "@/lib/server/vendor-review-store"
-import { mutateState } from "@/lib/server/mvp-store"
+import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import {
   determineReviewCase,
@@ -32,12 +31,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "citirea vendor review-ului")
 
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const review = await getReview(orgId, id)
+    const review = await getReview(session.orgId, id)
     if (!review) return jsonError("Review-ul nu a fost găsit.", 404, "REVIEW_NOT_FOUND")
 
     return NextResponse.json({ review })
@@ -52,10 +49,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = requireRole(request, [...WRITE_ROLES], "actualizare vendor review")
+    const session = await requireFreshRole(request, [...WRITE_ROLES], "actualizare vendor review")
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const existing = await getReview(orgId, id)
+    const existing = await getReview(session.orgId, id)
     if (!existing) return jsonError("Review-ul nu a fost găsit.", 404, "REVIEW_NOT_FOUND")
 
     const body = (await request.json()) as {
@@ -88,7 +84,7 @@ export async function PATCH(
       const nextStatus = nextStatusAfterReview(reviewCase)
       const nextReviewDueISO = computeNextReviewDue(reviewCase)
 
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         context: body.context,
         reviewCase,
         urgency,
@@ -102,7 +98,7 @@ export async function PATCH(
 
     // ── Approve (human validation) ──────────────────────────────────────
     if (body.action === "approve") {
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         status: "awaiting-evidence",
         closureApprovedBy: session.email,
         auditTrail: appendAudit(existing.auditTrail, "approved", session.email),
@@ -112,7 +108,7 @@ export async function PATCH(
 
     // ── Reject — back to needs-context ──────────────────────────────────
     if (body.action === "reject") {
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         status: "needs-context",
         context: undefined,
         reviewCase: undefined,
@@ -134,7 +130,7 @@ export async function PATCH(
         addedBy: session.email,
         addedAtISO: new Date().toISOString(),
       }
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         evidenceItems: [...(existing.evidenceItems ?? []), newItem],
         auditTrail: appendAudit(existing.auditTrail, "evidence-added", session.email, newItem.type),
       })
@@ -149,7 +145,7 @@ export async function PATCH(
         return jsonError("Cel puțin o dovadă este obligatorie pentru închidere.", 400, "MISSING_EVIDENCE")
       }
       const closedAtISO = new Date().toISOString()
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         status: "closed",
         closureEvidence: body.closureEvidence?.trim() || existing.closureEvidence,
         closedAtISO,
@@ -159,7 +155,7 @@ export async function PATCH(
 
       // MULT B — write vendor name to orgKnowledge when review is closed
       const dateLabel = new Date(closedAtISO).toLocaleDateString("ro-RO")
-      await mutateState((s) => {
+      await mutateStateForOrg(session.orgId, (s) => {
         const knowledgeItems = s.orgKnowledge?.items ?? []
         const vendorItem = makeKnowledgeItem(
           "vendors",
@@ -175,7 +171,7 @@ export async function PATCH(
             lastUpdatedAtISO: closedAtISO,
           },
         }
-      })
+      }, session.orgName)
 
       return NextResponse.json({ review: updated })
     }
@@ -186,7 +182,7 @@ export async function PATCH(
       const pastClosure = buildPastClosure(existing)
       const pastClosures = [...(existing.pastClosures ?? []), ...(pastClosure ? [pastClosure] : [])]
 
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         status: "needs-context",
         closedAtISO: undefined,
         closureEvidence: undefined,
@@ -204,7 +200,7 @@ export async function PATCH(
       const pastClosure = buildPastClosure(existing)
       const pastClosures = [...(existing.pastClosures ?? []), ...(pastClosure ? [pastClosure] : [])]
 
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         status: "needs-context",
         closedAtISO: undefined,
         closureEvidence: undefined,
@@ -228,7 +224,7 @@ export async function PATCH(
         return jsonError("Completează termenul sau nota de follow-up.", 400, "MISSING_FOLLOW_UP")
       }
 
-      const updated = await updateReview(orgId, id, {
+      const updated = await updateReview(session.orgId, id, {
         followUpDueISO,
         followUpNote,
         auditTrail: appendAudit(existing.auditTrail, "follow-up-scheduled", session.email, followUpDueISO ?? "notă actualizată"),
@@ -249,10 +245,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    requireRole(request, [...DELETE_ROLES], "ștergere vendor review")
+    const session = await requireFreshRole(request, [...DELETE_ROLES], "ștergere vendor review")
     const { id } = await params
-    const { orgId } = await getOrgContext()
-    const deleted = await deleteReview(orgId, id)
+    const deleted = await deleteReview(session.orgId, id)
     if (!deleted) return jsonError("Review-ul nu a fost găsit.", 404, "REVIEW_NOT_FOUND")
     return NextResponse.json({ ok: true })
   } catch (error) {

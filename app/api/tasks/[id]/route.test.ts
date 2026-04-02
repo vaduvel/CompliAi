@@ -16,8 +16,9 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   computeDashboardSummaryMock: vi.fn(),
   getPersistableTaskIdsMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   getTaskResolutionTargetsMock: vi.fn(),
-  mutateStateMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
   requireRoleMock: vi.fn(),
   validateTaskAgainstStateMock: vi.fn(),
@@ -32,13 +33,17 @@ vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/compliance/engine", () => ({
   computeDashboardSummary: mocks.computeDashboardSummaryMock,
   normalizeComplianceState: mocks.normalizeComplianceStateMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  mutateState: mocks.mutateStateMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/task-ids", () => ({
@@ -63,6 +68,14 @@ describe("PATCH /api/tasks/[id]", () => {
       orgName: "Org Demo",
       role: "reviewer",
       exp: Date.now() + 1000,
+    })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-ctx",
+      orgName: "Workspace Org",
+      workspaceLabel: "Workspace",
+      workspaceOwner: "Owner",
+      workspaceInitials: "WO",
+      userRole: "reviewer",
     })
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
     mocks.normalizeComplianceStateMock.mockImplementation((state) => state)
@@ -119,7 +132,7 @@ describe("PATCH /api/tasks/[id]", () => {
   })
 
   it("valideaza task-ul si intoarce feedback", async () => {
-    mocks.mutateStateMock.mockImplementationOnce(async (updater: (state: {
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: {
       taskState: Record<string, unknown>
       alerts: unknown[]
       driftRecords: unknown[]
@@ -149,5 +162,10 @@ describe("PATCH /api/tasks/[id]", () => {
     expect(payload.feedback.validationStatus).toBe("passed")
     expect(payload.feedback.validationConfidence).toBe("high")
     expect(payload.feedback.validationBasis).toBe("direct_signal")
+    expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
+      "org-1",
+      expect.any(Function),
+      "Org Demo"
+    )
   })
 })
