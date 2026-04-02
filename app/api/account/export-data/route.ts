@@ -7,21 +7,19 @@ export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
 
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { initialComplianceState, normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) {
-      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-    }
+    const session = await requireFreshAuthenticatedSession(request, "exportul datelor personale")
 
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const nis2State = await readNis2State(session.orgId)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import {
   getReviewCycle,
   markReviewCycleCompleted,
@@ -23,8 +23,11 @@ function deriveActiveStatus(scheduledAtISO: string, nowISO: string): Exclude<Rev
   return scheduledAtISO <= nowISO ? "due" : "upcoming"
 }
 
-async function buildResponse(orgId: string, cycleId: string) {
-  const [cycle, state] = await Promise.all([getReviewCycle(orgId, cycleId), readStateForOrg(orgId)])
+async function buildResponse(orgId: string, cycleId: string, orgName?: string) {
+  const [cycle, state] = await Promise.all([
+    getReviewCycle(orgId, cycleId),
+    readFreshStateForOrg(orgId, orgName),
+  ])
   if (!cycle) return null
 
   const finding = state?.findings.find((item) => item.id === cycle.findingId)
@@ -43,7 +46,7 @@ export async function GET(
   try {
     const session = await requireFreshRole(request, [...READ_ROLES], "citirea review-ului programat")
     const { id } = await params
-    const item = await buildResponse(session.orgId, id)
+    const item = await buildResponse(session.orgId, id, session.orgName)
     if (!item) {
       return jsonError("Review-ul programat nu există.", 404, "REVIEW_CYCLE_NOT_FOUND")
     }
@@ -105,7 +108,7 @@ export async function PATCH(
       })
     }
 
-    const item = await buildResponse(session.orgId, id)
+    const item = await buildResponse(session.orgId, id, session.orgName)
     return NextResponse.json({ item })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)

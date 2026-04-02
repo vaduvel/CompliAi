@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-const requireRole = vi.fn()
+const requireFreshRole = vi.fn()
 const getReleaseReadinessStatus = vi.fn()
 
 class MockAuthzError extends Error {
@@ -15,7 +15,7 @@ class MockAuthzError extends Error {
 }
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole,
+  requireFreshRole,
   AuthzError: MockAuthzError,
 }))
 
@@ -25,6 +25,13 @@ vi.mock("@/lib/server/release-readiness", () => ({
 
 describe("GET /api/release-readiness", () => {
   it("returns ok=false when readiness is review", async () => {
+    requireFreshRole.mockResolvedValue({
+      userId: "user-1",
+      orgId: "org-1",
+      orgName: "Org Demo",
+      email: "owner@example.com",
+      role: "owner",
+    })
     getReleaseReadinessStatus.mockResolvedValue({
       state: "review",
       ready: false,
@@ -45,7 +52,7 @@ describe("GET /api/release-readiness", () => {
   })
 
   it("returns auth error when role is blocked", async () => {
-    requireRole.mockImplementation(() => {
+    requireFreshRole.mockImplementation(async () => {
       throw new MockAuthzError("forbidden", 403, "AUTH_FORBIDDEN")
     })
 

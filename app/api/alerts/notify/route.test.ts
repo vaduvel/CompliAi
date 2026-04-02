@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { POST } from "./route"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   readAlertPrefsMock: vi.fn(),
   fetchMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/alert-preferences-store", () => ({
@@ -69,12 +69,14 @@ function makeRequest(body: object) {
 describe("POST /api/alerts/notify", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue(SESSION)
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue(SESSION)
     mocks.fetchMock.mockResolvedValue({ ok: true, status: 200 })
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValue(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
     const res = await POST(makeRequest({ event: "drift.detected", orgId: "org-1" }))
     expect(res.status).toBe(401)
   })
@@ -99,6 +101,15 @@ describe("POST /api/alerts/notify", () => {
     const body = await res.json()
     expect(res.status).toBe(400)
     expect(body.code).toBe("UNKNOWN_EVENT")
+  })
+
+  it("respinge mismatch-ul dintre orgId din body si sesiune", async () => {
+    mocks.readAlertPrefsMock.mockResolvedValue(PREFS_EMAIL_ONLY)
+    const res = await POST(makeRequest({ event: "drift.detected", orgId: "other-org" }))
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.code).toBe("ORG_CONTEXT_MISMATCH")
   })
 
   it("returneaza skipped cand evenimentul este dezactivat in preferinte", async () => {

@@ -2,14 +2,14 @@ import { NextResponse } from "next/server"
 
 import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-rule"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { listPayGapReports, listSalaryRecords } from "@/lib/server/pay-transparency-store"
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "citirea Pay Transparency"
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const [records, reports, state] = await Promise.all([
       listSalaryRecords(session.orgId),
       listPayGapReports(session.orgId),
-      readStateForOrg(session.orgId),
+      readFreshStateForOrg(session.orgId, session.orgName),
     ])
     const normalizedState = state ?? normalizeComplianceState(initialComplianceState)
 

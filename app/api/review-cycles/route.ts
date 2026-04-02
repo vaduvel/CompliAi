@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import {
   createReviewCycle,
   listReviewCycles,
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
   try {
     const session = await requireFreshRole(request, [...READ_ROLES], "citirea review-urilor programate")
     const search = new URL(request.url).searchParams
-    const state = await readStateForOrg(session.orgId)
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
     const cycles = await listReviewCycles(session.orgId, {
       findingId: search.get("findingId")?.trim() || undefined,
       status: parseStatusList(search.get("status")),

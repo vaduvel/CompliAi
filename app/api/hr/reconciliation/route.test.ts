@@ -11,18 +11,18 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireRoleMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
@@ -32,14 +32,14 @@ describe("HR REGES reconciliation route", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       email: "owner@example.com",
       role: "owner",
       orgId: "org-demo",
       orgName: "Demo HR SRL",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       orgProfile: {
         sector: "professional-services",
         employeeCount: "10-49",
@@ -77,7 +77,7 @@ describe("HR REGES reconciliation route", () => {
     expect(payload.derived.rosterCount).toBe(2)
     expect(payload.derived.registryChecklistCount).toBe(2)
     expect(payload.derived.readiness).toBe("ready")
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-demo")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-demo", "Demo HR SRL")
   })
 
   it("salvează reconcilierea și întoarce nota de handoff", async () => {

@@ -6,8 +6,8 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import {
   makeKnowledgeItem,
   mergeKnowledgeItems,
@@ -17,11 +17,11 @@ import type { OrgKnowledgeCategory, OrgKnowledgeSource } from "@/lib/compliance/
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "citirea cunoștințelor organizației")
 
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const knowledge = state.orgKnowledge ?? { items: [], lastUpdatedAtISO: new Date().toISOString() }
     const itemsWithStale = withStaleFlags(knowledge.items)
     const hasStale = itemsWithStale.some((i) => i.stale)
@@ -35,8 +35,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "actualizarea cunoștințelor organizației")
 
     const body = await request.json() as {
       items?: Array<{
@@ -81,8 +80,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "ștergerea cunoștințelor organizației")
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")

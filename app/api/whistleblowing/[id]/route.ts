@@ -3,8 +3,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { updateReport } from "@/lib/server/whistleblowing-store"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import type { WhistleblowingStatus } from "@/lib/server/whistleblowing-store"
@@ -18,7 +17,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireRole(request, WRITE_ROLES, "actualizarea sesizării")
+    const session = await requireFreshRole(request, WRITE_ROLES, "actualizarea sesizării")
     const { id } = await params
     const body = await request.json() as {
       status?: WhistleblowingStatus
@@ -28,7 +27,6 @@ export async function PATCH(
     if (body.status && !VALID_STATUSES.includes(body.status)) {
       return jsonError("Status invalid.", 400, "INVALID_STATUS")
     }
-    const { orgId } = await getOrgContext()
     const patch: Parameters<typeof updateReport>[2] = {}
     if (body.status) {
       patch.status = body.status
@@ -39,7 +37,7 @@ export async function PATCH(
     if (body.internalNotes !== undefined) patch.internalNotes = body.internalNotes
     if (body.assignedTo !== undefined) patch.assignedTo = body.assignedTo
 
-    const report = await updateReport(orgId, id, patch)
+    const report = await updateReport(session.orgId, id, patch)
     if (!report) return jsonError("Sesizarea nu a fost găsită.", 404, "NOT_FOUND")
     return NextResponse.json({ report })
   } catch (error) {

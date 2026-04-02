@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import {
   readAlertPreferences,
   type AlertEventType,
@@ -61,8 +61,7 @@ async function dispatchWebhook(
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "trimiterea notificărilor")
 
     const body = (await request.json()) as Partial<NotifyRequestBody>
 
@@ -73,6 +72,14 @@ export async function POST(request: Request) {
     const VALID_EVENTS: AlertEventType[] = ["drift.detected", "task.overdue", "alert.critical"]
     if (!VALID_EVENTS.includes(body.event)) {
       return jsonError(`Eveniment necunoscut: ${body.event}`, 400, "UNKNOWN_EVENT")
+    }
+
+    if (body.orgId !== session.orgId) {
+      return jsonError(
+        "Contextul organizației nu corespunde sesiunii active.",
+        403,
+        "ORG_CONTEXT_MISMATCH"
+      )
     }
 
     const prefs = await readAlertPreferences(body.orgId)

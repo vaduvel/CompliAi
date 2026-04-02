@@ -1,5 +1,5 @@
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { getReleaseReadinessStatus } from "@/lib/server/release-readiness"
@@ -8,7 +8,11 @@ export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/release-readiness")
 
   try {
-    requireRole(request, ["owner", "partner_manager", "compliance"], "verificarea release readiness")
+    await requireFreshRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "verificarea release readiness"
+    )
 
     const readiness = await getReleaseReadinessStatus()
 

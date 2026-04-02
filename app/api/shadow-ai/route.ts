@@ -1,9 +1,9 @@
 // V3 P2.1 — Shadow AI Questionnaire API
 import { NextRequest, NextResponse } from "next/server"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import {
   SHADOW_AI_QUESTIONS,
   calculateShadowAiRisk,
@@ -20,9 +20,10 @@ const SHADOW_AI_READ_ROLES: UserRole[] = ["owner", "partner_manager", "complianc
 // GET — returns current answers + questions
 export async function GET(request: Request) {
   try {
-    const session = requireRole(request, SHADOW_AI_READ_ROLES, "citirea evaluării Shadow AI")
+    const session = await requireFreshRole(request, SHADOW_AI_READ_ROLES, "citirea evaluării Shadow AI")
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     return NextResponse.json({
       questions: SHADOW_AI_QUESTIONS,
       answers: state.shadowAiAnswers ?? [],
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 // POST — save answers, compute risk, inject findings
 export async function POST(req: NextRequest) {
   try {
-    const session = requireRole(req, WRITE_ROLES, "salvarea evaluării Shadow AI")
+    const session = await requireFreshRole(req, WRITE_ROLES, "salvarea evaluării Shadow AI")
     const body = await req.json() as { answers: ShadowAiAnswer[] }
     const { answers } = body
 

@@ -8,17 +8,16 @@ import {
   type HrPackKind,
 } from "@/lib/compliance/hr-drafts"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/hr/pack")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
+    const session = await requireFreshAuthenticatedSession(request, "accesarea pachetului HR")
 
     const requestedKind = new URL(request.url).searchParams.get("kind")
     if (
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
     }
 
     const state =
-      (await readStateForOrg(session.orgId)) ??
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
       normalizeComplianceState(initialComplianceState)
     const orgProfile = state.orgProfile
     const packInput = {

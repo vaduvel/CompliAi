@@ -4,8 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readWhistleblowingState, createReport } from "@/lib/server/whistleblowing-store"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import type { WhistleblowingCategory } from "@/lib/server/whistleblowing-store"
@@ -16,9 +15,8 @@ const VALID_CATEGORIES: WhistleblowingCategory[] = [
 
 export async function GET(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "vizualizarea sesizărilor")
-    const { orgId } = await getOrgContext()
-    const state = await readWhistleblowingState(orgId)
+    const session = await requireFreshRole(request, WRITE_ROLES, "vizualizarea sesizărilor")
+    const state = await readWhistleblowingState(session.orgId)
     return NextResponse.json({ reports: state.reports, publicToken: state.publicToken })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
@@ -28,7 +26,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "crearea unei sesizări")
+    const session = await requireFreshRole(request, WRITE_ROLES, "crearea unei sesizări")
     const body = await request.json() as {
       category?: WhistleblowingCategory
       description?: string
@@ -41,8 +39,7 @@ export async function POST(request: Request) {
     if (!body.description?.trim() || body.description.trim().length < 20) {
       return jsonError("Descrierea trebuie să aibă cel puțin 20 caractere.", 400, "MISSING_DESCRIPTION")
     }
-    const { orgId } = await getOrgContext()
-    const report = await createReport(orgId, {
+    const report = await createReport(session.orgId, {
       category: body.category,
       description: body.description.trim(),
       anonymous: body.anonymous ?? true,

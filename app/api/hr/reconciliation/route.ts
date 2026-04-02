@@ -8,8 +8,8 @@ import {
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import type { HrRegistryReconciliationRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 type ReconciliationBody = {
   findingId?: string
@@ -19,7 +19,7 @@ type ReconciliationBody = {
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "reconcilierea HR / REGES"
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const requestedFindingId = new URL(request.url).searchParams.get("findingId")
     const reconciliationKey = getHrRegistryReconciliationKey(requestedFindingId)
     const state =
-      (await readStateForOrg(session.orgId)) ??
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
       normalizeComplianceState(initialComplianceState)
     const reconciliation = state.hrRegistryReconciliations?.[reconciliationKey] ?? null
     const derived = buildHrRegistryReconciliationDerived(reconciliation, {
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "reconcilierea HR / REGES"

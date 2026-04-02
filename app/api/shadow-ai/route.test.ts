@@ -7,7 +7,7 @@ import type { ComplianceState } from "@/lib/compliance/types"
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: vi.fn(),
+  readFreshStateForOrg: vi.fn(),
   mutateStateForOrg: vi.fn(),
 }))
 
@@ -22,7 +22,7 @@ vi.mock("@/lib/server/auth", () => ({
       this.code = code
     }
   },
-  requireRole: vi.fn(() => ({
+  requireFreshRole: vi.fn(async () => ({
     userId: "user-1",
     email: "demo@test.com",
     orgId: "org-1",
@@ -32,7 +32,7 @@ vi.mock("@/lib/server/auth", () => ({
   })),
 }))
 
-import { readStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
 import { GET, POST } from "./route"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ const highRiskAnswers = [
 describe("GET /api/shadow-ai", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(readStateForOrg).mockResolvedValue(makeState())
+    vi.mocked(readFreshStateForOrg).mockResolvedValue(makeState())
   })
 
   it("returnează întrebările și răspunsurile curente", async () => {
@@ -86,7 +86,7 @@ describe("GET /api/shadow-ai", () => {
 
   it("returnează answers din state dacă există", async () => {
     const savedAnswers = [{ questionId: "sq-general-chatgpt", value: "no" }]
-    vi.mocked(readStateForOrg).mockResolvedValue(
+    vi.mocked(readFreshStateForOrg).mockResolvedValue(
       makeState({
         shadowAiAnswers: savedAnswers,
         shadowAiCompletedAtISO: "2026-03-10T12:00:00.000Z",
@@ -109,7 +109,7 @@ describe("GET /api/shadow-ai", () => {
   })
 
   it("returnează 500 la eroare internă", async () => {
-    vi.mocked(readStateForOrg).mockRejectedValue(new Error("store error"))
+    vi.mocked(readFreshStateForOrg).mockRejectedValue(new Error("store error"))
 
     const res = await GET(new Request("http://localhost/api/shadow-ai"))
     expect(res.status).toBe(500)
