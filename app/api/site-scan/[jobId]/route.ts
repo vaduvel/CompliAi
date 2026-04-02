@@ -4,21 +4,20 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "citirea jobului de scanare site")
 
     const { jobId } = await params
     if (!jobId) return jsonError("jobId lipsă.", 400, "MISSING_JOB_ID")
 
-    const state = await readStateForOrg(session.orgId)
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
     if (!state) return jsonError("Starea organizației nu a fost găsită.", 404, "ORG_STATE_NOT_FOUND")
     const job = state.siteScanJobs?.[jobId]
 

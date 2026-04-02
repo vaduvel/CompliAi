@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readStateMock: vi.fn(),
-  readFreshStateMock: vi.fn(),
-  writeStateMock: vi.fn(),
-  getOrgContextMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
+  writeStateForOrgMock: vi.fn(),
   createNotificationMock: vi.fn(),
   mapFindingToTaskMock: vi.fn(),
   readFreshSessionFromRequestMock: vi.fn(),
@@ -14,13 +12,8 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readState: mocks.readStateMock,
-  readFreshState: mocks.readFreshStateMock,
-  writeState: mocks.writeStateMock,
-}))
-
-vi.mock("@/lib/server/org-context", () => ({
-  getOrgContext: mocks.getOrgContextMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
+  writeStateForOrg: mocks.writeStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/auth", () => ({
@@ -51,11 +44,13 @@ import { GET, PATCH } from "./route"
 
 describe("PATCH /api/findings/[id]", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-1", orgName: "Demo SRL" })
+    vi.resetAllMocks()
     mocks.readFreshSessionFromRequestMock.mockResolvedValue({
       userId: "user-1",
       email: "owner@example.com",
+      orgId: "org-1",
+      orgName: "Demo SRL",
+      role: "owner",
     })
     mocks.resolvePolicyMock.mockResolvedValue("auto")
     mocks.createPendingActionMock.mockResolvedValue({ id: "approval-1" })
@@ -77,8 +72,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readStateMock.mockResolvedValue(baseState)
-    mocks.readFreshStateMock.mockResolvedValue(baseState)
+    mocks.readFreshStateForOrgMock.mockResolvedValue(baseState)
     mocks.mapFindingToTaskMock.mockReturnValue({
       id: "task-1",
       title: "Rezolvă: Lipsa DPA",
@@ -87,7 +81,7 @@ describe("PATCH /api/findings/[id]", () => {
       evidenceNeeded: "DPA semnat",
       documentTrigger: "dpa",
     })
-    mocks.writeStateMock.mockResolvedValue(undefined)
+    mocks.writeStateForOrgMock.mockResolvedValue(undefined)
     mocks.createNotificationMock.mockResolvedValue(undefined)
   })
 
@@ -110,7 +104,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(retentionState)
 
     const response = await GET(
       new Request("http://localhost/api/findings/finding-retention"),
@@ -141,7 +135,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(aiOpsState)
 
     const response = await GET(
       new Request("http://localhost/api/findings/intake-ai-confidential-data"),
@@ -178,7 +172,7 @@ describe("PATCH /api/findings/[id]", () => {
   })
 
   it("blocheaza salvarea dovezii daca draftul nu este confirmat explicit", async () => {
-    mocks.readStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -206,7 +200,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     })
-    mocks.readFreshStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -255,7 +249,7 @@ describe("PATCH /api/findings/[id]", () => {
   })
 
   it("confirmă documentul fără să rezolve sau să trimită imediat cazul la dosar", async () => {
-    mocks.readStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -283,7 +277,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     })
-    mocks.readFreshStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -338,7 +332,7 @@ describe("PATCH /api/findings/[id]", () => {
   })
 
   it("accepta aliasul legacy pentru checklist-ul de review", async () => {
-    mocks.readStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -366,7 +360,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     })
-    mocks.readFreshStateMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       findings: [
         {
           id: "finding-1",
@@ -452,8 +446,8 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readStateMock.mockResolvedValueOnce(retentionState)
-    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(retentionState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(retentionState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -510,7 +504,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(attachedDocumentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(attachedDocumentState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -561,7 +555,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(documentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(documentState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -610,7 +604,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(documentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(documentState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -644,7 +638,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(aiOpsState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/intake-ai-confidential-data", {
@@ -695,7 +689,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(aiOpsState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(aiOpsState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/intake-ai-confidential-data", {
@@ -744,7 +738,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(resolvedDocumentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(resolvedDocumentState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -800,7 +794,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(confirmedDocumentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(confirmedDocumentState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-1", {
@@ -859,7 +853,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(retentionMonitoringState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(retentionMonitoringState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/finding-retention", {
@@ -873,7 +867,7 @@ describe("PATCH /api/findings/[id]", () => {
       { params: Promise.resolve({ id: "finding-retention" }) }
     )
     const payload = await response.json()
-    const writtenState = mocks.writeStateMock.mock.calls[0]?.[0]
+    const writtenState = mocks.writeStateForOrgMock.mock.calls[0]?.[1]
     const followUpFinding = writtenState?.findings?.find(
       (finding: { id: string }) => finding.id === "retention-deletion-proof-finding-retention"
     )
@@ -905,7 +899,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(efacturaState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/demo-efactura-1", {
@@ -938,7 +932,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(efacturaState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/demo-efactura-1", {
@@ -978,7 +972,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(contractualState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(contractualState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/contracts-baseline", {
@@ -1012,7 +1006,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(contractualState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(contractualState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/contracts-baseline", {
@@ -1052,7 +1046,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(hrRegistryState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(hrRegistryState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/intake-hr-registry", {
@@ -1086,7 +1080,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(hrRegistryState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(hrRegistryState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/intake-hr-registry", {
@@ -1127,7 +1121,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(efacturaState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(efacturaState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/demo-efactura-1", {
@@ -1187,7 +1181,7 @@ describe("PATCH /api/findings/[id]", () => {
         },
       ],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(retentionState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(retentionState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/retention-deletion-proof-1", {
@@ -1235,7 +1229,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(sysState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(sysState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/review-1", {
@@ -1278,7 +1272,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(sysState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(sysState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/review-1", {
@@ -1326,7 +1320,7 @@ describe("PATCH /api/findings/[id]", () => {
       ],
       generatedDocuments: [],
     }
-    mocks.readFreshStateMock.mockResolvedValueOnce(reopenedState)
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce(reopenedState)
 
     const response = await PATCH(
       new Request("http://localhost/api/findings/review-1", {

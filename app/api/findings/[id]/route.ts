@@ -7,8 +7,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { readFreshSessionFromRequest } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
-import { readFreshState, writeState } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import type { FindingResolution } from "@/lib/compliance/types"
@@ -62,12 +61,19 @@ type FindingPatchBody = {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await readFreshSessionFromRequest(request)
+    if (!session) {
+      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    }
     const { id } = await params
-    const state = await readFreshState()
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
+    if (!state) {
+      return jsonError("Nu există stare de conformitate pentru organizația selectată.", 404, "NO_STATE")
+    }
     const finding = state.findings.find((f) => f.id === id)
 
     if (!finding) {
@@ -80,7 +86,7 @@ export async function GET(
         .filter((document) => document.sourceFindingId === id)
         .sort((a, b) => b.generatedAtISO.localeCompare(a.generatedAtISO))[0] ?? null
 
-    const { orgId } = await getOrgContext()
+    const orgId = session.orgId
     const allDocs = state.generatedDocuments ?? []
     const evidenceSummary = getEvidenceSummary({
       finding: runtimeFinding,
@@ -117,9 +123,12 @@ export async function PATCH(
       return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
     }
 
-    const { orgId } = await getOrgContext()
+    const orgId = session.orgId
     // Always read fresh from Supabase to avoid stale cache overwriting concurrent agent writes
-    const state = await readFreshState()
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
+    if (!state) {
+      return jsonError("Nu există stare de conformitate pentru organizația selectată.", 404, "NO_STATE")
+    }
 
     const findingIdx = state.findings.findIndex((f) => f.id === findingId)
     if (findingIdx === -1) {
@@ -249,11 +258,11 @@ export async function PATCH(
         driftStatus: finding.driftStatus ? "reopened" : finding.driftStatus,
       })
 
-      await writeState({
+      await writeStateForOrg(session.orgId, {
         ...state,
         findings: updatedFindings,
         generatedDocuments,
-      })
+      }, session.orgName)
 
       return NextResponse.json({
         ok: true,
@@ -651,7 +660,7 @@ export async function PATCH(
       generatedDocuments,
     }
 
-    await writeState(updatedState)
+    await writeStateForOrg(session.orgId, updatedState, session.orgName)
 
     if (storedStatus === "under_monitoring") {
       const monitoringDateISO = updatedFindings[findingIdx]?.nextMonitoringDateISO

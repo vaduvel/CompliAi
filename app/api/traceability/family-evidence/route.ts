@@ -5,11 +5,11 @@ import {
   getControlFamilyReusePolicySummary,
 } from "@/lib/compliance/control-families"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 type FamilyEvidencePayload = {
   familyKey?: string
@@ -17,7 +17,7 @@ type FamilyEvidencePayload = {
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "reutilizarea dovezilor intre controale"
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Familia de controale este obligatorie." }, { status: 400 })
     }
 
-    const current = await readStateForOrg(session.orgId)
+    const current = await readFreshStateForOrg(session.orgId, session.orgName)
     if (!current) {
       return NextResponse.json(
         { error: "Nu am găsit starea organizației pentru această familie de controale." },
@@ -37,10 +37,13 @@ export async function POST(request: Request) {
       )
     }
 
+    const baseWorkspace = await getOrgContext({ request })
     const workspace = {
-      ...(await getOrgContext()),
+      ...baseWorkspace,
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email ?? baseWorkspace.workspaceOwner,
       userRole: session.role,
     }
     const payload = await buildDashboardPayload(current, workspace)

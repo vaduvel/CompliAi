@@ -1,15 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
+  AuthzErrorClass: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 401, code = "AUTH_SESSION_REQUIRED") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
   mutateStateForOrgMock: vi.fn(),
-  readSessionFromRequestMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   scanSiteMock: vi.fn(),
   knowledgeFromSiteScanMock: vi.fn(),
   mergeKnowledgeItemsMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  AuthzError: mocks.AuthzErrorClass,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -30,7 +40,7 @@ import { POST } from "./route"
 describe("POST /api/site-scan", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -58,6 +68,25 @@ describe("POST /api/site-scan", () => {
     })
     mocks.knowledgeFromSiteScanMock.mockReturnValue([])
     mocks.mergeKnowledgeItemsMock.mockImplementation((_existing: unknown[], items: unknown[]) => items)
+  })
+
+  it("respinge fără sesiune activă", async () => {
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorClass("Ai nevoie de sesiune activa.")
+    )
+
+    const response = await POST(
+      new Request("http://localhost/api/site-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: "https://example.com" }),
+      })
+    )
+
+    const payload = await response.json()
+
+    expect(response.status).toBe(401)
+    expect(payload.code).toBe("AUTH_SESSION_REQUIRED")
   })
 
   it("respinge request fara URL", async () => {

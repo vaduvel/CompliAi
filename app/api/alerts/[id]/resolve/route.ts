@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -14,7 +14,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await context.params
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "rezolvarea alertelor"
@@ -37,10 +37,13 @@ export async function PATCH(
       ]),
     }), session.orgName)
 
+    const baseWorkspace = await getOrgContext({ request })
     const workspace = {
-      ...(await getOrgContext()),
+      ...baseWorkspace,
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email ?? baseWorkspace.workspaceOwner,
       userRole: session.role,
     }
 

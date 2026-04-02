@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
@@ -28,7 +28,7 @@ class TraceabilityReviewError extends Error {
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "revizuirea traceability pentru audit"
@@ -54,10 +54,13 @@ export async function POST(request: Request) {
     const nowISO = new Date().toISOString()
     const actor = await resolveOptionalEventActor(request)
     let affectedControls = 0
+    const baseWorkspace = await getOrgContext({ request })
     const workspace = {
-      ...(await getOrgContext()),
+      ...baseWorkspace,
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email ?? baseWorkspace.workspaceOwner,
       userRole: session.role,
     }
 

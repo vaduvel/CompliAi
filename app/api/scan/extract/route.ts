@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
@@ -14,10 +14,16 @@ import { RequestValidationError } from "@/lib/server/request-validation"
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    const workspace = session
-      ? { orgId: session.orgId, orgName: session.orgName }
-      : await getOrgContext()
+    const session = await requireFreshAuthenticatedSession(request, "extragerea textului din scan")
+    const baseWorkspace = await getOrgContext({ request })
+    const workspace = {
+      ...baseWorkspace,
+      orgId: session.orgId,
+      orgName: session.orgName ?? baseWorkspace.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email,
+      userRole: session.role,
+    }
     const body = validateScanInputPayload(await request.json())
     const actor = await resolveOptionalEventActor(request)
     let extractionResult: ExtractionResult | undefined
@@ -33,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       scan: extractionResult.scan,
       ocrUsed: extractionResult.ocrUsed,
       ocrWarning: extractionResult.ocrWarning,
@@ -41,6 +47,12 @@ export async function POST(request: Request) {
       message: "Textul a fost extras. Revizuieste-l si porneste analiza.",
     })
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code, ocrWarning: null, extractionStatus: "needs_review" },
+        { status: error.status }
+      )
+    }
     const err = error as Error & { ocrWarning?: string | null }
     const message = err instanceof Error ? err.message : "Eroare la extragere."
     const status =

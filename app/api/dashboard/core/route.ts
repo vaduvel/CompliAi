@@ -13,11 +13,12 @@ export async function GET(request: Request) {
       request,
       "rezumatul dashboardului organizației active"
     )
-    const baseWorkspace = await getOrgContext()
+    const baseWorkspace = await getOrgContext({ request })
     const workspace = {
       ...baseWorkspace,
       orgId: session.orgId,
       orgName: session.orgName ?? baseWorkspace.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
       workspaceOwner: session.email,
       userRole: session.role,
     }

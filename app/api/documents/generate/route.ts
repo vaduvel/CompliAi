@@ -4,7 +4,7 @@ export const maxDuration = 60
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
-import { requireRole, AuthzError } from "@/lib/server/auth"
+import { requireFreshRole, AuthzError } from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { RequestValidationError } from "@/lib/server/request-validation"
@@ -21,7 +21,7 @@ const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "generarea documentelor")
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "generarea documentelor")
 
     const body = (await request.json()) as Partial<DocumentGenerationInput> & {
       sourceFindingId?: string

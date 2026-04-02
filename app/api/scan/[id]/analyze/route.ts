@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
@@ -14,10 +14,16 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = readSessionFromRequest(request)
-    const workspace = session
-      ? { orgId: session.orgId, orgName: session.orgName }
-      : await getOrgContext()
+    const session = await requireFreshAuthenticatedSession(request, "analiza scanului revizuit")
+    const baseWorkspace = await getOrgContext({ request })
+    const workspace = {
+      ...baseWorkspace,
+      orgId: session.orgId,
+      orgName: session.orgName ?? baseWorkspace.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email,
+      userRole: session.role,
+    }
     const { id } = await context.params
     const body = requirePlainObject(await request.json())
     const reviewedContent = asTrimmedString(body.reviewedContent, 50_000)
@@ -30,11 +36,15 @@ export async function POST(
     )
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message: "Analiza a fost rulata pe textul revizuit.",
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "Eroare la analiza."
+
+    if (error instanceof AuthzError) {
+      return jsonError(message, error.status, error.code)
+    }
 
     if (message === "SCAN_NOT_FOUND") {
       return jsonError("Scan-ul nu exista.", 404, "SCAN_NOT_FOUND")

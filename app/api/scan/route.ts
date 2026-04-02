@@ -7,7 +7,7 @@ import {
   type ExtractionResult,
   validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -19,10 +19,16 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/scan")
 
   try {
-    const session = readSessionFromRequest(request)
-    const workspace = session
-      ? { orgId: session.orgId, orgName: session.orgName }
-      : await getOrgContext()
+    const session = await requireFreshAuthenticatedSession(request, "scanarea documentelor")
+    const baseWorkspace = await getOrgContext({ request })
+    const workspace = {
+      ...baseWorkspace,
+      orgId: session.orgId,
+      orgName: session.orgName ?? baseWorkspace.orgName,
+      workspaceLabel: session.orgName ?? baseWorkspace.workspaceLabel,
+      workspaceOwner: session.email,
+      userRole: session.role,
+    }
     const body = validateScanInputPayload(await request.json())
     const actor = await resolveOptionalEventActor(request)
     let extractionResult: ExtractionResult | undefined
@@ -43,7 +49,7 @@ export async function POST(request: Request) {
 
     return jsonWithRequestContext(
       {
-        ...(await buildDashboardPayload(nextState)),
+        ...(await buildDashboardPayload(nextState, workspace)),
         ocrUsed: extractionResult.ocrUsed,
         ocrWarning: extractionResult.ocrWarning,
         extractedTextPreview: extractionResult.extractedTextPreview,
@@ -55,12 +61,19 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Eroare la scanare."
     const status =
-      error instanceof RequestValidationError
+      error instanceof AuthzError
         ? error.status
-        : message.includes("Nu am extras")
-          ? 422
-          : 400
-    const code = error instanceof RequestValidationError ? error.code : "SCAN_FAILED"
+        : error instanceof RequestValidationError
+          ? error.status
+          : message.includes("Nu am extras")
+            ? 422
+            : 400
+    const code =
+      error instanceof AuthzError
+        ? error.code
+        : error instanceof RequestValidationError
+          ? error.code
+          : "SCAN_FAILED"
 
     await logRouteError(context, error, {
       code,

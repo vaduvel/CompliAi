@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(
     async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) => fn({})
   ),
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
   AuthzError: class AuthzError extends Error {
     status: number
     code: string
@@ -64,7 +64,7 @@ describe("POST /api/documents/generate", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Math, "random").mockReturnValue(0.123456789)
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       orgId: "org-1",
       userId: "user-1",
       email: "owner@example.com",

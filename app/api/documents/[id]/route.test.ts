@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   readFreshStateForOrgMock: vi.fn(),
   writeStateForOrgMock: vi.fn(),
   jsonErrorMock: vi.fn((message: string, status: number, code: string) =>
@@ -10,7 +10,17 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
+  AuthzError: class AuthzError extends Error {
+    status: number
+    code: string
+
+    constructor(message: string, status = 403, code = "AUTH_ROLE_FORBIDDEN") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -27,7 +37,7 @@ import { PATCH } from "./route"
 describe("PATCH /api/documents/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       orgId: "org-1",
       orgName: "Demo Org SRL",
       role: "owner",

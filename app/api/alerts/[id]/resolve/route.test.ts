@@ -14,13 +14,13 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -44,7 +44,7 @@ import { PATCH } from "./route"
 describe("PATCH /api/alerts/[id]/resolve", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",

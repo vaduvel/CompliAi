@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 import { randomBytes } from "crypto"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { scanSite } from "@/lib/compliance/site-scanner"
 import { knowledgeFromSiteScan, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
@@ -18,8 +18,7 @@ const SCAN_TIMEOUT_MS = 55_000
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "scanarea site-ului")
 
     const body = await request.json() as { url?: string; saveToProfile?: boolean }
     if (!body.url?.trim()) return jsonError("URL lipsă.", 400, "MISSING_URL")

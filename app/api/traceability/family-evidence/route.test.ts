@@ -14,14 +14,14 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -34,7 +34,7 @@ vi.mock("@/lib/server/org-context", () => ({
 
 vi.mock("@/lib/server/mvp-store", () => ({
   mutateStateForOrg: mocks.mutateStateForOrgMock,
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/event-actor", () => ({
@@ -46,7 +46,7 @@ import { POST } from "./route"
 describe("POST /api/traceability/family-evidence", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -159,7 +159,7 @@ describe("POST /api/traceability/family-evidence", () => {
       },
     ]
 
-    mocks.readStateForOrgMock.mockResolvedValue(currentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock
       .mockResolvedValueOnce({
         state: hydratedState,
@@ -225,7 +225,7 @@ describe("POST /api/traceability/family-evidence", () => {
       driftRecords: [],
     }
 
-    mocks.readStateForOrgMock.mockResolvedValue(currentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: currentState,
       remediationPlan: [
@@ -349,7 +349,7 @@ describe("POST /api/traceability/family-evidence", () => {
       },
     ]
 
-    mocks.readStateForOrgMock.mockResolvedValue(currentState)
+    mocks.readFreshStateForOrgMock.mockResolvedValue(currentState)
     mocks.buildDashboardPayloadMock.mockResolvedValue({
       state: currentState,
       remediationPlan,

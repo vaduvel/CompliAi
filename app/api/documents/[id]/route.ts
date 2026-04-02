@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readFreshStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 
 type Params = {
@@ -14,7 +14,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"])
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "validarea documentului")
 
     const body = (await request.json()) as {
       validationStatus?: "pending" | "passed"
@@ -53,6 +53,9 @@ export async function PATCH(
 
     return NextResponse.json({ id, validationStatus: "passed" })
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return jsonError(error.message, error.status, error.code)
+    }
     const message = error instanceof Error ? error.message : "Eroare."
     return jsonError(message, 500, "DOCUMENT_UPDATE_FAILED")
   }

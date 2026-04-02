@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   getDocumentAdoptionFeedbackMock: vi.fn(),
   supportsDocumentAdoptionMock: vi.fn(),
@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
   AuthzError: class AuthzError extends Error {
     status: number
     code: string
@@ -42,7 +42,7 @@ import { PATCH } from "./route"
 describe("PATCH /api/documents/[id]/adoption", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       orgId: "org-1",
       orgName: "Demo Org SRL",
       userId: "user-1",

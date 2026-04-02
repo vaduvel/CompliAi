@@ -7,7 +7,7 @@ import {
   type DocumentAdoptionStatus,
 } from "@/lib/compliance/document-adoption"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 
 type Params = {
@@ -30,7 +30,7 @@ const VALID_ADOPTION_STATUSES = new Set<DocumentAdoptionStatus>([
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "urmă de adoptare document")
+    const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "urmă de adoptare document")
     const { id } = await params
     const documentId = id.trim()
 
