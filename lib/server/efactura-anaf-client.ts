@@ -5,12 +5,12 @@
 //   real  — ANAF OAuth active and FCTEL calls go to production, only when explicitly unlocked
 //
 // OAuth2 token endpoint: https://logincert.anaf.ro/anaf-oauth2/v1/token
-// Upload endpoints:
-//   test: https://webserviceapl.anaf.ro/test/FCTEL/rest/upload
-//   prod: https://webserviceapl.anaf.ro/prod/FCTEL/rest/upload
+// Upload endpoints (OAuth-protected host):
+//   test: https://api.anaf.ro/test/FCTEL/rest/upload
+//   prod: https://api.anaf.ro/prod/FCTEL/rest/upload
 // Status endpoints:
-//   test: https://webserviceapl.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=...
-//   prod: https://webserviceapl.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=...
+//   test: https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=...
+//   prod: https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=...
 
 const ANAF_CLIENT_ID = process.env.ANAF_CLIENT_ID
 const ANAF_CLIENT_SECRET = process.env.ANAF_CLIENT_SECRET
@@ -20,8 +20,8 @@ const ANAF_ENV = normalizeAnafEnvironment(process.env.ANAF_ENV)
 const ANAF_ALLOW_REAL_SUBMIT = process.env.ANAF_ALLOW_REAL_SUBMIT === "true"
 const ANAF_TOKEN_URL = "https://logincert.anaf.ro/anaf-oauth2/v1/token"
 const ANAF_FCTEL_BASE_URLS = {
-  test: "https://webserviceapl.anaf.ro/test/FCTEL/rest",
-  prod: "https://webserviceapl.anaf.ro/prod/FCTEL/rest",
+  test: "https://api.anaf.ro/test/FCTEL/rest",
+  prod: "https://api.anaf.ro/prod/FCTEL/rest",
 } as const
 
 export type AnafMode = "mock" | "test" | "real"

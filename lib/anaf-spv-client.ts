@@ -1,8 +1,8 @@
 // F4 — ANAF OAuth2 + SPV Client (implementat ULTIMUL)
 // OAuth2 flow: logincert.anaf.ro/anaf-oauth2/v1/authorize → token
 // SPV endpoint is selected centrally from the ANAF environment guard:
-//   test -> https://webserviceapl.anaf.ro/test/FCTEL/rest
-//   prod -> https://webserviceapl.anaf.ro/prod/FCTEL/rest
+//   test -> https://api.anaf.ro/test/FCTEL/rest
+//   prod -> https://api.anaf.ro/prod/FCTEL/rest
 // Tokens stored in Supabase anaf_tokens table (encrypted)
 // User notified 7 days and 24h before token expiry
 // NOTĂ: necesită certificat digital calificat al utilizatorului
