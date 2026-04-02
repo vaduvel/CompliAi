@@ -27,6 +27,7 @@ import {
 } from "@/lib/fiscal/spv-submission"
 import {
   ensureValidToken,
+  refreshAccessToken,
 } from "@/lib/anaf-spv-client"
 import {
   createPendingAction,
@@ -256,12 +257,36 @@ export async function executeSubmit(params: {
   await updateSubmissionStatus(orgId, submissionId, "submitting")
 
   try {
-    // Upload to ANAF
-    const result = await uploadInvoiceToAnaf({
-      xmlContent,
-      accessToken,
-      cif: submission.cif.replace(/^RO/i, ""),
-    })
+    // Upload to ANAF. If ANAF rejects a still-unexpired access token with 401,
+    // try a backend-only refresh before asking the user to reauthenticate.
+    let result
+    try {
+      result = await uploadInvoiceToAnaf({
+        xmlContent,
+        accessToken,
+        cif: submission.cif.replace(/^RO/i, ""),
+      })
+    } catch (err) {
+      const shouldRetryWithRefresh =
+        token &&
+        err instanceof AnafClientError &&
+        /401|unauthorized/i.test(err.message)
+
+      if (!shouldRetryWithRefresh) {
+        throw err
+      }
+
+      const refreshed = await refreshAccessToken(orgId, token.refreshToken, new Date().toISOString())
+      if (!refreshed) {
+        throw err
+      }
+
+      result = await uploadInvoiceToAnaf({
+        xmlContent,
+        accessToken: refreshed.accessToken,
+        cif: submission.cif.replace(/^RO/i, ""),
+      })
+    }
 
     const uploadIndex = result.uploadIndex
 
@@ -341,10 +366,32 @@ export async function checkSubmitStatus(params: {
   }
 
   try {
-    const anafResult = await getInvoiceStatus({
-      uploadIndex: submission.indexDescarcare,
-      accessToken,
-    })
+    let anafResult: AnafStatusResult
+    try {
+      anafResult = await getInvoiceStatus({
+        uploadIndex: submission.indexDescarcare,
+        accessToken,
+      })
+    } catch (err) {
+      const shouldRetryWithRefresh =
+        token &&
+        err instanceof AnafClientError &&
+        /401|unauthorized/i.test(err.message)
+
+      if (!shouldRetryWithRefresh) {
+        throw err
+      }
+
+      const refreshed = await refreshAccessToken(orgId, token.refreshToken, new Date().toISOString())
+      if (!refreshed) {
+        throw err
+      }
+
+      anafResult = await getInvoiceStatus({
+        uploadIndex: submission.indexDescarcare,
+        accessToken: refreshed.accessToken,
+      })
+    }
 
     const newStatus: SPVSubmissionStatus =
       anafResult.status === "ok" ? "ok"

@@ -191,6 +191,7 @@ export async function refreshAccessToken(
       body: new URLSearchParams({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
+        token_content_type: "jwt",
       }).toString(),
     })
 
