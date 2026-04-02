@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: vi.fn(async () => ({ orgProfile: null, applicability: null })),
+  readFreshStateForOrg: vi.fn(async () => ({ orgProfile: null, applicability: null })),
   mutateStateForOrg: vi.fn(async (_orgId: string, fn: (s: unknown) => unknown) =>
     fn({ orgProfile: null, applicability: null })
   ),
@@ -42,7 +42,7 @@ vi.mock("@/lib/server/drift-trigger-engine", () => ({
   fireDriftTrigger: vi.fn(async () => undefined),
 }))
 
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { GET, POST } from "./route"
 
@@ -69,7 +69,7 @@ describe("POST /api/org/profile — CUI", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(readNis2State).mockResolvedValue({ assessment: null, incidents: [], vendors: [] } as never)
-    vi.mocked(readStateForOrg).mockResolvedValue({
+    vi.mocked(readFreshStateForOrg).mockResolvedValue({
       orgProfile: null,
       applicability: null,
       findings: [],
@@ -78,7 +78,7 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("returnează prefill-ul org salvat la GET", async () => {
-    vi.mocked(readStateForOrg).mockResolvedValue({
+    vi.mocked(readFreshStateForOrg).mockResolvedValue({
       orgProfile: null,
       applicability: null,
       orgProfilePrefill: {
@@ -428,7 +428,7 @@ describe("POST /api/org/profile — CUI", () => {
   it("îmbogățește applicability cu semnalul fiscal din prefill când există match", async () => {
     let saved: unknown = null
     let callCount = 0
-    vi.mocked(readStateForOrg).mockResolvedValue({
+    vi.mocked(readFreshStateForOrg).mockResolvedValue({
       orgProfile: null,
       applicability: null,
       findings: [],

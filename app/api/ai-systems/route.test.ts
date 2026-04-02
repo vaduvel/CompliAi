@@ -17,7 +17,7 @@ const { AuthzErrorMock } = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: AuthzErrorMock,
-  requireRole: vi.fn(),
+  requireFreshRole: vi.fn(),
 }))
 
 vi.mock("@/lib/server/api-response", () => ({
@@ -80,13 +80,13 @@ const validPayload = {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 import { POST } from "./route"
-import { requireRole, AuthzError } from "@/lib/server/auth"
+import { requireFreshRole, AuthzError } from "@/lib/server/auth"
 
 describe("POST /api/ai-systems", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Implicit: WRITE_ROLES — owner/compliance/reviewer trec prin RBAC
-    vi.mocked(requireRole).mockReturnValue({
+    vi.mocked(requireFreshRole).mockResolvedValue({
       userId: "user-1",
       email: "demo@test.com",
       orgId: "org-1",
@@ -98,7 +98,7 @@ describe("POST /api/ai-systems", () => {
 
   describe("RBAC — rol insuficient", () => {
     it("returnează 403 dacă rolul nu are drept de scriere", async () => {
-      vi.mocked(requireRole).mockImplementation(() => {
+      vi.mocked(requireFreshRole).mockImplementation(() => {
         throw new AuthzError("Rolul viewer nu permite adăugarea sistemului AI.", 403)
       })
 

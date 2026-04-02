@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-rule"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { materializeFindingTruth } from "@/lib/compliscan/finding-truth"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { computeNextMonitoringDateISO } from "@/lib/compliscan/finding-kernel"
@@ -18,7 +18,7 @@ type Params = {
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "aprobarea raportului Pay Transparency"

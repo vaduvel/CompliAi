@@ -2,32 +2,28 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { getOrgContext } from "@/lib/server/org-context"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import { generateEUDatabaseEntry } from "@/lib/compliance/ai-act-exporter"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 
 export async function POST(request: Request) {
   try {
-    requireRole(request, WRITE_ROLES, "pregătirea înregistrării EU Database")
+    const session = await requireFreshRole(request, WRITE_ROLES, "pregătirea înregistrării EU Database")
     const body = await request.json()
 
     const { systemName, purpose, description, humanOversightMeasures, memberStates } = body
     if (!systemName?.trim()) return jsonError("Numele sistemului este obligatoriu.", 400, "MISSING_FIELD")
     if (!purpose) return jsonError("Scopul sistemului este obligatoriu.", 400, "MISSING_FIELD")
 
-    const { orgId } = await getOrgContext()
-
-    // In a real implementation, we'd read org profile for address/email
     const entry = generateEUDatabaseEntry({
       systemName: systemName.trim(),
       purpose: purpose as AISystemPurpose,
       description,
-      orgName: body.orgName ?? "Organizația mea",
+      orgName: body.orgName?.trim() || session.orgName,
       orgAddress: body.orgAddress,
       orgCountry: body.orgCountry ?? "RO",
-      orgEmail: body.orgEmail,
+      orgEmail: body.orgEmail ?? session.email,
       memberStates,
       humanOversightMeasures,
     })

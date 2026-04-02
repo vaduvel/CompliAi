@@ -2,18 +2,18 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 export async function GET(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "vizualizarea log-ului de audit"
     )
     const state =
-      (await readStateForOrg(session.orgId)) ??
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
       normalizeComplianceState(initialComplianceState)
     return NextResponse.json({ events: state.events ?? [] })
   } catch (error) {

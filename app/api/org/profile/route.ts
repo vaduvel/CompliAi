@@ -14,7 +14,7 @@ import { initialComplianceState, normalizeComplianceState } from "@/lib/complian
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import {
   evaluateApplicability,
@@ -72,7 +72,8 @@ export async function GET(request: Request) {
     const session = await requireFreshAuthenticatedSession(request, "citirea profilului organizației")
 
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     return NextResponse.json({
       orgProfile: state.orgProfile ?? null,
       applicability: state.applicability ?? null,
@@ -91,7 +92,8 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as OrgProfileRequestBody
     const currentState =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
 
     if (!body.sector || !VALID_SECTORS.includes(body.sector)) {
       return jsonError("Câmp invalid: sector.", 400, "INVALID_SECTOR")

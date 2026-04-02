@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
   requireFreshAuthenticatedSessionMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   lookupOrgProfilePrefillByCuiMock: vi.fn(),
   enrichWebsitePrefillMock: vi.fn(async (prefill: unknown) => prefill),
   enrichAICompliancePackPrefillMock: vi.fn(async (prefill: unknown) => prefill),
@@ -45,7 +45,7 @@ vi.mock("@/lib/server/ai-compliance-pack-prefill-signals", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
@@ -68,7 +68,7 @@ describe("POST /api/org/profile/prefill", () => {
       userId: "user-1",
       email: "owner@test.ro",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({ efacturaValidations: [] })
+    mocks.readFreshStateForOrgMock.mockResolvedValue({ efacturaValidations: [] })
     mocks.enrichWebsitePrefillMock.mockImplementation(async (prefill: unknown) => prefill)
     mocks.enrichAICompliancePackPrefillMock.mockImplementation(async (prefill: unknown) => prefill)
   })
@@ -177,7 +177,7 @@ describe("POST /api/org/profile/prefill", () => {
         },
       },
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "Amazon Web Services EMEA SARL",

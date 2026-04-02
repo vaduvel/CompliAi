@@ -3,13 +3,13 @@ import { NextResponse } from "next/server"
 import { PAY_TRANSPARENCY_FINDING_ID } from "@/lib/compliance/pay-transparency-rule"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { buildPayGapReport, buildPayGapReportMarkdown } from "@/lib/server/pay-transparency-store"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "calculul gap-ului salarial"

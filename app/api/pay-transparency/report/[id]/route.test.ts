@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   approvePayGapReportMock: vi.fn(),
   publishPayGapReportMock: vi.fn(),
@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -36,7 +36,7 @@ import { PATCH } from "./route"
 describe("PATCH /api/pay-transparency/report/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Demo",

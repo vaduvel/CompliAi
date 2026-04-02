@@ -16,12 +16,12 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -39,7 +39,7 @@ vi.mock("@/lib/server/mvp-store", () => ({
 describe("POST /api/state/drift-settings", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "compliance@site.ro",
@@ -87,7 +87,7 @@ describe("POST /api/state/drift-settings", () => {
   })
 
   it("respinge rolul nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

@@ -10,8 +10,9 @@ import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { removeAIActObligationFindings, syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
+import { getOrgContext } from "@/lib/server/org-context"
 import { DELETE_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 
 type AISystemPayload = {
@@ -39,9 +40,9 @@ function isPurpose(value: unknown): value is AISystemPurpose {
 }
 
 export async function POST(request: Request) {
-  let session: ReturnType<typeof requireRole>
+  let session: Awaited<ReturnType<typeof requireFreshRole>>
   try {
-    session = requireRole(request, WRITE_ROLES, "adăugarea sistemului AI")
+    session = await requireFreshRole(request, WRITE_ROLES, "adăugarea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -108,18 +109,25 @@ export async function POST(request: Request) {
       }, actor),
     ]),
   }), session.orgName)
+  const workspace = {
+    ...(await getOrgContext({ request })),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    workspaceOwner: session.email,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspace)),
     aiSystem: record,
     message: "Sistemul AI a fost adaugat in inventar.",
   })
 }
 
 export async function DELETE(request: Request) {
-  let session: ReturnType<typeof requireRole>
+  let session: Awaited<ReturnType<typeof requireFreshRole>>
   try {
-    session = requireRole(request, DELETE_ROLES, "ștergerea sistemului AI")
+    session = await requireFreshRole(request, DELETE_ROLES, "ștergerea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -151,9 +159,16 @@ export async function DELETE(request: Request) {
       ]),
     }
   }, session.orgName)
+  const workspace = {
+    ...(await getOrgContext({ request })),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    workspaceOwner: session.email,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspace)),
     message: "Sistemul AI a fost eliminat din inventar.",
   })
 }
@@ -173,9 +188,9 @@ function isAttestationStatus(v: unknown): v is AISystemAttestationStatus {
 }
 
 export async function PATCH(request: Request) {
-  let session: ReturnType<typeof requireRole>
+  let session: Awaited<ReturnType<typeof requireFreshRole>>
   try {
-    session = requireRole(request, WRITE_ROLES, "actualizarea sistemului AI")
+    session = await requireFreshRole(request, WRITE_ROLES, "actualizarea sistemului AI")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -309,9 +324,16 @@ export async function PATCH(request: Request) {
       }
     }
   }
+  const workspace = {
+    ...(await getOrgContext({ request })),
+    orgId: session.orgId,
+    orgName: session.orgName,
+    workspaceOwner: session.email,
+    userRole: session.role,
+  }
 
   return NextResponse.json({
-    ...(await buildDashboardPayload(nextState)),
+    ...(await buildDashboardPayload(nextState, workspace)),
     message: "Sistemul AI a fost actualizat.",
     pendingClassificationAction,
   })

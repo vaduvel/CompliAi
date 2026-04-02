@@ -11,13 +11,13 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   getSupabaseOperationalStatusMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/supabase-status", () => ({
@@ -29,7 +29,7 @@ import { GET } from "./route"
 describe("GET /api/integrations/supabase/status", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo",
       role: "owner",
@@ -70,7 +70,7 @@ describe("GET /api/integrations/supabase/status", () => {
   })
 
   it("respinge rolurile nepermise", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

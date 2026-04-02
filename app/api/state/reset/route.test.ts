@@ -14,21 +14,26 @@ const mocks = vi.hoisted(() => ({
     }
   },
   buildDashboardPayloadMock: vi.fn(),
-  requireRoleMock: vi.fn(),
-  writeStateMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  writeStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,
 }))
 
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
 vi.mock("@/lib/server/mvp-store", () => ({
-  writeState: mocks.writeStateMock,
+  writeStateForOrg: mocks.writeStateForOrgMock,
 }))
 
 describe("POST /api/state/reset", () => {
@@ -38,7 +43,7 @@ describe("POST /api/state/reset", () => {
     vi.clearAllMocks()
     if (originalResetKey === undefined) delete process.env.COMPLISCAN_RESET_KEY
     else process.env.COMPLISCAN_RESET_KEY = originalResetKey
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "owner@site.ro",
@@ -46,8 +51,16 @@ describe("POST /api/state/reset", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.getOrgContextMock.mockResolvedValue({
+      orgId: "org-ctx",
+      orgName: "Workspace Org",
+      workspaceLabel: "Workspace",
+      workspaceOwner: "Owner",
+      workspaceInitials: "WO",
+      userRole: "owner",
+    })
     mocks.buildDashboardPayloadMock.mockResolvedValue({ state: { ok: true } })
-    mocks.writeStateMock.mockResolvedValue(undefined)
+    mocks.writeStateForOrgMock.mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -66,7 +79,7 @@ describe("POST /api/state/reset", () => {
 
     expect(response.status).toBe(200)
     expect(payload.message).toContain("Starea a fost resetată")
-    expect(mocks.writeStateMock).toHaveBeenCalledTimes(1)
+    expect(mocks.writeStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Object), "Org Demo")
   })
 
   it("permite reset pentru owner autenticat si in productie fara cheie", async () => {
@@ -80,11 +93,11 @@ describe("POST /api/state/reset", () => {
 
     expect(response.status).toBe(200)
     expect(payload.message).toContain("Starea a fost resetată")
-    expect(mocks.writeStateMock).toHaveBeenCalledTimes(1)
+    expect(mocks.writeStateForOrgMock).toHaveBeenCalledWith("org-1", expect.any(Object), "Org Demo")
   })
 
   it("respinge resetul pentru rol nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

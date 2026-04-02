@@ -11,17 +11,17 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  readStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 import { GET } from "./route"
@@ -29,14 +29,14 @@ import { GET } from "./route"
 describe("GET /api/audit-log", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-audit",
       orgName: "Org Audit",
       email: "viewer@example.com",
       role: "viewer",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       events: [{ id: "evt-1", type: "demo", message: "ok" }],
     })
   })
@@ -47,11 +47,11 @@ describe("GET /api/audit-log", () => {
 
     expect(response.status).toBe(200)
     expect(payload.events).toEqual([{ id: "evt-1", type: "demo", message: "ok" }])
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-audit")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-audit", "Org Audit")
   })
 
   it("propagă eroarea de autorizare", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Interzis", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

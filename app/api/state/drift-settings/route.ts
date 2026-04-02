@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import type { ComplianceDriftChange, ComplianceDriftSeverity } from "@/lib/compliance/types"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
@@ -13,7 +13,11 @@ type DriftSettingsPayload = {
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "actualizarea setarilor de drift")
+    const session = await requireFreshRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "actualizarea setarilor de drift"
+    )
 
     const body = (await request.json().catch(() => ({}))) as DriftSettingsPayload
     const severityOverrides = sanitizeOverrides(body.severityOverrides)
@@ -26,7 +30,7 @@ export async function POST(request: Request) {
     }), session.orgName)
 
     const workspace = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
       userRole: session.role,

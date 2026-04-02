@@ -6,7 +6,7 @@ import { buildDetectedAISystemRecord } from "@/lib/compliance/ai-inventory"
 const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -28,7 +28,8 @@ vi.mock("@/lib/server/auth", () => ({
       this.code = code
     }
   },
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
+  readFreshSessionFromRequest: vi.fn(async () => null),
   readSessionFromRequest: vi.fn(() => null),
 }))
 
@@ -39,7 +40,7 @@ describe("PATCH /api/ai-systems/detected/[id]", () => {
     vi.clearAllMocks()
     vi.spyOn(Math, "random").mockReturnValue(0.123456789)
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       email: "demo@test.com",
       orgId: "org-1",

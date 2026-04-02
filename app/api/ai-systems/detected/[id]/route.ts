@@ -10,9 +10,10 @@ import {
   updateDetectedSystem,
 } from "@/lib/server/detected-ai-systems"
 import { syncAIActObligationFindings } from "@/lib/server/ai-act-obligation-sync"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 
 type CandidateAction = "review" | "confirm" | "reject" | "restore" | "edit"
@@ -45,9 +46,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  let session: ReturnType<typeof requireRole>
+  let session: Awaited<ReturnType<typeof requireFreshRole>>
   try {
-    session = requireRole(request, WRITE_ROLES, "gestionarea sistemelor AI detectate")
+    session = await requireFreshRole(request, WRITE_ROLES, "gestionarea sistemelor AI detectate")
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     throw error
@@ -155,9 +156,16 @@ export async function PATCH(
         ]),
       }
     }, session.orgName)
+    const workspace = {
+      ...(await getOrgContext({ request })),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      workspaceOwner: session.email,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(nextState)),
+      ...(await buildDashboardPayload(nextState, workspace)),
       message:
         body.action === "confirm"
           ? "Sistemul detectat a fost confirmat in inventar."

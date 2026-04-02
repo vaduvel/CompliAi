@@ -9,7 +9,7 @@ import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { enrichOrgProfilePrefillWithDocumentSignals } from "@/lib/server/document-prefill-signals"
 import { enrichOrgProfilePrefillWithVendorSignals } from "@/lib/server/efactura-vendor-signals"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeWebsiteUrl, validateCUI } from "@/lib/server/request-validation"
 import { enrichOrgProfilePrefillWithWebsiteSignals } from "@/lib/server/website-prefill-signals"
 
@@ -34,7 +34,8 @@ export async function POST(request: Request) {
     }
 
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     // Run ANAF lookup and website crawl in parallel — they're independent.
     const [cuiPrefill, websiteOnlyPrefill] = await Promise.all([
       cui ? lookupOrgProfilePrefillByCui(cui) : Promise.resolve(null),

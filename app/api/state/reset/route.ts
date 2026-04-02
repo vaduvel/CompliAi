@@ -2,11 +2,12 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
-import { writeState } from "@/lib/server/mvp-store"
+import { writeStateForOrg } from "@/lib/server/mvp-store"
+import { getOrgContext } from "@/lib/server/org-context"
 
 const RESET_HEADER = "x-compliscan-reset-key"
 
@@ -20,7 +21,7 @@ function hasValidResetKey(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner"], "resetarea starii workspace-ului")
+    const session = await requireFreshRole(request, ["owner"], "resetarea starii workspace-ului")
     const actor = eventActorFromSession(session)
 
     // UI reset is allowed for authenticated owners. The optional reset key
@@ -45,10 +46,17 @@ export async function POST(request: Request) {
         }, actor),
       ]),
     })
-    await writeState(cleanState)
+    await writeStateForOrg(session.orgId, cleanState, session.orgName)
+    const workspace = {
+      ...(await getOrgContext({ request })),
+      orgId: session.orgId,
+      orgName: session.orgName,
+      workspaceOwner: session.email,
+      userRole: session.role,
+    }
 
     return NextResponse.json({
-      ...(await buildDashboardPayload(cleanState)),
+      ...(await buildDashboardPayload(cleanState, workspace)),
       message: "Starea a fost resetată. Metricii vor fi populați doar din scanările reale noi.",
     })
   } catch (error) {

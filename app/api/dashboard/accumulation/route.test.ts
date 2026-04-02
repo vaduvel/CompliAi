@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
     }
   },
   requireFreshAuthenticatedSessionMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   loadEvidenceLedgerFromSupabaseMock: vi.fn(),
 }))
@@ -22,7 +22,7 @@ vi.mock("@/lib/server/auth", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/nis2-store", () => ({
@@ -44,7 +44,7 @@ describe("GET /api/dashboard/accumulation", () => {
       email: "owner@example.com",
       role: "owner",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       snapshotHistory: [{ generatedAt: "2026-03-01T10:00:00.000Z" }],
       scans: [{ createdAtISO: "2026-03-02T10:00:00.000Z" }],
       generatedDocuments: [{ id: "doc-1" }, { id: "doc-2" }],
@@ -58,7 +58,7 @@ describe("GET /api/dashboard/accumulation", () => {
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-session")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-session", "Session Org")
     expect(mocks.readNis2StateMock).toHaveBeenCalledWith("org-session")
     expect(mocks.loadEvidenceLedgerFromSupabaseMock).toHaveBeenCalledWith({ orgId: "org-session" })
     expect(body).toEqual(

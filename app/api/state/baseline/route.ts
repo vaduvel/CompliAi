@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
@@ -12,7 +12,11 @@ type BaselineAction = "set" | "clear"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "administrarea baseline-ului")
+    const session = await requireFreshRole(
+      request,
+      ["owner", "partner_manager", "compliance"],
+      "administrarea baseline-ului"
+    )
     const actor = eventActorFromSession(session)
 
     const body = (await request.json().catch(() => ({}))) as { action?: BaselineAction }
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
     }, session.orgName)
 
     const workspace = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
       userRole: session.role,

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { loadEvidenceLedgerFromSupabase } from "@/lib/server/supabase-evidence-read"
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     )
     const workspace = { orgId: session.orgId, orgName: session.orgName }
     const [state, nis2State, evidenceLedger] = await Promise.all([
-      readStateForOrg(workspace.orgId),
+      readFreshStateForOrg(workspace.orgId, workspace.orgName),
       readNis2State(workspace.orgId).catch(() => ({ vendors: [], incidents: [] })),
       loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId }).catch(() => null),
     ])
