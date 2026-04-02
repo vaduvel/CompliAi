@@ -8,6 +8,7 @@ import { NextResponse } from "next/server"
 
 import { decidePendingAction, getPendingAction, markExecuted } from "@/lib/server/approval-queue"
 import { syncSubmissionApprovalDecision } from "@/lib/server/anaf-submit-flow"
+import { dispatchAutoExecutedAction } from "@/lib/server/semi-auto-dispatcher"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -76,12 +77,12 @@ export async function PATCH(
       })
     } else if (body.decision === "approved") {
       try {
-        // TODO: dispatch execution based on action type
-        // For now, just mark as executed
-        await markExecuted(orgId, id, { executedBy: "approval-api" })
-        executed = true
+        const dispatch = await dispatchAutoExecutedAction(updated)
+        if (dispatch.executed) {
+          await markExecuted(orgId, id, { executedBy: "approval-api", detail: dispatch.detail })
+        }
+        executed = dispatch.executed
       } catch {
-        // Execution failed — action is still approved but not executed
         console.error(`[approvals] Execution failed for ${id}`)
       }
     }
