@@ -49,6 +49,10 @@ class AnafRateLimitError extends Error {
   }
 }
 
+function buildOauthBasicAuthHeader(): string {
+  return `Basic ${Buffer.from(`${ANAF_CLIENT_ID}:${ANAF_CLIENT_SECRET}`).toString("base64")}`
+}
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export type AnafTokenRecord = {
@@ -99,7 +103,7 @@ export function buildAuthorizeUrl(orgId: string, state?: string): string | null 
     response_type: "code",
     client_id: ANAF_CLIENT_ID,
     redirect_uri: ANAF_REDIRECT_URI,
-    scope: "SPV",
+    token_content_type: "jwt",
     state: state ?? orgId,
   })
 
@@ -121,13 +125,15 @@ export async function exchangeCodeForTokens(
 
     const res = await fetch(ANAF_TOKEN_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: buildOauthBasicAuthHeader(),
+      },
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        client_id: ANAF_CLIENT_ID,
-        client_secret: ANAF_CLIENT_SECRET,
         redirect_uri: ANAF_REDIRECT_URI,
+        token_content_type: "jwt",
       }).toString(),
     })
 
@@ -178,12 +184,13 @@ export async function refreshAccessToken(
 
     const res = await fetch(ANAF_TOKEN_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: buildOauthBasicAuthHeader(),
+      },
       body: new URLSearchParams({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
-        client_id: ANAF_CLIENT_ID,
-        client_secret: ANAF_CLIENT_SECRET,
       }).toString(),
     })
 
