@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Search,
   ScanLine,
+  Trash2,
   Upload,
   Users,
   X,
@@ -105,14 +106,36 @@ function ClientRow({
   onDrillDown,
   selected,
   onToggleSelect,
+  onDelete,
 }: {
   client: PortfolioOverviewClientSummary
   onDrillDown: (id: string) => void
   selected: boolean
   onToggleSelect: (id: string) => void
+  onDelete: (orgId: string) => void
 }) {
   const c = client.compliance
   const hasData = c?.hasData ?? false
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/partner/clients/${client.orgId}`, { method: "DELETE" })
+      if (!res.ok) {
+        const d = (await res.json()) as { error?: string }
+        toast.error(d.error ?? "Eroare la eliminare.")
+        return
+      }
+      onDelete(client.orgId)
+    } catch {
+      toast.error("Eroare la eliminare.")
+    } finally {
+      setDeleting(false)
+      setDeleteConfirm(false)
+    }
+  }
 
   return (
     <div
@@ -128,7 +151,7 @@ function ClientRow({
       aria-label={`Deschide ${client.orgName}`}
     >
       {/* ── Checkbox ── */}
-      <div onClick={(e) => { e.stopPropagation(); onToggleSelect(client.orgId) }}>
+      <div onClick={(e) => e.stopPropagation()}>
         <input
           type="checkbox"
           checked={selected}
@@ -253,6 +276,34 @@ function ClientRow({
         >
           <ExternalLink className="size-3.5" strokeWidth={2} />
         </a>
+        {deleteConfirm ? (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={handleDelete}
+              className="rounded-eos-md border border-eos-error/40 bg-eos-error-soft px-2 py-1.5 text-xs font-medium text-eos-error transition-all hover:bg-eos-error hover:text-white disabled:opacity-50"
+            >
+              {deleting ? <Loader2 className="size-3 animate-spin" /> : "Confirmi?"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(false)}
+              className="p-1.5 text-eos-text-tertiary hover:text-eos-text-muted"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setDeleteConfirm(true)}
+            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-error/40 hover:bg-eos-error-soft hover:text-eos-error"
+            title="Elimină firma din portofoliu"
+          >
+            <Trash2 className="size-3.5" strokeWidth={2} />
+          </button>
+        )}
       </div>
     </div>
   )
@@ -813,6 +864,7 @@ export function PortfolioOverviewClient() {
                   onDrillDown={(id) => void handleDrillDown(id)}
                   selected={selectedIds.has(client.orgId)}
                   onToggleSelect={handleToggleSelect}
+                  onDelete={(orgId) => setClients((prev) => prev.filter((c) => c.orgId !== orgId))}
                 />
               ))}
             </div>

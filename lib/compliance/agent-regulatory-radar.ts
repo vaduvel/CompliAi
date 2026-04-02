@@ -2,7 +2,7 @@
 // Monitors regulatory landscape: framework coverage gaps, upcoming deadlines,
 // stale legal status, missing assessments per active framework.
 // Phase 1: state-based analysis (no external API calls).
-// Phase 2 (future): DNSC.ro scraping, EUR-Lex API, Monitorul Oficial.
+// Phase 2: DNSC.ro scraping, EUR-Lex API (external sources passed from cron).
 
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
@@ -15,6 +15,8 @@ import {
   type AgentAction,
   type AgentOutput,
 } from "@/lib/compliance/agentic-engine"
+import type { EurLexDocument } from "@/lib/server/eurlex-client"
+import type { DnscAnnouncement } from "@/lib/server/dnsc-monitor"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +24,11 @@ export type RegulatoryRadarInput = {
   orgId: string
   state: ComplianceState
   nowISO: string
+  // Phase 2: pre-fetched external sources (optional — Phase 1 runs without them)
+  externalSources?: {
+    eurLexDocs?: EurLexDocument[]
+    dnscAnnouncements?: DnscAnnouncement[]
+  }
 }
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -314,6 +321,43 @@ export function runRegulatoryRadar(input: RegulatoryRadarInput): AgentOutput {
         targetId: "gdpr-dpa-gap",
         approvalLevel: 2,
         autoApplied: false,
+      })
+    }
+  }
+
+  // 7. Phase 2 — External sources (EUR-Lex + DNSC) if provided
+  if (input.externalSources) {
+    const { eurLexDocs = [], dnscAnnouncements = [] } = input.externalSources
+
+    for (const doc of eurLexDocs) {
+      itemsScanned++
+      // Only surface if relevant to frameworks that apply to this org
+      const relevant = doc.frameworks.some((f) => applicableTags.includes(f as ApplicabilityTag))
+      if (!relevant) continue
+
+      issuesFound++
+      actions.push({
+        type: "alert_created",
+        description: `[EUR-Lex] Act legislativ nou: "${doc.title.slice(0, 120)}" — publicat ${doc.publicationDateISO.slice(0, 10)}. Impact: ${doc.frameworks.join(", ").toUpperCase()}.`,
+        targetId: `eurlex-${doc.uri.slice(-20).replace(/[^a-z0-9]/gi, "-")}`,
+        approvalLevel: 1,
+        autoApplied: true,
+      })
+    }
+
+    for (const ann of dnscAnnouncements) {
+      itemsScanned++
+      if (ann.potentialImpact === "low") continue
+      if (!applicableTags.includes("nis2")) continue
+
+      issuesFound++
+      const level: 1 | 2 = ann.potentialImpact === "high" ? 2 : 1
+      actions.push({
+        type: level === 2 ? "escalation_raised" : "alert_created",
+        description: `[DNSC.ro] "${ann.title.slice(0, 120)}" — publicat ${ann.publishedDateISO.slice(0, 10)}. Impact estimat: ${ann.potentialImpact === "high" ? "ridicat" : "mediu"}.`,
+        targetId: `dnsc-${ann.url.split("/").pop()?.slice(0, 20) ?? "ann"}`,
+        approvalLevel: level,
+        autoApplied: level === 1,
       })
     }
   }

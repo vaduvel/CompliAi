@@ -10,6 +10,7 @@ import { getOrgContext } from "@/lib/server/org-context"
 import { safeGetRecentRuns } from "@/lib/server/agent-run-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { AGENT_LABELS, AGENT_DESCRIPTIONS, type AgentType } from "@/lib/compliance/agentic-engine"
+import { safeRecordFeedback } from "@/lib/server/agent-feedback-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 
@@ -88,5 +89,52 @@ export async function POST(request: Request) {
       status: 500,
     })
     return jsonError("Nu am putut executa agentul.", 500, "AGENT_EXECUTE_FAILED", undefined, context)
+  }
+}
+
+export async function PATCH(request: Request) {
+  const context = createRequestContext(request, "/api/agents")
+
+  try {
+    const session = requireRole(request, ["owner", "partner_manager", "compliance"], "feedback agent")
+    const { orgId } = await getOrgContext()
+
+    const body = (await request.json()) as {
+      agentType?: string
+      actionType?: string
+      decision?: string
+      rejectionReason?: string
+      triggerReason?: string
+    }
+
+    if (!body.agentType || !VALID_AGENTS.includes(body.agentType as AgentType)) {
+      return jsonError("agentType invalid.", 400, "INVALID_AGENT", undefined, context)
+    }
+    if (!body.decision || !["approved", "rejected", "ignored"].includes(body.decision)) {
+      return jsonError("decision trebuie să fie approved, rejected sau ignored.", 400, "INVALID_DECISION", undefined, context)
+    }
+
+    void session
+
+    await safeRecordFeedback(orgId, {
+      agentType: body.agentType as AgentType,
+      actionType: (body.actionType ?? "finding_created") as import("@/lib/compliance/agentic-engine").AgentActionType,
+      suggestionContext: {
+        triggerReason: body.triggerReason ?? "manual-feedback",
+      },
+      decision: body.decision as "approved" | "rejected" | "ignored",
+      rejectionReason: body.rejectionReason,
+      decidedAtISO: new Date().toISOString(),
+    })
+
+    return NextResponse.json({ ok: true }, withRequestIdHeaders(undefined, context))
+  } catch (error) {
+    if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code, undefined, context)
+    await logRouteError(context, error, {
+      code: "AGENT_FEEDBACK_FAILED",
+      durationMs: getRequestDurationMs(context),
+      status: 500,
+    })
+    return jsonError("Nu am putut salva feedback-ul.", 500, "AGENT_FEEDBACK_FAILED", undefined, context)
   }
 }

@@ -1,3 +1,5 @@
+import { Landmark, ShieldCheck } from "lucide-react"
+
 import {
   dashboardPrimaryNavItems,
   portfolioNavItems,
@@ -6,7 +8,25 @@ import {
   type DashboardNavSection,
   viewerNavItems,
 } from "@/components/compliscan/navigation"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+
+const MODULE_NAV_ITEMS: DashboardNavItem[] = [
+  {
+    id: "fiscal",
+    label: "Fiscal",
+    href: dashboardRoutes.fiscal,
+    icon: Landmark,
+    matchers: [dashboardRoutes.fiscal],
+  },
+  {
+    id: "nis2",
+    label: "NIS2",
+    href: dashboardRoutes.nis2,
+    icon: ShieldCheck,
+    matchers: [dashboardRoutes.nis2, dashboardRoutes.nis2Maturity, dashboardRoutes.nis2Dnsc],
+  },
+]
 
 export type AdaptiveNavSection = DashboardNavSection
 
@@ -59,6 +79,11 @@ export function getSidebarNavSections({
         label: "Firma activa",
         items: ORG_NAV_FULL,
       },
+      {
+        id: "module",
+        label: "Module conformitate",
+        items: MODULE_NAV_ITEMS,
+      },
     ]
   }
 
@@ -68,6 +93,11 @@ export function getSidebarNavSections({
         id: "org",
         label: "Flux principal",
         items: ORG_NAV_SOLO,
+      },
+      {
+        id: "module",
+        label: "Module conformitate",
+        items: MODULE_NAV_ITEMS,
       },
     ]
   }
@@ -87,6 +117,11 @@ export function getSidebarNavSections({
       id: "org",
       label: "Flux principal",
       items: ORG_NAV_FULL,
+    },
+    {
+      id: "module",
+      label: "Module conformitate",
+      items: MODULE_NAV_ITEMS,
     },
   ]
 }

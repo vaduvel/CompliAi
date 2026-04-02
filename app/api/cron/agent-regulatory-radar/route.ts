@@ -12,6 +12,10 @@ import { jsonError } from "@/lib/server/api-response"
 import { loadOrganizations } from "@/lib/server/auth"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { fetchRecentEurLexActs } from "@/lib/server/eurlex-client"
+import { fetchDnscAnnouncements } from "@/lib/server/dnsc-monitor"
+import type { EurLexDocument } from "@/lib/server/eurlex-client"
+import type { DnscAnnouncement } from "@/lib/server/dnsc-monitor"
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -26,12 +30,32 @@ export async function POST(request: Request) {
   let capturedCronErrors = false
 
   try {
+    // Phase 2: fetch external sources once, share across all orgs (cost-efficient)
+    const lastWeekISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    let eurLexDocs: EurLexDocument[] = []
+    let dnscAnnouncements: DnscAnnouncement[] = []
+
+    try {
+      ;[eurLexDocs, dnscAnnouncements] = await Promise.all([
+        fetchRecentEurLexActs(lastWeekISO),
+        fetchDnscAnnouncements(lastWeekISO),
+      ])
+      console.log(
+        `[RegulatoryRadar] Phase 2 sources: ${eurLexDocs.length} EUR-Lex, ${dnscAnnouncements.length} DNSC`,
+      )
+    } catch {
+      // External source fetch failed — continue with Phase 1 only
+      console.log("[RegulatoryRadar] Phase 2 surse externe indisponibile, continuăm cu Phase 1.")
+    }
+
     const organizations = await loadOrganizations()
     const orgsToProcess = organizations.slice(0, 50)
 
     for (const org of orgsToProcess) {
       try {
-        const output = await executeAgent(org.id, "regulatory_radar")
+        const output = await executeAgent(org.id, "regulatory_radar", {
+          externalSources: { eurLexDocs, dnscAnnouncements },
+        })
         results.push({
           orgId: org.id,
           issuesFound: output.metrics?.issuesFound ?? 0,

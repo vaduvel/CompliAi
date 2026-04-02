@@ -19,7 +19,8 @@ import { readNis2State, type Nis2OrgState, type Nis2Vendor } from "@/lib/server/
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
 
-const PORTFOLIO_ALLOWED_ROLES: UserRole[] = ["owner", "partner_manager", "compliance"]
+// "owner" exclus intenționat — consultantul nu trebuie să-și vadă propria firmă în portofoliu
+const PORTFOLIO_ALLOWED_ROLES: UserRole[] = ["partner_manager", "compliance"]
 
 type PortfolioMembership = UserMembershipSummary
 

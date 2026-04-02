@@ -3,7 +3,9 @@
 import {
   Bell,
   BookOpen,
+  Bot,
   Building2,
+  CalendarClock,
   CheckCircle,
   FileSearch,
   Flag,
@@ -44,6 +46,11 @@ export type DashboardNavId =
   | "ropa"
   | "pay-transparency"
   | "approvals"
+  | "review-cycles"
+  | "scheduled-reports"
+  | "agenti"
+  | "fiscal"
+  | "nis2"
 
 export type DashboardNavItem = {
   id: DashboardNavId
@@ -220,6 +227,9 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     label: "Automatizare",
     items: [
       { id: "approvals", label: "Aprobări", href: dashboardRoutes.approvals, icon: CheckCircle, matchers: [dashboardRoutes.approvals] },
+      { id: "review-cycles", label: "Review-uri", href: dashboardRoutes.reviewCycles, icon: CalendarClock, matchers: [dashboardRoutes.reviewCycles] },
+      { id: "scheduled-reports", label: "Rapoarte programate", href: dashboardRoutes.settingsScheduledReports, icon: CalendarClock, matchers: [dashboardRoutes.settingsScheduledReports] },
+      { id: "agenti", label: "Agenți AI", href: dashboardRoutes.agents, icon: Bot, matchers: [dashboardRoutes.agents] },
     ],
   },
   {

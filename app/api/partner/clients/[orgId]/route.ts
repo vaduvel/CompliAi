@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
+import { AuthzError, deactivateOrganizationMember, readSessionFromRequest, listUserMemberships } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
@@ -108,5 +108,37 @@ export async function GET(
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la incarcarea detaliilor clientului.", 500, "PARTNER_CLIENT_DETAIL_FAILED")
+  }
+}
+
+// DELETE /api/partner/clients/[orgId]
+// Elimină firma din portofoliul consultantului (dezactivează membership-ul).
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ orgId: string }> }
+) {
+  try {
+    const session = readSessionFromRequest(request)
+    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+
+    const { orgId } = await params
+
+    const memberships = await listUserMemberships(session.userId)
+    const membership = memberships.find((m) => m.orgId === orgId && m.status === "active")
+    if (!membership) return jsonError("Firma nu există în portofoliu.", 404, "NOT_FOUND")
+
+    if (membership.role === "owner") {
+      return jsonError("Nu poți elimina firma proprie din portofoliu.", 400, "CANNOT_REMOVE_OWN_ORG")
+    }
+
+    await deactivateOrganizationMember(orgId, membership.membershipId)
+
+    return NextResponse.json({ removed: true, orgId })
+  } catch (error) {
+    return jsonError(
+      error instanceof Error ? error.message : "Eroare la eliminarea firmei.",
+      500,
+      "REMOVE_CLIENT_FAILED"
+    )
   }
 }

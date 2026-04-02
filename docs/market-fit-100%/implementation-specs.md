@@ -1546,3 +1546,532 @@ Logica:
 - [ ] Batch actions funcționale (12.7)
 - [ ] Scheduled reports configurabile (12.7)
 - [ ] Diana poate opera 12 clienți fără a deschide fiecare individual
+
+---
+
+# P4 — Moat (Automation Engine)
+
+> **Context critic:** Infrastructura agentic V6 există deja în cod (Codex V6-F1 + EOS sprints S2-S8).
+> Ce lipsește nu este backend-ul — este UI-ul de control, stratul de self-learning, motorul predictiv și integrarea externă reală a Regulatory Radar.
+>
+> **Fișiere existente cheie:**
+> - `lib/compliance/agentic-engine.ts` — tipuri complete (AgentType, AgentTrigger, AgentOutput, ApprovalLevel)
+> - `lib/server/agent-orchestrator.ts` — executeAgent / executeAgents (toți 5 agenți funcționali)
+> - `lib/server/agent-run-store.ts` — log persistent per org
+> - `lib/compliance/agent-compliance-monitor.ts` — Health Check agentic
+> - `lib/compliance/agent-fiscal-sensor.ts` — e-Factura signal agentic
+> - `lib/compliance/agent-document.ts` — sugestii proactive documente
+> - `lib/compliance/agent-vendor-risk.ts` — re-scoring periodic furnizori
+> - `lib/compliance/agent-regulatory-radar.ts` — Phase 1 (state-based, fără API extern)
+> - `app/api/agents/route.ts` — GET (run history) + POST (manual trigger)
+> - `app/api/cron/agent-orchestrator/route.ts` — cron zilnic
+> - `app/api/cron/agent-regulatory-radar/route.ts` — cron săptămânal
+
+---
+
+# 12.13 Agent Control Center (P4 item 22 — advanced agents)
+
+## Starea curentă
+- Toți 5 agenți RULEAZĂ și produc output real
+- `GET /api/agents` returnează run history + status per agent
+- `POST /api/agents` permite trigger manual
+- **Lipsește complet: UI-ul** — userul nu poate vedea ce fac agenții, nu poate declanșa manual, nu poate vedea reasoning-ul, nu poate configura frecvența
+
+## Ce construim
+
+### 12.13.1 Pagina Agent Control Center
+
+**Fișier nou:** `app/dashboard/agenti/page.tsx`
+**Fișier nou:** `components/compliscan/agent-control-center.tsx`
+
+**Layout:**
+```
+┌─────────────────────────────────────────────────────┐
+│  Agenți AI                            [Rulează toți] │
+│                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐            │
+│  │ Compliance      │  │ Fiscal Sensor   │            │
+│  │ Monitor         │  │                 │            │
+│  │ ✅ Activ        │  │ ✅ Activ        │            │
+│  │ Ultima rulare:  │  │ Ultima rulare:  │            │
+│  │ Azi 06:00       │  │ Ieri 07:00      │            │
+│  │ 3 issues găsite │  │ 1 issue găsit  │            │
+│  │ [Detalii] [Run] │  │ [Detalii] [Run] │            │
+│  └─────────────────┘  └─────────────────┘            │
+│                                                      │
+│  ── Istoric rulări (ultimele 20) ──                  │
+│  ┌────────────────────────────────────────────────┐  │
+│  │ Compliance Monitor │ Azi 06:00 │ ✅ 3 issues  │  │
+│  │ Fiscal Sensor      │ Ieri 07:00│ ✅ 1 issue   │  │
+│  │ Vendor Risk        │ 30 mar    │ ✅ 0 issues  │  │
+│  └────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+**Per agent card arată:**
+- Status: Activ / Inactiv
+- Ultima rulare: timestamp
+- Issues găsite în ultima rulare
+- Buton "Detalii" → expandează reasoning + actions din ultima rulare
+- Buton "Rulează acum" → POST /api/agents cu agentType
+
+**Reasoning panel (expand):**
+```
+Compliance Monitor — Azi 06:00
+Confidence: 87%
+Reasoning: "Am verificat 12 documente, 4 vendors, 3 assessments.
+             Găsit: politica GDPR depășită (365 zile), 1 vendor nereviewed."
+Actions auto-aplicate (Level 1):
+  ✅ Notificare trimisă: "Politică GDPR expirată"
+  ✅ Score actualizat: 68 → 65
+Actions în așteptare (Level 2):
+  ⏳ Draft document: Politică GDPR actualizată — [Aprobă] [Respinge]
+```
+
+### 12.13.2 Navigare
+
+**Fișier modificat:** `components/compliscan/dashboard-shell.tsx`
+- Adaugă link "Agenți" în sidebar, sub "Conformitate"
+- Sau ca tab în `/dashboard/settings` — echipa decide la implementare
+
+### 12.13.3 Agent action approval UI
+
+**Fișier modificat:** `components/compliscan/agent-control-center.tsx`
+
+La acțiunile Level 2 (auto-draft, human-approve):
+```typescript
+// În AgentOutput.actions, acțiunile cu autoApplied=false sunt pending
+// UI arată per acțiune:
+// - ce a propus agentul
+// - reasoning
+// - [Aprobă] → execută acțiunea
+// - [Respinge] → marchează rejected, agentul nu mai sugerează similar 30 zile
+```
+
+### 12.13.4 API extensions
+
+**Fișier modificat:** `app/api/agents/route.ts`
+```
+PATCH /api/agents/actions/[runId]/[actionIndex]
+Body: { decision: "approved" | "rejected"; reason?: string }
+Response: { updated: AgentOutput }
+```
+
+Logica:
+- `approved` + `type === "document_drafted"` → apelează document generator pentru tipul respectiv
+- `rejected` → marchează în run log + salvează în `agent_feedback` pentru self-learning (12.14)
+
+## Dependențe
+- `lib/server/agent-orchestrator.ts` — existent
+- `lib/server/agent-run-store.ts` — existent
+- `app/api/agents/route.ts` — existent, extins cu PATCH
+
+## DONE means
+- [ ] Pagina `/dashboard/agenti` listează toți 5 agenți cu status + ultima rulare
+- [ ] Click "Rulează acum" declanșează agentul manual și arată rezultat în <5s
+- [ ] Reasoning și actions vizibile în expand panel
+- [ ] Acțiunile Level 2 pot fi aprobate sau respinse din UI
+- [ ] Link în sidebar către `/dashboard/agenti`
+- [ ] Radu (Compliance Officer) poate vedea ce a făcut fiecare agent fără să deschidă consola
+
+---
+
+# 12.14 Self-Learning Signal Layer (P4 item 20 — self-learning)
+
+## Starea curentă
+- Agenții produc suggestions cu `confidence: number` (0-1) hardcoded per logică
+- Nu există tracking al acceptărilor/respingerilor de sugestii
+- Confidence nu se ajustează în funcție de comportamentul userului
+- **Lipsește:** feedback loop — agentul nu știe dacă sugestiile lui sunt utile
+
+## Ce construim
+
+### 12.14.1 Agent feedback store
+
+**Fișier nou:** `lib/server/agent-feedback-store.ts`
+
+```typescript
+export type AgentFeedbackRecord = {
+  id: string
+  orgId: string
+  agentType: AgentType
+  actionType: AgentActionType
+  // Ce a sugerat agentul
+  suggestionContext: {
+    findingId?: string
+    documentType?: string
+    vendorId?: string
+    triggerReason: string
+  }
+  // Ce a decis userul
+  decision: "approved" | "rejected" | "ignored"  // ignored = nu a răspuns în 7 zile
+  rejectionReason?: string
+  decidedAtISO: string
+  createdAtISO: string
+}
+
+// Storage: Map fallback + Supabase (tabel: agent_feedback)
+export async function recordFeedback(orgId: string, feedback: Omit<AgentFeedbackRecord, "id" | "createdAtISO">): Promise<void>
+export async function getFeedbackStats(orgId: string, agentType: AgentType): Promise<AgentFeedbackStats>
+
+export type AgentFeedbackStats = {
+  totalSuggestions: number
+  approved: number
+  rejected: number
+  ignored: number
+  approvalRate: number    // 0-1
+  rejectedPatterns: string[]  // cele mai frecvente motive de respingere
+}
+```
+
+### 12.14.2 Confidence adjustment
+
+**Fișier modificat:** `lib/compliance/agentic-engine.ts` — funcție nouă:
+
+```typescript
+// Ajustează confidence-ul agentului bazat pe feedback istoric
+export async function adjustedConfidence(
+  baseConfidence: number,
+  orgId: string,
+  agentType: AgentType,
+  actionType: AgentActionType
+): Promise<number>
+// Logica:
+// - Dacă approvalRate > 0.8 → confidence * 1.1 (max 0.95)
+// - Dacă approvalRate < 0.3 → confidence * 0.8
+// - Dacă < 5 feedback records → return baseConfidence (insufficient data)
+```
+
+**Fișier modificat:** `lib/server/agent-orchestrator.ts`
+- La `applyAutoActions()`: acțiunile Level 2 se creează cu confidence ajustat
+- Dacă `adjustedConfidence < 0.4` → acțiunea se degradează din Level 2 la Level 3 (nu mai e auto-draft, devine manual)
+
+### 12.14.3 "Compli a învățat" — feedback vizibil
+
+**Fișier modificat:** `components/compliscan/agent-control-center.tsx`
+
+Pe cardul agentului, dacă `approvalRate > 0.7` și `totalSuggestions > 10`:
+```
+🎯 Compli s-a calibrat: 78% din sugestii aprobate
+```
+
+Dacă `approvalRate < 0.3` și `totalSuggestions > 5`:
+```
+⚙️ Compli ajustează: sugestiile vor fi mai prudente
+```
+
+## Dependențe
+- `agent-control-center.tsx` (12.13) — pentru UI de feedback
+- `app/api/agents/route.ts` — PATCH din 12.13 scrie în feedback store
+- `agent_feedback` tabel nou Supabase (sau Map fallback)
+
+## DONE means
+- [ ] Orice decizie `approved/rejected` de pe un action Level 2 se salvează în feedback store
+- [ ] `getFeedbackStats()` returnează rate corect per agent per org
+- [ ] `adjustedConfidence()` modifică confidence bazat pe minim 5 feedback-uri
+- [ ] Actions Level 2 cu confidence < 0.4 devin Level 3 automat
+- [ ] Feedback vizibil pe cardul agentului (calibrat / ajustează)
+- [ ] Supabase SQL: `CREATE TABLE agent_feedback (id uuid, org_id text, agent_type text, action_type text, suggestion_context jsonb, decision text, rejection_reason text, decided_at timestamptz, created_at timestamptz)`
+
+---
+
+# 12.15 Predictive Risk Engine (P4 item 21 — predictive risk)
+
+## Starea curentă
+- Agenții detectează probleme **prezente** (reactiv)
+- Score-ul de conformitate reflectă starea curentă
+- **Lipsește:** predicție — "dacă nu acționezi, în 30 de zile vei avea X probleme"
+
+## Ce construim
+
+### 12.15.1 Risk trajectory calculator
+
+**Fișier nou:** `lib/compliance/risk-trajectory.ts`
+
+```typescript
+export type RiskTrajectoryPoint = {
+  dateISO: string
+  predictedScore: number
+  predictedOpenFindings: number
+  confidence: "high" | "medium" | "low"
+}
+
+export type RiskTrajectory = {
+  current: { score: number; openFindings: number }
+  trajectory: RiskTrajectoryPoint[]   // next 7, 30, 90 days
+  topRisks: {
+    id: string
+    label: string
+    triggerDateISO: string     // când se materializează riscul
+    impact: number             // scădere estimată în scor
+    preventable: boolean       // dacă există acțiune care îl previne
+    preventionAction?: string  // ce trebuie făcut
+  }[]
+  trend: "improving" | "stable" | "degrading"
+}
+
+export function calculateRiskTrajectory(
+  state: ComplianceState,
+  findings: ScanFinding[],
+  agentRunLog: AgentRunLog,
+  nowISO: string
+): RiskTrajectory
+// Logica predictivă (deterministic, nu ML):
+// 1. Documente cu nextReviewDateISO → scad scorul la expirare
+// 2. Findings under_monitoring cu reviewDueAtISO → reopen la dată
+// 3. NIS2 vendors cu nextReviewDueISO → finding nou la dată
+// 4. Pay transparency deadline → finding critic dacă nerezolvat
+// 5. AI Act deadlines din KNOWN_DEADLINES → finding la dată
+// 6. Trend: compară scorul din ultimele 3 agent runs → improving/stable/degrading
+```
+
+### 12.15.2 Predictive Risk widget pe dashboard
+
+**Fișier modificat:** `app/dashboard/page.tsx` — widget nou
+
+**Widget (compact, above fold):**
+```
+┌────────────────────────────────────┐
+│  📈 Trajectorie risc               │
+│                                    │
+│  Scor azi: 72   →  30 zile: 58 ↓  │
+│  Trend: ⬇ Degradare                │
+│                                    │
+│  Top riscuri iminente:             │
+│  • Politică GDPR expiră în 12 zile │
+│  • Vendor X: review due în 5 zile  │
+│                                    │
+│  [Vezi toate] [Acționează]         │
+└────────────────────────────────────┘
+```
+
+**Fișier nou:** `components/compliscan/risk-trajectory-widget.tsx`
+
+Componenta:
+- Calcul la mount din `/api/dashboard` sau endpoint dedicat
+- Mini spark-line (SVG) cu predicted score pe 30 zile
+- Lista top 3 riscuri iminente cu data și acțiune preventivă
+- CTA "Acționează" → link direct la finding
+
+### 12.15.3 API endpoint
+
+**Fișier nou:** `app/api/risk/trajectory/route.ts`
+```
+GET /api/risk/trajectory
+Response: RiskTrajectory
+```
+
+Apelat de widget pe dashboard. Calculat on-demand (nu stocat).
+
+### 12.15.4 "Compli prevede" — insight card
+
+**Fișier modificat:** `components/compliscan/agent-control-center.tsx`
+
+Pe pagina Agenți, secțiune "Predicții active":
+```
+Compli prevede că în 30 de zile scorul va scădea de la 72 la 58.
+Motivul principal: 3 documente expiră, 1 finding se redeschide.
+Poți preveni: [Regenerează documente] [Reverifică finding X]
+```
+
+## Dependențe
+- `agent-run-store.ts` — pentru trend (ultimele 3 runs)
+- `lib/compliance/health-check.ts` — pentru state scoring
+- `drift-trigger-engine.ts` (12.12) — pentru review due dates
+
+## DONE means
+- [ ] `calculateRiskTrajectory()` returnează predicted score pentru 7 / 30 / 90 zile
+- [ ] Widget pe dashboard arată scor curent → scor 30 zile + trend
+- [ ] Top 3 riscuri iminente cu dată exactă și acțiune preventivă
+- [ ] `GET /api/risk/trajectory` funcțional
+- [ ] Trend corect detectat din ultimele N agent runs (improving/stable/degrading)
+- [ ] Predicțiile sunt deterministe (bazate pe date, nu aleatorii)
+
+---
+
+# 12.16 Regulatory Radar Phase 2 (P4 item 23 — heavy intelligence)
+
+## Starea curentă
+- `lib/compliance/agent-regulatory-radar.ts` — Phase 1 implementată:
+  - Verifică `KNOWN_DEADLINES` (array static cu date hard-coded)
+  - Detectează gaps per framework din starea org
+  - Generează findings pentru deadline-uri iminente și obligații lipsă
+- **Limitare Phase 1:** legislația e statică — necesită update manual la fiecare release de produs
+- **Lipsește Phase 2:** surse externe reale — EUR-Lex API, DNSC.ro, Monitorul Oficial
+
+## Ce construim
+
+### 12.16.1 EUR-Lex integration (sursă externă funcțională)
+
+**Fișier nou:** `lib/server/eurlex-client.ts`
+
+```typescript
+// EUR-Lex SPARQL endpoint: https://publications.europa.eu/webapi/rdf/sparql
+// Căutăm: acte noi care conțin "NIS2" OR "AI Act" OR "GDPR" în titlu, publicate recent
+
+export type EurLexDocument = {
+  uri: string
+  title: string
+  publicationDateISO: string
+  officialJournalRef: string
+  type: "regulation" | "directive" | "decision" | "recommendation"
+  frameworks: ("nis2" | "ai-act" | "gdpr" | "e-factura")[]
+  impactSummary?: string   // generat de Gemini din abstract
+}
+
+export async function fetchRecentEurLexActs(
+  frameworks: string[],
+  sinceISO: string
+): Promise<EurLexDocument[]>
+// Apelează EUR-Lex SPARQL API — are rate limit generos (public API)
+// Query: acte publicate după sinceISO, cu keyword match pe frameworks
+// Parsează rezultatele XML/JSON
+// Returnează max 20 documente sortate descrescător după dată
+
+export async function fetchEurLexActSummary(uri: string): Promise<string>
+// Fetch abstract de la EUR-Lex URI
+// Dacă abstract > 500 chars → trimite la Gemini pentru rezumat 2-3 fraze
+```
+
+### 12.16.2 DNSC.ro scan (web scraping simplu)
+
+**Fișier nou:** `lib/server/dnsc-monitor.ts`
+
+```typescript
+// DNSC.ro nu are API — verificăm pagina de știri/comunicate
+// https://dnsc.ro/citeste/comunicate-de-presa
+
+export type DnscAnnouncement = {
+  title: string
+  url: string
+  publishedDateISO: string
+  snippet: string
+  potentialImpact: "high" | "medium" | "low"
+}
+
+export async function fetchDnscAnnouncements(sinceISO: string): Promise<DnscAnnouncement[]>
+// fetch() pagina de comunicate
+// Parse HTML (regex pe titluri și date — pagina e simplă)
+// Filtrează anunțuri după sinceISO
+// Returnează max 10 anunțuri recente
+// Fallback: dacă fetch eșuează (CORS, timeout) → returnează []
+
+// Nu trimitem la Gemini per default (cost) — doar dacă `title` conține cuvinte cheie:
+// "ghid", "ordin", "cerință", "termen", "sancțiune", "amendă", "NIS2"
+```
+
+### 12.16.3 Radar run cu surse externe
+
+**Fișier modificat:** `lib/compliance/agent-regulatory-radar.ts`
+
+```typescript
+// Extindere Phase 2: input nou
+export type RegulatoryRadarInput = {
+  orgId: string
+  state: ComplianceState
+  nowISO: string
+  // Nou în Phase 2:
+  externalSources?: {
+    eurLexDocs?: EurLexDocument[]     // pre-fetchate de cron
+    dnscAnnouncements?: DnscAnnouncement[]
+  }
+}
+
+// Logica Phase 2 adăugată la finalul runRegulatoryRadar():
+// 1. Pentru fiecare EurLexDocument cu frameworks ce se aplică org-ului:
+//    → action: type="alert_created", description=`Legislație nouă: ${title}`, approvalLevel=1
+// 2. Pentru fiecare DnscAnnouncement cu potentialImpact="high":
+//    → action: type="alert_created", description=`DNSC: ${title}`, approvalLevel=1
+// 3. Dacă org aplicabilă NIS2 + EurLex document tip "regulation" cu "NIS2":
+//    → action: type="finding_created", description="Ordin NIS2 nou detectat...", approvalLevel=2
+```
+
+### 12.16.4 Cron Regulatory Radar extins
+
+**Fișier modificat:** `app/api/cron/agent-regulatory-radar/route.ts`
+
+```typescript
+// Înainte de runRegulatoryRadar():
+// 1. fetchRecentEurLexActs(["NIS2", "AI Act", "GDPR"], lastWeekISO)
+// 2. fetchDnscAnnouncements(lastWeekISO)
+// 3. Pasează rezultatele ca externalSources în input
+// Dacă fetch eșuează → logează eroare, continuă fără surse externe (Phase 1 fallback)
+```
+
+**Fișier modificat:** `vercel.json` — menține schedula săptămânală `0 8 * * 1` (luni dimineața)
+
+### 12.16.5 UI — "Actualizări legislative" pe pagina Agenți
+
+**Fișier modificat:** `components/compliscan/agent-control-center.tsx`
+
+Secțiune nouă "Radar legislativ":
+```
+┌────────────────────────────────────────────┐
+│  📡 Radar legislativ                       │
+│  Ultima scanare: Luni 08:00                │
+│                                            │
+│  Surse monitorizate:                       │
+│  ✅ EUR-Lex (API)     ✅ DNSC.ro (scan)    │
+│                                            │
+│  Actualizări recente:                      │
+│  • [EUR-Lex] Implementing Act AI Act —    │
+│    publicat 28 mar 2026 · Impact: NIS2, AI │
+│    [Vezi detalii]                          │
+│  • [DNSC] Ghid tehnic securitate rețele —  │
+│    publicat 25 mar 2026 · Impact: NIS2     │
+│    [Vezi detalii]                          │
+│                                            │
+│  [Scanează acum]                           │
+└────────────────────────────────────────────┘
+```
+
+## Limitări cunoscute și fallback-uri
+- EUR-Lex SPARQL poate fi lent (2-4s) — cron-ul rulează async, nu blochează
+- DNSC.ro HTML se poate schimba — dacă parse eșuează, returnează `[]`, Phase 1 continuă
+- Gemini rezumat opțional — dacă `GEMINI_API_KEY` lipsește, `impactSummary` rămâne null
+- Nu scriem în KNOWN_DEADLINES automat — actualizările sunt surfaced ca notifications, nu modifică codul
+
+## Dependențe
+- `agent-regulatory-radar.ts` — existent Phase 1, extins
+- `app/api/cron/agent-regulatory-radar/route.ts` — existent, extins
+- `GEMINI_API_KEY` env var (opțional, pentru rezumate)
+- EUR-Lex SPARQL endpoint (public, fără auth)
+
+## DONE means
+- [ ] `fetchRecentEurLexActs()` returnează documente reale din EUR-Lex SPARQL
+- [ ] `fetchDnscAnnouncements()` parsează pagina DNSC și returnează anunțuri
+- [ ] Cron `agent-regulatory-radar` apelează sursele externe înainte de run
+- [ ] Dacă sursele externe eșuează → Phase 1 continuă fără eroare
+- [ ] Actualizări legislative vizibile în UI pe pagina Agenți
+- [ ] Finding generat automat dacă EurLex detectează act nou relevant pentru org
+
+---
+
+# Rezumat P4 — dependențe și ordine
+
+```
+Infrastructura V6 ────────────────────→ EXISTĂ (orchestrator + 5 agenți)
+12.13 Agent Control Center ───────────→ UI pentru agenți existenți (Gateway P4)
+12.14 Self-Learning Layer ────────────→ feedback loop (necesită 12.13 PATCH UI)
+12.15 Predictive Risk Engine ─────────→ trajectory widget (independent, dar valoros după 12.13)
+12.16 Regulatory Radar Phase 2 ───────→ surse externe (independent de 12.13-12.15)
+```
+
+**Ordine recomandată P4:**
+1. **Sprint P4-A:** 12.13 (Agent Control Center) — gateway: UI care expune infrastructura existentă
+2. **Sprint P4-B:** 12.15 (Predictive Risk) — impact imediat pe dashboard, nu depinde de 12.13
+3. **Sprint P4-C:** 12.14 (Self-Learning) — depinde de PATCH action API din 12.13
+4. **Sprint P4-D:** 12.16 (Regulatory Radar Phase 2) — cel mai complex, surse externe
+
+**Notă:** 12.13 este cel mai important sprint P4. Fără UI, infrastructura agentic există dar nu e vizibilă sau controlabilă de user. Un product care face lucruri invizibile nu are moat.
+
+---
+
+## Gate G — Agentic truth
+- [ ] Agent Control Center vizibil la `/dashboard/agenti`
+- [ ] Toți 5 agenți pot fi declanșați manual din UI
+- [ ] Reasoning și actions vizibile per run
+- [ ] Actions Level 2 pot fi aprobate/respinse din UI
+- [ ] Feedback se salvează și ajustează confidence
+- [ ] Risk trajectory widget pe dashboard (scor 30 zile)
+- [ ] Regulatory Radar scana EUR-Lex și DNSC săptămânal

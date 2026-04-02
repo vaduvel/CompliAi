@@ -20,9 +20,9 @@ import {
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
 import { DriftActiveCard } from "@/components/compliscan/drift-active-card"
 import { Nis2CockpitCard } from "@/components/compliscan/nis2-cockpit-card"
+import { RiskTrajectoryWidget } from "@/components/compliscan/risk-trajectory-widget"
 import { ErrorScreen } from "@/components/compliscan/route-sections"
 import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
-import { SiteScanCard } from "@/components/compliscan/site-scan-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -367,6 +367,7 @@ export default function DashboardPage() {
         onResolve={() => router.push(dashboardRoutes.resolve)}
       />
 
+      <RiskTrajectoryWidget />
       <Nis2CockpitCard />
       <DriftActiveCard findings={state.findings} />
 
@@ -516,43 +517,15 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── Instrumente secundare — collapsed ────────────────────────────── */}
-      <details className="group rounded-eos-xl border border-eos-border-subtle">
-        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 select-none">
-          <ChevronRight className="h-4 w-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-          <span className="text-sm font-medium text-eos-text-tertiary">Instrumente secundare</span>
-          <span className="ml-auto text-xs text-eos-text-tertiary">Scanare · valoare acumulată · rute dedicate</span>
-        </summary>
-        <div className="border-t border-eos-border-subtle p-4">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-            <section
-              id="dashboard-accumulation-card"
-              className={`scroll-mt-24 rounded-eos-lg transition-all duration-500 ${
-                highlightAccumulation ? "ring-2 ring-blue-500/40 ring-offset-2 ring-offset-transparent" : ""
-              }`}
-            >
-              <AccumulationCard />
-            </section>
-            <div className="space-y-3">
-              <SiteScanCard existingScan={state.siteScan ?? null} defaultUrl={state.orgProfile?.website ?? undefined} />
-              <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-5 py-4">
-                <p className="text-sm font-semibold text-eos-text-muted">Suprafețe dedicate</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                  {[
-                    { label: "Fiscal", href: dashboardRoutes.fiscal },
-                    { label: "NIS2", href: dashboardRoutes.nis2 },
-                    { label: "Dosar", href: dashboardRoutes.dosar },
-                  ].map((l) => (
-                    <Link key={l.href} href={l.href} className="rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2.5 text-sm font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text-muted">
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </details>
+      {/* ── Valoare acumulată ─────────────────────────────────────────────── */}
+      <section
+        id="dashboard-accumulation-card"
+        className={`scroll-mt-24 rounded-eos-lg transition-all duration-500 ${
+          highlightAccumulation ? "ring-2 ring-blue-500/40 ring-offset-2 ring-offset-transparent" : ""
+        }`}
+      >
+        <AccumulationCard />
+      </section>
 
     </div>
   )
