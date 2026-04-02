@@ -7,18 +7,19 @@ import { initialComplianceState, normalizeComplianceState, computeDashboardSumma
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { buildComplianceResponse, buildCounselBrief } from "@/lib/compliance/response-pack"
 import { jsonError } from "@/lib/server/api-response"
-import { requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "generarea legal brief-ului de counsel"
     )
     const rawState =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
 
     const state = normalizeComplianceState(rawState)
     const summary = computeDashboardSummary(state)

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionFromRequestMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/org-context", () => ({
@@ -47,7 +47,7 @@ import { POST } from "./route"
 describe("POST /api/integrations/efactura/sync", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Demo",

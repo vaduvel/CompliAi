@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionFromRequestMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
   computeDashboardSummaryMock: vi.fn(),
   getSectorBenchmarkMock: vi.fn(),
@@ -12,11 +12,11 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/engine", () => ({
@@ -37,7 +37,7 @@ import { GET } from "./route"
 describe("GET /api/benchmark", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -45,7 +45,7 @@ describe("GET /api/benchmark", () => {
       role: "viewer",
       exp: Date.now() + 1000,
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       gdprProgress: 12,
       orgProfile: { sector: "retail" },
     })
@@ -70,5 +70,6 @@ describe("GET /api/benchmark", () => {
       })
     )
     expect(mocks.getSectorBenchmarkMock).toHaveBeenCalledWith("org-1", "47", 82)
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
   })
 })

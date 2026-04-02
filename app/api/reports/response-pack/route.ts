@@ -21,8 +21,8 @@ import {
   type ResponsePackVendorSummary,
 } from "@/lib/compliance/response-pack"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -31,13 +31,14 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/reports/response-pack")
 
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "generarea response pack-ului de conformitate"
     )
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)
     const remediationPlan = buildRemediationPlan(normalized)

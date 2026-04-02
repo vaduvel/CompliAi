@@ -5,7 +5,7 @@ import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getAnafEnvironment, getAnafMode } from "@/lib/server/efactura-anaf-client"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -15,10 +15,7 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/integrations/efactura/sync")
 
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) {
-      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED", undefined, context)
-    }
+    const session = await requireFreshAuthenticatedSession(request, "sincronizarea e-Factura")
     const nowISO = new Date().toISOString()
     const actor = await resolveOptionalEventActor(request)
     const mode = getAnafMode()
@@ -44,7 +41,7 @@ export async function POST(request: Request) {
       ]),
     }), session.orgName)
     const workspaceOverride = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
       userRole: session.role,

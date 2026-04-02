@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import {
   buildPortfolioOverviewRows,
   loadPortfolioBundles,
@@ -16,10 +16,7 @@ export type PartnerClientSummary = PortfolioOverviewClientSummary
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) {
-      return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
-    }
+    const session = await requireFreshAuthenticatedSession(request, "încărcarea clienților partener")
 
     const memberships = await listAccessiblePortfolioMemberships(session)
     const bundles = await loadPortfolioBundles(memberships.slice(0, 20))

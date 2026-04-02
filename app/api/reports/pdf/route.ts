@@ -4,8 +4,8 @@ import { computeDashboardSummary, initialComplianceState, normalizeComplianceSta
 import { buildOnePageReport, buildOnePageReportMarkdown } from "@/lib/compliance/one-page-report"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
-import { requireRole } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { requireFreshRole } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
@@ -14,13 +14,14 @@ export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/reports/pdf")
 
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "generarea PDF-ului raportului executiv"
     )
     const state =
-      (await readStateForOrg(session.orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(session.orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
     const normalized = normalizeComplianceState(state)
     const summary = computeDashboardSummary(normalized)
     const remediationPlan = buildRemediationPlan(normalized)

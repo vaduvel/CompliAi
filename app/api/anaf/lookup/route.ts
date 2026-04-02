@@ -4,13 +4,12 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    await requireFreshAuthenticatedSession(request, "interogarea ANAF")
 
     const { searchParams } = new URL(request.url)
     const cui = searchParams.get("cui")?.trim()

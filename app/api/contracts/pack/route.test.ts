@@ -11,19 +11,19 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  readSessionFromRequestMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   generateContractsBaselinePackMock: vi.fn(),
   logRouteErrorMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/contracts-drafts", () => ({
@@ -39,7 +39,7 @@ import { GET } from "./route"
 describe("GET /api/contracts/pack", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       orgProfile: {
         sector: "retail",
         employeeCount: "10-49",
@@ -59,7 +59,9 @@ describe("GET /api/contracts/pack", () => {
   })
 
   it("cere autentificare când nu există sesiune", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValue(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const response = await GET(new Request("http://localhost/api/contracts/pack"))
     const payload = await response.json()
@@ -69,7 +71,7 @@ describe("GET /api/contracts/pack", () => {
   })
 
   it("returnează pachetul contractual pregătit", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo-imm",
       email: "demo@demo-imm.compliscan.ro",
@@ -100,11 +102,11 @@ describe("GET /api/contracts/pack", () => {
       employeeCount: "10-49",
       hasAiTools: true,
     })
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-demo-imm")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-demo-imm", "Demo Retail SRL")
   })
 
   it("respinge tipurile necunoscute", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo-imm",
       email: "demo@demo-imm.compliscan.ro",

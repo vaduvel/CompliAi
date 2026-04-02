@@ -3,9 +3,9 @@
 
 import { NextResponse } from "next/server"
 
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { getSectorBenchmark } from "@/lib/sector-benchmark"
 import type { OrgSector } from "@/lib/compliance/applicability"
@@ -27,10 +27,9 @@ const SECTOR_CAEN_MAP: Record<OrgSector, string> = {
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Neautorizat.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "accesarea benchmark-ului")
 
-    const rawState = await readStateForOrg(session.orgId)
+    const rawState = await readFreshStateForOrg(session.orgId, session.orgName)
     if (!rawState) return NextResponse.json({ benchmark: null, reason: "no-state" })
 
     const state = normalizeComplianceState(rawState)

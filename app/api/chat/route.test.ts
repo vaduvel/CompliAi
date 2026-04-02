@@ -5,12 +5,12 @@ import { initialComplianceState } from "@/lib/compliance/engine"
 const mocks = vi.hoisted(() => ({
   generateComplianceAnswerMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  readSessionFromRequestMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/gemini", () => ({
@@ -19,7 +19,7 @@ vi.mock("@/lib/server/gemini", () => ({
 
 vi.mock("@/lib/server/mvp-store", () => ({
   mutateStateForOrg: mocks.mutateStateForOrgMock,
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 import { POST } from "./route"
@@ -27,14 +27,14 @@ import { POST } from "./route"
 describe("POST /api/chat", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo",
       orgName: "Demo Org",
       email: "owner@example.com",
       role: "owner",
     })
-    mocks.readStateForOrgMock.mockResolvedValue(structuredClone(initialComplianceState))
+    mocks.readFreshStateForOrgMock.mockResolvedValue(structuredClone(initialComplianceState))
     mocks.generateComplianceAnswerMock.mockResolvedValue("Răspuns AI")
     mocks.mutateStateForOrgMock.mockImplementation(async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) => {
       updater(structuredClone(initialComplianceState))
@@ -43,7 +43,7 @@ describe("POST /api/chat", () => {
   })
 
   it("cere autentificare pentru assistantul din dashboard", async () => {
-    mocks.readSessionFromRequestMock.mockReturnValueOnce(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(new Error("AUTH"))
 
     const response = await POST(
       new Request("http://localhost/api/chat", {
@@ -72,7 +72,7 @@ describe("POST /api/chat", () => {
 
     expect(response.status).toBe(200)
     expect(payload.answer).toBe("Răspuns AI")
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-demo")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-demo", "Demo Org")
     expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
       "org-demo",
       expect.any(Function),

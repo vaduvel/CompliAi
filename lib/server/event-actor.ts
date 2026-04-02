@@ -1,6 +1,6 @@
 import type { ComplianceEvent } from "@/lib/compliance/types"
 import type { SessionPayload } from "@/lib/server/auth"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { getOrgContext } from "@/lib/server/org-context"
 
 export type EventActor = {
@@ -20,10 +20,10 @@ export function eventActorFromSession(session: SessionPayload): EventActor {
 }
 
 export async function resolveOptionalEventActor(request: Request): Promise<EventActor> {
-  const session = readSessionFromRequest(request)
+  const session = await readFreshSessionFromRequest(request)
   if (session) return eventActorFromSession(session)
 
-  const workspace = await getOrgContext()
+  const workspace = await getOrgContext({ request })
   return {
     id: `workspace:${workspace.orgId}`,
     label: workspace.workspaceOwner || workspace.orgName,

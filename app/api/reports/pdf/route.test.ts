@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  requireRoleMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
   computeDashboardSummaryMock: vi.fn(),
   buildRemediationPlanMock: vi.fn(),
@@ -12,11 +12,11 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/compliance/engine", async () => {
@@ -48,8 +48,8 @@ import { POST } from "./route"
 describe("POST /api/reports/pdf", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({ orgId: "org-1", orgName: "Demo Org SRL" })
-    mocks.readStateForOrgMock.mockResolvedValue({ findings: [] })
+    mocks.requireFreshRoleMock.mockResolvedValue({ orgId: "org-1", orgName: "Demo Org SRL" })
+    mocks.readFreshStateForOrgMock.mockResolvedValue({ findings: [] })
     mocks.normalizeComplianceStateMock.mockImplementation((value: unknown) => value)
     mocks.computeDashboardSummaryMock.mockReturnValue({ score: 72 })
     mocks.buildRemediationPlanMock.mockReturnValue([{ id: "plan-1" }])
@@ -62,7 +62,7 @@ describe("POST /api/reports/pdf", () => {
     const response = await POST(new Request("http://localhost/api/reports/pdf", { method: "POST" }))
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Demo Org SRL")
     expect(mocks.buildPDFFromMarkdownMock).toHaveBeenCalledWith(
       "# Demo report",
       expect.objectContaining({

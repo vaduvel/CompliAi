@@ -2,17 +2,19 @@ import { NextResponse } from "next/server"
 
 import { computeDashboardSummary, initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import type { ChatMessage } from "@/lib/compliance/types"
-import { readSessionFromRequest } from "@/lib/server/auth"
+import { requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { generateComplianceAnswer } from "@/lib/server/gemini"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 
 type ChatPayload = {
   message?: string
 }
 
 export async function POST(request: Request) {
-  const session = readSessionFromRequest(request)
-  if (!session) {
+  let session
+  try {
+    session = await requireFreshAuthenticatedSession(request, "folosirea asistentului din dashboard")
+  } catch {
     return NextResponse.json(
       { error: "Autentificarea este obligatorie." },
       { status: 401 }
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   const state =
-    (await readStateForOrg(session.orgId)) ??
+    (await readFreshStateForOrg(session.orgId, session.orgName)) ??
     normalizeComplianceState(initialComplianceState)
   const summary = computeDashboardSummary(state)
   const context = {

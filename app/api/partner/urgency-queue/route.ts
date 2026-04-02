@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest, resolveUserMode } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession, resolveUserMode } from "@/lib/server/auth"
 import {
   listAccessiblePortfolioMemberships,
   loadPortfolioBundles,
@@ -16,8 +16,10 @@ const SEV_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "accesarea cozii de urgențe"
+    )
 
     const userMode = await resolveUserMode(session)
     if (userMode !== "partner") {
