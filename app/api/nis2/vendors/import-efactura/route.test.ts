@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(async (_orgId: string, fn: (state: Record<string, unknown>) => unknown) =>
     fn({ alerts: [] })
   ),
@@ -25,7 +25,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/api-response", () => ({
@@ -33,7 +33,7 @@ vi.mock("@/lib/server/api-response", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
@@ -62,7 +62,7 @@ import { POST } from "./route"
 describe("POST /api/nis2/vendors/import-efactura", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue({ orgId: "org-1", orgName: "Org Demo", userId: "user-1" })
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({ orgId: "org-1", orgName: "Org Demo", userId: "user-1" })
     mocks.readNis2StateMock.mockResolvedValue({ assessment: null, incidents: [], vendors: [] })
     mocks.upsertVendorsFromEfacturaMock.mockResolvedValue({
       added: 1,
@@ -73,7 +73,9 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("respinge accesul fara sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValue(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const res = await POST(new Request("http://localhost/api/nis2/vendors/import-efactura", { method: "POST" }))
 
@@ -81,7 +83,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("dedupeaza furnizorii din validari dupa CUI si agregeaza invoiceCount", async () => {
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "Amazon Web Services EMEA SARL",
@@ -114,7 +116,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("cade in demo mode cand nu exista validari e-Factura reale", async () => {
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       efacturaValidations: [],
     })
 
@@ -130,7 +132,7 @@ describe("POST /api/nis2/vendors/import-efactura", () => {
   })
 
   it("genereaza alerte cand sunt detectati tech vendors fara DPA", async () => {
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       efacturaValidations: [
         {
           supplierName: "OpenAI OpCo LLC",

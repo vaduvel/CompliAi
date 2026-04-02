@@ -8,13 +8,13 @@ import { NextResponse } from "next/server"
 import { buildAIActFindingId } from "@/lib/compliance/ai-act-classifier"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
-import { mutateStateForOrg, readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { buildAnnexIVDocument } from "@/lib/compliance/ai-conformity-assessment"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "generarea documentatiei Anexa IV"
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { systemId?: string }
     const { systemId } = body
 
-    const state = await readStateForOrg(session.orgId)
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
     if (!state) return jsonError("Stare indisponibilă.", 404, "STATE_NOT_FOUND")
 
     const system = state.aiSystems.find((s) => s.id === systemId)

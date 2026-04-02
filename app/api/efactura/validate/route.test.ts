@@ -1,17 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionFromRequestMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   resolveOptionalEventActorMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   buildDashboardPayloadMock: vi.fn(),
   appendComplianceEventsMock: vi.fn(),
   createComplianceEventMock: vi.fn(),
+  AuthzErrorMock: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 401, code = "UNAUTHORIZED") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  AuthzError: mocks.AuthzErrorMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/org-context", () => ({
@@ -40,7 +50,7 @@ import { POST } from "./route"
 describe("POST /api/efactura/validate", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo",
       orgName: "Org Demo",
@@ -102,6 +112,9 @@ describe("POST /api/efactura/validate", () => {
         workspaceLabel: "Workspace local",
       })
     )
+    expect(mocks.getOrgContextMock).toHaveBeenCalledWith({
+      request: expect.any(Request),
+    })
     expect(payload.validation.documentName).toBe("factura.xml")
   })
 })

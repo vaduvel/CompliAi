@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   readNis2StateMock: vi.fn(),
   AuthzErrorMock: class AuthzError extends Error {
     status: number
@@ -17,11 +17,11 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  readSessionFromRequest: mocks.readSessionMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/nis2-store", async () => {
@@ -37,8 +37,13 @@ import { GET } from "./route"
 describe("GET /api/nis2/package", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionMock.mockReturnValue({ userId: "user-1", orgId: "org-1", email: "demo@site.ro" })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      userId: "user-1",
+      orgId: "org-1",
+      orgName: "Org Demo",
+      email: "demo@site.ro",
+    })
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       applicability: { entries: [{ tag: "nis2", certainty: "certain" }] },
     })
     mocks.readNis2StateMock.mockResolvedValue({
@@ -58,7 +63,7 @@ describe("GET /api/nis2/package", () => {
     expect(body.applicable).toBe(true)
     expect(body.exportReady).toBe(false)
     expect(body.nis2Package.assessmentScore).toBe(42)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
     expect(body.findings.map((finding: { id: string }) => finding.id)).toEqual(
       expect.arrayContaining(["nis2-dnsc-registration", "nis2-assessment-gap"])
     )
@@ -84,7 +89,9 @@ describe("GET /api/nis2/package", () => {
   })
 
   it("respinge accesul fără sesiune", async () => {
-    mocks.readSessionMock.mockReturnValue(null)
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValue(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
 
     const response = await GET(new Request("http://localhost/api/nis2/package"))
 

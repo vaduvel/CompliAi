@@ -1,18 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  readSessionFromRequestMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   getAnafModeMock: vi.fn(),
+  AuthzErrorMock: class AuthzError extends Error {
+    status: number
+    code: string
+    constructor(message: string, status = 401, code = "UNAUTHORIZED") {
+      super(message)
+      this.status = status
+      this.code = code
+    }
+  },
 }))
 
 vi.mock("@/lib/server/auth", () => ({
-  readSessionFromRequest: mocks.readSessionFromRequestMock,
+  AuthzError: mocks.AuthzErrorMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
@@ -25,14 +35,14 @@ import { GET, POST } from "./route"
 describe("/api/efactura/signals", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.readSessionFromRequestMock.mockReturnValue({
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Demo",
       email: "owner@example.com",
       role: "owner",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       efacturaConnected: true,
       efacturaSyncedAtISO: "2026-04-02T10:00:00.000Z",
     })
@@ -49,7 +59,7 @@ describe("/api/efactura/signals", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
     expect(payload.connected).toBe(true)
     expect(payload.sandbox).toBe(true)
   })
@@ -65,5 +75,15 @@ describe("/api/efactura/signals", () => {
       "Org Demo"
     )
     expect(typeof payload.generated).toBe("number")
+  })
+
+  it("propaga 401 când lipsește sesiunea fresh", async () => {
+    mocks.requireFreshAuthenticatedSessionMock.mockRejectedValueOnce(
+      new mocks.AuthzErrorMock("Autentificare necesară.", 401, "UNAUTHORIZED")
+    )
+
+    const response = await GET(new Request("http://localhost/api/efactura/signals"))
+
+    expect(response.status).toBe(401)
   })
 })

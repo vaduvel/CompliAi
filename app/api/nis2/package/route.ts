@@ -2,17 +2,16 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { buildNis2Findings, buildNis2Package, readNis2State } from "@/lib/server/nis2-store"
 
 export async function GET(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(request, "citirea pachetului NIS2")
 
     const [state, nis2State] = await Promise.all([
-      readStateForOrg(session.orgId),
+      readFreshStateForOrg(session.orgId, session.orgName),
       readNis2State(session.orgId),
     ])
     const nowISO = new Date().toISOString()

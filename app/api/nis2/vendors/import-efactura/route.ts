@@ -7,22 +7,25 @@ import { NextResponse } from "next/server"
 
 import type { ComplianceState } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
 import { collectSupplierImports } from "@/lib/server/efactura-vendor-signals"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { readStateForOrg, mutateStateForOrg } from "@/lib/server/mvp-store"
+import { mutateStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State, upsertVendorsFromEfactura } from "@/lib/server/nis2-store"
 import { EFACTURA_MOCK_VENDORS } from "@/lib/server/efactura-mock-data"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 
 export async function POST(request: Request) {
   try {
-    const session = readSessionFromRequest(request)
-    if (!session) return jsonError("Autentificare necesară.", 401, "UNAUTHORIZED")
+    const session = await requireFreshAuthenticatedSession(
+      request,
+      "importul furnizorilor NIS2 din e-Factura"
+    )
 
     const orgId = session.orgId
     const state =
-      (await readStateForOrg(orgId)) ?? normalizeComplianceState(initialComplianceState)
+      (await readFreshStateForOrg(orgId, session.orgName)) ??
+      normalizeComplianceState(initialComplianceState)
 
     // Extrage furnizorii unici din validările e-Factura
     const realSuppliers = collectSupplierImports(state.efacturaValidations)

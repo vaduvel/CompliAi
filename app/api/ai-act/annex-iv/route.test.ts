@@ -11,19 +11,19 @@ const mocks = vi.hoisted(() => ({
       this.code = code
     }
   },
-  requireRoleMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   buildAnnexIVDocumentMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
@@ -36,14 +36,14 @@ import { POST } from "./route"
 describe("POST /api/ai-act/annex-iv", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       orgName: "Org Demo",
       email: "owner@example.com",
       role: "owner",
     })
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       aiSystems: [
         {
           id: "sys-1",
@@ -87,7 +87,7 @@ describe("POST /api/ai-act/annex-iv", () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(mocks.readStateForOrgMock).toHaveBeenCalledWith("org-1")
+    expect(mocks.readFreshStateForOrgMock).toHaveBeenCalledWith("org-1", "Org Demo")
     expect(mocks.mutateStateForOrgMock).toHaveBeenCalledWith(
       "org-1",
       expect.any(Function),

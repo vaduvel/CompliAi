@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server"
 
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { parseSalaryCSV } from "@/lib/server/pay-transparency-csv"
 import { saveSalaryRecords, type SalaryRecordInput } from "@/lib/server/pay-transparency-store"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "încărcarea datelor salariale"
