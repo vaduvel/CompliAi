@@ -19,8 +19,17 @@ type WebsitePageSnapshot = {
 }
 
 const MAX_PAGES = 4
-const MAX_HTML_LENGTH = 120_000
-const WEBSITE_TIMEOUT_MS = 6_000
+// Large corporate sites (Bitdefender 240KB, Altex 300KB+) have privacy/cookie links
+// only in footer. Truncating at 120KB misses them. 500KB accommodates most RO sites.
+const MAX_HTML_LENGTH = 500_000
+const WEBSITE_TIMEOUT_MS = 12_000
+
+// Real-browser UA — required because many RO enterprise sites (Bitdefender, Altex,
+// Dedeman, eMAG, etc.) sit behind Cloudflare/Akamai which block obvious bot UAs.
+// We're a legitimate compliance check, not abusive — a Chrome UA is appropriate.
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 const DEFAULT_PATHS = [
   "/",
@@ -239,7 +248,8 @@ async function fetchWebsiteHtml(url: string, fetchImpl: typeof fetch) {
     const response = await fetchImpl(url, {
       headers: {
         Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
-        "User-Agent": "CompliScan Website Prefill/1.0",
+        "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.8",
+        "User-Agent": BROWSER_UA,
       },
       redirect: "follow",
       signal: AbortSignal.timeout(WEBSITE_TIMEOUT_MS),

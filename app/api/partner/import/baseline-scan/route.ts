@@ -17,6 +17,8 @@ import {
 } from "@/lib/compliance/intake-engine"
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
+import { buildWebsitePrefillSignals } from "@/lib/server/website-prefill-signals"
+import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
@@ -101,29 +103,63 @@ export async function POST(request: Request) {
       }
     }
 
-    // Phase B: Generate findings — use conservative assumptions for partner import
-    // For imported firms, assume worst-case: every company needs compliance review.
-    // The partner will then verify/dismiss each finding with the client.
-    if (updatedProfile) {
-      const hasWebsite = !!(updatedProfile.website || body.website)
-      const hasEmployees = updatedProfile.employeeCount !== "1-9"
+    // Phase A.5: Website signals scrape (NEW — Faza 2 engine fix)
+    // Replaces pessimistic guesses with real evidence from client's public site.
+    // If site has privacy policy / cookie banner / forms, we DON'T generate
+    // findings claiming those are missing.
+    let websiteSuggestions: Awaited<ReturnType<typeof buildWebsitePrefillSignals>>["suggestions"] = {}
+    const websiteUrl = normalizeWebsiteUrl(updatedProfile?.website || body.website)
+    if (websiteUrl) {
+      try {
+        const signals = await buildWebsitePrefillSignals(websiteUrl)
+        websiteSuggestions = signals.suggestions
+        if (signals.websiteSignals && state.orgProfilePrefill) {
+          state.orgProfilePrefill = {
+            ...state.orgProfilePrefill,
+            normalizedWebsite: websiteUrl,
+            websiteSignals: signals.websiteSignals,
+          }
+        }
+        console.log(
+          "[baseline-scan] Website signals:",
+          Object.keys(websiteSuggestions).length,
+          "suggestions for",
+          websiteUrl
+        )
+      } catch (err) {
+        console.warn("[baseline-scan] Website scan failed, continuing:", (err as Error).message)
+      }
+    }
 
-      // Build aggressive intake answers: assume "no" for all compliance artifacts
-      // so that findings are generated for everything that needs checking.
+    // Phase B: Generate findings — pessimistic baseline OVERRIDDEN by real signals.
+    // Where website scrape detected real compliance evidence (privacy policy, cookies,
+    // forms), we mark that as "yes" instead of pessimistic "no". Where ANAF lookup
+    // confirmed e-Factura registration, we skip e-Factura missing findings.
+    // Partner verifies/dismisses what remains in cockpit.
+    if (updatedProfile) {
+      const hasWebsite = !!websiteUrl
+      const hasEmployees = updatedProfile.employeeCount !== "1-9"
+      const efacturaActive = prefill?.efacturaRegistered === true
+
+      // Helper: prefer real website signal over pessimistic default
+      const sigYes = (key: keyof typeof websiteSuggestions): "yes" | undefined =>
+        websiteSuggestions[key]?.value === true ? "yes" : undefined
+
       const conservativeAnswers: FullIntakeAnswers = {
         // Core questions — assume positive (company does these things)
         sellsToConsumers: "unknown",
         hasEmployees: hasEmployees ? "yes" : "unknown",
-        processesPersonalData: "probably",
+        processesPersonalData: sigYes("processesPersonalData") ?? "probably",
         usesAITools: updatedProfile.usesAITools ? "yes" : "no",
         usesExternalVendors: "probably",
-        hasSiteWithForms: hasWebsite ? "probably" : "unknown",
+        hasSiteWithForms: sigYes("hasSiteWithForms") ?? (hasWebsite ? "probably" : "unknown"),
         hasStandardContracts: "probably",
         // Conditional answers — assume "no" / missing (generates findings)
+        // unless website/ANAF gave us real positive evidence.
         hasJobDescriptions: hasEmployees ? "no" : undefined,
         hasEmployeeRegistry: hasEmployees ? "no" : undefined,
         hasInternalProcedures: hasEmployees ? "no" : undefined,
-        hasPrivacyPolicy: "no",
+        hasPrivacyPolicy: sigYes("hasPrivacyPolicy") ?? "no",
         hasDsarProcess: "no",
         hasRopaRegistry: "no",
         hasVendorDpas: "no",
@@ -131,15 +167,16 @@ export async function POST(request: Request) {
         hasAiPolicy: updatedProfile.usesAITools ? "no" : undefined,
         hasVendorDocumentation: "no",
         vendorsSendPersonalData: "probably",
-        hasSitePrivacyPolicy: hasWebsite ? "no" : undefined,
-        hasCookiesConsent: hasWebsite ? "no" : undefined,
+        hasSitePrivacyPolicy: sigYes("hasSitePrivacyPolicy") ?? (hasWebsite ? "no" : undefined),
+        hasCookiesConsent: sigYes("hasCookiesConsent") ?? (hasWebsite ? "no" : undefined),
       }
 
       // Also generate from prefill-aware engine for any ANAF-enriched suggestions
       const prefillAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
 
-      // Merge: conservative answers take precedence (more findings)
+      // Merge: conservative answers take precedence — but they now include real signals
       const mergedAnswers = { ...prefillAnswers, ...conservativeAnswers }
+      console.log("[baseline-scan] efacturaActive (from ANAF):", efacturaActive)
       const nis2State = await readNis2State(body.orgId)
       const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
       const findings = buildInitialFindings(mergedAnswers, { supplementalFindings: nis2Findings })
