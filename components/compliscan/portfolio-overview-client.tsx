@@ -904,10 +904,25 @@ export function PortfolioOverviewClient() {
       {/* ── Client table ── */}
       <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 px-5 py-16 text-center">
-            <Users className="size-8 text-eos-text-tertiary" strokeWidth={1.5} />
-            <p className="text-sm font-medium text-eos-text-tertiary">Nicio firmă activă</p>
-            <p className="text-xs text-eos-text-tertiary">Adaugă organizații sau acceptă invitații pentru a popula portofoliul.</p>
+          <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
+            <div className="flex size-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-surface-active">
+              <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-base font-semibold text-eos-text">Niciun client încă în portofoliu</p>
+              <p className="max-w-md text-sm leading-6 text-eos-text-tertiary">
+                Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowImport(true)}
+              disabled={planData ? !planData.canAddOrg : false}
+              className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Upload className="size-4" strokeWidth={2} />
+              Adaugă primul client
+            </button>
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="px-5 py-10 text-center text-sm text-eos-text-tertiary">

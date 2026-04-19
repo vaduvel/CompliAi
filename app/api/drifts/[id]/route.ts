@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { ComplianceDriftLifecycleStatus } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession, formatEventActorLabel } from "@/lib/server/event-actor"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
@@ -38,7 +38,7 @@ export async function PATCH(
     }
 
     const action = body.action
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       action === "waive" ? ["owner", "partner_manager", "compliance"] : ["owner", "partner_manager", "compliance", "reviewer"],
       action === "waive" ? "waive pe drift" : "actualizarea lifecycle-ului de drift"
@@ -122,9 +122,10 @@ export async function PATCH(
     }, session.orgName)
 
     const workspace = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceOwner: session.email,
       userRole: session.role,
     }
 

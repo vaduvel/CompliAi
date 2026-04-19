@@ -6,7 +6,7 @@ import { assessEvidenceQuality } from "@/lib/compliance/evidence-quality"
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import type { TaskEvidenceAttachment, TaskEvidenceKind } from "@/lib/compliance/types"
 import { jsonError, jsonWithRequestContext } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
 import { storePrivateEvidenceFile } from "@/lib/server/evidence-storage"
@@ -120,7 +120,7 @@ export async function POST(
 
   try {
     const { id } = await context.params
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "incarcarea dovezilor pentru remediere"
@@ -238,9 +238,10 @@ export async function POST(
     }, session.orgName)
 
     const workspace = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceOwner: session.email,
       userRole: session.role,
     }
 

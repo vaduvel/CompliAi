@@ -56,6 +56,8 @@ export default function DriftPage() {
   const cockpitActions = useCockpitMutations()
   const [actingDriftId, setActingDriftId] = useState<string | null>(null)
   const [expandedDriftId, setExpandedDriftId] = useState<string | null>(null)
+  const [waivingDriftId, setWaivingDriftId] = useState<string | null>(null)
+  const [waiveNotes, setWaiveNotes] = useState<Record<string, string>>({})
   const openDrifts = cockpit.activeDrifts
   const resolvedDrifts = useMemo(
     () =>
@@ -99,24 +101,24 @@ export default function DriftPage() {
         : ledgerUnratedCount > 0
           ? `${ledgerUnratedCount} neevaluate`
           : "registru curat"
-      : "fara registru de dovada inca"
+      : "fără registru de dovadă încă"
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Drift activ",
       value: `${openDrifts.length}`,
-      hint: "schimbari fata de baseline care cer decizie umana",
+      hint: "schimbări față de baseline care cer decizie umană",
       tone: openDrifts.length > 0 ? "warning" : "success",
     },
     {
       label: "SLA depasit",
       value: `${breachedDrifts}`,
-      hint: breachedDrifts > 0 ? "drift-uri iesite din fereastra de escalare" : "fara escalari depasite acum",
+      hint: breachedDrifts > 0 ? "drift-uri ieșite din fereastra de escalare" : "fără escalări depășite acum",
       tone: breachedDrifts > 0 ? "danger" : "success",
     },
     {
       label: "Task-uri din drift",
       value: `${driftTasks.length}`,
-      hint: "actiuni generate deja din semnalele de drift",
+      hint: "acțiuni generate deja din semnalele de drift",
       tone: driftTasks.length > 0 ? "accent" : "neutral",
     },
     {
@@ -129,24 +131,18 @@ export default function DriftPage() {
 
   async function handleDriftAction(
     driftId: string,
-    action: "acknowledge" | "start" | "resolve" | "waive" | "reopen"
+    action: "acknowledge" | "start" | "resolve" | "waive" | "reopen",
+    note?: string
   ) {
-    const note =
-      action === "waive"
-        ? window.prompt(
-            "Adaugă un motiv scurt pentru waive. Lasă gol dacă vrei doar justificarea standard."
-          ) ?? undefined
-        : undefined
-
     setActingDriftId(driftId)
     try {
-      await cockpitActions.updateDriftLifecycle({
-        driftId,
-        action,
-        note,
-      })
+      await cockpitActions.updateDriftLifecycle({ driftId, action, note })
     } finally {
       setActingDriftId(null)
+      if (action === "waive") {
+        setWaivingDriftId(null)
+        setWaiveNotes((prev) => { const next = { ...prev }; delete next[driftId]; return next })
+      }
     }
   }
 
@@ -154,8 +150,8 @@ export default function DriftPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Control / Drift"
-        title="Tratezi schimbarea fata de baseline"
-        description="Preiei, escaladezi sau inchizi drift-ul aici. Daca vrei queue-ul canonic sau livrabilul, continui in De rezolvat si Rapoarte."
+        title="Tratezi schimbarea față de baseline"
+        description="Preiei, escaladezi sau închizi drift-ul aici. Dacă vrei queue-ul canonic sau livrabilul, continui în De rezolvat și Rapoarte."
         badges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
@@ -206,23 +202,23 @@ export default function DriftPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
         <SectionBoundary
           eyebrow="Flux canonic"
-          title="Drift-ul ramane separat de inventar si dovada"
-          description="Aici tratezi schimbarea fata de baseline. Pentru queue-ul principal si livrabil continui in De rezolvat si Rapoarte."
+          title="Drift-ul rămâne separat de inventar și dovadă"
+          description="Aici tratezi schimbarea față de baseline. Pentru queue-ul principal și livrabil continui în De rezolvat și Rapoarte."
         />
         <HandoffCard
-          title="Handoff corect intre drift, queue si rapoarte"
-          description="Pastrezi drift-ul clar pe schimbare si decizie, iar executia si livrabilul stau in suprafetele canonice."
+          title="Handoff corect între drift, queue și rapoarte"
+          description="Păstrezi drift-ul clar pe schimbare și decizie, iar execuția și livrabilul stau în suprafețele canonice."
           destinationLabel="de rezolvat / rapoarte"
           checklist={[
             "nu amesteci inventarul cu drift-ul activ",
-            "folosesti De rezolvat pentru executie si Rapoarte pentru output",
+            "folosești De rezolvat pentru execuție și Rapoarte pentru output",
           ]}
           actions={
             <>
-              <Button asChild variant="outline">
+              <Button asChild>
                 <Link href={dashboardRoutes.resolve}>Deschide De rezolvat</Link>
               </Button>
-              <Button asChild>
+              <Button asChild variant="outline">
                 <Link href={dashboardRoutes.reports}>Deschide Rapoarte</Link>
               </Button>
             </>
@@ -235,7 +231,7 @@ export default function DriftPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Compliance drift</CardTitle>
             <p className="text-sm text-eos-text-muted">
-              Schimbari detectate fata de snapshot. Drift-urile inchise recent raman vizibile pentru redeschidere rapida.
+              Schimbări detectate față de snapshot. Drift-urile închise recent rămân vizibile pentru redeschidere rapidă.
             </p>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
@@ -402,17 +398,47 @@ export default function DriftPage() {
                                 Rezolvă
                               </Button>
                             )}
-                            {drift.open && (
+                            {drift.open && waivingDriftId === drift.id ? (
+                              <div className="flex w-full flex-col gap-2 rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft/30 p-3">
+                                <p className="text-[11px] font-medium text-eos-warning">
+                                  Motiv anulare urmărire (opțional)
+                                </p>
+                                <input
+                                  autoFocus
+                                  value={waiveNotes[drift.id] ?? ""}
+                                  onChange={(e) => setWaiveNotes((prev) => ({ ...prev, [drift.id]: e.target.value }))}
+                                  placeholder="Ex: risc acceptat, context schimbat..."
+                                  className="h-8 w-full rounded border border-eos-border bg-eos-surface px-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary"
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => void handleDriftAction(drift.id, "waive", waiveNotes[drift.id] || undefined)}
+                                    disabled={cockpit.busy || isActing}
+                                    size="sm"
+                                    className="border-eos-warning/40 bg-eos-warning text-white hover:bg-eos-warning/90"
+                                  >
+                                    {isActing ? "Se anulează..." : "Confirmă anularea"}
+                                  </Button>
+                                  <Button
+                                    onClick={() => setWaivingDriftId(null)}
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    Înapoi
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : drift.open ? (
                               <Button
-                                onClick={() => void handleDriftAction(drift.id, "waive")}
+                                onClick={() => setWaivingDriftId(drift.id)}
                                 disabled={cockpit.busy || isActing}
                                 variant="outline"
                                 size="sm"
                                 className="border-eos-border bg-eos-surface text-eos-warning hover:bg-eos-warning-soft"
                               >
-                                Waive
+                                Anulează urmărirea
                               </Button>
-                            )}
+                            ) : null}
                             {!drift.open && (
                               <Button
                                 onClick={() => void handleDriftAction(drift.id, "reopen")}

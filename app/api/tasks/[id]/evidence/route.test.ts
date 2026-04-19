@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   getOrgContextMock: vi.fn(),
   getPersistableTaskIdsMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   randomUUIDMock: vi.fn(),
   storePrivateEvidenceFileMock: vi.fn(),
   shouldUseSupabaseEvidenceAsRequiredMock: vi.fn(),
@@ -44,7 +44,7 @@ vi.mock("@/lib/compliance/task-ids", () => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/evidence-storage", () => ({
@@ -63,7 +63,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     vi.clearAllMocks()
     vi.spyOn(Date, "now").mockReturnValue(1_741_859_200_000)
     mocks.randomUUIDMock.mockReturnValue("uuid-1234")
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo",
       email: "demo@site.ro",
@@ -206,7 +206,7 @@ describe("POST /api/tasks/[id]/evidence", () => {
     const form = new FormData()
     form.set("kind", "screenshot")
     form.set("file", new File(["png-bytes"], "proof.png", { type: "image/png" }))
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

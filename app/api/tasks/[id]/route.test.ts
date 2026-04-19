@@ -20,13 +20,13 @@ const mocks = vi.hoisted(() => ({
   getTaskResolutionTargetsMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   normalizeComplianceStateMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   validateTaskAgainstStateMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -61,7 +61,7 @@ vi.mock("@/lib/compliance/task-validation", () => ({
 describe("PATCH /api/tasks/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",
       email: "demo@site.ro",
@@ -112,7 +112,7 @@ describe("PATCH /api/tasks/[id]", () => {
   })
 
   it("respinge rolul nepermis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 

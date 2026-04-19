@@ -2,9 +2,9 @@ import { NextResponse } from "next/server"
 
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { getStoredEvidenceSignedUrl, readStoredEvidenceFile } from "@/lib/server/evidence-storage"
-import { readStateForOrg } from "@/lib/server/mvp-store"
+import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { loadTaskEvidenceObjectFromSupabase } from "@/lib/server/supabase-evidence-read"
 
 export const runtime = "nodejs"
@@ -14,14 +14,14 @@ export async function GET(
   context: { params: Promise<{ id: string; evidenceId: string }> }
 ) {
   try {
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer", "viewer"],
       "vizualizarea dovezilor de remediere"
     )
 
     const { id, evidenceId } = await context.params
-    const state = await readStateForOrg(session.orgId)
+    const state = await readFreshStateForOrg(session.orgId, session.orgName)
 
     if (!state) {
       return jsonError(

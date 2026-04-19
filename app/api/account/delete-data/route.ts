@@ -9,14 +9,14 @@ import { NextResponse } from "next/server"
 
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
-import { writeState } from "@/lib/server/mvp-store"
+import { writeStateForOrg } from "@/lib/server/mvp-store"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner"], "ștergerea datelor de conformitate")
+    const session = await requireFreshRole(request, ["owner"], "ștergerea datelor de conformitate")
     const actor = eventActorFromSession(session)
 
     const cleanState = normalizeComplianceState({
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       ]),
     })
 
-    await writeState(cleanState)
+    await writeStateForOrg(session.orgId, cleanState, session.orgName)
 
     return NextResponse.json({
       ok: true,

@@ -5,7 +5,7 @@ import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/
 import type { PersistedTaskStatus } from "@/lib/compliance/types"
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import { getTaskResolutionTargets } from "@/lib/compliance/task-resolution"
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
 import { eventActorFromSession } from "@/lib/server/event-actor"
@@ -51,7 +51,7 @@ export async function PATCH(
     const hasAction = typeof body.action !== "undefined"
     let feedback: TaskUpdateFeedback | undefined
 
-    const session = requireRole(
+    const session = await requireFreshRole(
       request,
       ["owner", "partner_manager", "compliance", "reviewer"],
       "actualizarea task-urilor de remediere"
@@ -300,9 +300,10 @@ export async function PATCH(
     }
 
     const workspace = {
-      ...(await getOrgContext()),
+      ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceOwner: session.email,
       userRole: session.role,
     }
 

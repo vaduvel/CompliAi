@@ -1002,37 +1002,19 @@ export default function FindingDetailPage() {
           finding={finding}
           recipe={recipe}
         >
-          {hasGenerator ? (
-            <Button
-              data-testid="confirm-and-generate"
-              onClick={() => updateStatus("confirmed")}
-              disabled={actionLoading}
-              className="gap-1.5"
-            >
+          <Button
+            data-testid="confirm-finding"
+            onClick={() => updateStatus("confirmed")}
+            disabled={actionLoading}
+            className="gap-1.5"
+          >
+            {hasGenerator ? (
               <FileText className="size-3.5" strokeWidth={2} />
-              Confirmă findingul
-            </Button>
-          ) : recipe.workflowLink ? (
-            <Button
-              data-testid="confirm-and-open-workflow"
-              onClick={() => updateStatus("confirmed")}
-              disabled={actionLoading}
-              className="gap-1.5"
-            >
-              <FileText className="size-3.5" strokeWidth={2} />
-              Confirmă findingul
-            </Button>
-          ) : (
-            <Button
-              data-testid="confirm-finding"
-              onClick={() => updateStatus("confirmed")}
-              disabled={actionLoading}
-              className="gap-1.5"
-            >
+            ) : (
               <CheckCircle2 className="size-3.5" strokeWidth={2} />
-              Confirmă finding-ul
-            </Button>
-          )}
+            )}
+            Confirmă constatarea
+          </Button>
           <Button
             data-testid="dismiss-finding"
             variant="outline"

@@ -343,10 +343,10 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
         <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
           <p className="text-sm text-eos-text-tertiary">
             {findings.length === 0
-              ? "Nu există finding-uri. Rulează o scanare pentru a detecta probleme."
+              ? "Nu există constatări. Rulează o scanare pentru a detecta probleme."
               : statusFilter === "active"
-                ? "Nu există finding-uri active pentru filtrul curent."
-                : "Nu există finding-uri care să se potrivească filtrelor."}
+                ? "Nu există constatări active pentru filtrul curent."
+                : "Nu există constatări care să se potrivească filtrelor."}
           </p>
         </div>
       ) : (
@@ -564,7 +564,7 @@ export function ResolvePageSurface() {
                 Deadline-uri și semnale conexe
               </p>
               <p className="mt-1 text-sm text-eos-text-tertiary">
-                Rămân dedesubt, ca să nu concureze cu inbox-ul principal de finding-uri.
+                Rămân dedesubt, ca să nu concureze cu inbox-ul principal de constatări.
               </p>
             </div>
             <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">

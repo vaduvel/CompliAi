@@ -13,15 +13,15 @@ const mocks = vi.hoisted(() => ({
   },
   getPersistableTaskIdsMock: vi.fn(),
   loadTaskEvidenceObjectFromSupabaseMock: vi.fn(),
-  readStateForOrgMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   readStoredEvidenceFileMock: vi.fn(),
   getStoredEvidenceSignedUrlMock: vi.fn(),
-  requireRoleMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorMock,
-  requireRole: mocks.requireRoleMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
 }))
 
 vi.mock("@/lib/compliance/task-ids", () => ({
@@ -29,7 +29,7 @@ vi.mock("@/lib/compliance/task-ids", () => ({
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
-  readStateForOrg: mocks.readStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/evidence-storage", () => ({
@@ -46,7 +46,7 @@ import { GET } from "./route"
 describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.requireRoleMock.mockReturnValue({
+    mocks.requireFreshRoleMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-demo",
       email: "demo@site.ro",
@@ -55,7 +55,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
       exp: Date.now() + 1000,
     })
     mocks.getPersistableTaskIdsMock.mockReturnValue(new Set(["task-1"]))
-    mocks.readStateForOrgMock.mockResolvedValue({
+    mocks.readFreshStateForOrgMock.mockResolvedValue({
       taskState: {
         "task-1": {
           status: "todo",
@@ -103,7 +103,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   })
 
   it("respinge accesul fără rol permis", async () => {
-    mocks.requireRoleMock.mockImplementationOnce(() => {
+    mocks.requireFreshRoleMock.mockImplementationOnce(() => {
       throw new mocks.AuthzErrorMock("Acces interzis.", 403, "AUTH_ROLE_FORBIDDEN")
     })
 
@@ -117,7 +117,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   })
 
   it("redirijeaza controlat catre URL semnat pentru storage cloud", async () => {
-    mocks.readStateForOrgMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       taskState: {
         "task-1": {
           status: "todo",
@@ -153,7 +153,7 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   })
 
   it("foloseste registrul cloud cand metadata locala lipseste, dar asocierea task-dovada exista in DB", async () => {
-    mocks.readStateForOrgMock.mockResolvedValueOnce({
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
       taskState: {
         "task-1": {
           status: "todo",

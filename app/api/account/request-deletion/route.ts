@@ -7,7 +7,7 @@ export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
 
-import { AuthzError, requireRole } from "@/lib/server/auth"
+import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
@@ -17,7 +17,7 @@ const PRIVACY_EMAIL = "privacy@compliscan.ro"
 
 export async function POST(request: Request) {
   try {
-    const session = requireRole(request, ["owner"], "solicitarea ștergerii contului")
+    const session = await requireFreshRole(request, ["owner"], "solicitarea ștergerii contului")
 
     const body = (await request.json().catch(() => ({}))) as { reason?: string }
     const reason = typeof body.reason === "string" ? body.reason.slice(0, 500) : "Niciun motiv specificat"

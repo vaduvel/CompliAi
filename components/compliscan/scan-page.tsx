@@ -247,7 +247,7 @@ export function ScanPageSurface() {
       {/* Header */}
       <div>
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Alimentezi Compli cu surse noi</h1>
+        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Adaugă surse noi</h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
             ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
@@ -272,9 +272,9 @@ export function ScanPageSurface() {
             {activeFindingsCount > 0 && (
               <Link
                 href="/dashboard/resolve"
-                className="inline-flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition hover:bg-eos-primary"
+                className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text"
               >
-                Mergi la De rezolvat
+                De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             )}
@@ -299,21 +299,10 @@ export function ScanPageSurface() {
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
         <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
           <AlertTriangle className="size-5 shrink-0 text-eos-warning/70" strokeWidth={2} />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-eos-text-muted">
-              Scanarea alimentează cockpitul, nu îl dublează
-            </p>
-            <p className="mt-0.5 text-xs text-eos-text-tertiary">
-              {activeFindingsCount} constatări sunt deschise în workspace. După analiză, rezolvarea continuă în De rezolvat, unde fiecare caz are propriul cockpit.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/resolve"
-            className="flex shrink-0 items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted"
-          >
-            Deschide cockpiturile
-            <ArrowRight className="size-4" strokeWidth={2} />
-          </Link>
+          <p className="flex-1 text-sm text-eos-text-tertiary">
+            <span className="font-semibold text-eos-text-muted">Scanare + rezolvare sunt suprafețe separate.</span>{" "}
+            {activeFindingsCount} constatări deschise te așteaptă în De rezolvat după ce termini analiza.
+          </p>
         </div>
       )}
 

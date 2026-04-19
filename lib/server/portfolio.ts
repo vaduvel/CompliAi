@@ -138,14 +138,6 @@ export async function listAccessiblePortfolioMemberships(session: Pick<SessionPa
       membership.status === "active" && PORTFOLIO_ALLOWED_ROLES.includes(membership.role)
   )
 
-  if (memberships.length === 0) {
-    throw new AuthzError(
-      "Nu există organizații active eligibile pentru portofoliu.",
-      403,
-      "PORTFOLIO_NO_ACTIVE_MEMBERSHIPS"
-    )
-  }
-
   return memberships
 }
 
