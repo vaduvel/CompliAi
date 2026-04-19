@@ -293,10 +293,6 @@ const ENTRIES: Entry[] = [
     test: (p) => p === "/dashboard/agents",
     crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "Agenți" }],
   },
-  {
-    test: (p) => p === "/dashboard/asistent",
-    crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "Asistent" }],
-  },
 ]
 
 export function DashboardBreadcrumb() {
