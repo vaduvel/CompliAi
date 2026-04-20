@@ -52,6 +52,10 @@ export type InboxItem = {
   /** original notification type if source === "notification" */
   notificationType?: NotificationType
   sourceDocument?: string
+  /** underlying finding id when item corresponds to a finding (bulk-action target) */
+  findingId?: string
+  /** underlying notification id when source === "notification" (bulk-action target) */
+  notificationId?: string
 }
 
 /** Convert notification type to a severity bucket for unified UI display. */
@@ -74,6 +78,7 @@ function notificationSeverity(type: NotificationType): InboxItem["severity"] {
 }
 
 function alertToInboxItem(alert: PortfolioAlertRow): InboxItem {
+  const findingId = alert.findingId ?? alert.alertId
   return {
     id: `alert:${alert.alertId}`,
     source: "alert",
@@ -83,10 +88,10 @@ function alertToInboxItem(alert: PortfolioAlertRow): InboxItem {
     orgId: alert.orgId,
     orgName: alert.orgName,
     createdAt: alert.createdAtISO,
-    // alertId is typically the underlying findingId; route to resolve cockpit
-    linkTo: `/dashboard/resolve/${encodeURIComponent(alert.alertId)}`,
+    linkTo: `/dashboard/resolve/${encodeURIComponent(findingId)}`,
     framework: alert.framework,
     sourceDocument: alert.sourceDocument,
+    findingId,
   }
 }
 
@@ -119,6 +124,7 @@ function findingToInboxItem(
     linkTo: `/dashboard/resolve/${encodeURIComponent(finding.id)}`,
     framework: finding.category,
     sourceDocument: finding.sourceDocument,
+    findingId: finding.id,
   }
 }
 
@@ -153,6 +159,7 @@ function notificationToInboxItem(
     unread: !normalized.readAt,
     linkTo: normalized.linkTo,
     notificationType: normalized.type,
+    notificationId: normalized.id,
   }
 }
 
@@ -186,13 +193,14 @@ export async function GET(request: Request) {
       entry.notifications.map((n) => notificationToInboxItem(n, entry.orgId, entry.orgName))
     )
 
-    // Dedupe: if both an alert AND a finding point to same id, keep alert (has
-    // the remediation pipeline context).
-    const seenIds = new Set(alertItems.map((a) => a.id.replace("alert:", "")))
-    const dedupedFindings = findingItems.filter((f) => {
-      const findingId = f.id.split(":").pop() ?? ""
-      return !seenIds.has(findingId)
-    })
+    // Dedupe: if both an alert AND a finding point to the same finding, keep the
+    // alert (it carries the remediation pipeline context).
+    const alertFindingIds = new Set(
+      alertItems.map((a) => a.findingId).filter((id): id is string => !!id)
+    )
+    const dedupedFindings = findingItems.filter(
+      (f) => !f.findingId || !alertFindingIds.has(f.findingId)
+    )
 
     const items = [...alertItems, ...dedupedFindings, ...notificationItems].sort(compareInbox)
 

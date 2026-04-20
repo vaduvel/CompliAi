@@ -70,6 +70,7 @@ export type PortfolioAlertRow = {
   title: string
   createdAtISO: string
   sourceDocument?: string
+  findingId?: string
 }
 
 export type PortfolioTaskRow = {
@@ -246,6 +247,7 @@ export function buildPortfolioAlertRows(bundles: PortfolioOrgBundle[]): Portfoli
           title: alert.message,
           createdAtISO: alert.createdAtISO,
           ...(alert.sourceDocument ? { sourceDocument: alert.sourceDocument } : {}),
+          ...(alert.findingId ? { findingId: alert.findingId } : {}),
         }))
     })
     .sort(compareAlerts)

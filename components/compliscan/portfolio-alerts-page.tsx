@@ -10,18 +10,29 @@ import {
   FileText,
   Filter,
   Inbox as InboxIcon,
+  MailOpen,
   RefreshCw,
   Scale,
   ShieldAlert,
+  ThumbsDown,
+  X,
 } from "lucide-react"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { Badge } from "@/components/evidence-os/Badge"
+import { Button } from "@/components/evidence-os/Button"
 import { Card } from "@/components/evidence-os/Card"
+import { Checkbox } from "@/components/evidence-os/Checkbox"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { InboxItem } from "@/app/api/portfolio/inbox/route"
+
+type BatchAction = "dismiss_finding" | "confirm_finding" | "mark_notification_read"
+type BatchFeedback = {
+  tone: "success" | "error"
+  message: string
+} | null
 
 type InboxResponse = {
   items: InboxItem[]
@@ -110,6 +121,11 @@ export function PortfolioAlertsPage() {
   const [firmFilter, setFirmFilter] = useState<string>("all")
   const [frameworkFilter, setFrameworkFilter] = useState<string>("all")
 
+  // Bulk selection (Faza 4)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchBusy, setBatchBusy] = useState(false)
+  const [batchFeedback, setBatchFeedback] = useState<BatchFeedback>(null)
+
   async function fetchInbox(silent = false) {
     if (!silent) setLoading(true)
     else setRefreshing(true)
@@ -154,6 +170,114 @@ export function PortfolioAlertsPage() {
   }, [data, severityFilter, sourceFilter, firmFilter, frameworkFilter])
 
   const grouped = useMemo(() => groupByDay(filteredItems), [filteredItems])
+
+  // Drop stale selections when filters or data change.
+  useEffect(() => {
+    const visibleIds = new Set(filteredItems.map((i) => i.id))
+    setSelectedIds((prev) => {
+      let changed = false
+      const next = new Set<string>()
+      for (const id of prev) {
+        if (visibleIds.has(id)) next.add(id)
+        else changed = true
+      }
+      return changed ? next : prev
+    })
+  }, [filteredItems])
+
+  const selectedItems = useMemo(
+    () => filteredItems.filter((i) => selectedIds.has(i.id)),
+    [filteredItems, selectedIds]
+  )
+  const findingCandidateCount = selectedItems.filter((i) => !!i.findingId).length
+  const notificationCandidateCount = selectedItems.filter(
+    (i) => i.source === "notification" && !!i.notificationId
+  ).length
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAllVisible() {
+    if (selectedIds.size >= filteredItems.length && filteredItems.length > 0) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredItems.map((i) => i.id)))
+    }
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set())
+  }
+
+  async function runBatch(action: BatchAction) {
+    if (batchBusy || selectedItems.length === 0) return
+    type BatchPayloadItem = { orgId: string; findingId?: string; notificationId?: string }
+    const payloadItems: BatchPayloadItem[] = []
+    for (const i of selectedItems) {
+      if (action === "mark_notification_read") {
+        if (i.source === "notification" && i.notificationId) {
+          payloadItems.push({ orgId: i.orgId, notificationId: i.notificationId })
+        }
+      } else if (i.findingId) {
+        payloadItems.push({ orgId: i.orgId, findingId: i.findingId })
+      }
+    }
+
+    if (payloadItems.length === 0) {
+      setBatchFeedback({
+        tone: "error",
+        message: "Niciun item selectat nu suportă acțiunea aleasă.",
+      })
+      return
+    }
+
+    setBatchBusy(true)
+    setBatchFeedback(null)
+    try {
+      const response = await fetch("/api/portfolio/findings/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, items: payloadItems }),
+      })
+      const payload = (await response.json().catch(() => ({}))) as {
+        successCount?: number
+        failedCount?: number
+        skippedCount?: number
+        message?: string
+      }
+      if (!response.ok) {
+        setBatchFeedback({
+          tone: "error",
+          message: payload.message ?? "Batch-ul a eșuat.",
+        })
+        return
+      }
+      const parts = [
+        payload.successCount ? `${payload.successCount} aplicate` : null,
+        payload.skippedCount ? `${payload.skippedCount} sărite` : null,
+        payload.failedCount ? `${payload.failedCount} eșuate` : null,
+      ].filter(Boolean)
+      setBatchFeedback({
+        tone: (payload.failedCount ?? 0) > 0 ? "error" : "success",
+        message: parts.join(" · ") || payload.message || "Batch procesat.",
+      })
+      clearSelection()
+      await fetchInbox(true)
+    } catch (err) {
+      setBatchFeedback({
+        tone: "error",
+        message: err instanceof Error ? err.message : "Eroare la batch.",
+      })
+    } finally {
+      setBatchBusy(false)
+    }
+  }
 
   if (loading) return <LoadingScreen variant="section" />
   if (error) return <ErrorScreen message={error} variant="section" />
@@ -300,6 +424,92 @@ export function PortfolioAlertsPage() {
         </div>
       </Card>
 
+      {/* Bulk action bar — Faza 4 */}
+      {selectedItems.length > 0 ? (
+        <Card className="sticky top-2 z-10 border-eos-primary/40 bg-eos-primary-soft/40 px-4 py-3 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={
+                  filteredItems.length > 0 && selectedItems.length === filteredItems.length
+                    ? true
+                    : selectedItems.length > 0
+                      ? "indeterminate"
+                      : false
+                }
+                onCheckedChange={() => toggleSelectAllVisible()}
+                aria-label="Selectează tot ce e vizibil"
+              />
+              <span className="text-sm font-medium text-eos-text">
+                {selectedItems.length} selectate
+              </span>
+              <span className="text-xs text-eos-text-muted">
+                ({findingCandidateCount} findings · {notificationCandidateCount} notificări)
+              </span>
+            </div>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={batchBusy || findingCandidateCount === 0}
+                onClick={() => void runBatch("confirm_finding")}
+                className="gap-1.5"
+              >
+                <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                Confirmă {findingCandidateCount > 0 ? `(${findingCandidateCount})` : ""}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={batchBusy || findingCandidateCount === 0}
+                onClick={() => void runBatch("dismiss_finding")}
+                className="gap-1.5"
+              >
+                <ThumbsDown className="size-3.5" strokeWidth={2} />
+                Respinge {findingCandidateCount > 0 ? `(${findingCandidateCount})` : ""}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={batchBusy || notificationCandidateCount === 0}
+                onClick={() => void runBatch("mark_notification_read")}
+                className="gap-1.5"
+              >
+                <MailOpen className="size-3.5" strokeWidth={2} />
+                Marchează citite {notificationCandidateCount > 0 ? `(${notificationCandidateCount})` : ""}
+              </Button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                disabled={batchBusy}
+                className="flex h-8 items-center gap-1 rounded-eos-md px-2 text-xs font-medium text-eos-text-muted transition hover:bg-eos-surface-active hover:text-eos-text disabled:opacity-40"
+              >
+                <X className="size-3.5" strokeWidth={2} />
+                Deselectează
+              </button>
+            </div>
+          </div>
+          {batchFeedback ? (
+            <p
+              className={`mt-2 text-xs ${
+                batchFeedback.tone === "success" ? "text-eos-success" : "text-eos-error"
+              }`}
+            >
+              {batchFeedback.message}
+            </p>
+          ) : null}
+        </Card>
+      ) : batchFeedback ? (
+        <Card
+          className={`border-eos-border bg-eos-surface px-4 py-3 ${
+            batchFeedback.tone === "success" ? "text-eos-success" : "text-eos-error"
+          }`}
+        >
+          <p className="text-sm">{batchFeedback.message}</p>
+        </Card>
+      ) : null}
+
       {/* Feed grouped by day */}
       {filteredItems.length === 0 ? (
         <Card className="overflow-hidden border-eos-border bg-eos-surface">
@@ -330,13 +540,30 @@ export function PortfolioAlertsPage() {
                 <div className="divide-y divide-eos-border-subtle">
                   {group.items.map((item) => {
                     const Icon = iconForSource(item)
+                    const isSelected = selectedIds.has(item.id)
+                    const canSelect = !!item.findingId || !!item.notificationId
                     return (
                       <div
                         key={item.id}
                         className={`flex flex-wrap items-start gap-3 px-5 py-4 transition-colors ${
-                          item.unread === true ? "bg-eos-primary-soft/20" : ""
+                          isSelected
+                            ? "bg-eos-primary-soft/40"
+                            : item.unread === true
+                              ? "bg-eos-primary-soft/20"
+                              : ""
                         }`}
                       >
+                        <div className="mt-1 shrink-0">
+                          {canSelect ? (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleSelect(item.id)}
+                              aria-label={`Selectează ${item.title}`}
+                            />
+                          ) : (
+                            <div className="h-4 w-4" aria-hidden />
+                          )}
+                        </div>
                         <div className="mt-0.5 shrink-0">
                           <Icon
                             className={`size-4 ${
