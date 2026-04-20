@@ -267,7 +267,9 @@ export async function POST(request: Request) {
       message:
         successCount > 0
           ? `${successCount} itemi procesați cu succes.`
-          : "Niciun item nu a putut fi procesat.",
+          : skippedCount > 0 && failedCount === 0
+            ? "Toate deja procesate."
+            : "Niciun item nu a putut fi procesat.",
     })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
