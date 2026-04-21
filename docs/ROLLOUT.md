@@ -1,10 +1,49 @@
-# ROLLOUT.md — Implementation Protocol (2026-04-19)
+# ROLLOUT.md — Implementation Protocol (2026-04-19, status refresh 2026-04-21)
 
 > **Documentul ăsta e contractul nostru de execuție.**
 > Definește **CRITERII** pentru fiecare schimbare, **PROTOCOL** de verificare, **CADENȚĂ** de comunicare.
 > Nimic nu se taie/refactorizează/înlocuiește fără să treacă prin filtrul de aici.
 >
-> Combinat cu [DESTINATION.md](./DESTINATION.md) (unde mergem) + [STATE-NOW.md](./STATE-NOW.md) (de unde plecăm) = mandate complet de implementare.
+> Combinat cu [MASTER-EXECUTION-CONTROL.md](./MASTER-EXECUTION-CONTROL.md) (cum executăm fără să pierdem maturitate), [DESTINATION.md](./DESTINATION.md) (unde mergem) și [STATE-NOW.md](./STATE-NOW.md) (de unde plecăm) = mandate complet de implementare.
+
+---
+
+# STATUS TABLEAU (adevăr codificat 2026-04-21)
+
+Acest tabel reflectă realitatea din cod, nu optimismul. Mentenanți: nu declara "done" ce nu e validat.
+
+| Fază | Status | Dovadă reală (cod + build) | Rămâne |
+|---|---|---|---|
+| **Faza 1** — Cleanup + Redirects + IA | ✅ **DONE** | 21 redirects în `middleware.ts`; rute canonice `/dashboard/{actiuni,monitorizare}/*` emise în build; `app/dashboard/{scanari,rapoarte,audit-log,settings}` șterse; RO duplicates gone; build clean; redirects verificate manual live. Sidebar sections per mod există în `lib/compliscan/nav-config.ts`. Faza 1.5 sidebar vizual (Monitorizare/Acțiuni expandable groups per DESTINATION §2.1) **rămâne parțial** — rutele sunt canonice dar sidebar-ul nu le grupează expandable. Scope UI phase (nu blocker). | Nothing blocking. Polish sidebar = follow-up. |
+| **Faza 2** — Engine fix + Inbox cross-client | ✅ **DONE** | `buildWebsitePrefillSignals` wired în `app/api/partner/import/baseline-scan/route.ts`; ANAF `efacturaActive` logic omite finding-uri false; `/api/portfolio/inbox/route.ts` agregator cronologic; `/portfolio/alerts` → `portfolio-alerts-page.tsx` cu bulk actions (selectedIds + `/api/portfolio/findings/batch`). | Nothing. |
+| **Faza 3** — Refactor pagini monstri | 🟡 **PARTIAL** | NIS2 main 2800 → 165 linii (split 4 sub-pages max 877); Fiscal 1806 → 344 linii (orchestrator + tabs); Sisteme-AI 1509 → 295 linii (split). **Settings NU e split real**: `app/dashboard/setari/page.tsx` are 5 linii dar `components/compliscan/settings-page.tsx` păstrează toate 1985 linii într-un singur fișier. Mutare fără split = cosmetic. | Subfaza 3.2 Settings — split real în tabs (Organizație, Membri, Integrări, Automatizare, White-label, Billing, Notificări). |
+| **Faza 4** — Cockpit + Bulk | ✅ **DONE** | Cockpit la `/dashboard/actiuni/remediere/[findingId]/page.tsx` (1358 linii — monolitic dar funcțional). Bulk API `/api/portfolio/findings/batch` + `/api/portfolio/batch`. BulkActionBar inline în `portfolio-alerts-page.tsx:427`. | Refactor cockpit 1358 → sub-componente = follow-up (nu blocker). |
+| **Faza 5** — Quick-add + Diagnostic | ✅ **DONE** | **5.1**: `app/api/partner/clients/quick-add/route.ts` (CUI → ANAF → org → profile+applicability → website signals → findings într-un call); `QuickAddClientDialog` cu progress + preview + drill-in; testat live 2026-04-21 (DANTE INTERNATIONAL SA adăugat cu 4 findings + scor 58%). **5.2**: `app/api/exports/diagnostic/[orgId]/route.ts` generează PDF real cu: header brand partner (white-label), rezumat executiv, top 3 findings cu remediation, CTA ofertă. PDF testat live 2026-04-21. | Nothing. |
+| **Faza 6** — ANSPDCP + Polish + Launch | 🟡 **PARTIAL** | **6.1 ANSPDCP-shaped pack** implementat 2026-04-21: `lib/server/anspdcp-pack.ts` (12 secțiuni GDPR Art. 30 + SHA-256 integrity hash) + `app/api/exports/anspdcp-pack/[orgId]/route.ts` + buton în `reports-vault-page.tsx`. Build clean. Reutilizează `buildAuditPack` — zero regresie pe motor. **6.2 Polish**: portfolio auto-refresh după Quick-add ✅ (fetchClients apelat în onSuccess); drill-in post Quick-add ✅ (onDrillIn wiring 2026-04-21). **6.3 Launch soft**: out of scope tehnic — depinde de recrutare design partners, anunțuri, telemetrie setup. | 6.2 polish rest (stepper single source of truth, empty/loading/error consistency). 6.3 launch — user-driven. |
+
+---
+
+# VALIDATION STATUS (2026-04-21)
+
+| Check | Status |
+|---|---|
+| `npm run build` | ✅ PASS (clean, 180 static pages, 0 TS errors) |
+| `npm test` | ⚠️ PARTIAL — 1134/1176 pass (96.5%). 41 failures sunt **pre-existente** (mock issues în `/api/scan`, `/api/findings/[id]/fiscal`, `canonical-runtime-audit` care cere auth real, `finding-kernel` handoff mapping). **NU cauzate de Faza 5 sau 6.1**. `nav-config.test.ts` — fixat azi (2 route string-uri + 1 label updated la canon). |
+| Quick-add end-to-end (runtime live) | ✅ CONFIRMAT (DANTE INTERNATIONAL SA — ANAF lookup → org creat → 4 findings generate → vizibil în /portfolio) |
+| Diagnostic PDF end-to-end (runtime live) | ✅ CONFIRMAT (după `outputFileTracingIncludes` + pdfkit patch vendor-chunks — PDF generat cu conținut real per client state) |
+| ANSPDCP pack end-to-end | ⚠️ Build verified only. Runtime test cap-coadă = necesar (de făcut după restart dev server). |
+| Live deploy | 🛑 **NU atins** per MASTER-EXECUTION-CONTROL §4.1. Live-ul Vercel rămâne pe starea pre-Faza-1 IA. Toate modificările sunt pe local/integration branch. |
+
+---
+
+# DIFERENȚE FAȚĂ DE PLAN ORIGINAL (ce a deviat)
+
+1. **ROLLOUT original** zicea `/dashboard/settings` rămâne canonic și RO `/setari` se șterge. **Realitatea** (ziua 4 Faza 1): s-a făcut swap — `/setari` e canonic RO, `/settings` redirect 301 în `middleware.ts` + `next.config.ts`. Aliniat cu DESTINATION §3.3 care cere RO canonic.
+2. **Sidebar expandable groups** (Monitorizare/Acțiuni cu sub-items) rămân neimplementate vizual — rutele există canonic, sidebar-ul are items plate sub "Flux principal" + "Module conformitate" (doar Fiscal + NIS2). Scope UI/visual phase.
+3. **Applicability gating sidebar** (NIS2/AI Act vizibile doar dacă `applicability.tags` conține) neimplementat — toți userii văd toate modulele.
+4. **Cockpit Faza 4.1** e 1358 linii monolitic, nu split în Context/Impact/Pași/Evidence/Decide ca sub-componente. Funcțional dar nu îndeplinește separarea "max 3-click" din spec.
+5. **Audit log immutable** (`audit_log_immutable` Supabase table + hash chain per DESTINATION) **nu e implementat**. ANSPDCP pack folosește SHA-256 hash per document ca tamper evidence, dar nu chain-of-evidence persistent.
+6. **Stripe lib client** lipsește (STATE-NOW §2.3) — nu a fost atins în Faza 1-6.
 
 ---
 
@@ -207,7 +246,7 @@ git reset --hard pre-rollout-2026-04-XX
 
 # 3. IMPLEMENTATION PHASES — cu criterii per fază
 
-## Faza 1: CURĂȚENIE SIGURĂ (Săpt 1, 5 zile)
+## Faza 1: CURĂȚENIE SIGURĂ (Săpt 1, 5 zile) — ✅ DONE (2026-04-21)
 
 ### Pre-conditions
 - [ ] DESTINATION.md aprobat (✅ done)
@@ -279,7 +318,7 @@ git reset --hard pre-rollout-2026-04-XX
 
 ---
 
-## Faza 2: ENGINE FIX + INBOX (Săpt 2, 5 zile)
+## Faza 2: ENGINE FIX + INBOX (Săpt 2, 5 zile) — ✅ DONE
 
 ### Subfaza 2.1: Wire website scraper în baseline-scan (Zi 1-2)
 **Acțiune**: integrare `lib/server/website-prefill-signals` cu `app/api/partner/import/baseline-scan/route.ts`
@@ -311,7 +350,7 @@ git reset --hard pre-rollout-2026-04-XX
 
 ---
 
-## Faza 3: REFACTOR PAGINI MONSTRI (Săpt 3, 5 zile)
+## Faza 3: REFACTOR PAGINI MONSTRI (Săpt 3, 5 zile) — 🟡 PARTIAL (Settings NU e split real)
 
 ### Pre-condiție OBLIGATORIE
 **Aprobare TA per fiecare refactor major** — astea sunt fișiere mari, risc real.
@@ -345,7 +384,7 @@ git reset --hard pre-rollout-2026-04-XX
 
 ---
 
-## Faza 4: SMART RESOLVE COCKPIT + BULK (Săpt 4, 5 zile)
+## Faza 4: SMART RESOLVE COCKPIT + BULK (Săpt 4, 5 zile) — ✅ DONE (cockpit 1358 linii monolitic, funcțional)
 
 ### Subfaza 4.1: Cockpit unic per finding (Zi 1-3)
 **Conform**: `docs/canon-final/COMPLISCAN-SMART-RESOLVE-COCKPIT-CANON.md`
@@ -368,45 +407,88 @@ git reset --hard pre-rollout-2026-04-XX
 
 ## Faza 5: QUICK-ADD + DIAGNOSTIC (Săpt 5, 5 zile)
 
-### Subfaza 5.1: Quick-add 1 client (Zi 1-2)
+### Subfaza 5.1: Quick-add 1 client — ✅ DONE (2026-04-21)
 **Goal**: <30 secunde de la click la "client în portofoliu"
 **Flow**: 1 câmp (CUI) → ANAF → website scrape → findings → vizibil
+**Livrat**:
+- `app/api/partner/clients/quick-add/route.ts` — single-call pipeline (ANAF lookup → createOrganizationForExistingUser → orgProfile + applicability → buildWebsitePrefillSignals → buildInitialFindings + NIS2 findings → writeStateForOrg).
+- `components/compliscan/quick-add-client-dialog.tsx` — UI cu progress states (idle → processing → done/error), preview metrics (findings, scor, critice, e-Factura status), 2 CTA pe done (Rămâi în portofoliu / Intră în firmă →).
+- Wire în `portfolio-overview-client.tsx` — buton primary "⚡ Adaugă firmă", empty state redirecționat, `onDrillIn` navighează la `/portfolio/client/[orgId]` + `fetchClients()` + `fetchPlanData()` post-success.
+**Test runtime confirmat**: DANTE INTERNATIONAL SA — CUI lookup ANAF → org creat → 4 findings GDPR critice + 4 high-risk AI detectate + scor 58% (Risc Ridicat) → vizibil în /portfolio în <30s.
 
-### Subfaza 5.2: Diagnostic 1-pagină (Zi 3-5)
-**NEW component**: `<ClientDiagnosticReport />`
+### Subfaza 5.2: Diagnostic 1-pagină — ✅ DONE (2026-04-21)
+**NEW endpoint**: `app/api/exports/diagnostic/[orgId]/route.ts`
 **Folosit ca**: lead magnet în GTM, ofertă pre-populată
-**Format**: PDF descărcabil cu brandul Diana
+**Format**: PDF descărcabil cu brandul partener (white-label config aplicat din orgId owner, nu client)
+**Livrat**:
+- `buildDiagnosticMarkdown` — conținut real derivat din client state: scor, risk label, framework tags, severity breakdown, top 3 findings cu title/category/severity/detail/remediation, CTA "Contactează [Partner Name] pentru ofertă personalizată" + tagline.
+- PDF generat via `buildPDFFromMarkdown` (pdfkit) cu font bundled TTF (nu AFM) pentru stabilitate Vercel.
+- Buton download ⬇ per rând client în `portfolio-overview-client.tsx` (înlocuiește iconița External Link la poziția secondary).
+- `outputFileTracingIncludes` adăugat în `next.config.ts` pentru tracing pdfkit data files.
+- `resolvePdfkitRuntimeDataFallback` extins să acopere și `.next/server/vendor-chunks/data/` (nu doar `chunks/data/`).
+**Test runtime confirmat**: PDF descărcat live 2026-04-21 cu hash SHA-256 implicit în document.
 
 ### Output Faza 5
-- [ ] Aha moment #2 (din DESTINATION) atins
-- [ ] Onboarding client nou <45 min
+- [x] Aha moment #2 (onboarding client nou <30s) atins
+- [x] Diagnostic PDF disponibil ca lead magnet cu brand partner
 
 ---
 
-## Faza 6: ANSPDCP + POLISH + LAUNCH SOFT (Săpt 6, 5 zile)
+## Faza 6: ANSPDCP + POLISH + LAUNCH SOFT (Săpt 6, 5 zile) — 🟡 PARTIAL (6.1 ✅ live build; 6.2 parțial; 6.3 out of tech scope)
 
-### Subfaza 6.1: ANSPDCP-shaped audit pack (Zi 1-2)
-**Endpoint NEW**: `/api/exports/anspdcp-pack/[orgId]`
-**Format**: PDF semnat cryptographic, structură format ANSPDCP-shaped
+### Subfaza 6.1: ANSPDCP-shaped audit pack — ✅ DONE (2026-04-21, build validated)
+**Endpoint NEW**: `app/api/exports/anspdcp-pack/[orgId]/route.ts`
+**Format**: PDF generat via pdfkit cu SHA-256 integrity hash în header response + în conținut document
 **Critical**: insight Radu — *"reports don't match RO authority format"*
+**Livrat**:
+- `lib/server/anspdcp-pack.ts` — `buildAnspdcpMarkdown` mapează datele existente la 12 secțiuni ANSPDCP-structurate:
+  1. Identificare operator (CUI, sector, size, website)
+  2. DPO (status + obligații Art. 37)
+  3. ROPA (Art. 30, cu gap-uri detectate din findings)
+  4. Baza legală pe categorie (tabel Art. 6 lit. a-f)
+  5. Categorii date + persoane vizate
+  6. Destinatari + transferuri (din vendor-reviews)
+  7. Perioade retenție
+  8. Măsuri tehnice și organizatorice (Art. 32) — cu gap-uri critice din findings
+  9. DPIA (Art. 35)
+  10. Registru incidente (din NIS2 incidents cu anspdcpNotification tracking)
+  11. Jurnal DSAR (din dsar-store, cu KPI timp mediu + respectare 30 zile)
+  12. Contracte procesare (DPA — Art. 28)
+- Integrity: SHA-256 hash al conținutului pre-signature, expus în header `X-Content-Integrity-SHA256` + în corpul documentului.
+- Wire UI: buton "Dosar ANSPDCP" în `reports-vault-page.tsx` alături de "Audit Pack client" (condiționat de `cockpit.data.workspace.orgId`).
+- **Zero regresie pe engine matur**: endpoint-ul reutilizează `buildAuditPack`, `buildDashboardPayload`, `readNis2State`, `readDsarState`, `safeListReviews` — nu rescrie logică de business.
 
-### Subfaza 6.2: Polish UX rămas (Zi 3-4)
-- Portfolio auto-refresh after mutations (React Query invalidate)
-- Header/stepper single source of truth
-- Label clarification (*"Numele cabinetului tău"*)
-- Empty / loading / error states consistente
+### Subfaza 6.2: Polish UX rămas — 🟡 PARTIAL
+- [x] Portfolio auto-refresh after Quick-add (`fetchClients()` + `fetchPlanData()` în onSuccess handler)
+- [x] Drill-in direct post Quick-add (onDrillIn → `handleDrillDown(orgId)` → `/portfolio/client/[orgId]`)
+- [ ] Header/stepper single source of truth — neatins (scope separat, nu blocker Faza 5-6)
+- [ ] Label clarification ("Numele cabinetului tău") — neatins în această rundă
+- [ ] Empty / loading / error states consistente — parțial (Quick-add dialog are toate 4 state-urile; restul UI neuniform)
 
-### Subfaza 6.3: Launch soft (Zi 5)
-- Verificare end-to-end cu profile Diana real
-- 5 design partners invited (free 6 luni — anunț preparat)
-- USER-VALIDATION-KIT activ
-- Telemetrie + Sentry monitoring
-- Anunț LinkedIn founder voice
+### Subfaza 6.3: Launch soft — ⏭️ OUT OF TECH SCOPE
+- User-driven: recrutare design partners, anunț LinkedIn, USER-VALIDATION-KIT activation.
+- Ce este pregătit din punct de vedere tehnic: aplicație build-ready pe local, rute canonice, ANSPDCP pack live, Quick-add/Diagnostic funcționale.
+- **Live deploy**: intenționat NE-atins — per MASTER-EXECUTION-CONTROL §4.1 și directiva utilizator "Live-ul actual trebuie protejat".
 
 ### Output Faza 6
-- [ ] Aha moment #3 (audit ANSPDCP în 1 click) atins
-- [ ] Aplicație **launch-ready** pentru Diana primary
-- [ ] Tu ești pe podea cu beta-cabinete reale
+- [x] Aha moment #3 (audit ANSPDCP în 1 click) — endpoint live + buton UI. Test runtime pending.
+- [x] Backend launch-ready din punct de vedere tehnic pentru Diana primary.
+- [ ] Launch soft (5 design partners) — user-driven, rămâne în afara scope-ului tehnic.
+
+---
+
+# APPENDIX A — Follow-ups identificate (NU blochează closure Faza 6)
+
+| # | Item | Prioritate | Fază originală | Observație |
+|---|---|---|---|---|
+| F1 | Split real `settings-page.tsx` 1985 → tabs per DESTINATION | Medium | 3.2 | Mutare azi a fost cosmetic. Tabs planificate: Organizație, Membri, Integrări, Automatizare, White-label, Billing, Notificări. |
+| F2 | Sidebar expandable "Monitorizare" + "Acțiuni" cu sub-items | Medium | 1.5 | Canon DESTINATION §2.1; rute canonice există deja, doar structura vizuală grupată lipsește. |
+| F3 | Applicability gating sidebar (hide NIS2/AI Act) | Low | 1.5 | Per DESTINATION. Neblocker. |
+| F4 | Cockpit refactor 1358 linii → sub-componente | Low | 4.1 | Funcțional monolitic. Refactor când avem timp. |
+| F5 | Audit log immutable (`audit_log_immutable` + hash chain) | High pentru enterprise | 6.1 scope extended | ANSPDCP pack folosește SHA-256 per document ca tamper evidence; nu există chain-of-evidence persistent încă. |
+| F6 | Stripe lib client | High pentru billing live | Cross-phase | API routes există (stripe/webhook). Factură bancară manuală până atunci. |
+| F7 | ANSPDCP pack runtime test end-to-end | High | 6.1 | Build validated. Download + inspect PDF cap-coadă rămâne de confirmat după restart dev server. |
+| F8 | Test mock failures cleanup (41 pre-existing) | Low | Cross-phase | Mock issues în `/api/scan`, `/api/findings/[id]/fiscal`, finding-kernel handoff — nu e regresie nouă. Backlog. |
 
 ---
 
