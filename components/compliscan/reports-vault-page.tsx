@@ -304,6 +304,24 @@ export function ReportsVaultPageSurface() {
                     <Download className="size-4" strokeWidth={2} />
                   </a>
                 </Button>
+                {cockpit?.data?.workspace?.orgId && (
+                  <Button
+                    asChild
+                    size="default"
+                    variant="secondary"
+                    className="gap-2"
+                  >
+                    <a
+                      href={`/api/exports/anspdcp-pack/${cockpit.data.workspace.orgId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      title="Dosar ANSPDCP-shaped cu SHA-256 integrity hash"
+                    >
+                      Dosar ANSPDCP
+                      <Download className="size-4" strokeWidth={2} />
+                    </a>
+                  </Button>
+                )}
                 <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
                   <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
                     Export tehnic
