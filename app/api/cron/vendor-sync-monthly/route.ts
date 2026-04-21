@@ -116,7 +116,7 @@ export async function POST(request: Request) {
             type: "info",
             title: `${newVendors.length} furnizor(i) noi detectați din e-Factura`,
             message: `Am identificat ${newVendors.length} furnizor(i) noi care nu sunt în lista de furnizori NIS2. Verifică și adaugă DPA unde e necesar.`,
-            linkTo: "/dashboard/resolve",
+            linkTo: "/dashboard/actiuni/remediere",
           }).catch(() => {})
         }
 

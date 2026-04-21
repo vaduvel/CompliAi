@@ -175,7 +175,7 @@ export function getFindingAutoAction(finding: ScanFinding): {
   if (finding.id === "nis2-finding-eligibility") {
     return {
       label: "Revizuiește eligibilitatea NIS2",
-      href: "/dashboard/nis2/eligibility",
+      href: "/dashboard/monitorizare/nis2/eligibility",
       type: "assessment",
     }
   }
@@ -183,7 +183,7 @@ export function getFindingAutoAction(finding: ScanFinding): {
   if (finding.id.startsWith("nis2-finding-")) {
     return {
       label: "Actualizează evaluarea NIS2",
-      href: "/dashboard/nis2",
+      href: "/dashboard/monitorizare/nis2",
       type: "assessment",
     }
   }
@@ -202,7 +202,7 @@ export function getFindingAutoAction(finding: ScanFinding): {
   if (finding.suggestedDocumentType && getSuggestedDocumentLabel(finding.suggestedDocumentType)) {
     return {
       label: `Generează ${getSuggestedDocumentLabel(finding.suggestedDocumentType)}`,
-      href: `/dashboard/resolve/${finding.id}?generator=1`,
+      href: `/dashboard/actiuni/remediere/${finding.id}?generator=1`,
       type: "document",
     }
   }

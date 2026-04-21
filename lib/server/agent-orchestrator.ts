@@ -294,7 +294,7 @@ async function sendIncidentSlaAlert(
     message:
       `Incidentul NIS2 "${incident.title}" (${incident.severity}) a consumat ${percent}% ` +
       `din termenul SLA. Mai ai ~${hours}h pentru rezolvare/raportare DNSC.`,
-    linkTo: "/dashboard/resolve",
+    linkTo: "/dashboard/actiuni/remediere",
   }).catch(() => {
     // Notification failure shouldn't block timer check
   })

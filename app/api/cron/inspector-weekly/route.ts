@@ -54,7 +54,7 @@ function buildInspectorEmailHtml(
     </p>
     <h3 style="margin:0 0 8px;color:#334155">Gaps critice:</h3>
     ${gapsHtml}
-    <a href="${APP_URL}/dashboard/resolve"
+    <a href="${APP_URL}/dashboard/actiuni/remediere"
        style="display:inline-block;margin-top:16px;background:#34D399;color:#111;padding:10px 20px;
               border-radius:8px;text-decoration:none;font-weight:600">
       Rezolvă gaps →

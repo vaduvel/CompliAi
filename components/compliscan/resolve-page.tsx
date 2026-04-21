@@ -146,8 +146,8 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const flowStatus = getRecipeRowBadge(finding, recipe)
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
   const cockpitHref = hasGenerator
-    ? `/dashboard/resolve/${finding.id}?generator=1`
-    : `/dashboard/resolve/${finding.id}`
+    ? `/dashboard/actiuni/remediere/${finding.id}?generator=1`
+    : `/dashboard/actiuni/remediere/${finding.id}`
 
   const isHigh = finding.severity === "critical" || finding.severity === "high"
   const isMed = finding.severity === "medium"

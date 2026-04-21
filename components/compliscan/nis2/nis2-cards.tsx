@@ -38,26 +38,26 @@ export function Nis2ProgressStepper() {
       label: "Clasificare",
       sub: "Sector și tip entitate",
       status: "done",
-      href: "/dashboard/nis2",
+      href: "/dashboard/monitorizare/nis2",
     },
     {
       label: "Maturitate",
       sub: "Auto-evaluare DNSC",
       status: maturityDone === null ? "pending" : maturityDone ? "done" : "in_progress",
-      href: "/dashboard/nis2/maturitate",
+      href: "/dashboard/monitorizare/nis2/maturitate",
     },
     {
       label: "Incidente",
       sub: "Log SLA 24h / 72h",
       status: hasIncidents === null ? "pending" : hasIncidents ? "done" : "pending",
-      href: "/dashboard/nis2",
+      href: "/dashboard/monitorizare/nis2",
       anchor: "incidents",
     },
     {
       label: "Guvernanță",
       sub: "Board & CISO training",
       status: governanceDone === null ? "pending" : governanceDone ? "done" : "in_progress",
-      href: "/dashboard/nis2/governance",
+      href: "/dashboard/monitorizare/nis2/governance",
     },
   ]
 
@@ -110,7 +110,7 @@ export function MaturityCard() {
 
   if (!assessment) {
     return (
-      <Link href="/dashboard/nis2/maturitate" className="block">
+      <Link href="/dashboard/monitorizare/nis2/maturitate" className="block">
         <div className="flex items-center justify-between gap-4 rounded-eos-lg border border-dashed border-eos-primary/40 bg-eos-primary-soft px-4 py-3 transition-all hover:border-eos-primary/70">
           <div className="flex items-center gap-3">
             <ClipboardCheck className="size-5 shrink-0 text-eos-primary" strokeWidth={1.5} />
@@ -130,7 +130,7 @@ export function MaturityCard() {
   )
 
   return (
-    <Link href="/dashboard/nis2/maturitate" className="block">
+    <Link href="/dashboard/monitorizare/nis2/maturitate" className="block">
       <div className="flex items-center justify-between gap-4 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 transition-all hover:border-eos-primary/40">
         <div className="flex items-center gap-3">
           <ClipboardCheck className="size-5 shrink-0 text-eos-primary" strokeWidth={1.5} />
@@ -175,7 +175,7 @@ export function GovernanceCard() {
   const issues = missingTraining
 
   return (
-    <Link href="/dashboard/nis2/governance" className="block">
+    <Link href="/dashboard/monitorizare/nis2/governance" className="block">
       <div className={`flex items-center justify-between gap-4 rounded-eos-lg border px-4 py-3 transition-all hover:border-eos-primary/40 ${
         members.length === 0
           ? "border-dashed border-eos-border bg-eos-surface"

@@ -412,7 +412,7 @@ export function IncidentsTab({
     : null
   const backToCockpitHref =
     !returnTo && sourceFindingId && highlightedIncident?.earlyWarningReport
-      ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
+      ? `/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
           incidentFlow: "done",
           evidenceNote: buildIncidentCockpitEvidenceNote(highlightedIncident),
         }).toString()}`
@@ -467,7 +467,7 @@ export function IncidentsTab({
               </p>
             </div>
             <Link
-              href={`/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+              href={`/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}`}
               className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
             >
               <ArrowLeft className="size-3" strokeWidth={2} />

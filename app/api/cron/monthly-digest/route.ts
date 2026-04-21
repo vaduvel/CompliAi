@@ -226,7 +226,7 @@ export async function POST(request: Request) {
               : null
 
         const ctaHref = relevantFinding
-          ? `/dashboard/resolve?finding=${relevantFinding.id}`
+          ? `/dashboard/actiuni/remediere?finding=${relevantFinding.id}`
           : "/dashboard"
         const ctaLabel = relevantFinding
           ? "Vezi finding-ul relevant"

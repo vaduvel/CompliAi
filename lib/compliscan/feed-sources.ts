@@ -103,7 +103,7 @@ export function buildExternalFeedItems(
         detail: notif.message,
         dateISO: notif.createdAt,
         tone: "warning",
-        href: isAnspdcp ? "/dashboard/resolve" : "/dashboard/scan",
+        href: isAnspdcp ? "/dashboard/actiuni/remediere" : "/dashboard/scan",
         sourceType: isAnspdcp ? "anspdcp" : "legislation",
       })
     }
@@ -176,7 +176,7 @@ export function buildExternalFeedItems(
         detail: "Termenul de înregistrare la DNSC era septembrie 2025. Verifică statusul evaluării.",
         dateISO: stableNowISO,
         tone: "warning",
-        href: "/dashboard/nis2",
+        href: "/dashboard/monitorizare/nis2",
         sourceType: "legislation",
       })
     }
@@ -228,7 +228,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: `/dashboard/actiuni/remediere/${finding.id}`,
         sourceType: "anaf",
       }
     case "EF-004":
@@ -239,7 +239,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: `/dashboard/actiuni/remediere/${finding.id}`,
         sourceType: "anaf",
       }
     case "EF-005":
@@ -250,7 +250,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: `/dashboard/actiuni/remediere/${finding.id}`,
         sourceType: "anaf",
       }
     case "EF-006":
@@ -261,7 +261,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: `/dashboard/actiuni/remediere/${finding.id}`,
         sourceType: "anaf",
       }
     default:
@@ -355,7 +355,7 @@ export function buildProactiveSystemChecks(
       detail: "Configurația NIS2 nu s-a modificat față de ultimul snapshot. Continui monitorizarea săptămânală.",
       dateISO: now,
       tone: "success",
-      href: "/dashboard/nis2",
+      href: "/dashboard/monitorizare/nis2",
       sourceType: "system",
     })
   }

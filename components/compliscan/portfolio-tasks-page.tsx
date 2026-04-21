@@ -383,7 +383,7 @@ export function PortfolioTasksPage() {
                     </div>
                     <PortfolioOrgActionButton
                       orgId={task.orgId}
-                      destination="/dashboard/resolve"
+                      destination="/dashboard/actiuni/remediere"
                       label="Deschide"
                     />
                   </div>

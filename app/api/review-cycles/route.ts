@@ -49,7 +49,7 @@ function enrichCycles(cycles: ReviewCycle[], findingMap: Map<string, { title: st
       ...cycle,
       findingTitle: finding?.title ?? cycle.findingId,
       findingStatus: finding?.status ?? null,
-      href: `/dashboard/resolve/${encodeURIComponent(cycle.findingId)}`,
+      href: `/dashboard/actiuni/remediere/${encodeURIComponent(cycle.findingId)}`,
       isOverdue: cycle.status !== "completed" && cycle.scheduledAt < nowISO,
     } satisfies ReviewCycleApiItem
   })

@@ -203,7 +203,7 @@ export default function FiscalPage() {
             </p>
           </div>
           <a
-            href={`/dashboard/resolve/${findingIdParam}`}
+            href={`/dashboard/actiuni/remediere/${findingIdParam}`}
             className="flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
           >
             <ArrowLeft className="size-3" />
@@ -335,7 +335,7 @@ export default function FiscalPage() {
           <SubmitSpvTab
             sourceFindingId={findingIdParam}
             fromCockpit={tabParam === "transmitere" && Boolean(findingIdParam)}
-            returnToFindingHref={findingIdParam ? `/dashboard/resolve/${findingIdParam}` : null}
+            returnToFindingHref={findingIdParam ? `/dashboard/actiuni/remediere/${findingIdParam}` : null}
           />
         </TabsContent>
       </Tabs>

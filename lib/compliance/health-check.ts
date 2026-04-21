@@ -104,7 +104,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Drift-urile vechi neremediate indică probleme de conformitate neadresate.",
       status: "critical",
       action: "Investighează și rezolvă drift-urile stale",
-      actionHref: "/dashboard/alerte",
+      actionHref: "/dashboard/monitorizare/alerte",
       daysOverdue: Math.max(...staleDrifts.map((d) => Math.max(0, (daysSince(d.detectedAtISO, nowMs) ?? 0) - 30))),
     })
   } else if (openDrifts.length > 0) {
@@ -114,7 +114,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Drift-uri detectate — investighează în curând.",
       status: "warning",
       action: "Revizuiește drift-urile",
-      actionHref: "/dashboard/alerte",
+      actionHref: "/dashboard/monitorizare/alerte",
     })
   } else {
     items.push({
@@ -136,7 +136,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "EU AI Act impune supraveghere umană pentru sistemele cu risc. Actualizează inventarul.",
       status: noHumanReview.some((s) => s.riskLevel === "high") ? "critical" : "warning",
       action: "Actualizează inventarul AI",
-      actionHref: "/dashboard/sisteme",
+      actionHref: "/dashboard/monitorizare/sisteme-ai",
     })
   } else if (aiSystems.length === 0) {
     items.push({
@@ -145,7 +145,7 @@ export function runHealthCheck(state: ComplianceState, nowISO: string): HealthCh
       detail: "Nu există sisteme AI în inventar. Verifică dacă organizația folosește sisteme AI.",
       status: "warning",
       action: "Adaugă sisteme AI în inventar",
-      actionHref: "/dashboard/sisteme",
+      actionHref: "/dashboard/monitorizare/sisteme-ai",
     })
   } else {
     items.push({

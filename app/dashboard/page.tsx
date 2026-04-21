@@ -448,7 +448,7 @@ export default function DashboardPage() {
                 return (
                   <Link
                     key={f.id}
-                    href={`/dashboard/resolve/${encodeURIComponent(f.id)}`}
+                    href={`/dashboard/actiuni/remediere/${encodeURIComponent(f.id)}`}
                     className={`flex items-center gap-3 border-l-[3px] py-3 pl-4 pr-5 transition-colors hover:bg-eos-surface-active ${leftBorder}`}
                   >
                     <span className="flex-1 truncate text-sm text-eos-text">{f.title}</span>

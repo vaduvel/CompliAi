@@ -447,7 +447,7 @@ export function AIDiscoveryPanel({
                           <span>Detalii in Control / Drift.</span>
                           <a
                             className="text-eos-info underline decoration-eos-border underline-offset-4"
-                            href="/dashboard/alerte"
+                            href="/dashboard/monitorizare/alerte"
                           >
                             Deschide Drift
                           </a>

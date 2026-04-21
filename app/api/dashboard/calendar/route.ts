@@ -103,7 +103,7 @@ export async function GET(request: Request) {
             daysLeft: days,
             group: getGroup(days),
             severity: days < 0 ? "critical" : "critical",
-            href: "/dashboard/nis2",
+            href: "/dashboard/monitorizare/nis2",
             legalBasis: "NIS2 Art. 23(4)(a)",
           })
         }
@@ -119,7 +119,7 @@ export async function GET(request: Request) {
             daysLeft: days,
             group: getGroup(days),
             severity: days < 0 ? "critical" : days <= 1 ? "critical" : "high",
-            href: "/dashboard/nis2",
+            href: "/dashboard/monitorizare/nis2",
             legalBasis: "NIS2 Art. 23(4)(b)",
           })
         }
@@ -135,7 +135,7 @@ export async function GET(request: Request) {
             daysLeft: days,
             group: getGroup(days),
             severity: days < 0 ? "critical" : days <= 7 ? "high" : "medium",
-            href: "/dashboard/nis2",
+            href: "/dashboard/monitorizare/nis2",
             legalBasis: "NIS2 Art. 23(4)(c)",
           })
         }
@@ -151,7 +151,7 @@ export async function GET(request: Request) {
             daysLeft: days,
             group: getGroup(days),
             severity: days < 0 ? "critical" : days <= 1 ? "critical" : "high",
-            href: "/dashboard/nis2",
+            href: "/dashboard/monitorizare/nis2",
             legalBasis: "GDPR Art. 33",
           })
         }

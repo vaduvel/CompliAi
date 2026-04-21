@@ -99,7 +99,7 @@ export function DosarPageSurface() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        href={`/dashboard/resolve/${encodeURIComponent(finding.id)}`}
+                        href={`/dashboard/actiuni/remediere/${encodeURIComponent(finding.id)}`}
                         className="text-sm font-medium text-eos-text transition-colors hover:text-eos-text hover:underline underline-offset-2"
                       >
                         {finding.title}

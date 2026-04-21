@@ -16,7 +16,7 @@ describe("lib/compliscan/nav-config", () => {
 
     expect(sections.map((section) => section.label)).toEqual([
       "Portofoliu",
-      "Firma activa",
+      "Firmă",
       "Module conformitate",
     ])
     expect(sections[0]?.items[0]).toEqual(
@@ -35,7 +35,7 @@ describe("lib/compliscan/nav-config", () => {
     ])
     expect(sections[2]?.items.map((item) => item.href)).toEqual([
       "/dashboard/fiscal",
-      "/dashboard/nis2",
+      "/dashboard/monitorizare/nis2",
     ])
   })
 
@@ -65,9 +65,9 @@ describe("lib/compliscan/nav-config", () => {
     expect(sections[0]?.items.map((item) => item.href)).toEqual([
       "/dashboard",
       "/dashboard/scan",
-      "/dashboard/resolve",
+      "/dashboard/actiuni/remediere",
       "/dashboard/dosar",
-      "/dashboard/settings",
+      "/dashboard/setari",
     ])
     expect(sections[1]?.label).toBe("Module conformitate")
   })

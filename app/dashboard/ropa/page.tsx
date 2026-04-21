@@ -445,7 +445,7 @@ export default function RopaPage() {
   const searchParams = useSearchParams()
   const sourceFindingId = searchParams.get("findingId")
   const returnTo = sourceFindingId
-    ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`
+    ? `/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}`
     : null
 
   const [activities, setActivities] = useState<RopaActivity[]>([EMPTY_ACTIVITY()])

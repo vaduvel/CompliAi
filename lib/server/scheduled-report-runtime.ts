@@ -242,7 +242,7 @@ export async function executeScheduledReportDelivery(params: {
       params.executionMode === "approved"
         ? `${detail} Raportul a fost lansat după aprobare.`
         : `${detail} Raportul a fost lansat automat conform programării.`,
-    linkTo: "/dashboard/settings/scheduled-reports",
+    linkTo: "/dashboard/setari/scheduled-reports",
   }).catch(() => {})
 
   return {

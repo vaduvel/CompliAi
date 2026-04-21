@@ -145,7 +145,7 @@ export default function DoraPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <Breadcrumb items={[
-        { label: "De rezolvat", href: "/dashboard/resolve" },
+        { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
         { label: "DORA" },
       ]} />
 

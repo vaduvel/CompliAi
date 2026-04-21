@@ -17,23 +17,23 @@ type Entry = {
 const ENTRIES: Entry[] = [
   // ── Resolve ───────────────────────────────────────────────────────────────
   {
-    test: (p) => p.startsWith("/dashboard/resolve/support"),
+    test: (p) => p.startsWith("/dashboard/actiuni/remediere/support"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "Suport" },
     ],
   },
   {
-    test: (p) => /^\/dashboard\/resolve\/[^/]+/.test(p),
+    test: (p) => /^\/dashboard\/actiuni\/remediere\/[^/]+/.test(p),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "Caz" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/resolve",
+    test: (p) => p === "/dashboard/actiuni/remediere",
     crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "De rezolvat" }],
   },
 
@@ -61,54 +61,54 @@ const ENTRIES: Entry[] = [
 
   // ── NIS2 ──────────────────────────────────────────────────────────────────
   {
-    test: (p) => p === "/dashboard/nis2/eligibility",
+    test: (p) => p === "/dashboard/monitorizare/nis2/eligibility",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
-      { label: "NIS2", href: "/dashboard/nis2" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
+      { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
       { label: "Eligibilitate" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/nis2/maturitate",
+    test: (p) => p === "/dashboard/monitorizare/nis2/maturitate",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
-      { label: "NIS2", href: "/dashboard/nis2" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
+      { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
       { label: "Maturitate" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/nis2/inregistrare-dnsc",
+    test: (p) => p === "/dashboard/monitorizare/nis2/inregistrare-dnsc",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
-      { label: "NIS2", href: "/dashboard/nis2" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
+      { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
       { label: "Înregistrare DNSC" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/nis2/governance",
+    test: (p) => p === "/dashboard/monitorizare/nis2/governance",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
-      { label: "NIS2", href: "/dashboard/nis2" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
+      { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
       { label: "Guvernanță" },
     ],
   },
   {
-    test: (p) => p.startsWith("/dashboard/nis2/"),
+    test: (p) => p.startsWith("/dashboard/monitorizare/nis2/"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
-      { label: "NIS2", href: "/dashboard/nis2" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
+      { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/nis2",
+    test: (p) => p === "/dashboard/monitorizare/nis2",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "NIS2" },
     ],
   },
@@ -179,7 +179,7 @@ const ENTRIES: Entry[] = [
     ],
   },
   {
-    test: (p) => p === "/dashboard/politici",
+    test: (p) => p === "/dashboard/actiuni/politici",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
       { label: "Dosar", href: "/dashboard/dosar" },
@@ -193,43 +193,43 @@ const ENTRIES: Entry[] = [
 
   // ── Settings ──────────────────────────────────────────────────────────────
   {
-    test: (p) => p === "/dashboard/settings/abonament",
+    test: (p) => p === "/dashboard/setari/abonament",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "Setări", href: "/dashboard/settings" },
+      { label: "Setări", href: "/dashboard/setari" },
       { label: "Abonament" },
     ],
   },
   {
-    test: (p) => p.startsWith("/dashboard/settings"),
+    test: (p) => p.startsWith("/dashboard/setari"),
     crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "Setări" }],
   },
 
   // ── Sisteme AI ────────────────────────────────────────────────────────────
   {
-    test: (p) => p.startsWith("/dashboard/sisteme/eu-db-wizard"),
+    test: (p) => p.startsWith("/dashboard/monitorizare/sisteme-ai/eu-db-wizard"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "Sisteme AI", href: "/dashboard/sisteme" },
+      { label: "Sisteme AI", href: "/dashboard/monitorizare/sisteme-ai" },
       { label: "Înregistrare EU DB" },
     ],
   },
   {
-    test: (p) => p.startsWith("/dashboard/sisteme/"),
+    test: (p) => p.startsWith("/dashboard/monitorizare/sisteme-ai/"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "Sisteme AI", href: "/dashboard/sisteme" },
+      { label: "Sisteme AI", href: "/dashboard/monitorizare/sisteme-ai" },
     ],
   },
   {
-    test: (p) => p === "/dashboard/sisteme",
+    test: (p) => p === "/dashboard/monitorizare/sisteme-ai",
     crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "Sisteme AI" }],
   },
   {
-    test: (p) => p === "/dashboard/conformitate",
+    test: (p) => p === "/dashboard/monitorizare/conformitate",
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "Sisteme AI", href: "/dashboard/sisteme" },
+      { label: "Sisteme AI", href: "/dashboard/monitorizare/sisteme-ai" },
       { label: "Conformitate" },
     ],
   },
@@ -239,7 +239,7 @@ const ENTRIES: Entry[] = [
     test: (p) => p.startsWith("/dashboard/dsar"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "DSAR" },
     ],
   },
@@ -247,7 +247,7 @@ const ENTRIES: Entry[] = [
     test: (p) => p.startsWith("/dashboard/dora"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "DORA" },
     ],
   },
@@ -255,7 +255,7 @@ const ENTRIES: Entry[] = [
     test: (p) => p.startsWith("/dashboard/fiscal"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "Fiscal" },
     ],
   },
@@ -263,7 +263,7 @@ const ENTRIES: Entry[] = [
     test: (p) => p.startsWith("/dashboard/vendor-review"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "Vendor Review" },
     ],
   },
@@ -271,14 +271,14 @@ const ENTRIES: Entry[] = [
     test: (p) => p.startsWith("/dashboard/whistleblowing"),
     crumbs: () => [
       { label: "Acasă", href: "/dashboard" },
-      { label: "De rezolvat", href: "/dashboard/resolve" },
+      { label: "De rezolvat", href: "/dashboard/actiuni/remediere" },
       { label: "Whistleblowing" },
     ],
   },
 
   // ── Altele ────────────────────────────────────────────────────────────────
   {
-    test: (p) => p === "/dashboard/alerte",
+    test: (p) => p === "/dashboard/monitorizare/alerte",
     crumbs: () => [{ label: "Acasă", href: "/dashboard" }, { label: "Alerte" }],
   },
   {

@@ -35,7 +35,7 @@ async function buildResponse(orgId: string, cycleId: string, orgName?: string) {
     ...cycle,
     findingTitle: finding?.title ?? cycle.findingId,
     findingStatus: finding?.findingStatus ?? finding?.reviewState ?? null,
-    href: `/dashboard/resolve/${encodeURIComponent(cycle.findingId)}`,
+    href: `/dashboard/actiuni/remediere/${encodeURIComponent(cycle.findingId)}`,
   }
 }
 

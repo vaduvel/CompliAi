@@ -177,7 +177,7 @@ export function AIActEvidencePackCard() {
                 Descarcă Evidence Pack
               </Button>
               <Button asChild variant="outline">
-                <Link href="/dashboard/resolve">
+                <Link href="/dashboard/actiuni/remediere">
                   Vezi cazurile AI Act
                   <ArrowRight className="size-4" strokeWidth={2} />
                 </Link>

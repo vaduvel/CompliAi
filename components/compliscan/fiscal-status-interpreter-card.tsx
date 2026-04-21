@@ -41,7 +41,7 @@ export function FiscalStatusInterpreterCard({
   const secondaryHref = guide.secondarySurface
     ? `/dashboard/fiscal?tab=${guide.secondarySurface}&findingId=${encodeURIComponent(findingId)}`
     : null
-  const returnHref = `/dashboard/resolve/${encodeURIComponent(findingId)}?fiscalStatusFlow=done&evidenceNote=${encodeURIComponent(guide.cockpitNote)}`
+  const returnHref = `/dashboard/actiuni/remediere/${encodeURIComponent(findingId)}?fiscalStatusFlow=done&evidenceNote=${encodeURIComponent(guide.cockpitNote)}`
 
   async function handleCopyNote() {
     try {

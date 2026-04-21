@@ -240,7 +240,7 @@ export function AnspdcpNotificationPanel({
     : null
   const backToCockpitHref =
     !returnTo && sourceFindingId && notif && (notif.status === "submitted" || notif.status === "acknowledged")
-      ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
+      ? `/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
           anspdcp: "done",
           evidenceNote: buildAnspdcpEvidenceNote(notif),
         }).toString()}`

@@ -76,7 +76,7 @@ export function getSidebarNavSections({
       },
       {
         id: "org",
-        label: "Firma activa",
+        label: "Firmă",
         items: ORG_NAV_FULL,
       },
       {

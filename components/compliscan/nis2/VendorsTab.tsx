@@ -395,7 +395,7 @@ export function VendorsTab({
             </div>
             {sourceFindingId ? (
               <Link
-                href={returnTo || `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+                href={returnTo || `/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}`}
                 className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
               >
                 <ArrowLeft className="size-3" strokeWidth={2} />
@@ -418,7 +418,7 @@ export function VendorsTab({
               </p>
             </div>
             <Link
-              href={returnTo || `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}`}
+              href={returnTo || `/dashboard/actiuni/remediere/${encodeURIComponent(sourceFindingId)}`}
               className="inline-flex shrink-0 items-center gap-1 text-xs text-sky-950 hover:underline"
             >
               <ArrowLeft className="size-3" strokeWidth={2} />

@@ -287,11 +287,11 @@ function ActionItem({ action }: { action: AgentAction }) {
 function l2ActionHref(action: AgentAction): string {
   switch (action.type) {
     case "document_drafted": return "/dashboard/generator"
-    case "escalation_raised": return "/dashboard/resolve"
-    case "finding_created": return "/dashboard/resolve"
+    case "escalation_raised": return "/dashboard/actiuni/remediere"
+    case "finding_created": return "/dashboard/actiuni/remediere"
     case "vendor_rescored": return "/dashboard/vendor-review"
     case "review_triggered": return "/dashboard/vendor-review"
-    default: return "/dashboard/resolve"
+    default: return "/dashboard/actiuni/remediere"
   }
 }
 

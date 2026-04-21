@@ -90,14 +90,14 @@ function normalizeNotificationLink(
     }
 
     if (text.includes("factur") || text.includes("anaf")) {
-      return "/dashboard/resolve"
+      return "/dashboard/actiuni/remediere"
     }
 
     return "/dashboard/fiscal"
   }
 
   if (/f[aă]r[aă].*dovad[aă]/i.test(text)) {
-    return "/dashboard/resolve"
+    return "/dashboard/actiuni/remediere"
   }
 
   if (/scor.+declin/i.test(text) || /problemele deschise/i.test(text)) {

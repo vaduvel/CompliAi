@@ -88,9 +88,13 @@ export async function POST(request: Request) {
       }
     }
 
+    // DESTINATION §2.1 — Partner aterizează default pe /portfolio.
+    // Dacă user avea ultima sesiune în workspace "org" (drill-in mid-flow), păstrăm.
     const workspaceMode =
-      preferredWorkspace?.workspaceMode === "portfolio" && userMode === "partner"
-        ? "portfolio"
+      userMode === "partner"
+        ? preferredWorkspace?.workspaceMode === "org"
+          ? "org"
+          : "portfolio"
         : "org"
     const defaultDestination = workspaceMode === "portfolio" ? "/portfolio" : "/dashboard"
     const destination = sanitizeInternalRoute(

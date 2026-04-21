@@ -136,8 +136,8 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
   }, [query])
 
   const returnHref = derived
-    ? `/dashboard/resolve/${encodeURIComponent(findingId)}?fiscalStatusFlow=done&evidenceNote=${encodeURIComponent(derived.handoffEvidenceNote)}`
-    : `/dashboard/resolve/${encodeURIComponent(findingId)}?fiscalStatusFlow=done`
+    ? `/dashboard/actiuni/remediere/${encodeURIComponent(findingId)}?fiscalStatusFlow=done&evidenceNote=${encodeURIComponent(derived.handoffEvidenceNote)}`
+    : `/dashboard/actiuni/remediere/${encodeURIComponent(findingId)}?fiscalStatusFlow=done`
 
   async function handleSave() {
     setSaving(true)

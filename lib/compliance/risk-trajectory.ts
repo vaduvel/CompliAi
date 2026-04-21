@@ -73,7 +73,7 @@ const REGULATORY_DEADLINES: RegDeadline[] = [
     deadlineISO: "2025-08-02T00:00:00.000Z",
     scoreImpact: 15,
     preventionAction: "Verifică inventarul AI pentru sisteme interzise",
-    preventionHref: "/dashboard/sisteme",
+    preventionHref: "/dashboard/monitorizare/sisteme-ai",
   },
   {
     id: "ai-act-gpai-2025",
@@ -81,7 +81,7 @@ const REGULATORY_DEADLINES: RegDeadline[] = [
     deadlineISO: "2025-08-02T00:00:00.000Z",
     scoreImpact: 8,
     preventionAction: "Clasifică modelele AI general purpose",
-    preventionHref: "/dashboard/sisteme",
+    preventionHref: "/dashboard/monitorizare/sisteme-ai",
   },
 ]
 
@@ -158,7 +158,7 @@ export function calculateRiskTrajectory(
         scoreImpact: impact,
         preventable: true,
         preventionAction: "Reverifică finding-ul înainte de expirare",
-        preventionHref: "/dashboard/resolve",
+        preventionHref: "/dashboard/actiuni/remediere",
       })
     }
   }

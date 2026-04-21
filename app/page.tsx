@@ -94,7 +94,7 @@ function ProductMock() {
             <span className="block h-3 w-3 rounded-full bg-[#28c840]" />
           </div>
           <div className="mx-auto rounded-eos-md bg-eos-surface-elevated px-4 py-1.5 text-[11px] text-eos-text-tertiary">
-            app.compliscan.ro/dashboard/resolve
+            app.compliscan.ro/dashboard/actiuni/remediere
           </div>
         </div>
 

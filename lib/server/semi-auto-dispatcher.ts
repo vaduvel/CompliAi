@@ -102,7 +102,7 @@ async function resolveFindings(action: PendingAction): Promise<DispatchResult> {
       type: "info",
       title: `Finding rezolvat automat: ${finding.title}`,
       message: `"${finding.title}" a trecut în ${targetStatus === "under_monitoring" ? "monitorizare" : "rezolvat"} după aprobarea automată (24h fără respingere).`,
-      linkTo: `/dashboard/resolve/${sourceFindingId}`,
+      linkTo: `/dashboard/actiuni/remediere/${sourceFindingId}`,
     }).catch(() => {})
 
     return {

@@ -363,7 +363,7 @@ export function SubmitSpvTab({
                   {integrationStatus.tokenState === "missing" ? "Conectează ANAF" : "Reautentifică ANAF"}
                 </a>
                 <a
-                  href="/dashboard/settings"
+                  href="/dashboard/setari"
                   className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-1.5 text-xs font-medium text-eos-text hover:bg-eos-surface-hover"
                 >
                   <ExternalLink className="size-3" />
@@ -582,7 +582,7 @@ export function SubmitSpvTab({
             const isNok = s.status === "nok" || s.status === "error"
             const hasFinalVerdict = s.status === "ok" || s.status === "nok"
             const submissionErrorCategory = diagnoseSubmissionError(s.errorDetail)
-            const linkedFindingHref = s.sourceFindingId ? `/dashboard/resolve/${encodeURIComponent(s.sourceFindingId)}` : null
+            const linkedFindingHref = s.sourceFindingId ? `/dashboard/actiuni/remediere/${encodeURIComponent(s.sourceFindingId)}` : null
             const borderColor = isOk
               ? "border-l-eos-success"
               : s.status === "approved"

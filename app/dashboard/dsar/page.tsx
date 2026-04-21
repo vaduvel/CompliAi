@@ -120,7 +120,7 @@ export default function DsarPage() {
   const focus = searchParams.get("focus")
   const returnTo =
     searchParams.get("returnTo") ??
-    (sourceFindingId ? `/dashboard/resolve/${sourceFindingId}` : null)
+    (sourceFindingId ? `/dashboard/actiuni/remediere/${sourceFindingId}` : null)
 
   useEffect(() => {
     fetch("/api/dsar", { cache: "no-store" })

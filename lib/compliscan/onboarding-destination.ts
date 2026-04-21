@@ -22,8 +22,8 @@ export function resolveOnboardingDestination(
       }
     case "compliance":
       return {
-        clientHref: "/dashboard/resolve",
-        serverHref: "/dashboard/resolve",
+        clientHref: "/dashboard/actiuni/remediere",
+        serverHref: "/dashboard/actiuni/remediere",
         submitLabel: "Salvează și vezi cazurile deschise",
         summaryLabel: "cazurile de rezolvat",
         requiresPortfolioWorkspace: false,
@@ -39,8 +39,8 @@ export function resolveOnboardingDestination(
     case "solo":
     default:
       return {
-        clientHref: "/dashboard/resolve",
-        serverHref: "/dashboard/resolve",
+        clientHref: "/dashboard/actiuni/remediere",
+        serverHref: "/dashboard/actiuni/remediere",
         submitLabel: "Salvează și vezi snapshot-ul",
         summaryLabel: "snapshot-ul de riscuri",
         requiresPortfolioWorkspace: false,

@@ -2298,7 +2298,7 @@ function getWorkflowLink(
         href: `/dashboard/nis2/eligibility?${new URLSearchParams({
           findingId: record.id,
           source: "cockpit",
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide eligibilitatea NIS2",
       }
@@ -2308,7 +2308,7 @@ function getWorkflowLink(
           tab: "assessment",
           focus: "assessment",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide evaluarea NIS2",
       }
@@ -2318,7 +2318,7 @@ function getWorkflowLink(
         tab: "incidents",
         focus: "incident",
         findingId: record.id,
-        returnTo: `/dashboard/resolve/${record.id}`,
+        returnTo: `/dashboard/actiuni/remediere/${record.id}`,
       })
       if (incidentId) {
         search.set("incidentId", incidentId)
@@ -2333,7 +2333,7 @@ function getWorkflowLink(
         href: `/dashboard/pay-transparency?${new URLSearchParams({
           findingId: record.id,
           source: "cockpit",
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide Pay Transparency",
       }
@@ -2343,7 +2343,7 @@ function getWorkflowLink(
           href: `/dashboard/nis2/inregistrare-dnsc?${new URLSearchParams({
             findingId: record.id,
             source: "cockpit",
-            returnTo: `/dashboard/resolve/${record.id}`,
+            returnTo: `/dashboard/actiuni/remediere/${record.id}`,
           }).toString()}`,
           label: "Deschide înregistrarea DNSC",
         }
@@ -2356,7 +2356,7 @@ function getWorkflowLink(
             findingId: record.id,
             source: "cockpit",
             focus: governanceFocus,
-            returnTo: `/dashboard/resolve/${record.id}`,
+            returnTo: `/dashboard/actiuni/remediere/${record.id}`,
           }).toString()}`,
           label:
             governanceFocus === "certification"
@@ -2372,7 +2372,7 @@ function getWorkflowLink(
             findingId: record.id,
             source: "cockpit",
             ...(maturityFocus ? { focus: maturityFocus } : {}),
-            returnTo: `/dashboard/resolve/${record.id}`,
+            returnTo: `/dashboard/actiuni/remediere/${record.id}`,
           }).toString()}`,
           label: "Deschide evaluarea de maturitate",
         }
@@ -2385,7 +2385,7 @@ function getWorkflowLink(
         tab: "vendors",
         focus: "vendor",
         findingId: record.id,
-        returnTo: `/dashboard/resolve/${record.id}`,
+        returnTo: `/dashboard/actiuni/remediere/${record.id}`,
       })
       if (vendorId) {
         search.set("vendorId", vendorId)
@@ -2406,7 +2406,7 @@ function getWorkflowLink(
           action: "new",
           type: "access",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide DSAR",
       }
@@ -2415,7 +2415,7 @@ function getWorkflowLink(
         href: `/dashboard/documente?${new URLSearchParams({
           focus: "contracts-baseline",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide pachetul contractual",
       }
@@ -2424,7 +2424,7 @@ function getWorkflowLink(
         href: `/dashboard/documente?${new URLSearchParams({
           focus: "job-descriptions",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide pachetul HR",
       }
@@ -2433,7 +2433,7 @@ function getWorkflowLink(
         href: `/dashboard/documente?${new URLSearchParams({
           focus: "hr-procedures",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide pachetul HR",
       }
@@ -2442,7 +2442,7 @@ function getWorkflowLink(
         href: `/dashboard/documente?${new URLSearchParams({
           focus: "reges-correction",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide brief-ul REGES",
       }
@@ -2451,7 +2451,7 @@ function getWorkflowLink(
         href: `/dashboard/vendor-review?${new URLSearchParams({
           focus: "pack",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide pachetul vendor",
       }
@@ -2460,7 +2460,7 @@ function getWorkflowLink(
         href: `/dashboard/dsar?${new URLSearchParams({
           focus: "process",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide pachetul DSAR",
       }
@@ -2470,7 +2470,7 @@ function getWorkflowLink(
           action: "new",
           type: "erasure",
           findingId: record.id,
-          returnTo: `/dashboard/resolve/${record.id}`,
+          returnTo: `/dashboard/actiuni/remediere/${record.id}`,
         }).toString()}`,
         label: "Deschide cererea de ștergere",
       }
@@ -2482,7 +2482,7 @@ function getWorkflowLink(
         incidentId,
         focus: "anspdcp",
         findingId: record.id,
-        returnTo: `/dashboard/resolve/${record.id}`,
+        returnTo: `/dashboard/actiuni/remediere/${record.id}`,
       })
       return {
         href: `/dashboard/nis2?${search.toString()}`,

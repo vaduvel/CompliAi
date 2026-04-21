@@ -88,7 +88,7 @@ function buildApprovalContinuation(action: PendingAction) {
   return {
     fiscalHref,
     findingHref: action.sourceFindingId
-      ? `/dashboard/resolve/${encodeURIComponent(action.sourceFindingId)}`
+      ? `/dashboard/actiuni/remediere/${encodeURIComponent(action.sourceFindingId)}`
       : null,
   }
 }

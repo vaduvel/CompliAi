@@ -77,7 +77,7 @@ function buildAuditPackGapsEmailHtml(orgName: string, result: AuditPackResult): 
     <p style="color:#475569">Scor curent: <strong>${result.score ?? "—"}/100</strong> · ${result.riskLabel ?? "—"}</p>
     <p style="color:#b45309;font-weight:600">⚠ Gaps identificate:</p>
     <ul style="margin:8px 0 16px;padding-left:20px">${gapsList}</ul>
-    <a href="${APP_URL}/dashboard/resolve"
+    <a href="${APP_URL}/dashboard/actiuni/remediere"
        style="display:inline-block;margin-top:8px;background:#f59e0b;color:#111;padding:10px 20px;
               border-radius:8px;text-decoration:none;font-weight:600">
       Rezolvă gaps →

@@ -299,7 +299,7 @@ export function ControlDriftWorkspace({
             actions={
               <>
                 <Button asChild>
-                  <Link href="/dashboard/alerte">
+                  <Link href="/dashboard/monitorizare/alerte">
                     Vezi drift complet
                     <ArrowRight className="size-4" strokeWidth={2} />
                   </Link>

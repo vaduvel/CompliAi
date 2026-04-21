@@ -224,7 +224,7 @@ export async function POST(request: Request) {
                 `${taskCandidate.suggestedOwner} poate închide cazul până la ${new Date(
                   taskCandidate.deadline
                 ).toLocaleDateString("ro-RO")}.`,
-              linkTo: `/dashboard/resolve/${item.findingId}`,
+              linkTo: `/dashboard/actiuni/remediere/${item.findingId}`,
             })
             perItemResults.push({
               orgId,

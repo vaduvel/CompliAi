@@ -48,7 +48,7 @@ export function DriftActiveCard({ findings }: Props) {
           return (
             <Link
               key={finding.id}
-              href={`/dashboard/resolve/${encodeURIComponent(finding.id)}`}
+              href={`/dashboard/actiuni/remediere/${encodeURIComponent(finding.id)}`}
               className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-eos-surface-active"
             >
               <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-eos-warning/10">

@@ -194,7 +194,7 @@ export default function CalendarPage() {
               <Link href="/dashboard/review">Review-uri programate</Link>
             </Button>
             <Button asChild className="gap-2">
-              <Link href="/dashboard/settings/scheduled-reports">Rapoarte programate</Link>
+              <Link href="/dashboard/setari/scheduled-reports">Rapoarte programate</Link>
             </Button>
           </>
         }
@@ -223,7 +223,7 @@ export default function CalendarPage() {
                 <Link href="/dashboard/scan">Scanează primul document</Link>
               </Button>
               <Button asChild variant="outline" className="gap-2">
-                <Link href="/dashboard/resolve">Deschide De rezolvat</Link>
+                <Link href="/dashboard/actiuni/remediere">Deschide De rezolvat</Link>
               </Button>
             </div>
           </CardContent>

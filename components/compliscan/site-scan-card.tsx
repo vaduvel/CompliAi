@@ -116,7 +116,7 @@ export function SiteScanCard({
   const evidenceNote = result && result.reachable ? buildSiteScanEvidenceNote(result) : null
   const returnHref =
     findingId && evidenceNote
-      ? `/dashboard/resolve/${encodeURIComponent(findingId)}?siteScan=done&evidenceNote=${encodeURIComponent(evidenceNote)}`
+      ? `/dashboard/actiuni/remediere/${encodeURIComponent(findingId)}?siteScan=done&evidenceNote=${encodeURIComponent(evidenceNote)}`
       : null
 
   return (

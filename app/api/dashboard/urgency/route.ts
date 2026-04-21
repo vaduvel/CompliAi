@@ -99,7 +99,7 @@ export async function GET(request: Request) {
             : "medium",
           deadlineISO: nextDeadline,
           daysLeft: days ?? undefined,
-          href: "/dashboard/nis2",
+          href: "/dashboard/monitorizare/nis2",
         })
       }
     } catch {

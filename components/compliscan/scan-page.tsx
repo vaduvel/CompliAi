@@ -188,7 +188,7 @@ export function ScanPageSurface() {
               </p>
             </div>
             <Link
-              href="/dashboard/resolve"
+              href="/dashboard/actiuni/remediere"
               className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-3.5 py-2 text-xs font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
             >
               De rezolvat
@@ -271,7 +271,7 @@ export function ScanPageSurface() {
           <div className="ml-auto flex flex-wrap gap-2">
             {activeFindingsCount > 0 && (
               <Link
-                href="/dashboard/resolve"
+                href="/dashboard/actiuni/remediere"
                 className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text"
               >
                 De rezolvat

@@ -83,7 +83,7 @@ export function Nis2RescueBanner() {
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Button asChild size="sm" variant={isCritical ? "destructive" : "default"}>
-              <Link href="/dashboard/nis2/inregistrare-dnsc" onClick={() => track("clicked_late_nis2_rescue")}>
+              <Link href="/dashboard/monitorizare/nis2/inregistrare-dnsc" onClick={() => track("clicked_late_nis2_rescue")}>
                 Deschide Expertul de Înregistrare
               </Link>
             </Button>

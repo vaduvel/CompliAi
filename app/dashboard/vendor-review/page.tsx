@@ -1107,7 +1107,7 @@ export default function VendorReviewPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <Link
-        href="/dashboard/resolve"
+        href="/dashboard/actiuni/remediere"
         className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
       >
         <ArrowLeft className="size-3.5" strokeWidth={2} />

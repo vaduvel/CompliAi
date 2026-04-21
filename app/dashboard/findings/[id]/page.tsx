@@ -6,5 +6,5 @@ export default async function LegacyFindingPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  redirect(`/dashboard/resolve/${id}`)
+  redirect(`/dashboard/actiuni/remediere/${id}`)
 }

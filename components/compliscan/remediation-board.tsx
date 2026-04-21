@@ -462,8 +462,8 @@ function RelatedFindingAnchor({
   const status = getFindingStatusPresentation(finding.findingStatus)
   const narrative = getFindingNarrative(finding)
   const cockpitHref = finding.suggestedDocumentType
-    ? `/dashboard/resolve/${finding.id}?generator=1`
-    : `/dashboard/resolve/${finding.id}`
+    ? `/dashboard/actiuni/remediere/${finding.id}?generator=1`
+    : `/dashboard/actiuni/remediere/${finding.id}`
 
   return (
     <div className="mb-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">

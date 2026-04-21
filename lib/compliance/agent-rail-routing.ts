@@ -187,7 +187,7 @@ function determineNextBestAction(
       action: `Rezolvă ${criticalFindings} finding-uri critice`,
       reason: "Finding-urile critice necesită acțiune imediată.",
       priority: "critical",
-      href: "/dashboard/conformitate",
+      href: "/dashboard/monitorizare/conformitate",
     }
   }
 
