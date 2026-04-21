@@ -265,7 +265,7 @@ export default function DnscRegistrationPage() {
             </p>
           </div>
           <Link
-            href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
+            href={returnTo ?? `/dashboard/actiuni/remediere/${sourceFindingId}`}
             className="shrink-0 text-xs text-eos-primary hover:underline"
           >
             Înapoi la finding
@@ -391,7 +391,7 @@ export default function DnscRegistrationPage() {
 
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/nis2">
+                <Link href="/dashboard/monitorizare/nis2">
                   <ArrowLeft className="size-4" strokeWidth={2} />
                   Înapoi la NIS2
                 </Link>
@@ -863,7 +863,7 @@ export default function DnscRegistrationPage() {
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/nis2">
+                <Link href="/dashboard/monitorizare/nis2">
                   Mergi la modulul NIS2
                   <ArrowRight className="size-4 ml-2" strokeWidth={2} />
                 </Link>

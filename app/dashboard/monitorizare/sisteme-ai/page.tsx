@@ -125,7 +125,7 @@ export default function SistemePage() {
               Sisteme
             </Button>
             <Button asChild>
-              <Link href="/dashboard/alerte">
+              <Link href="/dashboard/monitorizare/alerte">
                 Drift
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
@@ -149,7 +149,7 @@ export default function SistemePage() {
           </p>
         </div>
         <Link
-          href="/dashboard/sisteme/eu-db-wizard"
+          href="/dashboard/monitorizare/sisteme-ai/eu-db-wizard"
           className="shrink-0 rounded-eos-md border border-eos-warning/30 bg-white px-3 py-1.5 text-xs font-medium text-eos-warning transition hover:bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-transparent dark:text-eos-warning"
         >
           Wizard EU DB →

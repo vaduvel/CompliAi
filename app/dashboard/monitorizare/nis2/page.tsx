@@ -87,7 +87,7 @@ export default function Nis2Page() {
               </p>
             </div>
             <Link
-              href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
+              href={returnTo ?? `/dashboard/actiuni/remediere/${sourceFindingId}`}
               className="inline-flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
             >
               <ArrowLeft className="size-3" strokeWidth={2} />
@@ -104,7 +104,7 @@ export default function Nis2Page() {
             <p className="text-sm font-medium">Verifică dacă firma ta intră sub NIS2</p>
             <p className="mt-0.5 text-xs text-eos-text-muted">Wizard rapid — 3 întrebări bazate pe OUG 155/2024</p>
           </div>
-          <Link href="/dashboard/nis2/eligibility">
+          <Link href="/dashboard/monitorizare/nis2/eligibility">
             <Button size="sm" className="shrink-0 gap-1.5 bg-eos-primary text-eos-primary-text hover:bg-eos-primary-hover">
               <ShieldAlert className="size-4" strokeWidth={2} />
               Verifică eligibilitatea

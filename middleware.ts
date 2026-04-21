@@ -115,6 +115,79 @@ function buildLoginRedirectUrl(request: NextRequest) {
   return loginUrl
 }
 
+// ── Legacy → canonic route redirects (DESTINATION §3.6) ───────────────────────
+// Payload: exact path → canonic path. Preserve search params.
+// Prefix-based redirects (ex: /dashboard/resolve/* → /dashboard/actiuni/remediere/*)
+// use LEGACY_PREFIX_REDIRECTS.
+// Only include redirects where the CANONIC target route EXISTS today.
+// Routes whose canonic doesn't exist yet stay as-is (no redirect) to avoid 404.
+const LEGACY_EXACT_REDIRECTS: Record<string, string> = {
+  // Resolve → Actiuni/Remediere
+  "/dashboard/resolve": "/dashboard/actiuni/remediere",
+  // Politici → Actiuni/Politici
+  "/dashboard/politici": "/dashboard/actiuni/politici",
+  "/dashboard/generator": "/dashboard/actiuni/politici",
+  "/dashboard/reports/policies": "/dashboard/actiuni/politici",
+  // Sisteme → Monitorizare/Sisteme-AI
+  "/dashboard/sisteme": "/dashboard/monitorizare/sisteme-ai",
+  "/dashboard/sisteme/eu-db-wizard": "/dashboard/monitorizare/sisteme-ai/eu-db-wizard",
+  // Conformitate → Monitorizare/Conformitate
+  "/dashboard/conformitate": "/dashboard/monitorizare/conformitate",
+  // Alerte → Monitorizare/Alerte
+  "/dashboard/alerte": "/dashboard/monitorizare/alerte",
+  // NIS2 → Monitorizare/NIS2
+  "/dashboard/nis2": "/dashboard/monitorizare/nis2",
+  "/dashboard/nis2/maturitate": "/dashboard/monitorizare/nis2/maturitate",
+  "/dashboard/nis2/governance": "/dashboard/monitorizare/nis2/governance",
+  "/dashboard/nis2/eligibility": "/dashboard/monitorizare/nis2/eligibility",
+  "/dashboard/nis2/inregistrare-dnsc": "/dashboard/monitorizare/nis2/inregistrare-dnsc",
+  // Reports legacy → canonic
+  "/dashboard/reports": "/dashboard/rapoarte",
+  "/dashboard/reports/audit-log": "/dashboard/rapoarte?tab=log",
+  "/dashboard/reports/trust-center": "/trust",
+  "/dashboard/audit-log": "/dashboard/rapoarte?tab=log",
+  // Orphans → nearest canonic (user directive #6)
+  "/dashboard/checklists": "/dashboard/actiuni/remediere",
+  // Settings EN → Setari RO (user directive #2)
+  "/dashboard/settings": "/dashboard/setari",
+  "/dashboard/settings/abonament": "/dashboard/setari/abonament",
+  "/dashboard/settings/scheduled-reports": "/dashboard/setari/scheduled-reports",
+}
+
+// Prefix redirects for dynamic routes (ex: /dashboard/resolve/finding-123 → /dashboard/actiuni/remediere/finding-123)
+const LEGACY_PREFIX_REDIRECTS: Array<[string, string]> = [
+  ["/dashboard/resolve/", "/dashboard/actiuni/remediere/"],
+  ["/dashboard/findings/", "/dashboard/actiuni/remediere/"],
+]
+
+function applyLegacyRedirect(request: NextRequest): NextResponse | null {
+  const { pathname, search } = request.nextUrl
+
+  // Exact match first
+  const exactTarget = LEGACY_EXACT_REDIRECTS[pathname]
+  if (exactTarget) {
+    // Don't redirect to self (same path)
+    if (exactTarget === pathname) return null
+    const url = new URL(exactTarget, request.url)
+    // Preserve existing search params unless target already has them
+    if (search && !exactTarget.includes("?")) {
+      url.search = search
+    }
+    return NextResponse.redirect(url, { status: 301 })
+  }
+
+  // Prefix match (dynamic segments)
+  for (const [legacyPrefix, canonicPrefix] of LEGACY_PREFIX_REDIRECTS) {
+    if (pathname.startsWith(legacyPrefix)) {
+      const rest = pathname.slice(legacyPrefix.length)
+      const url = new URL(`${canonicPrefix}${rest}${search}`, request.url)
+      return NextResponse.redirect(url, { status: 301 })
+    }
+  }
+
+  return null
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith("/api/")
@@ -124,6 +197,12 @@ export async function middleware(request: NextRequest) {
 
   if (isDemoBootRoute || isStripeWebhookRoute || isPublicWhistleblowingSubmit) {
     return NextResponse.next()
+  }
+
+  // Legacy → canonic redirects BEFORE auth check (bookmarks should redirect regardless of auth state)
+  if (!isApiRoute) {
+    const redirect = applyLegacyRedirect(request)
+    if (redirect) return redirect
   }
 
   const sessionCookie = request.cookies.get(SESSION_COOKIE)

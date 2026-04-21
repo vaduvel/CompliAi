@@ -250,7 +250,7 @@ export default function GovernancePage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[
-        { label: "NIS2", href: "/dashboard/nis2" },
+        { label: "NIS2", href: "/dashboard/monitorizare/nis2" },
         { label: "Guvernanță" },
       ]} />
 
@@ -278,7 +278,7 @@ export default function GovernancePage() {
           </p>
           <div className="mt-3">
             <Link
-              href={returnTo || `/dashboard/resolve/${findingId}`}
+              href={returnTo || `/dashboard/actiuni/remediere/${findingId}`}
               className="inline-flex h-9 items-center justify-center rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-hover"
             >
               Înapoi la finding

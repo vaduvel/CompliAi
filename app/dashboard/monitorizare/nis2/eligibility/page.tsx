@@ -105,7 +105,7 @@ export default function Nis2EligibilityPage() {
             </p>
           </div>
           <Link
-            href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
+            href={returnTo ?? `/dashboard/actiuni/remediere/${sourceFindingId}`}
             className="shrink-0 text-xs text-eos-primary hover:underline"
           >
             Înapoi la finding
@@ -117,7 +117,7 @@ export default function Nis2EligibilityPage() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push("/dashboard/nis2")}
+          onClick={() => router.push("/dashboard/monitorizare/nis2")}
         >
           <ArrowLeft className="size-4" strokeWidth={2} />
         </Button>
@@ -172,7 +172,7 @@ export default function Nis2EligibilityPage() {
                   <Button size="sm">Continuă spre DNSC</Button>
                 </Link>
                 <Link
-                  href={`/dashboard/resolve/${sourceFindingId}`}
+                  href={`/dashboard/actiuni/remediere/${sourceFindingId}`}
                   className="inline-flex items-center text-sm text-eos-primary hover:underline"
                 >
                   Înapoi la cockpit

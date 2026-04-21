@@ -94,7 +94,7 @@ export default function EUDatabaseWizardPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
       <div className="flex items-center gap-2">
-        <Link href="/dashboard/sisteme" className="text-xs text-eos-text-muted hover:text-eos-text">
+        <Link href="/dashboard/monitorizare/sisteme-ai" className="text-xs text-eos-text-muted hover:text-eos-text">
           <ArrowLeft className="inline size-3.5" /> Inventar AI
         </Link>
       </div>
@@ -287,7 +287,7 @@ export default function EUDatabaseWizardPage() {
               <Button size="sm" variant="outline" onClick={() => setStep(3)}>
                 <ArrowLeft className="size-3.5" /> Înapoi la preview
               </Button>
-              <Link href="/dashboard/sisteme">
+              <Link href="/dashboard/monitorizare/sisteme-ai">
                 <Button size="sm" variant="outline">Înapoi la inventar</Button>
               </Link>
             </div>

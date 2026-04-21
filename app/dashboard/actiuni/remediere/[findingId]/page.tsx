@@ -631,14 +631,14 @@ export default function FindingDetailPage() {
             placeholder: "Ex: Microsoft Corporation revizuit în registrul NIS2 la 26.03.2026. DPA verificat, clauza de notificare incidente confirmată, data ultimei revizuiri actualizată și contractul salvat la dosar.",
             footer: "Cazul nu poate intra în monitorizare fără urma clară a revizuirii furnizorului și a dovezii contractuale.",
           }
-      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/maturitate")
+      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/monitorizare/nis2/maturitate")
         ? {
             eyebrow: "Dovadă de evaluare maturitate NIS2",
             body: `${recipe.whatUserMustDo} Notează ce domeniu ai completat, ce răspunsuri ai confirmat și ce plan de remediere ai lăsat în evaluarea DNSC.`,
             placeholder: "Ex: Domeniul Business Continuity completat în evaluarea de maturitate la 26.03.2026. BCP și DRP confirmate ca lipsă, plan de remediere actualizat cu termen intern 30.04.2026 și assessment salvat.",
             footer: "Cazul nu poate intra în monitorizare fără urma clară a evaluării de maturitate și a planului salvat pentru domeniul afectat.",
           }
-      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/nis2/governance")
+      : recipe.findingTypeId === "NIS2-GENERIC" && recipe.workflowLink?.href.includes("/dashboard/monitorizare/nis2/governance")
         ? {
             eyebrow: "Dovadă de actualizare Board & CISO",
             body: `${recipe.whatUserMustDo} Notează ce training sau ce certificare ai actualizat și cum ai salvat urma în registrul de guvernanță.`,
@@ -1238,7 +1238,7 @@ export default function FindingDetailPage() {
               </p>
               <Link
                 className={buttonVariants({ className: "gap-2" })}
-                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/resolve/${encodeURIComponent(finding.id)}`)}`}
+                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/actiuni/remediere/${encodeURIComponent(finding.id)}`)}`}
               >
                 <FileText className="size-3.5" strokeWidth={2} />
                 Deschide RoPA

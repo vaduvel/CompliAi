@@ -203,7 +203,7 @@ function ResultsView({
           Reîncepe evaluarea
         </Button>
         <Button asChild size="sm" variant="ghost">
-          <Link href="/dashboard/nis2">Înapoi la NIS2</Link>
+          <Link href="/dashboard/monitorizare/nis2">Înapoi la NIS2</Link>
         </Button>
       </div>
     </div>
@@ -373,7 +373,7 @@ export default function MaturitatePage() {
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm" className="gap-2">
-                  <Link href={returnTo || `/dashboard/resolve/${findingId}`}>
+                  <Link href={returnTo || `/dashboard/actiuni/remediere/${findingId}`}>
                     <ArrowLeft className="size-4" strokeWidth={2} />
                     Înapoi la finding
                   </Link>
