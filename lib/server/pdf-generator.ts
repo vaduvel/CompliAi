@@ -13,10 +13,14 @@ let cachedPdfFont: Buffer | null = null
 let pdfkitDataLookupPatched = false
 
 const PDFKIT_RUNTIME_DATA_SEGMENT = `${path.sep}.next${path.sep}server${path.sep}chunks${path.sep}data${path.sep}`
+const PDFKIT_VENDOR_CHUNKS_DATA_SEGMENT = `${path.sep}.next${path.sep}server${path.sep}vendor-chunks${path.sep}data${path.sep}`
 const PDFKIT_VENDOR_DATA_DIR = path.join(process.cwd(), "node_modules", "pdfkit", "js", "data")
 
 export function resolvePdfkitRuntimeDataFallback(filePath: string) {
-  if (!filePath.includes(PDFKIT_RUNTIME_DATA_SEGMENT)) {
+  const matchesRuntime =
+    filePath.includes(PDFKIT_RUNTIME_DATA_SEGMENT) ||
+    filePath.includes(PDFKIT_VENDOR_CHUNKS_DATA_SEGMENT)
+  if (!matchesRuntime) {
     return undefined
   }
 

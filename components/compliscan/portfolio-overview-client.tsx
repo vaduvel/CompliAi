@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
+import { QuickAddClientDialog } from "@/components/compliscan/quick-add-client-dialog"
 import { toast } from "sonner"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -265,6 +266,13 @@ function ClientRow({
         >
           Intră în firmă
         </button>
+        <a
+          href={`/api/exports/diagnostic/${client.orgId}`}
+          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text-muted"
+          title="Descarcă diagnostic PDF"
+        >
+          <Download className="size-3.5" strokeWidth={2} />
+        </a>
         <a
           href={`/trust/${client.orgId}`}
           target="_blank"
@@ -543,6 +551,7 @@ export function PortfolioOverviewClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
+  const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [search, setSearch] = useState("")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchLoading, setBatchLoading] = useState(false)
@@ -725,6 +734,22 @@ export function PortfolioOverviewClient() {
         />
       ) : null}
 
+      <QuickAddClientDialog
+        open={showQuickAdd}
+        onClose={() => setShowQuickAdd(false)}
+        onSuccess={(result) => {
+          setShowQuickAdd(false)
+          void fetchClients()
+          void fetchPlanData()
+          toast.success(`${result.orgName} adăugată în portofoliu.`)
+        }}
+        onDrillIn={(orgId) => {
+          setShowQuickAdd(false)
+          void handleDrillDown(orgId)
+        }}
+      />
+
+
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -752,12 +777,21 @@ export function PortfolioOverviewClient() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => setShowQuickAdd(true)}
+            disabled={planData ? !planData.canAddOrg : false}
+            className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-md shadow-eos-primary/20 transition-all hover:bg-eos-primary/90 disabled:opacity-40"
+          >
+            <Zap className="size-4" strokeWidth={2.5} />
+            Adaugă firmă
+          </button>
+          <button
+            type="button"
             onClick={() => setShowImport(true)}
             disabled={planData ? !planData.canAddOrg : false}
             className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text disabled:opacity-40"
           >
             <Upload className="size-4" strokeWidth={2} />
-            {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
+            {planData && !planData.canAddOrg ? "Limita atinsă" : "Import CSV"}
           </button>
           <button
             type="button"
@@ -916,11 +950,11 @@ export function PortfolioOverviewClient() {
             </div>
             <button
               type="button"
-              onClick={() => setShowImport(true)}
+              onClick={() => setShowQuickAdd(true)}
               disabled={planData ? !planData.canAddOrg : false}
               className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Upload className="size-4" strokeWidth={2} />
+              <Zap className="size-4" strokeWidth={2} />
               Adaugă primul client
             </button>
           </div>
