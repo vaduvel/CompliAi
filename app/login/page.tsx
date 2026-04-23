@@ -208,10 +208,12 @@ function LoginContent() {
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                  <label htmlFor="orgName" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
                     Denumirea firmei
                   </label>
                   <input
+                    id="orgName"
+                    name="orgName"
                     type="text"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
@@ -224,10 +226,12 @@ function LoginContent() {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
                   Email
                 </label>
                 <input
+                  id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -239,11 +243,13 @@ function LoginContent() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
                   Parolă
                 </label>
                 <div className="relative">
                   <input
+                    id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -269,17 +275,20 @@ function LoginContent() {
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                  <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
                     Confirmă parola
                   </label>
                   <div className="relative">
                     <input
+                      id="confirmPassword"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Tastează parola încă o dată"
                       required
                       autoComplete="new-password"
+                      aria-invalid={Boolean(confirmPassword && password !== confirmPassword)}
                       className={[
                         "h-12 w-full rounded-eos-lg border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary transition-all",
                         confirmPassword && password !== confirmPassword
@@ -316,6 +325,8 @@ function LoginContent() {
               {mode === "register" && (
                 <label className="flex cursor-pointer items-start gap-3 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3.5">
                   <input
+                    id="acceptedTerms"
+                    name="acceptedTerms"
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}

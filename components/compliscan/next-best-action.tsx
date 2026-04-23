@@ -103,7 +103,7 @@ export function NextBestAction({
           {ctaHref && (
             <Button asChild variant="outline" size="sm" className="mt-3 w-full gap-2">
               <Link href={ctaHref}>
-                {!hasEvidence ? "Mergi la Scanare" : "Revizuiește alertele"}
+                {!hasEvidence ? "Deschide Scanare" : "Deschide Control drift"}
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </Button>

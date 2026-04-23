@@ -428,6 +428,7 @@ export function ScanWorkspace({
                         : "Click aici pentru a incarca PDF / PNG / JPG"}
                     </span>
                     <input
+                      aria-label="Încarcă document"
                       type="file"
                       accept="application/pdf,image/png,image/jpeg,image/webp"
                       className="hidden"
@@ -446,19 +447,23 @@ export function ScanWorkspace({
               <p className="text-sm font-medium text-eos-text">Pasul 2: context si scope</p>
               <div className="mt-4 grid gap-4">
                 <input
+                  id="scanSourceName"
+                  name="scanSourceName"
                   value={documentName}
                   onChange={(event) => setDocumentName(event.target.value)}
-                  placeholder="Nume document"
+                  placeholder="Nume sursă"
                   className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-bg px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
                 <textarea
+                  id="scanExtractedText"
+                  name="scanExtractedText"
                   value={documentContent}
                   onChange={(event) => setDocumentContent(event.target.value)}
                   rows={7}
                   placeholder={
                     isTextMode
-                      ? "Lipeste aici textul pe care vrei sa-l analizam."
-                      : "Paste text manual daca nu ai fisier. Daca ai PDF, lasa aici gol."
+                      ? "Lipește aici textul pe care vrei să-l analizăm."
+                      : "Text pentru analiză. Dacă ai PDF, lasă aici gol."
                   }
                   className="ring-focus rounded-eos-md border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
@@ -504,6 +509,8 @@ export function ScanWorkspace({
                       Text extras pentru review
                     </p>
                     <textarea
+                      id="pendingExtractedText"
+                      name="pendingExtractedText"
                       value={pendingExtractedText}
                       onChange={(event) => setPendingExtractedText(event.target.value)}
                       rows={8}
@@ -615,8 +622,8 @@ export function LatestDocumentSection({
         <CardContent className="space-y-6 pt-6">
           {!latestScan && (
             <EmptyState
-              title="Niciun document scanat"
-              label="Porneste un flux nou din Scanari si aici vei vedea ultimul document analizat."
+              title="Încă nu ai documente analizate"
+              label="Pornește un flux nou din Scanare și aici vei vedea ultimul document analizat."
               className="items-start rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
             />
           )}
@@ -655,8 +662,8 @@ export function LatestDocumentSection({
                   <div className="mt-4 space-y-3">
                     {latestScanFindings.length === 0 && (
                       <EmptyState
-                        title="Fara provenance disponibila"
-                        label="Pentru acest document nu exista inca provenance disponibila."
+                        title="Nu avem încă explicația detecției"
+                        label="Pentru acest document nu există încă detalii despre regula sau fragmentul care a declanșat finding-ul."
                         className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                       />
                     )}
@@ -710,8 +717,8 @@ export function LatestDocumentSection({
                 <div className="mt-4 space-y-3">
                   {latestScanTasks.length === 0 && (
                     <EmptyState
-                      title="Fara task-uri derivate"
-                      label="Nu există task-uri derivate direct din acest document."
+                      title="Încă nu ai task-uri din documentul ăsta"
+                      label="Când analiza găsește probleme acționabile, task-urile apar aici și în De rezolvat."
                       className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                     />
                   )}

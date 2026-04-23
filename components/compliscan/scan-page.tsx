@@ -191,7 +191,7 @@ export function ScanPageSurface() {
               href="/dashboard/resolve"
               className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-3.5 py-2 text-xs font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
             >
-              De rezolvat
+              Deschide De rezolvat
               <ArrowRight className="size-3.5" strokeWidth={2} />
             </Link>
           </div>
@@ -274,7 +274,7 @@ export function ScanPageSurface() {
                 href="/dashboard/resolve"
                 className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text"
               >
-                De rezolvat
+                Deschide De rezolvat
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             )}

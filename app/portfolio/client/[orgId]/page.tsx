@@ -6,10 +6,13 @@ import { ClientContextPanel } from "@/components/compliscan/client-context-panel
 
 export default async function PortfolioClientPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgId: string }>
+  searchParams: Promise<{ finding?: string }>
 }) {
   const { orgId } = await params
+  const { finding } = await searchParams
 
-  return <ClientContextPanel orgId={orgId} />
+  return <ClientContextPanel orgId={orgId} focusedFindingId={finding} />
 }
