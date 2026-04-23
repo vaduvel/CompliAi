@@ -8,7 +8,7 @@ import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, readSessionFromRequest } from "@/lib/server/auth"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { trackEvent } from "@/lib/server/analytics"
-import type { OrgProfile } from "@/lib/compliance/applicability"
+import { evaluateApplicability, type OrgProfile } from "@/lib/compliance/applicability"
 
 type PartnerWorkspaceBody = {
   orgName?: string
@@ -43,10 +43,12 @@ export async function POST(request: Request) {
       ...(cui ? { cui } : {}),
       completedAtISO: new Date().toISOString(),
     }
+    const applicability = evaluateApplicability(orgProfile)
 
     await mutateStateForOrg(session.orgId, (current) => ({
       ...current,
       orgProfile,
+      applicability,
       // Store partner workspace metadata separately for future use
       partnerWorkspace: {
         orgName: orgName ?? current.partnerWorkspace?.orgName,

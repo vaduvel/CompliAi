@@ -26,18 +26,18 @@ const nextConfig: NextConfig = {
     // (/dashboard/scaneaza, /dashboard/actiuni/*, /dashboard/monitorizare/*).
     return [
       {
-        source: "/dashboard/settings",
-        destination: "/dashboard/setari",
+        source: "/dashboard/setari",
+        destination: "/dashboard/settings",
         permanent: true,
       },
       {
-        source: "/dashboard/settings/abonament",
-        destination: "/dashboard/setari/abonament",
+        source: "/dashboard/setari/abonament",
+        destination: "/dashboard/settings/abonament",
         permanent: true,
       },
       {
         source: "/dashboard/reports",
-        destination: "/dashboard/rapoarte",
+        destination: "/dashboard/dosar",
         permanent: true,
       },
       {

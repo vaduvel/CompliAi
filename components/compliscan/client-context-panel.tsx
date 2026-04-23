@@ -117,7 +117,13 @@ function SeverityBadge({ severity }: { severity: string }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export function ClientContextPanel({ orgId }: { orgId: string }) {
+export function ClientContextPanel({
+  orgId,
+  focusedFindingId,
+}: {
+  orgId: string
+  focusedFindingId?: string
+}) {
   const [data, setData] = useState<ClientContextData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -158,7 +164,10 @@ export function ClientContextPanel({ orgId }: { orgId: string }) {
         toast.error(payload.error ?? "Nu am putut intra în firmă.")
         return
       }
-      window.location.assign("/dashboard")
+      const destination = focusedFindingId
+        ? `/dashboard/resolve/${encodeURIComponent(focusedFindingId)}`
+        : "/dashboard"
+      window.location.assign(destination)
     } finally {
       setEnteringWorkspace(false)
     }
@@ -213,9 +222,19 @@ export function ClientContextPanel({ orgId }: { orgId: string }) {
   }
 
   const c = data.compliance
+  const focusedFinding = focusedFindingId
+    ? data.openFindings.find((finding) => finding.id === focusedFindingId) ?? null
+    : null
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
+      {focusedFinding ? (
+        <div className="rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.08] px-4 py-3 text-sm text-eos-text-muted">
+          Ai venit din Alerte cu finding-ul <span className="font-semibold text-eos-text">{focusedFinding.title}</span>.
+          Poți deschide direct cockpit-ul sau intra în firmă pentru context complet.
+        </div>
+      ) : null}
+
       {/* ── Breadcrumb + actions ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm">

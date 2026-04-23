@@ -109,6 +109,16 @@ function groupByDay(items: InboxItem[]): { label: string; items: InboxItem[] }[]
   return groups
 }
 
+function actionLabelForDestination(destination?: string) {
+  if (!destination || destination === "/dashboard") return "Intră în firmă"
+  if (destination.startsWith("/dashboard/resolve")) return "Deschide finding"
+  if (destination.startsWith("/dashboard/fiscal")) return "Deschide fiscal"
+  if (destination.startsWith("/dashboard/nis2")) return "Deschide NIS2"
+  if (destination.startsWith("/dashboard/vendor-review")) return "Deschide registrul"
+  if (destination.startsWith("/dashboard/dosar") || destination.startsWith("/dashboard/reports")) return "Vezi cazul"
+  return "Vezi contextul"
+}
+
 export function PortfolioAlertsPage() {
   const [data, setData] = useState<InboxResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -617,7 +627,7 @@ export function PortfolioAlertsPage() {
                         <PortfolioOrgActionButton
                           orgId={item.orgId}
                           destination={item.linkTo ?? "/dashboard"}
-                          label="Intră în firmă"
+                          label={actionLabelForDestination(item.linkTo)}
                           variant="outline"
                         />
                       </div>

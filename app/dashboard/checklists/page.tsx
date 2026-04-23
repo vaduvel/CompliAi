@@ -200,16 +200,16 @@ export default function RemediationPage() {
             actions={
               <>
                 <Button asChild variant="outline">
-                  <Link href="/dashboard/rapoarte/auditor-vault">
-                    Auditor Vault
-                    <ArrowRight className="size-4" strokeWidth={2} />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/dashboard/rapoarte">
-                    Audit si export
-                    <ArrowRight className="size-4" strokeWidth={2} />
-                  </Link>
+                <Link href="/dashboard/dosar">
+                  Deschide Dosar
+                  <ArrowRight className="size-4" strokeWidth={2} />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/reports/audit-log">
+                  Vezi jurnal audit
+                  <ArrowRight className="size-4" strokeWidth={2} />
+                </Link>
                 </Button>
               </>
             }

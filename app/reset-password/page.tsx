@@ -31,6 +31,7 @@ function ResetPasswordContent() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [recoveryAccessToken, setRecoveryAccessToken] = useState(accessTokenFromQuery ?? "")
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
@@ -157,10 +158,12 @@ function ResetPasswordContent() {
             {mode === "forgot" && !emailSent && (
               <form onSubmit={(e) => void handleForgot(e)} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm text-eos-text-muted">
+                  <label htmlFor="resetEmail" className="text-sm text-eos-text-muted">
                     Adresa de email
                   </label>
                   <input
+                    id="resetEmail"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -219,11 +222,13 @@ function ResetPasswordContent() {
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-sm text-eos-text-muted">
+                  <label htmlFor="newPassword" className="text-sm text-eos-text-muted">
                     Parolă nouă
                   </label>
                   <div className="relative">
                     <input
+                      id="newPassword"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -236,6 +241,7 @@ function ResetPasswordContent() {
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-muted hover:text-eos-text"
+                      aria-label={showPassword ? "Ascunde parola nouă" : "Arată parola nouă"}
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" strokeWidth={2} />
@@ -247,18 +253,38 @@ function ResetPasswordContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm text-eos-text-muted">
+                  <label htmlFor="confirmNewPassword" className="text-sm text-eos-text-muted">
                     Confirmă parola
                   </label>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repetă parola"
-                    required
-                    autoComplete="new-password"
-                    className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmNewPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repetă parola"
+                      required
+                      autoComplete="new-password"
+                      aria-invalid={Boolean(confirmPassword && password !== confirmPassword)}
+                      className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-muted hover:text-eos-text"
+                      aria-label={showConfirmPassword ? "Ascunde confirmarea parolei" : "Arată confirmarea parolei"}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="size-4" strokeWidth={2} />
+                      ) : (
+                        <Eye className="size-4" strokeWidth={2} />
+                      )}
+                    </button>
+                  </div>
+                  {confirmPassword && password !== confirmPassword ? (
+                    <p className="text-xs text-eos-error">Parolele nu coincid.</p>
+                  ) : null}
                 </div>
 
                 {error && (

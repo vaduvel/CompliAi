@@ -174,10 +174,10 @@ export const viewerNavItems: DashboardNavItem[] = [
   },
   {
     id: "documente",
-    label: "Documente",
-    href: dashboardRoutes.documentsHub,
+    label: "Dosar",
+    href: dashboardRoutes.dosar,
     icon: FolderOpen,
-    matchers: [dashboardRoutes.documentsHub],
+    matchers: [...dashboardRouteGroups.dosar],
     description: "read-only",
   },
   {

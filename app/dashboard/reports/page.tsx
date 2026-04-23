@@ -1,5 +1,5 @@
-import { ReportsPageSurface } from "@/components/compliscan/reports-page"
+import { redirect } from "next/navigation"
 
-export default function ReportsPage() {
-  return <ReportsPageSurface />
+export default function LegacyReportsPage() {
+  redirect("/dashboard/dosar")
 }

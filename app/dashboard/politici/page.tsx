@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { ReportsPoliciesPageSurface } from "@/components/compliscan/reports-policies-page"
 
-export default function LegacyPoliciesPage() {
-  redirect("/dashboard/reports/policies")
+export default function PoliciesPage() {
+  return <ReportsPoliciesPageSurface />
 }
