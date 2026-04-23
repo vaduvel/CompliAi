@@ -1,8 +1,30 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowRight, CheckCircle2, ShieldCheck, FileCheck2, Activity, ChevronRight } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
-import { Button } from "@/components/evidence-os/Button"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
+
+export const metadata: Metadata = {
+  title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+  description:
+    "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional pentru GDPR, NIS2, EU AI Act și e-Factura.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+    description:
+      "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional.",
+    url: "/",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+    description:
+      "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada.",
+  },
+}
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 

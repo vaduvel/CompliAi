@@ -1,9 +1,32 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Check, X, ArrowRight, Zap, Building2, Briefcase, ShieldCheck } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 import { PricingVisitTracker } from "@/components/compliscan/pricing-visit-tracker"
 import { PLAN_LABELS, PLAN_PRICES } from "@/lib/server/plan"
+
+export const metadata: Metadata = {
+  title: "Prețuri CompliScan — Free, Pro și Partner",
+  description:
+    "Alege planul CompliScan potrivit: diagnostic gratuit, Pro pentru firma ta sau Partner pentru consultanți și contabili care gestionează mai mulți clienți.",
+  alternates: {
+    canonical: "/pricing",
+  },
+  openGraph: {
+    title: "Prețuri CompliScan — Free, Pro și Partner",
+    description:
+      "Diagnostic gratuit, Pro pentru firma ta sau Partner pentru consultanți și contabili.",
+    url: "/pricing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Prețuri CompliScan — Free, Pro și Partner",
+    description:
+      "Alege planul pentru diagnostic, execuție în firmă sau portofoliu multi-client.",
+  },
+}
 
 // ── Feature lists per plan ────────────────────────────────────────────────────
 
