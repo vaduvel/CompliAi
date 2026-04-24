@@ -1,29 +1,22 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import type { ReactNode } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 import { AIActEvidencePackCard } from "@/components/compliscan/ai-act-evidence-pack-card"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
-import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
+import { SummaryStrip } from "@/components/evidence-os/SummaryStrip"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { classifyAISystem, RISK_LEVEL_LABELS, RISK_LEVEL_COLORS } from "@/lib/compliance/ai-act-classifier"
-import { formatRelativeRomanian } from "@/lib/compliance/engine"
-import { cn } from "@/lib/utils"
 import type {
-  ControlPrimaryViewMode,
   SystemsSubViewMode,
   UpdateCompliancePackFieldInput,
 } from "./sisteme-shared"
@@ -91,12 +84,12 @@ export function ControlSystemsWorkspace({
         description="Parcurgi pașii în ordine: mai întâi descoperi, confirmi, fixezi reperul și revizuiești pack-ul."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               {confirmedCount} confirmate
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </span>
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               {detectedActiveCount} detecții active
-            </Badge>
+            </span>
           </>
         }
         support={
@@ -113,8 +106,8 @@ export function ControlSystemsWorkspace({
 
       {active === "discovery" && (
         <div className="space-y-6">
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="px-5 py-5">
+          <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+            <div className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Discovery"
                 title="Candidate detectate automat"
@@ -139,8 +132,8 @@ export function ControlSystemsWorkspace({
                   },
                 ]}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {discoveryPanel}
 
@@ -167,8 +160,8 @@ export function ControlSystemsWorkspace({
 
       {active === "inventory" && (
         <div className="space-y-6">
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="px-5 py-5">
+          <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+            <div className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Inventar oficial"
                 title="Sisteme asumate operațional"
@@ -193,54 +186,67 @@ export function ControlSystemsWorkspace({
                   },
                 ]}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader className="border-b border-eos-border pb-5">
-              <CardTitle className="text-xl">Inventar confirmat recent</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
+          <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+            <header className="border-b border-eos-border-subtle px-4 py-3.5">
+              <h3
+                data-display-text="true"
+                className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+              >
+                Inventar confirmat recent
+              </h3>
+            </header>
+            <div className="space-y-4 px-4 py-4">
               {recentInventory.length === 0 && (
-                <EmptyState
-                  title="Niciun sistem confirmat încă"
-                  label="Confirmă mai întâi o detecție din Discovery sau adaugă manual un sistem nou dacă sursa tehnică lipsește."
-                  className="border-eos-border bg-eos-surface-variant py-8"
-                />
+                <div className="rounded-eos-lg border border-dashed border-eos-border bg-white/[0.02] px-4 py-8 text-center">
+                  <p
+                    data-display-text="true"
+                    className="font-display text-[13.5px] font-semibold tracking-[-0.01em] text-eos-text"
+                  >
+                    Niciun sistem confirmat încă
+                  </p>
+                  <p className="mt-1.5 text-[12px] leading-[1.5] text-eos-text-muted">
+                    Confirmă mai întâi o detecție din Discovery sau adaugă manual un sistem nou dacă
+                    sursa tehnică lipsește.
+                  </p>
+                </div>
               )}
               {recentInventory.map((system) => {
                 const aiActClass = classifyAISystem(system.purpose)
+                const riskTone =
+                  system.riskLevel === "high"
+                    ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
+                    : system.riskLevel === "limited"
+                      ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+                      : "border-eos-success/30 bg-eos-success-soft text-eos-success"
                 return (
-                  <DenseListItem key={system.id} className="bg-eos-surface-variant">
+                  <DenseListItem key={system.id} className="bg-eos-surface-elevated">
                     <div className="p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="break-words text-sm font-semibold text-eos-text">
+                          <p className="break-words text-[13px] font-semibold text-eos-text">
                             {system.name}
                           </p>
-                          <p className="mt-1 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
+                          <p className="mt-1 text-[12.5px] text-eos-text-muted [overflow-wrap:anywhere]">
                             {system.vendor} · {formatPurposeLabel(system.purpose)}
                           </p>
                         </div>
-                        <Badge
-                          variant={
-                            system.riskLevel === "high"
-                              ? "destructive"
-                              : system.riskLevel === "limited"
-                                ? "warning"
-                                : "success"
-                          }
+                        <span
+                          className={`inline-flex items-center rounded-sm border ${riskTone} px-1.5 py-0.5 font-mono text-[10px] font-medium`}
                         >
                           {system.riskLevel}
-                        </Badge>
+                        </span>
                       </div>
-                      <p className="mt-2 text-xs text-eos-text-muted [overflow-wrap:anywhere]">
-                        {system.modelType} · {system.hasHumanReview ? "cu review uman" : "fără review uman"}
+                      <p className="mt-2 text-[11.5px] text-eos-text-muted [overflow-wrap:anywhere]">
+                        {system.modelType} ·{" "}
+                        {system.hasHumanReview ? "cu review uman" : "fără review uman"}
                       </p>
                       {/* GOLD 8 — AI Act classification (propusa, nu verdict final) */}
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <span
-                          className={`inline-flex items-center rounded border px-2 py-0.5 text-[11px] font-medium ${RISK_LEVEL_COLORS[aiActClass.riskLevel]}`}
+                          className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${RISK_LEVEL_COLORS[aiActClass.riskLevel]}`}
                         >
                           {RISK_LEVEL_LABELS[aiActClass.riskLevel]}
                         </span>
@@ -265,8 +271,8 @@ export function ControlSystemsWorkspace({
                   </DenseListItem>
                 )
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {inventoryPanel}
         </div>
@@ -274,8 +280,8 @@ export function ControlSystemsWorkspace({
 
       {active === "baseline" && (
         <div className="space-y-6">
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="px-5 py-5">
+          <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+            <div className="px-5 py-5">
               <SummaryStrip
                 eyebrow="Baseline"
                 title="Reperul față de care comparăm schimbarea reală"
@@ -304,8 +310,8 @@ export function ControlSystemsWorkspace({
                   },
                 ]}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           <HandoffCard
             title={validatedBaseline ? "Baseline-ul este gata pentru Drift" : "Mai întâi validezi baseline-ul"}
@@ -388,11 +394,18 @@ export function ControlSystemsWorkspace({
               />
             </>
           ) : (
-            <EmptyState
-              title="Compliance Pack indisponibil"
-              label="Solicită payload-ul complet sau confirmă mai întâi suficiente sisteme pentru review de control."
-              className="border-eos-border bg-eos-surface py-10"
-            />
+            <div className="rounded-eos-lg border border-dashed border-eos-border bg-white/[0.02] px-4 py-10 text-center">
+              <p
+                data-display-text="true"
+                className="font-display text-[13.5px] font-semibold tracking-[-0.01em] text-eos-text"
+              >
+                Compliance Pack indisponibil
+              </p>
+              <p className="mt-1.5 text-[12px] leading-[1.5] text-eos-text-muted">
+                Solicită payload-ul complet sau confirmă mai întâi suficiente sisteme pentru review
+                de control.
+              </p>
+            </div>
           )}
         </div>
       )}

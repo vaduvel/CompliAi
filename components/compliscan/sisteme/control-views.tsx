@@ -3,27 +3,18 @@
 import { useState } from "react"
 import Link from "next/link"
 import {
-  AlertTriangle,
   ArrowRight,
-  CalendarClock,
 } from "lucide-react"
 
-import { AIActEvidencePackCard } from "@/components/compliscan/ai-act-evidence-pack-card"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { formatRelativeRomanian } from "@/lib/compliance/engine"
-import { RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from "@/lib/compliance/ai-act-classifier"
-import { cn } from "@/lib/utils"
-import { ControlPackageHighlightsCard, buildControlPackageHighlights } from "./sisteme-shared"
 
 export function ControlOverview({
   summary,
@@ -112,22 +103,27 @@ export function ControlOverview({
 
   return (
     <div className="space-y-6">
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <div className="px-5 py-5">
           <SummaryStrip
             eyebrow="Stare curentă"
             title="Ce cere confirmare acum"
             description="Alegi zona unde continui confirmarea reală."
             items={items}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
           <div>
-            <p className="text-sm font-semibold text-eos-text">Continui confirmarea</p>
-            <p className="text-xs text-eos-text-muted">
+            <p
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              Continui confirmarea
+            </p>
+            <p className="mt-1 text-[12px] text-eos-text-muted">
               Control rămâne doar pentru confirmare. Execuția rămâne în Dovadă.
             </p>
           </div>
@@ -151,13 +147,13 @@ export function ControlOverview({
             <button
               type="button"
               onClick={() => setShowGuidance((current) => !current)}
-              className="text-xs text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline"
+              className="text-[11.5px] text-eos-text-muted underline-offset-2 hover:text-eos-text hover:underline"
             >
               {showGuidance ? "Ascunde ghidajul" : "Arată ghidajul"}
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {shouldShowGuidance ? (
         <>
@@ -165,7 +161,11 @@ export function ControlOverview({
             eyebrow="Control"
             title="Confirmare umană, fără execuție aici"
             description="Aici validezi inventarul, baseline-ul și drift-ul. Execuția rămâne în Dovadă, iar integrările rămân în Setări."
-            badges={<Badge variant="outline" className="normal-case tracking-normal">baseline + drift</Badge>}
+            badges={
+              <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+                baseline + drift
+              </span>
+            }
             support={
               <ActionCluster
                 eyebrow="Acțiuni"
@@ -248,8 +248,8 @@ export function ControlDriftWorkspace({
 }) {
   return (
     <div className="space-y-6">
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <div className="px-5 py-5">
           <SummaryStrip
             eyebrow="Drift"
             title="Schimbările față de baseline stau separat de restul Controlului"
@@ -274,8 +274,8 @@ export function ControlDriftWorkspace({
               },
             ]}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <SectionBoundary
         eyebrow="Investigație"
@@ -283,12 +283,12 @@ export function ControlDriftWorkspace({
         description="Aici înțelegi ce s-a schimbat și decizi dacă merge spre remediere. Execuția reală rămâne în Dovadă."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               progressive disclosure
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </span>
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               fără export aici
-            </Badge>
+            </span>
           </>
         }
         support={
@@ -316,43 +316,57 @@ export function ControlDriftWorkspace({
         }
       />
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader className="border-b border-eos-border pb-5">
-          <CardTitle className="text-xl">Drift recent pe inventar</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-6">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <header className="border-b border-eos-border-subtle px-4 py-3.5">
+          <h3
+            data-display-text="true"
+            className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+          >
+            Drift recent pe inventar
+          </h3>
+        </header>
+        <div className="space-y-4 px-4 py-4">
           {recentDrifts.length === 0 && (
-            <EmptyState
-              title="Niciun drift deschis"
-              label="Inventarul confirmat este stabil față de baseline-ul curent."
-              className="border-eos-border bg-eos-surface-variant py-8"
-            />
+            <div className="rounded-eos-lg border border-dashed border-eos-border bg-white/[0.02] px-4 py-8 text-center">
+              <p
+                data-display-text="true"
+                className="font-display text-[13.5px] font-semibold tracking-[-0.01em] text-eos-text"
+              >
+                Niciun drift deschis
+              </p>
+              <p className="mt-1.5 text-[12px] leading-[1.5] text-eos-text-muted">
+                Inventarul confirmat este stabil față de baseline-ul curent.
+              </p>
+            </div>
           )}
-          {recentDrifts.map((drift) => (
-            <DenseListItem key={drift.id} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium text-eos-text">{drift.summary}</p>
-                  <p className="mt-2 text-xs text-eos-text-muted">
-                    {drift.systemLabel || drift.sourceDocument || "Inventar AI"} · {formatRelativeRomanian(drift.detectedAtISO)}
-                  </p>
+          {recentDrifts.map((drift) => {
+            const severityTone =
+              drift.severity === "critical" || drift.severity === "high"
+                ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
+                : drift.severity === "medium"
+                  ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+                  : "border-eos-border bg-eos-surface-elevated text-eos-text-muted"
+            return (
+              <DenseListItem key={drift.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[13px] font-medium text-eos-text">{drift.summary}</p>
+                    <p className="mt-2 text-[11.5px] text-eos-text-muted">
+                      {drift.systemLabel || drift.sourceDocument || "Inventar AI"} ·{" "}
+                      {formatRelativeRomanian(drift.detectedAtISO)}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-sm border ${severityTone} px-1.5 py-0.5 font-mono text-[10px] font-medium`}
+                  >
+                    {drift.severity}
+                  </span>
                 </div>
-                <Badge
-                  variant={
-                    drift.severity === "critical" || drift.severity === "high"
-                      ? "destructive"
-                      : drift.severity === "medium"
-                        ? "warning"
-                        : "outline"
-                  }
-                >
-                  {drift.severity}
-                </Badge>
-              </div>
-            </DenseListItem>
-          ))}
-        </CardContent>
-      </Card>
+              </DenseListItem>
+            )
+          })}
+        </div>
+      </section>
     </div>
   )
 }
@@ -406,16 +420,16 @@ export function ControlReviewWorkspace({
 
   return (
     <div className="space-y-6">
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <div className="px-5 py-5">
           <SummaryStrip
             eyebrow="Review"
             title="Queue-ul de validare umană"
             description="Aici vezi ce mai cere confirmare înainte să împingi mai departe."
             items={reviewItems}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <div className="grid gap-4 xl:grid-cols-3">
         <HandoffCard

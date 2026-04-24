@@ -134,7 +134,7 @@ export default function Nis2EligibilityPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="size-6 animate-spin rounded-full border-2 border-eos-primary border-t-transparent" />
+          <div className="size-6 animate-spin rounded-full border border-eos-primary border-t-transparent" />
         </div>
       ) : (
         <>
@@ -144,7 +144,7 @@ export default function Nis2EligibilityPage() {
             onResetSaved={() => setSaved(null)}
           />
           {fromCockpit && saved && returnTo ? (
-            <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
+            <div className="rounded-eos-sm border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
               <p className="text-sm font-medium text-eos-text">
                 Eligibilitatea este deja clarificată. Dacă ai verificat rezultatul, te întorci acum în cockpit pentru pasul final.
               </p>
@@ -158,7 +158,7 @@ export default function Nis2EligibilityPage() {
               </div>
             </div>
           ) : fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
-            <div className="rounded-eos-md border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
+            <div className="rounded-eos-sm border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
               <p className="text-sm font-medium text-eos-text">
                 Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.
               </p>

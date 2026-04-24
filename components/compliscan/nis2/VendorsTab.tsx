@@ -1,10 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  AlertTriangle,
   ArrowLeft,
   ClipboardCheck,
   Download,
@@ -21,10 +20,9 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { Nis2Vendor, Nis2VendorRiskLevel } from "@/lib/server/nis2-store"
 import { computeVendorRisk } from "@/lib/compliance/vendor-risk"
@@ -119,7 +117,7 @@ export function VendorRow({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-bg-inset"
+          className="shrink-0 rounded-eos-sm border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-bg-inset"
           aria-label="Detalii risc"
         >
           {expanded ? <ChevronUp className="size-3.5" strokeWidth={2} /> : <ChevronDown className="size-3.5" strokeWidth={2} />}
@@ -127,7 +125,7 @@ export function VendorRow({
         <button
           type="button"
           onClick={() => onDelete(vendor.id)}
-          className="shrink-0 rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
+          className="shrink-0 rounded-eos-sm border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
           aria-label="Șterge vendor"
         >
           <Trash2 className="size-3.5" strokeWidth={2} />
@@ -140,19 +138,19 @@ export function VendorRow({
             Factori de risc NIS2 Art. 21(2)(d)
           </p>
           <div className="mb-4 grid gap-2 sm:grid-cols-2">
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+            <div className={`flex items-center gap-2 rounded-eos-sm border px-3 py-2 text-xs ${factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
               {factors.isTechVendor ? <ShieldAlert className="size-3.5 shrink-0" strokeWidth={2} /> : <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} />}
               Furnizor tech/cloud {factors.isTechVendor ? "(+30 pct risc)" : "— nedetectat"}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasDPA && factors.isTechVendor ? "border-eos-error/30 bg-eos-error-soft text-eos-error" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+            <div className={`flex items-center gap-2 rounded-eos-sm border px-3 py-2 text-xs ${!factors.hasDPA && factors.isTechVendor ? "border-eos-error/30 bg-eos-error-soft text-eos-error" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
               {factors.hasDPA ? <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
               DPA (Acord procesare date) {!factors.hasDPA && factors.isTechVendor ? "(+25 pct risc)" : factors.hasDPA ? "— bifat" : ""}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${!factors.hasSecuritySLA && factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+            <div className={`flex items-center gap-2 rounded-eos-sm border px-3 py-2 text-xs ${!factors.hasSecuritySLA && factors.isTechVendor ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
               {factors.hasSecuritySLA ? <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} /> : <XCircle className="size-3.5 shrink-0" strokeWidth={2} />}
               SLA securitate {!factors.hasSecuritySLA && factors.isTechVendor ? "(+15 pct risc)" : factors.hasSecuritySLA ? "— bifat" : ""}
             </div>
-            <div className={`flex items-center gap-2 rounded-eos-md border px-3 py-2 text-xs ${factors.dataProcessingVolume === "high" ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
+            <div className={`flex items-center gap-2 rounded-eos-sm border px-3 py-2 text-xs ${factors.dataProcessingVolume === "high" ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning" : "border-eos-border bg-eos-surface text-eos-text-muted"}`}>
               <Shield className="size-3.5 shrink-0" strokeWidth={2} />
               Date procesate: {factors.dataProcessingVolume === "high" ? "volum ridicat (+20 pct)" : factors.dataProcessingVolume === "low" ? "volum scăzut" : "necunoscut"}
             </div>
@@ -385,8 +383,8 @@ export function VendorsTab({
   return (
     <div className="space-y-4">
       {highlightedVendor && focusMode === "vendor" ? (
-        <Card className="border-sky-300 bg-sky-50">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-sky-300 bg-sky-50">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Registrul furnizorilor este deschis din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
@@ -402,15 +400,15 @@ export function VendorsTab({
                 Înapoi la finding
               </Link>
             ) : (
-              <Badge variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
+              <V3Pill variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
                 NIS2 Art. 21(2)(d)
-              </Badge>
+              </V3Pill>
             )}
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : sourceFindingId && focusMode === "vendor" ? (
-        <Card className="border-sky-300 bg-sky-50">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-sky-300 bg-sky-50">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Alege furnizorul corect din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
@@ -424,21 +422,21 @@ export function VendorsTab({
               <ArrowLeft className="size-3" strokeWidth={2} />
               Înapoi la finding
             </Link>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : null}
 
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-2">
           {highRiskCount > 0 && (
-            <Badge variant="destructive" className="normal-case tracking-normal">
+            <V3Pill variant="destructive" className="normal-case tracking-normal">
               {highRiskCount} scor risc ridicat
-            </Badge>
+            </V3Pill>
           )}
           {missingClausesCount > 0 && (
-            <Badge variant="warning" className="normal-case tracking-normal">
+            <V3Pill variant="warning" className="normal-case tracking-normal">
               {missingClausesCount} fără clauze complete
-            </Badge>
+            </V3Pill>
           )}
         </div>
         <div className="flex gap-2">
@@ -464,31 +462,31 @@ export function VendorsTab({
       </div>
 
       {showForm && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="text-sm">Furnizor ICT nou</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="text-sm">Furnizor ICT nou</V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <input
                 type="text"
                 placeholder="Nume furnizor *"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                className="h-9 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
               />
               <input
                 type="text"
                 placeholder="Serviciu (ex: hosting, ERP, email)"
                 value={form.service}
                 onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))}
-                className="h-9 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                className="h-9 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
               />
             </div>
             <div>
               <label className="mb-1 block text-xs text-eos-text-muted">Nivel risc</label>
               <select
-                className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none sm:w-48"
+                className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none sm:w-48"
                 value={form.riskLevel}
                 onChange={(e) => setForm((f) => ({ ...f, riskLevel: e.target.value as Nis2VendorRiskLevel }))}
               >
@@ -528,14 +526,14 @@ export function VendorsTab({
                 Salvează furnizor
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {loading ? (
         <LoadingScreen variant="section" />
       ) : vendors.length === 0 ? (
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface p-8 text-center">
+        <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-8 text-center">
           <Shield className="mx-auto mb-3 size-10 text-eos-text-muted" strokeWidth={1.5} />
           <p className="font-semibold text-eos-text">Niciun furnizor ICT înregistrat</p>
           <p className="mt-1 text-sm text-eos-text-muted">
@@ -553,7 +551,7 @@ export function VendorsTab({
           </Button>
         </div>
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
+        <V3Surface className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {vendors.map((v) => (
             <VendorRow
               key={v.id}
@@ -563,10 +561,10 @@ export function VendorsTab({
               highlighted={v.id === highlightedVendor?.id}
             />
           ))}
-        </Card>
+        </V3Surface>
       )}
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">De ce registrul furnizorilor ICT?</p>
         <p className="mt-1">
           NIS2 Art. 21(2)(d) obligă evaluarea riscurilor din lanțul de aprovizionare. La audit, DNSC verifică dacă ai clauze de securitate,

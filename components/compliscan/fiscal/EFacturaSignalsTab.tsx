@@ -1,13 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CheckCircle2, ExternalLink, Loader2, Radio } from "lucide-react"
+import { CheckCircle2, Loader2, Radio } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 
 // ── eFactura Signals Tab with Filters ────────────────────────────────────────
 
@@ -33,11 +30,11 @@ const SIGNAL_FILTER_LABELS: Record<SignalFilter, string> = {
   unsubmitted: "Netransmise",
 }
 
-const SIGNAL_STATUS_VARIANT: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
-  rejected: "destructive",
-  "xml-error": "destructive",
-  "processing-delayed": "default",
-  unsubmitted: "secondary",
+const SIGNAL_STATUS_TONE: Record<string, string> = {
+  rejected: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+  "xml-error": "border-eos-error/30 bg-eos-error-soft text-eos-error",
+  "processing-delayed": "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  unsubmitted: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
 }
 
 const SIGNAL_STATUS_LABELS: Record<string, string> = {
@@ -85,31 +82,43 @@ export function EFacturaSignalsTab() {
     unsubmitted: signals.filter((s) => s.status === "unsubmitted").length,
   }
 
-  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted"><Loader2 className="size-4 animate-spin" /> Se încarcă...</div>
+  if (loading)
+    return (
+      <div className="flex items-center gap-2 py-8 text-[12.5px] text-eos-text-muted">
+        <Loader2 className="size-4 animate-spin" strokeWidth={2} /> Se incarca...
+      </div>
+    )
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
-          {(Object.keys(SIGNAL_FILTER_LABELS) as SignalFilter[]).map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={`rounded-eos-md px-3 py-1.5 text-xs font-medium transition ${
-                filter === f
-                  ? "bg-eos-primary text-eos-text"
-                  : "bg-eos-bg-inset text-eos-text-muted hover:text-eos-text"
-              }`}
-            >
-              {SIGNAL_FILTER_LABELS[f]}
-              {counts[f] > 0 && (
-                <span className="ml-1.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">
-                  {counts[f]}
-                </span>
-              )}
-            </button>
-          ))}
+      <div className="flex flex-col gap-3 rounded-eos-lg border border-eos-border bg-eos-surface/80 px-3 py-2 md:flex-row md:items-center md:justify-between md:gap-4 md:px-4">
+        <div className="flex flex-wrap items-center gap-1 rounded-eos-sm bg-white/[0.03] p-0.5">
+          {(Object.keys(SIGNAL_FILTER_LABELS) as SignalFilter[]).map((f) => {
+            const active = filter === f
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={`flex items-center gap-1.5 rounded-eos-sm px-2.5 py-1 text-[12px] font-medium transition-all duration-100 ${
+                  active
+                    ? "bg-white/[0.06] font-semibold text-eos-text"
+                    : "text-eos-text-muted hover:text-eos-text"
+                }`}
+              >
+                {SIGNAL_FILTER_LABELS[f]}
+                {counts[f] > 0 && (
+                  <span
+                    className={`font-mono text-[10px] font-medium tabular-nums ${
+                      active ? "text-eos-text-muted" : "text-eos-text-tertiary"
+                    }`}
+                  >
+                    {counts[f]}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         <Button
@@ -119,52 +128,75 @@ export function EFacturaSignalsTab() {
           disabled={generating}
           className="gap-1.5"
         >
-          {generating ? <Loader2 className="size-3.5 animate-spin" /> : <Radio className="size-3.5" />}
+          {generating ? (
+            <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+          ) : (
+            <Radio className="size-3.5" strokeWidth={2} />
+          )}
           Genereaza findings
         </Button>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState
-          icon={CheckCircle2}
-          title="Fără semnale"
-          label={filter === "all" ? "Nu sunt semnale e-Factura active." : `Niciun semnal de tip ${SIGNAL_FILTER_LABELS[filter]}.`}
-        />
+        <div className="flex flex-col items-center justify-center gap-3 rounded-eos-lg border border-dashed border-eos-border bg-eos-surface/40 px-6 py-12 text-center">
+          <div className="flex size-10 items-center justify-center rounded-full border border-eos-success/30 bg-eos-success-soft">
+            <CheckCircle2 className="size-4 text-eos-success" strokeWidth={1.8} />
+          </div>
+          <div className="max-w-md space-y-1">
+            <p
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              Fara semnale
+            </p>
+            <p className="text-[12.5px] leading-[1.55] text-eos-text-muted">
+              {filter === "all"
+                ? "Nu sunt semnale e-Factura active."
+                : `Niciun semnal de tip ${SIGNAL_FILTER_LABELS[filter]}.`}
+            </p>
+          </div>
+        </div>
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
-          {filtered.map((signal) => (
-            <CardContent key={signal.id} className="space-y-1.5 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-semibold text-eos-text">{signal.vendorName}</p>
-                <Badge
-                  variant={SIGNAL_STATUS_VARIANT[signal.status] ?? "outline"}
-                  className="text-[10px] normal-case tracking-normal"
-                >
-                  {SIGNAL_STATUS_LABELS[signal.status]}
-                </Badge>
-                {signal.isTechVendor && (
-                  <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
-                    Tech vendor
-                  </Badge>
-                )}
-                {signal.invoiceNumber && (
-                  <span className="text-xs text-eos-text-muted">#{signal.invoiceNumber}</span>
-                )}
-              </div>
-              {signal.reason && (
-                <p className="text-xs text-eos-text-muted">{signal.reason}</p>
-              )}
-              <div className="flex flex-wrap items-center gap-3 text-xs text-eos-text-muted">
-                <span>{new Date(signal.date).toLocaleDateString("ro-RO")}</span>
-                {signal.amount != null && (
-                  <span className="font-semibold text-eos-text">
-                    {signal.amount.toLocaleString("ro-RO")} {signal.currency ?? "RON"}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          ))}
-        </Card>
+        <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+          <ul className="divide-y divide-eos-border-subtle">
+            {filtered.map((signal) => {
+              const statusTone = SIGNAL_STATUS_TONE[signal.status] ?? SIGNAL_STATUS_TONE.unsubmitted
+              return (
+                <li key={signal.id} className="space-y-1.5 px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-[13.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text">
+                      {signal.vendorName}
+                    </p>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${statusTone}`}
+                    >
+                      {SIGNAL_STATUS_LABELS[signal.status]}
+                    </span>
+                    {signal.isTechVendor && (
+                      <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+                        Tech vendor
+                      </span>
+                    )}
+                    {signal.invoiceNumber && (
+                      <span className="font-mono text-[11px] text-eos-text-muted">#{signal.invoiceNumber}</span>
+                    )}
+                  </div>
+                  {signal.reason && (
+                    <p className="text-[12px] leading-[1.5] text-eos-text-muted">{signal.reason}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-eos-text-muted">
+                    <span>{new Date(signal.date).toLocaleDateString("ro-RO")}</span>
+                    {signal.amount != null && (
+                      <span className="font-semibold text-eos-text">
+                        {signal.amount.toLocaleString("ro-RO")} {signal.currency ?? "RON"}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
       )}
     </div>
   )

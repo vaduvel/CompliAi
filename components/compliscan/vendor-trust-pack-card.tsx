@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react"
 import { AlertTriangle, CheckCircle2, Copy, Download, Loader2, Share2, Shield } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import type { VendorTrustPack } from "@/lib/server/vendor-trust-pack"
 
 type ReadinessTone = "success" | "warning" | "danger"
@@ -117,15 +117,15 @@ export function VendorTrustPackCard() {
 
   if (loading) {
     return (
-      <Card className="border-eos-border bg-eos-surface-variant">
-        <CardHeader>
-          <CardTitle className="text-base">Vendor Trust Pack</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center gap-3 text-sm text-eos-text-tertiary">
+      <V3Surface className="border-eos-border bg-eos-surface-variant">
+        <V3SurfaceHead>
+          <V3SurfaceTitle className="text-base">Vendor Trust Pack</V3SurfaceTitle>
+        </V3SurfaceHead>
+        <V3SurfaceBody className="flex items-center gap-3 text-sm text-eos-text-tertiary">
           <Loader2 className="size-4 animate-spin" />
           Se încarcă readiness-ul comercial și pack-ul de procurement.
-        </CardContent>
-      </Card>
+        </V3SurfaceBody>
+      </V3Surface>
     )
   }
 
@@ -149,17 +149,17 @@ export function VendorTrustPackCard() {
   )
 
   return (
-    <Card className="border-eos-border bg-eos-surface-variant">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle">
+    <V3Surface className="border-eos-border bg-eos-surface-variant">
+      <V3SurfaceHead className="gap-3 border-b border-eos-border-subtle">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
               P3-B
             </p>
-            <CardTitle className="mt-1 flex items-center gap-2 text-base">
+            <V3SurfaceTitle className="mt-1 flex items-center gap-2 text-base">
               <Shield className="size-4 text-eos-primary/80" />
               Vendor Trust Pack
-            </CardTitle>
+            </V3SurfaceTitle>
             <p className="mt-1 text-sm text-eos-text-tertiary">
               Livrabil comercial pentru due diligence, procurement și handoff extern.
             </p>
@@ -168,14 +168,14 @@ export function VendorTrustPackCard() {
             {pack.readinessScore}
           </div>
         </div>
-      </CardHeader>
+      </V3SurfaceHead>
 
-      <CardContent className="space-y-5 pt-5">
+      <V3SurfaceBody className="space-y-5 pt-5">
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-eos-text">GDPR</p>
-              <Badge className={toneClasses(gdprStatus.tone)}>{gdprStatus.label}</Badge>
+              <V3Pill className={toneClasses(gdprStatus.tone)}>{gdprStatus.label}</V3Pill>
             </div>
             <p className="mt-3 text-2xl font-semibold text-eos-text">{pack.gdpr.gdprProgress}%</p>
             <p className="mt-2 text-xs text-eos-text-tertiary">
@@ -186,7 +186,7 @@ export function VendorTrustPackCard() {
           <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-eos-text">NIS2</p>
-              <Badge className={toneClasses(nis2Status.tone)}>{nis2Status.label}</Badge>
+              <V3Pill className={toneClasses(nis2Status.tone)}>{nis2Status.label}</V3Pill>
             </div>
             <p className="mt-3 text-2xl font-semibold text-eos-text">
               {pack.nis2.applicable ? `${nis2ReferenceScore}%` : "N/A"}
@@ -199,7 +199,7 @@ export function VendorTrustPackCard() {
           <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-eos-text">Security</p>
-              <Badge className={toneClasses(securityStatus.tone)}>{securityStatus.label}</Badge>
+              <V3Pill className={toneClasses(securityStatus.tone)}>{securityStatus.label}</V3Pill>
             </div>
             <p className="mt-3 text-2xl font-semibold text-eos-text">{securityReference}%</p>
             <p className="mt-2 text-xs text-eos-text-tertiary">
@@ -221,11 +221,11 @@ export function VendorTrustPackCard() {
               {pack.procurementQuestionnaire.slice(0, 4).map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-3 py-2"
+                  className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface-variant px-3 py-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-xs font-medium text-eos-text">{item.question}</p>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-eos-text-tertiary">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-eos-text-tertiary">
                       {item.answer}
                     </span>
                   </div>
@@ -272,7 +272,7 @@ export function VendorTrustPackCard() {
               </Button>
             </div>
 
-            <div className="mt-4 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-3 py-2">
+            <div className="mt-4 rounded-eos-sm border border-eos-border-subtle bg-eos-surface-variant px-3 py-2">
               <p className="text-xs font-medium text-eos-text">Semnal comercial</p>
               <p className="mt-1 text-xs text-eos-text-tertiary">
                 {pack.readinessLabel} · {pack.security.vendorReviewsTotal} review-uri vendor · {pack.gdpr.evidenceItems.length} dovezi GDPR reutilizabile.
@@ -291,7 +291,7 @@ export function VendorTrustPackCard() {
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </V3SurfaceBody>
+    </V3Surface>
   )
 }

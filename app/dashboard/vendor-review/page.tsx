@@ -25,10 +25,15 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import {
+  V3PageHero,
+  V3KpiStrip,
+  V3Panel,
+  V3Stepper,
+  type V3KpiItem,
+  type V3StepperStep,
+} from "@/components/compliscan/v3"
 import {
   CONTEXT_QUESTIONS,
   REVIEW_STATUS_LABELS,
@@ -61,10 +66,39 @@ type Nis2Vendor = {
   hasDPA?: boolean
 }
 
+type PillTone = "success" | "warning" | "destructive" | "outline" | "secondary" | "primary"
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function urgencyVariant(u: VendorReviewUrgency) {
-  const map: Record<VendorReviewUrgency, "destructive" | "warning" | "secondary" | "outline"> = {
+const PILL_TONE_CLASS: Record<PillTone, string> = {
+  success: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+  warning: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  destructive: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+  outline: "border-eos-border-subtle bg-white/[0.04] text-eos-text-muted",
+  secondary: "border-eos-border-subtle bg-eos-surface-variant text-eos-text-muted",
+  primary: "border-eos-primary/30 bg-eos-primary/10 text-eos-primary",
+}
+
+function Pill({
+  tone,
+  children,
+  className,
+}: {
+  tone: PillTone
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${PILL_TONE_CLASS[tone]} ${className ?? ""}`}
+    >
+      {children}
+    </span>
+  )
+}
+
+function urgencyTone(u: VendorReviewUrgency): PillTone {
+  const map: Record<VendorReviewUrgency, PillTone> = {
     critical: "destructive",
     high: "warning",
     medium: "secondary",
@@ -76,27 +110,27 @@ function urgencyVariant(u: VendorReviewUrgency) {
 function statusIcon(s: VendorReviewStatus) {
   switch (s) {
     case "detected":
-      return <Eye className="size-3.5" strokeWidth={2} />
+      return <Eye className="size-3" strokeWidth={2} />
     case "needs-context":
-      return <AlertTriangle className="size-3.5" strokeWidth={2} />
+      return <AlertTriangle className="size-3" strokeWidth={2} />
     case "review-generated":
-      return <FileText className="size-3.5" strokeWidth={2} />
+      return <FileText className="size-3" strokeWidth={2} />
     case "awaiting-human-validation":
-      return <Clock className="size-3.5" strokeWidth={2} />
+      return <Clock className="size-3" strokeWidth={2} />
     case "awaiting-evidence":
-      return <Upload className="size-3.5" strokeWidth={2} />
+      return <Upload className="size-3" strokeWidth={2} />
     case "closed":
-      return <CheckCircle2 className="size-3.5" strokeWidth={2} />
+      return <CheckCircle2 className="size-3" strokeWidth={2} />
     case "overdue-review":
-      return <XCircle className="size-3.5" strokeWidth={2} />
+      return <XCircle className="size-3" strokeWidth={2} />
   }
 }
 
-function statusVariant(s: VendorReviewStatus) {
-  if (s === "closed") return "success" as const
-  if (s === "overdue-review") return "destructive" as const
-  if (s === "needs-context" || s === "awaiting-evidence") return "warning" as const
-  return "secondary" as const
+function statusTone(s: VendorReviewStatus): PillTone {
+  if (s === "closed") return "success"
+  if (s === "overdue-review") return "destructive"
+  if (s === "needs-context" || s === "awaiting-evidence") return "warning"
+  return "secondary"
 }
 
 function getLibraryMatch(vendorName: string): { vendor: VendorFingerprint; confidence: number } | null {
@@ -112,25 +146,23 @@ function LibraryBadges({ vendorName }: { vendorName: string }) {
   const { vendor } = match
   return (
     <>
-      <Badge variant="outline" className="text-[10px] normal-case tracking-normal gap-1">
+      <Pill tone="outline">
         <CheckCircle2 className="size-2.5" strokeWidth={2.5} />
         Library
-      </Badge>
+      </Pill>
       {vendor.dpaUrl && (
         <a
           href={vendor.dpaUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-1 rounded-full border border-eos-success/30 bg-eos-success/10 px-2 py-0.5 text-[10px] font-medium text-eos-success hover:bg-eos-success/20 transition-colors"
+          className="inline-flex items-center gap-1 rounded-sm border border-eos-success/30 bg-eos-success-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-success transition-colors hover:bg-eos-success/20"
         >
           DPA public ↗
         </a>
       )}
       {!vendor.dpaUrl && vendor.typicallyProcessor && (
-        <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
-          DPA lipsă
-        </Badge>
+        <Pill tone="warning">DPA lipsă</Pill>
       )}
     </>
   )
@@ -142,14 +174,12 @@ function LibraryDetailPanel({ vendorName }: { vendorName: string }) {
 
   const { vendor, confidence } = match
   return (
-    <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 p-3 space-y-1.5">
+    <div className="space-y-1.5 rounded-eos-sm border border-eos-primary/20 bg-eos-primary/5 p-3">
       <div className="flex items-center gap-2">
         <p className="text-xs font-semibold text-eos-primary">
           Recunoscut din Library: {vendor.canonicalName}
         </p>
-        <Badge variant="outline" className="text-[9px]">
-          {Math.round(confidence * 100)}% potrivire
-        </Badge>
+        <Pill tone="outline">{Math.round(confidence * 100)}% potrivire</Pill>
       </div>
       <div className="grid gap-1 text-xs text-eos-text-muted sm:grid-cols-2">
         <p><span className="font-medium">Categorie:</span> {VENDOR_CATEGORY_LABELS[vendor.category]}</p>
@@ -163,7 +193,7 @@ function LibraryDetailPanel({ vendorName }: { vendorName: string }) {
           <p className="sm:col-span-2"><span className="font-medium">Date procesate:</span> {vendor.dataTypes.join(", ")}</p>
         )}
         {vendor.complianceNote && (
-          <p className="sm:col-span-2 italic">{vendor.complianceNote}</p>
+          <p className="italic sm:col-span-2">{vendor.complianceNote}</p>
         )}
       </div>
       {vendor.dpaUrl && (
@@ -219,7 +249,7 @@ function ContextForm({
                 key={opt.value}
                 type="button"
                 onClick={() => setAnswers((prev) => ({ ...prev, [q.key]: opt.value }))}
-                className={`rounded-eos-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`rounded-eos-sm border px-3 py-1.5 text-xs font-medium transition-colors ${
                   answers[q.key] === opt.value
                     ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
                     : "border-eos-border bg-eos-surface text-eos-text-muted hover:bg-eos-surface-variant"
@@ -251,11 +281,11 @@ function AssetViewer({ assets }: { assets: VendorReview["generatedAssets"] }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
         Assets generate
       </p>
       {assets.map((a) => (
-        <div key={a.id} className="rounded-eos-md border border-eos-border bg-eos-surface">
+        <div key={a.id} className="rounded-eos-sm border border-eos-border bg-eos-surface">
           <button
             type="button"
             className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-eos-text hover:bg-eos-surface-variant"
@@ -309,7 +339,7 @@ function EvidenceManager({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
         Dovezi ({items.length})
       </p>
 
@@ -319,7 +349,7 @@ function EvidenceManager({
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-start gap-2 rounded-eos-md border border-eos-border-subtle bg-eos-surface px-3 py-2"
+              className="flex items-start gap-2 rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2"
             >
               <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-eos-success" strokeWidth={2} />
               <div className="min-w-0 flex-1">
@@ -335,7 +365,7 @@ function EvidenceManager({
       )}
 
       {/* Add new evidence */}
-      <div className="space-y-2 rounded-eos-md border border-eos-border bg-eos-surface-variant/50 p-3">
+      <div className="space-y-2 rounded-eos-sm border border-eos-border bg-eos-surface-variant/50 p-3">
         <p className="text-xs font-medium text-eos-text-muted">Adaugă dovadă nouă</p>
         <div className="flex flex-wrap gap-1.5">
           {EVIDENCE_TYPES.map((t) => (
@@ -343,7 +373,7 @@ function EvidenceManager({
               key={t}
               type="button"
               onClick={() => setEvidenceType(t)}
-              className={`rounded-eos-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-eos-sm border px-2.5 py-1 text-xs font-medium transition-colors ${
                 evidenceType === t
                   ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
                   : "border-eos-border bg-eos-surface text-eos-text-muted hover:bg-eos-surface-variant"
@@ -354,7 +384,7 @@ function EvidenceManager({
           ))}
         </div>
         <textarea
-          className="w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
+          className="w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           rows={2}
           placeholder="Descrie dovada: DPA semnat, link, notă internă, etc."
           value={description}
@@ -385,7 +415,7 @@ function EvidenceManager({
           Închide review-ul ({items.length} {items.length === 1 ? "dovadă" : "dovezi"})
         </Button>
       ) : (
-        <div className="flex items-center gap-2 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 p-3">
+        <div className="flex items-center gap-2 rounded-eos-sm border border-eos-warning/30 bg-eos-warning/5 p-3">
           <AlertTriangle className="size-4 shrink-0 text-eos-warning" strokeWidth={2} />
           <p className="flex-1 text-xs text-eos-text">
             Confirmi închiderea review-ului? Asigură-te că toate dovezile sunt adăugate.
@@ -403,53 +433,38 @@ function EvidenceManager({
   )
 }
 
-// ── Progress stepper (V5.3) ──────────────────────────────────────────────────
+// ── Progress stepper (V5.3) — V3 ─────────────────────────────────────────────
 
-const REVIEW_STEPS: { status: VendorReviewStatus; label: string }[] = [
-  { status: "needs-context", label: "Context" },
-  { status: "review-generated", label: "Review generat" },
-  { status: "awaiting-evidence", label: "Dovezi" },
-  { status: "closed", label: "Închis" },
+const REVIEW_STEP_ORDER: VendorReviewStatus[] = [
+  "needs-context",
+  "review-generated",
+  "awaiting-evidence",
+  "closed",
 ]
 
-function ProgressStepper({ currentStatus }: { currentStatus: VendorReviewStatus }) {
-  const statusOrder: VendorReviewStatus[] = [
-    "needs-context",
-    "review-generated",
-    "awaiting-evidence",
-    "closed",
-  ]
-  const currentIdx = statusOrder.indexOf(currentStatus)
+const REVIEW_STEP_LABELS: Record<VendorReviewStatus, string> = {
+  detected: "Detectat",
+  "needs-context": "Context",
+  "review-generated": "Review generat",
+  "awaiting-human-validation": "Validare",
+  "awaiting-evidence": "Dovezi",
+  closed: "Închis",
+  "overdue-review": "Expirat",
+}
 
-  return (
-    <div className="flex items-center gap-1">
-      {REVIEW_STEPS.map((step, i) => {
-        const isDone = currentIdx > i || currentStatus === "closed"
-        const isCurrent = statusOrder[i] === currentStatus
-        return (
-          <div key={step.status} className="flex items-center gap-1">
-            {i > 0 && (
-              <div
-                className={`h-px w-4 ${isDone ? "bg-eos-success" : "bg-eos-border"}`}
-              />
-            )}
-            <div
-              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                isDone
-                  ? "bg-eos-success/10 text-eos-success"
-                  : isCurrent
-                    ? "bg-eos-primary-soft text-eos-primary"
-                    : "bg-eos-surface-variant text-eos-text-tertiary"
-              }`}
-            >
-              {isDone && <CheckCircle2 className="size-2.5" strokeWidth={2.5} />}
-              {step.label}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
+function ProgressStepper({ currentStatus }: { currentStatus: VendorReviewStatus }) {
+  const currentIdx = REVIEW_STEP_ORDER.indexOf(currentStatus)
+  const steps: V3StepperStep[] = REVIEW_STEP_ORDER.map((status, i) => ({
+    id: status,
+    label: REVIEW_STEP_LABELS[status],
+    status:
+      currentStatus === "closed" || currentIdx > i
+        ? "done"
+        : REVIEW_STEP_ORDER[i] === currentStatus
+          ? "active"
+          : "pending",
+  }))
+  return <V3Stepper steps={steps} />
 }
 
 // ── Audit trail viewer (V5.3) ─────────────────────────────────────────────────
@@ -506,7 +521,7 @@ function PastClosuresViewer({ closures }: { closures: VendorReview["pastClosures
       {show && (
         <div className="mt-2 space-y-2">
           {closures.map((c, i) => (
-            <div key={i} className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-2 text-xs">
+            <div key={i} className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-2 text-xs">
               <p className="text-eos-text-muted">
                 <span className="font-medium">Închis:</span>{" "}
                 {new Date(c.closedAtISO).toLocaleDateString("ro-RO")} de {c.closedBy}
@@ -543,9 +558,9 @@ function FollowUpScheduler({
   }, [review.followUpDueISO, review.followUpNote, review.id])
 
   return (
-    <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
+    <div className="space-y-3 rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
           Următorul follow-up
         </p>
         <p className="mt-1 text-sm text-eos-text-muted">
@@ -560,7 +575,7 @@ function FollowUpScheduler({
             type="date"
             value={followUpDue}
             onChange={(event) => setFollowUpDue(event.target.value)}
-            className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+            className="mt-1 h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
           />
         </label>
         <label className="block">
@@ -569,7 +584,7 @@ function FollowUpScheduler({
             value={followUpNote}
             onChange={(event) => setFollowUpNote(event.target.value)}
             rows={3}
-            className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none"
+            className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none"
             placeholder="Ex: așteptăm DPA semnat / răspuns vendor / clarificare pe transfer."
           />
         </label>
@@ -627,7 +642,7 @@ function ReviewPanel({
 
       {/* Revalidation reason banner */}
       {review.reviewReason && (
-        <div className="flex items-start gap-2 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 p-2.5">
+        <div className="flex items-start gap-2 rounded-eos-sm border border-eos-warning/30 bg-eos-warning/5 p-2.5">
           <Clock className="mt-0.5 size-3.5 shrink-0 text-eos-warning" strokeWidth={2} />
           <p className="text-xs text-eos-text">{review.reviewReason}</p>
         </div>
@@ -640,7 +655,7 @@ function ReviewPanel({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <p className="text-xs text-eos-text-tertiary">Categorie</p>
-          <p className="text-sm font-medium text-eos-text capitalize">{review.category}</p>
+          <p className="text-sm font-medium capitalize text-eos-text">{review.category}</p>
         </div>
         <div>
           <p className="text-xs text-eos-text-tertiary">Sursă detectare</p>
@@ -648,7 +663,7 @@ function ReviewPanel({
         </div>
         <div>
           <p className="text-xs text-eos-text-tertiary">Încredere</p>
-          <p className="text-sm font-medium text-eos-text capitalize">{review.confidence}</p>
+          <p className="text-sm font-medium capitalize text-eos-text">{review.confidence}</p>
         </div>
         {review.reviewCase && (
           <div>
@@ -684,7 +699,7 @@ function ReviewPanel({
         const evidenceAge = daysSinceClosed > 365 ? "expirate" : daysSinceClosed > 270 ? "aproape expirate" : null
         if (!evidenceAge) return null
         return (
-          <div className="flex items-start gap-2 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 p-2.5">
+          <div className="flex items-start gap-2 rounded-eos-sm border border-eos-warning/30 bg-eos-warning/5 p-2.5">
             <Clock className="mt-0.5 size-3.5 shrink-0 text-eos-warning" strokeWidth={2} />
             <p className="text-xs text-eos-text">
               <span className="font-medium">Dovezile sunt {evidenceAge}</span> ({daysSinceClosed} zile de la închidere).
@@ -705,7 +720,7 @@ function ReviewPanel({
         const hasDpaEvidence = review.evidenceItems?.some((e) => e.type === "dpa-signed")
         if (hasDpaEvidence) return null
         return (
-          <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-2.5">
+          <div className="flex items-start gap-2 rounded-eos-sm border border-eos-error/30 bg-eos-error/5 p-2.5">
             <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-eos-error" strokeWidth={2} />
             <p className="text-xs text-eos-text">
               <span className="font-medium">{vendor.canonicalName} este processor GDPR</span> dar nu are dovadă DPA atașată.
@@ -720,7 +735,7 @@ function ReviewPanel({
 
       {/* Specialist escalation for high-urgency vendors */}
       {(review.urgency === "critical" || review.urgency === "high") && review.status !== "closed" && (
-        <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-2.5">
+        <div className="flex items-start gap-2 rounded-eos-sm border border-eos-error/30 bg-eos-error/5 p-2.5">
           <ShieldAlert className="mt-0.5 size-3.5 shrink-0 text-eos-error" strokeWidth={2} />
           <p className="text-xs text-eos-text">
             Cazul este pregătit pentru validare de specialitate. Documentele și red flags sunt deja organizate. Specialistul intervine doar pentru validare finală.
@@ -808,7 +823,7 @@ function ReviewPanel({
           {/* Evidence items */}
           {(review.evidenceItems?.length ?? 0) > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Dovezi ({review.evidenceItems!.length})
               </p>
               <div className="mt-1 space-y-1">
@@ -828,7 +843,7 @@ function ReviewPanel({
           {/* Legacy evidence text */}
           {review.closureEvidence && !(review.evidenceItems?.length) && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Dovadă
               </p>
               <p className="mt-1 text-sm text-eos-text">{review.closureEvidence}</p>
@@ -858,7 +873,7 @@ function ReviewPanel({
       {/* Overdue review state (V5.4) */}
       {review.status === "overdue-review" && (
         <div className="space-y-3">
-          <div className="flex items-start gap-2 rounded-eos-md border border-eos-error/30 bg-eos-error/5 p-3">
+          <div className="flex items-start gap-2 rounded-eos-sm border border-eos-error/30 bg-eos-error/5 p-3">
             <XCircle className="mt-0.5 size-4 shrink-0 text-eos-error" strokeWidth={2} />
             <div>
               <p className="text-sm font-medium text-eos-text">Review expirat</p>
@@ -890,7 +905,7 @@ function ReviewPanel({
         <a
           href={`/api/vendor-review/${review.id}/brief`}
           download
-          className="inline-flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
+          className="inline-flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-colors hover:bg-eos-surface-variant hover:text-eos-text"
         >
           <Download className="size-3.5" strokeWidth={2} />
           Descarcă brief counsel-ready
@@ -935,7 +950,7 @@ function VendorPicker({
             type="button"
             disabled={loading}
             onClick={() => onSelect(v.id)}
-            className="flex w-full items-center justify-between rounded-eos-md border border-eos-border px-3 py-2 text-left text-sm transition-colors hover:bg-eos-surface-variant disabled:opacity-50"
+            className="flex w-full items-center justify-between rounded-eos-sm border border-eos-border px-3 py-2 text-left text-sm transition-colors hover:bg-eos-surface-variant disabled:opacity-50"
           >
             <span className="font-medium text-eos-text">{v.name}</span>
             <span className="text-xs text-eos-text-muted">
@@ -1104,18 +1119,64 @@ export default function VendorReviewPage() {
     }
   }
 
+  const kpiItems: V3KpiItem[] = [
+    {
+      id: "open",
+      label: "Deschise",
+      value: openReviews.length,
+      stripe: openReviews.length > 0 ? "info" : "neutral",
+      valueTone: openReviews.length > 0 ? "info" : "neutral",
+      detail: openReviews.length === 0 ? "Niciun review deschis" : "în lucru",
+    },
+    {
+      id: "critical",
+      label: "Critice",
+      value: criticalCount,
+      stripe: criticalCount > 0 ? "critical" : "neutral",
+      valueTone: criticalCount > 0 ? "critical" : "neutral",
+      detail: criticalCount === 0 ? "Niciun review critic" : "urgență ridicată",
+    },
+    {
+      id: "needs-context",
+      label: "Necesită context",
+      value: needsContextCount,
+      stripe: needsContextCount > 0 ? "warning" : "neutral",
+      valueTone: needsContextCount > 0 ? "warning" : "neutral",
+      detail: needsContextCount === 0 ? "Context complet" : "completează context",
+    },
+    {
+      id: "overdue",
+      label: "Expirate",
+      value: overdueCount,
+      stripe: overdueCount > 0 ? "critical" : "neutral",
+      valueTone: overdueCount > 0 ? "critical" : "neutral",
+      detail: overdueCount === 0 ? "Fără review-uri expirate" : "revalidare urgentă",
+    },
+    {
+      id: "closed",
+      label: "Închise",
+      value: closedReviews.length,
+      stripe: closedReviews.length > 0 ? "success" : "neutral",
+      valueTone: closedReviews.length > 0 ? "success" : "neutral",
+      detail: closedReviews.length === 0 ? "Niciun review închis" : "cu dovadă atașată",
+    },
+  ]
+
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-5">
       <Link
         href="/dashboard/resolve"
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] text-eos-text-muted transition-colors hover:text-eos-text"
       >
         <ArrowLeft className="size-3.5" strokeWidth={2} />
         Înapoi la De rezolvat
       </Link>
 
-      <PageIntro
-        eyebrow="Furnizori · Review"
+      <V3PageHero
+        breadcrumbs={[
+          { label: "Furnizori" },
+          { label: "Vendor Review", current: true },
+        ]}
         title="Vendor Review"
         description="Review semi-automat pentru furnizorii externi detectați. Completează contextul, generează review-ul, confirmă și închide cu dovadă."
         actions={
@@ -1127,21 +1188,28 @@ export default function VendorReviewPage() {
       />
 
       {vendorPack ? (
-        <Card className={focusPack ? "ring-1 ring-eos-primary/30" : undefined}>
-          <CardHeader>
-            <CardTitle>{vendorPack.title}</CardTitle>
-            <p className="text-sm text-eos-text-muted">{vendorPack.summary}</p>
+        <section
+          className={`overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface ${focusPack ? "ring-1 ring-eos-primary/30" : ""}`}
+        >
+          <header className="border-b border-eos-border-subtle px-4 py-3.5">
+            <h3
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              {vendorPack.title}
+            </h3>
+            <p className="mt-1 text-sm text-eos-text-muted">{vendorPack.summary}</p>
             {focusPack ? (
-              <p className="text-xs text-eos-text-tertiary">
+              <p className="mt-1 text-xs text-eos-text-tertiary">
                 Ai venit din cockpitul unui finding de vendor governance. Pregătește pachetul, pornește cel puțin un review relevant și apoi revii automat în caz.
               </p>
             ) : null}
-          </CardHeader>
-          <CardContent className="space-y-4">
+          </header>
+          <div className="space-y-4 px-4 py-4">
             <AssetViewer assets={vendorPack.assets} />
 
             <div className="space-y-2 rounded-eos-lg border border-eos-border bg-eos-surface/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Checklist de revenire
               </p>
               {vendorPack.completionChecklist.map((item, index) => (
@@ -1168,8 +1236,8 @@ export default function VendorReviewPage() {
                 </div>
               ) : null}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       ) : null}
 
       {loading ? (
@@ -1178,67 +1246,35 @@ export default function VendorReviewPage() {
           Se încarcă...
         </div>
       ) : (
-        <div className="mt-6 space-y-6">
-          {/* Stats row */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-2xl font-semibold text-eos-text">{openReviews.length}</p>
-                <p className="text-xs text-eos-text-muted">Deschise</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-2xl font-semibold text-eos-error">{criticalCount}</p>
-                <p className="text-xs text-eos-text-muted">Critice</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-2xl font-semibold text-eos-warning">{needsContextCount}</p>
-                <p className="text-xs text-eos-text-muted">Necesită context</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className={`text-2xl font-semibold ${overdueCount > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
-                  {overdueCount}
-                </p>
-                <p className="text-xs text-eos-text-muted">Expirate</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-2xl font-semibold text-eos-success">{closedReviews.length}</p>
-                <p className="text-xs text-eos-text-muted">Închise</p>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-5">
+          {/* Stats row — V3 */}
+          <V3KpiStrip items={kpiItems} />
 
           {reviews.length > 0 ? (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Radar lifecycle vendor</CardTitle>
+            <V3Panel
+              eyebrow="Radar lifecycle vendor"
+              title="Expirate, apropiate și follow-up-uri active"
+              padding="none"
+            >
+              <div className="space-y-4 px-4 py-4">
                 <p className="text-sm text-eos-text-muted">
                   Aici vezi rapid ce review-uri au expirat, ce expiră curând și ce follow-up-uri au rămas încă active după pachetul inițial.
                 </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant={lifecycleSummary.overdue.length > 0 ? "destructive" : "outline"}>
+                  <Pill tone={lifecycleSummary.overdue.length > 0 ? "destructive" : "outline"}>
                     {lifecycleSummary.overdue.length} expirate
-                  </Badge>
-                  <Badge variant={lifecycleSummary.dueSoon.length > 0 ? "warning" : "outline"}>
+                  </Pill>
+                  <Pill tone={lifecycleSummary.dueSoon.length > 0 ? "warning" : "outline"}>
                     {lifecycleSummary.dueSoon.length} expiră în 30 zile
-                  </Badge>
-                  <Badge variant={lifecycleSummary.activeFollowUp.length > 0 ? "secondary" : "outline"}>
+                  </Pill>
+                  <Pill tone={lifecycleSummary.activeFollowUp.length > 0 ? "secondary" : "outline"}>
                     {lifecycleSummary.activeFollowUp.length} în follow-up
-                  </Badge>
+                  </Pill>
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                       Expirate
                     </p>
                     {lifecycleSummary.overdue.length > 0 ? (
@@ -1261,7 +1297,7 @@ export default function VendorReviewPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                       Expiră curând
                     </p>
                     {lifecycleSummary.dueSoon.length > 0 ? (
@@ -1284,7 +1320,7 @@ export default function VendorReviewPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                       Follow-up activ
                     </p>
                     {lifecycleSummary.activeFollowUp.length > 0 ? (
@@ -1308,7 +1344,9 @@ export default function VendorReviewPage() {
                 </div>
 
                 <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Notă de reminder</p>
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                    Notă de reminder
+                  </p>
                   <p className="mt-2 text-sm text-eos-text-muted">{lifecycleSummary.reminderNote}</p>
                 </div>
 
@@ -1318,28 +1356,31 @@ export default function VendorReviewPage() {
                     Copiază nota de follow-up
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </V3Panel>
           ) : null}
 
           {/* Vendor picker */}
           {showPicker && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
+            <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+              <header className="border-b border-eos-border-subtle px-4 py-3.5">
+                <h3
+                  data-display-text="true"
+                  className="flex items-center gap-2 font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
                   <Plus className="size-4 text-eos-text-muted" strokeWidth={2} />
                   Pornește review nou
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h3>
+              </header>
+              <div className="px-4 py-4">
                 <VendorPicker
                   vendors={vendors}
                   existingVendorIds={existingVendorIds}
                   onSelect={(vid) => void handleCreateReview(vid)}
                   loading={actionLoading}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
 
           {/* Empty state */}
@@ -1356,24 +1397,33 @@ export default function VendorReviewPage() {
           {/* Review queue */}
           {reviews.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Coada de review ({reviews.length})
               </p>
               {reviews.map((review) => {
                 const isExpanded = expandedId === review.id
-                const vrBorderL =
+                const severityStripe =
                   review.urgency === "critical" || review.urgency === "high"
-                    ? "border-l-eos-error"
+                    ? "bg-eos-error"
                     : review.urgency === "medium"
-                      ? "border-l-eos-warning"
-                      : "border-l-eos-border-subtle"
-                const vrUrgentBg =
+                      ? "bg-eos-warning"
+                      : review.status === "closed"
+                        ? "bg-eos-success"
+                        : "bg-eos-border-subtle"
+                const urgentTint =
                   (review.urgency === "critical" || review.urgency === "high") && review.status !== "closed"
-                    ? "bg-eos-error-soft/30 border-eos-error/20"
-                    : "border-eos-border"
+                    ? "bg-eos-error-soft/30"
+                    : "bg-eos-surface"
                 return (
-                  <Card key={review.id} className={`border border-l-[3px] ${vrBorderL} ${vrUrgentBg} ${isExpanded ? "ring-1 ring-eos-primary/30" : ""}`}>
-                    <div className="p-4">
+                  <section
+                    key={review.id}
+                    className={`relative overflow-hidden rounded-eos-lg border border-eos-border ${urgentTint} ${isExpanded ? "ring-1 ring-eos-primary/30" : ""}`}
+                  >
+                    <span
+                      className={`absolute left-0 top-0 bottom-0 w-[3px] ${severityStripe}`}
+                      aria-hidden
+                    />
+                    <div className="pl-5 pr-4 py-4">
                       {/* Row header */}
                       <button
                         type="button"
@@ -1390,20 +1440,18 @@ export default function VendorReviewPage() {
                             <span className="font-medium text-eos-text">
                               {review.vendorName}
                             </span>
-                            <Badge variant={urgencyVariant(review.urgency)}>
+                            <Pill tone={urgencyTone(review.urgency)}>
                               {URGENCY_LABELS[review.urgency]}
-                            </Badge>
-                            <Badge variant={statusVariant(review.status)}>
+                            </Pill>
+                            <Pill tone={statusTone(review.status)}>
                               {statusIcon(review.status)}
                               {REVIEW_STATUS_LABELS[review.status]}
-                            </Badge>
+                            </Pill>
                             <LibraryBadges vendorName={review.vendorName} />
                             {review.detectionSource === "site-scan" && (
-                              <Badge variant="secondary" className="text-[10px] normal-case tracking-normal gap-1">
-                                🔍 detectat din site
-                              </Badge>
+                              <Pill tone="secondary">detectat din site</Pill>
                             )}
-                            <span className="text-xs text-eos-text-tertiary capitalize">
+                            <span className="text-xs capitalize text-eos-text-tertiary">
                               {review.category}
                             </span>
                           </div>
@@ -1424,7 +1472,7 @@ export default function VendorReviewPage() {
                         />
                       )}
                     </div>
-                  </Card>
+                  </section>
                 )
               })}
             </div>

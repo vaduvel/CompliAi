@@ -8,9 +8,9 @@ import { ArrowRight, CalendarClock, AlertTriangle } from "lucide-react"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import { ControlOverview, ControlDriftWorkspace, ControlReviewWorkspace } from "@/components/compliscan/sisteme/control-views"
 import { ControlSystemsWorkspace } from "@/components/compliscan/sisteme/ControlSystemsWorkspace"
 import { ControlPrimaryTabs } from "@/components/compliscan/sisteme/control-nav"
@@ -37,7 +37,7 @@ const ShadowAiQuestionnaire = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-24 animate-pulse rounded-eos-md bg-eos-surface-variant" />
+      <div className="h-24 animate-pulse rounded-eos-sm bg-eos-surface-variant" />
     ),
   }
 )
@@ -93,26 +93,26 @@ export default function SistemePage() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
+      <V3Intro
         eyebrow="Control"
         title="Confirmi ce intră în inventarul oficial și ce devine drift real"
         description="Aici validezi candidatele, reperul și drift-ul real. Execuția rămâne în Dovadă."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               {confirmedCount} sisteme confirmate
-            </Badge>
-            <Badge variant={recentDrifts.length > 0 ? "warning" : "success"} className="normal-case tracking-normal">
+            </V3Pill>
+            <V3Pill variant={recentDrifts.length > 0 ? "warning" : "success"} className="normal-case tracking-normal">
               {recentDrifts.length > 0 ? `${recentDrifts.length} drift activ` : "fără drift activ"}
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </V3Pill>
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               {validatedBaseline ? "baseline validat" : "baseline în curs"}
-            </Badge>
+            </V3Pill>
           </>
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
               Snapshot control
             </p>
             <p className="text-2xl font-semibold text-eos-text">{data.summary.score}</p>
@@ -137,7 +137,7 @@ export default function SistemePage() {
       <PillarTabs sectionId="control" />
 
       {/* ── GOLD 8: AI Act deadline banner ───────────────────────────────────── */}
-      <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm dark:border-eos-warning/80/40 dark:bg-eos-warning-soft/20">
+      <div className="flex items-start gap-3 rounded-eos-sm border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm dark:border-eos-warning/80/40 dark:bg-eos-warning-soft/20">
         <CalendarClock className="mt-0.5 size-4 shrink-0 text-eos-warning dark:text-eos-warning" strokeWidth={2} />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-eos-warning dark:text-eos-warning">
@@ -150,7 +150,7 @@ export default function SistemePage() {
         </div>
         <Link
           href="/dashboard/sisteme/eu-db-wizard"
-          className="shrink-0 rounded-eos-md border border-eos-warning/30 bg-white px-3 py-1.5 text-xs font-medium text-eos-warning transition hover:bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-transparent dark:text-eos-warning"
+          className="shrink-0 rounded-eos-sm border border-eos-warning/30 bg-white px-3 py-1.5 text-xs font-medium text-eos-warning transition hover:bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-transparent dark:text-eos-warning"
         >
           Wizard EU DB →
         </Link>
@@ -158,7 +158,7 @@ export default function SistemePage() {
 
       {/* ── Sprint 10: False confidence prevention ────────────────────────────── */}
       {aiHighRisk > 0 && (
-        <div className="flex items-start gap-3 rounded-eos-md border border-eos-error/20 bg-eos-error-soft/60 px-4 py-3 text-sm dark:border-eos-error/50/40 dark:bg-eos-error-soft/20">
+        <div className="flex items-start gap-3 rounded-eos-sm border border-eos-error/20 bg-eos-error-soft/60 px-4 py-3 text-sm dark:border-eos-error/50/40 dark:bg-eos-error-soft/20">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error dark:text-eos-error" strokeWidth={2} />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-eos-error dark:text-eos-error">

@@ -14,10 +14,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import {
@@ -48,16 +48,16 @@ const ANSWER_OPTIONS: { value: MaturityAnswer; label: string; color: string }[] 
 
 function statusBadge(status: MaturityDomainResult["status"]) {
   if (status === "compliant")
-    return <Badge variant="success">Conform</Badge>
+    return <V3Pill variant="success">Conform</V3Pill>
   if (status === "partial")
-    return <Badge variant="warning">Parțial</Badge>
-  return <Badge variant="destructive">Neconform</Badge>
+    return <V3Pill variant="warning">Parțial</V3Pill>
+  return <V3Pill variant="destructive">Neconform</V3Pill>
 }
 
 function levelBadge(level: MaturityAssessment["level"]) {
-  if (level === "essential") return <Badge variant="success">Esențial</Badge>
-  if (level === "important") return <Badge variant="warning">Important</Badge>
-  return <Badge variant="destructive">Bazic</Badge>
+  if (level === "essential") return <V3Pill variant="success">Esențial</V3Pill>
+  if (level === "important") return <V3Pill variant="warning">Important</V3Pill>
+  return <V3Pill variant="destructive">Bazic</V3Pill>
 }
 
 function domainProgress(answers: MaturityAnswers, domainId: string) {
@@ -87,11 +87,11 @@ function ResultsView({
   return (
     <div className="space-y-6">
       {/* Summary card */}
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="p-5">
+      <V3Surface className="border-eos-border bg-eos-surface">
+        <V3SurfaceBody className="p-5">
           <div className="flex flex-wrap items-start gap-5">
             <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Scor general maturitate
               </p>
               <p className="mt-1 text-4xl font-bold text-eos-text">{assessment.overallScore}%</p>
@@ -130,15 +130,15 @@ function ResultsView({
               style={{ width: `${assessment.overallScore}%` }}
             />
           </div>
-        </CardContent>
-      </Card>
+        </V3SurfaceBody>
+      </V3Surface>
 
       {/* Domain scores */}
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader className="px-5 pt-4 pb-0">
-          <CardTitle className="text-sm font-semibold">Scoruri pe domenii</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-eos-border-subtle px-5 py-2">
+      <V3Surface className="border-eos-border bg-eos-surface">
+        <V3SurfaceHead className="px-5 pt-4 pb-0">
+          <V3SurfaceTitle className="text-sm font-semibold">Scoruri pe domenii</V3SurfaceTitle>
+        </V3SurfaceHead>
+        <V3SurfaceBody className="divide-y divide-eos-border-subtle px-5 py-2">
           {assessment.domains.map((d) => {
             const def = MATURITY_DOMAINS.find((x) => x.id === d.id)!
             return (
@@ -162,7 +162,7 @@ function ResultsView({
                   />
                 </div>
                 {d.score < 50 && (
-                  <div className="mt-2 flex items-start gap-1.5 rounded-eos-md bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
+                  <div className="mt-2 flex items-start gap-1.5 rounded-eos-sm bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
                     <AlertTriangle className="mt-0.5 size-3 shrink-0 text-eos-warning" />
                     <span>{def.closureRecipe}</span>
                   </div>
@@ -170,8 +170,8 @@ function ResultsView({
               </div>
             )
           })}
-        </CardContent>
-      </Card>
+        </V3SurfaceBody>
+      </V3Surface>
 
       {weakDomains.length > 0 && (
         <div className="rounded-eos-lg border border-eos-warning/30 bg-eos-warning-soft p-4">
@@ -186,7 +186,7 @@ function ResultsView({
       )}
 
       {/* Legal notice */}
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">
           Bază legală: OUG 155/2024 Art. 18(7) ✅ + NIS2 Art.21(2)
         </p>
@@ -352,14 +352,14 @@ export default function MaturitatePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       {fromCockpit && (
-        <Card className="border-eos-primary/30 bg-eos-primary-soft">
-          <CardContent className="p-4">
+        <V3Surface className="border-eos-primary/30 bg-eos-primary-soft">
+          <V3SurfaceBody className="p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="normal-case tracking-normal">
+                  <V3Pill variant="outline" className="normal-case tracking-normal">
                     Deschis din cockpit
-                  </Badge>
+                  </V3Pill>
                   {findingId && (
                     <span className="text-xs font-medium text-eos-text-muted">
                       Finding: <span className="font-semibold text-eos-text">{findingId}</span>
@@ -388,22 +388,22 @@ export default function MaturitatePage() {
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
-      <PageIntro
+      <V3Intro
         eyebrow="NIS2 — Maturitate"
         title="Auto-evaluare maturitate DNSC"
         description="Evaluare pe 10 domenii NIS2 Art.21(2). Obligatorie în 60 de zile de la evaluarea riscului. Bază: OUG 155/2024 Art. 18(7) ✅"
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               OUG 155/2024 Art.18(7)
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </V3Pill>
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               NIS2 Art.21(2)
-            </Badge>
+            </V3Pill>
           </>
         }
       />
@@ -467,22 +467,22 @@ export default function MaturitatePage() {
             </div>
 
             {/* Domain card */}
-            <Card className="border-eos-border bg-eos-surface">
-              <CardHeader className="px-5 pt-4 pb-3">
+            <V3Surface className="border-eos-border bg-eos-surface">
+              <V3SurfaceHead className="px-5 pt-4 pb-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
                       {domain.legalRef}
                     </p>
-                    <CardTitle className="mt-0.5 text-base font-semibold text-eos-text">
+                    <V3SurfaceTitle className="mt-0.5 text-base font-semibold text-eos-text">
                       {domain.name}
-                    </CardTitle>
+                    </V3SurfaceTitle>
                   </div>
                   {progress.complete && currentDomainResult && statusBadge(currentDomainResult.status)}
                 </div>
-              </CardHeader>
+              </V3SurfaceHead>
 
-              <CardContent className="divide-y divide-eos-border-subtle px-5 pb-4">
+              <V3SurfaceBody className="divide-y divide-eos-border-subtle px-5 pb-4">
                 {domain.questions.map((q, qi) => {
                   const current = answers[q.id]
                   const suggestion = suggestedAnswers[q.id]
@@ -493,7 +493,7 @@ export default function MaturitatePage() {
                         {q.text}
                       </p>
                       {suggestion && current === undefined && (
-                        <div className="mb-2 flex items-center gap-2 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 px-2.5 py-1.5">
+                        <div className="mb-2 flex items-center gap-2 rounded-eos-sm border border-eos-primary/20 bg-eos-primary/5 px-2.5 py-1.5">
                           <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-eos-primary">
                             Propus automat
                           </span>
@@ -505,7 +505,7 @@ export default function MaturitatePage() {
                           <button
                             type="button"
                             onClick={() => setAnswer(q.id, suggestion.answer)}
-                            className="ml-auto shrink-0 rounded-eos-md border border-eos-primary/30 bg-eos-surface px-2 py-0.5 text-[11px] font-medium text-eos-primary hover:bg-eos-primary/10"
+                            className="ml-auto shrink-0 rounded-eos-sm border border-eos-primary/30 bg-eos-surface px-2 py-0.5 text-[11px] font-medium text-eos-primary hover:bg-eos-primary/10"
                           >
                             Confirmă
                           </button>
@@ -517,7 +517,7 @@ export default function MaturitatePage() {
                             key={opt.value}
                             type="button"
                             onClick={() => setAnswer(q.id, opt.value)}
-                            className={`rounded-eos-md border px-3 py-1.5 text-xs font-medium transition-all ${
+                            className={`rounded-eos-sm border px-3 py-1.5 text-xs font-medium transition-all ${
                               current === opt.value
                                 ? `${opt.color} ring-2 ring-offset-1 ring-current`
                                 : "border-eos-border bg-eos-surface text-eos-text-muted hover:border-eos-border-subtle hover:text-eos-text"
@@ -530,8 +530,8 @@ export default function MaturitatePage() {
                     </div>
                   )
                 })}
-              </CardContent>
-            </Card>
+              </V3SurfaceBody>
+            </V3Surface>
 
             {/* Navigation */}
             <div className="flex items-center justify-between gap-3">
@@ -576,7 +576,7 @@ export default function MaturitatePage() {
             </div>
 
             {/* Legal notice */}
-            <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
+            <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
               <span className="font-medium text-eos-text">Cum funcționează scorul:</span> Da = 100p · Parțial = 50p ·
               Nu = 0p · Nu se aplică = exclus din calcul. Domeniile cu scor sub 50% generează automat probleme în
               tabloul de remediere.
