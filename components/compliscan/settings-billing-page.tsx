@@ -14,15 +14,11 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3Panel } from "@/components/compliscan/v3/panel"
 import { useTrackEvent } from "@/lib/client/use-track-event"
 import { PLAN_LABELS, PLAN_PRICES, type OrgPlan } from "@/lib/shared/plan-constants"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 type PlanResponse = {
   plan: OrgPlan
@@ -34,48 +30,52 @@ type PlanResponse = {
   canManageOrgBilling: boolean
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const pillBase =
+  "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-[0.02em]"
 
-function PlanStatusBadge({ plan, trialEndsAtISO }: { plan: OrgPlan; trialEndsAtISO: string | null }) {
+function PlanStatusPill({ plan, trialEndsAtISO }: { plan: OrgPlan; trialEndsAtISO: string | null }) {
   const isTrialActive =
-    trialEndsAtISO && trialEndsAtISO > new Date().toISOString()
+    !!trialEndsAtISO && trialEndsAtISO > new Date().toISOString()
 
   if (isTrialActive) {
     const daysLeft = Math.ceil(
       (new Date(trialEndsAtISO!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     )
     return (
-      <Badge variant="warning">
+      <span className={`${pillBase} border-eos-warning/30 bg-eos-warning-soft text-eos-warning`}>
         <Clock className="size-3" strokeWidth={2} />
         Trial Pro — {daysLeft} zile rămase
-      </Badge>
+      </span>
     )
   }
 
   if (plan === "partner") {
     return (
-      <Badge variant="warning">
+      <span className={`${pillBase} border-eos-warning/30 bg-eos-warning-soft text-eos-warning`}>
         <CheckCircle2 className="size-3" strokeWidth={2} />
         Partner activ
-      </Badge>
+      </span>
     )
   }
   if (plan === "pro") {
     return (
-      <Badge variant="success">
+      <span className={`${pillBase} border-eos-success/30 bg-eos-success-soft text-eos-success`}>
         <CheckCircle2 className="size-3" strokeWidth={2} />
         Pro activ
-      </Badge>
+      </span>
     )
   }
   return (
-    <Badge variant="secondary">
+    <span className={`${pillBase} border-eos-border bg-eos-surface-elevated text-eos-text-muted`}>
       Gratuit
-    </Badge>
+    </span>
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+const btnPrimary =
+  "flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-primary bg-eos-primary px-3 text-[12.5px] font-semibold text-white transition hover:bg-eos-primary-hover disabled:opacity-40"
+const btnOutline =
+  "flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text disabled:opacity-40"
 
 export function SettingsBillingPageSurface() {
   const { track } = useTrackEvent()
@@ -147,92 +147,91 @@ export function SettingsBillingPageSurface() {
     <div className="mx-auto max-w-2xl space-y-6">
       <Link
         href="/dashboard/settings"
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] text-eos-text-muted transition-colors hover:text-eos-text"
       >
         <ArrowLeft className="size-3.5" strokeWidth={2} />
         Înapoi la Setări
       </Link>
 
-      <PageIntro
+      <V3PageHero
+        breadcrumbs={[{ label: "Setări" }, { label: "Abonament", current: true }]}
         title="Abonament"
         description="Gestionează planul și facturarea organizației tale."
       />
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-eos-text-muted">
+        <div className="flex items-center gap-2 text-[12.5px] text-eos-text-muted">
           <Loader2 className="size-4 animate-spin" />
           Se încarcă...
         </div>
       ) : (
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-5">
           {isPartnerUser ? (
-            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft px-4 py-3 text-sm text-eos-warning">
+            <div className="rounded-eos-lg border border-eos-warning/30 bg-eos-warning-soft px-4 py-3 text-[12.5px] text-eos-warning">
               <p className="font-medium text-eos-text">Facturarea consultantului s-a mutat în Setări cont</p>
-              <p className="mt-1 text-xs leading-5 text-eos-warning/90">
+              <p className="mt-1 text-[12px] leading-[1.5] text-eos-warning/90">
                 Billingul partner se gestionează la nivel de cont. Pagina curentă rămâne doar pentru planul firmei active.
               </p>
               <div className="mt-3">
-                <Button asChild size="sm" variant="outline">
-                  <Link href={dashboardRoutes.accountSettings}>Deschide Setări cont</Link>
-                </Button>
+                <Link href={dashboardRoutes.accountSettings} className={btnOutline}>
+                  Deschide Setări cont
+                </Link>
               </div>
             </div>
           ) : null}
 
-          {/* Current plan card */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-3 text-base">
-                <CreditCard className="size-4 text-eos-text-muted" strokeWidth={2} />
+          {/* Current plan panel */}
+          <V3Panel
+            eyebrow={
+              <span className="inline-flex items-center gap-1.5">
+                <CreditCard className="size-3 text-eos-text-tertiary" strokeWidth={2} />
                 Plan curent
-                <PlanStatusBadge plan={currentPlan} trialEndsAtISO={trialEndsAtISO} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-semibold text-eos-text">
-                    {PLAN_LABELS[currentPlan]}
+              </span>
+            }
+            title={PLAN_LABELS[currentPlan]}
+            action={<PlanStatusPill plan={currentPlan} trialEndsAtISO={trialEndsAtISO} />}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[22px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-eos-text"
+                >
+                  {PLAN_PRICES[currentPlan]}
+                </p>
+                {isTrialActive && (
+                  <p className="mt-1 text-[12px] text-eos-warning">
+                    (trial activ — se termină {new Date(trialEndsAtISO!).toLocaleDateString("ro-RO")})
                   </p>
-                  <p className="mt-0.5 text-sm text-eos-text-muted">
-                    {PLAN_PRICES[currentPlan]}
-                    {isTrialActive && (
-                      <span className="ml-2 text-eos-warning">
-                        (trial activ — se termină{" "}
-                        {new Date(trialEndsAtISO!).toLocaleDateString("ro-RO")})
-                      </span>
-                    )}
+                )}
+                {planData?.updatedAtISO && (
+                  <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
+                    Actualizat: {new Date(planData.updatedAtISO).toLocaleDateString("ro-RO")}
                   </p>
-                  {planData?.updatedAtISO && (
-                    <p className="mt-1 text-xs text-eos-text-muted">
-                      Actualizat:{" "}
-                      {new Date(planData.updatedAtISO).toLocaleDateString("ro-RO")}
-                    </p>
-                  )}
-                </div>
-                {planData?.hasActiveSubscription && canManageOrgBilling && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void handlePortal()}
-                    disabled={portalLoading}
-                  >
-                    {portalLoading ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ExternalLink className="size-4" strokeWidth={2} />
-                    )}
-                    Gestionează în Stripe
-                  </Button>
                 )}
               </div>
-              {!canManageOrgBilling ? (
-                <p className="mt-3 text-xs text-eos-text-muted">
-                  Doar owner-ul poate modifica billingul firmei active.
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
+              {planData?.hasActiveSubscription && canManageOrgBilling && (
+                <button
+                  type="button"
+                  onClick={() => void handlePortal()}
+                  disabled={portalLoading}
+                  className={btnOutline}
+                >
+                  {portalLoading ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <ExternalLink className="size-3.5" strokeWidth={2} />
+                  )}
+                  Gestionează în Stripe
+                </button>
+              )}
+            </div>
+            {!canManageOrgBilling ? (
+              <p className="mt-3 text-[11px] text-eos-text-muted">
+                Doar owner-ul poate modifica billingul firmei active.
+              </p>
+            ) : null}
+          </V3Panel>
 
           {/* Trial expiry warning */}
           {isTrialActive && currentPlan === "free" && (
@@ -242,14 +241,14 @@ export function SettingsBillingPageSurface() {
                 strokeWidth={2}
               />
               <div>
-                <p className="text-sm font-medium text-eos-warning">
+                <p className="text-[12.5px] font-medium text-eos-warning">
                   Trial Pro activ —{" "}
                   {Math.ceil(
                     (new Date(trialEndsAtISO!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
                   )}{" "}
                   zile rămase
                 </p>
-                <p className="mt-0.5 text-xs text-eos-warning/80">
+                <p className="mt-0.5 text-[12px] leading-[1.5] text-eos-warning/80">
                   La expirarea trial-ului, accesul la funcțiile Pro va fi restricționat.
                   Fă upgrade înainte pentru a menține continuitatea.
                 </p>
@@ -258,40 +257,41 @@ export function SettingsBillingPageSurface() {
           )}
 
           {/* Upgrade options */}
-          {currentPlan !== "partner" && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {currentPlan === "free" && (
-                <Card className="border-eos-primary/30 bg-[linear-gradient(180deg,var(--eos-surface-primary),var(--eos-surface-elevated))]">
-                  <CardContent className="pt-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-primary">
-                      Pro
-                    </p>
-                    <p className="mt-1.5 text-2xl font-semibold text-eos-text">
-                      {PLAN_PRICES.pro}
-                    </p>
-                    <p className="mt-1 text-sm text-eos-text-muted">
-                      Compliance ops complet — NIS2, AI Act, Audit Pack, Inspector Mode.
-                    </p>
-                    <Button
-                      className="mt-4 w-full"
-                      onClick={() => void handleUpgrade("pro")}
-                      disabled={checkoutLoading !== null || !canManageOrgBilling}
-                    >
-                      {checkoutLoading === "pro" ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <ArrowUpRight className="size-4" strokeWidth={2} />
-                      )}
-                      Upgrade la Pro
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+          {currentPlan !== "partner" && currentPlan === "free" && (
+            <section className="relative overflow-hidden rounded-eos-lg border border-eos-primary/30 bg-eos-surface">
+              <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+              <div className="px-4 py-4">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                  Pro
+                </p>
+                <p
+                  data-display-text="true"
+                  className="mt-1.5 font-display text-[24px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-eos-text"
+                >
+                  {PLAN_PRICES.pro}
+                </p>
+                <p className="mt-1.5 text-[12.5px] text-eos-text-muted">
+                  Compliance ops complet — NIS2, AI Act, Audit Pack, Inspector Mode.
+                </p>
+                <button
+                  type="button"
+                  className={`${btnPrimary} mt-4 w-full justify-center`}
+                  onClick={() => void handleUpgrade("pro")}
+                  disabled={checkoutLoading !== null || !canManageOrgBilling}
+                >
+                  {checkoutLoading === "pro" ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <ArrowUpRight className="size-3.5" strokeWidth={2} />
+                  )}
+                  Upgrade la Pro
+                </button>
+              </div>
+            </section>
           )}
 
           {/* Compare plans link */}
-          <p className="text-sm text-eos-text-muted">
+          <p className="text-[12.5px] text-eos-text-muted">
             Compară toate planurile pe{" "}
             <Link href="/pricing" className="text-eos-primary hover:underline">
               pagina de prețuri →
@@ -299,7 +299,7 @@ export function SettingsBillingPageSurface() {
           </p>
 
           {/* Legal note */}
-          <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
+          <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-3 text-[11px] text-eos-text-muted">
             Facturarea este procesată prin Stripe. Nu stocăm date de card.{" "}
             <Link href="/terms" className="hover:text-eos-text">
               Termeni și condiții

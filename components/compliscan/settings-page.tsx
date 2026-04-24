@@ -7,7 +7,7 @@ import { ArrowRight, Bell, CalendarClock, Download, Loader2, MailWarning, Shield
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { Input } from "@/components/evidence-os/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/evidence-os/Select"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -535,27 +535,24 @@ export function SettingsPageSurface() {
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-          {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
-        </h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          {isSolo
+    <div className="space-y-6">
+      <V3PageHero
+        breadcrumbs={[{ label: "Setări", current: true }]}
+        title={isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
+        description={
+          isSolo
             ? "Aici rămân doar organizația, membrii, notificările și drumul către planul de facturare."
-            : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."}
-        </p>
-        <div className="mt-3">
-          <span className="rounded-full border border-eos-border bg-eos-surface-variant px-3 py-1 text-xs font-medium text-eos-text-tertiary">
+            : "Context, acces și operare. Execuția rămâne în Scanează, De rezolvat și Rapoarte."
+        }
+        eyebrowBadges={
+          <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
             {isSolo ? "admin firmă" : "operational admin"}
           </span>
-        </div>
-      </div>
+        }
+      />
 
       <div className="space-y-6">
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
           <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
             <h2 className="text-lg font-semibold text-eos-text-muted">Automatizări recurente</h2>
             <p className="mt-2 text-sm text-eos-text-tertiary">
@@ -605,7 +602,7 @@ export function SettingsPageSurface() {
 
         {/* Tab navigation */}
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Zone Setari</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Zone setari</p>
           <div className="overflow-x-auto pb-1">
             <div className="flex min-w-max gap-0 border-b border-eos-border-subtle">
               {visibleTabs.map((tab) => (
@@ -638,7 +635,7 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <h2 className="text-lg font-semibold text-eos-text-muted">Setări spațiu de lucru</h2>
               </div>
@@ -733,7 +730,7 @@ export function SettingsPageSurface() {
             </div>
 
             {canViewClaimStatus ? (
-              <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                 <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -838,7 +835,7 @@ export function SettingsPageSurface() {
               </div>
             ) : null}
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -1031,7 +1028,7 @@ export function SettingsPageSurface() {
             ) : (
               <div className="space-y-4">
                 {/* ── Email ─────────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
                       <Bell className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
@@ -1087,7 +1084,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Webhook ───────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
                       <Webhook className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
@@ -1128,7 +1125,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Events ────────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h2 className="text-lg font-semibold text-eos-text-muted">Evenimente monitorizate</h2>
                   </div>
@@ -1206,7 +1203,7 @@ export function SettingsPageSurface() {
             ) : (
               <>
                 {/* Risk level policies */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Politici per nivel de risc</h3>
                     <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1253,7 +1250,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* Category overrides */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Excepții pe tip de acțiune</h3>
                     <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1343,7 +1340,7 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces.</p>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -1392,7 +1389,7 @@ export function SettingsPageSurface() {
               </div>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Reset workspace local</h2>
@@ -1440,12 +1437,12 @@ export function SettingsPageSurface() {
 
             {/* ── GDPR Rights ──────────────────────────────────────────────── */}
             <div className="border-t border-eos-border-subtle pt-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
               <p className="mt-1 text-sm text-eos-text-tertiary">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
             </div>
 
             {/* Art. 20 — Export date */}
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <h2 className="text-lg font-semibold text-eos-text-muted">Exportă datele personale</h2>
                 <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1471,7 +1468,7 @@ export function SettingsPageSurface() {
             </div>
 
             {/* Art. 17 — Ștergere date conformitate */}
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Șterge datele de conformitate</h2>
@@ -1506,7 +1503,7 @@ export function SettingsPageSurface() {
             </div>
 
             {/* Art. 17 — Solicită ștergere cont */}
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Solicită ștergerea contului</h2>
@@ -1582,13 +1579,19 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">
                 Personalizează cum apare brandul tău în rapoartele și documentele generate pentru clienți.
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant={wlPersistenceStatus === "fallback" ? "warning" : "success"} className="normal-case tracking-normal">
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <span
+                  className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${
+                    wlPersistenceStatus === "fallback"
+                      ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+                      : "border-eos-success/30 bg-eos-success-soft text-eos-success"
+                  }`}
+                >
                   {wlPersistenceStatus === "fallback" ? "fallback local" : "Supabase synced"}
-                </Badge>
-                <Badge variant="outline" className="normal-case tracking-normal">
+                </span>
+                <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                   {wlStorageBackend === "supabase" ? "storage: supabase" : "storage: local"}
-                </Badge>
+                </span>
               </div>
             </div>
 
@@ -1599,7 +1602,7 @@ export function SettingsPageSurface() {
             ) : (
               <div className="space-y-6">
                 {wlPersistenceStatus === "fallback" ? (
-                  <div className="rounded-eos-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-sm text-eos-text">
+                  <div className="rounded-eos-lg border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-sm text-eos-text">
                     Brandingul este disponibil, dar persistă momentan pe fallback local. Nu îl trata ca adevăr
                     de producție până când traseul Supabase nu revine la `synced`.
                   </div>
@@ -1607,7 +1610,7 @@ export function SettingsPageSurface() {
 
                 {/* Preview strip */}
                 <div
-                  className="flex items-center gap-4 rounded-eos-xl border px-5 py-4"
+                  className="flex items-center gap-4 rounded-eos-lg border px-5 py-4"
                   style={{ borderColor: wlBrandColor + "33", backgroundColor: wlBrandColor + "0d" }}
                 >
                   <div
@@ -1633,7 +1636,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* Form */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Identitate vizuală</h3>
                   </div>
@@ -1664,7 +1667,7 @@ export function SettingsPageSurface() {
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="color"
-                            className="h-9 w-12 cursor-pointer rounded-eos-md border border-eos-border bg-transparent p-0.5"
+                            className="h-9 w-12 cursor-pointer rounded-eos-sm border border-eos-border bg-transparent p-0.5"
                             value={wlBrandColor}
                             onChange={(e) => setWlBrandColor(e.target.value)}
                           />

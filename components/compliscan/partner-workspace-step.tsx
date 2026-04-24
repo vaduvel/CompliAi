@@ -44,7 +44,7 @@ const CLIENT_SCALE_OPTIONS: {
 ]
 
 const inputClass =
-  "h-11 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3.5 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-violet-500/50 focus:bg-eos-surface-active transition-colors"
+  "h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-[13px] text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/60 focus:bg-eos-surface-active transition-colors"
 
 export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }: Props) {
   const [orgName, setOrgName] = useState(initialOrgName)
@@ -93,13 +93,14 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
   }
 
   return (
-    <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <section className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary/70" aria-hidden />
       <div className="px-5 py-5">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <Briefcase className="h-4 w-4 shrink-0 text-violet-400" strokeWidth={1.5} />
-            <p className="text-sm font-medium text-eos-text-muted">
+          <div className="flex items-center gap-2">
+            <Briefcase className="size-3.5 shrink-0 text-eos-primary" strokeWidth={1.5} />
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Spațiul tău de lucru
             </p>
           </div>
@@ -107,40 +108,47 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
             <button
               type="button"
               onClick={onBack}
-              className="flex shrink-0 items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-elevated px-3 py-1.5 text-xs text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+              className="flex h-[28px] shrink-0 items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
             >
               Înapoi
             </button>
           )}
         </div>
 
+        <h2
+          data-display-text="true"
+          className="mt-2 font-display text-[18px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+        >
+          Configurezi cabinetul tău
+        </h2>
+
         {/* Progress */}
         <div className="mt-4 space-y-1.5">
           <div className="h-1 w-full overflow-hidden rounded-full bg-eos-surface-elevated">
             <div
-              className="h-full bg-violet-500 transition-all duration-300"
+              className="h-full bg-eos-primary transition-all duration-300"
               style={{ width: clientScale ? "100%" : orgName.trim() ? "50%" : "10%" }}
             />
           </div>
-          <p className="text-right text-[10px] text-eos-text-tertiary">
+          <p className="text-right font-mono text-[10px] text-eos-text-tertiary">
             {clientScale ? "Gata pentru portofoliu" : "Completează câmpurile de mai jos"}
           </p>
         </div>
 
         <div className="mt-5 space-y-5">
           {/* Hint card */}
-          <div className="rounded-eos-lg border border-violet-500/20 bg-violet-500/[0.06] px-4 py-3">
-            <p className="text-sm font-medium text-eos-text">
+          <div className="rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.06] px-4 py-3">
+            <p className="text-[13px] font-medium text-eos-text">
               Configurezi spațiul de lucru al firmei tale de consultanță.
             </p>
-            <p className="mt-1 text-xs text-eos-text-tertiary">
+            <p className="mt-1 text-[12px] text-eos-text-tertiary">
               Datele de conformitate ale clienților se completează din portofoliu, nu de aici.
             </p>
           </div>
 
           {/* Org name */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-eos-text">
+            <label className="block text-[12.5px] font-medium text-eos-text">
               Numele firmei tale de consultanță
             </label>
             <input
@@ -155,7 +163,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
 
           {/* CUI optional */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-eos-text">
+            <label className="block text-[12.5px] font-medium text-eos-text">
               CUI propriu{" "}
               <span className="font-normal text-eos-text-tertiary">(opțional)</span>
             </label>
@@ -166,14 +174,14 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
               placeholder="Ex: RO12345678"
               className={inputClass}
             />
-            <p className="text-xs text-eos-text-tertiary">
+            <p className="text-[11px] text-eos-text-tertiary">
               Folosit doar pentru identificarea contului și eventuale facturi emise de noi.
             </p>
           </div>
 
           {/* Client scale */}
           <div className="space-y-2">
-            <p className="text-sm font-medium text-eos-text">
+            <p className="text-[12.5px] font-medium text-eos-text">
               Câți clienți gestionezi aproximativ?
             </p>
             <div className="grid grid-cols-3 gap-2.5">
@@ -186,32 +194,32 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
                     type="button"
                     onClick={() => { setClientScale(option.id); setError(null) }}
                     className={[
-                      "flex flex-col items-center gap-2 rounded-eos-xl border px-3 py-4 text-center transition-all duration-200",
+                      "flex flex-col items-center gap-2 rounded-eos-lg border px-3 py-4 text-center transition-all duration-200",
                       isSelected
-                        ? "border-violet-500/40 bg-violet-500/[0.08] shadow-[0_0_16px_rgba(139,92,246,0.10)]"
-                        : "border-eos-border bg-eos-surface-variant hover:border-eos-border-strong hover:bg-eos-surface-active",
+                        ? "border-eos-primary/40 bg-eos-primary/[0.08]"
+                        : "border-eos-border bg-eos-surface hover:border-eos-border-strong hover:bg-eos-surface-active",
                     ].join(" ")}
                   >
                     <div
                       className={[
-                        "flex h-9 w-9 items-center justify-center rounded-eos-lg border transition-all",
+                        "flex size-9 items-center justify-center rounded-eos-sm border transition-all",
                         isSelected
-                          ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                          ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
                           : "border-eos-border bg-eos-surface-elevated text-eos-text-tertiary",
                       ].join(" ")}
                     >
-                      <Icon className="h-4 w-4" strokeWidth={1.5} />
+                      <Icon className="size-4" strokeWidth={1.5} />
                     </div>
                     <div>
                       <p
                         className={[
-                          "text-sm font-semibold leading-tight",
+                          "text-[12.5px] font-semibold leading-tight",
                           isSelected ? "text-eos-text" : "text-eos-text-muted",
                         ].join(" ")}
                       >
                         {option.label}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-eos-text-tertiary">{option.sublabel}</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-eos-text-tertiary">{option.sublabel}</p>
                     </div>
                   </button>
                 )
@@ -220,7 +228,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
           </div>
 
           {error && (
-            <div className="rounded-eos-lg border border-eos-error/20 bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
+            <div className="rounded-eos-lg border border-eos-error/20 bg-eos-error-soft px-4 py-3 text-[12.5px] text-eos-error">
               {error}
             </div>
           )}
@@ -229,22 +237,22 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
             type="button"
             disabled={!orgName.trim() || !clientScale || saving}
             onClick={() => void handleSubmit()}
-            className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-violet-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-[40px] w-full items-center justify-center gap-1.5 rounded-eos-sm bg-eos-primary text-[13px] font-semibold text-white transition hover:bg-eos-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
                 Se salvează…
               </>
             ) : (
               <>
                 Deschid portofoliul
-                <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                <ArrowRight className="size-4" strokeWidth={2.5} />
               </>
             )}
           </button>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

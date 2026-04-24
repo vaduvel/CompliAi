@@ -2,12 +2,11 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { CalendarClock, CheckCircle2, ChevronRight, Clock3, RefreshCw } from "lucide-react"
+import { CalendarClock, CheckCircle2, ChevronRight, Clock3, Loader2, RefreshCw } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
+import { V3FilterBar, type V3FilterTab } from "@/components/compliscan/v3/filter-bar"
 
 type ReviewCycleStatus = "upcoming" | "due" | "overdue" | "completed"
 
@@ -39,13 +38,7 @@ type Payload = {
   }
 }
 
-const FILTERS: Array<{ id: ReviewCycleStatus | "all"; label: string }> = [
-  { id: "all", label: "Toate" },
-  { id: "upcoming", label: "Programate" },
-  { id: "due", label: "Scadente" },
-  { id: "overdue", label: "Depășite" },
-  { id: "completed", label: "Închise" },
-]
+type FilterId = ReviewCycleStatus | "all"
 
 function typeLabel(type: ReviewCycleItem["reviewType"]) {
   switch (type) {
@@ -60,16 +53,43 @@ function typeLabel(type: ReviewCycleItem["reviewType"]) {
   }
 }
 
-function statusVariant(status: ReviewCycleStatus, isOverdue: boolean) {
-  if (status === "completed") return "success" as const
-  if (status === "overdue" || isOverdue) return "warning" as const
-  if (status === "due") return "warning" as const
-  return "outline" as const
+function StatusPill({ status, isOverdue }: { status: ReviewCycleStatus; isOverdue: boolean }) {
+  const tone =
+    status === "completed"
+      ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+      : status === "overdue" || isOverdue
+        ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
+        : status === "due"
+          ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+          : "border-eos-border bg-eos-surface-elevated text-eos-text-muted"
+  const label =
+    status === "completed"
+      ? "închis"
+      : isOverdue || status === "overdue"
+        ? "depășit"
+        : status === "due"
+          ? "scadent"
+          : "programat"
+  return (
+    <span
+      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.05em] ${tone}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+function TypePill({ type }: { type: ReviewCycleItem["reviewType"] }) {
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.05em] text-eos-text-tertiary">
+      {typeLabel(type)}
+    </span>
+  )
 }
 
 export function ReviewCyclesPage() {
   const [payload, setPayload] = useState<Payload | null>(null)
-  const [filter, setFilter] = useState<ReviewCycleStatus | "all">("all")
+  const [filter, setFilter] = useState<FilterId>("all")
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -103,6 +123,38 @@ export function ReviewCyclesPage() {
       return item.status === filter
     })
   }, [payload, filter])
+
+  const tabs: V3FilterTab<FilterId>[] = [
+    { id: "all", label: "Toate", count: payload?.summary.total ?? 0 },
+    { id: "upcoming", label: "Programate", count: payload?.summary.upcoming ?? 0 },
+    { id: "due", label: "Scadente", count: payload?.summary.due ?? 0 },
+    { id: "overdue", label: "Depășite", count: payload?.summary.overdue ?? 0 },
+    { id: "completed", label: "Închise", count: payload?.summary.completed ?? 0 },
+  ]
+
+  const kpiItems: V3KpiItem[] = [
+    { id: "upcoming", label: "Programate", value: payload?.summary.upcoming ?? 0 },
+    {
+      id: "due",
+      label: "Scadente",
+      value: payload?.summary.due ?? 0,
+      stripe: (payload?.summary.due ?? 0) > 0 ? "warning" : undefined,
+      valueTone: (payload?.summary.due ?? 0) > 0 ? "warning" : "neutral",
+    },
+    {
+      id: "overdue",
+      label: "Depășite",
+      value: payload?.summary.overdue ?? 0,
+      stripe: (payload?.summary.overdue ?? 0) > 0 ? "critical" : undefined,
+      valueTone: (payload?.summary.overdue ?? 0) > 0 ? "critical" : "neutral",
+    },
+    {
+      id: "completed",
+      label: "Închise",
+      value: payload?.summary.completed ?? 0,
+      valueTone: "success",
+    },
+  ]
 
   async function completeCycle(item: ReviewCycleItem) {
     setBusyId(item.id)
@@ -146,54 +198,42 @@ export function ReviewCyclesPage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Review cycles"
+      <V3PageHero
+        breadcrumbs={[{ label: "Monitorizare" }, { label: "Review cycles", current: true }]}
         title="Reverificări și cazuri intrate din nou în lucru"
         description="Aici vezi tot ce a intrat în monitorizare, ce cere reverificare și ce poate redeschide automat finding-uri."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               {payload?.summary.total ?? 0} review-uri
-            </Badge>
-            <Badge variant={(payload?.summary.overdue ?? 0) > 0 ? "warning" : "outline"} className="normal-case tracking-normal">
-              {payload?.summary.overdue ?? 0} depășite
-            </Badge>
-          </>
+            </span>
+            {(payload?.summary.overdue ?? 0) > 0 && (
+              <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+                {payload?.summary.overdue} depășite
+              </span>
+            )}
+          </div>
         }
         actions={
-          <Button variant="outline" onClick={() => void load()}>
-            <RefreshCw className="size-4" strokeWidth={2} />
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+          >
+            <RefreshCw className="size-3.5" strokeWidth={2} />
             Reîncarcă
-          </Button>
+          </button>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Metric label="Programate" value={String(payload?.summary.upcoming ?? 0)} />
-        <Metric label="Scadente" value={String(payload?.summary.due ?? 0)} tone="warning" />
-        <Metric label="Depășite" value={String(payload?.summary.overdue ?? 0)} tone="warning" />
-        <Metric label="Închise" value={String(payload?.summary.completed ?? 0)} tone="success" />
-      </div>
+      <V3KpiStrip items={kpiItems} />
 
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setFilter(item.id)}
-            className={`rounded-eos-md border px-3 py-1.5 text-sm transition ${
-              filter === item.id
-                ? "border-eos-primary bg-eos-primary-soft text-eos-primary"
-                : "border-eos-border bg-eos-surface text-eos-text-muted"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border">
+        <V3FilterBar<FilterId> tabs={tabs} activeTab={filter} onTabChange={setFilter} />
       </div>
 
       {error ? (
-        <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft/50 p-4 text-sm text-eos-error">
+        <div className="rounded-eos-lg border border-eos-error/20 bg-eos-error-soft/50 p-4 text-[12.5px] text-eos-error">
           {error}
         </div>
       ) : null}
@@ -201,105 +241,112 @@ export function ReviewCyclesPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="h-24 animate-pulse rounded-eos-xl bg-eos-surface-variant" />
+            <div key={item} className="h-24 animate-pulse rounded-eos-lg bg-eos-surface-variant" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CalendarClock className="size-10 text-eos-text-tertiary" strokeWidth={1.5} />
-            <div className="space-y-1">
-              <p className="text-base font-medium text-eos-text">Niciun review activ</p>
-              <p className="text-sm text-eos-text-muted">
-                Review-urile apar automat când un finding intră în monitorizare sau când drift-ul cere reverificare.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface py-12 text-center">
+          <CalendarClock className="size-10 text-eos-text-tertiary" strokeWidth={1.5} />
+          <div className="space-y-1">
+            <p
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              Niciun review activ
+            </p>
+            <p className="text-[12.5px] text-eos-text-muted">
+              Review-urile apar automat când un finding intră în monitorizare sau când drift-ul cere reverificare.
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
-            <Card key={item.id} className="border-eos-border bg-eos-surface">
-              <CardHeader className="border-b border-eos-border pb-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-base">{item.findingTitle}</CardTitle>
-                    <p className="mt-1 text-sm text-eos-text-muted">
-                      {new Date(item.scheduledAt).toLocaleString("ro-RO")} · finding {item.findingTypeId ?? item.findingId}
-                    </p>
+          {items.map((item) => {
+            const severityStripe =
+              item.status === "completed"
+                ? "bg-eos-success"
+                : item.isOverdue || item.status === "overdue"
+                  ? "bg-eos-error"
+                  : item.status === "due"
+                    ? "bg-eos-warning"
+                    : "bg-eos-primary/60"
+            return (
+              <section
+                key={item.id}
+                className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface"
+              >
+                <span className={`absolute left-0 top-0 bottom-0 w-[3px] ${severityStripe}`} aria-hidden />
+                <header className="border-b border-eos-border-subtle px-4 py-3.5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3
+                        data-display-text="true"
+                        className="font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+                      >
+                        {item.findingTitle}
+                      </h3>
+                      <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
+                        {new Date(item.scheduledAt).toLocaleString("ro-RO")} · finding {item.findingTypeId ?? item.findingId}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <StatusPill status={item.status} isOverdue={item.isOverdue} />
+                      <TypePill type={item.reviewType} />
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant={statusVariant(item.status, item.isOverdue)} className="normal-case tracking-normal">
-                      {item.status === "completed"
-                        ? "închis"
-                        : item.isOverdue || item.status === "overdue"
-                          ? "depășit"
-                          : item.status === "due"
-                            ? "scadent"
-                            : "programat"}
-                    </Badge>
-                    <Badge variant="outline" className="normal-case tracking-normal">
-                      {typeLabel(item.reviewType)}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-5">
-                {item.triggerDetail || item.notes ? (
-                  <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
-                    {item.triggerDetail ?? item.notes}
-                  </div>
-                ) : null}
-
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild variant="outline">
-                    <Link href={item.href}>
-                      Deschide findingul
-                      <ChevronRight className="size-4" strokeWidth={2} />
-                    </Link>
-                  </Button>
-                  {item.status !== "completed" ? (
-                    <>
-                      <Button variant="outline" disabled={busyId === item.id} onClick={() => void postponeCycle(item, 7)}>
-                        <Clock3 className="size-4" strokeWidth={2} />
-                        Amână 7 zile
-                      </Button>
-                      <Button disabled={busyId === item.id} onClick={() => void completeCycle(item)}>
-                        <CheckCircle2 className="size-4" strokeWidth={2} />
-                        Marchează completat
-                      </Button>
-                    </>
+                </header>
+                <div className="space-y-3 px-4 py-3.5">
+                  {item.triggerDetail || item.notes ? (
+                    <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] px-3 py-2.5 text-[12.5px] leading-[1.5] text-eos-text-muted">
+                      {item.triggerDetail ?? item.notes}
+                    </div>
                   ) : null}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={item.href}
+                      className="flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+                    >
+                      Deschide findingul
+                      <ChevronRight className="size-3.5" strokeWidth={2} />
+                    </Link>
+                    {item.status !== "completed" ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busyId === item.id}
+                          onClick={() => void postponeCycle(item, 7)}
+                          className="flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text disabled:opacity-40"
+                        >
+                          {busyId === item.id ? (
+                            <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+                          ) : (
+                            <Clock3 className="size-3.5" strokeWidth={2} />
+                          )}
+                          Amână 7 zile
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busyId === item.id}
+                          onClick={() => void completeCycle(item)}
+                          className="flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-primary bg-eos-primary px-2.5 text-[12px] font-semibold text-white transition hover:bg-eos-primary-hover disabled:opacity-40"
+                        >
+                          {busyId === item.id ? (
+                            <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+                          ) : (
+                            <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                          )}
+                          Marchează completat
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </section>
+            )
+          })}
         </div>
       )}
-    </div>
-  )
-}
-
-function Metric({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string
-  value: string
-  tone?: "default" | "warning" | "success"
-}) {
-  const className =
-    tone === "warning"
-      ? "text-eos-warning"
-      : tone === "success"
-        ? "text-eos-success"
-        : "text-eos-text"
-
-  return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
-      <p className={`mt-2 text-lg font-semibold ${className}`}>{value}</p>
     </div>
   )
 }
