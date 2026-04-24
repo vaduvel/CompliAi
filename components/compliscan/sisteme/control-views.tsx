@@ -376,7 +376,6 @@ export function ControlReviewWorkspace({
   reviewedCount,
   recentDriftsCount,
   validatedBaseline,
-  compliancePack: _compliancePack,
   onOpenDiscovery,
   onOpenPack,
   onOpenBaseline,
