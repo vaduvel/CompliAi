@@ -108,10 +108,10 @@
   --eos-page-cluster-gap: 16px;
   --eos-page-summary-item-min: 220px;
 
-  --eos-radius-sm: 8px;
-  --eos-radius-md: 12px;
-  --eos-radius-lg: 16px;
-  --eos-radius-xl: 20px;
+  --eos-radius-sm: 6px;
+  --eos-radius-md: 8px;
+  --eos-radius-lg: 10px;
+  --eos-radius-xl: 14px;
   --eos-radius-full: 9999px;
 
   --eos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);

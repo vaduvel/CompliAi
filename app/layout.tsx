@@ -1,9 +1,30 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/evidence-os/Toaster";
 import { CookieConsent } from "@/components/compliscan/cookie-consent";
+
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro";
 
@@ -49,7 +70,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ro" suppressHydrationWarning>
+    <html
+      lang="ro"
+      suppressHydrationWarning
+      className={`${inter.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable}`}
+    >
       <body suppressHydrationWarning className="antialiased">
         <ThemeProvider
           attribute="class"

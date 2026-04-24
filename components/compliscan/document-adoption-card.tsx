@@ -6,7 +6,6 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import {
   DOCUMENT_ADOPTION_LABELS,
   getDocumentAdoptionHint,
@@ -109,17 +108,23 @@ export function DocumentAdoptionCard({
   }
 
   return (
-    <Card className="border-eos-border bg-eos-surface" data-testid="document-adoption-card">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
+    <div
+      data-testid="document-adoption-card"
+      className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface"
+    >
+      <header className="border-b border-eos-border-subtle px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+          <div className="min-w-0">
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Urmă bilaterală
             </p>
-            <CardTitle className="mt-1 text-base">
+            <h3
+              data-display-text="true"
+              className="mt-1 font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
               {isDpa ? "Semnarea DPA-ului" : "Adoptarea contractului-cadru"}
-            </CardTitle>
-            <p className="mt-2 text-sm text-eos-text-muted">
+            </h3>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
               {documentTitle} este deja în Dosar. De aici urmărești separat dacă a fost doar revizuit intern, trimis, semnat și pus efectiv în uz.
             </p>
           </div>
@@ -127,39 +132,41 @@ export function DocumentAdoptionCard({
             {adoptionStatus ? DOCUMENT_ADOPTION_LABELS[adoptionStatus] : "urmă nesalvată"}
           </Badge>
         </div>
-      </CardHeader>
+      </header>
 
-      <CardContent className="space-y-4 pt-5">
-        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="space-y-3 px-5 py-4">
+        <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 py-3">
+          <div className="flex flex-wrap items-center gap-1.5">
             {progress.map((step, index) => (
-              <div key={step.id} className="flex items-center gap-2">
+              <div key={step.id} className="flex items-center gap-1.5">
                 <span
                   className={[
-                    "rounded-full border px-2.5 py-1 text-xs font-medium",
+                    "rounded-eos-sm border px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em]",
                     step.state === "done"
                       ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
                       : step.state === "active"
-                        ? "border-eos-primary/30 bg-eos-primary-soft text-eos-primary"
-                        : "border-eos-border bg-eos-surface text-eos-text-tertiary",
+                        ? "border-eos-primary/30 bg-eos-primary/10 text-eos-primary"
+                        : "border-eos-border bg-transparent text-eos-text-tertiary",
                   ].join(" ")}
                 >
                   {step.label}
                 </span>
-                {index < progress.length - 1 ? <div className="h-px w-4 bg-eos-border-subtle" /> : null}
+                {index < progress.length - 1 ? (
+                  <span className="text-[10px] text-white/10">—</span>
+                ) : null}
               </div>
             ))}
           </div>
-          <p className="mt-3 text-sm text-eos-text-muted">{getDocumentAdoptionHint(adoptionStatus)}</p>
+          <p className="mt-3 text-[13px] text-eos-text-muted">{getDocumentAdoptionHint(adoptionStatus)}</p>
           {adoptionUpdatedAtISO ? (
-            <p className="mt-2 text-xs text-eos-text-tertiary">
+            <p className="mt-1.5 font-mono text-[10.5px] text-eos-text-tertiary">
               Ultima actualizare: {new Date(adoptionUpdatedAtISO).toLocaleString("ro-RO")}
             </p>
           ) : null}
         </div>
 
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+        <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 py-3">
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
             Notă pentru semnare / punere în uz
           </p>
           <textarea
@@ -171,7 +178,7 @@ export function DocumentAdoptionCard({
                 ? "Ex: Template-ul a fost revizuit intern și trimis către Mailchimp pentru semnare la 30.03.2026. Urma păstrată: email și ticket procurement."
                 : "Ex: Contractul-cadru a fost validat intern și pus în uz în folderul comercial. Urma păstrată: link intern și data comunicării."
             }
-            className="mt-3 min-h-[112px] w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none"
+            className="mt-2.5 min-h-[96px] w-full rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-2 text-[13px] leading-[1.5] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-border-strong"
           />
         </div>
 
@@ -192,7 +199,7 @@ export function DocumentAdoptionCard({
             </Button>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

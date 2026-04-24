@@ -5,7 +5,6 @@ import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, Maximize2, Plus, 
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import {
@@ -413,7 +412,7 @@ export function GeneratorDrawer({
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8 overflow-y-auto"
           onClick={(e) => { if (e.target === e.currentTarget) setPreviewExpanded(false) }}
         >
-          <div className="relative w-full max-w-3xl rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+          <div className="relative w-full max-w-3xl rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
             {/* Modal header */}
             <div className="flex items-center justify-between gap-4 border-b border-eos-border px-6 py-4">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -447,37 +446,45 @@ export function GeneratorDrawer({
         </div>
       )}
 
-    <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-surface-variant">
-      <CardContent className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+    <div
+      data-testid="finding-generator-drawer"
+      className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04]"
+    >
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+      <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
 
         {/* ── Header: doc type + compact step indicator ─────────────────── */}
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <p className="flex items-center gap-2 text-base font-semibold text-eos-text">
-              <FileText className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
+          <div className="min-w-0 space-y-1">
+            <p className="flex items-center gap-1.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+              <FileText className="size-3 shrink-0" strokeWidth={2} />
               {docTypeLabel}
             </p>
-            <p className="text-sm text-eos-text-muted truncate">{findingTitle}</p>
+            <p
+              data-display-text="true"
+              className="truncate font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              {findingTitle}
+            </p>
           </div>
-          {/* Compact step indicator */}
           <div className="flex shrink-0 flex-col items-end gap-1.5">
             <div className="flex items-center gap-1">
               {drawerSteps.map((step) => (
                 <div
                   key={step.id}
                   className={[
-                    "h-1.5 rounded-full transition-all duration-300",
+                    "h-1 rounded-full transition-all duration-300",
                     step.done
-                      ? "w-5 bg-eos-success"
+                      ? "w-4 bg-eos-success"
                       : step.active
-                        ? "w-6 bg-eos-primary"
-                        : "w-4 bg-eos-border",
+                        ? "w-5 bg-eos-primary"
+                        : "w-3 bg-white/[0.06]",
                   ].join(" ")}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-eos-text-tertiary whitespace-nowrap">
-              Pasul {currentStepNum} din {drawerSteps.length}
+            <p className="font-mono text-[10.5px] text-eos-text-tertiary whitespace-nowrap">
+              Pas {currentStepNum}/{drawerSteps.length}
               {currentStepLabel ? ` · ${currentStepLabel}` : ""}
             </p>
           </div>
@@ -794,8 +801,8 @@ export function GeneratorDrawer({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
     </>
   )
 }

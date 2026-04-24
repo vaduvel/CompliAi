@@ -28,16 +28,19 @@ export function DriftActiveCard({ findings }: Props) {
   if (items.length === 0) return null
 
   return (
-    <div className="overflow-hidden rounded-eos-xl border border-eos-warning/25 bg-eos-surface-variant">
-      <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-eos-warning" strokeWidth={2} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Drift activ</p>
+    <div className="relative overflow-hidden rounded-eos-lg border border-eos-warning/25 bg-eos-surface">
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-warning" aria-hidden />
+      <header className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-2.5">
+        <div className="flex items-center gap-1.5">
+          <AlertTriangle className="size-3 text-eos-warning" strokeWidth={2} />
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Drift activ
+          </p>
         </div>
-        <span className="rounded-full bg-eos-warning/10 px-2 py-0.5 text-[10px] font-semibold text-eos-warning">
-          {flagged.length} în reverificare · {reopened.length} redeschise
+        <span className="rounded-sm border border-eos-warning/25 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-warning">
+          {flagged.length} reverificare · {reopened.length} redeschise
         </span>
-      </div>
+      </header>
 
       <div className="divide-y divide-eos-border-subtle">
         {items.map((finding) => {
@@ -49,27 +52,27 @@ export function DriftActiveCard({ findings }: Props) {
             <Link
               key={finding.id}
               href={`/dashboard/resolve/${encodeURIComponent(finding.id)}`}
-              className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-eos-surface-active"
+              className="group flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-white/[0.02]"
             >
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-eos-warning/10">
+              <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-eos-sm bg-eos-warning-soft text-eos-warning">
                 {statusLabel === "Redeschis" ? (
-                  <RotateCcw className="h-3.5 w-3.5 text-eos-warning" strokeWidth={2} />
+                  <RotateCcw className="size-3" strokeWidth={2} />
                 ) : (
-                  <AlertTriangle className="h-3.5 w-3.5 text-eos-warning" strokeWidth={2} />
+                  <AlertTriangle className="size-3" strokeWidth={2} />
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium text-eos-text">{finding.title}</p>
-                  <span className="rounded bg-eos-warning/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-eos-warning">
+                  <p className="truncate text-[13px] font-semibold text-eos-text">{finding.title}</p>
+                  <span className="rounded-sm border border-eos-warning/25 bg-eos-warning-soft px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-warning">
                     {statusLabel}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-eos-text-tertiary">
+                <p className="mt-1 text-[12px] leading-relaxed text-eos-text-tertiary">
                   {finding.driftTriggerReason ?? "A apărut un semnal nou și cazul cere reverificare."}
                 </p>
               </div>
-              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+              <ChevronRight className="mt-1.5 size-3.5 shrink-0 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
             </Link>
           )
         })}

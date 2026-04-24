@@ -8,13 +8,9 @@ import {
   Clock3,
   ShieldAlert,
   UserRound,
-  TrendingUp,
-  TrendingDown,
   ChevronRight,
   Activity,
   CheckCircle2,
-  AlertTriangle,
-  XCircle,
 } from "lucide-react"
 
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
@@ -22,6 +18,17 @@ import { DriftActiveCard } from "@/components/compliscan/drift-active-card"
 import { Nis2CockpitCard } from "@/components/compliscan/nis2-cockpit-card"
 import { RiskTrajectoryWidget } from "@/components/compliscan/risk-trajectory-widget"
 import { ErrorScreen } from "@/components/compliscan/route-sections"
+import {
+  V3FindingRow,
+  V3FrameworkTag,
+  V3KpiStrip,
+  V3PageHero,
+  V3Panel,
+  V3RiskPill,
+  type V3KpiItem,
+  type V3KpiTone,
+  type V3SeverityTone,
+} from "@/components/compliscan/v3"
 import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
@@ -125,11 +132,11 @@ export default function DashboardPage() {
         <SkeletonMetric />
         <SkeletonMetric />
       </div>
-      <Skeleton className="h-32 w-full rounded-eos-xl" />
+      <Skeleton className="h-32 w-full rounded-eos-lg" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-24 rounded-eos-xl" />
-        <Skeleton className="h-24 rounded-eos-xl" />
-        <Skeleton className="h-24 rounded-eos-xl" />
+        <Skeleton className="h-24 rounded-eos-lg" />
+        <Skeleton className="h-24 rounded-eos-lg" />
+        <Skeleton className="h-24 rounded-eos-lg" />
       </div>
     </div>
   )
@@ -215,7 +222,7 @@ export default function DashboardPage() {
   if (!state.orgProfile) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-primary-soft">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-primary-soft">
           <ShieldAlert className="h-6 w-6 text-eos-primary" strokeWidth={1.5} />
         </div>
         <h2 className="text-xl font-semibold text-eos-text">Completează profilul firmei</h2>
@@ -233,131 +240,110 @@ export default function DashboardPage() {
   }
 
   const score = data.summary.score
-  const circumference = 2 * Math.PI * 38
-  const strokeDash = (score / 100) * circumference
+
+  const readinessStripe: V3KpiTone | undefined =
+    score >= 80 ? "info" : score >= 60 ? "warning" : "critical"
+  const readinessValueTone: V3KpiTone =
+    score >= 80 ? "info" : score >= 60 ? "warning" : "critical"
+  const readinessLabel = score >= 80 ? "Stabil" : score >= 60 ? "În progres" : "Risc ridicat"
+  const scoreTrend =
+    scoreDelta !== null && scoreDelta !== 0 ? `${scoreDelta > 0 ? "+" : ""}${scoreDelta}p` : null
+  const scoreTrendDirection: "up" | "down" | "flat" | undefined =
+    scoreDelta === null || scoreDelta === 0 ? "flat" : scoreDelta > 0 ? "down" : "up"
+
+  const kpiItems: V3KpiItem[] = [
+    {
+      id: "readiness",
+      label: "Readiness",
+      value: score,
+      valueUnit: "%",
+      stripe: readinessStripe,
+      valueTone: readinessValueTone,
+      detail: readinessLabel,
+      trend: scoreTrend ?? undefined,
+      trendDirection: scoreTrendDirection,
+    },
+    {
+      id: "cazuri",
+      label: "Cazuri active",
+      value: activeFindings.length,
+      stripe: activeFindings.length > 0 ? "critical" : undefined,
+      valueTone: activeFindings.length > 0 ? "critical" : "neutral",
+      detail: activeFindings.length === 0
+        ? "Nicio problemă activă"
+        : activeFindings.length === 1
+          ? "1 caz deschis"
+          : `${activeFindings.length} cazuri deschise`,
+    },
+    {
+      id: "drift",
+      label: "Modificări detectate",
+      value: activeDrifts.length,
+      stripe: activeDrifts.length > 0 ? "warning" : undefined,
+      valueTone: activeDrifts.length > 0 ? "warning" : "neutral",
+      detail: activeDrifts.length === 0 ? "Control stabil" : "schimbări detectate",
+    },
+    {
+      id: "audit",
+      label: "Audit dosar",
+      value: auditStatusLabel,
+      stripe:
+        auditStatusLabel === "Pregătit"
+          ? "success"
+          : auditStatusLabel === "Blocat"
+            ? "critical"
+            : undefined,
+      valueTone:
+        auditStatusLabel === "Pregătit"
+          ? "success"
+          : auditStatusLabel === "Blocat"
+            ? "critical"
+            : "warning",
+      detail: missingEvidenceCount > 0 ? `${missingEvidenceCount} dovezi lipsă` : "dosar complet",
+    },
+    {
+      id: "aplicabil",
+      label: "Se aplică",
+      value: frameworkItems.length || applicableEntries.length,
+      stripe: "info",
+      detail: applicabilitySummary,
+    },
+  ]
 
   return (
-    <div className="space-y-6 pb-20 sm:pb-0" role="main">
+    <div className="space-y-5 pb-20 sm:pb-0" role="main">
 
-      {/* ── Context strip — info, no card ────────────────────────────────── */}
-      <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
-        <div className="sm:flex-1 sm:pr-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
-          <p className="mt-0.5 text-sm text-eos-text">{applicabilitySummary}</p>
-        </div>
-        <div className="sm:flex-1 sm:px-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Dovezi lipsă</p>
-          <p className="mt-0.5 text-sm text-eos-text">
-            {missingEvidenceCount === 0 ? "Toate task-urile au dovadă" : `${missingEvidenceCount} task${missingEvidenceCount === 1 ? "" : "-uri"} fără dovadă`}
-          </p>
-        </div>
-        <div className="sm:flex-1 sm:pl-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
-          <p className="mt-0.5 text-sm text-eos-text">{nextActionSummary}</p>
-        </div>
-      </div>
+      {/* ── V3 hero ─────────────────────────────────────────────────────── */}
+      <V3PageHero
+        breadcrumbs={[{ label: "Firma mea" }, { label: "Acasă", current: true }]}
+        title={data.workspace?.orgName ?? "Tablou de bord"}
+        description={
+          <>
+            Vezi ce se aplică, ce e în lucru și ce trebuie să faci acum. {" "}
+            <strong className="text-eos-text">{nextActionSummary}</strong>
+          </>
+        }
+        actions={
+          <>
+            <Link
+              href={dashboardRoutes.scan}
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 text-[12.5px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+            >
+              Scanare
+            </Link>
+            <Link
+              href={nextBestActionHref}
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm bg-eos-primary px-3.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-primary-hover"
+            >
+              Deschide cockpit
+              <ArrowRight className="size-3.5" strokeWidth={2.5} />
+            </Link>
+          </>
+        }
+      />
 
-      {/* ── KPI row — 4 differentiated cards ─────────────────────────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
-        {/* Readiness — top accent bar + ring */}
-        <div className={`relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 ${
-          score >= 80 ? "border-eos-border" : score >= 60 ? "border-eos-warning/20" : "border-eos-error/20"
-        }`}>
-          <div className={`absolute inset-x-0 top-0 h-[3px] ${
-            score >= 80 ? "bg-eos-primary" : score >= 60 ? "bg-eos-warning" : "bg-eos-error"
-          }`} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Readiness</p>
-          <div className="mt-3 flex items-center gap-4">
-            <div className="relative h-[72px] w-[72px] shrink-0">
-              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-                <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" strokeLinecap="round" />
-                <circle
-                  cx="50" cy="50" r="38" fill="none"
-                  stroke={score >= 80 ? "#3b82f6" : score >= 60 ? "#f59e0b" : "#ef4444"}
-                  strokeWidth="10" strokeLinecap="round"
-                  strokeDasharray={`${strokeDash} ${circumference}`}
-                  className="transition-all duration-700"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-semibold tabular-nums leading-none text-eos-text">{score}</span>
-                <span className="text-[9px] font-medium tracking-widest text-eos-text-tertiary">%</span>
-              </div>
-            </div>
-            <div>
-              <p className={`text-base font-semibold ${score >= 80 ? "text-eos-text" : score >= 60 ? "text-eos-warning" : "text-eos-error"}`}>
-                {score >= 80 ? "Stabil" : score >= 60 ? "În progres" : "Risc ridicat"}
-              </p>
-              {scoreDelta !== null && scoreDelta !== 0 && (
-                <div className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${scoreDelta > 0 ? "text-eos-success" : "text-eos-error"}`}>
-                  {scoreDelta > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {scoreDelta > 0 ? "+" : ""}{scoreDelta}p vs anterior
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Cazuri active — left accent border when issues */}
-        <Link href={dashboardRoutes.resolve} className={`group relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
-          activeFindings.length > 0 ? "border-eos-error/25" : "border-eos-border"
-        }`}>
-          {activeFindings.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-error" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
-          <div className="mt-3 flex items-end justify-between">
-            <span className={`text-4xl font-semibold tabular-nums leading-none ${activeFindings.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
-              {activeFindings.length}
-            </span>
-            {activeFindings.length > 0 && (
-              <ChevronRight className="mb-1 h-4 w-4 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
-            )}
-          </div>
-          <p className="mt-2 text-[11px] text-eos-text-tertiary">
-            {activeFindings.length === 0 ? "Nicio problemă activă" : activeFindings.length === 1 ? "caz deschis" : "cazuri deschise"}
-          </p>
-        </Link>
-
-        {/* Drift activ — left accent border when drift */}
-        <Link href={dashboardRoutes.drifts} className={`group relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
-          activeDrifts.length > 0 ? "border-eos-warning/25" : "border-eos-border"
-        }`}>
-          {activeDrifts.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-warning" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Modificări detectate</p>
-          <div className="mt-3 flex items-end justify-between">
-            <span className={`text-4xl font-semibold tabular-nums leading-none ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
-              {activeDrifts.length}
-            </span>
-            {activeDrifts.length > 0 && (
-              <ChevronRight className="mb-1 h-4 w-4 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
-            )}
-          </div>
-          <p className="mt-2 text-[11px] text-eos-text-tertiary">
-            {activeDrifts.length === 0 ? "Control stabil" : "schimbări detectate"}
-          </p>
-        </Link>
-
-        {/* Audit — left accent border by status */}
-        <div className={`relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 ${
-          auditStatusLabel === "Pregătit" ? "border-eos-success/25" :
-          auditStatusLabel === "Blocat" ? "border-eos-error/25" : "border-eos-border"
-        }`}>
-          {auditStatusLabel === "Blocat" && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-error" />}
-          {auditStatusLabel === "Pregătit" && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-success" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Audit dosar</p>
-          <div className="mt-3">
-            <span className={`text-2xl font-semibold leading-none ${
-              auditStatusLabel === "Pregătit" ? "text-eos-success" :
-              auditStatusLabel === "Blocat" ? "text-eos-error" : "text-eos-warning"
-            }`}>
-              {auditStatusLabel}
-            </span>
-          </div>
-          <p className="mt-2 text-[11px] text-eos-text-tertiary">
-            {missingEvidenceCount > 0 ? `${missingEvidenceCount} dovezi lipsă` : "dosar complet"}
-          </p>
-        </div>
-      </div>
+      {/* ── KPI strip — V3 ──────────────────────────────────────────────── */}
+      <V3KpiStrip items={kpiItems} />
 
       {/* ── Ce faci acum ─────────────────────────────────────────────────── */}
       <CompactNextAction
@@ -371,163 +357,191 @@ export default function DashboardPage() {
       <Nis2CockpitCard />
       <DriftActiveCard findings={state.findings} />
 
-      {/* ── Framework-uri + Cazuri active — 2 col, collapsible on mobile ── */}
-      <details className="group/details md:open" open>
-        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-3.5 transition-transform group-open/details:rotate-90" strokeWidth={2.5} />
-          Detalii framework-uri și cazuri
-        </summary>
+      {/* ── Framework-uri + Cazuri active — V3 panels ────────────────────── */}
       <div className="grid gap-4 xl:grid-cols-2">
 
-        {/* Framework-uri — cu mini progress bars (Drata pattern) */}
+        {/* Framework-uri aplicabile */}
         {frameworkItems.length > 0 && (
-          <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
-            <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Framework-uri aplicabile</p>
-              <span className="text-[10px] tabular-nums text-eos-text-tertiary">
+          <V3Panel
+            eyebrow="Framework-uri aplicabile"
+            padding="none"
+            action={
+              <span className="font-mono text-[10px] font-medium tabular-nums text-eos-text-tertiary">
                 {frameworkItems.filter((f) => f.status === "ok").length}/{frameworkItems.length} ok
               </span>
-            </div>
+            }
+          >
+            <div className="px-4 pb-3 pt-2" />
             <div className="divide-y divide-eos-border-subtle">
               {frameworkItems.map((fw) => {
                 const barColor = fw.status === "ok" ? "bg-eos-success" : fw.status === "warning" ? "bg-eos-warning" : "bg-eos-error"
                 const barWidth = fw.status === "ok" ? "100%" : fw.status === "warning" ? "55%" : "22%"
+                const tone: V3SeverityTone = fw.status === "ok" ? "ok" : fw.status === "warning" ? "high" : "critical"
                 return (
-                  <div key={fw.tag} className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      {fw.status === "ok" ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" strokeWidth={2.5} />
-                      ) : fw.status === "warning" ? (
-                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-eos-warning" strokeWidth={2.5} />
-                      ) : (
-                        <XCircle className="h-3.5 w-3.5 shrink-0 text-eos-error" strokeWidth={2.5} />
-                      )}
-                      <span className="flex-1 text-sm font-medium text-eos-text">{fw.label}</span>
-                      <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${
-                        fw.status === "ok" ? "bg-eos-success/10 text-eos-success" :
-                        fw.status === "warning" ? "bg-eos-warning/10 text-eos-warning" :
-                        "bg-eos-error/10 text-eos-error"
-                      }`}>
-                        {fw.status === "ok" ? "Activ" : fw.count === 1 ? "1 finding" : `${fw.count} findings`}
-                      </span>
+                  <div key={fw.tag} className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`size-1.5 shrink-0 rounded-full ${barColor}`} aria-hidden />
+                      <span className="flex-1 text-[13px] font-medium text-eos-text">{fw.label}</span>
+                      <V3FrameworkTag
+                        label={fw.status === "ok" ? "Activ" : fw.count === 1 ? "1 finding" : `${fw.count} findings`}
+                        tone={tone}
+                      />
                     </div>
-                    <div className="mt-2.5 h-[3px] w-full overflow-hidden rounded-full bg-eos-border-subtle">
-                      <div className={`h-full rounded-full transition-all duration-700 ${barColor} opacity-60`} style={{ width: barWidth }} />
+                    <div className="mt-2 h-[2px] w-full overflow-hidden rounded-full bg-white/[0.04]">
+                      <div className={`h-full rounded-full transition-all duration-700 ${barColor} opacity-70`} style={{ width: barWidth }} />
                     </div>
                   </div>
                 )
               })}
             </div>
-          </div>
+          </V3Panel>
         )}
 
-        {/* Cazuri active — border-l per severity row */}
-        <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
-          <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
-              {activeFindings.length > 0 && (
-                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-eos-error px-1 text-[9px] font-bold text-white">
-                  {activeFindings.length}
-                </span>
-              )}
-            </div>
-            <Link href={dashboardRoutes.resolve} className="flex items-center gap-1 text-[10px] font-medium text-eos-primary transition-colors hover:text-eos-text">
-              De rezolvat <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
+        {/* Cazuri active */}
+        <V3Panel
+          eyebrow={`Cazuri active${activeFindings.length > 0 ? ` · ${activeFindings.length}` : ""}`}
+          padding="none"
+          action={
+            <Link
+              href={dashboardRoutes.resolve}
+              className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-primary transition-colors hover:text-eos-text"
+            >
+              De rezolvat
+              <ChevronRight className="size-3" strokeWidth={2.5} />
             </Link>
-          </div>
+          }
+        >
+          <div className="px-4 pb-3 pt-2" />
           {topFindings.length > 0 ? (
-            <div className="divide-y divide-eos-border-subtle">
+            <div className="space-y-2 px-3 pb-3">
               {topFindings.map((f) => {
-                const isHigh = f.severity === "critical" || f.severity === "high"
-                const isMed = f.severity === "medium"
-                const leftBorder = isHigh ? "border-l-eos-error" : isMed ? "border-l-eos-warning" : "border-l-eos-border-subtle"
-                const sevLabel = f.severity === "critical" ? "Critic" : f.severity === "high" ? "Ridicat" : f.severity === "medium" ? "Mediu" : "Scăzut"
-                const sevColor = isHigh ? "text-eos-error" : isMed ? "text-eos-warning" : "text-eos-text-tertiary"
-                const catLabel = f.category === "GDPR" ? "GDPR" : f.category === "NIS2" ? "NIS2" : f.category === "EU_AI_ACT" ? "AI Act" : f.category === "E_FACTURA" ? "e-Factura" : f.category
+                const tone: V3SeverityTone =
+                  f.severity === "critical"
+                    ? "critical"
+                    : f.severity === "high"
+                      ? "high"
+                      : f.severity === "medium"
+                        ? "medium"
+                        : "low"
+                const sevLabel =
+                  f.severity === "critical"
+                    ? "Critic"
+                    : f.severity === "high"
+                      ? "Ridicat"
+                      : f.severity === "medium"
+                        ? "Mediu"
+                        : "Scăzut"
+                const catLabel =
+                  f.category === "GDPR"
+                    ? "GDPR"
+                    : f.category === "NIS2"
+                      ? "NIS2"
+                      : f.category === "EU_AI_ACT"
+                        ? "AI Act"
+                        : f.category === "E_FACTURA"
+                          ? "e-Factura"
+                          : f.category
                 return (
-                  <Link
+                  <V3FindingRow
                     key={f.id}
                     href={dashboardFindingRoute(f.id)}
-                    className={`flex items-center gap-3 border-l-[3px] py-3 pl-4 pr-5 transition-colors hover:bg-eos-surface-active ${leftBorder}`}
-                  >
-                    <span className="flex-1 truncate text-sm text-eos-text">{f.title}</span>
-                    <span className="shrink-0 rounded bg-eos-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-eos-text-tertiary">
-                      {catLabel}
-                    </span>
-                    <span className={`shrink-0 text-[11px] font-semibold ${sevColor}`}>{sevLabel}</span>
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-                  </Link>
+                    severity={tone}
+                    title={f.title}
+                    badges={
+                      <>
+                        <V3RiskPill tone={tone}>{sevLabel}</V3RiskPill>
+                        <V3FrameworkTag label={catLabel} tone="neutral" />
+                      </>
+                    }
+                    ctaLabel="Deschide"
+                  />
                 )
               })}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 px-5 py-8">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-eos-success/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-eos-success-soft">
                 <CheckCircle2 className="h-5 w-5 text-eos-success" strokeWidth={1.5} />
               </div>
-              <p className="text-sm text-eos-text-tertiary">
+              <p className="text-[13px] text-eos-text-tertiary">
                 {hasBaselineEvidence ? "Niciun caz activ." : "Scanează primul document."}
               </p>
               {!hasBaselineEvidence && (
-                <Link href={dashboardRoutes.scan} className="flex items-center gap-1 text-xs font-medium text-eos-primary hover:underline">
-                  Mergi la Scanare <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
+                <Link
+                  href={dashboardRoutes.scan}
+                  className="flex items-center gap-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-primary hover:underline"
+                >
+                  Mergi la Scanare
+                  <ChevronRight className="size-3" strokeWidth={2.5} />
                 </Link>
               )}
             </div>
           )}
-        </div>
+        </V3Panel>
       </div>
-      </details>
 
-      {/* ── Activitate recentă — pill badges per tip, collapsible mobile ── */}
-      <details className="group/activity md:open" open>
-        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-3.5 transition-transform group-open/activity:rotate-90" strokeWidth={2.5} />
-          Activitate recentă
-        </summary>
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
-        <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-          <div className="flex items-center gap-2">
-            <Activity className="h-3.5 w-3.5 text-eos-text-tertiary" strokeWidth={2} />
-            <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Activitate recentă</p>
-          </div>
-          <Link href={dashboardRoutes.auditLog} className="flex items-center gap-1 text-[10px] font-medium text-eos-primary transition-colors hover:text-eos-text">
-            Jurnal audit <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
+      {/* ── Activitate recentă — V3 panel ────────────────────────────────── */}
+      <V3Panel
+        eyebrow={
+          <span className="inline-flex items-center gap-1.5">
+            <Activity className="size-3" strokeWidth={2} />
+            Activitate recentă
+          </span>
+        }
+        padding="none"
+        action={
+          <Link
+            href={dashboardRoutes.auditLog}
+            className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-primary transition-colors hover:text-eos-text"
+          >
+            Jurnal audit
+            <ChevronRight className="size-3" strokeWidth={2.5} />
           </Link>
-        </div>
+        }
+      >
+        <div className="px-4 pb-2 pt-2" />
         {activityFeedItems.length === 0 ? (
-          <p className="px-5 py-6 text-center text-sm text-eos-text-tertiary">
+          <p className="px-5 py-6 text-center text-[13px] text-eos-text-tertiary">
             Monitorizarea e activă. Primele verificări vor apărea aici.
           </p>
         ) : (
           <div className="divide-y divide-eos-border-subtle">
             {activityFeedItems.map((item) => {
-              const dotColor = item.tone === "success" ? "bg-eos-success" : item.tone === "warning" ? "bg-eos-warning" : "bg-eos-primary"
-              const badgeStyle = item.tone === "success" ? "bg-eos-success/10 text-eos-success" : item.tone === "warning" ? "bg-eos-warning/10 text-eos-warning" : "bg-eos-primary/10 text-eos-primary"
+              const dotColor =
+                item.tone === "success"
+                  ? "bg-eos-success"
+                  : item.tone === "warning"
+                    ? "bg-eos-warning"
+                    : "bg-eos-primary"
+              const badgeTone: V3SeverityTone =
+                item.tone === "success" ? "ok" : item.tone === "warning" ? "high" : "info"
               const body = (
-                <div className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-eos-surface-active">
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
-                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] ${badgeStyle}`}>
-                    {item.eyebrow}
-                  </span>
-                  <span className="flex-1 truncate text-sm text-eos-text">{item.title}</span>
-                  <span className="shrink-0 text-[11px] tabular-nums text-eos-text-tertiary">
+                <div className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-white/[0.02]">
+                  <span className={`size-1.5 shrink-0 rounded-full ${dotColor}`} aria-hidden />
+                  <V3FrameworkTag label={item.eyebrow} tone={badgeTone} />
+                  <span className="flex-1 truncate text-[13px] text-eos-text">{item.title}</span>
+                  <span className="shrink-0 font-mono text-[10.5px] tabular-nums text-eos-text-tertiary">
                     {formatDashboardFeedDateTime(item.dateISO)}
                   </span>
-                  {item.href && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />}
+                  {item.href && (
+                    <ChevronRight
+                      className="size-3 shrink-0 text-eos-text-tertiary"
+                      strokeWidth={2}
+                    />
+                  )}
                 </div>
               )
               return item.href ? (
-                <Link key={item.id} href={item.href} className="block">{body}</Link>
+                <Link key={item.id} href={item.href} className="block">
+                  {body}
+                </Link>
               ) : (
                 <div key={item.id}>{body}</div>
               )
             })}
           </div>
         )}
-      </div>
-      </details>
+      </V3Panel>
 
       {/* ── Valoare acumulată ─────────────────────────────────────────────── */}
       <section
@@ -564,63 +578,100 @@ function CompactNextAction({
         : "Revizuiește alertele și închide riscul cu cel mai mare impact."
 
     const ctaHref = !hasEvidence ? dashboardRoutes.scan : activeRiskCount > 0 ? dashboardRoutes.drifts : null
+    const ctaLabel = !hasEvidence ? "Scanare" : "Alerte"
 
     return (
-      <div className="flex items-center gap-4 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-eos-lg bg-eos-surface-active">
-          <CheckCircle2 className="h-4 w-4 text-eos-success" strokeWidth={2} />
+      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <span className="absolute left-0 top-3 bottom-3 w-[2px] rounded-r-sm bg-eos-success" aria-hidden />
+        <div className="flex items-center gap-3 py-3 pl-5 pr-3 md:pr-4">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-eos-sm bg-eos-success-soft text-eos-success">
+            <CheckCircle2 className="size-3.5" strokeWidth={2} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Ce faci acum
+            </p>
+            <p className="mt-0.5 text-[13px] text-eos-text-muted">{msg}</p>
+          </div>
+          {ctaHref && (
+            <Link
+              href={ctaHref}
+              className="inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+            >
+              {ctaLabel}
+              <ArrowRight className="size-3.5" strokeWidth={2} />
+            </Link>
+          )}
         </div>
-        <div className="flex-1">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
-          <p className="mt-0.5 text-sm text-eos-text-muted">{msg}</p>
-        </div>
-        {ctaHref && (
-          <Link href={ctaHref} className="shrink-0 flex items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-active px-4 py-2 text-xs font-semibold text-eos-text-muted transition-all hover:bg-eos-surface-elevated hover:text-eos-text">
-            {!hasEvidence ? "Scanare" : "Alerte"} <ArrowRight className="size-4" strokeWidth={2} />
-          </Link>
-        )}
       </div>
     )
   }
 
-  const prioColor =
-    task.priority === "P1" ? "bg-eos-error-soft text-eos-error border-eos-error/50/25" :
-    task.priority === "P2" ? "bg-eos-warning-soft text-eos-warning border-eos-warning/50/25" :
-    "bg-eos-surface-active text-eos-text-tertiary border-eos-border-subtle"
+  const prioTone: V3SeverityTone =
+    task.priority === "P1" ? "critical" : task.priority === "P2" ? "high" : "neutral" as V3SeverityTone
+
+  const sevTone: V3SeverityTone =
+    task.severity === "critical"
+      ? "critical"
+      : task.severity === "high"
+        ? "high"
+        : task.severity === "medium"
+          ? "medium"
+          : "low"
 
   const sevLabel =
-    task.severity === "critical" ? "Critic" :
-    task.severity === "high" ? "Ridicat" :
-    task.severity === "medium" ? "Mediu" : "Scăzut"
-
-  const sevColor =
-    task.severity === "critical" || task.severity === "high" ? "text-eos-error" :
-    task.severity === "medium" ? "text-eos-warning" : "text-eos-text-tertiary"
+    task.severity === "critical"
+      ? "Critic"
+      : task.severity === "high"
+        ? "Ridicat"
+        : task.severity === "medium"
+          ? "Mediu"
+          : "Scăzut"
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
-      <div className="flex items-center gap-3 border-b border-eos-primary/[0.10] px-5 py-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
-        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${prioColor}`}>{task.priority}</span>
-        <span className={`text-[11px] font-semibold ${sevColor}`}>{sevLabel}</span>
-        <div className="ml-auto flex items-center gap-3 text-[11px] text-eos-text-tertiary">
-          <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" />{task.effortLabel}</span>
-          <span className="hidden sm:flex items-center gap-1"><UserRound className="h-3 w-3" />{task.owner}</span>
-          <span className="hidden md:flex items-center gap-1"><ShieldAlert className="h-3 w-3" />{task.lawReference}</span>
+    <div className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04] shadow-[0_0_32px_rgba(59,130,246,0.05)]">
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+      <div className="flex flex-wrap items-center gap-2 border-b border-eos-primary/10 px-5 py-2.5">
+        <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Ce faci acum
+        </p>
+        <V3FrameworkTag label={task.priority} tone={prioTone as Exclude<V3SeverityTone, "ok">} />
+        <V3RiskPill tone={sevTone}>{sevLabel}</V3RiskPill>
+        <div className="ml-auto flex items-center gap-3 font-mono text-[10.5px] text-eos-text-tertiary">
+          <span className="flex items-center gap-1">
+            <Clock3 className="size-3" strokeWidth={2} />
+            {task.effortLabel}
+          </span>
+          <span className="hidden items-center gap-1 sm:flex">
+            <UserRound className="size-3" strokeWidth={2} />
+            {task.owner}
+          </span>
+          <span className="hidden items-center gap-1 md:flex">
+            <ShieldAlert className="size-3" strokeWidth={2} />
+            {task.lawReference}
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-4 px-5 py-4">
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-eos-text [overflow-wrap:anywhere]">{task.title}</p>
+      <div className="flex items-center gap-4 px-5 py-3.5">
+        <div className="min-w-0 flex-1">
+          <p
+            data-display-text="true"
+            className="font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text [overflow-wrap:anywhere]"
+          >
+            {task.title}
+          </p>
           {task.fixPreview && task.fixPreview.toLowerCase().trim() !== task.summary.toLowerCase().trim() && (
-            <p className="mt-1 text-sm text-eos-text-tertiary [overflow-wrap:anywhere]">{task.fixPreview}</p>
+            <p className="mt-1 text-[12.5px] leading-[1.5] text-eos-text-tertiary [overflow-wrap:anywhere]">
+              {task.fixPreview}
+            </p>
           )}
         </div>
         <button
           onClick={onResolve}
-          className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
+          className="inline-flex h-[34px] shrink-0 items-center gap-1.5 rounded-eos-sm bg-eos-primary px-3.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-primary-hover"
         >
-          Deschide cazul <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Deschide cockpit
+          <ArrowRight className="size-3.5" strokeWidth={2.5} />
         </button>
       </div>
     </div>

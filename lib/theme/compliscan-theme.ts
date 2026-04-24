@@ -7,8 +7,8 @@ export const compliScanTheme = {
   fonts: {
     sans: 'var(--font-sans-custom, "Inter", ui-sans-serif, system-ui, sans-serif)',
     display:
-      'var(--font-display-custom, "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif)',
-    mono: 'var(--font-mono-custom, "JetBrains Mono", ui-monospace, monospace)',
+      'var(--font-display-custom, "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif)',
+    mono: 'var(--font-mono-custom, "IBM Plex Mono", ui-monospace, monospace)',
   },
   bg: {
     canvas: "var(--eos-surface-base)",

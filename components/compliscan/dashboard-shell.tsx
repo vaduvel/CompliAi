@@ -168,7 +168,7 @@ export function DashboardShell({
       <div className="mx-auto flex max-w-[1680px]">
 
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-        <aside className="sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-eos-border bg-eos-surface md:flex">
+        <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col border-r border-eos-border-subtle bg-eos-surface md:flex">
 
           {/* Logo + Bell */}
           <div className="flex items-center justify-between gap-2 border-b border-eos-border px-4 py-4">
@@ -200,7 +200,7 @@ export function DashboardShell({
             {navSections.map((section, sectionIdx) => (
               <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
                 {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  <p className="mb-1.5 px-2.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-eos-text-tertiary">
                     {section.label}
                   </p>
                 ) : null}
@@ -222,10 +222,10 @@ export function DashboardShell({
                           if (handleNavItemSelection(item)) e.preventDefault()
                         }}
                         className={[
-                          "group flex w-full items-center gap-3 rounded-eos-lg px-3 py-2.5 text-sm transition-all duration-150",
+                          "group flex w-full items-center gap-2.5 rounded-eos-sm px-2.5 py-1.5 text-[12.5px] transition-all duration-100",
                           active
-                            ? "bg-eos-primary-soft font-semibold text-eos-text shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
-                            : "font-medium text-eos-text-tertiary hover:bg-eos-surface-elevated hover:text-eos-text",
+                            ? "bg-white/[0.035] font-semibold text-eos-text"
+                            : "font-medium text-eos-text-tertiary hover:bg-white/[0.025] hover:text-eos-text-muted",
                         ].join(" ")}
                       >
                         <item.icon
