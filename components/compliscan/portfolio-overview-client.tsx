@@ -263,7 +263,7 @@ function ClientRow({
         <button
           type="button"
           onClick={() => onDrillDown(client.orgId)}
-          className="rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
+          className="rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
         >
           Intră în firmă
         </button>
@@ -271,7 +271,7 @@ function ClientRow({
           href={`/trust/${client.orgId}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text-muted"
+          className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text-muted"
           title="Trust Profile"
         >
           <ExternalLink className="size-3.5" strokeWidth={2} />
@@ -282,7 +282,7 @@ function ClientRow({
               type="button"
               disabled={deleting}
               onClick={handleDelete}
-              className="rounded-eos-md border border-eos-error/40 bg-eos-error-soft px-2 py-1.5 text-xs font-medium text-eos-error transition-all hover:bg-eos-error hover:text-white disabled:opacity-50"
+              className="rounded-eos-sm border border-eos-error/40 bg-eos-error-soft px-2 py-1.5 text-xs font-medium text-eos-error transition-all hover:bg-eos-error hover:text-white disabled:opacity-50"
             >
               {deleting ? <Loader2 className="size-3 animate-spin" /> : "Confirmi?"}
             </button>
@@ -298,7 +298,7 @@ function ClientRow({
           <button
             type="button"
             onClick={() => setDeleteConfirm(true)}
-            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-error/40 hover:bg-eos-error-soft hover:text-eos-error"
+            className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-error/40 hover:bg-eos-error-soft hover:text-eos-error"
             title="Elimină firma din portofoliu"
           >
             <Trash2 className="size-3.5" strokeWidth={2} />
@@ -340,7 +340,7 @@ function BatchToolbar({
             type="button"
             disabled={loading}
             onClick={() => onAction(type)}
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
           >
             {loading ? <Loader2 className="size-3 animate-spin" /> : <Zap className="size-3" />}
             {label}
@@ -485,7 +485,7 @@ function BatchResultsModal({
                 )}
 
                 {r.nextStep && (
-                  <div className="mt-3 rounded-eos-md border border-eos-border/70 bg-eos-surface/70 px-3 py-2 text-xs text-eos-text-muted">
+                  <div className="mt-3 rounded-eos-sm border border-eos-border/70 bg-eos-surface/70 px-3 py-2 text-xs text-eos-text-muted">
                     <span className="font-medium text-eos-text">Ce urmează:</span> {r.nextStep}
                   </div>
                 )}
@@ -496,7 +496,7 @@ function BatchResultsModal({
 
         <button
           onClick={onClose}
-          className="mt-4 w-full rounded-eos-md border border-eos-border bg-eos-surface-active py-2 text-sm font-medium text-eos-text-muted hover:text-eos-text"
+          className="mt-4 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active py-2 text-sm font-medium text-eos-text-muted hover:text-eos-text"
         >
           Închide
         </button>

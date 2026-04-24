@@ -255,7 +255,7 @@ export function ClientContextPanel({
               type="button"
               onClick={() => void handleOpenFinding(focusedFindingId)}
               disabled={enteringWorkspace}
-              className="flex shrink-0 items-center justify-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+              className="flex shrink-0 items-center justify-center gap-1.5 rounded-eos-sm bg-eos-primary px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
             >
               {enteringWorkspace ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
               Deschide finding-ul în cockpit
@@ -278,7 +278,7 @@ export function ClientContextPanel({
           <button
             type="button"
             onClick={() => void loadContext()}
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
           >
             <RefreshCw className="size-3.5" />
             Reîncarcă
@@ -289,7 +289,7 @@ export function ClientContextPanel({
               type="button"
               onClick={() => void handleOpenFinding(priorityFinding.id)}
               disabled={enteringWorkspace}
-              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+              className="flex items-center gap-1.5 rounded-eos-sm bg-eos-primary px-4 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
             >
               {enteringWorkspace ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
               Deschide cazul prioritar
@@ -300,7 +300,7 @@ export function ClientContextPanel({
             href={`/trust/${orgId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
           >
             <ExternalLink className="size-3.5" />
             Trust Profile
@@ -314,7 +314,7 @@ export function ClientContextPanel({
                 : void handleEnterWorkspace()
             }
             disabled={enteringWorkspace}
-            className={`flex items-center gap-1.5 rounded-eos-md px-4 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
+            className={`flex items-center gap-1.5 rounded-eos-sm px-4 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
               focusedFindingId
                 ? "border border-eos-primary/30 bg-eos-primary text-white hover:opacity-90"
                 : "border border-eos-border bg-eos-surface-active text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text"
@@ -389,7 +389,7 @@ export function ClientContextPanel({
                   type="button"
                   onClick={() => void handleOpenFinding(f.id)}
                   disabled={enteringWorkspace}
-                  className="block w-full space-y-1 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-3 py-2 text-left transition-all hover:border-eos-primary/30 hover:bg-eos-primary/[0.04] disabled:opacity-60"
+                  className="block w-full space-y-1 rounded-eos-sm border border-eos-border-subtle bg-eos-surface-variant px-3 py-2 text-left transition-all hover:border-eos-primary/30 hover:bg-eos-primary/[0.04] disabled:opacity-60"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-xs font-medium leading-snug text-eos-text">{f.title}</p>
@@ -514,7 +514,7 @@ export function ClientContextPanel({
               type="button"
               disabled={batchLoading}
               onClick={() => void handleQuickAction(type)}
-              className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
             >
               {batchLoading ? <Loader2 className="size-3 animate-spin" /> : <FileText className="size-3" />}
               {label}
@@ -523,7 +523,7 @@ export function ClientContextPanel({
 
           <Link
             href="/dashboard/approvals"
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
           >
             <CheckCircle2 className="size-3" />
             Coada de aprobare

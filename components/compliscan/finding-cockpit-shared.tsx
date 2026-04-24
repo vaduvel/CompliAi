@@ -3,9 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, CheckCircle2, FolderKanban, ShieldCheck } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import { V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3"
 import type { ScanFinding } from "@/lib/compliance/types"
 import { DOCUMENT_ADOPTION_LABELS, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
 import {
@@ -87,6 +85,23 @@ function getRecipeBadgePresentation(
     default:
       return { label: recipe.collapsedStatusLabel, variant: "outline" }
   }
+}
+
+function v3ToneFromBadgeVariant(
+  variant: ReturnType<typeof getRecipeBadgePresentation>["variant"]
+): V3SeverityTone {
+  if (variant === "success") return "ok"
+  if (variant === "warning") return "high"
+  if (variant === "destructive") return "critical"
+  if (variant === "default") return "info"
+  return "low"
+}
+
+function v3ToneFromFindingSeverity(severity: ScanFinding["severity"]): V3SeverityTone {
+  if (severity === "critical") return "critical"
+  if (severity === "high") return "high"
+  if (severity === "medium") return "medium"
+  return "low"
 }
 
 function getRecipeMainStepLabel(recipe: CockpitRecipe) {
@@ -234,22 +249,29 @@ export function FindingNarrativeCard({
   )
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <CardTitle className="text-base">{title}</CardTitle>
+            <h3
+              data-display-text="true"
+              className="font-display text-base font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              {title}
+            </h3>
             <p className="max-w-2xl text-sm text-eos-text-muted">{description}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
-            <Badge variant={status.variant} className="normal-case tracking-normal">
+          <div className="flex flex-wrap items-center gap-2">
+            <V3RiskPill tone={v3ToneFromFindingSeverity(finding.severity)}>
+              {finding.severity}
+            </V3RiskPill>
+            <V3RiskPill tone={v3ToneFromBadgeVariant(status.variant)}>
               {status.label}
-            </Badge>
+            </V3RiskPill>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-5">
+      </header>
+      <div className="space-y-4 px-4 py-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <NarrativeBlock
             label="Problema"
@@ -270,7 +292,7 @@ export function FindingNarrativeCard({
           </div>
         </div>
 
-        <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+        <div className="rounded-eos-sm border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             Cum arată închiderea
           </p>
@@ -278,7 +300,7 @@ export function FindingNarrativeCard({
         </div>
 
         {hasSecondaryContext ? (
-          <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+          <details className="group rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-3">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
@@ -321,8 +343,8 @@ export function FindingNarrativeCard({
           <FactLine label="Detectat" value={getFindingAgeLabel(finding.createdAtISO)} />
           <FactLine label="Ref. legală" value={finding.legalReference || "în curs de mapare"} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -434,24 +456,29 @@ export function FindingExecutionCard({
       : null
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Harta cazului</CardTitle>
+            <h3
+              data-display-text="true"
+              className="font-display text-base font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              Harta cazului
+            </h3>
             <p className="mt-2 text-sm text-eos-text-muted">
               Vezi progresul, dovada și ce rămâne sub watch, fără să concureze cu acțiunea principală.
             </p>
           </div>
-          <Badge variant={status.variant} className="normal-case tracking-normal">
+          <V3RiskPill tone={v3ToneFromBadgeVariant(status.variant)}>
             {status.label}
-          </Badge>
+          </V3RiskPill>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-5">
+      </header>
+      <div className="space-y-4 px-4 py-5">
         <div
           data-testid="finding-progress-stepper"
-          className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4"
+          className="space-y-3 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4"
         >
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
@@ -476,7 +503,7 @@ export function FindingExecutionCard({
               ))}
             </div>
           </div>
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-3">
             <p className="text-xs font-medium text-eos-text">Pas activ: {activeStep.label}</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">{activeStep.hint}</p>
             <p className="mt-2 text-xs leading-5 text-eos-text-muted">
@@ -486,7 +513,7 @@ export function FindingExecutionCard({
         </div>
 
         {artifactLabel ? (
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-3">
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
               <div>
@@ -533,7 +560,7 @@ export function FindingExecutionCard({
         ) : null}
 
         {cockpitRecipe.vendorContext ? (
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-3">
             <div className="flex items-start gap-2">
               <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
               <div>
@@ -558,7 +585,7 @@ export function FindingExecutionCard({
           </div>
         ) : null}
 
-        <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+        <details className="group rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
@@ -607,8 +634,8 @@ export function FindingExecutionCard({
             />
           </div>
         </details>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -677,9 +704,9 @@ export function FindingDossierSuccessCard({
               </p>
             </div>
           </div>
-          <Badge variant="success" className="normal-case tracking-normal">
+          <V3RiskPill tone="ok">
             înregistrat
-          </Badge>
+          </V3RiskPill>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
@@ -765,9 +792,9 @@ export function FindingCaseClosedCard({
               </p>
             </div>
           </div>
-          <Badge variant="success" className="normal-case tracking-normal">
+          <V3RiskPill tone="ok">
             monitorizat
-          </Badge>
+          </V3RiskPill>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
@@ -858,7 +885,7 @@ function RailCard({
   items: string[]
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+    <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
         {eyebrow}
       </p>
@@ -892,7 +919,7 @@ function NarrativeBlock({
         : "border-eos-border bg-eos-bg-inset"
 
   return (
-    <div className={`rounded-eos-md border px-4 py-3 ${toneClass}`}>
+    <div className={`rounded-eos-sm border px-4 py-3 ${toneClass}`}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
         {label}
       </p>

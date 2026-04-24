@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState } from "react"
 import {
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -14,9 +13,8 @@ import {
   XCircle,
 } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3FrameworkTag, V3RiskPill } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
-import { Card } from "@/components/evidence-os/Card"
 import type { ImportColumnId, ImportParseResult, ImportRowParsed } from "@/lib/server/import-parser"
 import type { OrgProfilePrefill } from "@/lib/compliance/org-profile-prefill"
 
@@ -71,7 +69,7 @@ function UploadStep({
   return (
     <div className="space-y-4">
       <div
-        className={`flex flex-col items-center justify-center rounded-eos-lg border-2 border-dashed px-6 py-12 transition ${
+        className={`flex flex-col items-center justify-center rounded-eos-lg border border-dashed px-6 py-12 transition ${
           dragOver
             ? "border-eos-primary bg-eos-primary-soft"
             : "border-eos-border-subtle bg-eos-bg-inset"
@@ -117,12 +115,12 @@ function UploadStep({
       </div>
 
       {error && (
-        <div className="rounded-eos-md border border-eos-error/30 bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
+        <div className="rounded-eos-sm border border-eos-error/30 bg-eos-error-soft px-4 py-3 text-sm text-eos-error">
           {error}
         </div>
       )}
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">Coloanele sunt detectate automat</p>
         <p className="mt-1">
           Putem detecta: Nume firmă, CUI, Sector, Nr. angajați, Email contact — indiferent
@@ -147,17 +145,17 @@ function MappingStep({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Badge
-          variant={parseResult.mappingConfidence === "high" ? "success" : parseResult.mappingConfidence === "medium" ? "warning" : "destructive"}
+        <V3RiskPill
+          tone={parseResult.mappingConfidence === "high" ? "ok" : parseResult.mappingConfidence === "medium" ? "high" : "critical"}
         >
           Încredere: {parseResult.mappingConfidence}
-        </Badge>
+        </V3RiskPill>
         <span className="text-xs text-eos-text-muted">
           {parseResult.totalRows} rânduri detectate
         </span>
       </div>
 
-      <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
+      <section className="overflow-hidden rounded-eos-lg border divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
         {(Object.keys(COLUMN_LABELS) as ImportColumnId[]).map((colId) => (
           <div key={colId} className="flex items-center gap-4 px-4 py-3">
             <div className="w-36 shrink-0">
@@ -171,7 +169,7 @@ function MappingStep({
               onChange={(e) =>
                 onUpdateMapping(colId, e.target.value === "" ? null : Number(e.target.value))
               }
-              className="flex-1 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text focus:outline-none"
+              className="flex-1 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text focus:outline-none"
             >
               <option value="">— nu mapează —</option>
               {parseResult.headers.map((header, idx) => (
@@ -185,7 +183,7 @@ function MappingStep({
             )}
           </div>
         ))}
-      </Card>
+      </section>
 
       {parseResult.unmappedHeaders.length > 0 && (
         <p className="text-xs text-eos-text-muted">
@@ -193,7 +191,7 @@ function MappingStep({
         </p>
       )}
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-3">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-3">
         <p className="text-xs font-medium text-eos-text">Preview primele 3 rânduri:</p>
         <div className="mt-2 overflow-x-auto">
           <table className="w-full text-xs">
@@ -254,25 +252,25 @@ function ReviewStep({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
+        <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
           <p className="text-lg font-semibold text-eos-success">{valid.length}</p>
           <p className="text-[10px] text-eos-text-muted">De importat</p>
         </div>
-        <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
+        <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
           <p className="text-lg font-semibold text-eos-warning">{withWarnings.length}</p>
           <p className="text-[10px] text-eos-text-muted">Cu avertismente</p>
         </div>
-        <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
+        <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
           <p className="text-lg font-semibold text-eos-error">{withErrors.length}</p>
           <p className="text-[10px] text-eos-text-muted">Cu erori</p>
         </div>
-        <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
+        <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-3 py-2.5 text-center">
           <p className="text-lg font-semibold text-eos-text-muted">{excludedRows.length}</p>
           <p className="text-[10px] text-eos-text-muted">Excluse</p>
         </div>
       </div>
 
-      <Card className="max-h-[400px] divide-y divide-eos-border-subtle overflow-y-auto border-eos-border bg-eos-surface">
+      <section className="overflow-hidden rounded-eos-lg border max-h-[400px] divide-y divide-eos-border-subtle overflow-y-auto border-eos-border bg-eos-surface">
         {rows.map((row) => {
           const hasErrors = row.errors.length > 0
           const isExcluded = excluded.has(row.rowIndex)
@@ -306,19 +304,15 @@ function ReviewStep({
                     {row.orgName || "(fără nume)"}
                   </span>
                   {row.cuiNormalized && (
-                    <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                      {row.cuiNormalized}
-                    </Badge>
+                    <V3FrameworkTag label={row.cuiNormalized} />
                   )}
                   {row.sector && (
-                    <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
-                      {row.sector}
-                    </Badge>
+                    <V3FrameworkTag label={row.sector} tone="info" />
                   )}
                   {row.isDuplicate && (
-                    <Badge variant="warning" className="text-[10px] normal-case tracking-normal">
+                    <V3RiskPill tone="high">
                       Duplicat
-                    </Badge>
+                    </V3RiskPill>
                   )}
                 </div>
 
@@ -336,7 +330,7 @@ function ReviewStep({
             </div>
           )
         })}
-      </Card>
+      </section>
     </div>
   )
 }
@@ -406,7 +400,7 @@ function ProgressStep({
         </div>
       </div>
 
-      <Card className="max-h-[350px] divide-y divide-eos-border-subtle overflow-y-auto border-eos-border bg-eos-surface">
+      <section className="overflow-hidden rounded-eos-lg border max-h-[350px] divide-y divide-eos-border-subtle overflow-y-auto border-eos-border bg-eos-surface">
         {results.map((result, idx) => (
           <div key={idx} className="flex items-center gap-3 px-4 py-2.5">
             {result.ok ? (
@@ -427,7 +421,7 @@ function ProgressStep({
             </div>
           </div>
         ))}
-      </Card>
+      </section>
     </div>
   )
 }
@@ -618,7 +612,7 @@ export function ImportWizard({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-eos-border-subtle px-6 py-4">
           <div>
@@ -630,7 +624,7 @@ export function ImportWizard({
           <button
             type="button"
             onClick={onClose}
-            className="grid size-8 place-items-center rounded-eos-md text-eos-text-muted hover:bg-eos-bg-inset hover:text-eos-text"
+            className="grid size-8 place-items-center rounded-eos-sm text-eos-text-muted hover:bg-eos-bg-inset hover:text-eos-text"
           >
             <X className="size-4" strokeWidth={2} />
           </button>

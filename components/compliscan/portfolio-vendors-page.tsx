@@ -5,18 +5,15 @@ import { Building2, GitPullRequestArrow } from "lucide-react"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
-import { Card } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3FrameworkTag, V3KpiStrip, V3PageHero, V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3"
 import type { PortfolioVendorRow } from "@/lib/server/portfolio"
 
-const riskVariant = {
-  critical: "destructive",
-  high: "warning",
-  medium: "secondary",
-  low: "outline",
-  unknown: "outline",
+const riskTone: Record<PortfolioVendorRow["highestRisk"], V3SeverityTone> = {
+  critical: "critical",
+  high: "high",
+  medium: "medium",
+  low: "low",
+  unknown: "info",
 } as const
 
 export function PortfolioVendorsPage() {
@@ -44,57 +41,115 @@ export function PortfolioVendorsPage() {
   if (loading) return <LoadingScreen variant="section" />
   if (error) return <ErrorScreen message={error} variant="section" />
 
+  const criticalCount = vendors.filter((vendor) => vendor.highestRisk === "critical").length
+  const highCount = vendors.filter((vendor) => vendor.highestRisk === "high").length
+  const openReviews = vendors.reduce((sum, vendor) => sum + vendor.openReviews, 0)
+  const affectedOrgs = new Set(vendors.flatMap((vendor) => vendor.orgs.map((org) => org.orgId))).size
+  const sourceCount = new Set(vendors.flatMap((vendor) => vendor.sourceKinds)).size
+
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Portofoliu"
+      <V3PageHero
+        breadcrumbs={[{ label: "Portofoliu" }, { label: "Furnizori", current: true }]}
         title="Furnizori comuni"
         description="Registru agregat de vendor reviews și furnizori NIS2, dedupat pe CUI sau nume."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {vendors.length} furnizori unici
-            </Badge>
-          </>
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-2">
+            <V3FrameworkTag label="furnizori unici" count={vendors.length} />
+            {criticalCount > 0 ? <V3RiskPill tone="critical">{criticalCount} critic</V3RiskPill> : null}
+            {highCount > 0 ? <V3RiskPill tone="high">{highCount} ridicat</V3RiskPill> : null}
+          </div>
         }
       />
 
-      <Card className="overflow-hidden border-eos-border bg-eos-surface">
+      <V3KpiStrip
+        items={[
+          {
+            id: "vendors",
+            label: "Furnizori unici",
+            value: vendors.length,
+            detail: "dedup CUI sau nume",
+          },
+          {
+            id: "orgs",
+            label: "Firme afectate",
+            value: affectedOrgs,
+            detail: "au vendor în registru",
+          },
+          {
+            id: "reviews",
+            label: "Review-uri deschise",
+            value: openReviews,
+            detail: "necesită execuție",
+            stripe: openReviews > 0 ? "warning" : undefined,
+            valueTone: openReviews > 0 ? "warning" : "neutral",
+          },
+          {
+            id: "critical",
+            label: "Risc critic",
+            value: criticalCount,
+            detail: "highest risk",
+            stripe: criticalCount > 0 ? "critical" : undefined,
+            valueTone: criticalCount > 0 ? "critical" : "neutral",
+          },
+          {
+            id: "sources",
+            label: "Surse",
+            value: sourceCount,
+            detail: "tipuri detectate",
+          },
+        ]}
+      />
+
+      <section className="space-y-2">
         {vendors.length === 0 ? (
-          <EmptyState
-            title="Nu există furnizori în portofoliu"
-            label="Adaugă vendor reviews sau completează registrul NIS2 în firmele din portofoliu."
-            icon={GitPullRequestArrow}
-            className="px-5 py-10"
-          />
+          <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10 text-center">
+            <GitPullRequestArrow className="mx-auto mb-3 size-6 text-eos-text-tertiary" strokeWidth={1.6} />
+            <h3 data-display-text="true" className="font-display text-[16px] font-semibold text-eos-text">
+              Nu există furnizori în portofoliu
+            </h3>
+            <p className="mx-auto mt-1 max-w-md text-[13px] text-eos-text-muted">
+              Adaugă vendor reviews sau completează registrul NIS2 în firmele din portofoliu.
+            </p>
+          </div>
         ) : (
-          <div className="divide-y divide-eos-border-subtle">
+          <div className="space-y-2">
             {vendors.map((vendor) => (
-              <div key={vendor.dedupeKey} className="flex flex-wrap items-start gap-3 px-5 py-4">
+              <article
+                key={vendor.dedupeKey}
+                className="group relative flex flex-wrap items-start gap-3 overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4 transition-all duration-150 hover:border-eos-border-strong hover:bg-white/[0.02]"
+              >
+                <span
+                  className={`absolute left-0 top-0 bottom-0 w-[3px] ${
+                    vendor.highestRisk === "critical"
+                      ? "bg-eos-error"
+                      : vendor.highestRisk === "high"
+                        ? "bg-eos-warning"
+                        : vendor.highestRisk === "medium"
+                          ? "bg-eos-primary/70"
+                          : "bg-eos-border-strong"
+                  }`}
+                  aria-hidden
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={riskVariant[vendor.highestRisk]}
-                      className="text-[10px] normal-case tracking-normal"
-                    >
+                    <V3RiskPill tone={riskTone[vendor.highestRisk]}>
                       risc {vendor.highestRisk}
-                    </Badge>
-                    <span className="text-sm font-medium text-eos-text">{vendor.vendorName}</span>
-                    <span className="text-xs text-eos-text-muted">{vendor.orgCount} firme</span>
+                    </V3RiskPill>
+                    <span className="text-[13.5px] font-semibold tracking-[-0.015em] text-eos-text">{vendor.vendorName}</span>
+                    <span className="font-mono text-[11px] text-eos-text-muted">{vendor.orgCount} firme</span>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-eos-text-muted">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[11px] text-eos-text-muted">
                     {vendor.cui ? <span>CUI: {vendor.cui}</span> : null}
                     <span>Surse: {vendor.sourceKinds.join(", ")}</span>
                     <span>Review-uri deschise: {vendor.openReviews}</span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {vendor.categoryLabels.map((label) => (
-                      <Badge key={label} variant="outline" className="text-[10px] normal-case tracking-normal">
-                        {label}
-                      </Badge>
+                      <V3FrameworkTag key={label} label={label} />
                     ))}
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-eos-text-muted">
+                  <p className="mt-2 text-[12px] leading-5 text-eos-text-muted">
                     Prezent în: {vendor.orgs.map((org) => org.orgName).join(", ")}
                   </p>
                 </div>
@@ -104,16 +159,16 @@ export function PortfolioVendorsPage() {
                   label="Deschide registrul"
                   variant="outline"
                 />
-              </div>
+              </article>
             ))}
           </div>
         )}
-      </Card>
+      </section>
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <div className="flex items-center gap-2 text-eos-text">
           <Building2 className="size-4" strokeWidth={1.8} />
-          <span className="font-medium">Dedup cross-client</span>
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">Dedup cross-client</span>
         </div>
         <p className="mt-1">
           Vendorii sunt grupați după CUI sau nume, dar drilldown-ul te duce în prima firmă relevantă pentru execuție și actualizare.
@@ -122,4 +177,3 @@ export function PortfolioVendorsPage() {
     </div>
   )
 }
-

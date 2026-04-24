@@ -4,7 +4,7 @@ import { useState } from "react"
 import { CheckCircle2, PenSquare, Send, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3FrameworkTag } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
 import {
   DOCUMENT_ADOPTION_LABELS,
@@ -128,9 +128,11 @@ export function DocumentAdoptionCard({
               {documentTitle} este deja în Dosar. De aici urmărești separat dacă a fost doar revizuit intern, trimis, semnat și pus efectiv în uz.
             </p>
           </div>
-          <Badge variant="outline" className="normal-case tracking-normal">
-            {adoptionStatus ? DOCUMENT_ADOPTION_LABELS[adoptionStatus] : "urmă nesalvată"}
-          </Badge>
+          <V3FrameworkTag
+            tone={adoptionStatus ? "info" : "neutral"}
+            label={adoptionStatus ? DOCUMENT_ADOPTION_LABELS[adoptionStatus] : "urmă nesalvată"}
+            className="normal-case"
+          />
         </div>
       </header>
 

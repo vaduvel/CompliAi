@@ -24,7 +24,6 @@ import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { V3KpiStrip } from "@/components/compliscan/v3/kpi-strip"
 import { Button } from "@/components/evidence-os/Button"
 import { Checkbox } from "@/components/evidence-os/Checkbox"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 import type { InboxItem } from "@/app/api/portfolio/inbox/route"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
@@ -513,17 +512,25 @@ export function PortfolioAlertsPage() {
 
       {/* ── Feed grouped by day ── */}
       {filteredItems.length === 0 ? (
-        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
-          <EmptyState
-            title={data.total === 0 ? "Inbox curat" : "Niciun item pentru filtrele selectate"}
-            label={
-              data.total === 0
-                ? "Nu există alerte sau notificări active în portofoliul tău. Watchdog-ul monitorizează continuu."
-                : "Modifică sau șterge filtrele ca să vezi mai mulți itemi."
-            }
-            icon={data.total === 0 ? CheckCircle2 : InboxIcon}
-            className="px-5 py-12"
-          />
+        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-12 text-center">
+          <div className="mx-auto flex size-10 items-center justify-center rounded-eos-sm border border-eos-border bg-white/[0.03] text-eos-text-muted">
+            {data.total === 0 ? (
+              <CheckCircle2 className="size-5" strokeWidth={1.8} />
+            ) : (
+              <InboxIcon className="size-5" strokeWidth={1.8} />
+            )}
+          </div>
+          <h3
+            data-display-text="true"
+            className="mt-4 font-display text-base font-semibold tracking-[-0.015em] text-eos-text"
+          >
+            {data.total === 0 ? "Inbox curat" : "Niciun item pentru filtrele selectate"}
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-eos-text-muted">
+            {data.total === 0
+              ? "Nu există alerte sau notificări active în portofoliul tău. Watchdog-ul monitorizează continuu."
+              : "Modifică sau șterge filtrele ca să vezi mai mulți itemi."}
+          </p>
         </div>
       ) : (
         <div className="space-y-5">
