@@ -17,7 +17,7 @@ import {
   isFindingActive,
 } from "@/lib/compliscan/finding-cockpit"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 
@@ -145,9 +145,7 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const recipe = buildCockpitRecipe(finding)
   const flowStatus = getRecipeRowBadge(finding, recipe)
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
-  const cockpitHref = hasGenerator
-    ? `/dashboard/resolve/${finding.id}?generator=1`
-    : `/dashboard/resolve/${finding.id}`
+  const cockpitHref = dashboardFindingRoute(finding.id, hasGenerator ? { generator: "1" } : undefined)
 
   const isHigh = finding.severity === "critical" || finding.severity === "high"
   const isMed = finding.severity === "medium"

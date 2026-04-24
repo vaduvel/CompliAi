@@ -1,5 +1,6 @@
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import type { DriftTrigger, ScanFinding } from "@/lib/compliance/types"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 import { classifyFinding, getReopenPolicy } from "@/lib/compliscan/finding-kernel"
 import { createNotification } from "@/lib/server/notifications-store"
 import {
@@ -186,7 +187,7 @@ export async function fireDriftTrigger(params: {
         type: "drift_detected",
         title: "Finding în reverificare",
         message: `${finding.title} necesită reverificare pentru că ${triggerReason}.`,
-        linkTo: `/dashboard/resolve/${encodeURIComponent(finding.id)}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }).catch(() => {})
     })
   )
@@ -271,7 +272,7 @@ export async function runDriftSweep(nowISO = new Date().toISOString()) {
         type: "drift_detected",
         title: "Finding redeschis automat",
         message: `${finding.title} a fost redeschis automat și cere reverificare imediată.`,
-        linkTo: `/dashboard/resolve/${encodeURIComponent(finding.id)}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }).catch(() => {})
 
       processed.reopened += 1
@@ -307,7 +308,7 @@ export async function runDriftSweep(nowISO = new Date().toISOString()) {
         type: "drift_detected",
         title: "Review scadent",
         message: `${finding.title} a depășit termenul de reverificare.`,
-        linkTo: `/dashboard/resolve/${encodeURIComponent(finding.id)}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }).catch(() => {})
 
       processed.flagged += 1

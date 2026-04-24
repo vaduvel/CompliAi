@@ -1,4 +1,5 @@
 import type { ScanFinding } from "@/lib/compliance/types"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 
 export type FindingDocumentFlowState =
   | "not_required"
@@ -202,7 +203,7 @@ export function getFindingAutoAction(finding: ScanFinding): {
   if (finding.suggestedDocumentType && getSuggestedDocumentLabel(finding.suggestedDocumentType)) {
     return {
       label: `Generează ${getSuggestedDocumentLabel(finding.suggestedDocumentType)}`,
-      href: `/dashboard/resolve/${finding.id}?generator=1`,
+      href: dashboardFindingRoute(finding.id, { generator: "1" }),
       type: "document",
     }
   }

@@ -6,6 +6,7 @@ import type { AppNotification } from "@/lib/server/notifications-store"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 
 const FEED_TIME_ZONE = "Europe/Bucharest"
 
@@ -228,7 +229,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: dashboardFindingRoute(finding.id),
         sourceType: "anaf",
       }
     case "EF-004":
@@ -239,7 +240,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: dashboardFindingRoute(finding.id),
         sourceType: "anaf",
       }
     case "EF-005":
@@ -250,7 +251,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: dashboardFindingRoute(finding.id),
         sourceType: "anaf",
       }
     case "EF-006":
@@ -261,7 +262,7 @@ function buildFiscalMonitoringFeedItem(finding: ScanFinding): ExternalFeedItem |
         detail: `${mainSignal}${nextControlLabel}`.trim(),
         dateISO: finding.nextMonitoringDateISO ?? finding.findingStatusUpdatedAtISO ?? finding.createdAtISO,
         tone: "warning",
-        href: `/dashboard/resolve/${finding.id}`,
+        href: dashboardFindingRoute(finding.id),
         sourceType: "anaf",
       }
     default:

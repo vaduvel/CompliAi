@@ -18,7 +18,7 @@ import { Card, CardContent } from "@/components/evidence-os/Card"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding } from "@/lib/compliance/types"
 import {
   FindingCaseClosedCard,
@@ -426,8 +426,8 @@ export default function FindingDetailPage() {
       generatedDocumentId?: string
       confirmationChecklist?: string[]
     }
-  ) {
-    if (!finding) return
+  ): Promise<FindingDetailResponse | null> {
+    if (!finding) return null
     setActionLoading(true)
     try {
       if (status === "resolved" || status === "under_monitoring") {
@@ -457,7 +457,7 @@ export default function FindingDetailPage() {
           duration: 5000,
         })
         setActionLoading(false)
-        return
+        return payload
       }
 
       setFinding(
@@ -479,8 +479,10 @@ export default function FindingDetailPage() {
         router.push(options.redirectTo)
       }
       void reloadDashboard()
+      return payload
     } catch {
       setError("Nu s-a putut actualiza statusul.")
+      return null
     } finally {
       setActionLoading(false)
     }
@@ -595,6 +597,23 @@ export default function FindingDetailPage() {
     finding.operationalEvidenceNote ||
     finding.resolution?.closureEvidence ||
     linkedGeneratedDocument?.title
+
+  async function handleConfirmFinding() {
+    const currentFinding = finding
+    if (!currentFinding) return
+
+    const payload = await updateStatus("confirmed")
+    if (!payload || payload.pendingApproval) return
+
+    if (hasGenerator) {
+      const confirmedFindingId = payload.finding?.id ?? currentFinding.id
+      router.replace(dashboardFindingRoute(confirmedFindingId, { generator: "1" }), { scroll: false })
+      window.setTimeout(() => {
+        const generatorDrawer = document.querySelector<HTMLElement>('[data-testid="finding-generator-drawer"]')
+        generatorDrawer?.scrollIntoView({ behavior: "smooth", block: "start" })
+      }, 80)
+    }
+  }
   const evidenceCardCopy =
     recipe.findingTypeId === "GDPR-013"
       ? {
@@ -1004,7 +1023,7 @@ export default function FindingDetailPage() {
         >
           <Button
             data-testid="confirm-finding"
-            onClick={() => updateStatus("confirmed")}
+            onClick={handleConfirmFinding}
             disabled={actionLoading}
             className="gap-1.5"
           >
@@ -1238,7 +1257,7 @@ export default function FindingDetailPage() {
               </p>
               <Link
                 className={buttonVariants({ className: "gap-2" })}
-                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(`/dashboard/resolve/${encodeURIComponent(finding.id)}`)}`}
+                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(dashboardFindingRoute(finding.id))}`}
               >
                 <FileText className="size-3.5" strokeWidth={2} />
                 Deschide RoPA

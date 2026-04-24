@@ -26,6 +26,7 @@ import {
   type NotificationType,
 } from "@/lib/server/notifications-store"
 import { isFindingActive } from "@/lib/compliscan/finding-cockpit"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding } from "@/lib/compliance/types"
 
 export type InboxItemSource = "alert" | "notification"
@@ -88,7 +89,7 @@ function alertToInboxItem(alert: PortfolioAlertRow): InboxItem {
     orgId: alert.orgId,
     orgName: alert.orgName,
     createdAt: alert.createdAtISO,
-    linkTo: `/dashboard/resolve/${encodeURIComponent(findingId)}`,
+    linkTo: dashboardFindingRoute(findingId),
     framework: alert.framework,
     sourceDocument: alert.sourceDocument,
     findingId,
@@ -121,7 +122,7 @@ function findingToInboxItem(
     orgId,
     orgName,
     createdAt: finding.createdAtISO,
-    linkTo: `/dashboard/resolve/${encodeURIComponent(finding.id)}`,
+    linkTo: dashboardFindingRoute(finding.id),
     framework: finding.category,
     sourceDocument: finding.sourceDocument,
     findingId: finding.id,

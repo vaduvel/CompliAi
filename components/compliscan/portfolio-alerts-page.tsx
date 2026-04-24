@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/evidence-os/Checkbox"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { InboxItem } from "@/app/api/portfolio/inbox/route"
+import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 type BatchAction = "dismiss_finding" | "confirm_finding" | "mark_notification_read"
 type BatchFeedback = {
@@ -111,7 +112,7 @@ function groupByDay(items: InboxItem[]): { label: string; items: InboxItem[] }[]
 
 function actionLabelForDestination(destination?: string) {
   if (!destination || destination === "/dashboard") return "Intră în firmă"
-  if (destination.startsWith("/dashboard/resolve")) return "Deschide finding"
+  if (destination.startsWith(dashboardRoutes.resolve)) return "Deschide finding-ul"
   if (destination.startsWith("/dashboard/fiscal")) return "Deschide fiscal"
   if (destination.startsWith("/dashboard/nis2")) return "Deschide NIS2"
   if (destination.startsWith("/dashboard/vendor-review")) return "Deschide registrul"

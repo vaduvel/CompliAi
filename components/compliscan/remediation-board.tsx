@@ -22,6 +22,7 @@ import {
   getFindingNarrative,
   getFindingStatusPresentation,
 } from "@/lib/compliscan/finding-cockpit"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 
 type FilterValue = "ALL" | TaskPriority | "DONE" | "RAPID" | "STRUCTURAL" | "L1" | "L2" | "L3"
 
@@ -461,9 +462,10 @@ function RelatedFindingAnchor({
 
   const status = getFindingStatusPresentation(finding.findingStatus)
   const narrative = getFindingNarrative(finding)
-  const cockpitHref = finding.suggestedDocumentType
-    ? `/dashboard/resolve/${finding.id}?generator=1`
-    : `/dashboard/resolve/${finding.id}`
+  const cockpitHref = dashboardFindingRoute(
+    finding.id,
+    finding.suggestedDocumentType ? { generator: "1" } : undefined
+  )
 
   return (
     <div className="mb-3 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
