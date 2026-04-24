@@ -22,6 +22,8 @@ import {
 } from "lucide-react"
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
 import { toast } from "sonner"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -81,7 +83,7 @@ function SortHeader({
     <button
       type="button"
       onClick={() => onSort(sortKey)}
-      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors duration-150 ${
+      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] transition-colors duration-150 ${
         active ? "text-eos-text-muted" : "text-eos-text-tertiary hover:text-eos-text-muted"
       } ${className}`}
     >
@@ -321,7 +323,7 @@ function BatchToolbar({
   loading: boolean
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-eos-xl border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-6 items-center justify-center rounded-full bg-eos-primary text-xs font-semibold text-white">
           {count}
@@ -421,7 +423,7 @@ function BatchResultsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
+      <div className="w-full max-w-2xl rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-eos-text">{BATCH_ACTION_LABELS[action]}</p>
@@ -503,39 +505,6 @@ function BatchResultsModal({
   )
 }
 
-function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }) {
-  const active = clients.filter((c) => c.status === "active")
-  const withData = active.filter((c) => c.compliance?.hasData)
-  const redClients = active.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
-  const activeTasks = active.reduce((s, c) => s + (c.compliance?.totalTasks ?? 0), 0)
-  const avgScore =
-    withData.length > 0
-      ? Math.round(withData.reduce((s, c) => s + (c.compliance?.score ?? 0), 0) / withData.length)
-      : 0
-  const totalEfacturaRisks = active.reduce((s, c) => s + (c.compliance?.efacturaRiskCount ?? 0), 0)
-
-  const stats = [
-    { label: "Firme active", value: active.length },
-    { label: "Cu date", value: withData.length },
-    { label: "Scor mediu", value: withData.length > 0 ? `${avgScore}%` : "—" },
-    { label: "Taskuri active", value: activeTasks },
-    { label: "Alerte critice", value: redClients.length },
-    ...(totalEfacturaRisks > 0 ? [{ label: "Semnale e-Factura", value: totalEfacturaRisks }] : []),
-  ]
-
-  return (
-    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
-      {stats.map((stat) => (
-        <div key={stat.label} className="flex flex-col gap-1 px-5 py-4">
-          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-            {stat.label}
-          </span>
-          <span className="text-xl font-semibold text-eos-text">{stat.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function PortfolioOverviewClient() {
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
@@ -679,6 +648,25 @@ export function PortfolioOverviewClient() {
 
   const activeClients = clients.filter((c) => c.status === "active")
 
+  const kpiItems: V3KpiItem[] = useMemo(() => {
+    const withData = activeClients.filter((c) => c.compliance?.hasData)
+    const redClients = activeClients.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
+    const activeTasks = activeClients.reduce((s, c) => s + (c.compliance?.totalTasks ?? 0), 0)
+    const avgScore = withData.length > 0
+      ? Math.round(withData.reduce((s, c) => s + (c.compliance?.score ?? 0), 0) / withData.length)
+      : null
+    const totalEfacturaRisks = activeClients.reduce((s, c) => s + (c.compliance?.efacturaRiskCount ?? 0), 0)
+    return [
+      { id: "active", label: "Firme active", value: activeClients.length, detail: withData.length > 0 ? `${withData.length} cu date` : undefined },
+      { id: "critical", label: "Alerte critice", value: redClients.length, stripe: redClients.length > 0 ? "critical" as const : undefined, valueTone: redClients.length > 0 ? "critical" as const : "neutral" as const },
+      { id: "score", label: "Scor mediu", value: avgScore !== null ? avgScore : "—", valueUnit: avgScore !== null ? "%" : undefined },
+      { id: "tasks", label: "Taskuri active", value: activeTasks },
+      totalEfacturaRisks > 0
+        ? { id: "efactura", label: "Semnale e-Factura", value: totalEfacturaRisks, stripe: "warning" as const, valueTone: "warning" as const }
+        : { id: "firms-data", label: "Firme cu date", value: withData.length },
+    ]
+  }, [activeClients])
+
   const filteredClients = useMemo(() => {
     let list = activeClients
     if (search.trim()) {
@@ -725,62 +713,60 @@ export function PortfolioOverviewClient() {
         />
       ) : null}
 
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
-          <h1 className="mt-1 text-2xl font-semibold text-eos-text">Portofoliu firme</h1>
-          <p className="mt-1.5 max-w-xl text-sm leading-6 text-eos-text-tertiary">
-            Aici faci triage cross-client. Intri în firmă doar când trebuie să execuți într-un workspace real.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-xs text-eos-text-muted">
-              {activeClients.length} firme active
-            </span>
-            {planData?.planType && planData.maxOrgs !== null && (
-              <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs text-eos-text-tertiary">
-                {PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} · {planData.currentOrgs}/{planData.maxOrgs}
-              </span>
+      <V3PageHero
+        breadcrumbs={[{ label: "Portofoliu" }, { label: "Firme", current: true }]}
+        title="Portofoliu firme"
+        description={
+          <>
+            Triage cross-client. Intri în firmă doar când trebuie să execuți.
+            {activeClients.length > 0 && (
+              <>
+                {" "}<strong className="text-eos-text">{activeClients.length} firme active</strong>
+                {alertClients.length > 0 && <>, <strong className="text-eos-error">{alertClients.length} cu alerte critice</strong></>}
+                {"."}
+              </>
             )}
-            {alertClients.length > 0 && (
-              <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-medium text-eos-error">
-                {alertClients.length} cu alerte critice
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowImport(true)}
-            disabled={planData ? !planData.canAddOrg : false}
-            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text disabled:opacity-40"
-          >
-            <Upload className="size-4" strokeWidth={2} />
-            {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
-          </button>
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
-          >
-            <Download className="size-4" strokeWidth={2} />
-            Exportă CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => { void fetchClients(); void fetchPlanData() }}
-            className="flex items-center gap-2 rounded-eos-lg px-3 py-2 text-sm font-medium text-eos-text-tertiary transition-all duration-150 hover:bg-eos-surface-active hover:text-eos-text-muted"
-          >
-            <RefreshCw className="size-4" strokeWidth={2} />
-            Actualizează
-          </button>
-        </div>
-      </div>
+          </>
+        }
+        eyebrowBadges={planData?.planType && planData.maxOrgs !== null ? (
+          <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-tertiary">
+            {PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} · {planData.currentOrgs}/{planData.maxOrgs}
+          </span>
+        ) : undefined}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowImport(true)}
+              disabled={planData ? !planData.canAddOrg : false}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-primary bg-eos-primary px-3 text-[12.5px] font-medium text-white transition-all hover:bg-eos-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Upload className="size-3.5" strokeWidth={2} />
+              {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+            >
+              <Download className="size-3.5" strokeWidth={2} />
+              Exportă CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => { void fetchClients(); void fetchPlanData() }}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-tertiary transition-all hover:border-eos-border-strong hover:text-eos-text-muted"
+            >
+              <RefreshCw className="size-3.5" strokeWidth={2} />
+              Actualizează
+            </button>
+          </>
+        }
+      />
 
       {/* ── Capacity warning ── */}
       {planData && !planData.canAddOrg && (
-        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-xl border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
           <div>
             <p className="text-sm font-semibold text-eos-text">Capacitatea portofoliului este atinsă</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">
@@ -824,7 +810,7 @@ export function PortfolioOverviewClient() {
 
         if (urgencies.length === 0) return null
         return (
-          <div className="rounded-eos-xl border border-eos-error-border bg-eos-error-soft px-5 py-4">
+          <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft px-5 py-4">
             <div className="mb-3 flex items-center gap-2">
               <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
               <span className="text-sm font-semibold text-eos-error">Urgențe acum</span>
@@ -856,8 +842,8 @@ export function PortfolioOverviewClient() {
         />
       )}
 
-      {/* ── Summary strip ── */}
-      <SummaryStrip clients={activeClients} />
+      {/* ── KPI strip ── */}
+      <V3KpiStrip items={kpiItems} />
 
       {/* ── Batch toolbar ── */}
       {selectedIds.size > 0 && (
@@ -902,10 +888,10 @@ export function PortfolioOverviewClient() {
       </div>
 
       {/* ── Client table ── */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
           <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-surface-active">
+            <div className="flex size-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-active">
               <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
             </div>
             <div className="space-y-1.5">
@@ -972,14 +958,14 @@ export function PortfolioOverviewClient() {
 
       {/* ── Info cards ── */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <Building2 className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Portofoliu-first, fără switch constant</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
             Triage-ul rămâne aici. Intrarea în firmă deschide doar execuția pe clientul selectat. Poți importa firme în masă și exporta snapshot-ul curent.
           </p>
         </div>
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <CalendarClock className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Drilldown rapid</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">

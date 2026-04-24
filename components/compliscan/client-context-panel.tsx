@@ -220,7 +220,7 @@ export function ClientContextPanel({
           <ArrowLeft className="size-4" />
           Înapoi la portofoliu
         </Link>
-        <div className="rounded-eos-xl border border-eos-error/20 bg-eos-error-soft p-6 text-sm text-eos-error">
+        <div className="rounded-eos-lg border border-eos-error/20 bg-eos-error-soft p-6 text-sm text-eos-error">
           {error ?? "Firma nu a fost găsită."}
         </div>
       </div>
@@ -236,10 +236,10 @@ export function ClientContextPanel({
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       {focusedFindingId ? (
-        <div className="rounded-eos-xl border border-eos-primary/30 bg-eos-primary/[0.08] p-4">
+        <div className="rounded-eos-lg border border-eos-primary/30 bg-eos-primary/[0.08] p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-primary">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
                 Ai venit din Alerte
               </p>
               <h2 className="mt-1 text-base font-semibold text-eos-text">
@@ -327,7 +327,7 @@ export function ClientContextPanel({
       </div>
 
       {/* ── Header card ── */}
-      <div className="flex flex-wrap items-center gap-6 rounded-eos-xl border border-eos-border bg-eos-surface p-6">
+      <div className="flex flex-wrap items-center gap-6 rounded-eos-lg border border-eos-border bg-eos-surface p-6">
         <div className="flex items-center gap-4">
           <div className="flex size-12 shrink-0 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-elevated">
             <Building2 className="size-6 text-eos-text-muted" strokeWidth={1.5} />
@@ -365,7 +365,7 @@ export function ClientContextPanel({
       {/* ── 3-col grid: findings + NIS2 + vendors ── */}
       <div className="grid gap-5 md:grid-cols-3">
         {/* Findings */}
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="size-4 text-eos-warning" strokeWidth={2} />
@@ -408,7 +408,7 @@ export function ClientContextPanel({
         </div>
 
         {/* NIS2 */}
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center gap-2">
             <Shield className="size-4 text-eos-primary" strokeWidth={2} />
             <p className="text-sm font-semibold text-eos-text">NIS2</p>
@@ -460,7 +460,7 @@ export function ClientContextPanel({
         </div>
 
         {/* Vendor reviews */}
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center gap-2">
             <Users className="size-4 text-eos-text-muted" strokeWidth={2} />
             <p className="text-sm font-semibold text-eos-text">Furnizori</p>
@@ -500,7 +500,7 @@ export function ClientContextPanel({
       </div>
 
       {/* ── Quick actions ── */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
         <div className="mb-4 flex items-center gap-2">
           <Zap className="size-4 text-eos-primary" strokeWidth={2} />
           <p className="text-sm font-semibold text-eos-text">Acțiuni rapide</p>
