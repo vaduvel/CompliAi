@@ -14,6 +14,7 @@ import type { FindingResolution } from "@/lib/compliance/types"
 import { supportsDocumentAdoption } from "@/lib/compliance/document-adoption"
 import { DOCUMENT_TYPES, type DocumentType } from "@/lib/server/document-generator"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 import {
   buildCockpitRecipe,
   classifyFinding,
@@ -308,7 +309,7 @@ export async function PATCH(
         message:
           `Finding-ul "${finding.title}" este confirmat. ` +
           `${taskCandidate.suggestedOwner} poate închide cazul până la ${new Date(taskCandidate.deadline).toLocaleDateString("ro-RO")}.`,
-        linkTo: `/dashboard/resolve/${findingId}`,
+        linkTo: dashboardFindingRoute(findingId),
       }).catch(() => {})
 
       if (cockpitDocumentType) {
@@ -792,35 +793,35 @@ function buildFiscalMonitoringNotification(
         type: "fiscal_alert",
         title: "Reverificăm factura retransmisă",
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
-        linkTo: `/dashboard/resolve/${finding.id}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }
     case "EF-004":
       return {
         type: "fiscal_alert",
         title: "Verificăm dacă factura a ieșit din prelucrare",
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
-        linkTo: `/dashboard/resolve/${finding.id}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }
     case "EF-005":
       return {
         type: "fiscal_alert",
         title: "Verificăm confirmarea transmiterii în SPV",
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
-        linkTo: `/dashboard/resolve/${finding.id}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }
     case "EF-006":
       return {
         type: "fiscal_alert",
         title: "Verificăm factura după corecția datelor clientului",
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
-        linkTo: `/dashboard/resolve/${finding.id}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }
     default:
       return {
         type: "fiscal_alert",
         title: "Monitorizare fiscală activă",
         message: `${recipe.heroSummary} ${recheckSignal}${nextControlLabel}`.trim(),
-        linkTo: `/dashboard/resolve/${finding.id}`,
+        linkTo: dashboardFindingRoute(finding.id),
       }
   }
 }

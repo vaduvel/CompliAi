@@ -12,6 +12,7 @@ import { createNotification } from "@/lib/server/notifications-store"
 import type { PendingAction } from "@/lib/server/approval-queue"
 import { markReportRun, type ScheduledReportFrequency, type ScheduledReportType } from "@/lib/server/scheduled-reports"
 import { executeScheduledReportDelivery } from "@/lib/server/scheduled-report-runtime"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 
 export type DispatchResult = {
   executed: boolean
@@ -102,7 +103,7 @@ async function resolveFindings(action: PendingAction): Promise<DispatchResult> {
       type: "info",
       title: `Finding rezolvat automat: ${finding.title}`,
       message: `"${finding.title}" a trecut în ${targetStatus === "under_monitoring" ? "monitorizare" : "rezolvat"} după aprobarea automată (24h fără respingere).`,
-      linkTo: `/dashboard/resolve/${sourceFindingId}`,
+      linkTo: dashboardFindingRoute(sourceFindingId),
     }).catch(() => {})
 
     return {

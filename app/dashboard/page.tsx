@@ -25,7 +25,7 @@ import { ErrorScreen } from "@/components/compliscan/route-sections"
 import { Skeleton, SkeletonMetric } from "@/components/evidence-os/Skeleton"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { APPLICABILITY_TAG_LABELS } from "@/lib/compliance/applicability"
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type {
   ComplianceDriftRecord,
   ComplianceEvent,
@@ -33,7 +33,7 @@ import type {
   FindingCategory,
 } from "@/lib/compliance/types"
 import { buildExternalFeedItems, buildProactiveSystemChecks } from "@/lib/compliscan/feed-sources"
-import { describeFindingRiskForTriage, sortFindingsForTriage } from "@/lib/compliscan/finding-triage"
+import { sortFindingsForTriage } from "@/lib/compliscan/finding-triage"
 import { isFindingActive } from "@/lib/compliscan/finding-cockpit"
 import type { AppNotification } from "@/lib/server/notifications-store"
 import type { CockpitTask } from "@/components/compliscan/types"
@@ -152,6 +152,10 @@ export default function DashboardPage() {
       ? latestSnapshot.summary.complianceScore - previousSnapshot.summary.complianceScore
       : null
   const topFindings = sortFindingsForTriage(activeFindings).slice(0, 5)
+  const nextBestActionFindingId = nextBestAction?.relatedFindingIds[0] ?? null
+  const nextBestActionHref = nextBestActionFindingId
+    ? dashboardFindingRoute(nextBestActionFindingId)
+    : dashboardRoutes.resolve
 
   const auditStatusLabel =
     data.summary.score >= 90
@@ -188,10 +192,6 @@ export default function DashboardPage() {
     applicableEntries.length > 0
       ? applicableEntries.map((entry) => APPLICABILITY_TAG_LABELS[entry.tag]).join(" · ")
       : "Se completează după primul snapshot"
-  const findingsSummary =
-    activeFindings.length === 0
-      ? "Nicio problemă activă."
-      : `${activeFindings.length} cazuri active · ${openAlerts.length} alerte · ${activeDrifts.length} modificări`
   const nextActionSummary = nextBestAction
     ? nextBestAction.title
     : "Intră în De rezolvat și lucrează pe cazul prioritar."
@@ -364,7 +364,7 @@ export default function DashboardPage() {
         task={nextBestAction}
         hasEvidence={hasBaselineEvidence}
         activeRiskCount={activeRiskCount}
-        onResolve={() => router.push(dashboardRoutes.resolve)}
+        onResolve={() => router.push(nextBestActionHref)}
       />
 
       <RiskTrajectoryWidget />
@@ -448,7 +448,7 @@ export default function DashboardPage() {
                 return (
                   <Link
                     key={f.id}
-                    href={`/dashboard/resolve/${encodeURIComponent(f.id)}`}
+                    href={dashboardFindingRoute(f.id)}
                     className={`flex items-center gap-3 border-l-[3px] py-3 pl-4 pr-5 transition-colors hover:bg-eos-surface-active ${leftBorder}`}
                   >
                     <span className="flex-1 truncate text-sm text-eos-text">{f.title}</span>
@@ -620,7 +620,7 @@ function CompactNextAction({
           onClick={onResolve}
           className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
         >
-          Deschide <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Deschide cazul <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
         </button>
       </div>
     </div>
@@ -687,7 +687,8 @@ function buildActivityFeedItems({
       event.entityType === "finding" ? "Actualizat" : "Activitate"
     const href =
       event.entityType === "drift" ? dashboardRoutes.drifts :
-      event.entityType === "task" || event.entityType === "finding" ? dashboardRoutes.resolve :
+      event.entityType === "finding" ? dashboardFindingRoute(event.entityId) :
+      event.entityType === "task" ? dashboardRoutes.resolve :
       dashboardRoutes.dosar
     items.push({
       id: `event-${event.id}`,

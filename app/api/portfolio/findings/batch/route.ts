@@ -20,6 +20,7 @@ import { mapFindingToTask } from "@/lib/finding-to-task-mapper"
 import {
   materializeFindingTruth,
 } from "@/lib/compliscan/finding-truth"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 import { normalizeFindingSuggestedDocumentType } from "@/lib/compliscan/finding-kernel"
 
 type BatchAction = "dismiss_finding" | "confirm_finding" | "mark_notification_read"
@@ -224,7 +225,7 @@ export async function POST(request: Request) {
                 `${taskCandidate.suggestedOwner} poate închide cazul până la ${new Date(
                   taskCandidate.deadline
                 ).toLocaleDateString("ro-RO")}.`,
-              linkTo: `/dashboard/resolve/${item.findingId}`,
+              linkTo: dashboardFindingRoute(item.findingId),
             })
             perItemResults.push({
               orgId,

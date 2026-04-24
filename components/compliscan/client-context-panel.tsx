@@ -4,7 +4,7 @@
 // Shown at /portfolio/client/[orgId] — lets partner view a client's
 // compliance status without switching workspace permanently.
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { BATCH_ACTION_LABELS, type BatchActionType } from "@/lib/compliance/batch-actions"
+import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
 // ── Types (mirrors /api/partner/clients/[orgId] response) ─────────────────────
 
@@ -130,7 +131,7 @@ export function ClientContextPanel({
   const [enteringWorkspace, setEnteringWorkspace] = useState(false)
   const [batchLoading, setBatchLoading] = useState(false)
 
-  async function loadContext() {
+  const loadContext = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -145,13 +146,13 @@ export function ClientContextPanel({
     } finally {
       setLoading(false)
     }
-  }
+  }, [orgId])
 
   useEffect(() => {
     void loadContext()
-  }, [orgId])
+  }, [loadContext])
 
-  async function handleEnterWorkspace() {
+  async function openOrgDestination(destination: string) {
     setEnteringWorkspace(true)
     try {
       const res = await fetch("/api/auth/select-workspace", {
@@ -164,13 +165,18 @@ export function ClientContextPanel({
         toast.error(payload.error ?? "Nu am putut intra în firmă.")
         return
       }
-      const destination = focusedFindingId
-        ? `/dashboard/resolve/${encodeURIComponent(focusedFindingId)}`
-        : "/dashboard"
       window.location.assign(destination)
     } finally {
       setEnteringWorkspace(false)
     }
+  }
+
+  async function handleEnterWorkspace() {
+    await openOrgDestination(dashboardRoutes.home)
+  }
+
+  async function handleOpenFinding(findingId: string) {
+    await openOrgDestination(dashboardFindingRoute(findingId))
   }
 
   async function handleQuickAction(actionType: BatchActionType) {
@@ -225,13 +231,36 @@ export function ClientContextPanel({
   const focusedFinding = focusedFindingId
     ? data.openFindings.find((finding) => finding.id === focusedFindingId) ?? null
     : null
+  const priorityFinding = focusedFinding ?? data.openFindings[0] ?? null
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
-      {focusedFinding ? (
-        <div className="rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.08] px-4 py-3 text-sm text-eos-text-muted">
-          Ai venit din Alerte cu finding-ul <span className="font-semibold text-eos-text">{focusedFinding.title}</span>.
-          Poți deschide direct cockpit-ul sau intra în firmă pentru context complet.
+      {focusedFindingId ? (
+        <div className="rounded-eos-xl border border-eos-primary/30 bg-eos-primary/[0.08] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-primary">
+                Ai venit din Alerte
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-eos-text">
+                {focusedFinding?.title ?? "Finding selectat"}
+              </h2>
+              <p className="mt-1 text-xs text-eos-text-tertiary">
+                {focusedFinding
+                  ? "Deschide cockpit-ul cazului sau intră în firmă doar dacă ai nevoie de context complet."
+                  : "Finding-ul este selectat din alertă. Îl deschidem direct în cockpit după schimbarea contextului."}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleOpenFinding(focusedFindingId)}
+              disabled={enteringWorkspace}
+              className="flex shrink-0 items-center justify-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+            >
+              {enteringWorkspace ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
+              Deschide finding-ul în cockpit
+            </button>
+          </div>
         </div>
       ) : null}
 
@@ -255,6 +284,18 @@ export function ClientContextPanel({
             Reîncarcă
           </button>
 
+          {!focusedFindingId && priorityFinding ? (
+            <button
+              type="button"
+              onClick={() => void handleOpenFinding(priorityFinding.id)}
+              disabled={enteringWorkspace}
+              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+            >
+              {enteringWorkspace ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
+              Deschide cazul prioritar
+            </button>
+          ) : null}
+
           <a
             href={`/trust/${orgId}`}
             target="_blank"
@@ -267,12 +308,20 @@ export function ClientContextPanel({
 
           <button
             type="button"
-            onClick={() => void handleEnterWorkspace()}
+            onClick={() =>
+              focusedFindingId
+                ? void handleOpenFinding(focusedFindingId)
+                : void handleEnterWorkspace()
+            }
             disabled={enteringWorkspace}
-            className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+            className={`flex items-center gap-1.5 rounded-eos-md px-4 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
+              focusedFindingId
+                ? "border border-eos-primary/30 bg-eos-primary text-white hover:opacity-90"
+                : "border border-eos-border bg-eos-surface-active text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text"
+            }`}
           >
             {enteringWorkspace ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
-            Intră în firmă
+            {focusedFindingId ? "Deschide finding-ul" : "Intră în firmă"}
           </button>
         </div>
       </div>
@@ -335,13 +384,19 @@ export function ClientContextPanel({
           ) : (
             <div className="space-y-2">
               {data.openFindings.slice(0, 6).map((f) => (
-                <div key={f.id} className="space-y-1 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-3 py-2">
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => void handleOpenFinding(f.id)}
+                  disabled={enteringWorkspace}
+                  className="block w-full space-y-1 rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-3 py-2 text-left transition-all hover:border-eos-primary/30 hover:bg-eos-primary/[0.04] disabled:opacity-60"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-xs font-medium leading-snug text-eos-text">{f.title}</p>
                     <SeverityBadge severity={f.severity} />
                   </div>
                   <p className="text-[10px] uppercase tracking-wide text-eos-text-tertiary">{f.category}</p>
-                </div>
+                </button>
               ))}
               {data.openFindings.length > 6 && (
                 <p className="text-center text-[11px] text-eos-text-tertiary">

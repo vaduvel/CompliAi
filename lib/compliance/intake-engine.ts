@@ -4,7 +4,7 @@
 // Model: prefill → 7 întrebări decisive → condiționare → findings + doc requests + next action
 // Funcție pură, fără I/O, safe în browser și pe server.
 
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { dashboardFindingRoute } from "@/lib/compliscan/dashboard-routes"
 import type { OrgProfile } from "@/lib/compliance/applicability"
 import type {
   OrgProfilePrefill,
@@ -1059,7 +1059,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (privacyFinding) {
     return {
       label: "Generează prima politică GDPR",
-      href: `${dashboardRoutes.resolve}/${privacyFinding.id}?action=generate`,
+      href: dashboardFindingRoute(privacyFinding.id, { action: "generate" }),
       estimatedMinutes: 3,
     }
   }
@@ -1067,7 +1067,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (ropaFinding) {
     return {
       label: "Deschide registrul RoPA în cockpit",
-      href: `${dashboardRoutes.resolve}/${ropaFinding.id}`,
+      href: dashboardFindingRoute(ropaFinding.id),
       estimatedMinutes: 4,
     }
   }
@@ -1075,7 +1075,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (vendorDpaFinding) {
     return {
       label: "Deschide primul DPA în cockpit",
-      href: `${dashboardRoutes.resolve}/${vendorDpaFinding.id}?action=generate`,
+      href: dashboardFindingRoute(vendorDpaFinding.id, { action: "generate" }),
       estimatedMinutes: 4,
     }
   }
@@ -1083,7 +1083,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (vendorPackFinding) {
     return {
       label: "Deschide pachetul vendor în cockpit",
-      href: `${dashboardRoutes.resolve}/${vendorPackFinding.id}`,
+      href: dashboardFindingRoute(vendorPackFinding.id),
       estimatedMinutes: 5,
     }
   }
@@ -1091,7 +1091,7 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (hrJobFinding) {
     return {
       label: "Deschide pachetul fișelor de post",
-      href: `${dashboardRoutes.resolve}/${hrJobFinding.id}`,
+      href: dashboardFindingRoute(hrJobFinding.id),
       estimatedMinutes: 5,
     }
   }
@@ -1099,14 +1099,14 @@ export function buildNextBestAction(findings: ScanFinding[]): NextBestAction {
   if (aiFinding) {
     return {
       label: "Deschide politica AI în cockpit",
-      href: `${dashboardRoutes.resolve}/${aiFinding.id}?action=generate`,
+      href: dashboardFindingRoute(aiFinding.id, { action: "generate" }),
       estimatedMinutes: 4,
     }
   }
   if (findings.length > 0) {
     return {
       label: "Rezolvă primul finding din board",
-      href: dashboardRoutes.resolve,
+      href: dashboardFindingRoute(findings[0].id),
       estimatedMinutes: 3,
     }
   }
