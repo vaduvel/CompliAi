@@ -6,19 +6,18 @@ import { ArrowRight } from "lucide-react"
 
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { LifecycleBadge } from "@/components/evidence-os/LifecycleBadge"
-import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { DenseListItem } from "@/components/evidence-os/DenseListItem"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { PillarTabs } from "@/components/compliscan/pillar-tabs"
 import { AlertsList, LoadingScreen } from "@/components/compliscan/route-sections"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SectionBoundary } from "@/components/evidence-os/SectionBoundary"
-import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
+import { V3FindingRow, V3FrameworkTag, V3RiskPill } from "@/components/compliscan/v3/finding-row"
 import {
   formatDriftEscalationDeadline,
   formatDriftEscalationTier,
@@ -102,30 +101,38 @@ export default function DriftPage() {
           ? `${ledgerUnratedCount} neevaluate`
           : "registru curat"
       : "fără registru de dovadă încă"
-  const summaryItems: SummaryStripItem[] = [
+  const kpiItems: V3KpiItem[] = [
     {
+      id: "drift-activ",
       label: "Drift activ",
-      value: `${openDrifts.length}`,
-      hint: "schimbări față de baseline care cer decizie umană",
-      tone: openDrifts.length > 0 ? "warning" : "success",
+      value: openDrifts.length,
+      detail: "schimbări față de baseline care cer decizie umană",
+      stripe: openDrifts.length > 0 ? "warning" : "success",
+      valueTone: openDrifts.length > 0 ? "warning" : "success",
     },
     {
+      id: "sla-depasit",
       label: "SLA depasit",
-      value: `${breachedDrifts}`,
-      hint: breachedDrifts > 0 ? "drift-uri ieșite din fereastra de escalare" : "fără escalări depășite acum",
-      tone: breachedDrifts > 0 ? "danger" : "success",
+      value: breachedDrifts,
+      detail: breachedDrifts > 0 ? "drift-uri ieșite din fereastra de escalare" : "fără escalări depășite acum",
+      stripe: breachedDrifts > 0 ? "critical" : "success",
+      valueTone: breachedDrifts > 0 ? "critical" : "success",
     },
     {
+      id: "task-uri-drift",
       label: "Task-uri din drift",
-      value: `${driftTasks.length}`,
-      hint: "acțiuni generate deja din semnalele de drift",
-      tone: driftTasks.length > 0 ? "accent" : "neutral",
+      value: driftTasks.length,
+      detail: "acțiuni generate deja din semnalele de drift",
+      stripe: driftTasks.length > 0 ? "info" : "neutral",
+      valueTone: driftTasks.length > 0 ? "info" : "neutral",
     },
     {
+      id: "dovada",
       label: "Dovada",
-      value: evidenceLedger.length > 0 ? `${evidenceLedger.length}` : "lipsa",
-      hint: ledgerHint,
-      tone: ledgerWeakCount > 0 ? "warning" : evidenceLedger.length > 0 ? "success" : "neutral",
+      value: evidenceLedger.length > 0 ? evidenceLedger.length : "—",
+      detail: ledgerHint,
+      stripe: ledgerWeakCount > 0 ? "warning" : evidenceLedger.length > 0 ? "success" : "neutral",
+      valueTone: ledgerWeakCount > 0 ? "warning" : evidenceLedger.length > 0 ? "success" : "neutral",
     },
   ]
 
@@ -148,26 +155,15 @@ export default function DriftPage() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow="Control / Drift"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Alerte", current: true }]}
+        eyebrowBadges={
+          <Badge variant="outline" className="normal-case tracking-normal">
+            decizie umana
+          </Badge>
+        }
         title="Tratezi schimbarea față de baseline"
         description="Preiei, escaladezi sau închizi drift-ul aici. Dacă vrei queue-ul canonic sau livrabilul, continui în De rezolvat și Rapoarte."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              decizie umana
-            </Badge>
-          </>
-        }
-        aside={
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Snapshot drift
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{cockpit.data.summary.riskLabel}</p>
-          </div>
-        }
         actions={
           <>
             <Button asChild variant="outline">
@@ -188,16 +184,7 @@ export default function DriftPage() {
 
       <PillarTabs sectionId="control" />
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-5">
-          <SummaryStrip
-            eyebrow="Drift"
-            title="Semnal si actiune"
-            description="Cate schimbari sunt active, ce a depasit SLA-ul si ce task-uri au aparut din drift."
-            items={summaryItems}
-          />
-        </CardContent>
-      </Card>
+      <V3KpiStrip items={kpiItems} />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
         <SectionBoundary
@@ -234,7 +221,7 @@ export default function DriftPage() {
               Schimbări detectate față de snapshot. Drift-urile închise recent rămân vizibile pentru redeschidere rapidă.
             </p>
           </CardHeader>
-          <CardContent className="space-y-4 pt-4">
+          <CardContent className="space-y-3 pt-4">
             {visibleDrifts.map((drift) => {
               const guidance = getDriftPolicyFromRecord(drift)
               const breached = isDriftSlaBreached(drift)
@@ -242,68 +229,48 @@ export default function DriftPage() {
               const isExpanded = expandedDriftId === drift.id
               const lifecycleStatus = drift.lifecycleStatus ?? "open"
 
-              const driftBorderL =
-                drift.severity === "critical" || drift.severity === "high"
-                  ? "border-l-[3px] border-l-eos-error"
-                  : drift.severity === "medium"
-                    ? "border-l-[3px] border-l-eos-warning"
-                    : "border-l-[3px] border-l-eos-border-subtle"
+              const severityTone =
+                drift.severity === "critical"
+                  ? "critical"
+                  : drift.severity === "high"
+                    ? "high"
+                    : drift.severity === "medium"
+                      ? "medium"
+                      : "low"
 
               return (
-                <DenseListItem
-                  key={drift.id}
-                  active={isExpanded}
-                  className={`p-5 ${driftBorderL} ${breached && drift.open ? "bg-eos-error-soft" : ""}`}
-                >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
-                      }
-                      className="min-w-0 flex-1 text-left"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-base font-semibold text-eos-text">
-                              {drift.summary}
-                            </p>
-                            {isExpanded ? (
-                              <Badge variant="secondary">
-                                detalii deschise
-                              </Badge>
-                            ) : null}
-                          </div>
-                          <p className="mt-1 text-xs text-eos-text-muted">
-                            {formatDriftTypeLabel(drift.type)} · {formatDriftDetectedAt(drift.detectedAtISO)}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap justify-end gap-2">
-                          <SeverityBadge severity={drift.severity} />
-                          <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
-                          {breached && (
-                            <Badge variant="destructive">
-                              SLA depășit
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
-                      }
-                      variant="outline"
-                      size="sm"
-                    >
-                      {isExpanded ? "Ascunde" : "Detalii"}
-                    </Button>
-                  </div>
-                  {isExpanded ? (
-                    <>
-                      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div key={drift.id} className="flex flex-col gap-0">
+                  <V3FindingRow
+                    severity={severityTone}
+                    onClick={() =>
+                      setExpandedDriftId((current) => (current === drift.id ? null : drift.id))
+                    }
+                    title={drift.summary}
+                    subtitle={
+                      isExpanded
+                        ? undefined
+                        : `${formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")} · owner: ${drift.escalationOwner || guidance.ownerSuggestion} · ${formatDriftEscalationDeadline(drift.escalationDueAtISO || guidance.escalationDueAtISO)}`
+                    }
+                    meta={
+                      <>
+                        <V3FrameworkTag label={formatDriftTypeLabel(drift.type)} tone={severityTone} />
+                        <span>{formatDriftDetectedAt(drift.detectedAtISO)}</span>
+                      </>
+                    }
+                    badges={
+                      <>
+                        <V3RiskPill tone={severityTone}>{drift.severity ?? "low"}</V3RiskPill>
+                        <LifecycleBadge state={(drift.lifecycleStatus ?? "open") as "open" | "acknowledged" | "in_progress" | "resolved" | "waived"} />
+                        {breached && (
+                          <Badge variant="destructive">SLA depășit</Badge>
+                        )}
+                      </>
+                    }
+                    ctaLabel={isExpanded ? "Ascunde" : "Detalii"}
+                  />
+                  {isExpanded && (
+                    <div className="rounded-b-eos-lg border border-t-0 border-eos-border bg-eos-surface px-5 pb-5 pt-4 space-y-4">
+                      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                           <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             De ce conteaza
@@ -355,7 +322,7 @@ export default function DriftPage() {
                           </p>
                         </div>
                       </div>
-                      <p className="mt-3 text-xs text-eos-text-muted">
+                      <p className="text-xs text-eos-text-muted">
                         {[
                           drift.systemLabel || drift.sourceDocument || "Sursa tehnica fara eticheta",
                           drift.change,
@@ -452,17 +419,9 @@ export default function DriftPage() {
                           </>
                         }
                       />
-                    </>
-                  ) : (
-                    <p className="mt-3 text-xs text-eos-text-muted">
-                      {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")} · owner:{" "}
-                      {drift.escalationOwner || guidance.ownerSuggestion} ·{" "}
-                      {formatDriftEscalationDeadline(
-                        drift.escalationDueAtISO || guidance.escalationDueAtISO
-                      )}
-                    </p>
+                    </div>
                   )}
-                </DenseListItem>
+                </div>
               )
             })}
           </CardContent>
