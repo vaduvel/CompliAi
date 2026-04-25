@@ -9,6 +9,7 @@ import { ReportsPageSurface } from "@/components/compliscan/reports-page"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { getFindingAgeLabel } from "@/lib/compliscan/finding-cockpit"
 import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 
 export function DosarPageSurface() {
   const cockpit = useCockpitData()
@@ -33,21 +34,17 @@ export function DosarPageSurface() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Dosar</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-          {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
-        </h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          Cazurile rezolvate cu dovada atașată, documentele generate și exporturile pentru audit sau control.
-        </p>
-        <div className="mt-3 flex items-center gap-2">
-          <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-muted">
+      {/* Page hero */}
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Dosar", current: true }]}
+        title={isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
+        description="Cazurile rezolvate cu dovada atașată, documentele generate și exporturile pentru audit sau control."
+        eyebrowBadges={
+          <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
             {resolvedFindings.length} {resolvedFindings.length === 1 ? "caz rezolvat" : "cazuri rezolvate"}
           </span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Cazuri rezolvate + dovezi */}
       <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
