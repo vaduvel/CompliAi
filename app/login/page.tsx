@@ -167,7 +167,7 @@ function LoginContent() {
         </div>
 
         {/* Card */}
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
 
           {/* Mode toggle */}
           <div className="flex border-b border-eos-border-subtle p-1.5">
@@ -208,7 +208,7 @@ function LoginContent() {
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label htmlFor="orgName" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                  <label htmlFor="orgName" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                     Denumirea firmei
                   </label>
                   <input
@@ -226,7 +226,7 @@ function LoginContent() {
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                <label htmlFor="email" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Email
                 </label>
                 <input
@@ -243,7 +243,7 @@ function LoginContent() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                <label htmlFor="password" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Parolă
                 </label>
                 <div className="relative">
@@ -275,7 +275,7 @@ function LoginContent() {
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-wider text-eos-text-tertiary">
+                  <label htmlFor="confirmPassword" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                     Confirmă parola
                   </label>
                   <div className="relative">
@@ -292,9 +292,9 @@ function LoginContent() {
                       className={[
                         "h-12 w-full rounded-eos-lg border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary transition-all",
                         confirmPassword && password !== confirmPassword
-                          ? "border-eos-error/50/40 focus:border-eos-error/50/60"
+                          ? "border-eos-error/40 focus:border-eos-error/60"
                           : confirmPassword && password === confirmPassword
-                            ? "border-eos-success/50/40 focus:border-eos-success/50/50"
+                            ? "border-eos-success/40 focus:border-eos-success/50"
                             : "border-eos-border focus:border-eos-primary/50 focus:bg-eos-surface-active",
                       ].join(" ")}
                     />
@@ -370,7 +370,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={submitDisabled}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {loading ? (
                   <>
@@ -416,7 +416,7 @@ function LoginContent() {
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-eos-bg/70 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-eos-xl border border-eos-border bg-eos-surface-active px-5 py-5 shadow-2xl backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-eos-lg border border-eos-border bg-eos-surface-active px-5 py-5 shadow-2xl backdrop-blur-md">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-eos-lg bg-eos-primary-soft">
                 <Loader2 className="h-5 w-5 animate-spin text-eos-primary" strokeWidth={2} />
