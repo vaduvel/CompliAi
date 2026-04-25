@@ -90,7 +90,7 @@ const PLANS = [
     iconBg: "bg-eos-primary-soft border-eos-border",
     borderClass: "border-eos-primary/40",
     bgClass: "bg-eos-primary-soft",
-    ctaClass: "bg-eos-primary text-eos-text shadow-lg shadow-eos-primary/20/25 hover:bg-eos-primary",
+    ctaClass: "bg-eos-primary text-eos-text shadow-lg shadow-eos-primary/25 hover:bg-eos-primary",
   },
   {
     id: "partner" as const,
@@ -182,7 +182,7 @@ export default function PricingPage() {
             </Link>
             <Link
               href="/login"
-              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
+              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary"
             >
               Începe gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -218,7 +218,7 @@ export default function PricingPage() {
               <div
                 key={plan.id}
                 className={[
-                  "relative flex flex-col rounded-eos-xl border p-7 transition-all",
+                  "relative flex flex-col rounded-eos-lg border p-7 transition-all",
                   plan.borderClass,
                   plan.bgClass,
                   isHighlighted
@@ -228,7 +228,7 @@ export default function PricingPage() {
               >
                 {plan.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full border border-eos-primary/30 bg-eos-primary/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-eos-primary">
+                    <span className="font-mono rounded-full border border-eos-primary/30 bg-eos-primary/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-eos-primary">
                       {plan.badge}
                     </span>
                   </div>
@@ -244,7 +244,7 @@ export default function PricingPage() {
                   >
                     <plan.Icon className={["h-5 w-5", plan.iconClass].join(" ")} strokeWidth={1.5} />
                   </div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                     {plan.label}
                   </p>
                 </div>
@@ -301,7 +301,7 @@ export default function PricingPage() {
                   <Link
                     href={plan.ctaHref}
                     className={[
-                      "flex w-full items-center justify-center gap-2 rounded-eos-xl py-3.5 text-sm font-semibold transition-all",
+                      "flex w-full items-center justify-center gap-2 rounded-eos-lg py-3.5 text-sm font-semibold transition-all",
                       plan.ctaClass,
                     ].join(" ")}
                   >
@@ -316,30 +316,28 @@ export default function PricingPage() {
 
         {/* Feature comparison */}
         <div className="mt-16">
-          <details className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-5 select-none">
-              <div>
-                <h2 className="text-base font-semibold text-eos-text">Comparație completă</h2>
-                <p className="mt-0.5 text-sm text-eos-text-tertiary">
-                  Toate funcționalitățile față în față pe cele 3 planuri.
-                </p>
-              </div>
-              <span className="rounded-eos-md border border-eos-border bg-eos-surface-elevated px-3 py-1.5 text-xs font-medium text-eos-text-tertiary transition-colors group-open:text-eos-text-muted">
-                Deschide
-              </span>
-            </summary>
+          <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
+            <div className="px-6 py-5">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Comparație
+              </p>
+              <h2 className="mt-2 text-base font-semibold text-eos-text">Toate funcționalitățile pe cele 3 planuri</h2>
+              <p className="mt-1 text-sm text-eos-text-tertiary">
+                Vezi exact ce e inclus și ce nu, pe fiecare plan.
+              </p>
+            </div>
             <div className="overflow-x-auto border-t border-eos-border-subtle">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-eos-border-subtle">
-                    <th className="px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-eos-text-tertiary">
+                    <th className="font-mono px-5 py-3.5 text-left text-xs font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                       Funcționalitate
                     </th>
                     {PLANS.map((p) => (
                       <th
                         key={p.id}
                         className={[
-                          "px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider",
+                          "font-mono px-4 py-3.5 text-center text-xs font-bold uppercase tracking-[0.14em]",
                           p.highlight ? "text-eos-primary" : "text-eos-text-tertiary",
                         ].join(" ")}
                       >
@@ -386,33 +384,35 @@ export default function PricingPage() {
                 </tbody>
               </table>
             </div>
-          </details>
+          </div>
         </div>
 
         {/* FAQ */}
-        <div className="mt-10 space-y-3">
-          <h2 className="mb-6 text-base font-semibold text-eos-text-muted">Întrebări frecvente</h2>
-          {FAQ.map((item) => (
-            <details
-              key={item.q}
-              className="group rounded-eos-lg border border-eos-border bg-eos-surface-variant"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 select-none">
-                <span className="text-sm font-medium text-eos-text">{item.q}</span>
-                <span className="shrink-0 text-lg font-light text-eos-text-tertiary transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <div className="border-t border-eos-border-subtle px-5 py-4">
-                <p className="text-sm leading-relaxed text-eos-text-muted">{item.a}</p>
+        <div className="mt-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Întrebări frecvente
+          </p>
+          <h2 className="mt-2 text-base font-semibold text-eos-text-muted">Răspunsuri la întrebările uzuale</h2>
+          <div className="mt-6 space-y-3">
+            {FAQ.map((item) => (
+              <div
+                key={item.q}
+                className="rounded-eos-lg border border-eos-border bg-eos-surface-variant"
+              >
+                <div className="px-5 py-4">
+                  <p className="text-sm font-medium text-eos-text">{item.q}</p>
+                </div>
+                <div className="border-t border-eos-border-subtle px-5 py-4">
+                  <p className="text-sm leading-relaxed text-eos-text-muted">{item.a}</p>
+                </div>
               </div>
-            </details>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 rounded-eos-xl border border-eos-border bg-eos-primary-soft px-8 py-10 text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-eos-primary/70">
+        <div className="mt-16 rounded-eos-lg border border-eos-border bg-eos-primary-soft px-8 py-10 text-center">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-primary/70">
             Fără card. Fără angajament.
           </p>
           <h2 className="mt-3 text-2xl font-bold text-eos-text md:text-3xl">
@@ -424,14 +424,14 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-6 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/25 transition-all hover:bg-eos-primary"
+              className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-6 py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/25 transition-all hover:bg-eos-primary"
             >
               Creează cont gratuit
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
             </Link>
             <Link
               href="mailto:contact@compliscan.ro"
-              className="rounded-eos-xl border border-eos-border bg-eos-surface-elevated px-6 py-3.5 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
+              className="rounded-eos-lg border border-eos-border bg-eos-surface-elevated px-6 py-3.5 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
             >
               Vorbește cu echipa
             </Link>
