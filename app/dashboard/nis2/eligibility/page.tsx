@@ -3,18 +3,18 @@
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowLeft, ShieldAlert } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2, ShieldAlert } from "lucide-react"
 
-import { Button } from "@/components/evidence-os/Button"
+import { V3PageHero, V3RiskPill } from "@/components/compliscan/v3"
 import {
   Nis2EligibilityWizard,
   type Nis2EligibilityCompletionPayload,
 } from "@/components/compliscan/nis2/eligibility-wizard"
 import {
   NIS2_SECTORS,
+  type Nis2EligibilityResult,
   type Nis2EmployeeRange,
   type Nis2RevenueRange,
-  type Nis2EligibilityResult,
 } from "@/lib/compliscan/nis2-eligibility"
 
 type SavedEligibility = {
@@ -66,9 +66,12 @@ export default function Nis2EligibilityPage() {
     ].join(" ")
   }
 
-  function buildSavedEligibilityPayload(savedEligibility: SavedEligibility): Nis2EligibilityCompletionPayload {
+  function buildSavedEligibilityPayload(
+    savedEligibility: SavedEligibility
+  ): Nis2EligibilityCompletionPayload {
     const sectorLabel =
-      NIS2_SECTORS.find((sector) => sector.id === savedEligibility.sectorId)?.label ?? savedEligibility.sectorId
+      NIS2_SECTORS.find((sector) => sector.id === savedEligibility.sectorId)?.label ??
+      savedEligibility.sectorId
     return {
       sectorId: savedEligibility.sectorId,
       sectorLabel,
@@ -91,97 +94,118 @@ export default function Nis2EligibilityPage() {
     void fetchEligibility()
   }
 
+  // ── Render ──────────────────────────────────────────────────────────────
+
   return (
-    <div className="mx-auto max-w-xl space-y-6 py-6">
-      {fromCockpit ? (
-        <div className="flex items-start gap-3 rounded-lg border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
-          <ShieldAlert className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
+    <div className="space-y-5 pb-12">
+      <V3PageHero
+        breadcrumbs={[
+          { label: "Firma mea" },
+          { label: "NIS2" },
+          { label: "Eligibilitate", current: true },
+        ]}
+        eyebrowBadges={
+          <V3RiskPill tone="info">OUG 155/2024 · Directiva NIS2</V3RiskPill>
+        }
+        title="Eligibilitate NIS2"
+        description="Verifică rapid dacă organizația ta intră sub incidența Directivei NIS2. Răspunde la 3 întrebări (sector + angajați + cifră de afaceri) și primești verdictul cu temei legal."
+        actions={
+          <Link
+            href="/dashboard/nis2"
+            className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 text-[12.5px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+          >
+            <ArrowLeft className="size-3.5" strokeWidth={2.5} />
+            Înapoi la NIS2
+          </Link>
+        }
+      />
+
+      {fromCockpit && (
+        <div className="flex items-start gap-3 rounded-eos-lg border border-eos-warning/25 bg-eos-warning-soft px-4 py-3.5">
+          <ShieldAlert className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2.25} />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-eos-text">
-              Ai venit din cockpit pentru eligibilitatea NIS2
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
+              Vii din cockpit · pasul preliminar
             </p>
-            <p className="mt-0.5 text-xs text-eos-text-muted">
-              Clarifică mai întâi dacă firma intră sub NIS2. După salvare, te întorci automat în același cockpit pentru pasul final.
+            <p className="mt-1.5 text-[13px] leading-[1.6] text-eos-text">
+              Clarifică mai întâi dacă firma intră sub NIS2. După salvare, te întorci automat în
+              cockpit pentru pasul final.
             </p>
           </div>
           <Link
             href={returnTo ?? `/dashboard/resolve/${sourceFindingId}`}
-            className="shrink-0 text-xs text-eos-primary hover:underline"
+            className="inline-flex shrink-0 items-center gap-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-primary transition-colors hover:text-eos-primary/80"
           >
-            Înapoi la finding
+            <ArrowLeft className="size-3" strokeWidth={2.5} />
+            la finding
           </Link>
         </div>
-      ) : null}
-
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/dashboard/nis2")}
-        >
-          <ArrowLeft className="size-4" strokeWidth={2} />
-        </Button>
-        <div>
-          <h1 className="flex items-center gap-2 text-lg font-semibold">
-            <ShieldAlert className="size-5 text-eos-primary" strokeWidth={2} />
-            Eligibilitate NIS2
-          </h1>
-          <p className="text-sm text-eos-text-muted">
-            Verifică rapid dacă organizația ta intră sub incidența Directivei NIS2 (OUG 155/2024)
-          </p>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="size-6 animate-spin rounded-full border border-eos-primary border-t-transparent" />
-        </div>
-      ) : (
-        <>
-          <Nis2EligibilityWizard
-            saved={saved}
-            onComplete={handleComplete}
-            onResetSaved={() => setSaved(null)}
-          />
-          {fromCockpit && saved && returnTo ? (
-            <div className="rounded-eos-sm border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
-              <p className="text-sm font-medium text-eos-text">
-                Eligibilitatea este deja clarificată. Dacă ai verificat rezultatul, te întorci acum în cockpit pentru pasul final.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Button
-                  size="sm"
-                  onClick={() => handleComplete(buildSavedEligibilityPayload(saved))}
-                >
-                  Revino în cockpit
-                </Button>
-              </div>
-            </div>
-          ) : fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
-            <div className="rounded-eos-sm border border-eos-primary/25 bg-eos-primary/5 px-4 py-4">
-              <p className="text-sm font-medium text-eos-text">
-                Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Link
-                  href={`/dashboard/nis2/inregistrare-dnsc?${new URLSearchParams({
-                    findingId: sourceFindingId ?? "",
-                    source: "cockpit",
-                  }).toString()}`}
-                >
-                  <Button size="sm">Continuă spre DNSC</Button>
-                </Link>
-                <Link
-                  href={`/dashboard/resolve/${sourceFindingId}`}
-                  className="inline-flex items-center text-sm text-eos-primary hover:underline"
-                >
-                  Înapoi la cockpit
-                </Link>
-              </div>
-            </div>
-          ) : null}
-        </>
       )}
+
+      <div className="mx-auto max-w-2xl">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="size-6 animate-spin text-eos-text-tertiary" strokeWidth={2} />
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <Nis2EligibilityWizard
+              saved={saved}
+              onComplete={handleComplete}
+              onResetSaved={() => setSaved(null)}
+            />
+
+            {fromCockpit && saved && returnTo ? (
+              <div className="rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.06] px-5 py-4">
+                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                  Eligibilitate clarificată
+                </p>
+                <p className="mt-2 text-[13.5px] leading-[1.55] text-eos-text">
+                  Dacă ai verificat rezultatul, te întorci acum în cockpit pentru pasul final.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleComplete(buildSavedEligibilityPayload(saved))}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-eos-sm bg-eos-primary px-4 text-[12.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.45)] transition-all hover:bg-eos-primary/90"
+                  >
+                    Revino în cockpit
+                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
+            ) : fromCockpit && saved && saved.result !== "nu_intri" && !returnTo ? (
+              <div className="rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.06] px-5 py-4">
+                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                  Următorul pas
+                </p>
+                <p className="mt-2 text-[13.5px] leading-[1.55] text-eos-text">
+                  Eligibilitatea este clarificată. Poți continua direct spre înregistrarea DNSC.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link
+                    href={`/dashboard/nis2/inregistrare-dnsc?${new URLSearchParams({
+                      findingId: sourceFindingId ?? "",
+                      source: "cockpit",
+                    }).toString()}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-eos-sm bg-eos-primary px-4 text-[12.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.45)] transition-all hover:bg-eos-primary/90"
+                  >
+                    Continuă spre DNSC
+                    <ArrowRight className="size-3.5" strokeWidth={2.5} />
+                  </Link>
+                  <Link
+                    href={`/dashboard/resolve/${sourceFindingId}`}
+                    className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-text-muted transition-colors hover:text-eos-text"
+                  >
+                    <ArrowLeft className="size-3" strokeWidth={2.5} />
+                    Înapoi la cockpit
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

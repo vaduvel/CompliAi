@@ -41,7 +41,7 @@ function GapChip({ value, children }: { value: number; children?: ReactNode }) {
   }
   if (abs >= 5) {
     return (
-      <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
         {children ?? `${value}%`}
       </span>
     )
@@ -63,7 +63,7 @@ function RiskChip({ risk }: { risk: "low" | "medium" | "high" }) {
   }
   if (risk === "medium") {
     return (
-      <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
         risc medium
       </span>
     )
@@ -230,10 +230,10 @@ export function PayTransparencyPage() {
                 Încarcă CSV
                 <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleFileInput} />
               </label>
-              <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+              <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                 {records.length} înregistrări salvate
               </span>
-              <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+              <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                 finding {findingStatus ?? "open"}
               </span>
             </div>
@@ -275,7 +275,7 @@ export function PayTransparencyPage() {
             </div>
 
             {latestReport ? (
-              <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-eos-text">
                     Gap salarial {latestReport.gapPercent}%
@@ -303,7 +303,7 @@ export function PayTransparencyPage() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4 text-sm text-eos-text-muted">
                 Generează primul draft după ce ai încărcat datele salariale.
               </div>
             )}
@@ -328,12 +328,12 @@ export function PayTransparencyPage() {
           </header>
           <div className="space-y-3 px-4 py-4">
             {latestReport.gapByRole.length === 0 ? (
-              <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4 text-sm text-eos-text-muted">
                 Nu există suficiente date pentru comparație pe roluri.
               </div>
             ) : (
               latestReport.gapByRole.map((role) => (
-                <div key={role.role} className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
+                <div key={role.role} className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium text-eos-text">{role.role}</p>
@@ -362,7 +362,7 @@ export function PayTransparencyPage() {
           </header>
           <div className="space-y-3 px-4 py-4">
             {latestReport.gapByDepartment.map((department) => (
-              <div key={department.dept} className="flex items-center justify-between rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
+              <div key={department.dept} className="flex items-center justify-between rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                 <p className="text-sm font-medium text-eos-text">{department.dept}</p>
                 <GapChip value={department.gapPercent} />
               </div>
@@ -376,7 +376,7 @@ export function PayTransparencyPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
+    <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">{label}</p>
       <p className="mt-2 text-lg font-semibold text-eos-text">{value}</p>
     </div>
