@@ -345,7 +345,7 @@ export function FindingHeroAction({
   return (
     <div
       data-testid="finding-hero-action"
-      className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6"
+      className="rounded-eos-lg border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6"
     >
       <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
         Acum faci asta

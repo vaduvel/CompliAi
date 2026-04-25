@@ -196,7 +196,7 @@ export function ScanPageSurface() {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Constatări
               </p>
@@ -207,7 +207,7 @@ export function ScanPageSurface() {
                 {activeFromLastScan} active
               </p>
             </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+            <div className={`rounded-eos-lg border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Critice / ridicate
               </p>
@@ -218,7 +218,7 @@ export function ScanPageSurface() {
                 {criticalOrHighFindings.length > 0 ? "necesită atenție" : "nicio alertă"}
               </p>
             </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+            <div className={`rounded-eos-lg border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Rezolvate
               </p>
@@ -229,7 +229,7 @@ export function ScanPageSurface() {
                 din {latestDocumentFindings.length} total
               </p>
             </div>
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Categorii
               </p>
@@ -297,7 +297,7 @@ export function ScanPageSurface() {
 
       {/* Active findings nudge */}
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
-        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
+        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
           <AlertTriangle className="size-5 shrink-0 text-eos-warning/70" strokeWidth={2} />
           <p className="flex-1 text-sm text-eos-text-tertiary">
             <span className="font-semibold text-eos-text-muted">Scanare + rezolvare sunt suprafețe separate.</span>{" "}
@@ -446,7 +446,7 @@ export function ScanPageSurface() {
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-5">
+    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-5">
       <p className="text-sm font-semibold text-eos-text">{title}</p>
       <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>

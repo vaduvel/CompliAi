@@ -18,7 +18,7 @@ function formatValue(n: number | null, suffix?: string): string {
 
 function AccumulationSkeleton() {
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-secondary p-5 animate-pulse">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-secondary p-5 animate-pulse">
       <div className="mb-4 h-4 w-40 rounded bg-eos-border" />
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
@@ -89,7 +89,7 @@ export function AccumulationCard() {
   if (!hasAnyActivity) return null
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-secondary p-5">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-secondary p-5">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-eos-text-muted">
         Ce am construit pentru tine
       </p>

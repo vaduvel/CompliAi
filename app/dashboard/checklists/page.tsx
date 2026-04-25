@@ -28,7 +28,7 @@ export default function RemediationPage() {
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return (
     <div className="space-y-8">
-      <Skeleton className="h-20 w-full rounded-eos-xl" />
+      <Skeleton className="h-20 w-full rounded-eos-lg" />
       <Skeleton className="h-12 w-full rounded-eos-lg" />
       <div className="grid gap-3">
         <SkeletonCard />

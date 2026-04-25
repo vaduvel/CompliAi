@@ -228,7 +228,7 @@ function ActionDetailPanel({
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface">
+    <div className="flex h-full flex-col overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-eos-border px-5 py-4">
         <div className="min-w-0 flex-1">
@@ -472,7 +472,7 @@ export function ApprovalsPageSurface() {
         {/* List panel */}
         <div className={`${selected ? "w-full lg:w-1/2" : "w-full"} space-y-3`}>
           {/* Filter bar */}
-          <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+          <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
             {/* Search */}
             <label className="flex items-center gap-2 border-b border-eos-border-subtle px-4 py-3">
               <Search className="h-4 w-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />

@@ -239,7 +239,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
   return (
     <div>
       {/* Filter bar — search + status toggle */}
-      <div className="mb-3 overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="mb-3 overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {/* Search */}
         <label className="flex items-center gap-2 border-b border-eos-border-subtle px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
@@ -462,7 +462,7 @@ export function ResolvePageSurface() {
     <div className="space-y-6">
 
       {/* Context strip — lighter, no heavy card */}
-      <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
+      <div className="flex flex-col gap-4 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
         <div className="sm:flex-1 sm:pr-6">
           <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-0.5 text-sm text-eos-text">{applicabilityLabels}</p>
@@ -604,7 +604,7 @@ export function ResolveSupportPageSurface() {
         </div>
       </div>
 
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-eos-text-muted">Nu concurează cu cockpitul</p>

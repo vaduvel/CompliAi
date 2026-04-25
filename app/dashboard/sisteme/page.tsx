@@ -137,7 +137,7 @@ export default function SistemePage() {
       <PillarTabs sectionId="control" />
 
       {/* ── GOLD 8: AI Act deadline banner ───────────────────────────────────── */}
-      <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm dark:border-eos-warning/80/40 dark:bg-eos-warning-soft/20">
+      <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm dark:border-eos-warning/40 dark:bg-eos-warning-soft/20">
         <CalendarClock className="mt-0.5 size-4 shrink-0 text-eos-warning dark:text-eos-warning" strokeWidth={2} />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-eos-warning dark:text-eos-warning">
@@ -158,7 +158,7 @@ export default function SistemePage() {
 
       {/* ── Sprint 10: False confidence prevention ────────────────────────────── */}
       {aiHighRisk > 0 && (
-        <div className="flex items-start gap-3 rounded-eos-md border border-eos-error/20 bg-eos-error-soft/60 px-4 py-3 text-sm dark:border-eos-error/50/40 dark:bg-eos-error-soft/20">
+        <div className="flex items-start gap-3 rounded-eos-md border border-eos-error/20 bg-eos-error-soft/60 px-4 py-3 text-sm dark:border-eos-error/40 dark:bg-eos-error-soft/20">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-error dark:text-eos-error" strokeWidth={2} />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-eos-error dark:text-eos-error">

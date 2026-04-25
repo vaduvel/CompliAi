@@ -28,7 +28,7 @@ export function DriftActiveCard({ findings }: Props) {
   if (items.length === 0) return null
 
   return (
-    <div className="overflow-hidden rounded-eos-xl border border-eos-warning/25 bg-eos-surface-variant">
+    <div className="overflow-hidden rounded-eos-lg border border-eos-warning/25 bg-eos-surface-variant">
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-3.5 w-3.5 text-eos-warning" strokeWidth={2} />

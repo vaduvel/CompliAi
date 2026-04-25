@@ -83,7 +83,7 @@ function BatchActionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+      <div className="w-full max-w-lg rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
         <div className="border-b border-eos-border-subtle px-6 py-4">
           <h2 className="text-base font-semibold text-eos-text">
             Batch acțiuni — {tasks.length} taskuri selectate

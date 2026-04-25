@@ -50,7 +50,7 @@ export function DosarPageSurface() {
       </div>
 
       {/* Cazuri rezolvate + dovezi */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         <div className="border-b border-eos-border-subtle px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

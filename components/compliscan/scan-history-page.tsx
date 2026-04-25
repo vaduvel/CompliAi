@@ -37,7 +37,7 @@ export function ScanHistoryPageSurface() {
 
   if (cockpit.loading || !cockpit.data) return (
     <div className="space-y-6">
-      <Skeleton className="h-20 w-full rounded-eos-xl" />
+      <Skeleton className="h-20 w-full rounded-eos-lg" />
       <SkeletonCard />
       <SkeletonCard />
       <SkeletonCard />

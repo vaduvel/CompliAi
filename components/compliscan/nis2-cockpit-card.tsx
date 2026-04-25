@@ -76,7 +76,7 @@ export function Nis2CockpitCard() {
 
   if (state.status === "loading") {
     return (
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-5">
         <div className="flex items-center gap-2 text-sm font-medium text-eos-text-muted">
           <Loader2 className="size-4 animate-spin" strokeWidth={2} />
           Se încarcă pachetul NIS2
@@ -91,7 +91,7 @@ export function Nis2CockpitCard() {
   const topGap = nis2Package.gaps[0] ?? null
 
   return (
-    <section className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
+    <section className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">NIS2 rollout</p>

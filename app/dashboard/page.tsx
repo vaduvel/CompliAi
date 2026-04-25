@@ -125,11 +125,11 @@ export default function DashboardPage() {
         <SkeletonMetric />
         <SkeletonMetric />
       </div>
-      <Skeleton className="h-32 w-full rounded-eos-xl" />
+      <Skeleton className="h-32 w-full rounded-eos-lg" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-24 rounded-eos-xl" />
-        <Skeleton className="h-24 rounded-eos-xl" />
-        <Skeleton className="h-24 rounded-eos-xl" />
+        <Skeleton className="h-24 rounded-eos-lg" />
+        <Skeleton className="h-24 rounded-eos-lg" />
+        <Skeleton className="h-24 rounded-eos-lg" />
       </div>
     </div>
   )
@@ -215,7 +215,7 @@ export default function DashboardPage() {
   if (!state.orgProfile) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-primary-soft">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-primary-soft">
           <ShieldAlert className="h-6 w-6 text-eos-primary" strokeWidth={1.5} />
         </div>
         <h2 className="text-xl font-semibold text-eos-text">Completează profilul firmei</h2>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
     <div className="space-y-6 pb-20 sm:pb-0" role="main">
 
       {/* ── Context strip — info, no card ────────────────────────────────── */}
-      <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
+      <div className="flex flex-col gap-4 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
         <div className="sm:flex-1 sm:pr-6">
           <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-0.5 text-sm text-eos-text">{applicabilitySummary}</p>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {/* Readiness — top accent bar + ring */}
-        <div className={`relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 ${
+        <div className={`relative overflow-hidden rounded-eos-lg border bg-eos-surface-variant p-5 ${
           score >= 80 ? "border-eos-border" : score >= 60 ? "border-eos-warning/20" : "border-eos-error/20"
         }`}>
           <div className={`absolute inset-x-0 top-0 h-[3px] ${
@@ -300,7 +300,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Cazuri active — left accent border when issues */}
-        <Link href={dashboardRoutes.resolve} className={`group relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
+        <Link href={dashboardRoutes.resolve} className={`group relative overflow-hidden rounded-eos-lg border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
           activeFindings.length > 0 ? "border-eos-error/25" : "border-eos-border"
         }`}>
           {activeFindings.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-error" />}
@@ -319,7 +319,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* Drift activ — left accent border when drift */}
-        <Link href={dashboardRoutes.drifts} className={`group relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
+        <Link href={dashboardRoutes.drifts} className={`group relative overflow-hidden rounded-eos-lg border bg-eos-surface-variant p-5 transition-all hover:bg-eos-surface-active ${
           activeDrifts.length > 0 ? "border-eos-warning/25" : "border-eos-border"
         }`}>
           {activeDrifts.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-warning" />}
@@ -338,7 +338,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* Audit — left accent border by status */}
-        <div className={`relative overflow-hidden rounded-eos-xl border bg-eos-surface-variant p-5 ${
+        <div className={`relative overflow-hidden rounded-eos-lg border bg-eos-surface-variant p-5 ${
           auditStatusLabel === "Pregătit" ? "border-eos-success/25" :
           auditStatusLabel === "Blocat" ? "border-eos-error/25" : "border-eos-border"
         }`}>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
 
         {/* Framework-uri — cu mini progress bars (Drata pattern) */}
         {frameworkItems.length > 0 && (
-          <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+          <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
             <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
               <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Framework-uri aplicabile</p>
               <span className="text-[10px] tabular-nums text-eos-text-tertiary">
@@ -417,7 +417,7 @@ export default function DashboardPage() {
         )}
 
         {/* Cazuri active — border-l per severity row */}
-        <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
           <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
             <div className="flex items-center gap-2">
               <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cazuri active</p>
@@ -475,7 +475,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Activitate recentă — pill badges per tip ─────────────────────── */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-eos-text-tertiary" strokeWidth={2} />
@@ -554,7 +554,7 @@ function CompactNextAction({
     const ctaHref = !hasEvidence ? dashboardRoutes.scan : activeRiskCount > 0 ? dashboardRoutes.drifts : null
 
     return (
-      <div className="flex items-center gap-4 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
+      <div className="flex items-center gap-4 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-5 py-4">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-eos-lg bg-eos-surface-active">
           <CheckCircle2 className="h-4 w-4 text-eos-success" strokeWidth={2} />
         </div>
@@ -572,8 +572,8 @@ function CompactNextAction({
   }
 
   const prioColor =
-    task.priority === "P1" ? "bg-eos-error-soft text-eos-error border-eos-error/50/25" :
-    task.priority === "P2" ? "bg-eos-warning-soft text-eos-warning border-eos-warning/50/25" :
+    task.priority === "P1" ? "bg-eos-error-soft text-eos-error border-eos-error/25" :
+    task.priority === "P2" ? "bg-eos-warning-soft text-eos-warning border-eos-warning/25" :
     "bg-eos-surface-active text-eos-text-tertiary border-eos-border-subtle"
 
   const sevLabel =
@@ -586,7 +586,7 @@ function CompactNextAction({
     task.severity === "medium" ? "text-eos-warning" : "text-eos-text-tertiary"
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
       <div className="flex items-center gap-3 border-b border-eos-primary/[0.10] px-5 py-3">
         <p className="text-[11px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Ce faci acum</p>
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${prioColor}`}>{task.priority}</span>
@@ -606,7 +606,7 @@ function CompactNextAction({
         </div>
         <button
           onClick={onResolve}
-          className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
+          className="shrink-0 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-4 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary"
         >
           Deschide cazul <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
         </button>

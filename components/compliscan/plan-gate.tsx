@@ -89,7 +89,7 @@ export function PlanGate({
         {children}
       </div>
       {/* Overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-eos-xl bg-eos-surface/70 backdrop-blur-[2px]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-eos-lg bg-eos-surface/70 backdrop-blur-[2px]">
         <div className="flex max-w-xs flex-col items-center gap-3 text-center">
           <div className="grid size-10 place-items-center rounded-full border border-eos-border bg-eos-surface-primary shadow-[var(--eos-shadow-sm)]">
             <Lock className="size-5 text-eos-text-muted" strokeWidth={1.5} />

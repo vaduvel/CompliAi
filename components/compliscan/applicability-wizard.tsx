@@ -468,7 +468,7 @@ export function ApplicabilityWizard({
   }
 
   return (
-    <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
       <div className="px-5 py-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
@@ -584,7 +584,7 @@ export function ApplicabilityWizard({
               ) : null}
 
               {orgPrefill ? (
-                <div className="rounded-eos-lg border border-eos-success/50/25 bg-eos-success/[0.07] px-4 py-3">
+                <div className="rounded-eos-lg border border-eos-success/25 bg-eos-success/[0.07] px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-eos-text">{orgPrefill.companyName}</p>

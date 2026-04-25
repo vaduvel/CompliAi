@@ -20,7 +20,7 @@ export function RiskTrajectoryWidget() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-3">
+      <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3">
         <Loader2 className="size-4 animate-spin text-eos-text-muted" />
         <span className="text-sm text-eos-text-muted">Calculez trajectoria de risc…</span>
       </div>
@@ -44,7 +44,7 @@ export function RiskTrajectoryWidget() {
     data.trend === "degrading" ? "border-eos-warning/40 bg-eos-warning-soft/5" : "border-eos-border bg-eos-surface-variant"
 
   return (
-    <div className={`overflow-hidden rounded-eos-xl border ${borderColor}`}>
+    <div className={`overflow-hidden rounded-eos-lg border ${borderColor}`}>
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
         <div className="flex items-center gap-2">
           <TrendIcon className={`size-4 ${trendColor}`} />

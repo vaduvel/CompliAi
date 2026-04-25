@@ -321,7 +321,7 @@ function BatchToolbar({
   loading: boolean
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-eos-xl border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-6 items-center justify-center rounded-full bg-eos-primary text-xs font-semibold text-white">
           {count}
@@ -421,7 +421,7 @@ function BatchResultsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
+      <div className="w-full max-w-2xl rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-eos-text">{BATCH_ACTION_LABELS[action]}</p>
@@ -524,7 +524,7 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
   ]
 
   return (
-    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
+    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1 px-5 py-4">
           <span className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
@@ -780,7 +780,7 @@ export function PortfolioOverviewClient() {
 
       {/* ── Capacity warning ── */}
       {planData && !planData.canAddOrg && (
-        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-xl border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
           <div>
             <p className="text-sm font-semibold text-eos-text">Capacitatea portofoliului este atinsă</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">
@@ -824,7 +824,7 @@ export function PortfolioOverviewClient() {
 
         if (urgencies.length === 0) return null
         return (
-          <div className="rounded-eos-xl border border-eos-error-border bg-eos-error-soft px-5 py-4">
+          <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft px-5 py-4">
             <div className="mb-3 flex items-center gap-2">
               <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
               <span className="text-sm font-semibold text-eos-error">Urgențe acum</span>
@@ -902,10 +902,10 @@ export function PortfolioOverviewClient() {
       </div>
 
       {/* ── Client table ── */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
           <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-surface-active">
+            <div className="flex size-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-active">
               <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
             </div>
             <div className="space-y-1.5">
@@ -972,14 +972,14 @@ export function PortfolioOverviewClient() {
 
       {/* ── Info cards ── */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <Building2 className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Portofoliu-first, fără switch constant</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
             Triage-ul rămâne aici. Intrarea în firmă deschide doar execuția pe clientul selectat. Poți importa firme în masă și exporta snapshot-ul curent.
           </p>
         </div>
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <CalendarClock className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Drilldown rapid</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">

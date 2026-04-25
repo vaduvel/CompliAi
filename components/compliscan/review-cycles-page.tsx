@@ -201,7 +201,7 @@ export function ReviewCyclesPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="h-24 animate-pulse rounded-eos-xl bg-eos-surface-variant" />
+            <div key={item} className="h-24 animate-pulse rounded-eos-lg bg-eos-surface-variant" />
           ))}
         </div>
       ) : items.length === 0 ? (

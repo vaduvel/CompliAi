@@ -93,7 +93,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
   }
 
   return (
-    <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
       <div className="px-5 py-5">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
@@ -186,7 +186,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
                     type="button"
                     onClick={() => { setClientScale(option.id); setError(null) }}
                     className={[
-                      "flex flex-col items-center gap-2 rounded-eos-xl border px-3 py-4 text-center transition-all duration-200",
+                      "flex flex-col items-center gap-2 rounded-eos-lg border px-3 py-4 text-center transition-all duration-200",
                       isSelected
                         ? "border-violet-500/40 bg-violet-500/[0.08] shadow-[0_0_16px_rgba(139,92,246,0.10)]"
                         : "border-eos-border bg-eos-surface-variant hover:border-eos-border-strong hover:bg-eos-surface-active",

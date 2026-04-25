@@ -170,7 +170,7 @@ function WhiteLabelSection() {
       </div>
 
       {/* Preview */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border">
         <div
           className="flex items-center gap-3 px-5 py-3"
           style={{ backgroundColor: previewColor + "18", borderBottom: `2px solid ${previewColor}` }}
@@ -535,12 +535,12 @@ export function PortfolioReportsPage() {
       </div>
 
       {/* ── White-label branding ── */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
         <WhiteLabelSection />
       </div>
 
       {/* ── Scheduled Reports ── */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
         <ScheduledReportsSection />
       </div>
 

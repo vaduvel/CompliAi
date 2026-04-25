@@ -413,7 +413,7 @@ export function GeneratorDrawer({
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8 overflow-y-auto"
           onClick={(e) => { if (e.target === e.currentTarget) setPreviewExpanded(false) }}
         >
-          <div className="relative w-full max-w-3xl rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+          <div className="relative w-full max-w-3xl rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
             {/* Modal header */}
             <div className="flex items-center justify-between gap-4 border-b border-eos-border px-6 py-4">
               <div className="flex items-center gap-2.5 min-w-0">
