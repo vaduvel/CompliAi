@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 
@@ -116,7 +116,7 @@ export function SettingsTabIntro({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-muted">
         {title}
       </p>
       <p className="max-w-2xl text-sm leading-6 text-eos-text-muted">
@@ -141,7 +141,7 @@ export function SettingsTile({
         <span className="grid size-7 place-items-center rounded-eos-md border border-eos-border bg-eos-bg-inset">
           <Icon className="size-3.5" strokeWidth={2} />
         </span>
-        <p className="text-[11px] uppercase tracking-[0.18em]">{label}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em]">{label}</p>
       </div>
       <p className="mt-3 text-sm font-semibold leading-5 text-eos-text">{value}</p>
     </div>
@@ -193,7 +193,7 @@ export function SettingsStatusBlock({
 }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">{eyebrow}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{title}</p>
       {description ? (
         <p className="mt-2 text-sm leading-6 text-eos-text-muted">{description}</p>
@@ -249,26 +249,18 @@ export function SettingsDisclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <summary className="cursor-pointer list-none">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-              {eyebrow}
-            </p>
-            <p className="mt-1 text-sm font-medium text-eos-text">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-              {description}
-            </p>
-          </div>
-          <ChevronDown
-            className="mt-1 size-4 shrink-0 text-eos-text-muted"
-            strokeWidth={2}
-          />
-        </div>
-      </summary>
+    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+      <div className="min-w-0">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+          {eyebrow}
+        </p>
+        <p className="mt-1 text-sm font-medium text-eos-text">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+          {description}
+        </p>
+      </div>
       <div className="mt-4">{children}</div>
-    </details>
+    </div>
   )
 }
 
