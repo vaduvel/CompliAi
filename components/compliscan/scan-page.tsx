@@ -180,7 +180,7 @@ export function ScanPageSurface() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Ultima scanare
               </p>
               <p className="mt-0.5 text-xs text-eos-text-muted truncate max-w-[260px]">
@@ -197,7 +197,7 @@ export function ScanPageSurface() {
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Constatări
               </p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
@@ -208,7 +208,7 @@ export function ScanPageSurface() {
               </p>
             </div>
             <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Critice / ridicate
               </p>
               <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${criticalOrHighFindings.length > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
@@ -219,7 +219,7 @@ export function ScanPageSurface() {
               </p>
             </div>
             <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Rezolvate
               </p>
               <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${resolvedFromLastScan > 0 ? "text-eos-success" : "text-eos-text-tertiary"}`}>
@@ -230,7 +230,7 @@ export function ScanPageSurface() {
               </p>
             </div>
             <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Categorii
               </p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
