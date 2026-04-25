@@ -305,12 +305,9 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
         </div>
 
         {!soloMode && (
-          <details className="group border-t border-eos-border-subtle">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5">
-              <p className="text-xs font-medium text-eos-text-tertiary">Filtrare severitate</p>
-              <ChevronRight className="h-3.5 w-3.5 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-            </summary>
-            <div className="border-t border-eos-border-subtle px-4 pb-3 pt-3">
+          <div className="border-t border-eos-border-subtle">
+            <div className="px-4 pb-3 pt-3">
+              <p className="font-mono mb-2 text-xs font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Filtrare severitate</p>
               <div className="flex flex-wrap gap-1.5">
                 {severityTabs.map((tab) => {
                   const active = severityFilter === tab.id
@@ -332,7 +329,7 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                 })}
               </div>
             </div>
-          </details>
+          </div>
         )}
       </div>
 
@@ -391,7 +388,7 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
     <section aria-label="Urgențe cu deadline" className="space-y-2">
       <div className="flex items-center gap-2">
         <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-tertiary">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
           Urgențe cu deadline — {items.length} active
         </p>
       </div>
@@ -467,15 +464,15 @@ export function ResolvePageSurface() {
       {/* Context strip — lighter, no heavy card */}
       <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
         <div className="sm:flex-1 sm:pr-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-0.5 text-sm text-eos-text">{applicabilityLabels}</p>
         </div>
         <div className="sm:flex-1 sm:px-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Am găsit</p>
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Am găsit</p>
           <p className="mt-0.5 text-sm text-eos-text">{foundSummary}</p>
         </div>
         <div className="sm:flex-1 sm:pl-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Acum faci asta</p>
           <p className="mt-0.5 text-sm text-eos-text">{nextActionLine}</p>
         </div>
       </div>
@@ -503,7 +500,7 @@ export function ResolvePageSurface() {
 
       {/* Header + Severity KPI row */}
       <div>
-        <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
+        <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">De rezolvat</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
         </h1>
@@ -523,7 +520,7 @@ export function ResolvePageSurface() {
           ].map((item) => (
             <div key={item.label} className={`flex flex-col gap-1 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant border-l-[3px] px-4 py-3 ${item.color}`}>
               <span className="text-2xl font-semibold tabular-nums leading-none">{item.count}</span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">{item.label}</span>
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">{item.label}</span>
             </div>
           ))}
         </div>
@@ -555,10 +552,10 @@ export function ResolvePageSurface() {
       </section>
 
       {urgencyItems.length > 0 && (
-        <details className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant px-5 py-4">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Deadline-uri și semnale conexe
               </p>
               <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -568,11 +565,11 @@ export function ResolvePageSurface() {
             <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
               {urgencyItems.length} active
             </span>
-          </summary>
+          </div>
           <div className="mt-4">
             <UrgentItemsSection items={urgencyItems} />
           </div>
-        </details>
+        </div>
       )}
     </div>
   )
@@ -593,7 +590,7 @@ export function ResolveSupportPageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Task-uri de suport</p>
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Task-uri de suport</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           Board separat · {openTasks.length} deschise
         </h1>

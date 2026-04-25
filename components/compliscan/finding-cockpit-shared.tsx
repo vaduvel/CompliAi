@@ -278,18 +278,15 @@ export function FindingNarrativeCard({
         </div>
 
         {hasSecondaryContext ? (
-          <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
-                  Pregătire, confirmare și revalidare
-                </p>
-                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                  Doar contextul care te ajută să închizi corect cazul, fără să aglomereze primul ecran.
-                </p>
-              </div>
-              <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-            </summary>
+          <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
+            <div>
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
+                Pregătire, confirmare și revalidare
+              </p>
+              <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                Doar contextul care te ajută să închizi corect cazul, fără să aglomereze primul ecran.
+              </p>
+            </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {narrative.compliSupport ? (
                 <NarrativeBlock
@@ -313,7 +310,7 @@ export function FindingNarrativeCard({
                 />
               ) : null}
             </div>
-          </details>
+          </div>
         ) : null}
 
         <div className="grid gap-3 border-t border-eos-border-subtle pt-4 sm:grid-cols-3">
@@ -556,18 +553,15 @@ export function FindingExecutionCard({
           </div>
         ) : null}
 
-        <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                Aftercare
-              </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Dosarul și monitoring-ul rămân aici după închidere, fără să concureze cu execuția.
-              </p>
-            </div>
-            <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-          </summary>
+        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+          <div>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Aftercare
+            </p>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Dosarul și monitoring-ul rămân aici după închidere, fără să concureze cu execuția.
+            </p>
+          </div>
           <div className="mt-4 grid gap-3 border-t border-eos-border-subtle pt-4 md:grid-cols-2">
             <RailCard
               title="Ce intră în dosar"
@@ -604,7 +598,7 @@ export function FindingExecutionCard({
               }
             />
           </div>
-        </details>
+        </div>
       </CardContent>
     </Card>
   )
@@ -891,7 +885,7 @@ function NarrativeBlock({
 function FactLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
         {label}
       </p>
       <p className="text-sm text-eos-text-muted">{value}</p>
