@@ -242,17 +242,17 @@ export default function DashboardPage() {
       {/* ── Context strip — info, no card ────────────────────────────────── */}
       <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
         <div className="sm:flex-1 sm:pr-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Se aplică</p>
           <p className="mt-0.5 text-sm text-eos-text">{applicabilitySummary}</p>
         </div>
         <div className="sm:flex-1 sm:px-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Dovezi lipsă</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Dovezi lipsă</p>
           <p className="mt-0.5 text-sm text-eos-text">
             {missingEvidenceCount === 0 ? "Toate task-urile au dovadă" : `${missingEvidenceCount} task${missingEvidenceCount === 1 ? "" : "-uri"} fără dovadă`}
           </p>
         </div>
         <div className="sm:flex-1 sm:pl-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Acum faci asta</p>
           <p className="mt-0.5 text-sm text-eos-text">{nextActionSummary}</p>
         </div>
       </div>
@@ -267,7 +267,7 @@ export default function DashboardPage() {
           <div className={`absolute inset-x-0 top-0 h-[3px] ${
             score >= 80 ? "bg-eos-primary" : score >= 60 ? "bg-eos-warning" : "bg-eos-error"
           }`} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Readiness</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Readiness</p>
           <div className="mt-3 flex items-center gap-4">
             <div className="relative h-[72px] w-[72px] shrink-0">
               <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
@@ -304,7 +304,7 @@ export default function DashboardPage() {
           activeFindings.length > 0 ? "border-eos-error/25" : "border-eos-border"
         }`}>
           {activeFindings.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-error" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cazuri active</p>
           <div className="mt-3 flex items-end justify-between">
             <span className={`text-4xl font-semibold tabular-nums leading-none ${activeFindings.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
               {activeFindings.length}
@@ -323,7 +323,7 @@ export default function DashboardPage() {
           activeDrifts.length > 0 ? "border-eos-warning/25" : "border-eos-border"
         }`}>
           {activeDrifts.length > 0 && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-warning" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Modificări detectate</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Modificări detectate</p>
           <div className="mt-3 flex items-end justify-between">
             <span className={`text-4xl font-semibold tabular-nums leading-none ${activeDrifts.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>
               {activeDrifts.length}
@@ -344,7 +344,7 @@ export default function DashboardPage() {
         }`}>
           {auditStatusLabel === "Blocat" && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-error" />}
           {auditStatusLabel === "Pregătit" && <div className="absolute inset-y-0 left-0 w-[3px] bg-eos-success" />}
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Audit dosar</p>
+          <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Audit dosar</p>
           <div className="mt-3">
             <span className={`text-2xl font-semibold leading-none ${
               auditStatusLabel === "Pregătit" ? "text-eos-success" :
@@ -371,19 +371,14 @@ export default function DashboardPage() {
       <Nis2CockpitCard />
       <DriftActiveCard findings={state.findings} />
 
-      {/* ── Framework-uri + Cazuri active — 2 col, collapsible on mobile ── */}
-      <details className="group/details md:open" open>
-        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-3.5 transition-transform group-open/details:rotate-90" strokeWidth={2.5} />
-          Detalii framework-uri și cazuri
-        </summary>
+      {/* ── Framework-uri + Cazuri active — 2 col ──────────────────────── */}
       <div className="grid gap-4 xl:grid-cols-2">
 
         {/* Framework-uri — cu mini progress bars (Drata pattern) */}
         {frameworkItems.length > 0 && (
           <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
             <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Framework-uri aplicabile</p>
+              <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Framework-uri aplicabile</p>
               <span className="text-[10px] tabular-nums text-eos-text-tertiary">
                 {frameworkItems.filter((f) => f.status === "ok").length}/{frameworkItems.length} ok
               </span>
@@ -425,7 +420,7 @@ export default function DashboardPage() {
         <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
           <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cazuri active</p>
+              <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Cazuri active</p>
               {activeFindings.length > 0 && (
                 <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-eos-error px-1 text-[9px] font-bold text-white">
                   {activeFindings.length}
@@ -478,19 +473,13 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-      </details>
 
-      {/* ── Activitate recentă — pill badges per tip, collapsible mobile ── */}
-      <details className="group/activity md:open" open>
-        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg px-1 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary transition-colors hover:text-eos-text md:hidden [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-3.5 transition-transform group-open/activity:rotate-90" strokeWidth={2.5} />
-          Activitate recentă
-        </summary>
+      {/* ── Activitate recentă — pill badges per tip ─────────────────────── */}
       <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
         <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-eos-text-tertiary" strokeWidth={2} />
-            <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Activitate recentă</p>
+            <p className="text-[10px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Activitate recentă</p>
           </div>
           <Link href={dashboardRoutes.auditLog} className="flex items-center gap-1 text-[10px] font-medium text-eos-primary transition-colors hover:text-eos-text">
             Jurnal audit <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
@@ -527,7 +516,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-      </details>
 
       {/* ── Valoare acumulată ─────────────────────────────────────────────── */}
       <section
@@ -571,7 +559,7 @@ function CompactNextAction({
           <CheckCircle2 className="h-4 w-4 text-eos-success" strokeWidth={2} />
         </div>
         <div className="flex-1">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
+          <p className="text-[11px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Ce faci acum</p>
           <p className="mt-0.5 text-sm text-eos-text-muted">{msg}</p>
         </div>
         {ctaHref && (
@@ -600,7 +588,7 @@ function CompactNextAction({
   return (
     <div className="rounded-eos-xl border border-eos-border bg-eos-primary-soft shadow-[0_0_32px_rgba(59,130,246,0.07)]">
       <div className="flex items-center gap-3 border-b border-eos-primary/[0.10] px-5 py-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Ce faci acum</p>
+        <p className="text-[11px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Ce faci acum</p>
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${prioColor}`}>{task.priority}</span>
         <span className={`text-[11px] font-semibold ${sevColor}`}>{sevLabel}</span>
         <div className="ml-auto flex items-center gap-3 text-[11px] text-eos-text-tertiary">
