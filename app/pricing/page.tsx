@@ -199,7 +199,7 @@ export default function PricingPage() {
             <Zap className="h-3.5 w-3.5 text-eos-primary" strokeWidth={2} />
             <span className="text-xs font-semibold text-eos-primary">Prețuri clare, fără surprize</span>
           </div>
-          <h1 className="text-4xl font-bold leading-tight text-eos-text md:text-5xl">
+          <h1 className="font-display text-4xl font-semibold leading-tight tracking-[-0.025em] text-eos-text md:text-5xl">
             Alege planul potrivit
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-eos-text-muted md:text-lg">
@@ -252,7 +252,7 @@ export default function PricingPage() {
                 {/* Price */}
                 <div className="mb-2">
                   <div className="flex items-end gap-2">
-                    <span className="text-4xl font-bold text-eos-text md:text-5xl">
+                    <span className="font-display text-4xl font-semibold tracking-[-0.02em] text-eos-text md:text-5xl">
                       {plan.price.split(" / ")[0]}
                     </span>
                     {plan.price.includes("/") && (
@@ -415,7 +415,7 @@ export default function PricingPage() {
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-primary/70">
             Fără card. Fără angajament.
           </p>
-          <h2 className="mt-3 text-2xl font-bold text-eos-text md:text-3xl">
+          <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.02em] text-eos-text md:text-3xl">
             Începe gratuit și afli în 5 minute ce ți se aplică.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-eos-text-tertiary">

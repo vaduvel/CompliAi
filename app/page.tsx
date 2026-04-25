@@ -250,11 +250,11 @@ export default function HomePage() {
           </div>
 
           {/* H1 */}
-          <h1 className="relative mx-auto max-w-4xl text-5xl font-bold leading-[0.95] tracking-[-0.035em] md:text-6xl lg:text-7xl">
+          <h1 className="relative mx-auto max-w-4xl font-display text-5xl font-semibold leading-[0.95] tracking-[-0.035em] md:text-6xl lg:text-7xl">
             <span className="block text-eos-text">
               Vezi ce se aplică firmei tale.
             </span>
-            <span className="mt-2 block bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            <span className="mt-2 block text-eos-primary">
               Rezolvi clar.
             </span>
             <span className="block text-eos-text">Rămâi acoperit.</span>
@@ -321,7 +321,7 @@ export default function HomePage() {
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Cum merge
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
+              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
                 Un traseu. De la snapshot la dovadă.
               </h2>
             </div>
@@ -358,7 +358,7 @@ export default function HomePage() {
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Ce primești
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
+              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
                 Conformitate operată, nu doar explicată.
               </h2>
             </div>
@@ -409,7 +409,7 @@ export default function HomePage() {
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Pentru cine
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl">
+              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl">
                 Construit pentru firmele românești.
               </h2>
             </div>
@@ -437,7 +437,7 @@ export default function HomePage() {
             <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-eos-primary/8 blur-3xl" />
           </div>
           <div className="relative mx-auto max-w-2xl">
-            <h2 className="text-2xl font-bold text-eos-text md:text-3xl lg:text-4xl">
+            <h2 className="font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
               Gratuit pentru diagnostic.
               <br />
               <span className="text-eos-text-muted">Pro pentru operare.</span>

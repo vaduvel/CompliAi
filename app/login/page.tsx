@@ -150,9 +150,9 @@ function LoginContent() {
 
         {/* Tagline */}
         <div className="mb-7 text-center">
-          <h1 className="text-2xl font-bold text-eos-text">
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-eos-text">
             Află ce ți se aplică.{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="text-eos-primary">
               Fii gata de control.
             </span>
           </h1>
