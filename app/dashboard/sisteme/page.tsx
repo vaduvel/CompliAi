@@ -10,7 +10,8 @@ import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
 import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { V3Intro } from "@/components/compliscan/v3/compat"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
 import { ControlOverview, ControlDriftWorkspace, ControlReviewWorkspace } from "@/components/compliscan/sisteme/control-views"
 import { ControlSystemsWorkspace } from "@/components/compliscan/sisteme/ControlSystemsWorkspace"
 import { ControlPrimaryTabs } from "@/components/compliscan/sisteme/control-nav"
@@ -91,13 +92,49 @@ export default function SistemePage() {
     evidenceLedger.length - ledgerReadyCount - ledgerWeakCount
   )
 
+  const kpiItems: V3KpiItem[] = [
+    {
+      id: "score",
+      label: "Snapshot control",
+      value: data.summary.score,
+      detail: data.summary.riskLabel,
+      stripe: "neutral",
+    },
+    {
+      id: "confirmed",
+      label: "Sisteme confirmate",
+      value: confirmedCount,
+      detail: confirmedCount === 1 ? "sistem în inventar" : "sisteme în inventar",
+      stripe: "info",
+    },
+    {
+      id: "drift",
+      label: "Drift activ",
+      value: recentDrifts.length,
+      detail: recentDrifts.length > 0 ? "necesită atenție" : "fără drift activ",
+      stripe: recentDrifts.length > 0 ? "warning" : "success",
+      valueTone: recentDrifts.length > 0 ? "warning" : "success",
+    },
+    {
+      id: "baseline",
+      label: "Baseline",
+      value: validatedBaseline ? "validat" : "în curs",
+      detail: validatedBaseline
+        ? `validat ${new Date(validatedBaseline.generatedAt).toLocaleString("ro-RO")}`
+        : "baseline nevalidat încă",
+      stripe: validatedBaseline ? "success" : "warning",
+      valueTone: validatedBaseline ? "success" : "warning",
+    },
+  ]
+
   return (
     <div className="space-y-8">
-      <V3Intro
-        eyebrow="Control"
-        title="Confirmi ce intră în inventarul oficial și ce devine drift real"
-        description="Aici validezi candidatele, reperul și drift-ul real. Execuția rămâne în Dovadă."
-        badges={
+      <V3PageHero
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sisteme AI", current: true },
+        ]}
+        eyebrowBadges={
           <>
             <V3Pill variant="outline" className="normal-case tracking-normal">
               {confirmedCount} sisteme confirmate
@@ -110,15 +147,8 @@ export default function SistemePage() {
             </V3Pill>
           </>
         }
-        aside={
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Snapshot control
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{data.summary.score}</p>
-            <p className="text-sm text-eos-text-muted">{data.summary.riskLabel}</p>
-          </div>
-        }
+        title="Confirmi ce intră în inventarul oficial și ce devine drift real"
+        description="Aici validezi candidatele, reperul și drift-ul real. Execuția rămâne în Dovadă."
         actions={
           <>
             <Button variant="outline" onClick={() => setPrimaryView("systems")}>
@@ -133,6 +163,8 @@ export default function SistemePage() {
           </>
         }
       />
+
+      <V3KpiStrip items={kpiItems} />
 
       <PillarTabs sectionId="control" />
 
