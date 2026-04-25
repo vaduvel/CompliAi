@@ -151,7 +151,7 @@ export function FloatingAssistant({ pathname }: { pathname: string }) {
       {open && (
         <div
           id={panelId}
-          className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-xl border border-eos-border-subtle bg-eos-bg shadow-[var(--eos-shadow-lg)] sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-20 md:right-6 xl:w-[26rem]"
+          className="fixed bottom-36 left-4 right-4 z-[79] flex min-w-0 max-h-[min(36rem,calc(100vh-7.5rem))] flex-col overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-bg shadow-[var(--eos-shadow-lg)] sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-20 md:right-6 xl:w-[26rem]"
         >
           <div className="border-b border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
             <div className="flex items-start gap-3">

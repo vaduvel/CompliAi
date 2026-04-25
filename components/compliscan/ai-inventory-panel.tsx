@@ -387,10 +387,8 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove, onPatch }:
                 )}
               </div>
 
-              <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
-                  Urmatorii pasi recomandati
-                </summary>
+              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">Urmatorii pasi recomandati</p>
                 <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                   {previewClassification.recommendedActions.map((action, i) => (
                     <li key={i} className="flex gap-2">
@@ -402,7 +400,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove, onPatch }:
                     </li>
                   ))}
                 </ul>
-              </details>
+              </div>
             </div>
           )}
 
@@ -638,10 +636,8 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove, onPatch }:
                     </div>
                   )}
 
-                  <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.24em] text-eos-text-muted">
-                      Urmatorii pasi
-                    </summary>
+                  <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">Urmatorii pasi</p>
                     <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
                       {system.recommendedActions.map((item, index) => (
                         <li key={`${system.id}-${index}`} className="flex gap-2">
@@ -653,7 +649,7 @@ export function AIInventoryPanel({ systems, busy, onSubmit, onRemove, onPatch }:
                         </li>
                       ))}
                     </ul>
-                  </details>
+                  </div>
 
                   <div className="mt-3">
                     <AIActTimelineCard system={system} />

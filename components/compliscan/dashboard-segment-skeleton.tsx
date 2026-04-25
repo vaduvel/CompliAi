@@ -14,7 +14,7 @@ export function DashboardSegmentSkeleton({
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4 border-b border-eos-border pb-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+            <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
               {title}
             </p>
             <p className="mt-2 text-2xl font-semibold tracking-tight text-eos-text">

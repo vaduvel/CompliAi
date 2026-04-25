@@ -37,7 +37,7 @@ export function CookieConsent() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4">
-      <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-eos-xl border border-eos-border bg-eos-surface p-4 shadow-lg">
+      <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-eos-lg border border-eos-border bg-eos-surface p-4 shadow-lg">
         <Cookie className="mt-0.5 size-5 shrink-0 text-eos-primary" strokeWidth={2} />
         <div className="min-w-0 flex-1 space-y-2">
           <p className="text-sm text-eos-text">

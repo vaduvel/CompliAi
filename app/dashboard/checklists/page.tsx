@@ -28,7 +28,7 @@ export default function RemediationPage() {
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
   if (cockpit.loading || !cockpit.data) return (
     <div className="space-y-8">
-      <Skeleton className="h-20 w-full rounded-eos-xl" />
+      <Skeleton className="h-20 w-full rounded-eos-lg" />
       <Skeleton className="h-12 w-full rounded-eos-lg" />
       <div className="grid gap-3">
         <SkeletonCard />
@@ -112,7 +112,7 @@ export default function RemediationPage() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Blocaj curent
             </p>
             <p className="text-2xl font-semibold text-eos-text">{dominantExecutionSignal}</p>

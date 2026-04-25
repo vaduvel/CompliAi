@@ -217,7 +217,7 @@ export function RiskHeader({
         eyebrow="Tablou de bord"
         badges={
           <>
-            <Badge className="border-eos-border bg-eos-surface-variant px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
+            <Badge className="border-eos-border bg-eos-surface-variant px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
               {state.eyebrow}
             </Badge>
             <Badge className={state.badge}>{state.statusLabel}</Badge>
@@ -234,7 +234,7 @@ export function RiskHeader({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
+                <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
                   {activeWorkspace.workspaceLabel}
                 </p>
                 <p className="mt-1 truncate text-base font-semibold text-eos-text">
@@ -245,7 +245,7 @@ export function RiskHeader({
             </div>
 
             <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-tertiary">
+              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
                 {state.scoreLabel}
               </p>
               <div className="mt-3 flex items-end gap-2">

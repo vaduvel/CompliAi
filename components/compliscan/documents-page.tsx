@@ -388,7 +388,7 @@ export function DocumentsPageSurface() {
             <EmptyState
               title="Nu există documente generate"
               label="Generează primul document asistat — Politică de confidențialitate, DPA sau Politică Internă."
-              className="rounded-eos-xl border border-eos-border bg-eos-surface px-5 py-10"
+              className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10"
               actions={
                 <Button asChild size="sm">
                   <Link href={dashboardRoutes.generator}>Mergi la Generator</Link>
@@ -431,7 +431,7 @@ export function DocumentsPageSurface() {
             <EmptyState
               title="Nu există documente scanate"
               label="Încarcă primul document din Scanează pentru a porni istoricul firmei."
-              className="rounded-eos-xl border border-eos-border bg-eos-surface px-5 py-10"
+              className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10"
             />
           ) : (
             <div className="space-y-4">

@@ -2,7 +2,6 @@
 
 import {
   type LucideIcon,
-  ChevronDown,
   ClipboardCheck,
   FileBraces,
   FileCheck2,
@@ -191,7 +190,7 @@ export function ExportCenter({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                   Trimite acum
                 </p>
                 <Badge variant="success">principal</Badge>
@@ -231,7 +230,7 @@ export function ExportCenter({
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                   Suport pentru audit si review
                 </p>
                 <p className="text-sm text-eos-text-muted">
@@ -262,26 +261,18 @@ export function ExportCenter({
         )}
 
         {technicalActions.length > 0 && (
-          <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-            <summary className="cursor-pointer list-none">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                    Tehnic
-                  </p>
-                  <p className="text-sm font-medium text-eos-text">
-                    Snapshoturi si arhive pentru integrare, suport sau arhivare.
-                  </p>
-                  <p className="text-xs text-eos-text-muted">
-                    Deschizi aceasta zona doar cand ai nevoie de artefacte tehnice.
-                  </p>
-                </div>
-                <ChevronDown
-                  className="mt-1 size-4 shrink-0 text-eos-text-muted"
-                  strokeWidth={2}
-                />
-              </div>
-            </summary>
+          <section className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+            <div className="space-y-1">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+                Tehnic
+              </p>
+              <p className="text-sm font-medium text-eos-text">
+                Snapshoturi si arhive pentru integrare, suport sau arhivare.
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                Folosesti aceste exporturi pentru artefacte tehnice si integrare.
+              </p>
+            </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {technicalActions.map((action) => (
                 <Button
@@ -301,13 +292,13 @@ export function ExportCenter({
                 </Button>
               ))}
             </div>
-          </details>
+          </section>
         )}
 
         {/* Share / handoff CTA — always visible (GOLD 7 polish) */}
         <section className="flex flex-col gap-3 rounded-eos-md border border-eos-primary/20 bg-eos-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-primary">
               Partajează spre review
             </p>
             <p className="text-sm font-medium text-eos-text">Trimite pachetul spre contabil, auditor sau client</p>

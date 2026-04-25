@@ -124,7 +124,7 @@ export function RemediationBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.12em]">
+              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.14em]">
                 Task-uri de suport
               </CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
@@ -137,11 +137,8 @@ export function RemediationBoard({
           </div>
 
           {openCount > 0 && (
-            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
-              <summary className="cursor-pointer list-none text-xs text-eos-text-muted">
-                Filtru: {activeFilterLabel}
-              </summary>
-              <div className="mt-2 space-y-2">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
+              <div className="space-y-2">
                 {filterGroups.map((group) => (
                   <FilterCluster
                     key={group.label}
@@ -152,7 +149,7 @@ export function RemediationBoard({
                   />
                 ))}
               </div>
-            </details>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -340,7 +337,7 @@ function FilterCluster({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
           const filter = filters.find((item) => item.value === value)
@@ -472,7 +469,7 @@ function RelatedFindingAnchor({
       <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Caz asociat
             </p>
             <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />

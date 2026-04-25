@@ -71,7 +71,7 @@ const MODE_OPTIONS = [
     badge: "Compliance",
     iconClass: "text-eos-success",
     iconBg: "bg-eos-success-soft border-eos-border",
-    activeBorder: "border-eos-success/50/40",
+    activeBorder: "border-eos-success/40",
     activeBg: "bg-eos-success/[0.06]",
     activeShadow: "shadow-[0_0_28px_rgba(16,185,129,0.10)]",
     badgeClass: "bg-eos-success/20 text-eos-success",
@@ -290,7 +290,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                     type="button"
                     onClick={() => setSelectedMode(option.id)}
                     className={[
-                      "w-full rounded-eos-xl border p-5 text-left transition-all duration-200",
+                      "w-full rounded-eos-lg border p-5 text-left transition-all duration-200",
                       isSelected
                         ? [option.activeBorder, option.activeBg, option.activeShadow].join(" ")
                         : "border-eos-border bg-eos-surface-variant hover:border-eos-border-strong hover:bg-eos-surface-active",
@@ -356,7 +356,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               type="button"
               disabled={!selectedMode || loading}
               onClick={() => void handleConfirm()}
-              className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
                 <>

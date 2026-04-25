@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, ClipboardList, FileCode2, FileSearch } from "lucide-react"
+import { ClipboardList, FileCode2, FileSearch } from "lucide-react"
 
 import { Badge } from "@/components/evidence-os/Badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
@@ -86,7 +86,7 @@ export function ExportArtifactsCard() {
             className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
           >
             <div className="border-b border-eos-border pb-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                 {group.label}
               </p>
               <p className="mt-2 text-sm text-eos-text-muted [overflow-wrap:anywhere]">
@@ -136,7 +136,7 @@ function DriftDetailBlock({
 }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">{eyebrow}</p>
       <p className="mt-2 break-words text-sm font-medium text-eos-text">{title}</p>
       <p className="mt-1 text-xs leading-5 text-eos-text-muted [overflow-wrap:anywhere]">{detail}</p>
     </div>
@@ -217,23 +217,17 @@ export function RecentDriftCard({
                 />
               </div>
 
-              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                <summary className="cursor-pointer list-none">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
-                        Context operational
-                      </p>
-                      <p className="mt-1 break-words text-sm font-medium text-eos-text">
-                        Escalare, owner si update-uri de stare
-                      </p>
-                    </div>
-                    <ChevronDown
-                      className="mt-1 size-4 shrink-0 text-eos-text-muted"
-                      strokeWidth={2}
-                    />
+              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
+                      Context operational
+                    </p>
+                    <p className="mt-1 break-words text-sm font-medium text-eos-text">
+                      Escalare, owner si update-uri de stare
+                    </p>
                   </div>
-                </summary>
+                </div>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   <DriftDetailBlock
                     eyebrow="Escalare"
@@ -254,7 +248,7 @@ export function RecentDriftCard({
                     )}
                   />
                 </div>
-              </details>
+              </div>
             </div>
           )
         })}

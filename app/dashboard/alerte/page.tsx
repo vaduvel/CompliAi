@@ -161,7 +161,7 @@ export default function DriftPage() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Snapshot drift
             </p>
             <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>
@@ -305,7 +305,7 @@ export default function DriftPage() {
                     <>
                       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             De ce conteaza
                           </p>
                           <p className="mt-2 text-sm font-medium text-eos-text">
@@ -316,7 +316,7 @@ export default function DriftPage() {
                           </p>
                         </div>
                         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             Ce faci acum
                           </p>
                           <p className="mt-2 text-sm font-medium text-eos-text">
@@ -324,7 +324,7 @@ export default function DriftPage() {
                           </p>
                         </div>
                         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             Dovada
                           </p>
                           <p className="mt-2 text-sm font-medium text-eos-text">
@@ -332,7 +332,7 @@ export default function DriftPage() {
                           </p>
                         </div>
                         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             Escalare
                           </p>
                           <p className="mt-2 text-sm font-medium text-eos-text">

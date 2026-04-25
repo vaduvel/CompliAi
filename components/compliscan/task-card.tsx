@@ -272,7 +272,7 @@ export function TaskCard({
                     </Badge>
                   ) : null}
                   {task.status === "done" ? (
-                    <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.24em] text-[11px] text-eos-text-muted">
+                    <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.14em] text-[11px] text-eos-text-muted">
                       închis
                     </Badge>
                   ) : null}
@@ -303,7 +303,7 @@ export function TaskCard({
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <div className="space-y-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                     Acum faci asta
                   </p>
                   <p className="mt-2 text-sm font-medium text-eos-text">
@@ -384,20 +384,17 @@ export function TaskCard({
                 </div>
               </div>
 
-              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
-                <summary className="cursor-pointer list-none">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                        Dovada si utilitare
-                      </p>
-                      <p className="text-xs text-eos-text-muted">
-                        {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
+              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+                      Dovada si utilitare
+                    </p>
+                    <p className="text-xs text-eos-text-muted">
+                      {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
+                    </p>
                   </div>
-                </summary>
+                </div>
                 <div className="mt-3 space-y-3">
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     {task.attachedEvidence ? (
@@ -443,7 +440,7 @@ export function TaskCard({
 
                   <div className="flex items-center justify-between gap-3 rounded-eos-md border border-dashed border-eos-border bg-eos-bg-inset px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                         Utilitar
                       </p>
                       <p className="text-xs text-eos-text-muted">
@@ -461,7 +458,7 @@ export function TaskCard({
                     </Button>
                   </div>
                 </div>
-              </details>
+              </div>
             </section>
           </div>
 
@@ -621,23 +618,18 @@ function TaskDisclosure({
   children: ReactNode
 }) {
   return (
-    <details className="group rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <summary className="cursor-pointer list-none">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
-          {eyebrow}
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+        {eyebrow}
+      </p>
+      <div className="mt-2 min-w-0">
+        <p className="text-sm font-medium text-eos-text">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+          {subtitle}
         </p>
-        <div className="mt-2 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-eos-text">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-              {subtitle}
-            </p>
-          </div>
-          <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
-        </div>
-      </summary>
+      </div>
       <div className="mt-4">{children}</div>
-    </details>
+    </div>
   )
 }
 
@@ -674,7 +666,7 @@ function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
       }`}
     >
       <p
-        className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+        className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${
           isSpecialist ? "text-eos-error" : "text-eos-warning"
         }`}
       >
@@ -724,7 +716,7 @@ function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
     <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset">
       {/* Header cu progress */}
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
           Drum complet la rezolvare
         </span>
         {actionSteps > 0 && (
@@ -760,7 +752,7 @@ function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
               </div>
               <div className="min-w-0 pb-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
                     {label}
                   </p>
                   {cfg.label && (

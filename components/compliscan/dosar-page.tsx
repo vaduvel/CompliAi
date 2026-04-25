@@ -35,7 +35,7 @@ export function DosarPageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Dosar</p>
+        <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Dosar</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
         </h1>
@@ -50,7 +50,7 @@ export function DosarPageSurface() {
       </div>
 
       {/* Cazuri rezolvate + dovezi */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         <div className="border-b border-eos-border-subtle px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

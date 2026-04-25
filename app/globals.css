@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "./evidence-os.css";
 @import "../styles/tokens.css";
+@import "../styles/v3-design-system.css";
 
 @custom-variant dark (&:is(.dark *));
 

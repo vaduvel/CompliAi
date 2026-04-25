@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
-import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bot } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -57,7 +57,7 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">{eyebrow}</p>
       <p className="mt-1 text-sm font-semibold text-eos-text">{title}</p>
       {description && <p className="mt-0.5 text-xs text-eos-text-tertiary">{description}</p>}
     </div>
@@ -180,7 +180,7 @@ export function ScanPageSurface() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Ultima scanare
               </p>
               <p className="mt-0.5 text-xs text-eos-text-muted truncate max-w-[260px]">
@@ -196,8 +196,8 @@ export function ScanPageSurface() {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Constatări
               </p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
@@ -207,8 +207,8 @@ export function ScanPageSurface() {
                 {activeFromLastScan} active
               </p>
             </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className={`rounded-eos-lg border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Critice / ridicate
               </p>
               <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${criticalOrHighFindings.length > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
@@ -218,8 +218,8 @@ export function ScanPageSurface() {
                 {criticalOrHighFindings.length > 0 ? "necesită atenție" : "nicio alertă"}
               </p>
             </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className={`rounded-eos-lg border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Rezolvate
               </p>
               <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${resolvedFromLastScan > 0 ? "text-eos-success" : "text-eos-text-tertiary"}`}>
@@ -229,8 +229,8 @@ export function ScanPageSurface() {
                 din {latestDocumentFindings.length} total
               </p>
             </div>
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Categorii
               </p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
@@ -246,7 +246,7 @@ export function ScanPageSurface() {
 
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Scanează</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Adaugă surse noi</h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
@@ -297,7 +297,7 @@ export function ScanPageSurface() {
 
       {/* Active findings nudge */}
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
-        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
+        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
           <AlertTriangle className="size-5 shrink-0 text-eos-warning/70" strokeWidth={2} />
           <p className="flex-1 text-sm text-eos-text-tertiary">
             <span className="font-semibold text-eos-text-muted">Scanare + rezolvare sunt suprafețe separate.</span>{" "}
@@ -418,20 +418,15 @@ export function ScanPageSurface() {
             </div>
           )}
 
-          <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
-            <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
-              <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-              Detalii context scanare
-            </summary>
-            <div className="mt-4">
-              <ScanFlowOverviewCard
-                sourceType={sourceType}
-                latestDocumentScan={latestDocumentScan}
-                latestManifestScan={latestManifestScan}
-                latestYamlScan={latestYamlScan}
-              />
-            </div>
-          </details>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-tertiary mb-3">Detalii context scanare</p>
+            <ScanFlowOverviewCard
+              sourceType={sourceType}
+              latestDocumentScan={latestDocumentScan}
+              latestManifestScan={latestManifestScan}
+              latestYamlScan={latestYamlScan}
+            />
+          </div>
 
           <div className="flex justify-end border-t border-eos-border-subtle pt-3">
             <Link
@@ -451,7 +446,7 @@ export function ScanPageSurface() {
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-5">
+    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-5">
       <p className="text-sm font-semibold text-eos-text">{title}</p>
       <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>
