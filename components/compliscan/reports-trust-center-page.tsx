@@ -7,7 +7,7 @@ import { CheckCircle2, ExternalLink, Globe, Lock, ShieldCheck } from "lucide-rea
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
@@ -67,25 +67,23 @@ export function ReportsTrustCenterPageSurface() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow="Trust Center"
+      <V3PageHero
+        breadcrumbs={[{ label: "Rapoarte" }, { label: "Trust Center", current: true }]}
         title="Profil public de conformitate"
         description="Configurezi ce văd clienții și auditorii externi când primesc linkul Trust Center. Preview-ul de mai jos reflectă exact ce apare public."
-        badges={
+        eyebrowBadges={
           <Badge variant="outline" className="normal-case tracking-normal">
             vizualizare externa
           </Badge>
         }
-        aside={
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Scor global
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{score}%</p>
-            <p className="text-sm text-eos-text-muted">{data.summary.riskLabel}</p>
-          </div>
-        }
       />
+      <div className="grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-3">
+        <div className="px-5 py-4">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Scor global</p>
+          <p className="mt-1 text-2xl font-semibold text-eos-text">{score}%</p>
+          <p className="mt-0.5 text-xs text-eos-text-muted">{data.summary.riskLabel}</p>
+        </div>
+      </div>
 
       <ReportsTabs />
 

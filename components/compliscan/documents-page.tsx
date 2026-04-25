@@ -14,7 +14,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { HrPackKind, HrPreparedPack } from "@/lib/compliance/hr-drafts"
@@ -207,15 +207,15 @@ export function DocumentsPageSurface() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow={isSolo ? "Documente" : "Documente asistate"}
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: isSolo ? "Documente" : "Documente asistate", current: true }]}
         title={isSolo ? "Politici și documente scanate" : "Documente generate și arhivă scanată"}
         description={
           isSolo
             ? "Aici găsești într-un singur loc politicile generate și documentele scanate. Intri în detaliu doar când vrei să continui analiza sau exportul."
             : "Suprafața asta grupează documentele generate și arhiva scanărilor, fără să dubleze fluxurile din Scanează și Rapoarte."
         }
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {generatedDocuments.length} documente generate
@@ -226,7 +226,7 @@ export function DocumentsPageSurface() {
           </>
         }
         actions={
-          <div className="flex gap-2">
+          <>
             <Button asChild variant="outline" size="sm">
               <Link href={dashboardRoutes.auditorVault}>
                 <FolderOpen className="mr-1.5 size-3.5" />
@@ -239,7 +239,7 @@ export function DocumentsPageSurface() {
                 Generator
               </Link>
             </Button>
-          </div>
+          </>
         }
       />
 

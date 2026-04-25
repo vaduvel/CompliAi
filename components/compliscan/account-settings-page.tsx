@@ -19,7 +19,7 @@ import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import {
   PARTNER_ACCOUNT_PLAN_LABELS,
@@ -131,11 +131,11 @@ export function AccountSettingsPageSurface() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <PageIntro
-        eyebrow="Cont"
+      <V3PageHero
+        breadcrumbs={[{ label: "Cont" }, { label: "Setări cont", current: true }]}
         title="Setări cont"
         description="Gestionezi identitatea contului și, dacă lucrezi în modul partner, planul care guvernează capacitatea portofoliului."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {currentUser.email}

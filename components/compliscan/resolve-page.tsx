@@ -615,8 +615,8 @@ export function ResolvePageSurface() {
       </section>
 
       {urgencyItems.length > 0 && (
-        <details className="group overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Deadline-uri și semnale conexe
@@ -628,11 +628,11 @@ export function ResolvePageSurface() {
             <span className="rounded-sm border border-eos-border-subtle bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted">
               {urgencyItems.length} active
             </span>
-          </summary>
+          </div>
           <div className="mt-3">
             <UrgentItemsSection items={urgencyItems} />
           </div>
-        </details>
+        </div>
       )}
     </div>
   )

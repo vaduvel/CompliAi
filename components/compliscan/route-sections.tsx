@@ -286,11 +286,10 @@ export function DriftCommandCenter({
               })}
             </div>
 
-            <details className="group">
-              <summary className="flex cursor-pointer select-none items-center gap-2 py-1 text-xs font-medium text-eos-text-muted hover:text-eos-text">
-                <span className="transition-transform group-open:rotate-90">▶</span>
+            <div>
+              <p className="py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Detalii drift selectat
-              </summary>
+              </p>
               <div className="mt-3 grid gap-3 md:grid-cols-3">
                 <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3">
                   <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Impact principal</p>
@@ -343,7 +342,7 @@ export function DriftCommandCenter({
                   </p>
                 </div>
               </div>
-            </details>
+            </div>
 
             <div className="space-y-3">
               <ActionCluster

@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 
@@ -213,9 +213,9 @@ export function RiskHeader({
 
   return (
     <section className="space-y-4">
-      <PageIntro
-        eyebrow="Tablou de bord"
-        badges={
+      <V3PageHero
+        breadcrumbs={[{ label: "Tablou de bord", current: true }]}
+        eyebrowBadges={
           <>
             <Badge className="border-eos-border bg-eos-surface-variant px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
               {state.eyebrow}
@@ -225,39 +225,6 @@ export function RiskHeader({
         }
         title={state.actionTitle}
         description={state.primaryMessage}
-        aside={
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Avatar size="lg" className="border border-eos-border bg-eos-surface-variant">
-                <AvatarFallback className="bg-transparent text-eos-text">
-                  {activeWorkspace.workspaceInitials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  {activeWorkspace.workspaceLabel}
-                </p>
-                <p className="mt-1 truncate text-base font-semibold text-eos-text">
-                  {activeWorkspace.workspaceOwner}
-                </p>
-                <p className="truncate text-sm text-eos-text-muted">{activeWorkspace.orgName}</p>
-              </div>
-            </div>
-
-            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-4">
-              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
-                {state.scoreLabel}
-              </p>
-              <div className="mt-3 flex items-end gap-2">
-                <div className="text-4xl font-semibold leading-none tracking-tight text-eos-text">
-                  {score}
-                </div>
-                <div className="pb-1 text-sm text-eos-text-muted">/100</div>
-              </div>
-              <p className={`mt-2 text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
-            </div>
-          </div>
-        }
         actions={
           <Button
             onClick={onScan}
@@ -270,6 +237,38 @@ export function RiskHeader({
           </Button>
         }
       />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex items-center gap-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
+          <Avatar size="lg" className="border border-eos-border bg-eos-surface-variant">
+            <AvatarFallback className="bg-transparent text-eos-text">
+              {activeWorkspace.workspaceInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-eos-text-tertiary">
+              {activeWorkspace.workspaceLabel}
+            </p>
+            <p className="mt-1 truncate text-base font-semibold text-eos-text">
+              {activeWorkspace.workspaceOwner}
+            </p>
+            <p className="truncate text-sm text-eos-text-muted">{activeWorkspace.orgName}</p>
+          </div>
+        </div>
+
+        <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-eos-text-tertiary">
+            {state.scoreLabel}
+          </p>
+          <div className="mt-2 flex items-end gap-2">
+            <div className="text-4xl font-semibold leading-none tracking-tight text-eos-text">
+              {score}
+            </div>
+            <div className="pb-1 text-sm text-eos-text-muted">/100</div>
+          </div>
+          <p className={`mt-1.5 text-sm font-medium ${state.emphasis}`}>{scoreCaption(score)}</p>
+        </div>
+      </div>
 
       <SummaryStrip
         eyebrow="Indicatori de orientare"

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react"
 
 export type RepoSyncStatus = {
   headerName: string
@@ -275,26 +275,18 @@ export function SettingsDisclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
-      <summary className="cursor-pointer list-none">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-              {eyebrow}
-            </p>
-            <p className="mt-1 text-[12.5px] font-medium text-eos-text">{title}</p>
-            <p className="mt-1 text-[11.5px] leading-[1.5] text-eos-text-muted">
-              {description}
-            </p>
-          </div>
-          <ChevronDown
-            className="mt-1 size-4 shrink-0 text-eos-text-muted"
-            strokeWidth={2}
-          />
-        </div>
-      </summary>
+    <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          {eyebrow}
+        </p>
+        <p className="mt-1 text-[12.5px] font-medium text-eos-text">{title}</p>
+        <p className="mt-1 text-[11.5px] leading-[1.5] text-eos-text-muted">
+          {description}
+        </p>
+      </div>
       <div className="mt-4">{children}</div>
-    </details>
+    </div>
   )
 }
 
