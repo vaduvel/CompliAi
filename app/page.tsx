@@ -73,7 +73,7 @@ const FEATURES = [
   {
     icon: Activity,
     color: "text-eos-success",
-    bg: "bg-eos-success/10 border-eos-success/50/20",
+    bg: "bg-eos-success/10 border-eos-success/20",
     title: "Dosar și monitorizare",
     description:
       "Dovada intră automat în dosar. Cazul rămâne sub watch și îți semnalează când trebuie revizuit.",
@@ -181,7 +181,7 @@ function ProductMock() {
               ))}
 
               {/* Resolved row */}
-              <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/50/15 bg-eos-success/5 px-3.5 py-2.5 opacity-60">
+              <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/15 bg-eos-success/5 px-3.5 py-2.5 opacity-60">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" />
                 <span className="flex-1 truncate text-xs text-eos-success/80">
                   Cookie policy publicată · dovadă în dosar
@@ -270,14 +270,14 @@ export default function HomePage() {
           <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/login?mode=register"
-              className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/25 transition-all hover:bg-eos-primary hover:shadow-eos-primary/20/40"
+              className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/25 transition-all hover:bg-eos-primary hover:shadow-eos-primary/40"
             >
               Creează cont gratuit
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
               href="/demo/imm"
-              className="rounded-eos-xl border border-eos-border bg-eos-surface-elevated px-7 py-3 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
+              className="rounded-eos-lg border border-eos-border bg-eos-surface-elevated px-7 py-3 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
             >
               Vezi demo live
             </Link>
@@ -318,7 +318,7 @@ export default function HomePage() {
         <section className="relative mt-24 px-6 pb-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Cum merge
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
@@ -355,7 +355,7 @@ export default function HomePage() {
         <section className="border-t border-eos-border-subtle bg-eos-surface-variant px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Ce primești
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
@@ -367,7 +367,7 @@ export default function HomePage() {
               {FEATURES.map((item) => (
                 <div
                   key={item.title}
-                  className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant p-6 transition-colors hover:border-eos-border-strong hover:bg-eos-surface-active"
+                  className="group rounded-eos-lg border border-eos-border bg-eos-surface-variant p-6 transition-colors hover:border-eos-border-strong hover:bg-eos-surface-active"
                 >
                   <div
                     className={[
@@ -406,7 +406,7 @@ export default function HomePage() {
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-eos-text-tertiary">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Pentru cine
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-eos-text md:text-3xl">
@@ -418,9 +418,9 @@ export default function HomePage() {
               {PERSONAS.map((p) => (
                 <div
                   key={p.role}
-                  className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-6"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-6"
                 >
-                  <span className="mb-4 inline-block rounded-full border border-eos-primary/25 bg-eos-primary-soft px-3 py-1 text-[11px] font-semibold text-eos-primary">
+                  <span className="font-mono mb-4 inline-block rounded-full border border-eos-primary/25 bg-eos-primary-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
                     {p.label}
                   </span>
                   <p className="mb-3 font-semibold text-eos-text">{p.role}</p>
@@ -449,7 +449,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/login?mode=register"
-                className="flex items-center gap-2 rounded-eos-xl bg-eos-primary px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20/20 transition-all hover:bg-eos-primary"
+                className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary"
               >
                 Creează cont gratuit
                 <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
