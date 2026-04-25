@@ -10,6 +10,7 @@ import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { VendorTrustPackCard } from "@/components/compliscan/vendor-trust-pack-card"
 import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
@@ -89,25 +90,25 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
   return (
     <div className="space-y-6">
       {!hideHeader && (
-        <div>
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Rapoarte</p>
-          <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-            {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
-          </h1>
-          <p className="mt-1 text-sm text-eos-text-tertiary">
-            {isSolo
+        <V3PageHero
+          breadcrumbs={[{ label: "Dashboard" }, { label: "Rapoarte", current: true }]}
+          title={isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
+          description={
+            isSolo
               ? "Documentele generate, exporturile și dovezile aprobate — tot ce ai nevoie pentru un audit sau un control."
-              : "Output-ul conformității tale — livrabile gata de trimis, dovezi aprobate și pachet de handoff."}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-              doar vizualizare
-            </span>
-            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-              Audit: {auditStatusLabel}
-            </span>
-          </div>
-        </div>
+              : "Output-ul conformității tale — livrabile gata de trimis, dovezi aprobate și pachet de handoff."
+          }
+          eyebrowBadges={
+            <>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                doar vizualizare
+              </span>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Audit: {auditStatusLabel}
+              </span>
+            </>
+          }
+        />
       )}
 
       {!isSolo ? <ReportsTabs /> : null}

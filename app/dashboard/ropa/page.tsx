@@ -22,7 +22,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
@@ -566,20 +566,22 @@ export default function RopaPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <PageIntro
-        eyebrow={
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "RoPA", current: true }]}
+        title="Registru de Prelucrări"
+        description="Gestionează și menține registrul activităților de prelucrare a datelor personale conform GDPR Art. 30."
+        eyebrowBadges={
           <>
             <SimpleTooltip content="Record of Processing Activities — Art. 30 GDPR">
-              <span className="cursor-help border-b border-dotted border-current">GDPR</span>
-            </SimpleTooltip>{" · "}
+              <span className="cursor-help font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary border-b border-dotted border-current">GDPR</span>
+            </SimpleTooltip>
+            <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">·</span>
             <SimpleTooltip content="Registrul de Prelucrări">
-              <span className="cursor-help border-b border-dotted border-current">RoPA</span>
+              <span className="cursor-help font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary border-b border-dotted border-current">RoPA</span>
             </SimpleTooltip>
           </>
         }
-        title="Registru de Prelucrări"
-        description="Gestionează și menține registrul activităților de prelucrare a datelor personale conform GDPR Art. 30."
-        badges={
+        actions={
           <Link href="/dashboard/calendar" className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline">
             <FileText className="size-3.5" strokeWidth={2} />
             Vezi și celelalte documente

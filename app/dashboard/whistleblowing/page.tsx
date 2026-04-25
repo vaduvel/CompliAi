@@ -9,7 +9,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { WhistleblowingReport, WhistleblowingStatus, WhistleblowingCategory } from "@/lib/server/whistleblowing-store"
 
@@ -83,18 +83,24 @@ export default function WhistleblowingPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <Link
-        href="/dashboard/resolve"
-        className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={2} />
-        Înapoi la De rezolvat
-      </Link>
-
-      <PageIntro
-        eyebrow="Sesizări · Directiva UE 2019/1937"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Whistleblowing", current: true }]}
         title="Canal sesizări"
         description="Obligatoriu pentru organizații cu peste 50 de angajați. Gestionează sesizările interne anonim sau nominativ — termen de răspuns: 3 luni."
+        eyebrowBadges={
+          <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Sesizări · Directiva UE 2019/1937
+          </span>
+        }
+        actions={
+          <Link
+            href="/dashboard/resolve"
+            className="inline-flex items-center gap-1.5 text-xs text-eos-text-muted transition-colors hover:text-eos-text"
+          >
+            <ArrowLeft className="size-3.5" strokeWidth={2} />
+            Înapoi la De rezolvat
+          </Link>
+        }
       />
 
       {/* Public link */}

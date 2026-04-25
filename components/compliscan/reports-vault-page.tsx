@@ -29,7 +29,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { CockpitTask } from "@/components/compliscan/types"
@@ -191,32 +191,30 @@ export function ReportsVaultPageSurface() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow="Dovada / Vault"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Rapoarte" }, { label: "Vault", current: true }]}
         title="Verifici dacă pachetul chiar se susține"
         description="Aici vezi doar dacă pachetul este gata, ce îl blochează și unde revii dacă încă lipsește ceva."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               vault overview
             </Badge>
           </>
         }
-        aside={
-          <div className="space-y-2">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-              Stare pachet
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">
-              {auditReadiness === "audit_ready" ? "gata" : "în lucru"}
-            </p>
-            <p className="text-sm text-eos-text-muted">
-              drift {activeDrifts.length} · gap dovezi {evidenceMissingTasks.length}
-            </p>
-          </div>
-        }
         actions={
           <>
+            <div className="space-y-0.5 text-right">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Stare pachet
+              </p>
+              <p className="text-xl font-semibold text-eos-text">
+                {auditReadiness === "audit_ready" ? "gata" : "în lucru"}
+              </p>
+              <p className="text-xs text-eos-text-muted">
+                drift {activeDrifts.length} · gap dovezi {evidenceMissingTasks.length}
+              </p>
+            </div>
             <Button asChild>
               <Link href={dashboardRoutes.resolve}>
                 Rezolvă gap-urile
