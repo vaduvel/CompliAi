@@ -204,7 +204,7 @@ export function ReportsVaultPageSurface() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
               Stare pachet
             </p>
             <p className="text-2xl font-semibold text-eos-text">
@@ -269,10 +269,10 @@ export function ReportsVaultPageSurface() {
         </CardContent>
       </Card>
 
-      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
           Dovezi & gap-uri
-        </summary>
+        </p>
         <div className="mt-4">
           <EvidenceLedgerCard
             evidenceLedger={evidenceLedger}
@@ -281,12 +281,12 @@ export function ReportsVaultPageSurface() {
             allTasks={cockpit.tasks}
           />
         </div>
-      </details>
+      </div>
 
-      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
           Pachete & export
-        </summary>
+        </p>
         <div className="mt-4 space-y-6">
           <ActionCluster
             eyebrow="Export"
@@ -304,10 +304,10 @@ export function ReportsVaultPageSurface() {
                     <Download className="size-4" strokeWidth={2} />
                   </a>
                 </Button>
-                <details className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
-                  <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                <div className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-xs text-eos-text-muted">
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                     Export tehnic
-                  </summary>
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Button asChild variant="outline" size="sm" className="gap-2">
                       <a href="/api/exports/audit-pack">
@@ -322,7 +322,7 @@ export function ReportsVaultPageSurface() {
                       </a>
                     </Button>
                   </div>
-                </details>
+                </div>
               </>
             }
           />
@@ -343,12 +343,12 @@ export function ReportsVaultPageSurface() {
             />
           )}
         </div>
-      </details>
+      </div>
 
-      <details className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
           Trasabilitate & audit
-        </summary>
+        </p>
         <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
           <div className="space-y-6">
             <LegalMatrixCard tasks={legalMappedTasks} />
@@ -373,7 +373,7 @@ export function ReportsVaultPageSurface() {
             <AuditTimelineCard events={recentEvents} />
           </div>
         </div>
-      </details>
+      </div>
     </div>
   )
 }
@@ -525,12 +525,12 @@ function EvidenceLedgerCard({
                       </p>
                     )}
                     {task.validationMessage && (
-                      <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                        <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                      <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                        <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                           Detaliu validare
-                        </summary>
+                        </p>
                         <p className="mt-2 text-xs text-eos-text-muted">{task.validationMessage}</p>
-                      </details>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -572,12 +572,12 @@ function EvidenceLedgerCard({
                   {task.validationMessage || task.evidenceSnippet}
                 </p>
                 {task.validationMessage && task.evidenceSnippet && task.validationMessage !== task.evidenceSnippet && (
-                  <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Dovada asteptata
-                    </summary>
+                    </p>
                     <p className="mt-2 text-xs text-eos-text-muted">{task.evidenceSnippet}</p>
-                  </details>
+                  </div>
                 )}
               </div>
             ))}
@@ -633,16 +633,16 @@ function LegalMatrixCard({
             </div>
             <p className="mt-3 text-sm font-semibold text-eos-text">{task.title}</p>
             <p className="mt-2 text-sm text-eos-text-muted">{task.why}</p>
-            <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-              <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+            <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                 Dovada si urmatorul pas
-              </summary>
+              </p>
               {task.legalSummary && (
                 <p className="mt-3 text-xs text-eos-text-muted">{task.legalSummary}</p>
               )}
               <div className="mt-3 grid gap-3 md:grid-cols-2">
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                   Dovada ceruta
                 </p>
                 <p className="mt-2 text-sm text-eos-text-muted">
@@ -650,7 +650,7 @@ function LegalMatrixCard({
                 </p>
               </div>
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                   Cand revii
                 </p>
                 <p className="mt-2 text-sm text-eos-text-muted">
@@ -658,7 +658,7 @@ function LegalMatrixCard({
                 </p>
               </div>
               </div>
-            </details>
+            </div>
           </div>
         ))}
       </CardContent>
@@ -688,7 +688,7 @@ function SnapshotAuditCard({
         {latestSnapshot && (
           <>
             <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                 Snapshot curent
               </p>
               <p className="mt-2 text-sm font-semibold text-eos-text">
@@ -705,7 +705,7 @@ function SnapshotAuditCard({
               <MiniMeta label="Comparat cu" value={latestSnapshot.comparedToSnapshotId ? 1 : 0} />
             </div>
             <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                 Baseline validat
               </p>
               <p className="mt-2 text-sm text-eos-text-muted">
@@ -784,13 +784,13 @@ function DriftWatchCard({
                   </Badge>
                 )}
               </div>
-                <details className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                  <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                     Impact si escalare
-                  </summary>
+                  </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       De ce conteaza
                     </p>
                     <p className="mt-2 text-sm font-medium text-eos-text">
@@ -801,7 +801,7 @@ function DriftWatchCard({
                     </p>
                   </div>
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Ce faci acum
                     </p>
                     <p className="mt-2 text-sm font-medium text-eos-text">
@@ -809,7 +809,7 @@ function DriftWatchCard({
                     </p>
                   </div>
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Dovada
                     </p>
                     <p className="mt-2 text-sm font-medium text-eos-text">
@@ -817,7 +817,7 @@ function DriftWatchCard({
                     </p>
                   </div>
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Escalare
                     </p>
                     <p className="mt-2 text-sm font-medium text-eos-text">
@@ -848,7 +848,7 @@ function DriftWatchCard({
                     )}
                   </div>
                 </div>
-                </details>
+                </div>
               </div>
             )
           })()
@@ -926,10 +926,10 @@ function ValidationLedgerCard({
               </div>
             )}
             {(entry.message || entry.evidence || entry.validatedAtISO) && (
-              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                   Detalii validare
-                </summary>
+                </p>
                 {entry.message && (
                   <p className="mt-2 text-sm text-eos-text-muted">{entry.message}</p>
                 )}
@@ -939,7 +939,7 @@ function ValidationLedgerCard({
                     <span>Ultima verificare: {formatRelativeRomanian(entry.validatedAtISO)}</span>
                   )}
                 </div>
-              </details>
+              </div>
             )}
           </div>
         ))}
@@ -990,10 +990,10 @@ function AuditTimelineCard({
                   event.metadata?.fileName ||
                   event.metadata?.checkedSource ||
                   event.actorLabel) && (
-                  <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                    <summary className="cursor-pointer text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Detalii eveniment
-                    </summary>
+                    </p>
                     {event.metadata?.validationMessage && (
                       <p className="mt-2 text-sm text-eos-text-muted">
                         {String(event.metadata.validationMessage)}
@@ -1013,7 +1013,7 @@ function AuditTimelineCard({
                         Actor: {formatEventActor(event)}
                       </p>
                     )}
-                  </details>
+                  </div>
                 )}
               </div>
             </div>
@@ -1054,7 +1054,7 @@ function formatEventActor(event: ComplianceEvent) {
 function MiniMeta({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text">{value}</p>
     </div>
   )
