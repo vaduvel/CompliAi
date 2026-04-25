@@ -271,7 +271,7 @@ export function FindingNarrativeCard({
         </div>
 
         <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             Cum arată închiderea
           </p>
           <p className="mt-1.5 text-sm leading-relaxed text-eos-text">{cockpitRecipe.closeCondition}</p>
@@ -347,7 +347,7 @@ export function FindingHeroAction({
       data-testid="finding-hero-action"
       className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
         Acum faci asta
       </p>
       <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
@@ -355,7 +355,7 @@ export function FindingHeroAction({
       </p>
       {cockpitRecipe.vendorContext ? (
         <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
             Vendor detectat
           </p>
           <p className="mt-1">{cockpitRecipe.vendorContext.vendorName}</p>
@@ -449,7 +449,7 @@ export function FindingExecutionCard({
           className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4"
         >
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
               Harta de progres
             </p>
             <p className="text-xs text-eos-text-muted">
@@ -651,7 +651,7 @@ export function FindingDossierSuccessCard({
               <ShieldCheck className="size-5" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
                 Risc rezolvat și dovadă salvată la dosar
               </p>
               <p className="mt-1 text-lg font-semibold text-eos-text">
@@ -732,7 +732,7 @@ export function FindingCaseClosedCard({
               <ShieldCheck className="size-5" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
                 Caz închis și trecut în monitorizare
               </p>
               <p className="mt-1 text-lg font-semibold text-eos-text">
@@ -840,7 +840,7 @@ function RailCard({
 }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
         {eyebrow}
       </p>
       <p className="mt-1.5 text-sm font-medium text-eos-text">{title}</p>
@@ -874,7 +874,7 @@ function NarrativeBlock({
 
   return (
     <div className={`rounded-eos-md border px-4 py-3 ${toneClass}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
         {label}
       </p>
       <p className="mt-1.5 text-sm leading-relaxed text-eos-text">{content}</p>
