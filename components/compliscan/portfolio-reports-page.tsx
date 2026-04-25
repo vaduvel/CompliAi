@@ -481,7 +481,7 @@ export function PortfolioReportsPage() {
   return (
     <div className="space-y-6">
       <V3PageHero
-        breadcrumbs={[{ label: "Portofoliu" }, { label: "Rapoarte", current: true }]}
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Rapoarte", current: true }]}
         title="Rapoarte și livrabile"
         description="Metadata agregată pentru rapoarte, documente generate și ultima activitate pe fiecare firmă."
         eyebrowBadges={

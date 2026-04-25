@@ -234,7 +234,7 @@ export function PortfolioTasksPage() {
       )}
 
       <V3PageHero
-        breadcrumbs={[{ label: "Portofoliu" }, { label: "Remediere clienți", current: true }]}
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Task-uri", current: true }]}
         title="De rezolvat — cross-client"
         description={
           <>

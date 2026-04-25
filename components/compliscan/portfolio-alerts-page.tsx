@@ -306,7 +306,7 @@ export function PortfolioAlertsPage() {
   return (
     <div className="space-y-6">
       <V3PageHero
-        breadcrumbs={[{ label: "Portofoliu" }, { label: "Alerte", current: true }]}
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Alerte", current: true }]}
         title="Inbox — alerte și notificări"
         description="Un singur feed cu tot ce apare peste noapte pe toate firmele tale. Drift, alerte, noi legi, schimbări status ANAF — toate într-un singur loc."
         eyebrowBadges={
