@@ -15,7 +15,6 @@ import {
 import { toast } from "sonner"
 
 import { V3Pill } from "@/components/compliscan/v3/compat"
-import { Breadcrumb } from "@/components/evidence-os"
 import { Button } from "@/components/evidence-os/Button"
 import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import { V3Intro } from "@/components/compliscan/v3/compat"
@@ -248,11 +247,6 @@ export default function GovernancePage() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumb items={[
-        { label: "NIS2", href: "/dashboard/nis2" },
-        { label: "Guvernanță" },
-      ]} />
-
       <V3Intro
         eyebrow="NIS2 — Guvernanță"
         title="Training Board & CISO"
