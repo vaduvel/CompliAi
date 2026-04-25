@@ -1,6 +1,14 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, ShieldCheck, FileCheck2, Activity, ChevronRight } from "lucide-react"
+import {
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  FileCheck2,
+  Activity,
+  ChevronRight,
+} from "lucide-react"
+
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 
@@ -28,26 +36,26 @@ export const metadata: Metadata = {
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-const REGS = ["GDPR", "NIS2", "EU AI Act", "e-Factura", "DORA"]
+const REGS = ["GDPR", "NIS2", "EU AI Act", "e-Factura", "DORA"] as const
 
 const JOURNEY_STEPS = [
   {
-    step: "01",
+    n: "01",
     title: "Introduci CUI și website",
     description: "Pornim din datele firmei și semnalele publice deja disponibile.",
   },
   {
-    step: "02",
+    n: "02",
     title: "Primești snapshot-ul",
     description: "Vezi exact ce legi ți se aplică și care sunt golurile reale.",
   },
   {
-    step: "03",
+    n: "03",
     title: "Rezolvi în cockpit",
     description: "Generezi documentul, validezi și rezolvi riscul cu dovadă.",
   },
   {
-    step: "04",
+    n: "04",
     title: "Rămâi în monitorizare",
     description: "Dosarul și watch-ul rămân legate de același caz.",
   },
@@ -56,29 +64,35 @@ const JOURNEY_STEPS = [
 const FEATURES = [
   {
     icon: ShieldCheck,
-    color: "text-eos-primary",
-    bg: "bg-eos-primary-soft border-eos-border",
     title: "Snapshot pe firma ta",
     description:
       "Nu liste generice. CompliScan pornește din CUI, ANAF și website-ul tău și îți arată exact ce i se aplică firmei tale.",
+    tone: "info",
   },
   {
     icon: FileCheck2,
-    color: "text-violet-400",
-    bg: "bg-violet-500/10 border-violet-500/20",
     title: "Rezolvare cu dovadă",
     description:
       "Intri pe risc, generezi documentul conform cu AI, validezi și închizi cazul cu urmă completă — totul din același cockpit.",
+    tone: "violet",
   },
   {
     icon: Activity,
-    color: "text-eos-success",
-    bg: "bg-eos-success/10 border-eos-success/20",
     title: "Dosar și monitorizare",
     description:
       "Dovada intră automat în dosar. Cazul rămâne sub watch și îți semnalează când trebuie revizuit.",
+    tone: "success",
   },
-]
+] as const
+
+const FEATURE_TONE_CLASSES: Record<
+  (typeof FEATURES)[number]["tone"],
+  { bg: string; icon: string }
+> = {
+  info: { bg: "border-eos-primary/25 bg-eos-primary/10", icon: "text-eos-primary" },
+  violet: { bg: "border-violet-500/25 bg-violet-500/10", icon: "text-violet-400" },
+  success: { bg: "border-eos-success/25 bg-eos-success-soft", icon: "text-eos-success" },
+}
 
 const PERSONAS = [
   {
@@ -98,95 +112,247 @@ const PERSONAS = [
   },
 ]
 
-// ── Mock UI (product preview) ─────────────────────────────────────────────────
+const STATS = [
+  { number: "5", label: "Regulamente europene" },
+  { number: "40+", label: "Tipuri de constatări" },
+  { number: "<3", label: "Minute prim snapshot", unit: "min" },
+  { number: "100", label: "Date stocate în UE", unit: "%" },
+]
+
+// ── V3 Hero Mock — preview cockpit cu stepper ────────────────────────────────
+
+function HeroMock() {
+  return (
+    <div className="relative w-full">
+      {/* glow fundal */}
+      <div className="pointer-events-none absolute -inset-10 -z-10 rounded-eos-lg bg-eos-primary/10 opacity-40 blur-3xl" />
+
+      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
+        {/* header card cu badge GDPR + timestamp */}
+        <div className="flex items-center gap-2.5 border-b border-eos-border bg-white/[0.02] px-5 py-4">
+          <span className="size-2.5 shrink-0 rounded-full bg-eos-error shadow-[0_0_8px_rgba(248,113,113,0.6)]" />
+          <span className="inline-flex items-center gap-1 rounded-sm border border-eos-error/25 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-error">
+            GDPR
+          </span>
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+            detectat acum 47 min
+          </span>
+        </div>
+
+        {/* body */}
+        <div className="space-y-4 px-5 py-5">
+          <div>
+            <h3
+              data-display-text="true"
+              className="font-display text-[18px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              Politica de confidențialitate lipsește pe apex.ro
+            </h3>
+            <p className="mt-2 text-[12.5px] leading-[1.55] text-eos-text-muted">
+              Scan-ul a găsit că după redesign linkul din footer a fost șters. Am pregătit un draft aliniat cu GDPR art. 13.
+            </p>
+          </div>
+
+          {/* stepper vertical */}
+          <div className="space-y-1.5 border-t border-eos-border pt-4">
+            {[
+              { l: "Analiză legală", state: "done" as const },
+              { l: "Draft IA generat", state: "done" as const },
+              { l: "Adaptare la firma ta", state: "done" as const },
+              { l: "Review consultant", state: "active" as const },
+              { l: "Trimite la tine", state: "todo" as const },
+            ].map((s, i) => (
+              <div key={s.l} className="flex items-center gap-2.5 py-1">
+                <div
+                  className={[
+                    "flex size-4 items-center justify-center rounded-full font-mono text-[9px] font-bold text-white",
+                    s.state === "done"
+                      ? "bg-eos-success"
+                      : s.state === "active"
+                        ? "bg-eos-primary"
+                        : "bg-white/[0.08] text-eos-text-tertiary",
+                  ].join(" ")}
+                >
+                  {s.state === "done" ? "✓" : i + 1}
+                </div>
+                <span
+                  className={[
+                    "font-mono text-[12px] tracking-[0.02em]",
+                    s.state === "done"
+                      ? "text-eos-text-muted"
+                      : s.state === "active"
+                        ? "font-semibold text-eos-primary"
+                        : "text-eos-text-tertiary",
+                  ].join(" ")}
+                >
+                  {s.l}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* avatar floating bottom-right */}
+      <div className="absolute -bottom-5 -right-5 hidden items-center gap-2.5 rounded-eos-lg border border-eos-border bg-eos-bg px-3.5 py-2.5 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.8)] sm:flex">
+        <div className="grid size-8 place-items-center rounded-full border border-eos-border bg-eos-surface font-mono text-[11px] font-semibold text-eos-text">
+          DP
+        </div>
+        <div className="leading-tight">
+          <div className="text-[11.5px] font-semibold text-eos-text">Diana Popescu</div>
+          <div className="font-mono text-[9.5px] uppercase tracking-[0.04em] text-eos-text-tertiary">
+            Consultant conformitate
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── V3 Product preview (cockpit list) ─────────────────────────────────────────
 
 function ProductMock() {
   return (
-    <div className="relative mx-auto mt-16 max-w-4xl px-4">
-      {/* Glow */}
-      <div className="absolute left-1/2 top-0 h-64 w-3/4 -translate-x-1/2 rounded-full bg-eos-primary/20 blur-3xl" />
+    <div className="relative mx-auto mt-20 max-w-5xl px-4">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-3/4 -translate-x-1/2 rounded-full bg-eos-primary/15 blur-3xl" />
 
-      {/* Browser chrome */}
-      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-[#0d1117] shadow-[0_0_60px_rgba(0,0,0,0.6)]">
-        {/* Top bar */}
-        <div className="flex items-center gap-3 border-b border-eos-border bg-eos-surface-elevated px-4 py-3">
+      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface shadow-[0_0_60px_rgba(0,0,0,0.55)]">
+        {/* browser chrome */}
+        <div className="flex items-center gap-3 border-b border-eos-border bg-white/[0.02] px-4 py-2.5">
           <div className="flex gap-1.5">
-            <span className="block h-3 w-3 rounded-full bg-[#ff5f57]" />
-            <span className="block h-3 w-3 rounded-full bg-[#febc2e]" />
-            <span className="block h-3 w-3 rounded-full bg-[#28c840]" />
+            <span className="block size-2.5 rounded-full bg-[#ff5f57]" />
+            <span className="block size-2.5 rounded-full bg-[#febc2e]" />
+            <span className="block size-2.5 rounded-full bg-[#28c840]" />
           </div>
-          <div className="mx-auto rounded-eos-md bg-eos-surface-elevated px-4 py-1.5 text-[11px] text-eos-text-tertiary">
+          <div className="mx-auto rounded-eos-sm border border-eos-border bg-white/[0.03] px-3 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
             app.compliscan.ro/dashboard/resolve
           </div>
         </div>
 
-        {/* App layout */}
-        <div className="flex h-[340px] sm:h-[380px]">
-          {/* Sidebar */}
-          <div className="hidden w-52 shrink-0 flex-col gap-1 border-r border-eos-border bg-eos-surface-variant p-4 sm:flex">
-            <div className="mb-2 flex items-center gap-2 px-2 py-1.5">
-              <span className="h-6 w-6 rounded bg-eos-primary/30" />
-              <span className="text-[11px] font-semibold text-eos-text-muted">CompliScan</span>
-            </div>
-            {["Acasă", "Scanează", "De rezolvat", "Dosar", "Setări"].map((item, i) => (
-              <div
-                key={item}
-                className={[
-                  "flex items-center gap-2.5 rounded-eos-md px-2 py-1.5 text-xs",
-                  i === 2
-                    ? "bg-eos-primary/15 text-eos-primary font-medium"
-                    : "text-eos-text-tertiary",
-                ].join(" ")}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                {item}
-                {i === 2 && (
-                  <span className="ml-auto rounded-full bg-eos-primary/25 px-1.5 py-0.5 text-[10px] text-eos-primary">
-                    4
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Main content */}
-          <div className="flex flex-1 flex-col overflow-hidden p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-semibold text-eos-text">De rezolvat</p>
-              <span className="rounded-full bg-eos-surface-elevated px-2.5 py-1 text-[11px] text-eos-text-tertiary">
-                4 riscuri identificate
+        <div className="flex h-[360px] sm:h-[400px]">
+          {/* sidebar mock */}
+          <aside className="hidden w-[210px] shrink-0 border-r border-eos-border bg-white/[0.02] px-3 py-4 sm:block">
+            <div className="mb-4 flex items-center gap-2 px-2">
+              <span className="grid size-6 place-items-center rounded-eos-sm bg-eos-primary text-[10px] font-bold text-white">
+                C
+              </span>
+              <span className="font-display text-[12px] font-semibold tracking-[-0.015em] text-eos-text">
+                CompliScan
               </span>
             </div>
+            <p className="mb-1.5 px-2.5 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-eos-text-tertiary">
+              Firmă activă
+            </p>
+            {["Acasă", "Scanează", "De rezolvat", "Dosar", "Setări"].map((item, i) => {
+              const active = i === 2
+              return (
+                <div
+                  key={item}
+                  className={[
+                    "flex items-center gap-2 rounded-eos-sm px-2.5 py-1.5 text-[12px]",
+                    active
+                      ? "bg-white/[0.04] font-semibold text-eos-text"
+                      : "font-medium text-eos-text-tertiary",
+                  ].join(" ")}
+                >
+                  <span
+                    className={[
+                      "size-1.5 rounded-full",
+                      active ? "bg-eos-primary" : "bg-current opacity-40",
+                    ].join(" ")}
+                  />
+                  {item}
+                  {active && (
+                    <span className="ml-auto rounded-sm bg-eos-error-soft px-1.5 py-0 font-mono text-[10px] font-bold text-eos-error">
+                      4
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </aside>
 
-            <div className="space-y-2.5">
+          {/* main */}
+          <div className="flex flex-1 flex-col px-5 py-5">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Acțiuni / De rezolvat
+              </p>
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-muted">
+                4 riscuri
+              </span>
+            </div>
+            <h4
+              data-display-text="true"
+              className="mb-4 font-display text-[18px] font-semibold tracking-[-0.02em] text-eos-text"
+            >
+              Acțiuni urgente · următoarele 72h
+            </h4>
+
+            <div className="space-y-2">
               {[
-                { title: "Politică de confidențialitate lipsă", badge: "GDPR", dot: "bg-eos-error", priority: "Critic" },
-                { title: "DPA cu furnizori neconfirmat", badge: "GDPR", dot: "bg-orange-400", priority: "Ridicat" },
-                { title: "Registru evidență ANAF neemis", badge: "e-Factura", dot: "bg-yellow-400", priority: "Mediu" },
+                {
+                  id: "GDPR-001",
+                  title: "Politica de confidențialitate lipsă",
+                  fw: "GDPR",
+                  sla: "47h",
+                  sev: "critical" as const,
+                },
+                {
+                  id: "GDPR-014",
+                  title: "DPA cu furnizori neconfirmat",
+                  fw: "GDPR",
+                  sla: "5z",
+                  sev: "critical" as const,
+                },
+                {
+                  id: "EFA-002",
+                  title: "Registru evidență ANAF neemis",
+                  fw: "e-Factura",
+                  sla: "12z",
+                  sev: "high" as const,
+                },
               ].map((f) => (
                 <div
-                  key={f.title}
-                  className="flex items-center gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3.5 py-2.5"
+                  key={f.id}
+                  className="relative flex items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-3.5 py-2.5"
                 >
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${f.dot}`} />
-                  <span className="flex-1 truncate text-xs text-eos-text-muted">{f.title}</span>
-                  <span className="shrink-0 rounded bg-eos-primary/15 px-2 py-0.5 text-[10px] font-medium text-eos-primary">
-                    {f.badge}
+                  <span
+                    aria-hidden
+                    className={[
+                      "absolute left-0 top-0 bottom-0 w-[3px]",
+                      f.sev === "critical" ? "bg-eos-error" : "bg-eos-warning",
+                    ].join(" ")}
+                  />
+                  <span className="ml-1 font-mono text-[10.5px] font-semibold tracking-[0.04em] text-eos-text">
+                    {f.id}
                   </span>
-                  <span className="hidden shrink-0 text-[10px] text-eos-text-tertiary sm:block">
-                    {f.priority}
+                  <span className="flex-1 truncate text-[12.5px] text-eos-text">{f.title}</span>
+                  <span className="hidden shrink-0 rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted sm:inline-flex">
+                    {f.fw}
                   </span>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" />
+                  <span
+                    className={[
+                      "shrink-0 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em]",
+                      f.sev === "critical" ? "text-eos-error" : "text-eos-warning",
+                    ].join(" ")}
+                  >
+                    SLA {f.sla}
+                  </span>
+                  <ChevronRight className="size-3.5 shrink-0 text-eos-text-tertiary" />
                 </div>
               ))}
 
-              {/* Resolved row */}
-              <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/15 bg-eos-success/5 px-3.5 py-2.5 opacity-60">
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" />
-                <span className="flex-1 truncate text-xs text-eos-success/80">
+              {/* resolved row */}
+              <div className="relative flex items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-success/15 bg-eos-success-soft/40 px-3.5 py-2.5 opacity-70">
+                <span aria-hidden className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-success" />
+                <CheckCircle2 className="ml-1 size-3.5 shrink-0 text-eos-success" strokeWidth={2.5} />
+                <span className="flex-1 truncate text-[12.5px] text-eos-success/90">
                   Cookie policy publicată · dovadă în dosar
                 </span>
-                <span className="shrink-0 text-[10px] text-eos-success/60">Rezolvat</span>
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-success">
+                  Rezolvat
+                </span>
               </div>
             </div>
           </div>
@@ -201,215 +367,273 @@ function ProductMock() {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-eos-bg text-eos-text">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-eos-border bg-eos-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      {/* ── Top nav ── */}
+      <header className="sticky top-0 z-50 border-b border-eos-border bg-eos-bg/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <CompliScanLogoLockup variant="flat" size="sm" />
           <div className="flex items-center gap-2">
             <Link
               href="/pricing"
-              className="hidden px-3 py-1.5 text-sm text-eos-text-muted transition-colors hover:text-eos-text sm:block"
+              className="hidden px-3 py-1.5 font-mono text-[11.5px] font-medium uppercase tracking-[0.08em] text-eos-text-muted transition-colors hover:text-eos-text sm:block"
             >
               Prețuri
             </Link>
             <Link
               href="/login"
-              className="px-3 py-1.5 text-sm text-eos-text-muted transition-colors hover:text-eos-text"
+              className="rounded-eos-sm border border-eos-border bg-transparent px-3 py-1.5 text-[12.5px] font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
             >
               Conectare
             </Link>
             <Link
               href="/login?mode=register"
-              className="flex items-center gap-1.5 rounded-eos-md bg-eos-primary px-4 py-1.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-primary"
+              className="flex items-center gap-1.5 rounded-eos-sm bg-eos-primary px-4 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-primary/90"
             >
               Creează cont gratuit
-              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+              <ArrowRight className="size-3.5" strokeWidth={2.5} />
             </Link>
           </div>
         </div>
       </header>
 
       <main>
-        {/* ── Hero ── */}
-        <section className="relative overflow-hidden px-6 pb-8 pt-20 text-center">
-          {/* Background glow */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-eos-primary/10 blur-3xl" />
+        {/* ── Hero (V3 2-col) ── */}
+        <section className="relative overflow-hidden border-b border-eos-border">
+          <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-eos-primary/10 blur-3xl" />
+
+          <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:py-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+            {/* left column */}
+            <div className="flex flex-col">
+              <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-eos-primary/25 bg-eos-primary/10 px-3 py-1">
+                <span className="size-1.5 rounded-full bg-eos-success shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
+                <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
+                  Pentru IMM-urile din România
+                </span>
+              </div>
+
+              <h1
+                data-display-text="true"
+                className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] text-eos-text md:text-[52px] lg:text-[56px]"
+                style={{ textWrap: "balance" }}
+              >
+                <span className="block">Vezi ce se aplică firmei tale.</span>
+                <span className="block text-eos-primary">Rezolvi clar.</span>
+                <span className="block">Rămâi acoperit.</span>
+              </h1>
+
+              <p className="mt-5 max-w-xl text-[15px] leading-[1.6] text-eos-text-muted md:text-[16px]">
+                Snapshot din CUI și website, cockpit de rezolvare cu dovadă, dosar
+                și monitorizare — tot pe un singur traseu.
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/login?mode=register"
+                  className="flex items-center gap-2 rounded-eos-sm bg-eos-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.5)] transition-all hover:bg-eos-primary/90 hover:shadow-[0_12px_32px_-8px_rgba(59,130,246,0.55)]"
+                >
+                  Creează cont gratuit
+                  <ArrowRight className="size-4" strokeWidth={2.5} />
+                </Link>
+                <Link
+                  href="/demo/imm"
+                  className="rounded-eos-sm border border-eos-border bg-white/[0.02] px-5 py-2.5 text-[13.5px] font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+                >
+                  Vezi demo live
+                </Link>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                <span>Fără card necesar</span>
+                <span className="text-eos-border-strong">·</span>
+                <span>Primul snapshot în 3 minute</span>
+                <span className="text-eos-border-strong">·</span>
+                <span>Date stocate în UE</span>
+              </div>
+
+              {/* stats divider */}
+              <div className="mt-10 grid grid-cols-3 gap-6 border-t border-eos-border pt-6">
+                {[
+                  { n: "47+", l: "IMM-uri în pilot" },
+                  { n: "5", l: "regulamente acoperite" },
+                  { n: "98%", l: "rate închidere finding" },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <div
+                      data-display-text="true"
+                      className="font-display text-[24px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
+                    >
+                      {s.n}
+                    </div>
+                    <div className="mt-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
+                      {s.l}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* right column — V3 mock */}
+            <div className="relative flex items-center">
+              <HeroMock />
+            </div>
           </div>
 
-          {/* Regulation badges */}
-          <div className="relative mb-8 flex flex-wrap items-center justify-center gap-2">
+          {/* regulation badges sub hero */}
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-2 px-6 pb-12">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              acoperă
+            </span>
             {REGS.map((reg) => (
               <span
                 key={reg}
-                className="rounded-full border border-eos-border bg-eos-surface-elevated px-3 py-1 text-[11px] font-medium text-eos-text-muted"
+                className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.03] px-2 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted"
               >
                 {reg}
               </span>
             ))}
           </div>
-
-          {/* H1 */}
-          <h1 className="relative mx-auto max-w-4xl font-display text-5xl font-semibold leading-[0.95] tracking-[-0.035em] md:text-6xl lg:text-7xl">
-            <span className="block text-eos-text">
-              Vezi ce se aplică firmei tale.
-            </span>
-            <span className="mt-2 block text-eos-primary">
-              Rezolvi clar.
-            </span>
-            <span className="block text-eos-text">Rămâi acoperit.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="relative mx-auto mt-7 max-w-2xl text-lg leading-8 text-eos-text-muted md:text-xl">
-            Snapshot din CUI și website, cockpit de rezolvare cu dovadă, dosar
-            și monitorizare — tot pe un singur traseu.
-          </p>
-
-          {/* CTAs */}
-          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/login?mode=register"
-              className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-7 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/25 transition-all hover:bg-eos-primary hover:shadow-eos-primary/40"
-            >
-              Creează cont gratuit
-              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-            </Link>
-            <Link
-              href="/demo/imm"
-              className="rounded-eos-lg border border-eos-border bg-eos-surface-elevated px-7 py-3 text-sm font-medium text-eos-text-muted transition-all hover:bg-eos-surface-hover hover:text-eos-text"
-            >
-              Vezi demo live
-            </Link>
-          </div>
-
-          {/* Proof strip */}
-          <div className="relative mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[12px] text-eos-text-tertiary">
-            <span>Fără card necesar</span>
-            <span className="hidden sm:block">·</span>
-            <span>Primul snapshot în 3 minute</span>
-            <span className="hidden sm:block">·</span>
-            <span>Date stocate în UE</span>
-          </div>
-
-          {/* Trust badges */}
-          <div className="relative mt-5 flex flex-wrap items-center justify-center gap-3">
-            {[
-              "Produs în România",
-              "GDPR compliant",
-              "5 regulamente europene",
-              "Fără date trimise în afara UE",
-            ].map((trust) => (
-              <span
-                key={trust}
-                className="inline-flex items-center gap-1.5 rounded-full border border-eos-success/20 bg-eos-success/5 px-3 py-1 text-[11px] font-medium text-eos-success"
-              >
-                <CheckCircle2 className="size-3" strokeWidth={2.5} />
-                {trust}
-              </span>
-            ))}
-          </div>
-
-          {/* Product mock */}
-          <ProductMock />
         </section>
 
-        {/* ── Journey ── */}
-        <section className="relative mt-24 px-6 pb-20">
+        {/* ── Cum merge — V3 4-values band ── */}
+        <section className="border-b border-eos-border px-6 py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className="mb-12 max-w-2xl">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Cum merge
               </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
+              <h2
+                data-display-text="true"
+                className="mt-3 font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text md:text-[34px]"
+              >
                 Un traseu. De la snapshot la dovadă.
               </h2>
             </div>
 
-            {/* Steps with connecting line */}
-            <div className="relative grid gap-6 md:grid-cols-4">
-              {/* Connecting line (desktop) */}
-              <div className="absolute left-0 right-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-white/10 to-transparent md:block" />
-
-              {JOURNEY_STEPS.map((item, i) => (
-                <div key={item.step} className="relative flex flex-col gap-3">
-                  {/* Step number */}
-                  <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-2">
-                    <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-eos-primary/30 bg-eos-primary-soft text-xs font-bold text-eos-primary">
-                      {i + 1}
-                      {/* Pulse dot for first step */}
-                      {i === 0 && (
-                        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-eos-bg bg-eos-primary" />
-                      )}
-                    </div>
-                    <p className="font-semibold text-eos-text md:mt-3">{item.title}</p>
+            <div className="grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-4">
+              {JOURNEY_STEPS.map((item) => (
+                <div key={item.n} className="flex flex-col">
+                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
+                    {item.n}
                   </div>
-                  <p className="text-sm leading-6 text-eos-text-tertiary md:mt-0">{item.description}</p>
+                  <h3
+                    data-display-text="true"
+                    className="mt-3 font-display text-[16px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+                  >
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-[12.5px] leading-[1.55] text-eos-text-muted">
+                    {item.description}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Features ── */}
-        <section className="border-t border-eos-border-subtle bg-eos-surface-variant px-6 py-20">
+        {/* ── Product mock band ── */}
+        <section className="border-b border-eos-border px-6 py-16">
+          <div className="mx-auto max-w-5xl text-center">
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Cockpit
+            </p>
+            <h2
+              data-display-text="true"
+              className="mt-3 font-display text-[24px] font-semibold tracking-[-0.025em] text-eos-text md:text-[28px]"
+            >
+              Findings clare. Acțiuni concrete. Dovadă în dosar.
+            </h2>
+          </div>
+          <ProductMock />
+        </section>
+
+        {/* ── Features (V3 panels) ── */}
+        <section className="border-b border-eos-border bg-white/[0.015] px-6 py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className="mb-12 max-w-2xl">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Ce primești
               </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
+              <h2
+                data-display-text="true"
+                className="mt-3 font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text md:text-[34px]"
+              >
                 Conformitate operată, nu doar explicată.
               </h2>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-3">
-              {FEATURES.map((item) => (
-                <div
-                  key={item.title}
-                  className="group rounded-eos-lg border border-eos-border bg-eos-surface-variant p-6 transition-colors hover:border-eos-border-strong hover:bg-eos-surface-active"
-                >
+            <div className="grid gap-4 md:grid-cols-3">
+              {FEATURES.map((item) => {
+                const tone = FEATURE_TONE_CLASSES[item.tone]
+                return (
                   <div
-                    className={[
-                      "mb-5 inline-flex h-10 w-10 items-center justify-center rounded-eos-lg border",
-                      item.bg,
-                    ].join(" ")}
+                    key={item.title}
+                    className="group rounded-eos-lg border border-eos-border bg-eos-surface p-5 transition-colors duration-150 hover:border-eos-border-strong hover:bg-white/[0.02]"
                   >
-                    <item.icon className={["h-5 w-5", item.color].join(" ")} strokeWidth={1.5} />
+                    <div
+                      className={[
+                        "mb-4 inline-flex size-10 items-center justify-center rounded-eos-sm border",
+                        tone.bg,
+                      ].join(" ")}
+                    >
+                      <item.icon className={["size-5", tone.icon].join(" ")} strokeWidth={1.75} />
+                    </div>
+                    <h3
+                      data-display-text="true"
+                      className="mb-2 font-display text-[15px] font-semibold tracking-[-0.015em] text-eos-text"
+                    >
+                      {item.title}
+                    </h3>
+                    <p className="text-[13px] leading-[1.55] text-eos-text-muted">
+                      {item.description}
+                    </p>
                   </div>
-                  <p className="mb-2 font-semibold text-eos-text">{item.title}</p>
-                  <p className="text-sm leading-6 text-eos-text-muted">{item.description}</p>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Stats (V3 KPI strip variant) ── */}
+        <section className="border-b border-eos-border px-6 py-16">
+          <div className="mx-auto max-w-5xl">
+            <div
+              className={[
+                "grid divide-x divide-eos-border overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface",
+                "grid-cols-2 md:grid-cols-4",
+              ].join(" ")}
+            >
+              {STATS.map((stat) => (
+                <div key={stat.label} className="px-4 py-4">
+                  <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                    {stat.label}
+                  </p>
+                  <div className="mt-2 flex items-baseline gap-1">
+                    <span
+                      data-display-text="true"
+                      className="font-display text-[26px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
+                    >
+                      {stat.number}
+                    </span>
+                    {stat.unit && (
+                      <span className="text-[13px] text-eos-text-tertiary">{stat.unit}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Metrics / social proof ── */}
-        <section className="px-6 py-16">
-          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 sm:grid-cols-4">
-            {[
-              { number: "5", label: "Regulamente europene acoperite" },
-              { number: "40+", label: "Tipuri de constatări detectate" },
-              { number: "< 3 min", label: "Timp prim snapshot" },
-              { number: "100%", label: "Date stocate în UE" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-3xl font-bold text-eos-text">{stat.number}</p>
-                <p className="mt-1 text-xs text-eos-text-tertiary">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Personas ── */}
-        <section className="px-6 py-20">
+        {/* ── Personas (V3 cards) ── */}
+        <section className="border-b border-eos-border px-6 py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            <div className="mb-12 max-w-2xl">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Pentru cine
               </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-eos-text md:text-3xl">
+              <h2
+                data-display-text="true"
+                className="mt-3 font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text md:text-[34px]"
+              >
                 Construit pentru firmele românești.
               </h2>
             </div>
@@ -418,13 +642,20 @@ export default function HomePage() {
               {PERSONAS.map((p) => (
                 <div
                   key={p.role}
-                  className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-6"
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface p-5"
                 >
-                  <span className="font-mono mb-4 inline-block rounded-full border border-eos-primary/25 bg-eos-primary-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+                  <span className="inline-flex items-center rounded-sm border border-eos-primary/25 bg-eos-primary/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-primary">
                     {p.label}
                   </span>
-                  <p className="mb-3 font-semibold text-eos-text">{p.role}</p>
-                  <p className="text-sm leading-6 text-eos-text-muted italic">&ldquo;{p.quote}&rdquo;</p>
+                  <h3
+                    data-display-text="true"
+                    className="mt-3 font-display text-[16px] font-semibold tracking-[-0.015em] text-eos-text"
+                  >
+                    {p.role}
+                  </h3>
+                  <p className="mt-2 text-[13px] italic leading-[1.55] text-eos-text-muted">
+                    &ldquo;{p.quote}&rdquo;
+                  </p>
                 </div>
               ))}
             </div>
@@ -432,48 +663,62 @@ export default function HomePage() {
         </section>
 
         {/* ── Final CTA ── */}
-        <section className="relative overflow-hidden border-t border-eos-border-subtle px-6 py-20 text-center">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-eos-primary/8 blur-3xl" />
-          </div>
-          <div className="relative mx-auto max-w-2xl">
-            <h2 className="font-display text-2xl font-semibold text-eos-text md:text-3xl lg:text-4xl">
-              Gratuit pentru diagnostic.
-              <br />
+        <section className="relative overflow-hidden px-6 py-20 text-center">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-eos-primary/10 blur-3xl" />
+          <div className="mx-auto max-w-2xl">
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Începe acum
+            </p>
+            <h2
+              data-display-text="true"
+              className="mt-3 font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text md:text-[34px] lg:text-[38px]"
+            >
+              Gratuit pentru diagnostic.{" "}
               <span className="text-eos-text-muted">Pro pentru operare.</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-eos-text-tertiary">
+            <p className="mx-auto mt-4 max-w-lg text-[13.5px] leading-[1.65] text-eos-text-muted">
               Începi cu snapshot-ul și vezi exact ce ai de făcut. Când vrei
               cockpit complet, dovadă și dosar, treci pe Pro.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/login?mode=register"
-                className="flex items-center gap-2 rounded-eos-lg bg-eos-primary px-8 py-3 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary"
+                className="flex items-center gap-2 rounded-eos-sm bg-eos-primary px-6 py-3 text-[13.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.5)] transition-all hover:bg-eos-primary/90"
               >
                 Creează cont gratuit
-                <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                <ArrowRight className="size-4" strokeWidth={2.5} />
               </Link>
               <Link
                 href="/pricing"
-                className="text-sm text-eos-text-tertiary underline underline-offset-4 hover:text-eos-text-muted"
+                className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-eos-text-tertiary underline-offset-4 hover:text-eos-text-muted hover:underline"
               >
-                Vezi prețurile
+                Vezi prețurile →
               </Link>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
+      {/* ── Footer mono ── */}
       <footer className="border-t border-eos-border-subtle py-8">
         <div className="mx-auto max-w-6xl px-6">
           <LegalDisclaimer variant="short" />
-          <div className="mt-4 flex flex-wrap gap-5 text-xs text-eos-text-tertiary">
-            <Link href="/terms" className="hover:text-eos-text-muted transition-colors">Termeni și condiții</Link>
-            <Link href="/privacy" className="hover:text-eos-text-muted transition-colors">Privacy / Confidențialitate</Link>
-            <Link href="/dpa" className="hover:text-eos-text-muted transition-colors">DPA</Link>
-            <Link href="/pricing" className="hover:text-eos-text-muted transition-colors">Prețuri</Link>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+            <Link href="/terms" className="transition-colors hover:text-eos-text-muted">
+              Termeni
+            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-eos-text-muted">
+              Confidențialitate
+            </Link>
+            <Link href="/dpa" className="transition-colors hover:text-eos-text-muted">
+              DPA
+            </Link>
+            <Link href="/pricing" className="transition-colors hover:text-eos-text-muted">
+              Prețuri
+            </Link>
+            <span className="ml-auto text-eos-text-muted">
+              © 2026 CompliScan
+            </span>
           </div>
         </div>
       </footer>

@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { ArrowLeft, Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
+import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { TrialBanner } from "@/components/compliscan/billing/trial-banner"
@@ -21,6 +21,7 @@ import { isNavItemActive, type DashboardNavItem } from "@/components/compliscan/
 import { useOptionalCockpitData } from "@/components/compliscan/use-cockpit"
 import { DashboardBreadcrumb } from "@/components/compliscan/dashboard-breadcrumb"
 import { WorkspaceModeSwitcher } from "@/components/compliscan/workspace-mode-switcher"
+import { V3WorkspaceBanner } from "@/components/compliscan/v3"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
 import {
   DropdownMenu,
@@ -329,30 +330,19 @@ export function DashboardShell({
             </div>
           )}
 
-          <TrialBanner />
-
-          {/* Partner context banner */}
+          {/* V3 Workspace banner — partner în execuție pe o firmă (cobalt strip cap-coadă) */}
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
-            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary/70">
-                  Execuție în firmă
-                </p>
-                <p className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</p>
-                <p className="text-xs text-eos-text-tertiary">
-                  Triage-ul cross-client rămâne în Portofoliu. Aici execuți doar în firma selectată.
-                </p>
-              </div>
-              <button
-                onClick={() => void handleSwitchWorkspaceMode("portfolio")}
-                disabled={switchingWorkspaceMode === "portfolio"}
-                className="ml-auto flex shrink-0 items-center gap-2 rounded-eos-md px-3 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
-              >
-                <ArrowLeft className="size-4" strokeWidth={2} />
-                Portofoliu
-              </button>
+            <div className="mb-4">
+              <V3WorkspaceBanner
+                client={currentUser.orgName}
+                exitLabel="Înapoi la portofoliu"
+                onExit={() => void handleSwitchWorkspaceMode("portfolio")}
+                exitDisabled={switchingWorkspaceMode === "portfolio"}
+              />
             </div>
           )}
+
+          <TrialBanner />
 
           <DashboardRuntimeProvider user={currentUser}>
             <DashboardBreadcrumb />

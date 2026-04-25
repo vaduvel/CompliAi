@@ -3,7 +3,13 @@
 import { Suspense, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle2, Loader2, Eye, EyeOff, ArrowRight } from "lucide-react"
+import {
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
@@ -120,95 +126,89 @@ function LoginContent() {
     setRegisterDuplicateEmail(false)
   }
 
-  const VALUE_PROPS = [
-    "NIS2, GDPR, AI Act, e-Factura — totul într-un loc",
-    "Import automat din SPV / e-Factura ANAF",
-    "Dosar de control gata de descărcat oricând",
-  ]
-
   const submitDisabled =
     loading ||
     (mode === "register" &&
       (!acceptedTerms || !confirmPassword || password !== confirmPassword))
 
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
-    <div className="min-h-screen bg-eos-bg px-4 py-12 text-eos-text">
-
-      {/* Background glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-eos-primary/[0.06] blur-[120px]" />
-      </div>
-
-      <div className="relative mx-auto w-full max-w-md">
-
-        {/* Logo */}
-        <div className="mb-8 flex justify-center">
-          <Link href="/">
-            <CompliScanLogoLockup variant="flat" size="md" />
-          </Link>
-        </div>
-
-        {/* Tagline */}
-        <div className="mb-7 text-center">
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-eos-text">
-            Află ce ți se aplică.{" "}
-            <span className="text-eos-primary">
-              Fii gata de control.
+    <div className="min-h-screen bg-eos-bg text-eos-text">
+      <div className="grid min-h-screen lg:grid-cols-2">
+        {/* ── LEFT — Form ──────────────────────────────────────────────────── */}
+        <div className="flex flex-col px-6 py-8 md:px-12 md:py-10 lg:px-16">
+          {/* Top bar */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="block">
+              <CompliScanLogoLockup variant="flat" size="sm" />
+            </Link>
+            <span className="ml-auto font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-eos-text-tertiary">
+              Conformitate · GDPR · NIS2 · AI Act
             </span>
-          </h1>
-          <ul className="mt-4 space-y-2">
-            {VALUE_PROPS.map((prop) => (
-              <li key={prop} className="flex items-center justify-center gap-2 text-sm text-eos-text-muted">
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success/70" strokeWidth={2.5} />
-                {prop}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Card */}
-        <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
-
-          {/* Mode toggle */}
-          <div className="flex border-b border-eos-border-subtle p-1.5">
-            <button
-              type="button"
-              onClick={switchToLogin}
-              className={[
-                "flex-1 rounded-eos-lg py-2.5 text-sm font-semibold transition-all",
-                mode === "login"
-                  ? "bg-eos-surface-elevated text-eos-text shadow-sm"
-                  : "text-eos-text-tertiary hover:text-eos-text-muted",
-              ].join(" ")}
-            >
-              Autentificare
-            </button>
-            <button
-              type="button"
-              onClick={switchToRegister}
-              className={[
-                "flex-1 rounded-eos-lg py-2.5 text-sm font-semibold transition-all",
-                mode === "register"
-                  ? "bg-eos-surface-elevated text-eos-text shadow-sm"
-                  : "text-eos-text-tertiary hover:text-eos-text-muted",
-              ].join(" ")}
-            >
-              Cont nou
-              {mode === "register" && (
-                <span className="ml-2 rounded-full bg-eos-primary/20 px-2 py-0.5 text-[10px] font-bold text-eos-primary">
-                  14 zile Pro
-                </span>
-              )}
-            </button>
           </div>
 
-          {/* Form */}
-          <div className="px-6 py-7">
-            <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+          {/* Center — form column */}
+          <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
+            <h1
+              data-display-text="true"
+              className="font-display text-[32px] font-semibold leading-[1.1] tracking-[-0.025em] text-eos-text md:text-[36px]"
+            >
+              {mode === "login" ? "Bun venit înapoi." : "Creează-ți contul."}
+            </h1>
+            <p className="mt-2.5 text-[14px] leading-[1.55] text-eos-text-muted">
+              {mode === "login"
+                ? "Continuă pe firma ta sau pe portofoliul cabinetului."
+                : "Începi cu snapshot-ul firmei tale. Primul scan rulează în 3 minute."}
+            </p>
 
+            {/* Mode toggle — V3 segmented */}
+            <div
+              role="tablist"
+              aria-label="Mod autentificare"
+              className="mt-7 inline-flex w-full items-center gap-0.5 rounded-eos-sm bg-white/[0.03] p-0.5"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "login"}
+                onClick={switchToLogin}
+                className={[
+                  "flex flex-1 items-center justify-center rounded-eos-sm px-3 py-2 text-[12.5px] font-medium transition-colors duration-100",
+                  mode === "login"
+                    ? "bg-white/[0.06] font-semibold text-eos-text"
+                    : "text-eos-text-muted hover:text-eos-text",
+                ].join(" ")}
+              >
+                Autentificare
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "register"}
+                onClick={switchToRegister}
+                className={[
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-eos-sm px-3 py-2 text-[12.5px] font-medium transition-colors duration-100",
+                  mode === "register"
+                    ? "bg-white/[0.06] font-semibold text-eos-text"
+                    : "text-eos-text-muted hover:text-eos-text",
+                ].join(" ")}
+              >
+                Cont nou
+                <span className="inline-flex items-center rounded-sm border border-eos-success/25 bg-eos-success-soft px-1 py-0 font-mono text-[9px] font-bold uppercase tracking-[0.05em] text-eos-success">
+                  14z PRO
+                </span>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={(e) => void handleSubmit(e)} className="mt-6 space-y-4">
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label htmlFor="orgName" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  <label
+                    htmlFor="orgName"
+                    className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary"
+                  >
                     Denumirea firmei
                   </label>
                   <input
@@ -217,16 +217,19 @@ function LoginContent() {
                     type="text"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Ex: BRRR SRL"
+                    placeholder="Ex: Apex Logistic SRL"
                     required
                     autoComplete="organization"
-                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
+                    className="h-11 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[13.5px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-primary/50"
                   />
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="email" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                <label
+                  htmlFor="email"
+                  className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary"
+                >
                   Email
                 </label>
                 <input
@@ -238,14 +241,27 @@ function LoginContent() {
                   placeholder="email@firma.ro"
                   required
                   autoComplete="email"
-                  className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
+                  className="h-11 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[13.5px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-primary/50"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-                  Parolă
-                </label>
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="password"
+                    className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary"
+                  >
+                    Parolă
+                  </label>
+                  {mode === "login" && (
+                    <Link
+                      href="/reset-password"
+                      className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-primary transition-colors hover:text-eos-primary/80"
+                    >
+                      Am uitat parola
+                    </Link>
+                  )}
+                </div>
                 <div className="relative">
                   <input
                     id="password"
@@ -256,26 +272,25 @@ function LoginContent() {
                     placeholder={mode === "register" ? "Minim 8 caractere" : "Parola ta"}
                     required
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
-                    className="h-12 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/50 focus:bg-eos-surface-active transition-all"
+                    className="h-11 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 pr-11 text-[13.5px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-primary/50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-eos-text-tertiary transition-colors hover:text-eos-text-muted"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-tertiary transition-colors hover:text-eos-text-muted"
                     aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" strokeWidth={2} />
-                    ) : (
-                      <Eye className="h-4 w-4" strokeWidth={2} />
-                    )}
+                    {showPassword ? <EyeOff className="size-4" strokeWidth={2} /> : <Eye className="size-4" strokeWidth={2} />}
                   </button>
                 </div>
               </div>
 
               {mode === "register" && (
                 <div className="space-y-1.5">
-                  <label htmlFor="confirmPassword" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary"
+                  >
                     Confirmă parola
                   </label>
                   <div className="relative">
@@ -290,55 +305,66 @@ function LoginContent() {
                       autoComplete="new-password"
                       aria-invalid={Boolean(confirmPassword && password !== confirmPassword)}
                       className={[
-                        "h-12 w-full rounded-eos-lg border bg-eos-surface-active px-4 pr-12 text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary transition-all",
+                        "h-11 w-full rounded-eos-sm border bg-eos-surface px-3 pr-11 text-[13.5px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary",
                         confirmPassword && password !== confirmPassword
-                          ? "border-eos-error/40 focus:border-eos-error/60"
+                          ? "border-eos-error/50 focus:border-eos-error/70"
                           : confirmPassword && password === confirmPassword
-                            ? "border-eos-success/40 focus:border-eos-success/50"
-                            : "border-eos-border focus:border-eos-primary/50 focus:bg-eos-surface-active",
+                            ? "border-eos-success/40 focus:border-eos-success/60"
+                            : "border-eos-border focus:border-eos-primary/50",
                       ].join(" ")}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword((v) => !v)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-eos-text-tertiary transition-colors hover:text-eos-text-muted"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-eos-text-tertiary transition-colors hover:text-eos-text-muted"
                       aria-label={showConfirmPassword ? "Ascunde confirmarea" : "Arată confirmarea"}
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" strokeWidth={2} />
+                        <EyeOff className="size-4" strokeWidth={2} />
                       ) : (
-                        <Eye className="h-4 w-4" strokeWidth={2} />
+                        <Eye className="size-4" strokeWidth={2} />
                       )}
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
-                    <p className="text-xs text-eos-error/80">Parolele nu coincid.</p>
+                    <p className="font-mono text-[11px] text-eos-error">
+                      Parolele nu coincid.
+                    </p>
                   )}
                   {confirmPassword && password === confirmPassword && password.length >= 8 && (
-                    <p className="flex items-center gap-1.5 text-xs text-eos-success/80">
-                      <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} /> Parolele coincid
+                    <p className="flex items-center gap-1.5 font-mono text-[11px] text-eos-success">
+                      <CheckCircle2 className="size-3" strokeWidth={2.5} />
+                      Parolele coincid
                     </p>
                   )}
                 </div>
               )}
 
               {mode === "register" && (
-                <label className="flex cursor-pointer items-start gap-3 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-3.5">
+                <label className="flex cursor-pointer items-start gap-3 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 py-3">
                   <input
                     id="acceptedTerms"
                     name="acceptedTerms"
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-eos-primary"
+                    className="mt-0.5 size-4 shrink-0 accent-eos-primary"
                   />
-                  <span className="text-xs leading-relaxed text-eos-text-tertiary">
+                  <span className="text-[12px] leading-[1.55] text-eos-text-muted">
                     Am citit și accept{" "}
-                    <Link href="/terms" target="_blank" className="text-eos-primary hover:text-eos-primary hover:underline">
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="text-eos-primary underline-offset-2 hover:underline"
+                    >
                       Termenii și Condițiile
                     </Link>{" "}
                     și{" "}
-                    <Link href="/privacy" target="_blank" className="text-eos-primary hover:text-eos-primary hover:underline">
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="text-eos-primary underline-offset-2 hover:underline"
+                    >
                       Politica de Confidențialitate
                     </Link>
                     .
@@ -347,21 +373,25 @@ function LoginContent() {
               )}
 
               {error && (
-                <div className="rounded-eos-lg border border-eos-error-border bg-eos-error/10 px-4 py-3 text-sm text-eos-error">
+                <div className="rounded-eos-sm border border-eos-error/30 bg-eos-error-soft px-3.5 py-2.5 font-mono text-[11.5px] text-eos-error">
                   {error}
                 </div>
               )}
 
               {mode === "register" && registerDuplicateEmail && (
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.06em]">
                   <button
                     type="button"
                     onClick={switchToLogin}
-                    className="text-sm text-eos-primary hover:text-eos-primary hover:underline"
+                    className="text-eos-primary transition-colors hover:text-eos-primary/80"
                   >
-                    Mergi la autentificare
+                    → Mergi la autentificare
                   </button>
-                  <Link href="/reset-password" className="text-sm text-eos-primary hover:text-eos-primary hover:underline">
+                  <span className="text-eos-border-strong">·</span>
+                  <Link
+                    href="/reset-password"
+                    className="text-eos-primary transition-colors hover:text-eos-primary/80"
+                  >
                     Resetează parola
                   </Link>
                 </div>
@@ -370,62 +400,138 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={submitDisabled}
-                className="flex w-full items-center justify-center gap-2 rounded-eos-lg bg-eos-primary py-3.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-eos-sm bg-eos-primary text-[13.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.5)] transition-all hover:bg-eos-primary/90 disabled:cursor-not-allowed disabled:bg-eos-primary/50 disabled:shadow-none"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     {mode === "login" ? "Se autentifică..." : "Se creează contul..."}
                   </>
                 ) : mode === "login" ? (
                   <>
-                    Autentificare
-                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    Intră în CompliScan
+                    <ArrowRight className="size-4" strokeWidth={2.5} />
                   </>
                 ) : (
                   <>
                     Creează cont gratuit
-                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    <ArrowRight className="size-4" strokeWidth={2.5} />
                   </>
                 )}
               </button>
 
+              <p className="text-center font-mono text-[10px] uppercase tracking-[0.08em] text-eos-text-tertiary">
+                Conectare securizată · 2FA disponibil · Date stocate în UE
+              </p>
             </form>
-
-            {mode === "login" && (
-              <div className="mt-4 text-center">
-                <Link
-                  href="/reset-password"
-                  className="text-xs text-eos-text-tertiary transition-colors hover:text-eos-text-muted"
-                >
-                  Am uitat parola
-                </Link>
-              </div>
-            )}
           </div>
+
+          {/* Footer note */}
+          <p className="mt-auto pt-6 text-center text-[11.5px] leading-[1.55] text-eos-text-tertiary">
+            Nu oferim consiliere juridică. Oferim instrumente de pregătire.
+            <br />
+            Verificați cu un specialist înainte de orice raport oficial.
+          </p>
         </div>
 
-        {/* Footer note */}
-        <p className="mt-6 text-center text-xs leading-relaxed text-eos-text-tertiary">
-          Nu oferim consiliere juridică. Oferim instrumente de pregătire.
-          <br />
-          Verificați cu un specialist înainte de orice raport oficial.
-        </p>
+        {/* ── RIGHT — Ambient panel (V3 frozen pattern) ───────────────────── */}
+        <div className="relative hidden overflow-hidden border-l border-eos-border bg-gradient-to-br from-eos-surface via-eos-bg to-eos-bg lg:flex">
+          {/* radial glow */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute right-[15%] top-[15%] size-[480px] rounded-full bg-eos-primary/15 blur-[100px]" />
+            <div className="absolute bottom-[10%] left-[10%] size-[380px] rounded-full bg-violet-500/10 blur-[100px]" />
+          </div>
+
+          <div className="relative flex flex-col px-12 py-14 xl:px-16">
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+              — Sincronizare live · acum 2 ore
+            </p>
+            <h2
+              data-display-text="true"
+              className="mt-4 max-w-md font-display text-[34px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text xl:text-[38px]"
+              style={{ textWrap: "balance" }}
+            >
+              Conformitate operată continuu, nu doar verificată anual.
+            </h2>
+
+            {/* Framework grid (V3 ambient cards) */}
+            <div className="mt-10 grid max-w-md grid-cols-2 gap-3">
+              {[
+                { fw: "GDPR", a: "47/47", t: "ok", l: "firme conforme" },
+                { fw: "AI Act", a: "12/47", t: "warning", l: "high-risk identificate" },
+                { fw: "NIS2", a: "8/47", t: "warning", l: "în maturitate" },
+                { fw: "e-Factura", a: "47/47", t: "ok", l: "sincronizate ANAF" },
+              ].map((f) => (
+                <div
+                  key={f.fw}
+                  className="rounded-eos-lg border border-eos-border bg-eos-surface/60 p-3.5 backdrop-blur-md"
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      className={[
+                        "inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.05em]",
+                        f.t === "ok"
+                          ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
+                          : "border-eos-warning/25 bg-eos-warning-soft text-eos-warning",
+                      ].join(" ")}
+                    >
+                      {f.fw}
+                    </span>
+                    <span className="ml-auto font-mono text-[9.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                      monitor
+                    </span>
+                  </div>
+                  <div
+                    data-display-text="true"
+                    className="font-display text-[22px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
+                  >
+                    {f.a}
+                  </div>
+                  <p className="mt-1.5 text-[11px] leading-tight text-eos-text-muted">{f.l}</p>
+                </div>
+              ))}
+            </div>
+
+            <blockquote className="mt-12 max-w-md border-l-2 border-eos-primary pl-5">
+              <p className="text-[15px] italic leading-[1.6] text-eos-text-muted">
+                „Îmi recuperez o zi pe săptămână. CompliScan face scanarea, eu fac deciziile."
+              </p>
+              <footer className="mt-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
+                — Ramona Ilie · expert contabil · 22 clienți
+              </footer>
+            </blockquote>
+
+            <div className="mt-auto pt-12 font-mono text-[10px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+              <span>© 2026 CompliScan</span>
+              <span className="mx-2 text-eos-border-strong">·</span>
+              <Link href="/terms" className="hover:text-eos-text-muted">
+                Termeni
+              </Link>
+              <span className="mx-2 text-eos-border-strong">·</span>
+              <Link href="/privacy" className="hover:text-eos-text-muted">
+                Confidențialitate
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-eos-bg/70 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-eos-lg border border-eos-border bg-eos-surface-active px-5 py-5 shadow-2xl backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-5 shadow-2xl">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-eos-lg bg-eos-primary-soft">
-                <Loader2 className="h-5 w-5 animate-spin text-eos-primary" strokeWidth={2} />
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-eos-sm border border-eos-primary/25 bg-eos-primary/10">
+                <Loader2 className="size-5 animate-spin text-eos-primary" strokeWidth={2} />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-eos-text">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14px] font-semibold tracking-[-0.01em] text-eos-text"
+                >
                   {mode === "login" ? "Te autentificăm acum" : "Creăm contul tău"}
                 </p>
-                <p className="text-sm text-eos-text-tertiary">
+                <p className="text-[12px] leading-[1.55] text-eos-text-muted">
                   {mode === "login"
                     ? "Îți păstrăm contextul și te trimitem direct în workspace."
                     : "Creăm organizația, activăm sesiunea și te ducem în onboarding."}
