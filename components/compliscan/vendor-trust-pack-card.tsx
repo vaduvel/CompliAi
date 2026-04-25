@@ -153,7 +153,7 @@ export function VendorTrustPackCard() {
       <CardHeader className="gap-3 border-b border-eos-border-subtle">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               P3-B
             </p>
             <CardTitle className="mt-1 flex items-center gap-2 text-base">

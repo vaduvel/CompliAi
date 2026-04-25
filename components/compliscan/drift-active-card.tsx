@@ -32,7 +32,7 @@ export function DriftActiveCard({ findings }: Props) {
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-3.5 w-3.5 text-eos-warning" strokeWidth={2} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Drift activ</p>
+          <p className="text-[10px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Drift activ</p>
         </div>
         <span className="rounded-full bg-eos-warning/10 px-2 py-0.5 text-[10px] font-semibold text-eos-warning">
           {flagged.length} în reverificare · {reopened.length} redeschise

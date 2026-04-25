@@ -114,7 +114,7 @@ export function HealthCheckCard() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Health Check Conformitate
             </p>
             <CardTitle className="text-base text-eos-text">

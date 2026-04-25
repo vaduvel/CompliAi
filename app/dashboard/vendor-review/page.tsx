@@ -1308,7 +1308,7 @@ export default function VendorReviewPage() {
                 </div>
 
                 <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Notă de reminder</p>
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">Notă de reminder</p>
                   <p className="mt-2 text-sm text-eos-text-muted">{lifecycleSummary.reminderNote}</p>
                 </div>
 

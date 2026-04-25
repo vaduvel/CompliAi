@@ -94,7 +94,7 @@ export function Nis2CockpitCard() {
     <section className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">NIS2 rollout</p>
+          <p className="text-[10px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">NIS2 rollout</p>
           <div className="mt-2 flex items-center gap-2">
             {findings.length > 0 ? (
               <AlertTriangle className="size-4 text-eos-warning" strokeWidth={2} />
@@ -162,7 +162,7 @@ function Metric({
 
   return (
     <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{label}</p>
+      <p className="text-[10px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">{label}</p>
       <p className={`mt-2 text-lg font-semibold ${toneClass}`}>{value}</p>
     </div>
   )

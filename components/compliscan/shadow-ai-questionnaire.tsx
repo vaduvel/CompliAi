@@ -249,7 +249,7 @@ export function ShadowAiQuestionnaire() {
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Shadow AI
             </p>
             <CardTitle className="flex items-center gap-2 text-base text-eos-text">

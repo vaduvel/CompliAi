@@ -159,7 +159,7 @@ export function DocumentAdoptionCard({
         </div>
 
         <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
             Notă pentru semnare / punere în uz
           </p>
           <textarea

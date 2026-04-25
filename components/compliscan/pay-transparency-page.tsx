@@ -333,7 +333,7 @@ export function PayTransparencyPage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+      <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-lg font-semibold text-eos-text">{value}</p>
     </div>
   )

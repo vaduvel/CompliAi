@@ -384,7 +384,7 @@ export default function ScanResultsPage() {
         }
         aside={
           <div className="space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Finding-uri
             </p>
             <p className="text-2xl font-semibold text-eos-text">{targetFindings.length}</p>
@@ -431,7 +431,7 @@ export default function ScanResultsPage() {
       <section aria-label="Finding-uri din această scanare">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Finding-uri din această scanare
             </p>
             <p className="mt-1 text-sm text-eos-text-muted">

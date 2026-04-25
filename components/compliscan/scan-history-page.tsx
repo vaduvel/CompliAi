@@ -113,7 +113,7 @@ export function ScanHistoryPageSurface() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Snapshot documente
             </p>
             <p className="text-2xl font-semibold text-eos-text">{cockpit.data.summary.score}</p>

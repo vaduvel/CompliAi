@@ -85,7 +85,7 @@ export function FiscalStatusInterpreterCard({
         </div>
 
         <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Dovada pe care o ceri în cockpit</p>
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">Dovada pe care o ceri în cockpit</p>
           <div className="mt-3 space-y-2">
             {guide.evidenceItems.map((item) => (
               <div key={item} className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text-muted">
@@ -96,7 +96,7 @@ export function FiscalStatusInterpreterCard({
         </div>
 
         <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
           <textarea
             data-testid="fiscal-status-note"
             readOnly

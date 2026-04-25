@@ -24,7 +24,7 @@ export function WorkspaceModeSwitcher({
 
   return (
     <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-2">
-      <p className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+      <p className="mb-2 px-1 text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
         Mod de lucru
       </p>
       <div className="flex flex-col gap-0.5">

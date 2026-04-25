@@ -112,7 +112,7 @@ export default function RemediationPage() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Blocaj curent
             </p>
             <p className="text-2xl font-semibold text-eos-text">{dominantExecutionSignal}</p>

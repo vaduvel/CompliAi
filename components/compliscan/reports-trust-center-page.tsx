@@ -78,7 +78,7 @@ export function ReportsTrustCenterPageSurface() {
         }
         aside={
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Scor global
             </p>
             <p className="text-2xl font-semibold text-eos-text">{score}%</p>
@@ -96,7 +96,7 @@ export function ReportsTrustCenterPageSurface() {
             <div>
               <div className="flex items-center gap-2">
                 <Globe className="size-4 text-eos-text-muted" strokeWidth={2} />
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+                <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Preview profil public
                 </p>
               </div>
@@ -141,7 +141,7 @@ export function ReportsTrustCenterPageSurface() {
               {/* Score */}
               {visibility.score && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     Scor global
                   </p>
                   <p className="mt-2 text-3xl font-semibold text-eos-text">{score}%</p>
@@ -152,7 +152,7 @@ export function ReportsTrustCenterPageSurface() {
               {/* GDPR */}
               {visibility.gdpr && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     GDPR
                   </p>
                   <div className="mt-2 flex items-center gap-2">
@@ -169,7 +169,7 @@ export function ReportsTrustCenterPageSurface() {
               {/* EU AI Act */}
               {visibility.euAiAct && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     EU AI Act
                   </p>
                   <div className="mt-2 flex items-center gap-2">
@@ -188,7 +188,7 @@ export function ReportsTrustCenterPageSurface() {
               {/* e-Factura */}
               {visibility.efactura && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     e-Factura
                   </p>
                   <div className="mt-2 flex items-center gap-2">
@@ -207,7 +207,7 @@ export function ReportsTrustCenterPageSurface() {
               {/* Updated at */}
               {visibility.updatedAt && (
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     Ultima actualizare
                   </p>
                   <p className="mt-2 text-sm font-semibold text-eos-text">{updatedAt}</p>

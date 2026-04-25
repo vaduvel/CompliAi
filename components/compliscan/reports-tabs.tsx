@@ -42,7 +42,7 @@ export function ReportsTabs() {
 
   return (
     <div className="space-y-2">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+      <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-muted">
         Rapoarte
       </p>
       <div className="flex flex-wrap gap-2">

@@ -162,7 +162,7 @@ export default function DoraPage() {
             <div className="absolute inset-x-0 top-0 h-[3px] bg-eos-error" />
           )}
           <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Incidente majore</p>
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Incidente majore</p>
             <p className={`mt-1 text-2xl font-semibold tabular-nums ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
               {majorOpen.length}
             </p>
@@ -171,14 +171,14 @@ export default function DoraPage() {
         </Card>
         <Card className={`relative overflow-hidden border-eos-border border-l-[3px] ${criticalProviders.length > 0 ? "border-l-eos-warning" : "border-l-eos-border-subtle"}`}>
           <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Furnizori critici</p>
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Furnizori critici</p>
             <p className={`mt-1 text-2xl font-semibold tabular-nums ${criticalProviders.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>{criticalProviders.length}</p>
             <p className="text-[10px] text-eos-text-muted">{tprm.length} furnizori total</p>
           </CardContent>
         </Card>
         <Card className="border-eos-border border-l-[3px] border-l-eos-border-subtle">
           <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Teste reziliență</p>
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Teste reziliență</p>
             <p className="mt-1 text-2xl font-semibold tabular-nums text-eos-text">{state?.resilienceTests.length ?? 0}</p>
             <p className="text-[10px] text-eos-text-muted">
               {(state?.resilienceTests ?? []).filter((t) => t.status === "completed").length} completate
@@ -343,13 +343,13 @@ function IncidentRow({
         {expanded && (
           <div className="space-y-3 border-t border-eos-border-subtle pt-3">
             <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Descriere</p>
+              <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Descriere</p>
               <p className="mt-1 text-sm text-eos-text whitespace-pre-wrap">{i.description}</p>
             </div>
 
             {i.affectedSystems.length > 0 && (
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Sisteme afectate</p>
+                <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Sisteme afectate</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {i.affectedSystems.map((s) => (
                     <Badge key={s} variant="outline" className="text-[10px] normal-case">{s}</Badge>
@@ -364,7 +364,7 @@ function IncidentRow({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cauza rădăcină</label>
+                <label className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Cauza rădăcină</label>
                 <textarea
                   className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
@@ -374,7 +374,7 @@ function IncidentRow({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Măsuri de remediere</label>
+                <label className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Măsuri de remediere</label>
                 <textarea
                   className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
@@ -496,7 +496,7 @@ function TprmRow({
             </div>
 
             <div>
-              <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Note</label>
+              <label className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Note</label>
               <textarea
                 className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                 rows={2}

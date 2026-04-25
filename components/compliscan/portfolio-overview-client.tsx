@@ -81,7 +81,7 @@ function SortHeader({
     <button
       type="button"
       onClick={() => onSort(sortKey)}
-      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors duration-150 ${
+      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] transition-colors duration-150 ${
         active ? "text-eos-text-muted" : "text-eos-text-tertiary hover:text-eos-text-muted"
       } ${className}`}
     >
@@ -527,7 +527,7 @@ function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }
     <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1 px-5 py-4">
-          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+          <span className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
             {stat.label}
           </span>
           <span className="text-xl font-semibold text-eos-text">{stat.value}</span>
@@ -728,7 +728,7 @@ export function PortfolioOverviewClient() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
+          <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Portofoliu</p>
           <h1 className="mt-1 text-2xl font-semibold text-eos-text">Portofoliu firme</h1>
           <p className="mt-1.5 max-w-xl text-sm leading-6 text-eos-text-tertiary">
             Aici faci triage cross-client. Intri în firmă doar când trebuie să execuți într-un workspace real.

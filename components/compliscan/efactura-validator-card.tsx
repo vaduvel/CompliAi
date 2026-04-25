@@ -365,7 +365,7 @@ export function EFacturaValidatorCard({
 
                       <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                             {showDiff ? "Diff original vs reparat" : "XML reparat"}
                           </p>
                           <Button
@@ -414,7 +414,7 @@ export function EFacturaValidatorCard({
                       </div>
 
                       <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Protocol după repair</p>
+                        <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">Protocol după repair</p>
                         <div className="mt-3 space-y-3">
                           {[
                             "Înlocuiește editorul sau descarcă XML-ul reparat ca fișier separat.",
@@ -446,7 +446,7 @@ export function EFacturaValidatorCard({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm text-eos-text [overflow-wrap:anywhere]">{value}</p>
     </div>
   )

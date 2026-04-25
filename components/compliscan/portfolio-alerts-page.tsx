@@ -540,7 +540,7 @@ export function PortfolioAlertsPage() {
           {grouped.map((group) => (
             <div key={group.label} className="space-y-2">
               <div className="flex items-center gap-2 px-1">
-                <h3 className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+                <h3 className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                   {group.label}
                 </h3>
                 <Badge variant="outline" className="text-[10px] normal-case tracking-normal">

@@ -369,7 +369,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
             </div>
 
             <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
+              <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
               <Textarea
                 readOnly
                 value={derived?.handoffEvidenceNote ?? ""}

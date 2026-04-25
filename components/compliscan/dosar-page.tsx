@@ -35,7 +35,7 @@ export function DosarPageSurface() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Dosar</p>
+        <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Dosar</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
         </h1>

@@ -48,7 +48,7 @@ export function RiskTrajectoryWidget() {
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
         <div className="flex items-center gap-2">
           <TrendIcon className={`size-4 ${trendColor}`} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+          <p className="text-[10px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
             Trajectorie risc
           </p>
         </div>

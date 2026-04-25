@@ -200,7 +200,7 @@ export function DashboardShell({
             {navSections.map((section, sectionIdx) => (
               <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
                 {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  <p className="mb-2 px-2 text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
                     {section.label}
                   </p>
                 ) : null}
@@ -335,7 +335,7 @@ export function DashboardShell({
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
             <div className="mb-4 flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary/70">
+                <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-primary/70">
                   Execuție în firmă
                 </p>
                 <p className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</p>

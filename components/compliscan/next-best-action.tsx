@@ -133,7 +133,7 @@ export function NextBestAction({
       <CardContent className="pt-5">
         {hasDistinctNextStepCopy(task.summary, task.fixPreview) ? (
           <div className="mb-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-muted">
               Pas recomandat
             </p>
             <p className="mt-2 text-sm text-eos-text [overflow-wrap:anywhere]">
@@ -180,7 +180,7 @@ export function NextBestAction({
 
         {additionalTasks.length > 0 ? (
           <div className="mt-5 border-t border-eos-border-subtle pt-4 space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted mb-3">
+            <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-eos-text-muted mb-3">
               Urmează
             </p>
             {additionalTasks.map((t) => (

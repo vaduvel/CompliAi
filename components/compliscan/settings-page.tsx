@@ -538,7 +538,7 @@ export function SettingsPageSurface() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
+        <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Setări</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
           {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
         </h1>
@@ -605,7 +605,7 @@ export function SettingsPageSurface() {
 
         {/* Tab navigation */}
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Zone Setari</p>
+          <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">Zone Setari</p>
           <div className="overflow-x-auto pb-1">
             <div className="flex min-w-max gap-0 border-b border-eos-border-subtle">
               {visibleTabs.map((tab) => (
@@ -1440,7 +1440,7 @@ export function SettingsPageSurface() {
 
             {/* ── GDPR Rights ──────────────────────────────────────────────── */}
             <div className="border-t border-eos-border-subtle pt-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
+              <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
               <p className="mt-1 text-sm text-eos-text-tertiary">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
             </div>
 
