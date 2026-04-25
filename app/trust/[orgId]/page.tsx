@@ -29,8 +29,8 @@ function TrustMetricCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-eos-md border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400">{label}</p>
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4 shadow-sm">
+      <p className="text-[11px] font-mono font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">{label}</p>
       <div className="mt-2">{children}</div>
     </div>
   )
@@ -67,11 +67,11 @@ function StatusPill({
 
 function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-eos-bg px-4">
       <div className="max-w-md text-center">
-        <ShieldCheck className="mx-auto mb-4 size-12 text-gray-300" strokeWidth={1.5} />
-        <h1 className="text-xl font-semibold text-gray-900">Profil negăsit</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <ShieldCheck className="mx-auto mb-4 size-12 text-eos-text-tertiary" strokeWidth={1.5} />
+        <h1 className="text-xl font-semibold text-eos-text">Profil negăsit</h1>
+        <p className="mt-2 text-sm text-eos-text-tertiary">
           Organizația solicitată nu are un profil public de conformitate disponibil.
         </p>
       </div>
@@ -115,7 +115,7 @@ export default async function TrustPage({
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-eos-bg py-12 px-4">
       <div className="mx-auto max-w-2xl">
 
         {/* Header */}
@@ -125,21 +125,21 @@ export default async function TrustPage({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-gray-900">Trust Center</h1>
-              <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-0.5 text-[11px] text-gray-400">
+              <h1 className="text-2xl font-semibold text-eos-text">Trust Center</h1>
+              <span className="inline-flex items-center gap-1 rounded-full border border-eos-border bg-eos-surface px-2.5 py-0.5 text-[11px] text-eos-text-tertiary">
                 <Lock className="size-3" strokeWidth={2} />
                 doar vizualizare
               </span>
             </div>
-            <p className="mt-1 text-base text-gray-600">{orgName}</p>
-            <p className="mt-0.5 text-sm text-gray-400">Profil public de conformitate</p>
+            <p className="mt-1 text-base text-eos-text-muted">{orgName}</p>
+            <p className="mt-0.5 text-sm text-eos-text-tertiary">Profil public de conformitate</p>
           </div>
         </div>
 
         {/* Score hero */}
-        <div className="mb-6 rounded-eos-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-sm">
           <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-gray-900">{summary.score}%</span>
+            <span className="text-5xl font-bold text-eos-text">{summary.score}%</span>
             <div className="mb-1">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
@@ -154,10 +154,10 @@ export default async function TrustPage({
               </span>
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-400">Scor global de conformitate</p>
+          <p className="mt-2 text-sm text-eos-text-tertiary">Scor global de conformitate</p>
 
           {/* Progress bar */}
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-eos-bg-inset">
             <div
               className={`h-full rounded-full transition-all ${
                 summary.score >= 70
@@ -175,7 +175,7 @@ export default async function TrustPage({
         <div className="grid gap-4 sm:grid-cols-2">
           <TrustMetricCard label="GDPR">
             <StatusPill ok={isGdprGood} labelOk="Conform" labelFail="În progres" />
-            <p className="mt-2 text-sm text-gray-500">Progres: {gdprProgress}%</p>
+            <p className="mt-2 text-sm text-eos-text-tertiary">Progres: {gdprProgress}%</p>
           </TrustMetricCard>
 
           <TrustMetricCard label="EU AI Act">
@@ -184,7 +184,7 @@ export default async function TrustPage({
               labelOk="Fără risc ridicat"
               labelFail="Sisteme de risc ridicat"
             />
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-eos-text-tertiary">
               {highRisk === 0
                 ? "Niciun sistem AI cu risc ridicat detectat"
                 : `${highRisk} sistem${highRisk !== 1 ? "e" : ""} cu risc ridicat`}
@@ -197,7 +197,7 @@ export default async function TrustPage({
               labelOk="Conectat"
               labelFail="Neconectat"
             />
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-eos-text-tertiary">
               {efacturaConnected
                 ? "Integrare e-Factura activă"
                 : "Integrarea e-Factura nu este configurată"}
@@ -205,16 +205,16 @@ export default async function TrustPage({
           </TrustMetricCard>
 
           <TrustMetricCard label="Ultima actualizare">
-            <p className="text-sm font-semibold text-gray-800">{updatedAt}</p>
+            <p className="text-sm font-semibold text-eos-text">{updatedAt}</p>
             <div className="mt-1.5 flex items-center gap-1">
               <CheckCircle2 className="size-3.5 text-eos-success" strokeWidth={2} />
-              <p className="text-xs text-gray-400">Status verificat</p>
+              <p className="text-xs text-eos-text-tertiary">Status verificat</p>
             </div>
           </TrustMetricCard>
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-xs text-gray-400">
+        <p className="mt-8 text-center text-xs text-eos-text-tertiary">
           Acest profil este generat automat de CompliScan și reflectă starea conformității la data afișată.
           Datele sunt furnizate exclusiv în scop informativ.
         </p>

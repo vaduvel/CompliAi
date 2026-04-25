@@ -57,14 +57,14 @@ export default async function SharedCompliancePage({
 
   if (!payload) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <div className="min-h-screen bg-eos-bg flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-eos-lg border border-eos-border bg-eos-surface p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto size-10 text-eos-warning" strokeWidth={1.5} />
-          <h1 className="mt-4 text-lg font-semibold text-slate-900">Link invalid sau expirat</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="mt-4 text-lg font-semibold text-eos-text">Link invalid sau expirat</h1>
+          <p className="mt-2 text-sm text-eos-text-tertiary">
             Acest link de partajare nu mai este valid. Solicită un link nou de la organizația care l-a generat.
           </p>
-          <p className="mt-4 text-xs text-slate-400">Link-urile de conformitate expiră în 72 de ore.</p>
+          <p className="mt-4 text-xs text-eos-text-tertiary">Link-urile de conformitate expiră în 72 de ore.</p>
         </div>
       </div>
     )
@@ -76,11 +76,11 @@ export default async function SharedCompliancePage({
 
   if (!rawState) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-eos-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <div className="min-h-screen bg-eos-bg flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-eos-lg border border-eos-border bg-eos-surface p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto size-10 text-eos-warning" strokeWidth={1.5} />
-          <h1 className="mt-4 text-lg font-semibold text-slate-900">Date indisponibile</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="mt-4 text-lg font-semibold text-eos-text">Date indisponibile</h1>
+          <p className="mt-2 text-sm text-eos-text-tertiary">
             Profilul de conformitate pentru această organizație nu este disponibil momentan.
           </p>
         </div>
@@ -112,21 +112,21 @@ export default async function SharedCompliancePage({
   })
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
+    <div className="min-h-screen bg-eos-bg py-10 px-4">
       <div className="mx-auto max-w-2xl space-y-6">
 
         {/* Header */}
-        <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <ShieldCheck className="size-5 text-indigo-600" strokeWidth={2} />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
+                <ShieldCheck className="size-5 text-eos-primary" strokeWidth={2} />
+                <span className="text-xs font-mono font-semibold uppercase tracking-[0.14em] text-eos-primary">
                   CompliAI · {recipientLabel(payload.recipientType)}
                 </span>
               </div>
-              <h1 className="mt-2 text-xl font-bold text-slate-900">{orgName}</h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <h1 className="mt-2 text-xl font-bold text-eos-text">{orgName}</h1>
+              <p className="mt-1 text-sm text-eos-text-tertiary">
                 Profil de conformitate generat la {generatedAt}
               </p>
             </div>
@@ -139,15 +139,15 @@ export default async function SharedCompliancePage({
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-eos-text-tertiary">
             <Clock className="size-3.5" strokeWidth={2} />
             Link valid până la {formatExpiry(payload.expiresAtISO)}
           </div>
         </div>
 
         {/* Framework status */}
-        <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-sm">
+          <h2 className="text-sm font-mono font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
             Stare framework-uri
           </h2>
           <div className="mt-4 space-y-3">
@@ -190,15 +190,15 @@ export default async function SharedCompliancePage({
 
         {/* Open risks */}
         {criticalFindings.length > 0 && (
-          <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
+          <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-sm">
+            <h2 className="text-sm font-mono font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Riscuri deschise prioritare
             </h2>
             <div className="mt-4 space-y-3">
               {criticalFindings.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-start gap-3 rounded-eos-md border border-slate-100 bg-slate-50 px-4 py-3"
+                  className="flex items-start gap-3 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3"
                 >
                   <span
                     className={`mt-0.5 size-2 shrink-0 rounded-full ${
@@ -206,18 +206,18 @@ export default async function SharedCompliancePage({
                     }`}
                   />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800">{f.title}</p>
+                    <p className="text-sm font-medium text-eos-text">{f.title}</p>
                     {f.impactSummary && (
-                      <p className="mt-1 text-xs text-slate-500 line-clamp-2">{f.impactSummary}</p>
+                      <p className="mt-1 text-xs text-eos-text-muted line-clamp-2">{f.impactSummary}</p>
                     )}
-                    <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400">
+                    <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.1em] text-eos-text-tertiary">
                       {f.category} · {f.severity}
                     </p>
                   </div>
                 </div>
               ))}
               {openFindings.length > criticalFindings.length && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-eos-text-tertiary">
                   + {openFindings.length - criticalFindings.length} alte finding-uri de conformitate active
                 </p>
               )}
@@ -236,7 +236,7 @@ export default async function SharedCompliancePage({
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-eos-text-tertiary">
           Generat de <strong>CompliAI</strong> · compliscanag.vercel.app ·{" "}
           Link expiră în 72 ore de la generare
         </p>
@@ -265,8 +265,8 @@ function FrameworkRow({
         <XCircle className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
       )}
       <div className="min-w-0">
-        <p className="text-sm font-medium text-slate-800">{name}</p>
-        <p className="mt-0.5 text-xs text-slate-500">{detail}</p>
+        <p className="text-sm font-medium text-eos-text">{name}</p>
+        <p className="mt-0.5 text-xs text-eos-text-muted">{detail}</p>
       </div>
     </div>
   )
