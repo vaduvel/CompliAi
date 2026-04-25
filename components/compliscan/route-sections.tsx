@@ -208,14 +208,11 @@ export function DriftCommandCenter({
               })}
             </div>
 
-            <details className="group">
-              <summary className="flex cursor-pointer select-none items-center gap-2 py-1 text-xs font-medium text-eos-text-muted hover:text-eos-text">
-                <span className="transition-transform group-open:rotate-90">▶</span>
-                Detalii drift selectat
-              </summary>
-              <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted mb-3">Detalii drift selectat</p>
+              <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Impact principal</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Impact principal</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {selectedGuidance?.lawReference || "revizie legala / operationala"}
                   </p>
@@ -225,7 +222,7 @@ export function DriftCommandCenter({
                 </div>
 
                 <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Actiune pentru drift</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Actiune pentru drift</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                   </p>
@@ -235,7 +232,7 @@ export function DriftCommandCenter({
                 </div>
 
                 <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Escalare si baseline</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Escalare si baseline</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
                   </p>
@@ -265,7 +262,7 @@ export function DriftCommandCenter({
                   </p>
                 </div>
               </div>
-            </details>
+            </div>
 
             <div className="space-y-3">
               <ActionCluster
@@ -476,13 +473,13 @@ export function ScanWorkspace({
               <p className="text-sm font-medium text-eos-text">Pasul 3: extrage si revizuieste</p>
               <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
                 <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Document</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Document</p>
                   <p className="mt-2 text-sm text-eos-text">
                     {documentName || "Inca nu ai setat numele documentului."}
                   </p>
                 </div>
                 <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Sursa</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Sursa</p>
                   <p className="mt-2">
                     {isTextMode
                       ? documentContent.trim()
@@ -496,7 +493,7 @@ export function ScanWorkspace({
                   </p>
                 </div>
                 <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Scope implicit</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">Scope implicit</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">GDPR</Badge>
                     <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">EU AI Act</Badge>
@@ -505,7 +502,7 @@ export function ScanWorkspace({
                 </div>
                 {pendingScanId && (
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Text extras pentru review
                     </p>
                     <textarea
@@ -646,7 +643,7 @@ export function LatestDocumentSection({
                         key={insight.id}
                         className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
                       >
-                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                        <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                           {insight.label}
                         </p>
                         <p className="mt-2 text-sm text-eos-text">{insight.value}</p>
