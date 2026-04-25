@@ -542,20 +542,15 @@ export default function GeneratorPage() {
               recipe={findingContextRecipe ?? undefined}
             />
 
-            <details className="group rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
-              <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                    Contextul finding-ului
-                  </p>
-                  <p className="mt-1 text-sm text-eos-text-muted">
-                    Generatorul rămâne în urma cazului, iar contextul complet stă aici doar când ai nevoie de el.
-                  </p>
-                </div>
-                <Badge variant="outline" className="normal-case tracking-normal">
-                  Deschide
-                </Badge>
-              </summary>
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+              <div>
+                <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Contextul finding-ului
+                </p>
+                <p className="mt-1 text-sm text-eos-text-muted">
+                  Generatorul rămâne în urma cazului, iar contextul complet stă aici când ai nevoie de el.
+                </p>
+              </div>
               <div className="mt-4">
                 <FindingNarrativeCard
                   finding={findingContext.finding}
@@ -564,7 +559,7 @@ export default function GeneratorPage() {
                   recipe={findingContextRecipe ?? undefined}
                 />
               </div>
-            </details>
+            </div>
           </div>
         ) : null
       ) : null}
