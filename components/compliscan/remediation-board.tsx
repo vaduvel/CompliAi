@@ -124,7 +124,7 @@ export function RemediationBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.12em]">
+              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.14em]">
                 Task-uri de suport
               </CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
@@ -469,7 +469,7 @@ function RelatedFindingAnchor({
       <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Caz asociat
             </p>
             <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
