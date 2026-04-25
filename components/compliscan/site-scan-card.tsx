@@ -201,7 +201,7 @@ export function SiteScanCard({
                 {/* Findings */}
                 {result.findingSuggestions.length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-muted">
+                    <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-muted">
                       Finding-uri detectate
                     </p>
                     {result.findingSuggestions.map((s, i) => (
@@ -230,10 +230,10 @@ export function SiteScanCard({
 
                 {/* Detected trackers list */}
                 {result.trackers.length > 0 && (
-                  <details className="rounded-eos-sm border border-eos-border">
-                    <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-eos-text-muted hover:text-eos-text">
-                      {result.trackers.length} trackere detectate — detalii
-                    </summary>
+                  <div className="rounded-eos-sm border border-eos-border">
+                    <p className="font-mono px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+                      {result.trackers.length} trackere detectate
+                    </p>
                     <div className="divide-y divide-eos-border border-t border-eos-border">
                       {result.trackers.map((t) => (
                         <div key={t.id} className="flex items-center justify-between px-3 py-2 text-xs">
@@ -248,7 +248,7 @@ export function SiteScanCard({
                         </div>
                       ))}
                     </div>
-                  </details>
+                  </div>
                 )}
 
                 {returnHref ? (

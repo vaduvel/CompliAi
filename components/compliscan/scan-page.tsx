@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
-import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bot } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -57,7 +57,7 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">{eyebrow}</p>
       <p className="mt-1 text-sm font-semibold text-eos-text">{title}</p>
       {description && <p className="mt-0.5 text-xs text-eos-text-tertiary">{description}</p>}
     </div>
@@ -246,7 +246,7 @@ export function ScanPageSurface() {
 
       {/* Header */}
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Scanează</p>
         <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Adaugă surse noi</h1>
         <p className="mt-1 text-sm text-eos-text-tertiary">
           {isSolo
@@ -418,20 +418,15 @@ export function ScanPageSurface() {
             </div>
           )}
 
-          <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
-            <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
-              <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-              Detalii context scanare
-            </summary>
-            <div className="mt-4">
-              <ScanFlowOverviewCard
-                sourceType={sourceType}
-                latestDocumentScan={latestDocumentScan}
-                latestManifestScan={latestManifestScan}
-                latestYamlScan={latestYamlScan}
-              />
-            </div>
-          </details>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-tertiary mb-3">Detalii context scanare</p>
+            <ScanFlowOverviewCard
+              sourceType={sourceType}
+              latestDocumentScan={latestDocumentScan}
+              latestManifestScan={latestManifestScan}
+              latestYamlScan={latestYamlScan}
+            />
+          </div>
 
           <div className="flex justify-end border-t border-eos-border-subtle pt-3">
             <Link
