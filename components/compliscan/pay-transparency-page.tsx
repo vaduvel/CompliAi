@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react"
 import { AlertTriangle, ArrowRight, Upload } from "lucide-react"
 
+import { V3RiskPill } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
 
 type SalaryRecord = {
@@ -54,25 +55,9 @@ function GapChip({ value, children }: { value: number; children?: ReactNode }) {
 }
 
 function RiskChip({ risk }: { risk: "low" | "medium" | "high" }) {
-  if (risk === "high") {
-    return (
-      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
-        risc high
-      </span>
-    )
-  }
-  if (risk === "medium") {
-    return (
-      <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
-        risc medium
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center rounded-sm border border-eos-success/30 bg-eos-success-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-success">
-      risc low
-    </span>
-  )
+  const tone = risk === "high" ? "high" : risk === "medium" ? "medium" : "ok"
+  const label = risk === "high" ? "risc ridicat" : risk === "medium" ? "risc mediu" : "risc scăzut"
+  return <V3RiskPill tone={tone}>{label}</V3RiskPill>
 }
 
 export function PayTransparencyPage() {
