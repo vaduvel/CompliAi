@@ -137,11 +137,8 @@ export function RemediationBoard({
           </div>
 
           {openCount > 0 && (
-            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
-              <summary className="cursor-pointer list-none text-xs text-eos-text-muted">
-                Filtru: {activeFilterLabel}
-              </summary>
-              <div className="mt-2 space-y-2">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
+              <div className="space-y-2">
                 {filterGroups.map((group) => (
                   <FilterCluster
                     key={group.label}
@@ -152,7 +149,7 @@ export function RemediationBoard({
                   />
                 ))}
               </div>
-            </details>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -340,7 +337,7 @@ function FilterCluster({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
           const filter = filters.find((item) => item.value === value)
