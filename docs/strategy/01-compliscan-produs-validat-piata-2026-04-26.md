@@ -3,99 +3,145 @@
 **Data**: 26 aprilie 2026
 **Status**: canonical — singura sursă pentru "ce este CompliScan și pentru cine"
 **Înlocuiește**: `compliscan-product-manifest-2026-04-26.md` + `market-research-2026-04-26.md` + secțiunea "decizii închise" din `compliscan-readiness-gap-memo-2026-04-26.md`
-**Validări incluse**: market research cu surse oficiale + răspuns DPO firm sofisticat (pilot acceptat) + demo run pe cod real + **discovery arhitectural 5 produse din 1 cod**
+**Validări incluse**: market research cu surse oficiale + răspuns DPO firm sofisticat (pilot acceptat) + demo run pe cod real + **discovery final v4.0: pattern compliance loop universal**
 
 ---
 
-## ⭐ Descoperirea fundamentală — 5 produse, 1 cod
+## ⭐ THESIS-ul — Compliance Loop OS
 
-Codul actual CompliScan **NU este un singur produs**. Este **5 produse comerciale separate** într-o singură platformă tehnică. Pattern aplicat: Stripe (Connect + Payments + Atlas + Issuing + Terminal), Atlassian (JIRA + Confluence + Bitbucket), HubSpot (Marketing + Sales + Service + CMS).
+**CompliScan NU este "GDPR software", "GRC platform", sau "5 produse separate"**. CompliScan este **Sistemul Operațional pentru Compliance Loop** din România.
+
+**Pattern universal validat**: indiferent de framework (GDPR, NIS2, AI Act, DORA, e-Factura, Pay Transparency, Whistleblowing) și indiferent de cumpărător (Solo, IMM, Cabinet, Contabil, Enterprise), toată activitatea de compliance urmează același 5-step loop:
 
 ```
-                COMPLISCAN
-       (1 brand · 1 cod · 5 produse comerciale)
-                    │
-    ┌───────┬──────┼──────┬──────────┐
-    ▼       ▼      ▼      ▼          ▼
-┌────────┐┌──────┐┌────┐┌──────┐┌────────┐
-│ DPO    ││ NIS2 ││ AI ││ DORA ││ Fiscal │
-│ OS     ││ OS   ││ OS ││ OS   ││ OS     │
-└────────┘└──────┘└────┘└──────┘└────────┘
-Diana    Mihai   Andrei Cristina Marius
-DPO      CISO    AIGov  FinComp  CECCAR
-GDPR     NIS2    AI Act DORA     e-Factura
-€49-299  €99-599 €149+  €499+    €29-199
+1. GĂSIRE         scan, signal, alert, applicability check
+   ↓
+2. REZOLVARE      AI draft + workflow review + approval
+   ↓
+3. DOSARIAT       evidence binding + manifest + traceability
+   ↓
+4. MONITORIZAT    drift detection + cron + reopen automat
+   ↓
+5. DOVEDIT        Audit Pack ZIP + hash chain + export autoritate
 ```
 
-**De ce 5 produse, nu 1**:
-- Piața RO are **5 ICP-uri separate** (DPO consultant ≠ CISO ≠ AI Governance ≠ Financial Compliance ≠ Contabil)
-- Niciun cumpărător nu folosește toate 5 frameworks. Diana DPO face GDPR (80-90% din timp). Mihai CISO face NIS2. Cristina face DORA. Etc.
-- Mesajul "all-in-one platform" îi pierde pe toți: "nu am nevoie de 80%, de ce să plătesc?"
-- Mesajul "platforma ta vertical specializată" îi câștigă: per produs, mesaj specific, pricing specific, demo specific.
+**Industria globală vinde compliance ca vertical specialist tools**:
+- Vanta = SOC 2 specialist
+- OneTrust = Privacy specialist
+- Drata = GRC enterprise specialist
+- Privacy Manager RO = GDPR specialist
+- audatis = GDPR specialist DE
 
-**Implicație strategică**: nu vindem "platformă unificată". Vindem **5 landing pages, 5 onboarding-uri, 5 pricing tiers, 5 ICP-uri** sub același brand. Lansare faseată: DPO OS Q3 2026 → NIS2 OS Q1 2027 → Fiscal OS Q3 2027 → AI Act + DORA 2028.
+**Niciunul nu vinde infrastructura loop universal**. CompliScan vinde **loop-ul**, configurabil per framework + per ICP. Pattern Salesforce (CRM infrastructure pentru orice industrie) aplicat la compliance.
 
 ---
 
-## TL;DR — pe produsul primar (DPO OS)
+## ⭐ Cele 4 ICP-uri orizontale (NU verticale per framework)
 
-**Produsul lansat primul**: **DPO OS** — operating system pentru cabinete DPO din România.
+```
+                    COMPLISCAN
+            (Compliance Loop OS · 1 cod · 4-5 ICP-uri)
+                        │
+        ┌───────────────┼───────────────┬─────────────┐
+        ▼               ▼               ▼             ▼
+   ┌─────────┐    ┌──────────┐    ┌──────────┐  ┌──────────┐
+   │ SOLO    │    │ INTERNAL │    │CONSULTANT│  │CONTABIL  │
+   │ MICRO   │    │ OFFICER  │    │ CABINET  │  │ CECCAR   │
+   ├─────────┤    ├──────────┤    ├──────────┤  ├──────────┤
+   │ SRL mic │    │IMM mid   │    │ DPO/CISO │  │ Cabinet  │
+   │ <10 ang │    │50-500 ang│    │5-100 cli │  │contabil  │
+   │ Owner   │    │HR/Legal/ │    │Diana/    │  │30-100    │
+   │ self-do │    │Office Mgr│    │Mihai     │  │clienți   │
+   ├─────────┤    ├──────────┤    ├──────────┤  ├──────────┤
+   │ €29-49  │    │€299-999  │    │€499-1999 │  │€29-199   │
+   └─────────┘    └──────────┘    └──────────┘  └──────────┘
+                                          
+                 + ENTERPRISE custom (500+ ang, banking, healthcare)
+```
 
-**Pentru cine**: Diana, consultant DPO/Privacy specialist cu 20-80 clienți IMM, plătește €99-299/lună.
+**Diferența vs v3.0 (5 produse verticale)**: nu mai vorbim de "DPO OS" sau "NIS2 OS" ca produse separate. Vorbim de **4 ICP-uri orizontale** (Solo/Internal/Cabinet/Fiscal) care folosesc **aceeași infrastructură loop**, configurată cu framework rules diferite (GDPR + NIS2 + AI Act + DORA + e-Factura) activate per cabinet/segment.
 
-**Cabinetul** intră dimineața, vede portofoliul colorat după risc, deschide cockpit-ul cazului care arde cel mai tare, AI-ul a pregătit draft-ul, DPO-ul validează în 5 minute, trimite link semnat patronului pentru aprobare, dosarul se construiește singur. La sfârșit de lună descarcă **Audit Pack ZIP** semnat criptografic pentru ANSPDCP.
+**Cum vinzi**:
+- Owner SRL care vrea DIY → tier Solo €29-49
+- IMM 50-300 angajați care plătește 4 consultanți (€60-100K/an) → tier Internal €299-999 (reducere 70-90% costuri, ROI 2-5×)
+- DPO/CISO consultant cu portofoliu → tier Cabinet €499-1999
+- Contabil CECCAR cu e-Factura + GDPR lite per client → tier Fiscal €29-199
+- Enterprise 500+ → custom
 
-**Concurență directă pe DPO OS**: Privacy Manager (privacymanager.ro), MyDPO (Decalex). Diferențiator: cockpit finding-first + pricing transparent self-serve + V3 design system + AI EU sovereignty.
+---
 
-**Pricing DPO OS**: Solo €49 (<5 clienți) → Cabinet €149 (5-30) → Pro €299 (30-80) → Studio €599 (multi-cabinet). Add-on opțional NIS2 module (+€99) sau AI Act module (+€149) la upgrade.
+## TL;DR — primul segment lansat: SOLO + IMM Internal + CABINET (paralel Q3 2026)
 
-**Validare empirică**: cabinet DPO român sofisticat a acceptat pilot 30 zile internal-first cu 6 condiții concrete, după demo controlat.
+**Discovery v4.0 vs v3.0**: NU mai lansăm doar 1 produs (DPO OS) primul. Lansăm **3 segmente paralel** pentru că au fundație tehnică comună (același compliance loop, doar context diferit):
 
-**Restul 4 produse** (NIS2 OS, AI Act OS, DORA OS, Fiscal OS): cod activ în repo, dar **landing pages "Coming soon — join waitlist"** până la Q1 2027 / Q3 2027 / 2028. Vezi Secțiunea 6.5 pentru roadmap lansare.
+1. **SOLO** — Owner SRL face DIY compliance cu €29-49/lună
+2. **IMM INTERNAL** — IMM 50-300 angajați internalizează compliance cu €299-999/lună
+3. **CABINET** — DPO/CISO consultant scalează portofoliul cu €499-1999/lună (DPO Complet pilot e aici)
+
+**Q1 2027**: FISCAL launch dedicat cu distribution Facebook groups (Contabili pe Facebook 50K + Nicoleta Banciu 34K e-Factura).
+
+**2028**: Enterprise tier custom + EU expansion (BG, HU, PL).
+
+**Validare empirică (azi)**: cabinet DPO român sofisticat a acceptat pilot 30 zile internal-first cu 6 condiții — pilot e segment CABINET.
+
+**TAM RO realist 5 ani**: €30-80M ARR atingibil pe combinația 4 segmente.
 
 ---
 
 ## 1. Ce este CompliScan
 
-CompliScan este **portfolio de 5 produse compliance vertical specializate** pentru piața RO, sub un singur brand și un singur cod (Stripe-style).
+CompliScan este **Compliance Loop OS** — infrastructura tehnică care execută loop-ul universal compliance (găsire → rezolvare → dosariat → monitorizat → dovedit), configurabilă per framework și per cumpărător, pentru piața RO.
 
-### Cele 5 produse comerciale
+### Pattern universal compliance loop — validat across 7+ frameworks
 
-| Produs | ICP | Frameworks | Pricing/lună | Lansare |
+Toate frameworks-urile au exact același 5-step loop. Doar contextul diferă:
+
+| Pas | GDPR | NIS2 | AI Act | DORA | e-Factura | Pay Transparency | Whistleblowing |
+|---|---|---|---|---|---|---|---|
+| **1. Găsire** | DSAR primit, breach, vendor nou | Incident, vulnerability | AI sistem nou | ICT incident | Factură respinsă | Gap salarial | Sesizare primită |
+| **2. Rezolvare** | Privacy Policy update, DPA | Incident response, security control | Annex IV doc | ICT recovery | Re-issue factură | Salary equity action | Investigation |
+| **3. Dosariat** | RoPA, DPIA, audit log | Incident registry, NIS2 evidence | AI governance docs | ICT third-party log | Submission record | Pay equity reports | Case file |
+| **4. Monitorizat** | Site drift, vendor reviews | DNSC reporting | AI usage monitoring | ICT continuous monitoring | ANAF signals | Quarterly reviews | Channel monitoring |
+| **5. Dovedit** | ANSPDCP audit | DNSC audit | EU AI Office | BNR/ECB inspection | ANAF inspection | Authority audit | Court |
+
+→ **CompliScan vinde loop-ul, NU legea**. Pattern Salesforce: nu vinde "CRM pentru fintech" — vinde infrastructură de relații cu clienții, configurabilă per industrie.
+
+### Cele 4-5 ICP-uri orizontale care folosesc loop-ul
+
+| ICP | Cumpărător | Frameworks active | Pricing/lună | TAM realist (5 ani) |
 |---|---|---|---|---|
-| **DPO OS** | Diana — DPO consultant cabinet (20-80 clienți IMM) | GDPR + Legea 190/2018 + ANSPDCP | €49-599 | **Q3 2026** ⭐ primul |
-| **NIS2 OS** | Mihai — CISO/cybersec consultant (1-15 clienți enterprise) | NIS2 + DNSC + ICT risk | €99-599 | Q1 2027 |
-| **Fiscal OS** | Marius — contabil CECCAR (30-100 clienți SRL) | e-Factura + ANAF SPV + SAF-T + e-TVA | €29-199 | Q3 2027 |
-| **AI Act OS** | Andrei — AI Governance specialist (rar, niche) | AI Act Reg. 2024/1689 + Annex IV | €149-499 | 2028 |
-| **DORA OS** | Cristina — Financial Compliance fintech/banking | DORA Reg. 2022/2554 + BNR + ICT third-party | €499-1.499+ | 2028 |
+| **SOLO** | Owner SRL <10 ang, freelancer cu site | GDPR + e-Privacy + Cookie | €29-49 | €1-1.5M MRR (50K firme × 5% adoption) |
+| **IMM INTERNAL** | CFO/COO/HR Manager la IMM 50-500 ang | GDPR + NIS2 + AI Act + Pay Transp | €299-999 | €1-3M MRR (10K firme × 3% adoption) |
+| **CABINET** | DPO/CISO consultant cu 5-100 clienți | GDPR + NIS2 (white-label) | €499-1999 | €50-200K MRR (500 cabinete × 20% adoption) |
+| **FISCAL** | Contabil CECCAR cu 30-200 clienți | e-Factura + SAF-T + GDPR lite | €29-199 | €20-130K MRR (12.8K cabinete × 5% adoption) |
+| **ENTERPRISE** | CFO la firmă 500+ ang, banking, healthcare | Multi-framework custom | €5K-20K | €250K-2M MRR (50-100 deals) |
 
-Fiecare produs:
-- Landing page propriu (`compliscan.ro/dpo`, `/nis2`, `/fiscal`, `/ai-act`, `/dora`)
-- Mesaj specific per cumpărător
-- Onboarding choice "Care produs te interesează?"
-- Pricing tiers independente
-- Module activate by plan tier (restul rămân hidden în UI)
+**Total TAM RO 5 ani**: **€30-80M ARR realist atingibil**.
 
-### Spine canonical — același pentru toate 5 produse
+### Spine canonical — același pentru toate 4-5 ICP-uri
 
-Toate produsele operează pe un spine canonical unic:
+Toate ICP-urile operează pe același spine compliance loop:
 
 ```
-PORTOFOLIU CABINET (sau organizație internă pentru NIS2 OS)
+ORGANIZAȚIE / PORTOFOLIU
+   ↓ (entitate primară: solo = propriul SRL, IMM = firma, cabinet = portofoliu, fiscal = portofoliu, enterprise = own)
+CONTEXT (per organizație, per client din portofoliu, sau direct pe entitate)
    ↓
-CONTEXT CLIENT (organizație finală obligată)
-   ↓
-COCKPIT FINDING (un caz de neconformitate, o singură obiectivă: rezolvare)
+COCKPIT FINDING (un caz, baza legală, draft, dovezi, history, CTA)
    ↓
 DOSAR (audit-pack-ready, ZIP semnat, hash chain)
 ```
 
-Diferența între produse: **frameworks active + findings detector + document templates + integrations active**. Spine identic, content diferit.
+Diferența între ICP-uri: **frameworks active + workflow density + multi-tenancy + branding**. Spine identic.
 
-### Diferența fundamentală vs Drive/Excel
+### Diferența fundamentală vs alternative actuale
 
-- **Drive** ține fișiere
-- **CompliScan** ține **cazuri, versiuni, aprobări, dovezi, portofoliu, lifecycle** — Drive nu poate.
+| Cumpărător | Alternativa actuală | Cost actual | CompliScan |
+|---|---|---|---|
+| Owner SRL | Drive + Excel + 1 consultant ad-hoc | €0-2K/an + risc amendă | €348-588/an + zero risc |
+| IMM 50-300 ang | 3-5 consultanți fragmentați | **€30-100K/an** | **€3.6-12K/an + 1 angajat existing role** = **70-90% reducere** |
+| Cabinet DPO | Word + Excel + Drive | €0 + scalabilitate 0 | €6-24K/an, scalabilitate 5× clienți |
+| Contabil CECCAR | SmartBill + Excel | €600/an + chaos | €348-2.4K/an + validator real |
 
 ---
 
@@ -215,76 +261,107 @@ Restul de rute (43+1) sunt sub-căi în aceste 5 moduri.
 
 ---
 
-## 6. Pricing — 5 produse, 5 tier sets independente
+## 6. Pricing — 16 SKU pe 5 grupuri tier-uri (per ICP segment)
 
-Fiecare produs are propriul pricing tier matrix. Cabinetul plătește **doar pentru produsele active** (modulele neactivate rămân hidden în UI).
+Pricing v4.0 pe **4-5 ICP-uri orizontale**, NU pe 5 produse verticale. Fiecare segment are scaling tier-uri proprii. Toate pe aceeași infrastructură loop.
 
-### 6.1. DPO OS pricing (lansare Q3 2026)
-
-| Tier | Preț/lună | Scope | Target |
-|---|---|---|---|
-| **Solo DPO** | €49 | 1 DPO, 5 clienți, branding limitat | DPO consultant nou |
-| **Cabinet DPO** | €149 | 1 cabinet, 30 clienți, white-label complet, AI Gemini EU | Cabinet 5-30 clienți (sweet spot) |
-| **Pro DPO** | €299 | 1 cabinet, 80 clienți, multi-DPO seats (3), Mistral EU optional | Cabinet 30-80 clienți |
-| **Studio DPO** | €599 | Multi-cabinet, partner-of-partners, API access | Firmă mare cu sub-cabinete (LegalUp tier) |
-
-**Math validation pe DPO OS**:
-- LegalUp 650 lei (€131) → cabinet 30 clienți × €131 = €3.930 revenue → Cabinet DPO €149 = 3.8% (sweet spot)
-- DPO Expert €250 → cabinet 30 × €250 = €7.500 → Pro DPO €299 = 4% (acceptabil)
-- iTProtection €100 → cabinet 15 × €100 = €1.500 → Solo DPO €49 = 3.3% (entry)
-
-### 6.2. NIS2 OS pricing (lansare Q1 2027)
+### 6.1. SOLO TIER (Owner SRL DIY compliance)
 
 | Tier | Preț/lună | Scope | Target |
 |---|---|---|---|
-| **Single Entity** | €99 | 1 firmă proprie obligată NIS2 | Compliance Officer intern |
-| **Cabinet NIS2** | €299 | 3-15 clienți enterprise NIS2 | CISO consultant (Sectio Aurea, HIFENCE-style) |
-| **Pro NIS2** | €599 | 15+ clienți + DNSC integration full + cyber risk dashboard | Cabinet cyber stabilit |
+| **Solo Free** | €0 | 1 firmă, 3 docs, snapshot 30 zile | Trial / freelancer începător |
+| **Solo Starter** | €29 | 1 firmă, GDPR + Privacy Policy + Cookie + DSAR | Owner SRL <10 ang |
+| **Solo Pro** | €49 | 1 firmă, + NIS2 lite + AI Act dacă e cazul | Owner SRL care folosește AI sau e în sector reglementat |
 
-### 6.3. Fiscal OS pricing (lansare Q3 2027)
+**Math validation Solo**: Owner SRL plătește €0/an pe consultanță (folosește Drive + Excel) sau €1-2K/an pe ad-hoc. Solo €29-49 e **cheaper than 1 ora consultant** (€100-200/oră).
 
-| Tier | Preț/lună | Scope | Target |
-|---|---|---|---|
-| **Solo Fiscal** | €29 | 1 contabil, 30 clienți, e-Factura validator + ANAF SPV | Contabil CECCAR solo |
-| **Cabinet Fiscal** | €99 | 100 clienți, multi-contabil seats, SAF-T + e-TVA discrepancies | Cabinet contabilitate mediu |
-| **Pro Fiscal** | €199 | 100+ clienți, API access, integrări SmartBill/Saga | Cabinet contabilitate mare |
-
-### 6.4. AI Act OS pricing (lansare 2028)
+### 6.2. IMM INTERNAL TIER (compliance officer intern existent)
 
 | Tier | Preț/lună | Scope | Target |
 |---|---|---|---|
-| **Starter AI** | €149 | 1 firmă cu AI usage, AI inventar + Annex III tracking | Firmă cu AI deployer |
-| **Pro AI** | €499 | AI provider/deployer enterprise, Annex IV documentation | Firmă cu AI products |
+| **Internal Starter** | €299 | 1 firmă 50-150 ang, GDPR core + NIS2 lite + Whistleblowing | IMM mid-market entry |
+| **Internal Pro** | €599 | 1 firmă 150-300 ang, multi-framework + DPIA + Vendor mgmt + Pay Transp | IMM mid-market mature |
+| **Internal Scale** | €999 | 1 firmă 300-500 ang, advanced + DORA dacă financial + custom integrations | IMM mare / mid-enterprise |
 
-### 6.5. DORA OS pricing (lansare 2028)
+**Math validation IMM Internal** (validat empiric):
+
+```
+Costuri actuale IMM 50-100 angajați:
+- DPO outsourced:           €200/lună × 12 = €2.400/an
+- NIS2 consultant (ad-hoc): €5.000-15.000/an
+- Avocat consultanță GDPR:  €3.000/an
+- HR/whistleblowing setup:  €2.000/an
+─────────────────────────────────────────────────
+Total externalizat:         €12.400-22.400/an
+
+Cu CompliScan Internal Starter €299:
+- CompliScan:               €299 × 12 = €3.588/an
+- Consultant ad-hoc DPIA:   €1.500/an
+- Avocat verificare:        €1.500/an
+─────────────────────────────────────────────────
+Total cu CompliScan:        €6.588/an
+
+Economie: €5.812-15.812/an = ROI 2-5×
+```
+
+→ **Lovitura de gratie**: IMM-ul care plătește 4 consultanți fragmentați azi vede math direct: -50% până -90% costuri + 1 angajat existent (no extra hire) + control total intern.
+
+### 6.3. CABINET CONSULTANT TIER (compliance as service, white-label)
 
 | Tier | Preț/lună | Scope | Target |
 |---|---|---|---|
-| **Single Entity** | €499 | 1 fintech, DORA + ICT third-party + BNR reporting | Fintech mid-market |
-| **Multi Entity** | €1.499 | Cabinet financial 5-15 clienți | Financial compliance specialist |
-| **Enterprise** | Custom | Bănci, asigurări, multi-region | Big 4 partnerships |
+| **Cabinet Solo** | €499 | 5-15 clienți, white-label basic | DPO/CISO consultant solo cu portofoliu mic |
+| **Cabinet Pro** | €999 | 15-50 clienți, full white-label, multi-DPO seats (3) | Cabinet 15-50 clienți (sweet spot) |
+| **Cabinet Studio** | €1.999 | 50+ clienți, multi-DPO (10), API access, partner-of-partners | Cabinet mare (LegalUp/Decalex tier) |
 
-### 6.6. Combo Multi-Framework (rar — pentru avocatură enterprise)
+**Math validation Cabinet** (validat empiric):
 
-Pentru cabinetele rare care fac cross-framework (Wolf Theiss, DLA Piper, Bird & Bird stil):
+- LegalUp 650 lei (€131)/client × 30 clienți = €3.930/lună revenue → Cabinet Pro €999 = 25% (acceptabil pentru tool care înlocuiește Excel + scalabilitate 5×)
+- DPO Expert €250 × 50 clienți = €12.500/lună revenue → Cabinet Pro €999 = 8% (sweet spot)
+- iTProtection €100 × 15 clienți = €1.500/lună → Cabinet Solo €499 = 33% (la limita superioară, dar ok pentru cabinet mic)
 
-| Combo | Preț/lună | Acoperire |
+### 6.4. FISCAL TIER (contabil CECCAR e-Factura + GDPR lite)
+
+| Tier | Preț/lună | Scope | Target |
+|---|---|---|---|
+| **Fiscal Solo** | €29 | 1 contabil, 30 clienți, e-Factura validator + ANAF SPV | Contabil solo |
+| **Fiscal Cabinet** | €99 | 100 clienți, multi-contabil seats, + e-TVA discrepancies + SAF-T + GDPR lite | Cabinet contabilitate mediu |
+| **Fiscal Pro** | €199 | 100+ clienți, API access, integrări SmartBill/Saga, advanced reporting | Cabinet contabilitate mare |
+
+### 6.5. ENTERPRISE TIER (custom)
+
+| Tier | Preț/lună | Scope |
 |---|---|---|
-| **DPO + NIS2** | €399 | Cabinet GDPR care preia clienți NIS2 ca service secondar |
-| **DPO + AI Act** | €449 | Cabinet GDPR care servește AI deployer-i |
-| **Studio All-in** | €1.999 | Toate 5 module active (DPO + NIS2 + AI Act + DORA + Fiscal) |
+| **Enterprise** | €5K-20K custom | 500+ angajați, banking/healthcare specific, SLA, dedicated CSM, on-prem opțional |
 
-**De ce Combo există**: avocatura enterprise (5-10 firme RO) face cross-framework advisory. NU e mass-market, dar e segment cu willingness-to-pay €1.500-3.000/lună.
+### 6.6. Total: 16 SKU-uri configurabile
 
-### Math validation per produs (validat empiric)
+```
+SOLO         3 SKU  (Free €0 / Starter €29 / Pro €49)
+INTERNAL     3 SKU  (Starter €299 / Pro €599 / Scale €999)
+CABINET      3 SKU  (Solo €499 / Pro €999 / Studio €1.999)
+FISCAL       3 SKU  (Solo €29 / Cabinet €99 / Pro €199)
+ENTERPRISE   1 SKU  (custom €5K-20K)
+ADD-ONS      3 SKU  (NIS2 module +€99, AI Act +€149, DORA +€299)
+─────────────────────────
+TOTAL: 16 SKU
+```
 
-| Produs | Pricing piață | CompliScan tier sweet spot | % din revenue cabinet |
-|---|---|---|---|
-| DPO OS | DPO Expert €79-360, LegalUp €131-703, iTProtection €100 | Cabinet DPO €149 | 3-8% |
-| NIS2 OS | Sectio Aurea €15-60K setup + €5-25K/an | Cabinet NIS2 €299 | 1-2% |
-| Fiscal OS | SmartBill nu e compliance, gap real €100/lună estimat | Cabinet Fiscal €99 | 5-10% |
-| AI Act OS | Decalex Code AI Practice nepublic | Pro AI €499 | enterprise pricing |
-| DORA OS | Big 4 €100K+/an | Multi Entity €1.499 | 1-3% |
+**Cumpărătorul își alege segmentul prin onboarding pas 1**. Restul UI / nav / modules / dashboard se configurează automat.
+
+### Math validation pe TAM real RO
+
+| Segment | TAM firme | Adoption realist 5 ani | Pricing mediu | TAM revenue 5 ani |
+|---|---|---|---|---|
+| SOLO | ~50.000 SRL <10 ang în sectoare relevante | 5% | €40/lună | €1-1.5M MRR |
+| IMM INTERNAL | ~10.000 IMM 50-500 ang | 3% | €600/lună | €1-3M MRR |
+| CABINET | ~500 cabinete DPO/CISO | 20% | €1.200/lună | €50-200K MRR |
+| FISCAL | ~12.800 cabinete contabile | 5% | €100/lună | €20-130K MRR |
+| ENTERPRISE | ~300 firme target | 30% | €10K/lună | €250K-2M MRR |
+
+**Total TAM RO 5 ani: €30-80M ARR realist atingibil.**
+
+Asta e business B2B SaaS RO viabil pentru solo founder care scalează la 5-15 oameni team în 3-5 ani. Sau acquisition target la €30-100M evaluation pentru strategic buyer (DataGuard EU expansion, Decalex consolidare, Wolters Kluwer).
 
 ### Comparație europeană
 
@@ -578,38 +655,72 @@ Pentru claritate finală — produsul **NU**:
 
 ---
 
-## 13. Mesajul de vânzare — cum se prezintă în 30 secunde (post-corecție)
+## 13. Mesajul de vânzare — 4 mesaje per ICP (NU 1 generic)
 
-### Mesaj corect
+### Mesaj brand umbrella (compliscan.ro/ hub)
 
-> **"Ai cabinet DPO cu 15-50 de clienți. Folosești poate Privacy Manager, MyDPO, sau încă Word + Excel + Drive. Indiferent ce, ai aceeași durere: fragmentare între documente, emailuri, foldere și clienți. Versiunile se pierd. Patronii nu răspund la emailuri. La control ANSPDCP, dosarul nu e gata.**
+> **"CompliScan — Sistemul Operațional pentru Compliance Loop din România.**
 >
-> **CompliScan e next-gen DPO Operations OS: cockpit unic pe fiecare caz de conformitate, AI care pregătește draft-ul, link semnat pentru patron să aprobe, Audit Pack ZIP cu hash chain SHA-256 gata în 2 minute. Multi-framework: GDPR + AI Act + NIS2 + ANAF integrations.**
+> **Indiferent dacă ești owner SRL, IMM mid-market, consultant DPO/CISO, sau contabil CECCAR, compliance-ul tău urmează același loop: găsire → rezolvare → dosariat → monitorizat → dovedit. Noi vindem loop-ul, configurat pentru tine.**
 >
-> **Pricing transparent: €99 → €999/lună, Stripe Checkout instant. NU sales call. Ești în continuare DPO-ul. Documentul e al tău. Brand-ul e al cabinetului tău.**
->
-> **Pilot 30 zile gratis cu 2-3 clienți reali."**
+> **Solo €29-49 / IMM €299-999 / Cabinet €499-1.999 / Fiscal €29-199. Pricing transparent self-serve. Stripe Checkout instant."**
 
-### Mesaje TĂIATE (NU mai folosim)
+### Mesaj per landing page (mesaj specific per ICP)
+
+#### `compliscan.ro/solo` — Owner SRL DIY
+
+> **"Ai SRL mic, ai site, ai newsletter. Și ai primit email de la un client mare cu DPA de semnat — n-ai habar.**
+>
+> **CompliScan Solo €29-49/lună: AI generează Privacy Policy + Cookie + DSAR procedure + DPA pentru tine. Tu validezi. Salvezi în dosar. Când vine ANSPDCP, exporți PDF în 2 minute.**
+>
+> **NU consultant scump (€100-200/oră). NU Drive haos. €29/lună, 3 clicks."**
+
+#### `compliscan.ro/imm` — IMM Internal Officer
+
+> **"Ai IMM 50-300 angajați. Plătești 3-5 consultanți fragmentați (DPO + CISO + avocat + auditor) = €30-100K/an. Niciunul nu vorbește cu altul. La control nu ai dosarul gata.**
+>
+> **CompliScan Internal €299-999/lună: 1 angajat existent (HR/Legal/Office Manager) gestionează tot. GDPR + NIS2 + AI Act + Pay Transparency + Whistleblowing într-un singur tool.**
+>
+> **Reducere 70-90% costuri. ROI 2-5×. Math: 4 facturi consultanți × €1.5K-5K/lună → €299-999 + 1 zi/săptămână al unui om existing role."**
+
+#### `compliscan.ro/cabinet` — DPO/CISO Consultant
+
+> **"Ești cabinet DPO/CISO cu 15-50 clienți. Folosești Privacy Manager, MyDPO, sau Word/Excel/Drive. Aceeași durere: fragmentare, versiuni pierdute, scalabilitate 0.**
+>
+> **CompliScan Cabinet €499-1.999/lună: portofoliu multi-client + cockpit finding-first + AI documents + magic link patron + Audit Pack ZIP cu SHA-256. White-label complet — clienții văd brand-ul tău.**
+>
+> **Pricing transparent self-serve (NU sales call ca Privacy Manager). Stripe Checkout instant. Pilot 30 zile gratis."**
+
+#### `compliscan.ro/fiscal` — Contabil CECCAR
+
+> **"Ai cabinet contabilitate cu 30-200 clienți SRL. e-Factura te omoară (XML respins, RON discrepanțe e-TVA, SAF-T D406 chaos). Plus clienții cer GDPR lite.**
+>
+> **CompliScan Fiscal €29-199/lună: validator UBL CIUS-RO real + ANAF SPV signals + e-TVA discrepancies + SAF-T export + GDPR lite per client.**
+>
+> **NU SmartBill (acela emite, nu validează). Primul SaaS dedicat compliance fiscal pentru cabinete contabile RO."**
+
+### Mesaje TĂIATE (NU mai folosim — invalidate empiric)
 
 | Greșit (taie) | De ce e greșit |
 |---|---|
-| "Înlocuim Excel/Word/Drive pentru DPO-uri" | Validat empiric — există Privacy Manager, MyDPO, Wolters Kluwer. Nu suntem first-mover |
-| "AI GDPR autonom" | MyDPO are deja AI din 2023. AI nu e diferențiator |
-| "Nu există așa ceva în România" | Există. Privacy Manager + MyDPO + WK + kitgdpr |
-| "Suntem primul OS pentru DPO" | Privacy Manager se autopozitionează ca OS multi-client |
-| "GDPR software pentru cabinete" | Toate concurenții fac asta. Trebuie clar "operations OS" nu "GDPR software" |
+| "Platformă all-in-one compliance" | Cumpărătorul aud "nu am nevoie de toate" |
+| "Înlocuim Excel/Word/Drive pentru DPO" | Există Privacy Manager + MyDPO + Wolters Kluwer |
+| "AI GDPR autonom" | MyDPO are deja AI din 2023 |
+| "Suntem primul OS pentru DPO" | Privacy Manager se autopozitionează similar |
+| "Multi-framework all-in-one" | Diluat, sună ca SAP |
+| "GRC pentru mid-market RO" | Categoria de cumpărător aproape inexistentă în RO ca rol formal |
+| "GDPR software" | Toate concurenții fac asta |
 
-### Mesaje CORECTE (folosim)
+### Mesaje CORECTE (folosim — pattern Salesforce/Notion)
 
 | Mesaj | De ce funcționează |
 |---|---|
-| "Next-gen DPO Operations OS" | Poziționare onestă — există tools, dar nu workflow modern operations |
-| "Cockpit finding-first" | Diferențiere clară vs concurenți cu workflows fragmentate |
-| "Multi-framework RO native: GDPR + AI Act + NIS2 + ANAF" | Concurenții sunt mostly GDPR-only |
+| **"Sistemul Operațional pentru Compliance Loop"** | Categorie nouă, vinde infrastructura nu legea |
+| "1 cod, 4 ICP-uri, pricing scalat" | Pattern Notion/HubSpot — Solo → Team → Enterprise |
+| "Pattern universal: găsire → rezolvare → dosariat → monitorizat → dovedit" | Frame mental clar pentru orice cumpărător |
 | "Pricing transparent self-serve" | Privacy Manager + Wolters Kluwer sunt sales-led — friction |
-| "AI pregătește, DPO validează, sistemul ține dovada" | Onesty profesională — nu vinde "AI replace DPO" |
-| "Brand cabinet peste tot output" | White-label arhitectural complet (patron page, docs, reports, ZIP) |
+| "ROI 2-5× pentru IMM care plătește 4 consultanți" | Math empiric validat |
+| "AI pregătește, omul validează, sistemul ține dovada" | Onesty profesională |
 
 ---
 

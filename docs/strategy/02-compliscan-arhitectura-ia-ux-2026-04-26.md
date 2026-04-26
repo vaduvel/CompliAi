@@ -7,26 +7,54 @@
 
 ---
 
-## TL;DR
+## TL;DR — Compliance Loop OS architecture
 
-Aplicația operează pe **un singur spine canonical** comun pentru toate 5 produse:
+Aplicația operează pe **un singur spine canonical** care implementează loop-ul universal compliance, configurabil per ICP segment:
 
 ```
-Cabinet/Org → Client/Sub-org → Cockpit Finding → Dosar → Audit Pack ZIP
+Org/Portofoliu → Client/Sub-org → Cockpit Finding → Dosar → Audit Pack ZIP
+                  (LOOP UNIVERSAL: găsire → rezolvare → dosariat → monitorizat → dovedit)
 ```
 
-Tot restul (43+1 rute, 5 moduri navigare, 5 ICP-uri, 10 primitive) e atașat la acest spine.
+**Diferențiator arhitectural cheie vs concurenți**: **cockpit finding-first** + **infrastructură loop universal**. Vanta vinde "audit-ready" (un tip de loop), OneTrust vinde "privacy ops" (alt tip), Drata vinde "GRC enterprise". Niciunul NU vinde infrastructura **loop universal configurabil per framework + per ICP**.
 
-**Diferențiator arhitectural cheie vs concurenți**: **cockpit finding-first**. Privacy Manager, MyDPO, Wolters Kluwer, Sectio Aurea (NIS2), SmartBill (fiscal) au workflows fragmentate cross-tabs. CompliScan are **o pagină per caz** care strânge tot — bază legală + draft + dovezi + history + CTA. Asta e UX-ul care face diferența zilnic, nu AI-ul.
+### Architecture v4.0 — 4-5 ICP segments + framework rules layer
 
-**Codul conține 5 produse comerciale coexistente** într-o platformă tehnică unică:
-- **DPO OS** — GDPR + Legea 190/2018 + ANSPDCP (primary lansare Q3 2026)
-- **NIS2 OS** — NIS2 + DNSC + ICT risk (Q1 2027)
-- **Fiscal OS** — e-Factura + ANAF SPV + SAF-T (Q3 2027)
-- **AI Act OS** — AI Act + Annex IV (2028)
-- **DORA OS** — DORA + BNR + ICT third-party (2028)
+```
+┌─────────────────────────────────────────────────────────────┐
+│ INFRASTRUCTURE PRIMITIVE LAYER (compliance loop universal)  │
+│ - finding-kernel.ts (generic finding lifecycle)             │
+│ - evidence-quality.ts (evidence binding)                    │
+│ - task-validation.ts (workflow review/approve)              │
+│ - audit-pack.ts (dossier export ZIP)                        │
+│ - compliance-drift.ts (monitor primitive)                   │
+│ - share-token-store.ts (magic link generic)                 │
+│ - events.ts (audit log generic)                             │
+└─────────────────────────────────────────────────────────────┘
+                            │
+        ┌──────┬──────┬─────┴─────┬──────┬──────┐
+        ▼      ▼      ▼           ▼      ▼      ▼
+   ┌────────────────────────────────────────────────┐
+   │ FRAMEWORK RULES LAYER (per legislație)         │
+   │ GDPR · NIS2 · AI Act · DORA · e-Factura · Pay   │
+   │ Activate by per-org feature flag                │
+   └────────────────────────────────────────────────┘
+                            │
+        ┌──────┬──────┬─────┴─────┬──────┬──────┐
+        ▼      ▼      ▼           ▼      ▼      ▼
+   ┌────────────────────────────────────────────────┐
+   │ ICP SEGMENT LAYER (per cumpărător)              │
+   │ Solo · IMM Internal · Cabinet · Fiscal · Enterprise │
+   │ Onboarding choice + nav config + dashboard default │
+   └────────────────────────────────────────────────┘
+```
 
-Soluția arhitecturală: **feature flag `module.{name}.enabled` per cabinet/org**. Default `dpoOs: true`, restul `false` până la upgrade tier sau lansare publică.
+**3 layers separate**:
+1. **Infrastructure primitives** (87% maturity validat) — generic, NU specific GDPR
+2. **Framework rules** (rules + templates per lege) — GDPR 90% / NIS2 85% / AI Act 60% / DORA 15% / e-Factura 80%
+3. **ICP segment config** (cum se prezintă produsul per cumpărător) — Solo/Internal/Cabinet/Fiscal/Enterprise
+
+→ Diferența vs v3.0 (5 produse vertical): **NU mai vorbim de "DPO OS" sau "NIS2 OS"** ca produse separate. Vorbim de **infrastructure primitive layer** care suportă toate ICP-urile, peste care activăm rules per framework configurabil.
 
 **Design system**: V3 — Space Grotesk (display) + IBM Plex Mono (eyebrows) + Inter (body) + cobalt accent. Aplicat 100% peste tot deja.
 
@@ -419,19 +447,107 @@ UI: în Dosar, fiecare document are progress bar 4 steps. Hint sub progress: "A�
 
 ---
 
-## 10. 5 produse coexistente în cod — soluție arhitecturală
+## 10. Architecture v4.0 — 3 layers (Infrastructure + Framework rules + ICP segment)
 
-### Realitate (descoperit empiric în demo run + market validation)
+### Layer 1 — Infrastructure primitives (87% maturity validat)
 
-Codebase-ul curent are **5 produse comerciale** coexistente într-o platformă tehnică unică:
+Cod generic care implementează compliance loop universal. **NU e specific GDPR sau NIS2**. Funcționează pentru orice framework + orice ICP:
 
-| Modul | Frameworks | Routes | API | State fields | Status maturity |
-|---|---|---|---|---|---|
-| **DPO OS** | GDPR, Legea 190/2018, ANSPDCP | 1-24, 29-44 | `/api/findings`, `/api/documents/generate`, `/api/exports/audit-pack`, `/api/reports/share-token` | `findings`, `alerts`, `generatedDocuments`, `traceabilityReviews` | 87% |
-| **NIS2 OS** | NIS2, OUG 155/2024, Lege 124/2025, DNSC | 31, 30 (drift) | `/api/nis2/*`, `dnsc-monitor.ts` | `nis2Eligibility`, `incidents`, `vendorRiskMatrix`, `maturityAssessment`, `governanceTraining` | 85% |
-| **Fiscal OS** | e-Factura, OUG 120/2021, SPV, SAF-T, e-TVA | 25-28 | `/api/fiscal/*`, `/api/efactura/*`, `/api/anaf/*` | `efacturaConnected`, `efacturaValidations`, `vatRegistered`, `fiscalProtocols`, `etvaDiscrepancies` | 80% |
-| **AI Act OS** | AI Act Reg. 2024/1689 | 14 (sisteme) | `/api/exports/ai-act-evidence-pack` | `aiSystems`, `detectedAISystems`, `aiComplianceFieldOverrides` | 60% |
-| **DORA OS** | DORA Reg. 2022/2554, BNR | 0% UI | (planned) | (planned) | 10% |
+| Primitive | Code path | Ce face | Status |
+|---|---|---|---|
+| **Finding kernel** | `lib/compliscan/finding-kernel.ts` | Lifecycle generic (detected → confirmed → resolved → reopen) | ✅ 95% |
+| **Evidence binding** | `lib/compliance/document-adoption.ts` | Atașare dovadă obligatorie pentru close | ✅ 100% |
+| **Task validation** | `lib/server/task-validation.ts` | Workflow draft → review → approved | ✅ 90% |
+| **Audit Pack** | `lib/server/audit-pack.ts` + `audit-pack-bundle.ts` | Dossier export ZIP cu manifest | ⚠️ 70% |
+| **Compliance drift** | `lib/server/compliance-drift.ts` + `drift-trigger-engine.ts` | Monitor + reopen automat | ✅ 90% |
+| **Share token** | `lib/server/share-token-store.ts` | Magic link HMAC generic | ✅ 95% |
+| **Events ledger** | `lib/compliance/events.ts` | Audit log append-only | ✅ 95% |
+| **White-label** | `lib/server/white-label.ts` | Brand cabinet propagat în output | ⚠️ 75% |
+| **Document generator** | `lib/server/document-generator.ts` | AI draft pentru orice document type | ⚠️ 60% |
+| **Plan/billing** | `lib/server/plan.ts` + Stripe | Per-org tier gating | ⚠️ 70% |
+
+→ **Layer 1 = 87% maturity globală**. Codul actual e infrastructură generică. Funcționează pentru orice ICP fără modificări structurale.
+
+### Layer 2 — Framework rules (per legislație, activabile)
+
+Regulile + templates + workflows specifice per framework, atașate deasupra infrastructure primitive:
+
+| Framework | Rules paths | Templates/workflows | Maturity | Lansare ICP-uri active |
+|---|---|---|---|---|
+| **GDPR** | `lib/compliance/gdpr-*.ts` | Privacy Policy, RoPA, DPA, DSAR, Cookie | 90% | Solo + Internal + Cabinet (Q3 2026) |
+| **e-Factura** | `lib/compliance/efactura-validator.ts` | UBL CIUS-RO + SPV + SAF-T + e-TVA | 80% | Fiscal (Q1 2027) |
+| **NIS2** | `lib/server/nis2-store.ts` + `dnsc-monitor.ts` + `nis2-eligibility.ts` | Incident reporting 3-stage + maturity + governance | 85% | Internal + Cabinet (Q3 2026 alături de GDPR) |
+| **AI Act** | `lib/compliance/ai-*.ts` | AI inventar + Annex III + Annex IV | 60% | Internal Pro + Cabinet (Q1 2027 polish) |
+| **DORA** | (planned) | (planned) | 15% | Enterprise + Cabinet Studio (2028) |
+| **Pay Transparency** | (planned 2026 EU) | (planned) | 5% | Internal Pro (2027) |
+| **Whistleblowing** | `app/whistleblowing/[token]/` partial | (partial) | 40% | Internal + Cabinet (Q3 2026 polish) |
+
+→ **Layer 2 = activable per cabinet via feature flags**. Cabinet GDPR-only activează doar `frameworks.gdpr = true`. Cabinet multi-framework activează mai multe.
+
+### Layer 3 — ICP segment configuration
+
+Cum se prezintă produsul per cumpărător:
+
+```typescript
+// lib/shared/icp-segments.ts (nou)
+export type IcpSegment = 
+  | "solo"           // Owner SRL DIY
+  | "imm-internal"   // IMM 50-500 ang internal officer
+  | "cabinet"        // DPO/CISO consultant white-label
+  | "fiscal"         // Contabil CECCAR
+  | "enterprise"     // 500+ ang custom
+
+export interface IcpConfig {
+  segment: IcpSegment
+  tier: PlanTier
+  enabledFrameworks: ("gdpr" | "nis2" | "ai-act" | "dora" | "efactura" | "pay-transp" | "whistleblowing")[]
+  defaultDashboard: string  // /dashboard/portfolio for cabinet, /dashboard for solo, etc.
+  navConfig: SidebarConfig
+  whiteLabel: boolean
+  multiTenant: boolean
+}
+
+// Default per segment:
+const SEGMENT_DEFAULTS: Record<IcpSegment, Partial<IcpConfig>> = {
+  "solo": {
+    enabledFrameworks: ["gdpr"],
+    defaultDashboard: "/dashboard",
+    navConfig: SOLO_NAV,  // simplified
+    whiteLabel: false,
+    multiTenant: false,
+  },
+  "imm-internal": {
+    enabledFrameworks: ["gdpr", "nis2", "whistleblowing"],
+    defaultDashboard: "/dashboard",
+    navConfig: INTERNAL_NAV,  // full features
+    whiteLabel: false,
+    multiTenant: false,
+  },
+  "cabinet": {
+    enabledFrameworks: ["gdpr", "nis2", "ai-act"],
+    defaultDashboard: "/dashboard/portfolio",
+    navConfig: CABINET_NAV,  // multi-client + brand
+    whiteLabel: true,
+    multiTenant: true,
+  },
+  "fiscal": {
+    enabledFrameworks: ["efactura", "gdpr"],
+    defaultDashboard: "/dashboard/portfolio",
+    navConfig: FISCAL_NAV,  // e-Factura primary
+    whiteLabel: true,
+    multiTenant: true,
+  },
+  "enterprise": {
+    enabledFrameworks: ["gdpr", "nis2", "ai-act", "dora", "whistleblowing", "pay-transp"],
+    defaultDashboard: "/dashboard",
+    navConfig: ENTERPRISE_NAV,  // all features
+    whiteLabel: true,
+    multiTenant: false,
+  },
+}
+```
+
+→ **Layer 3 = cum vinzi, NU ce ai**. Aceeași infrastructură + aceleași rules, dar UI/nav/onboarding diferit per cumpărător.
 
 ### Soluție arhitecturală: feature flags per produs
 
@@ -550,70 +666,75 @@ if (products.doraOs) detectedFindings.push(...detectDORA(state))
 return detectedFindings
 ```
 
-### Onboarding choice — primul ecran (Sprint 1)
+### Onboarding choice — primul ecran (Sprint 1, v4.0 — choice per ICP NU per produs)
 
 ```tsx
-// app/onboarding/product-choice/page.tsx (nou)
+// app/onboarding/segment-choice/page.tsx (nou)
 <OnboardingStep title="Bine ai venit la CompliScan. Ce te aduce aici azi?">
-  <ProductCard
-    productId="dpo-os"
-    title="DPO Operating System"
-    description="Cabinet GDPR cu portofoliu multi-client. Privacy Policy, DPA, RoPA, DSAR, ANSPDCP."
-    price="de la €49/lună"
-    icp="Diana — DPO consultant"
+  <SegmentCard
+    segment="solo"
+    title="Sunt owner SRL / freelancer"
+    description="Vreau să-mi fac singur compliance. Privacy Policy, Cookie, DSAR, GDPR pentru site-ul meu."
+    icp="Owner SRL <10 angajați"
+    pricing="€29-49/lună"
+    activates={["GDPR + e-Privacy + Cookie"]}
     available={true}
   />
-  <ProductCard
-    productId="nis2-os"
-    title="NIS2 Operating System"
-    description="Implementare NIS2 + DNSC reporting + ICT risk + cyber incident management."
-    price="de la €99/lună"
-    icp="Mihai — CISO/cybersec consultant"
-    available={false}
-    waitlistAvailable={true}  // Q1 2027
+  <SegmentCard
+    segment="imm-internal"
+    title="Sunt în firma mea (50-500 ang) și gestionez compliance intern"
+    description="Vreau să internalizez compliance cu un angajat existent în loc să plătesc 4 consultanți."
+    icp="HR/Legal/Office Manager + 30% job compliance"
+    pricing="€299-999/lună (ROI 2-5× vs consultanți)"
+    activates={["GDPR + NIS2 + Whistleblowing + Pay Transp"]}
+    available={true}
   />
-  <ProductCard
-    productId="fiscal-os"
-    title="Fiscal Operating System"
-    description="e-Factura validator UBL CIUS-RO + ANAF SPV + SAF-T + e-TVA discrepancies."
-    price="de la €29/lună"
-    icp="Marius — contabil CECCAR"
-    available={false}
-    waitlistAvailable={true}  // Q3 2027
+  <SegmentCard
+    segment="cabinet"
+    title="Sunt consultant DPO/CISO și am clienți"
+    description="Vreau portofoliu multi-client cu brand-ul meu. Magic link patron, Audit Pack ZIP, white-label complet."
+    icp="DPO/CISO consultant cu 5-100 clienți"
+    pricing="€499-1999/lună (white-label)"
+    activates={["GDPR + NIS2 + AI Act"]}
+    available={true}
   />
-  <ProductCard
-    productId="ai-act-os"
-    title="AI Act Operating System"
-    description="AI inventar + Annex III/IV + risk classification + Annex IV documentation."
-    price="de la €149/lună"
-    icp="Andrei — AI Governance specialist"
+  <SegmentCard
+    segment="fiscal"
+    title="Sunt contabil CECCAR și gestionez e-Factura + GDPR lite"
+    description="Vreau validator UBL CIUS-RO real + ANAF SPV signals + e-TVA discrepancies + SAF-T + GDPR lite per client."
+    icp="Contabil CECCAR cu 30-200 clienți SRL"
+    pricing="€29-199/lună"
+    activates={["e-Factura + SAF-T + GDPR lite"]}
     available={false}
-    comingSoon={true}  // 2028
+    waitlistAvailable={true}  // Q1 2027 lansare
   />
-  <ProductCard
-    productId="dora-os"
-    title="DORA Operating System"
-    description="DORA + ICT third-party + BNR reporting + financial compliance."
-    price="de la €499/lună"
-    icp="Cristina — Financial Compliance specialist"
-    available={false}
-    comingSoon={true}  // 2028
-  />
-  <ProductCard
-    productId="combo"
-    title="Multi-framework Combo"
-    description="Pentru avocatură enterprise care face cross-framework. Studio All-in cu toate 5 module."
-    price="de la €399/lună (combo) sau €1.999 (Studio All-in)"
-    icp="Avocatură enterprise (Wolf Theiss, DLA Piper stil)"
-    available={false}
+  <SegmentCard
+    segment="enterprise"
+    title="Sunt enterprise (500+ ang sau banking/healthcare)"
+    description="Vreau soluție custom cu SLA dedicat, multi-region support, on-prem opțional."
+    icp="CFO/CCO la enterprise"
+    pricing="€5K-20K/lună custom"
+    activates={["Toate frameworks + DORA + Pay Transp + custom"]}
+    available={true}
     contactSales={true}
   />
 </OnboardingStep>
 ```
 
-→ Pentru cabinet DPO nou care alege "DPO OS", restul 4 produse rămân ascunse. Cod intact, UI invizibil. Cabinet nu vede sidebar groups pentru NIS2/Fiscal/AI Act/DORA.
+→ Pentru cabinet DPO nou care alege "cabinet", se activează automat:
+- `frameworks.gdpr = true`, `frameworks.nis2 = true`, `frameworks.aiAct = true` (default cabinet)
+- `whiteLabel = true`, `multiTenant = true`
+- `defaultDashboard = "/dashboard/portfolio"`
+- Sidebar config = CABINET_NAV
+- Restul rule sets (DORA, Fiscal validator etc.) rămân hidden
 
-→ Activare ulterioară: cabinet upgrade la combo "DPO + NIS2" → `nis2Os: true` → toate rute NIS2 reapar instant.
+→ Pentru IMM Internal care alege "imm-internal":
+- `frameworks.gdpr = true`, `frameworks.nis2 = true`, `frameworks.whistleblowing = true`
+- `whiteLabel = false`, `multiTenant = false`
+- `defaultDashboard = "/dashboard"` (single-org)
+- Sidebar = INTERNAL_NAV (full features pentru 1 firmă)
+
+→ Activare ulterioară (upgrade): cabinet care vrea să adauge DORA module → `frameworks.dora = true` → tot DORA reapare instant.
 
 ---
 
@@ -932,48 +1053,55 @@ Bazat pe demo run + 6 condiții DPO Complet + audit cod (26 apr 2026), cele 5 pr
 
 Detaliu execuție în `04-compliscan-directie-implementare-2026-04-26.md`.
 
-## 18.5. 5 landing pages — strategy
+## 18.5. 4 landing pages — strategy v4.0 (per ICP segment, NU per produs)
 
-Fiecare produs are propria landing page la `compliscan.ro/{product}`. Mesaj specific per cumpărător, NU mesaj all-in-one.
+Fiecare ICP segment are propria landing page la `compliscan.ro/{segment}`. Mesaj specific per cumpărător.
 
-### Structură per landing
+### Structură per landing v4.0
 
 ```
-compliscan.ro/                  → Hub principal cu 5 cards (DPO/NIS2/Fiscal/AI/DORA)
-compliscan.ro/dpo               → DPO OS (ACTIV Q3 2026)
-compliscan.ro/nis2              → NIS2 OS ("Coming soon Q1 2027 + waitlist")
-compliscan.ro/fiscal            → Fiscal OS ("Coming soon Q3 2027 + waitlist")
-compliscan.ro/ai-act            → AI Act OS ("Coming soon 2028 + waitlist")
-compliscan.ro/dora              → DORA OS ("Coming soon 2028 + waitlist")
-compliscan.ro/pricing           → Pricing matrix per produs (5 columns)
-compliscan.ro/about             → Founder + roadmap + portfolio strategy
+compliscan.ro/                  → Hub principal cu 4 cards ICP (Solo/IMM/Cabinet/Fiscal) + Enterprise
+compliscan.ro/solo              → Owner SRL DIY compliance (ACTIV Q3 2026)
+compliscan.ro/imm               → IMM Internal Officer (ACTIV Q3 2026 — lovitura de gratie)
+compliscan.ro/cabinet           → DPO/CISO Consultant white-label (ACTIV Q3 2026 — DPO Complet pilot)
+compliscan.ro/fiscal            → Contabil CECCAR (ACTIV Q1 2027)
+compliscan.ro/enterprise        → 500+ ang custom (Contact sales)
+compliscan.ro/pricing           → Pricing matrix 16 SKU pe 5 grupuri segment
+compliscan.ro/about             → Founder + Compliance Loop OS thesis + roadmap
+compliscan.ro/loop              → Explainer pattern universal "găsire → rezolvare → dosariat → monitorizat → dovedit"
 ```
 
-### Per landing page conținut
+### Per landing page conținut v4.0
 
 Fiecare landing are:
-- **Hero specific produsului** (NU "platforma all-in-one")
-- **Concurența directă listată** (Privacy Manager pentru /dpo, Sectio Aurea pentru /nis2, etc.)
-- **Pricing tier specific produs** (NU pricing combinat)
-- **Demo specific use case** (Diana cu 30 clienți pentru /dpo, Mihai cu firmă obligată NIS2 pentru /nis2)
-- **Testimonial specific industrie** (DPO Complet pentru /dpo, primărie pentru /nis2 dacă valid)
-- **CTA specific**: "Start trial 14 zile" pentru produsul activ, "Join waitlist + early access pricing" pentru cele coming soon
+- **Hero specific ICP-ului** (NU "platforma all-in-one", NU "5 produse")
+- **Mesajul concret** (Solo: "fără consultant scump"; IMM: "ROI 2-5× vs 4 consultanți"; Cabinet: "white-label scalabil"; Fiscal: "validator UBL real")
+- **Math validation specific**: per segment cu numbers reali (vezi Doc 01 secțiunea 6)
+- **Concurența directă listată** specific per segment
+- **Demo specific use case** real pentru ICP-ul respectiv
+- **Pricing tier-uri specifice segmentului** (3 tier-uri per segment)
+- **Testimonial specific** (când le ai după pilot DPO Complet)
+- **CTA specific**: "Start trial 14 zile" pentru segmente active, "Contact sales" pentru enterprise
 
-### Hub principal (`compliscan.ro/`)
+### Hub principal (`compliscan.ro/`) v4.0
 
 ```
-HERO: "5 produse compliance pentru piața RO. 1 cod. 1 brand."
+HERO: "Sistemul Operațional pentru Compliance Loop din România."
 
-5 CARDS:
-[DPO OS]      [NIS2 OS]     [AI Act OS]   [DORA OS]    [Fiscal OS]
-ACTIV         Q1 2027       2028          2028         Q3 2027
-€49-599       €99-599       €149-499      €499-1.499   €29-199
+EXPLAINER: "Pattern universal: găsire → rezolvare → dosariat → 
+monitorizat → dovedit. Indiferent dacă ești owner SRL, IMM, cabinet 
+DPO/CISO, sau contabil CECCAR — același loop, configurat pentru tine."
 
-CARD-uri pentru cele inactive: "Join waitlist + early access pricing".
+4 CARDS ICP:
+[SOLO]              [IMM INTERNAL]      [CABINET]            [FISCAL]
+Owner SRL DIY       50-500 ang internal DPO/CISO consultant  Contabil CECCAR
+€29-49              €299-999            €499-1999            €29-199
+ACTIV Q3 2026       ACTIV Q3 2026 ⭐    ACTIV Q3 2026         Q1 2027
 
-EXPLAINER: "De ce 5 produse, nu 1 platformă: piața RO are ICP-uri 
-specializate. Diana DPO ≠ Mihai CISO ≠ Marius CECCAR. Vindem produsul 
-pe care îl folosești, nu un bundle generic."
++ ENTERPRISE custom (500+ ang, banking/healthcare)
+
+PROOF POINT: "Pattern Salesforce / Notion / Stripe aplicat la compliance RO. 
+1 cod, 4-5 ICP-uri, pricing scalat. Nu vinzi categoria — vinzi loop-ul."
 ```
 
 ---

@@ -7,58 +7,39 @@
 
 ---
 
-## TL;DR
+## TL;DR — Roadmap v4.0 (lansare per ICP segment, NU per produs)
 
-**Roadmap revizuit post discovery 5 produse: lansare faseată DPO OS → NIS2 OS → Fiscal OS → AI Act OS → DORA OS pe 18 luni.**
+**Compliance Loop OS lansare faseată: 3 segmente paralele Q3 2026 (Solo + IMM Internal + Cabinet) → Fiscal Q1 2027 → Enterprise + EU expansion 2028.**
 
-### Etapa 1 — DPO OS production launch (Q3 2026)
+### Etapa 1 — Production launch 3 segmente (Q3 2026)
+
+Lansare paralelă **Solo + IMM Internal + Cabinet** pentru că folosesc aceeași infrastructure + aceleași framework rules (GDPR + NIS2 + Whistleblowing).
 
 | Sprint | Durată | Ce livrăm | Validare |
 |---|---|---|---|
-| **S0** | 5 zile (27 apr → 1 mai) | Fix 6 bug-uri DPO OS demo run + Audit Pack 100% mature + product choice onboarding | Demo refăcut fără bug-uri vizibile |
-| **S1** | 2 săpt (4 → 16 mai) | Custom templates UI + reject/comment flow + AI on/off + feature flags 5 produse hide non-DPO + signature upload + landing `/dpo` | Pilot kickoff DPO Complet 7 mai |
-| **S2** | 2 săpt (18 → 30 mai) | Stripe billing DPO OS tiers (Solo €49/Cabinet €149/Pro €299/Studio €599) + Mistral EU optional + Supabase cutover + monthly digest | Primii clienți reali în pilot |
-| **S3** | 1 săpt (1 → 7 iun) | Drift cron + landing pages "Coming soon" pentru NIS2/Fiscal/AI/DORA + waitlist signup + onboarding product choice screen | Pilot retro + extension la 5 cabinete |
-| **PROD** | 1 săpt (15 iun) | Production launch DPO OS + marketing landing | First paying customers |
+| **S0** | 5 zile (27 apr → 1 mai) | Fix 6 bug-uri infrastructure (workspace.label, disclaimer, Diana branding, Aprob button, SHA-256, PDF font) | Demo refăcut fără bug-uri vizibile |
+| **S1** | 2 săpt (4 → 16 mai) | ICP segment choice onboarding + nav config per segment (Solo simplified / IMM full / Cabinet white-label) + custom templates UI + reject/comment flow + AI on/off | Pilot kickoff DPO Complet (Cabinet segment) 7 mai |
+| **S2** | 2 săpt (18 → 30 mai) | Stripe billing 16 SKU pe 5 grupuri segment + Mistral EU optional + Supabase cutover + monthly digest | Primii clienți reali în pilot |
+| **S3** | 1 săpt (1 → 7 iun) | Drift cron + 4 landing pages live (`/solo`, `/imm`, `/cabinet`, `/fiscal` waitlist) + framework rules polish (Whistleblowing, Pay Transp partial) | Pilot retro + outreach Solo + IMM Internal start |
+| **PROD** | 1 săpt (15 iun) | Production launch 3 segmente + hub principal compliscan.ro + pricing page | First paying customers across 3 segmente |
 
-**Pilot DPO Complet kickoff**: **Joi 7 mai 2026, 15:00**.
+**Pilot DPO Complet kickoff** (Cabinet segment): **Joi 7 mai 2026, 15:00**.
 
-### Etapa 2 — NIS2 OS launch (Q1 2027)
+### Etapa 2 — Fiscal segment launch (Q1 2027)
 
 Sprint dedicat 4-6 săpt înainte de Q1 2027 (start ~1 dec 2026):
-- Activează landing `/nis2`
-- DNSC API integration full
-- NIS2 cabinet UI specific (CISO consultant view)
-- Pricing tiers NIS2 (Single €99 / Cabinet €299 / Pro €599)
-- Outreach Sectio Aurea, HIFENCE, Prodefence
-
-### Etapa 3 — Fiscal OS launch (Q3 2027)
-
-Sprint dedicat 6-8 săpt înainte de Q3 2027 (start ~1 iul 2027):
 - Activează landing `/fiscal`
-- Cabinet contabil specific UI
+- Cabinet contabil specific UI (NU cabinet DPO format)
 - Bulk e-Factura import + SAF-T D406 export complet
 - Integrări SmartBill / Saga / Oblio
-- Pricing tiers Fiscal (Solo €29 / Cabinet €99 / Pro €199)
-- Outreach Facebook groups "Contabili pe Facebook" 50K + Nicoleta Banciu 34K
+- Distribuție Facebook groups "Contabili pe Facebook" 50K + Nicoleta Banciu 34K
 
-### Etapa 4 — AI Act OS launch (2028)
+### Etapa 3 — Enterprise segment + framework rules expansion (Q3 2027 → 2028)
 
-Sprint dedicat 8-10 săpt:
-- Deployer vs provider workflow
-- Annex III risk classification
-- Annex IV documentation generator
-- Pricing tiers (Starter €149 / Pro €499)
-- Outreach via avocatură + AI startup community
-
-### Etapa 5 — DORA OS launch (2028)
-
-Sprint MAJOR 12+ săpt:
-- Full DORA implementation
-- BNR reporting integration
-- ICT third-party register
-- Pricing tiers (Single €499 / Multi €1.499 / Enterprise custom)
-- Outreach enterprise + Big 4 partnerships
+- Q3 2027: Enterprise tier custom deals (banking, healthcare 500+ ang) + Pay Transparency rules launch (compliance officer intern Internal Pro)
+- Q1 2028: AI Act rules polish — Annex III/IV deployer workflow + AI Governance specific UI pentru Cabinet Studio
+- Q3 2028: DORA rules full — BNR reporting + ICT third-party + Big 4 partnerships
+- 2028+: EU expansion adjacent (BG, HU, PL) pe Solo + IMM + Cabinet (Cabinet Solo €499 traduceabil)
 
 ---
 
@@ -547,47 +528,59 @@ Cu pricing media €350/lună (mix Solo + Growth):
 
 ---
 
-## 11. Long-term vision — portfolio play 5 produse (2026 → 2030)
+## 11. Long-term vision v4.0 — Compliance Loop OS portfolio (2026 → 2030)
 
-### 2026 (year 1) — DPO OS lansat + 30 cabinete plătitoare
+### 2026 (year 1) — 3 segmente lansate paralel + 50-100 plătitori distribuiți
 
-**Q1-Q2**: pilot DPO Complet → S0-S3 → production launch DPO OS 15 iun
-**Q3**: outreach Target A/B/C → 15 cabinete plătitoare DPO OS (€3-5K MRR)
-**Q4**: 30 cabinete plătitoare DPO OS mix tiers (€8-12K MRR), waitlist NIS2/Fiscal building
-
-**Revenue 2026 estimate**: €60-100K ARR (tot din DPO OS)
-
-### 2027 (year 2) — NIS2 OS Q1 + Fiscal OS Q3 lansate
-
-**Q1**: NIS2 OS launch — outreach Sectio Aurea, HIFENCE → 5 piloturi NIS2 (€1-3K MRR adițional)
-**Q2**: 60-80 cabinete DPO OS (€20-30K MRR) + 5-10 NIS2 (€2-5K MRR) = €25-35K MRR total
-**Q3**: Fiscal OS launch — outreach Facebook groups → 10-20 contabili Fiscal (€500-2K MRR adițional)
+**Q1-Q2**: pilot DPO Complet (Cabinet segment) → S0-S3 → production launch 15 iun (3 segmente: Solo + IMM Internal + Cabinet)
+**Q3**: outreach paralel pe 3 ICP-uri:
+- Solo: marketing content + Facebook groups "SRL Romania", "Antreprenori RO" → 20-30 plătitori (€600-1.500 MRR)
+- IMM Internal: outreach LinkedIn la CFO/COO + content "ROI 2-5× vs 4 consultanți" → 10-20 plătitori (€3-15K MRR)
+- Cabinet: outreach DPO/CISO consultanți (post-pilot DPO Complet success) → 5-10 plătitori (€2-15K MRR)
 **Q4**: portfolio mix:
-- 100 DPO OS (€25-35K MRR)
-- 15-20 NIS2 OS (€5-10K MRR)
-- 30-50 Fiscal OS (€2-5K MRR)
-- **Total: €32-50K MRR (€400-600K ARR)**
+- 30-50 SOLO (€1-2K MRR)
+- 15-30 IMM INTERNAL (€5-25K MRR)
+- 10-20 CABINET (€5-30K MRR)
+- **Total: €11-57K MRR (€135-680K ARR)**
 
-### 2028 (year 3) — AI Act OS + DORA OS lansate
+**Revenue 2026 estimate**: €100-300K ARR (3 segmente paralele, NU doar 1 produs cum era v3.0)
 
-**Q1-Q2**: continuă creștere pe DPO OS + NIS2 OS + Fiscal OS = €50-70K MRR
-**Q3**: AI Act OS launch — outreach avocatură + AI startups → 5-10 AI Act (€1-3K MRR adițional)
-**Q4**: DORA OS launch — outreach Big 4 partnerships → 3-5 DORA (€2-7K MRR adițional)
+### 2027 (year 2) — Fiscal Q1 lansat + portfolio scaling
+
+**Q1**: Fiscal launch — distribution Facebook groups "Contabili pe Facebook" 50K + Nicoleta Banciu 34K → 30-50 contabili plătitori (€2-8K MRR adițional)
+**Q2**: portfolio mix scaling:
+- 80-150 SOLO (€3-7K MRR)
+- 50-100 IMM INTERNAL (€18-50K MRR)
+- 30-60 CABINET (€20-80K MRR)
+- 30-60 FISCAL (€2-10K MRR)
+- **Total: €43-147K MRR (€500K-1.7M ARR)**
+**Q3**: AI Act rules polish + Pay Transparency activated în IMM Internal Pro → IMM Pro upgrades €299→€599
+**Q4**: Enterprise tier custom deals (3-5 deals × €5-15K/lună = €15-75K MRR adițional)
+
+**Portfolio end of 2027**:
+- **Total: €70-200K MRR (€800K-2.4M ARR)**
+
+### 2028 (year 3) — DORA + EU expansion adjacent
+
+**Q1-Q2**: continuă creștere pe 4 segmente RO + DORA rules launch (Cabinet Studio + Enterprise)
+**Q3**: EU expansion adjacent — Polonia (Solo + IMM + Cabinet, GDPR + NIS2 dominante)
+**Q4**: BG + HU launch pe Solo + IMM (translated landing pages)
 
 **Portfolio end of 2028**:
-- 150-200 DPO OS (€40-60K MRR)
-- 30-50 NIS2 OS (€10-20K MRR)
-- 100-150 Fiscal OS (€5-15K MRR)
-- 10-20 AI Act OS (€2-5K MRR)
-- 5-10 DORA OS (€5-10K MRR)
-- **Total: €60-110K MRR (€700K-1.3M ARR)**
+- 200-400 SOLO RO + 50-100 EU (€6-15K MRR)
+- 100-200 IMM INTERNAL (€30-100K MRR)
+- 60-120 CABINET (€40-160K MRR)
+- 100-200 FISCAL (€8-20K MRR)
+- 10-20 ENTERPRISE (€50-200K MRR)
+- **Total: €134-495K MRR (€1.6M-5.9M ARR)**
 
-### 2029-2030 — Portfolio maturity + EU expansion adjacent
+### 2029-2030 — Portfolio maturity + category leadership
 
-- 300+ DPO OS + 100+ NIS2 OS + 200+ Fiscal OS + 30+ AI Act OS + 20+ DORA OS
-- **Total: €120-200K MRR (€1.5M-2.5M ARR)**
-- Expansiune EU adjacent (BG, HU, PL) pentru DPO OS + NIS2 OS
-- Brand de referință în compliance RO
+- 500+ SOLO + 300+ IMM + 200+ CABINET + 300+ FISCAL + 30-50 ENTERPRISE
+- EU adjacent (BG, HU, PL, CZ, GR) pe Solo + IMM + Cabinet
+- **Total: €200-500K MRR (€2.5-6M ARR)**
+- Brand de referință "Compliance Loop OS" — categoria nouă recunoscută
+- Posibilă expansion vertical: training modules, certificare cabinete, marketplace consultanți
 
 ### Strategic exit options (2029+)
 

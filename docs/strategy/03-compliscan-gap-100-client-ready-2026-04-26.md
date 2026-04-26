@@ -9,23 +9,54 @@
 
 ## TL;DR
 
-CompliScan **nu e un produs, sunt 5 produse într-un cod**. Maturity diferă DRAMATIC între cele 5:
+CompliScan e **Compliance Loop OS** cu 3 layers (Infrastructure + Framework rules + ICP segment). Maturity per layer:
 
-| Produs | Maturity globală | Status pentru pilot client |
+### Layer 1 — Infrastructure primitives: **87% mediu**
+
+Cod generic pentru loop universal — funcționează pentru orice ICP fără modificări structurale.
+
+| Primitive | Maturity | Status |
 |---|---|---|
-| **DPO OS** | **87%** | ✅ pilot DPO Complet acceptabil cu Sprint 0 (5 zile fix-uri vizibile) |
-| **NIS2 OS** | **75%** | ⚠️ schema + features mature, lipsește UI module owner switching + DNSC API integration final |
-| **Fiscal OS** | **80%** | ⚠️ validator UBL + SPV mature, lipsește dedicated cabinet contabil UI |
-| **AI Act OS** | **60%** | ⚠️ AI inventar + Annex IV partial, lipsește deployer/provider workflow |
-| **DORA OS** | **15%** | ❌ schema gândită, NU implementat — Sprint mare necesar 2028 |
+| Finding kernel + lifecycle | 95% | ✅ |
+| Evidence binding | 100% | ✅ |
+| Task validation workflow | 90% | ✅ |
+| Audit Pack ZIP + manifest | 70% | ⚠️ Sprint 0 fix |
+| Compliance drift + reopen | 90% | ✅ |
+| Share token magic link | 95% | ✅ |
+| Events ledger | 95% | ✅ |
+| White-label cabinet | 75% | ⚠️ Sprint 0 fix |
+| Document generator AI | 60% | ⚠️ Gemini config Sprint 0 |
+| Plan/billing Stripe | 70% | ⚠️ Sprint 2 |
 
-**Lansare faseată**: doar **DPO OS** trebuie 100% client-ready pentru kickoff DPO Complet (Joi 7 mai). Restul 4 produse rămân hidden by feature flag până la lansare publică (Q1'27, Q3'27, 2028).
+### Layer 2 — Framework rules: variat per legislație
 
-**Definiția "client-ready"** per produs: un cumpărător din ICP poate folosi produsul **fără workaround-uri founder, fără explicații "în Sprint X livrăm Y"**, exclusiv prin UI și API standard.
+| Framework | Maturity | Activate în segment | Sprint dedicat |
+|---|---|---|---|
+| **GDPR** | 90% | Solo + IMM Internal + Cabinet | S0-S1 (deja matur) |
+| **e-Factura** | 80% | Fiscal | S0 polish + S1 cabinet UI |
+| **NIS2** | 85% | IMM Internal + Cabinet | S0-S1 (deja matur) |
+| **AI Act** | 60% | IMM Internal Pro + Cabinet Studio | Sprint dedicat 8-10 săpt 2027 |
+| **DORA** | 15% | Enterprise + Cabinet Studio | Sprint MAJOR 12+ săpt 2028 |
+| **Pay Transparency** | 5% | IMM Internal Pro | Sprint dedicat 6-8 săpt 2027 |
+| **Whistleblowing** | 40% | IMM Internal + Cabinet | S1 polish |
 
-**Pentru DPO OS**: 6 bug-uri vizibile (Sprint 0 — 5 zile) + 5 limitări announced (Sprint 1-2 — 4 săpt) până la 100%.
+### Layer 3 — ICP segment configuration: variat per launch
 
-**Pentru restul 4 produse**: sprint dedicat per produs **când lansăm public** (NU acum). Vezi Doc 04 Secțiunea 1.5 pentru roadmap.
+| Segment | UI/onboarding maturity | Status pentru launch |
+|---|---|---|
+| **SOLO** | 60% | ⚠️ Onboarding choice screen + simplified nav (S1) |
+| **IMM INTERNAL** | 70% | ⚠️ Single-org dashboard polish + framework filter (S1-S2) |
+| **CABINET** | **85%** | ✅ Pilot DPO Complet — Sprint 0 fix-uri vizibile suficient |
+| **FISCAL** | 50% | ⚠️ Cabinet contabil specific UI lipsește (sprint dedicat 2027) |
+| **ENTERPRISE** | 40% | ❌ Custom integrations + SLA + on-prem (2028) |
+
+### Diferența vs v3.0 (5 produse)
+
+În v3.0 vorbeam despre "DPO OS 87%, NIS2 OS 75%, etc." ca produse. **În v4.0 e mai precis**: Infrastructure primitives sunt 87% generic; framework rules sunt mature variat (GDPR 90% / NIS2 85%); ICP segment configuration variat (Cabinet 85% — pilot ready, Solo + IMM 60-70% — Sprint 1 polish).
+
+**Pentru DPO Complet pilot (Joi 7 mai)**: segment **Cabinet** are 85% maturity + framework rules GDPR 90% + Infrastructure 87%. Combinația = **pilot acceptabil cu Sprint 0 (6 bug-uri fix)**.
+
+**Pentru SOLO + IMM lansare paralelă (Q3 2026)**: necesită Sprint 1 dedicat pentru ICP segment configuration (onboarding choice + nav simplified pentru Solo + nav full pentru IMM). Frameworks sunt deja mature.
 
 ---
 

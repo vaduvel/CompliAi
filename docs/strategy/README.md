@@ -1,30 +1,45 @@
-# CompliScan — Stack documente strategice (v3.0 — 5-product portfolio)
+# CompliScan — Stack documente strategice (v4.0 — Compliance Loop OS)
 
 **Status**: 4 documente canonice. Restul arhivate.
-**Trigger consolidare v3.0**: discovery arhitectural fundamental — codul conține **5 produse comerciale separate**, nu 1 platformă. Pattern Stripe/Atlassian/HubSpot.
+**Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
 
-## ⭐ Realitatea descoperită — 5 produse, 1 cod
+## ⭐ THESIS-ul final — Compliance Loop OS
+
+**Pattern universal validat**: indiferent de framework (GDPR, NIS2, AI Act, DORA, e-Factura, Pay Transp, Whistleblowing) și indiferent de cumpărător (Solo, IMM, Cabinet, Contabil, Enterprise), toată activitatea de compliance urmează același 5-step loop:
 
 ```
-                COMPLISCAN
-       (1 brand · 1 cod · 5 produse comerciale)
-                    │
-    ┌───────┬──────┼──────┬──────────┐
-    ▼       ▼      ▼      ▼          ▼
-┌────────┐┌──────┐┌────┐┌──────┐┌────────┐
-│ DPO    ││ NIS2 ││ AI ││ DORA ││ Fiscal │
-│ OS     ││ OS   ││ OS ││ OS   ││ OS     │
-└────────┘└──────┘└────┘└──────┘└────────┘
-Diana    Mihai   Andrei Cristina Marius
-DPO      CISO    AIGov  FinComp  CECCAR
-GDPR     NIS2    AI Act DORA     e-Factura
-€49-599  €99-599 €149+  €499+    €29-199
-Q3 2026  Q1 2027 2028   2028     Q3 2027
+1. GĂSIRE → 2. REZOLVARE → 3. DOSARIAT → 4. MONITORIZAT → 5. DOVEDIT
 ```
 
-**Realitate piață**: niciun consultant single din RO nu acoperă tot stack-ul compliance. Diana DPO face GDPR. Mihai CISO face NIS2. Cristina face DORA. **5 ICP-uri separate**.
+CompliScan vinde **loop-ul**, configurat per framework + per ICP. Nu mai vinde "DPO OS" sau "5 produse". Vinde **infrastructura compliance care servește 4-5 ICP-uri orizontale prin același cod**.
 
-**Strategie**: lansare faseată cu DPO OS primul (Q3 2026). Restul: landing pages "Coming soon + waitlist" până la lansare publică.
+## ⭐ Cele 4-5 ICP-uri orizontale (NU produse verticale)
+
+```
+                    COMPLISCAN
+            (Compliance Loop OS · 1 cod · 4-5 ICP-uri)
+                        │
+        ┌───────────────┼───────────────┬─────────────┐
+        ▼               ▼               ▼             ▼
+   ┌─────────┐    ┌──────────┐    ┌──────────┐  ┌──────────┐
+   │ SOLO    │    │ INTERNAL │    │CONSULTANT│  │CONTABIL  │
+   │ MICRO   │    │ OFFICER  │    │ CABINET  │  │ CECCAR   │
+   ├─────────┤    ├──────────┤    ├──────────┤  ├──────────┤
+   │ SRL mic │    │IMM mid   │    │ DPO/CISO │  │ Cabinet  │
+   │ <10 ang │    │50-500 ang│    │5-100 cli │  │contabil  │
+   │ Owner   │    │HR/Legal/ │    │Diana/    │  │30-200    │
+   │ self-do │    │Office Mgr│    │Mihai     │  │clienți   │
+   ├─────────┤    ├──────────┤    ├──────────┤  ├──────────┤
+   │ €29-49  │    │€299-999  │    │€499-1999 │  │€29-199   │
+   └─────────┘    └──────────┘    └──────────┘  └──────────┘
+                                          
+                 + ENTERPRISE custom (500+ ang, banking, healthcare)
+                   €5K-20K/lună
+```
+
+**TAM RO 5 ani**: €30-80M ARR realist atingibil pe combinația 4-5 segmente.
+
+**Lansare faseată**: 3 segmente paralel Q3 2026 (Solo + IMM Internal + Cabinet) → Fiscal Q1 2027 → Enterprise + EU expansion 2028.
 
 ---
 
@@ -221,21 +236,59 @@ Singurul motiv să creezi document nou:
 
 ## Versiuni
 
-### v3.0 — 26 aprilie 2026 (CURENT)
+### v4.0 — 26 aprilie 2026 (CURENT)
 
-**Trigger**: discovery arhitectural fundamental — codul conține **5 produse comerciale separate**, nu 1 platformă. Conversație iterativă cu user a relevat:
-1. DPO consultanți români NU folosesc multi-framework (specializare segmentată: GDPR-only, NIS2-only, etc.)
-2. Niciun consultant RO nu acoperă tot stack-ul compliance — firme mid-market sună 3-5 firme diferite
-3. Tools-uri folosite per DPO: 8-22 (NU 18 generic) — depinde de specializare
-4. CompliScan engine face bine toate 5 frameworks → împart în 5 produse → vând fiecare separat
-5. Pattern Stripe/Atlassian/HubSpot: 1 platformă tehnică, 5 produse comerciale, lansare faseată
+**Trigger**: discovery final — **pattern compliance loop universal**. Conversație iterativă cu user a relevat progresiv:
+1. Tools folosite per DPO: 8-22 depending on specialization (NU 18 generic)
+2. Niciun consultant single RO nu acoperă tot stack-ul compliance
+3. Firme mid-market sună 3-5 firme, plătesc €60-100K/an consultanță fragmentată
+4. **Discovery cheie**: niciun specialist single nu folosește toate frameworks → invalidează "5 produse vertical specializate" v3.0
+5. **Discovery final**: cumpărătorul real e IMM-ul care plătește 4 consultanți (€60-100K/an) și vrea internal cu €299/lună + 1 angajat existent
+6. **Discovery THE BIG ONE**: CompliScan absoarbe 4-5 ICP-uri orizontale (Solo + IMM + Cabinet + Contabil + Enterprise) prin același cod
+7. **Discovery thesis universal**: toate frameworks au același 5-step loop — găsire → rezolvare → dosariat → monitorizat → dovedit. CompliScan vinde **loop-ul**, NU legea
 
-**Cele 5 produse identificate**:
-- **DPO OS** (Diana, GDPR consultant) — €49-599/lună — primary launch Q3 2026
-- **NIS2 OS** (Mihai, CISO/cybersec) — €99-599/lună — Q1 2027
-- **Fiscal OS** (Marius, contabil CECCAR) — €29-199/lună — Q3 2027
-- **AI Act OS** (Andrei, AI Governance) — €149-499/lună — 2028
-- **DORA OS** (Cristina, Financial Compliance) — €499-1.499+/lună — 2028
+**Cele 4-5 ICP-uri orizontale identificate**:
+- **SOLO** (Owner SRL DIY) — €29-49/lună — Q3 2026
+- **IMM INTERNAL** (Officer intern, lovitura de gratie ROI 2-5×) — €299-999/lună — Q3 2026
+- **CABINET** (DPO/CISO consultant white-label, pilot DPO Complet) — €499-1999/lună — Q3 2026
+- **FISCAL** (Contabil CECCAR e-Factura+) — €29-199/lună — Q1 2027
+- **ENTERPRISE** (500+ ang custom) — €5K-20K/lună — 2028
+
+**3 layers arhitecturale**:
+1. Infrastructure primitives (87% maturity, generic loop)
+2. Framework rules (per legislație: GDPR 90% / NIS2 85% / AI Act 60% / DORA 15% / e-Factura 80%)
+3. ICP segment configuration (cum se prezintă produsul per cumpărător)
+
+**TAM RO 5 ani**: €30-80M ARR realist (vs €100-300K în v3.0 single product).
+
+**Pattern aplicat**: Salesforce (CRM infrastructure pentru orice industrie), Notion (Solo → Team → Enterprise), HubSpot (multi-hub portfolio).
+
+**Acțiuni aplicate**:
+1. **Doc 01**: thesis Compliance Loop OS la început, pattern universal 5 steps validat across 7 frameworks, restructurat 4-5 ICP-uri orizontale, pricing 16 SKU pe 5 grupuri segment, mesaj per landing (4 mesaje specifice)
+2. **Doc 02**: arhitectura 3 layers (Infrastructure + Framework rules + ICP segment), feature flags per ICP segment NU per produs, onboarding 5-segment choice screen, 4 landing pages strategy (NU 5)
+3. **Doc 03**: maturity matrix split per layer (Infrastructure 87% / Framework rules variabil / ICP segment variabil), criterii client-ready per segment specific
+4. **Doc 04**: timeline 3 segmente paralel Q3 2026 (Solo + IMM + Cabinet) + Fiscal Q1 2027 + Enterprise 2028, sales motion per ICP, vision 2027-2030 €1.6M-5.9M ARR
+
+**Reposition strategic v4.0**:
+- ❌ NU mai vinde "DPO OS pentru cabinet" sau "5 produse vertical"
+- ❌ NU mai vinde "GRC pentru mid-market RO" (categoria de cumpărător aproape inexistentă)
+- ❌ NU mai vinde "platformă all-in-one"
+- ✅ **Vinzi infrastructura compliance loop universal — pattern Salesforce aplicat la compliance**
+- ✅ Per landing page: mesaj specific per ICP segment (NU per produs)
+- ✅ Onboarding pas 1: "Care ICP ești?" cu 4-5 cards segmente
+
+### v3.0 — 26 aprilie 2026 (înlocuit de v4.0)
+
+**Trigger**: discovery arhitectural — codul conține 5 produse comerciale separate (DPO OS, NIS2 OS, Fiscal OS, AI Act OS, DORA OS).
+
+**Cele 5 produse identificate (v3.0, înlocuit)**:
+- **DPO OS** (Diana, GDPR consultant) — €49-599/lună
+- **NIS2 OS** (Mihai, CISO/cybersec) — €99-599/lună
+- **Fiscal OS** (Marius, contabil CECCAR) — €29-199/lună
+- **AI Act OS** (Andrei, AI Governance) — €149-499/lună
+- **DORA OS** (Cristina, Financial Compliance) — €499-1.499+/lună
+
+**De ce înlocuit cu v4.0**: arhitectura "5 produse vertical" era prea rigidă. User a observat că engine-ul face TOATE frameworks → împart per ICP segment, NU per produs. Pattern Salesforce mai potrivit decât Stripe (Stripe are produse separate Connect/Atlas/Issuing care chiar sunt diferite tehnic; CompliScan are același loop pentru toate ICP-uri). Reposition v4.0 = mai onest și mai potrivit cu codul real.
 
 **Acțiuni aplicate**:
 1. **Doc 01**: secțiune nouă "Descoperirea fundamentală — 5 produse, 1 cod" în top, restructurat 5 ICP-uri separate (Diana/Mihai/Marius/Andrei/Cristina), pricing 5 tier sets independente per produs, secțiune nouă pentru combo multi-framework (avocatură enterprise rar)
@@ -305,4 +358,4 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v3.0 — 5-product portfolio
+**Versiune**: v4.0 — Compliance Loop OS (4-5 ICP-uri orizontale, 1 cod, 3 layers arhitecturale)
