@@ -9,17 +9,24 @@
 
 ## TL;DR
 
-Aplicația operează pe **un singur spine canonical**:
+Aplicația operează pe **un singur spine canonical** comun pentru toate 5 produse:
 
 ```
-Cabinet → Client → Cockpit → Dosar → Audit Pack ZIP
+Cabinet/Org → Client/Sub-org → Cockpit Finding → Dosar → Audit Pack ZIP
 ```
 
-Tot restul (43+1 rute, 5 moduri navigare, 4 personas, 10 primitive) e atașat la acest spine.
+Tot restul (43+1 rute, 5 moduri navigare, 5 ICP-uri, 10 primitive) e atașat la acest spine.
 
-**Diferențiator arhitectural cheie vs concurenți**: **cockpit finding-first**. Privacy Manager, MyDPO, Wolters Kluwer au workflows fragmentate cross-tabs (separat pentru documente, separat pentru DSAR, separat pentru vendori). CompliScan are **o pagină per caz** care strânge tot — bază legală + draft + dovezi + history + CTA. Asta e UX-ul care face diferența zilnic, nu AI-ul.
+**Diferențiator arhitectural cheie vs concurenți**: **cockpit finding-first**. Privacy Manager, MyDPO, Wolters Kluwer, Sectio Aurea (NIS2), SmartBill (fiscal) au workflows fragmentate cross-tabs. CompliScan are **o pagină per caz** care strânge tot — bază legală + draft + dovezi + history + CTA. Asta e UX-ul care face diferența zilnic, nu AI-ul.
 
-**Codul conține DOUĂ aplicații coexistente**: DPO OS (primary 2026) și Fiscal OS (hibernated până 2027). Soluția arhitecturală: feature flag `module.fiscal.enabled` per cabinet.
+**Codul conține 5 produse comerciale coexistente** într-o platformă tehnică unică:
+- **DPO OS** — GDPR + Legea 190/2018 + ANSPDCP (primary lansare Q3 2026)
+- **NIS2 OS** — NIS2 + DNSC + ICT risk (Q1 2027)
+- **Fiscal OS** — e-Factura + ANAF SPV + SAF-T (Q3 2027)
+- **AI Act OS** — AI Act + Annex IV (2028)
+- **DORA OS** — DORA + BNR + ICT third-party (2028)
+
+Soluția arhitecturală: **feature flag `module.{name}.enabled` per cabinet/org**. Default `dpoOs: true`, restul `false` până la upgrade tier sau lansare publică.
 
 **Design system**: V3 — Space Grotesk (display) + IBM Plex Mono (eyebrows) + Inter (body) + cobalt accent. Aplicat 100% peste tot deja.
 
@@ -412,55 +419,119 @@ UI: în Dosar, fiecare document are progress bar 4 steps. Hint sub progress: "A�
 
 ---
 
-## 10. Două aplicații în cod — soluție arhitecturală
+## 10. 5 produse coexistente în cod — soluție arhitecturală
 
-### Realitate (descoperit empiric în demo run)
+### Realitate (descoperit empiric în demo run + market validation)
 
-Codebase-ul curent are 2 aplicații coexistente:
+Codebase-ul curent are **5 produse comerciale** coexistente într-o platformă tehnică unică:
 
-**A. DPO OS (compliance privacy)** — primary 2026
-- Frameworks: GDPR, AI Act, NIS2
-- Routes: 1-24, 29-44 (din table sus)
-- API: `/api/findings`, `/api/documents/generate`, `/api/exports/audit-pack`, `/api/reports/share-token`
-- State fields: `findings`, `alerts`, `generatedDocuments`, `aiSystems`, `traceabilityReviews`
+| Modul | Frameworks | Routes | API | State fields | Status maturity |
+|---|---|---|---|---|---|
+| **DPO OS** | GDPR, Legea 190/2018, ANSPDCP | 1-24, 29-44 | `/api/findings`, `/api/documents/generate`, `/api/exports/audit-pack`, `/api/reports/share-token` | `findings`, `alerts`, `generatedDocuments`, `traceabilityReviews` | 87% |
+| **NIS2 OS** | NIS2, OUG 155/2024, Lege 124/2025, DNSC | 31, 30 (drift) | `/api/nis2/*`, `dnsc-monitor.ts` | `nis2Eligibility`, `incidents`, `vendorRiskMatrix`, `maturityAssessment`, `governanceTraining` | 85% |
+| **Fiscal OS** | e-Factura, OUG 120/2021, SPV, SAF-T, e-TVA | 25-28 | `/api/fiscal/*`, `/api/efactura/*`, `/api/anaf/*` | `efacturaConnected`, `efacturaValidations`, `vatRegistered`, `fiscalProtocols`, `etvaDiscrepancies` | 80% |
+| **AI Act OS** | AI Act Reg. 2024/1689 | 14 (sisteme) | `/api/exports/ai-act-evidence-pack` | `aiSystems`, `detectedAISystems`, `aiComplianceFieldOverrides` | 60% |
+| **DORA OS** | DORA Reg. 2022/2554, BNR | 0% UI | (planned) | (planned) | 10% |
 
-**B. Fiscal OS (compliance fiscal)** — hibernated 2026
-- Frameworks: e-Factura, OUG 120/2021, SPV, e-TVA, SAF-T
-- Routes: 25-28
-- API: `/api/fiscal/*`, `/api/efactura/*`, `/api/anaf/*`
-- State fields: `efacturaConnected`, `efacturaValidations`, `vatRegistered`, `fiscalProtocols`, `etvaDiscrepancies`
-
-### Soluție: feature flag `module.fiscal.enabled`
+### Soluție arhitecturală: feature flags per produs
 
 ```typescript
-// lib/shared/cabinet-modules.ts
-export interface CabinetModules {
-  dpoOs: boolean         // default true
-  fiscalOs: boolean      // default false (hibernated 2026)
-  internalCompliance: boolean // default false (sub-mode)
+// lib/shared/product-modules.ts (nou)
+export interface ProductModules {
+  dpoOs: boolean              // GDPR + DSAR + ROPA + DPA + Privacy Policy
+  nis2Os: boolean             // NIS2 + DNSC + ICT risk + incident reporting
+  fiscalOs: boolean           // e-Factura + SPV + SAF-T + e-TVA
+  aiActOs: boolean            // AI Act + Annex IV + AI inventar
+  doraOs: boolean             // DORA + BNR + ICT third-party
+  internalComplianceMode: boolean  // single-org variant pentru NIS2 OS
 }
 
-// lib/server/cabinet-config.ts
-export async function getEnabledModules(orgId: string): Promise<CabinetModules> {
-  // Read from .data/cabinet-modules-{orgId}.json or Supabase
-  // Default: { dpoOs: true, fiscalOs: false, internalCompliance: false }
+// lib/server/product-config.ts (nou)
+export async function getEnabledProducts(orgId: string): Promise<ProductModules>
+export async function setProductsEnabled(orgId: string, products: ProductModules)
+
+// .data/product-modules-{orgId}.json (per-org storage)
+// Default pentru cabinet DPO nou:
+{
+  "dpoOs": true,
+  "nis2Os": false,
+  "fiscalOs": false,
+  "aiActOs": false,
+  "doraOs": false,
+  "internalComplianceMode": false
 }
 ```
 
-### Aplicare în UI
+### Plan tier → produse activate (mapping)
 
 ```typescript
+// lib/server/plan-products-map.ts (nou)
+export const PLAN_PRODUCTS_MAP: Record<PlanTier, ProductModules> = {
+  // DPO OS tiers
+  "solo-dpo":     { dpoOs: true, ... rest false },
+  "cabinet-dpo":  { dpoOs: true, ... rest false },
+  "pro-dpo":      { dpoOs: true, ... rest false },
+  "studio-dpo":   { dpoOs: true, ... rest false },
+  
+  // NIS2 OS tiers (post-Q1 2027)
+  "single-nis2":  { nis2Os: true, ... rest false },
+  "cabinet-nis2": { nis2Os: true, ... rest false },
+  "pro-nis2":     { nis2Os: true, ... rest false },
+  
+  // Fiscal OS tiers (post-Q3 2027)
+  "solo-fiscal":   { fiscalOs: true, ... rest false },
+  "cabinet-fiscal":{ fiscalOs: true, ... rest false },
+  "pro-fiscal":    { fiscalOs: true, ... rest false },
+  
+  // AI Act OS tiers (post-2028)
+  "starter-ai":   { aiActOs: true, ... rest false },
+  "pro-ai":       { aiActOs: true, ... rest false },
+  
+  // DORA OS tiers (post-2028)
+  "single-dora":  { doraOs: true, ... rest false },
+  "multi-dora":   { doraOs: true, ... rest false },
+  
+  // Combo (rar, avocatură enterprise)
+  "combo-dpo-nis2":   { dpoOs: true, nis2Os: true, ... rest false },
+  "combo-dpo-aiact":  { dpoOs: true, aiActOs: true, ... rest false },
+  "studio-allin":     { dpoOs: true, nis2Os: true, fiscalOs: true, aiActOs: true, doraOs: true },
+}
+```
+
+### Aplicare în Sidebar
+
+```tsx
 // components/compliscan/dashboard-shell.tsx
-const modules = await getEnabledModules(session.orgId)
+const products = await getEnabledProducts(session.orgId)
 
 <Sidebar>
-  <NavGroup label="Compliance privacy">
-    {/* GDPR, AI Act, NIS2 routes — always visible if modules.dpoOs */}
-  </NavGroup>
+  {products.dpoOs && (
+    <NavGroup label="Privacy & GDPR">
+      {/* findings GDPR + DSAR + RoPA + DPA + Privacy Policy + ANSPDCP */}
+    </NavGroup>
+  )}
   
-  {modules.fiscalOs && (
-    <NavGroup label="Compliance fiscal">
-      {/* e-Factura, SPV, e-TVA routes */}
+  {products.nis2Os && (
+    <NavGroup label="Cybersecurity & NIS2">
+      {/* incidents + vendor risk + maturity + DNSC reporting */}
+    </NavGroup>
+  )}
+  
+  {products.fiscalOs && (
+    <NavGroup label="Fiscal & e-Factura">
+      {/* validator UBL + SPV + e-TVA discrepancies + SAF-T */}
+    </NavGroup>
+  )}
+  
+  {products.aiActOs && (
+    <NavGroup label="AI Governance">
+      {/* AI inventar + Annex III/IV + risk classification */}
+    </NavGroup>
+  )}
+  
+  {products.doraOs && (
+    <NavGroup label="Financial Compliance">
+      {/* DORA + ICT third-party + BNR reporting */}
     </NavGroup>
   )}
 </Sidebar>
@@ -471,14 +542,78 @@ const modules = await getEnabledModules(session.orgId)
 ```typescript
 // lib/server/findings-detector.ts
 const detectedFindings = []
-if (modules.dpoOs) detectedFindings.push(...detectGDPRFindings(state))
-if (modules.fiscalOs) detectedFindings.push(...detectFiscalFindings(state))
+if (products.dpoOs) detectedFindings.push(...detectGDPR(state), ...detectAIAct(state, "privacy"))
+if (products.nis2Os) detectedFindings.push(...detectNIS2(state))
+if (products.fiscalOs) detectedFindings.push(...detectEFactura(state))
+if (products.aiActOs) detectedFindings.push(...detectAIAct(state, "governance"))
+if (products.doraOs) detectedFindings.push(...detectDORA(state))
 return detectedFindings
 ```
 
-→ Pentru DPO Complet și toate cabinetele DPO, Fiscal OS rămâne ascuns. Cod intact, UI invizibil. Cabinetul nu vede e-Factura tab, validator UBL, SPV ANAF — toate dispar din sidebar.
+### Onboarding choice — primul ecran (Sprint 1)
 
-→ Activare ulterioară (2027): `modules.fiscalOs = true` per partner_account → tot Fiscal OS reapare.
+```tsx
+// app/onboarding/product-choice/page.tsx (nou)
+<OnboardingStep title="Bine ai venit la CompliScan. Ce te aduce aici azi?">
+  <ProductCard
+    productId="dpo-os"
+    title="DPO Operating System"
+    description="Cabinet GDPR cu portofoliu multi-client. Privacy Policy, DPA, RoPA, DSAR, ANSPDCP."
+    price="de la €49/lună"
+    icp="Diana — DPO consultant"
+    available={true}
+  />
+  <ProductCard
+    productId="nis2-os"
+    title="NIS2 Operating System"
+    description="Implementare NIS2 + DNSC reporting + ICT risk + cyber incident management."
+    price="de la €99/lună"
+    icp="Mihai — CISO/cybersec consultant"
+    available={false}
+    waitlistAvailable={true}  // Q1 2027
+  />
+  <ProductCard
+    productId="fiscal-os"
+    title="Fiscal Operating System"
+    description="e-Factura validator UBL CIUS-RO + ANAF SPV + SAF-T + e-TVA discrepancies."
+    price="de la €29/lună"
+    icp="Marius — contabil CECCAR"
+    available={false}
+    waitlistAvailable={true}  // Q3 2027
+  />
+  <ProductCard
+    productId="ai-act-os"
+    title="AI Act Operating System"
+    description="AI inventar + Annex III/IV + risk classification + Annex IV documentation."
+    price="de la €149/lună"
+    icp="Andrei — AI Governance specialist"
+    available={false}
+    comingSoon={true}  // 2028
+  />
+  <ProductCard
+    productId="dora-os"
+    title="DORA Operating System"
+    description="DORA + ICT third-party + BNR reporting + financial compliance."
+    price="de la €499/lună"
+    icp="Cristina — Financial Compliance specialist"
+    available={false}
+    comingSoon={true}  // 2028
+  />
+  <ProductCard
+    productId="combo"
+    title="Multi-framework Combo"
+    description="Pentru avocatură enterprise care face cross-framework. Studio All-in cu toate 5 module."
+    price="de la €399/lună (combo) sau €1.999 (Studio All-in)"
+    icp="Avocatură enterprise (Wolf Theiss, DLA Piper stil)"
+    available={false}
+    contactSales={true}
+  />
+</OnboardingStep>
+```
+
+→ Pentru cabinet DPO nou care alege "DPO OS", restul 4 produse rămân ascunse. Cod intact, UI invizibil. Cabinet nu vede sidebar groups pentru NIS2/Fiscal/AI Act/DORA.
+
+→ Activare ulterioară: cabinet upgrade la combo "DPO + NIS2" → `nis2Os: true` → toate rute NIS2 reapar instant.
 
 ---
 
@@ -796,6 +931,52 @@ Bazat pe demo run + 6 condiții DPO Complet + audit cod (26 apr 2026), cele 5 pr
 5. **Feature flag `module.fiscal.enabled`** — ascunde rute 25-28 + state fields fiscal pentru DPO ICP
 
 Detaliu execuție în `04-compliscan-directie-implementare-2026-04-26.md`.
+
+## 18.5. 5 landing pages — strategy
+
+Fiecare produs are propria landing page la `compliscan.ro/{product}`. Mesaj specific per cumpărător, NU mesaj all-in-one.
+
+### Structură per landing
+
+```
+compliscan.ro/                  → Hub principal cu 5 cards (DPO/NIS2/Fiscal/AI/DORA)
+compliscan.ro/dpo               → DPO OS (ACTIV Q3 2026)
+compliscan.ro/nis2              → NIS2 OS ("Coming soon Q1 2027 + waitlist")
+compliscan.ro/fiscal            → Fiscal OS ("Coming soon Q3 2027 + waitlist")
+compliscan.ro/ai-act            → AI Act OS ("Coming soon 2028 + waitlist")
+compliscan.ro/dora              → DORA OS ("Coming soon 2028 + waitlist")
+compliscan.ro/pricing           → Pricing matrix per produs (5 columns)
+compliscan.ro/about             → Founder + roadmap + portfolio strategy
+```
+
+### Per landing page conținut
+
+Fiecare landing are:
+- **Hero specific produsului** (NU "platforma all-in-one")
+- **Concurența directă listată** (Privacy Manager pentru /dpo, Sectio Aurea pentru /nis2, etc.)
+- **Pricing tier specific produs** (NU pricing combinat)
+- **Demo specific use case** (Diana cu 30 clienți pentru /dpo, Mihai cu firmă obligată NIS2 pentru /nis2)
+- **Testimonial specific industrie** (DPO Complet pentru /dpo, primărie pentru /nis2 dacă valid)
+- **CTA specific**: "Start trial 14 zile" pentru produsul activ, "Join waitlist + early access pricing" pentru cele coming soon
+
+### Hub principal (`compliscan.ro/`)
+
+```
+HERO: "5 produse compliance pentru piața RO. 1 cod. 1 brand."
+
+5 CARDS:
+[DPO OS]      [NIS2 OS]     [AI Act OS]   [DORA OS]    [Fiscal OS]
+ACTIV         Q1 2027       2028          2028         Q3 2027
+€49-599       €99-599       €149-499      €499-1.499   €29-199
+
+CARD-uri pentru cele inactive: "Join waitlist + early access pricing".
+
+EXPLAINER: "De ce 5 produse, nu 1 platformă: piața RO are ICP-uri 
+specializate. Diana DPO ≠ Mihai CISO ≠ Marius CECCAR. Vindem produsul 
+pe care îl folosești, nu un bundle generic."
+```
+
+---
 
 ## 18. Differentiation arhitecturală vs concurenți (validat empiric)
 

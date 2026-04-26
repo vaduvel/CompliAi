@@ -1,7 +1,30 @@
-# CompliScan — Stack documente strategice (consolidat 26 apr 2026)
+# CompliScan — Stack documente strategice (v3.0 — 5-product portfolio)
 
 **Status**: 4 documente canonice. Restul arhivate.
-**Trigger consolidare**: demo run pe cod real (26 apr) + răspuns DPO firm sofisticat → identificat că aveam prea multe documente cu overlap.
+**Trigger consolidare v3.0**: discovery arhitectural fundamental — codul conține **5 produse comerciale separate**, nu 1 platformă. Pattern Stripe/Atlassian/HubSpot.
+
+## ⭐ Realitatea descoperită — 5 produse, 1 cod
+
+```
+                COMPLISCAN
+       (1 brand · 1 cod · 5 produse comerciale)
+                    │
+    ┌───────┬──────┼──────┬──────────┐
+    ▼       ▼      ▼      ▼          ▼
+┌────────┐┌──────┐┌────┐┌──────┐┌────────┐
+│ DPO    ││ NIS2 ││ AI ││ DORA ││ Fiscal │
+│ OS     ││ OS   ││ OS ││ OS   ││ OS     │
+└────────┘└──────┘└────┘└──────┘└────────┘
+Diana    Mihai   Andrei Cristina Marius
+DPO      CISO    AIGov  FinComp  CECCAR
+GDPR     NIS2    AI Act DORA     e-Factura
+€49-599  €99-599 €149+  €499+    €29-199
+Q3 2026  Q1 2027 2028   2028     Q3 2027
+```
+
+**Realitate piață**: niciun consultant single din RO nu acoperă tot stack-ul compliance. Diana DPO face GDPR. Mihai CISO face NIS2. Cristina face DORA. **5 ICP-uri separate**.
+
+**Strategie**: lansare faseată cu DPO OS primul (Q3 2026). Restul: landing pages "Coming soon + waitlist" până la lansare publică.
 
 ---
 
@@ -198,7 +221,42 @@ Singurul motiv să creezi document nou:
 
 ## Versiuni
 
-### v2.1 — 26 aprilie 2026 (CURENT)
+### v3.0 — 26 aprilie 2026 (CURENT)
+
+**Trigger**: discovery arhitectural fundamental — codul conține **5 produse comerciale separate**, nu 1 platformă. Conversație iterativă cu user a relevat:
+1. DPO consultanți români NU folosesc multi-framework (specializare segmentată: GDPR-only, NIS2-only, etc.)
+2. Niciun consultant RO nu acoperă tot stack-ul compliance — firme mid-market sună 3-5 firme diferite
+3. Tools-uri folosite per DPO: 8-22 (NU 18 generic) — depinde de specializare
+4. CompliScan engine face bine toate 5 frameworks → împart în 5 produse → vând fiecare separat
+5. Pattern Stripe/Atlassian/HubSpot: 1 platformă tehnică, 5 produse comerciale, lansare faseată
+
+**Cele 5 produse identificate**:
+- **DPO OS** (Diana, GDPR consultant) — €49-599/lună — primary launch Q3 2026
+- **NIS2 OS** (Mihai, CISO/cybersec) — €99-599/lună — Q1 2027
+- **Fiscal OS** (Marius, contabil CECCAR) — €29-199/lună — Q3 2027
+- **AI Act OS** (Andrei, AI Governance) — €149-499/lună — 2028
+- **DORA OS** (Cristina, Financial Compliance) — €499-1.499+/lună — 2028
+
+**Acțiuni aplicate**:
+1. **Doc 01**: secțiune nouă "Descoperirea fundamentală — 5 produse, 1 cod" în top, restructurat 5 ICP-uri separate (Diana/Mihai/Marius/Andrei/Cristina), pricing 5 tier sets independente per produs, secțiune nouă pentru combo multi-framework (avocatură enterprise rar)
+2. **Doc 02**: arhitectura cu feature flags per produs (`module.{name}.enabled`), plan tier → produse map, sidebar conditional render per produs activ, onboarding choice screen 5 produse, secțiune nouă 18.5 "5 landing pages strategy"
+3. **Doc 03**: maturity matrix split per produs (DPO OS 87%, NIS2 OS 75%, Fiscal OS 80%, AI Act OS 60%, DORA OS 15%), criterii client-ready DPO OS specific (NU global), comparație concurenți split per produs (DPO vs Privacy Manager/MyDPO; NIS2 vs Sectio Aurea/HIFENCE; Fiscal vs SmartBill etc.)
+4. **Doc 04**: timeline pe 5 etape (DPO Q3'26, NIS2 Q1'27, Fiscal Q3'27, AI Act 2028, DORA 2028), sales motion per produs cu Target A/B/C diferit, pricing rollout per produs (NU monolit), long-term vision portfolio play cu projection ARR €1.5M-2.5M până 2030
+
+**Reposition strategic v3.0**:
+- ❌ NU mai vinde "platformă all-in-one" (cumpărător aud și gândește "nu am nevoie de 80%")
+- ❌ NU mai vinde "GRC pentru mid-market RO" (categoria de cumpărător aproape inexistentă)
+- ❌ NU mai vinde "first-mover DPO OS" (există Privacy Manager + MyDPO)
+- ✅ Vinzi **5 produse vertical specializate sub același brand** (Stripe-style)
+- ✅ Per landing page: mesaj specific, pricing specific, demo specific, ICP specific
+- ✅ Onboarding pas 1: "Care produs te interesează?" cu 5 opțiuni
+
+**Implicație exit value**:
+- Single SaaS GDPR vague: 1-3× ARR multiple → exit €100-300K
+- Portfolio 5 produse compliance RO faseat: 5-10× ARR multiple → exit €7.5M-25M
+- **3-7× value lift doar prin reposition de la "single product" la "5-product portfolio"**
+
+### v2.1 — 26 aprilie 2026 (înlocuit)
 
 **Trigger**: market validation cu surse reale (research agent + code audit Explore agent rulate paralel) → invalidare scenariu "DPO-uri folosesc doar Word/Excel/Drive"
 
@@ -247,4 +305,4 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v2.1
+**Versiune**: v3.0 — 5-product portfolio

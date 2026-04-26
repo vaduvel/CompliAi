@@ -9,21 +9,56 @@
 
 ## TL;DR
 
-**Sprint roadmap revizuit post code audit + market validation: S0-S3 = 6-7 săptămâni la 100% client-ready** (redus de la 9 săpt în versiunea inițială).
+**Roadmap revizuit post discovery 5 produse: lansare faseată DPO OS → NIS2 OS → Fiscal OS → AI Act OS → DORA OS pe 18 luni.**
+
+### Etapa 1 — DPO OS production launch (Q3 2026)
 
 | Sprint | Durată | Ce livrăm | Validare |
 |---|---|---|---|
-| **S0** | 5 zile (saptămâna asta) | Fix 6 bug-uri demo run + Audit Pack 100% mature | Demo refăcut fără bug-uri vizibile |
-| **S1** | 2 săpt | Custom templates UI + reject/comment flow + AI on/off + feature flag fiscal hide + signature upload | Pilot kickoff DPO Complet |
-| **S2** | 2 săpt | Stripe billing live + Mistral EU optional + Supabase cutover + monthly digest | Primii clienți reali în pilot |
-| **S3** | 1 săpt (redus de la 2) | Drift cron scheduling + legislation monitoring + NIS2 polish + onboarding wizard final | Pilot retro + extension la 5 cabinete |
-| **S4** | OPȚIONAL | Production launch features extra (custom domain, signature canvas, multi-cabinet Studio tier) | Post first paying customers |
+| **S0** | 5 zile (27 apr → 1 mai) | Fix 6 bug-uri DPO OS demo run + Audit Pack 100% mature + product choice onboarding | Demo refăcut fără bug-uri vizibile |
+| **S1** | 2 săpt (4 → 16 mai) | Custom templates UI + reject/comment flow + AI on/off + feature flags 5 produse hide non-DPO + signature upload + landing `/dpo` | Pilot kickoff DPO Complet 7 mai |
+| **S2** | 2 săpt (18 → 30 mai) | Stripe billing DPO OS tiers (Solo €49/Cabinet €149/Pro €299/Studio €599) + Mistral EU optional + Supabase cutover + monthly digest | Primii clienți reali în pilot |
+| **S3** | 1 săpt (1 → 7 iun) | Drift cron + landing pages "Coming soon" pentru NIS2/Fiscal/AI/DORA + waitlist signup + onboarding product choice screen | Pilot retro + extension la 5 cabinete |
+| **PROD** | 1 săpt (15 iun) | Production launch DPO OS + marketing landing | First paying customers |
 
-**De ce S3 redus**: code audit revelează drift detection la 90% maturity (era estimat 20% în DEMO-RUN-REPORT) — algoritm + schema + lifecycle deja există. Doar cron daily scheduling lipsește.
+**Pilot DPO Complet kickoff**: **Joi 7 mai 2026, 15:00**.
 
-**De ce S4 opțional**: Capabilities mature descoperite (NIS2 85%, Onboarding 80%, Stripe 70%, White-label 75%) elimină nevoia de S4 pentru pilot DPO Complet. Features S4 (multi-cabinet Studio, custom domain) devin "post-pilot enhancement".
+### Etapa 2 — NIS2 OS launch (Q1 2027)
 
-**Pilot DPO Complet kickoff target**: **Joi 7 mai 2026, 15:00** (slot original Joi 30 apr amânat 1 săptămână ca să livrăm S0).
+Sprint dedicat 4-6 săpt înainte de Q1 2027 (start ~1 dec 2026):
+- Activează landing `/nis2`
+- DNSC API integration full
+- NIS2 cabinet UI specific (CISO consultant view)
+- Pricing tiers NIS2 (Single €99 / Cabinet €299 / Pro €599)
+- Outreach Sectio Aurea, HIFENCE, Prodefence
+
+### Etapa 3 — Fiscal OS launch (Q3 2027)
+
+Sprint dedicat 6-8 săpt înainte de Q3 2027 (start ~1 iul 2027):
+- Activează landing `/fiscal`
+- Cabinet contabil specific UI
+- Bulk e-Factura import + SAF-T D406 export complet
+- Integrări SmartBill / Saga / Oblio
+- Pricing tiers Fiscal (Solo €29 / Cabinet €99 / Pro €199)
+- Outreach Facebook groups "Contabili pe Facebook" 50K + Nicoleta Banciu 34K
+
+### Etapa 4 — AI Act OS launch (2028)
+
+Sprint dedicat 8-10 săpt:
+- Deployer vs provider workflow
+- Annex III risk classification
+- Annex IV documentation generator
+- Pricing tiers (Starter €149 / Pro €499)
+- Outreach via avocatură + AI startup community
+
+### Etapa 5 — DORA OS launch (2028)
+
+Sprint MAJOR 12+ săpt:
+- Full DORA implementation
+- BNR reporting integration
+- ICT third-party register
+- Pricing tiers (Single €499 / Multi €1.499 / Enterprise custom)
+- Outreach enterprise + Big 4 partnerships
 
 ---
 
@@ -288,42 +323,90 @@
 
 Dacă DPO Complet semnează subscription Growth după pilot → testimonial pentru landing page + LinkedIn case study.
 
-### Etapa 2 — Outreach 5 cabinete RO target (iulie 2026)
+### Etapa 1 outreach — DPO OS post-pilot (iulie-august 2026)
 
-**Strategie diferențiată per concurent actual** (post market validation 26 apr 2026):
+**Strategie diferențiată per concurent actual + per ICP** (post market validation 26 apr 2026):
 
-**Target A** — Cabinete care folosesc Privacy Manager azi (frustrate de UX legacy + sales-led pricing):
+**Target A — DPO OS** — Cabinete care folosesc Privacy Manager azi (frustrate de UX legacy + sales-led pricing):
 1. iGDPR (CIPP/E + CIPM)
 2. DPO Consulting
 3. WestGDPR
 4. EuroMarket (Iași)
+5. NeoPrivacy
 
-**Pitch**: "Privacy Manager funcționează, dar a îmbătrânit pe UX. CompliScan e next-gen cu cockpit finding-first + pricing transparent self-serve. 30 zile pilot gratis, în 5 minute pe Stripe după."
+**Pitch**: "Privacy Manager funcționează, dar a îmbătrânit pe UX. CompliScan DPO OS e next-gen cu cockpit finding-first + pricing transparent self-serve €149-299. Pilot 30 zile gratis."
 
-**Target B** — Cabinete care folosesc Excel/Word (5-30 clienți, sub 5 oameni):
-5. DPO Expert (€79-360/lună servicii)
-6. iTProtection (€100/lună DPO entry)
-7. NeoPrivacy
+**Target B — DPO OS** — Cabinete care folosesc Excel/Word (5-30 clienți, sub 5 oameni):
+6. DPO Expert (€79-360/lună servicii)
+7. iTProtection (€100/lună DPO entry)
 8. PrivacyON
 9. DPO Safety
+10. dpo-timisoara
+11. gdpr-bucuresti.ro
 
-**Pitch**: "Ai 15 clienți. Drive-ul devine haos. Tier Mini €99/lună, prim SaaS profesional cu cabinet operations real."
+**Pitch**: "Ai 15 clienți pe Drive + Excel. La 20 clienți devine haos. CompliScan DPO OS Solo €49 sau Cabinet €149, prim SaaS profesional cu cabinet operations real + Audit Pack ZIP în 2 minute."
 
-**Target C** — Cabinete top tier care NU sunt MyDPO/Decalex (cer multi-framework):
-10. LegalUp (există deja, are 800-3500 RON pricing)
-11. Accace (multi-country)
-12. Setrio MyBiz GDPR
+**Target C — DPO OS Combo** — Cabinete top tier care cer cross-framework:
+12. LegalUp (650-3500 RON, are NIS2 ca service)
+13. Accace (multi-country)
+14. Setrio MyBiz GDPR
 
-**Pitch**: "GDPR + AI Act + NIS2 într-un singur cabinet view + ANAF integrations native. Tier Pro €699 sau Studio €999."
+**Pitch**: "GDPR + NIS2 light + ANAF integrations native într-un singur cabinet view. Combo DPO + NIS2 €399 sau Studio All-in €1.999."
 
-**Format outreach**:
+**Format outreach Etapa 1**:
 - LinkedIn DM personalizat (consultant DPO senior, NU general info@)
-- Subject: "DPO Complet folosește acum CompliScan după pilot — îți pot arăta în 15 min?"
-- Body: 1 paragraph diferențiator concret per target type + link demo video (3 min) + propunere call
+- Subject: "DPO Complet folosește acum CompliScan DPO OS după pilot — îți pot arăta în 15 min?"
+- Body: 1 paragraph diferențiator concret per target type + link landing page `/dpo` + propunere call
 
-Target: **3-5 piloturi noi în iulie-august**.
+Target Etapa 1: **3-5 piloturi noi în iulie-august pe DPO OS**.
 
-**NU outreach la** Decalex/MyDPO (concurent direct cu propriu produs), Wolters Kluwer Romania (enterprise channel diferit), Privacy Manager (vendor — nu vinzi la el).
+**NU outreach Etapa 1 la**:
+- Decalex/MyDPO (concurent direct cu propriu produs)
+- Wolters Kluwer Romania (enterprise channel diferit, NU mass-market)
+- Privacy Manager (vendor — nu vinzi la el)
+- CISO/cybersec firms (Sectio Aurea, HIFENCE) → așteaptă Etapa 2 NIS2 OS lansare Q1 2027
+
+### Etapa 2 outreach — NIS2 OS launch (decembrie 2026 → februarie 2027)
+
+**Target NIS2 OS — CISO consultanți**:
+- Sectio Aurea
+- HIFENCE
+- Prodefence
+- SecureShield
+- iSoft Consulting
+
+**Pitch NIS2 OS**: "12.000 entități obligate NIS2 în RO, deadline înregistrare DNSC trecut 22 sept 2025. Multe încă neînregistrate. CompliScan NIS2 OS oferă SaaS multi-client pentru CISO consultanți: incident reporting 3-stage + DNSC integration + vendor risk + maturity assessment. Cabinet €299/lună."
+
+**Target Compliance Officer intern (firme obligate NIS2)**:
+- Outreach via LinkedIn la firme din sectoare reglementate (energie, sănătate, transport, fintech)
+- Single Entity tier €99/lună
+- Pitch: "Tu ești în firmă esențială/importantă obligată NIS2. CompliScan NIS2 OS te conduce de la DNSC registration la incident reporting Art. 23 cu 3 stages. €99/lună."
+
+### Etapa 3 outreach — Fiscal OS launch (mai → iulie 2027)
+
+**Target Fiscal OS — Contabili CECCAR**:
+- Distribuție via Facebook groups: "Contabili pe Facebook" 50K + grupul Nicoleta Banciu 34K e-Factura
+- Outreach la cabinete contabile cu 30-100 clienți SRL
+
+**Pitch Fiscal OS**: "Toate cabinetele contabile RO sunt obligate să gestioneze e-Factura clienților. SmartBill emite, dar nu validează. CompliScan Fiscal OS = primul SaaS validator UBL CIUS-RO + ANAF SPV signals + e-TVA discrepancies + SAF-T export. Solo €29 / Cabinet €99 / Pro €199."
+
+### Etapa 4 outreach — AI Act OS launch (2028)
+
+**Target AI Act OS — AI Governance specialists**:
+- Avocatură cu practice AI (Wolf Theiss, DLA Piper, Bird & Bird, PrivacyON)
+- AI startup community (UiPath alumni, AI Romania community)
+- Firme cu produse AI (deployer/provider Annex III)
+
+**Pitch AI Act OS**: "AI Act intră în vigoare august 2026 (high-risk systems). CompliScan AI Act OS = AI inventar + Annex III risk classification + Annex IV documentation generator. Starter €149 / Pro €499."
+
+### Etapa 5 outreach — DORA OS launch (2028)
+
+**Target DORA OS — Financial Compliance**:
+- Big 4 partnerships (PwC, Deloitte, EY, KPMG)
+- Boutique financial compliance firms RO
+- Fintech mid-market (~250-300 entități obligate DORA)
+
+**Pitch DORA OS**: "DORA în vigoare 17 ian 2025. Big 4 €100K+/an. CompliScan DORA OS = primul SaaS la pricing accesibil €499-1.499/lună pentru fintech mid-market."
 
 ### Etapa 3 — Channel via comunități (sept 2026)
 
@@ -464,47 +547,79 @@ Cu pricing media €350/lună (mix Solo + Growth):
 
 ---
 
-## 11. Long-term vision — 2026 → 2030 (revizuit post market validation)
+## 11. Long-term vision — portfolio play 5 produse (2026 → 2030)
 
-### 2026 (year 1) — DPO OS validat + 30 cabinete plătitoare
+### 2026 (year 1) — DPO OS lansat + 30 cabinete plătitoare
 
-**Q1-Q2**: pilot DPO Complet → S0-S3 → production launch 15 iun (cu 2 săpt mai devreme)
-**Q3**: outreach Target A/B/C + Mini tier disponibil → 15 cabinete plătitoare (€3-5K MRR)
-**Q4**: 30 cabinete plătitoare mix tiers (€8-12K MRR), case study + thought leadership LinkedIn
+**Q1-Q2**: pilot DPO Complet → S0-S3 → production launch DPO OS 15 iun
+**Q3**: outreach Target A/B/C → 15 cabinete plătitoare DPO OS (€3-5K MRR)
+**Q4**: 30 cabinete plătitoare DPO OS mix tiers (€8-12K MRR), waitlist NIS2/Fiscal building
 
-### 2027 (year 2) — Expansiune RO + Fiscal OS unhibernate
+**Revenue 2026 estimate**: €60-100K ARR (tot din DPO OS)
 
-**Q1-Q2**: 60-80 cabinete RO (€20-30K MRR), migration offer Privacy Manager users
-**Q3**: Fiscal OS unhibernate ca produs separat pentru contabili (€149-499 tier)
-**Q4**: 100 cabinete DPO + 20 contabili Fiscal OS = €35-50K MRR
+### 2027 (year 2) — NIS2 OS Q1 + Fiscal OS Q3 lansate
 
-### 2028 (year 3) — Multi-product + EU expansion adjacent
+**Q1**: NIS2 OS launch — outreach Sectio Aurea, HIFENCE → 5 piloturi NIS2 (€1-3K MRR adițional)
+**Q2**: 60-80 cabinete DPO OS (€20-30K MRR) + 5-10 NIS2 (€2-5K MRR) = €25-35K MRR total
+**Q3**: Fiscal OS launch — outreach Facebook groups → 10-20 contabili Fiscal (€500-2K MRR adițional)
+**Q4**: portfolio mix:
+- 100 DPO OS (€25-35K MRR)
+- 15-20 NIS2 OS (€5-10K MRR)
+- 30-50 Fiscal OS (€2-5K MRR)
+- **Total: €32-50K MRR (€400-600K ARR)**
 
-**Q1-Q2**: 150 cabinete DPO RO + 50 contabili + 20-30 cabinete EU adjacent (BG, HU, PL) = €50-70K MRR
-**Q3**: Adaugă AI Act Annex IV automation (high-risk system documentation)
-**Q4**: NIS2 integration full cu DNSC end-to-end + DORA pentru fintech
+### 2028 (year 3) — AI Act OS + DORA OS lansate
 
-### 2029-2030 — Maturitate market position
+**Q1-Q2**: continuă creștere pe DPO OS + NIS2 OS + Fiscal OS = €50-70K MRR
+**Q3**: AI Act OS launch — outreach avocatură + AI startups → 5-10 AI Act (€1-3K MRR adițional)
+**Q4**: DORA OS launch — outreach Big 4 partnerships → 3-5 DORA (€2-7K MRR adițional)
 
-- 300+ cabinete DPO + 100+ contabili = €100-150K MRR (€1-2M ARR)
-- Brand de referință în compliance RO + adjacent EU
-- Posibilă achiziție / parteneriat strategic:
-  - **Decalex** (potențial M&A — au 800+ clienți, complementar)
-  - **Privacy Manager** (potențial buyout dacă ei își îmbătrânesc, noi creștem)
-  - **DataGuard EU expansion** (parteneriat partener regional)
-  - **CECCAR** (parteneriat distribuție pe Fiscal OS în 2027+)
-- Sau continuă bootstrapped pentru maximizare profitability (founder + 2-3 hires)
+**Portfolio end of 2028**:
+- 150-200 DPO OS (€40-60K MRR)
+- 30-50 NIS2 OS (€10-20K MRR)
+- 100-150 Fiscal OS (€5-15K MRR)
+- 10-20 AI Act OS (€2-5K MRR)
+- 5-10 DORA OS (€5-10K MRR)
+- **Total: €60-110K MRR (€700K-1.3M ARR)**
 
-### Risc strategic post-market validation
+### 2029-2030 — Portfolio maturity + EU expansion adjacent
 
-**Risc mare**: Decalex/MyDPO investește în multi-client + cabinet operations → competitor mai puternic decât azi.
-**Mitigare**: viteză execuție S0-S3, win cabinete primii înainte ca Decalex să mute.
+- 300+ DPO OS + 100+ NIS2 OS + 200+ Fiscal OS + 30+ AI Act OS + 20+ DORA OS
+- **Total: €120-200K MRR (€1.5M-2.5M ARR)**
+- Expansiune EU adjacent (BG, HU, PL) pentru DPO OS + NIS2 OS
+- Brand de referință în compliance RO
 
-**Risc mediu**: Privacy Manager modernizează UX + scade pricing → pierdem diferențiator.
-**Mitigare**: cockpit finding-first e structural unic, greu de copiat fără rewrite complet.
+### Strategic exit options (2029+)
 
-**Risc mic**: DataGuard intră RO cu localizare + pricing redus → competitor enterprise.
-**Mitigare**: targeting cabinete <100 clienți, DataGuard rămâne pe enterprise corporate.
+**Pattern Stripe/Atlassian/HubSpot**:
+- Portfolio play cu 5 produse vertical specializate = multiplu evaluare 5-10× ARR
+- Exit value 2029-2030: €7.5M-25M (vs €100-300K dacă rămâneam single product)
+- 3-7× value lift doar prin reposition de la "single SaaS GDPR" la "5-product portfolio compliance RO"
+
+**Cumpărători potențiali**:
+- **Decalex** (au 800+ clienți, complementar pe distribuție)
+- **Privacy Manager** (potențial buyout dacă ei stagnează, noi creștem)
+- **DataGuard EU expansion** (parteneriat partener regional pentru EE)
+- **Wolters Kluwer** (acquihire pentru localizare RO)
+- **Big 4** (PwC/Deloitte) pentru DORA OS spinoff
+
+### Risc strategic post-discovery 5 produse
+
+**Risc 1 — Solo founder peste 5 produse**:
+- **Mitigare**: NU lansăm toate 5 simultan. Lansare faseată 1 produs / 6-9 luni. Founder se concentrează pe 1 ICP la timp.
+- **Hire necesar 2027**: 1 product manager (după DPO OS profitable) + 1 dev senior
+
+**Risc 2 — Decalex/MyDPO investește în multi-client + cabinet operations**:
+- **Mitigare**: viteză execuție Q3 2026 launch. Win cabinete primii înainte ca Decalex să mute.
+
+**Risc 3 — Privacy Manager modernizează UX + scade pricing**:
+- **Mitigare**: cockpit finding-first e structural unic, greu de copiat fără rewrite complet.
+
+**Risc 4 — Niciun produs din 5 nu prinde**:
+- **Mitigare**: pilot DPO Complet e validare. Dacă DPO Complet semnează la sfarsit pilot Q3 2026 → DPO OS validat. Dacă nu → pivot la alt ICP (NIS2 OS first sau pivot 3A NIS2 sector public RO).
+
+**Risc 5 — DORA OS prea complex pentru solo founder**:
+- **Mitigare**: DORA OS lansare 2028, NU 2026. Întâi cash flow din DPO + NIS2 + Fiscal. Hire dedicated team pentru DORA când ARR > €500K.
 
 ---
 

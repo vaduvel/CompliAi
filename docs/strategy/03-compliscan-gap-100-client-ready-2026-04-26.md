@@ -9,34 +9,53 @@
 
 ## TL;DR
 
-CompliScan **nu e demo, e produs**. Audit cod 26 apr 2026 (parallel cu market validation) revelează **maturity globală 73%**, mai mare decât credea DEMO-RUN-REPORT inițial (66%). Surprize POZITIVE: NIS2 module 85%, Onboarding 80%, Stripe billing 70%, White-label 75%, Trust Profile 75%.
+CompliScan **nu e un produs, sunt 5 produse într-un cod**. Maturity diferă DRAMATIC între cele 5:
 
-Mai sunt **6 bug-uri vizibile** (Sprint 0 — 5 zile) + **5 limitări announced** (Sprint 1-2 — 4 săpt, redus de la 6 săpt) până la "100% client-ready".
+| Produs | Maturity globală | Status pentru pilot client |
+|---|---|---|
+| **DPO OS** | **87%** | ✅ pilot DPO Complet acceptabil cu Sprint 0 (5 zile fix-uri vizibile) |
+| **NIS2 OS** | **75%** | ⚠️ schema + features mature, lipsește UI module owner switching + DNSC API integration final |
+| **Fiscal OS** | **80%** | ⚠️ validator UBL + SPV mature, lipsește dedicated cabinet contabil UI |
+| **AI Act OS** | **60%** | ⚠️ AI inventar + Annex IV partial, lipsește deployer/provider workflow |
+| **DORA OS** | **15%** | ❌ schema gândită, NU implementat — Sprint mare necesar 2028 |
 
-**Definiția "client-ready"**: un cabinet DPO sofisticat poate folosi CompliScan **fără workaround-uri founder, fără explicații de "în Sprint X livrăm Y"**, exclusiv prin UI și API standard.
+**Lansare faseată**: doar **DPO OS** trebuie 100% client-ready pentru kickoff DPO Complet (Joi 7 mai). Restul 4 produse rămân hidden by feature flag până la lansare publică (Q1'27, Q3'27, 2028).
 
-Astăzi nu suntem acolo, dar suntem mai aproape decât crezut. În **7 săptămâni** (nu 9) suntem.
+**Definiția "client-ready"** per produs: un cumpărător din ICP poate folosi produsul **fără workaround-uri founder, fără explicații "în Sprint X livrăm Y"**, exclusiv prin UI și API standard.
+
+**Pentru DPO OS**: 6 bug-uri vizibile (Sprint 0 — 5 zile) + 5 limitări announced (Sprint 1-2 — 4 săpt) până la 100%.
+
+**Pentru restul 4 produse**: sprint dedicat per produs **când lansăm public** (NU acum). Vezi Doc 04 Secțiunea 1.5 pentru roadmap.
 
 ---
 
-## 1. Definiția "client-ready" — criterii concrete
+## 1. Definiția "client-ready" — criterii per DPO OS (primul lansat)
 
-Un cabinet e **"client-ready"** când îndeplinește toate următoarele:
+Un cabinet e **"client-ready" pe DPO OS** când îndeplinește toate următoarele:
 
 | Criteriu | Validare |
 |---|---|
-| 1. Cabinet poate face onboarding singur (logo, semnătură, brand) | UI complet pentru `/dashboard/cabinet/branding` + upload logo + setup signature |
+| 1. Cabinet poate face onboarding singur (logo, semnătură, brand) + alege "DPO OS" în product choice | UI complet pentru `/dashboard/cabinet/branding` + upload logo + signature + onboarding step "Care produs?" |
 | 2. Cabinet poate adăuga client singur (nu CSV import founder) | UI `/dashboard/clients/add` + ANAF prefill + validare CUI |
 | 3. Cabinet poate genera documente cu AI (NU template fallback) | Gemini 2.5 Flash Lite EU configurat pentru cabinet, `llmUsed: true` în răspuns |
-| 4. Cabinet poate ascunde Fiscal OS din UI | Feature flag `module.fiscal.enabled = false` aplicat în sidebar + findings |
+| 4. Cabinet vede DOAR DPO OS routes (NIS2, Fiscal, AI Act, DORA hidden) | Feature flags `productModules.nis2Os = false` etc. aplicat în sidebar + findings detector |
 | 5. Cabinet poate trimite magic link patron cu Aprob/Respinge funcționale | Buttons pe `/shared/[token]` care fac POST status update |
 | 6. Cabinet poate descărca Audit Pack ZIP cu **SHA-256 hash chain** funcțional | `bundle-manifest.json` conține SHA-256 per fișier, MANIFEST.md afișează hash chain |
 | 7. Cabinet poate seta AI ON/OFF per client | Toggle în client settings, document generator respect-uie config |
 | 8. Cabinet poate uploada custom templates (Privacy Policy, DPA, RoPA, DSAR) | UI `/dashboard/cabinet/templates` cu upload + preview + activate per finding type |
 | 9. Cabinet primește notificări la drift | Cron job zilnic detectează drift + email + dashboard alert |
-| 10. Cabinet plătește prin Stripe (NU bonificare manuală founder) | Stripe Checkout live + webhook + plan tier auto-update |
+| 10. Cabinet plătește prin Stripe pe tier DPO OS (NU bonificare manuală founder) | Stripe Checkout live + webhook + plan tier auto-update + 4 tier-uri DPO OS active (Solo/Cabinet/Pro/Studio) |
 
-**Status azi**: 4 din 10 criterii îndeplinite (1, 2, 3 partial cu fallback, 6 partial fără SHA-256). Sprint 0-3 livrează celelalte 6.
+**Status azi**: 4 din 10 criterii îndeplinite (1 partial fără product choice, 2, 3 partial cu fallback, 6 partial fără SHA-256). Sprint 0-2 livrează celelalte 6.
+
+### Pentru restul 4 produse — criterii separate, NU urgente
+
+NIS2 OS, Fiscal OS, AI Act OS, DORA OS au criterii similare (10 criterii per produs) dar **NU sunt blockers pentru DPO Complet pilot**. Vor avea propriile sprint-uri când lansăm public:
+
+- **NIS2 OS client-ready**: 10 criterii diferite (DNSC API integration, vendor risk dashboard, incident workflow, etc.) — sprint dedicat 4-6 săpt înainte de Q1 2027
+- **Fiscal OS client-ready**: cabinet contabil specific UI, e-Factura import bulk, SAF-T D406 export, integrări SmartBill/Saga — sprint dedicat 6-8 săpt înainte de Q3 2027
+- **AI Act OS client-ready**: deployer vs provider workflow, Annex III risk classification, Annex IV documentation generator — sprint dedicat 8-10 săpt înainte de 2028
+- **DORA OS client-ready**: full DORA implementation, BNR reporting, ICT third-party register — sprint MAJOR 12+ săpt înainte de 2028
 
 ---
 
@@ -554,9 +573,11 @@ function detect(state, modules) {
 
 ---
 
-## 14. Maturity comparison — CompliScan vs concurenți reali (validat empiric 26 apr 2026)
+## 14. Maturity comparison per produs — CompliScan vs concurenți reali
 
-| Aspect | CompliScan azi | Privacy Manager RO | MyDPO (Decalex) | Wolters Kluwer GDPR Soft |
+### 14.1. DPO OS vs Privacy Manager + MyDPO (validat empiric 26 apr 2026)
+
+| Aspect | CompliScan DPO OS azi | Privacy Manager RO | MyDPO (Decalex) | Wolters Kluwer GDPR Soft |
 |---|---|---|---|---|
 | Multi-client portfolio | ✅ 85% | ✅ 95% (mature) | ❌ 0% (single SME) | ⚠️ 60% (enterprise) |
 | Cockpit finding-first | ✅ 95% (UNIC) | ⚠️ 30% (workflows fragmentate) | ⚠️ 40% | ⚠️ 30% |
@@ -564,13 +585,66 @@ function detect(state, modules) {
 | AI document generation | ⚠️ 60% (template fallback acum, Gemini config Sprint 0) | ❌ 0% (no AI) | ✅ 80% (lansat 2023) | ⚠️ 30% |
 | Audit Pack ZIP cu hash chain | ⚠️ 70% (Sprint 0 fix) | ⚠️ 40% (custom format) | ⚠️ 30% | ✅ 70% |
 | Magic link patron self-action | ✅ 95% | ⚠️ 50% (link, dar UX legacy) | ❌ 0% | ⚠️ 40% |
-| RO native (ANAF, ANSPDCP, DNSC NIS2) | ✅ 75% (NIS2 85%, e-Fact 80%, ANAF 60%) | ⚠️ 60% | ⚠️ 50% | ⚠️ 40% |
+| RO native (ANAF, ANSPDCP) | ✅ 70% | ⚠️ 60% | ⚠️ 50% | ⚠️ 40% |
 | Drift detection auto | ✅ 90% | ⚠️ 30% | ❌ 0% | ⚠️ 50% |
-| NIS2 module integrated | ✅ 85% | ⚠️ 50% | ❌ 10% | ✅ 70% |
 | Pricing transparent self-serve | ✅ 100% (Stripe Checkout) | ❌ 0% (sales-led demo) | ❌ 20% (sales-led) | ❌ 0% (enterprise) |
-| Pricing accessibility | ✅ 100% (€99-999) | ❓ nepublic (estimat €200-500) | ❓ nepublic | ❌ 20% (€1K-5K+) |
 | Romanian UI native | ✅ 100% | ✅ 100% | ✅ 100% | ✅ 100% |
-| Multi-framework (GDPR + AI Act + NIS2 + e-Fact) | ✅ 75% | ⚠️ 50% (GDPR + NIS2) | ❌ 30% (GDPR only) | ⚠️ 60% |
+
+**Verdict DPO OS**: paritate funcțională cu Privacy Manager, **superior pe** cockpit finding-first + drift auto + pricing transparent + AI native EU. Inferior pe brand recognition (Privacy Manager pe piață de 12 ani).
+
+### 14.2. NIS2 OS vs Sectio Aurea + HIFENCE + audatis (estimat)
+
+| Aspect | CompliScan NIS2 OS azi | Sectio Aurea / HIFENCE | audatis (DE) |
+|---|---|---|---|
+| NIS2 incident reporting 3-stage | ✅ 85% (early warning + 72h + final) | ⚠️ 60% (consultance, NU SaaS) | ✅ 90% |
+| DNSC integration RO | ✅ 70% | ⚠️ 50% | ❌ 0% (DE focus) |
+| Vendor risk matrix | ✅ 80% | ⚠️ 60% | ✅ 85% |
+| Maturity assessment | ✅ 85% | ⚠️ 70% | ✅ 90% |
+| Multi-client cabinet view | ✅ 85% | ❌ 0% (consultancy services) | ⚠️ 60% |
+| Pricing self-serve | ✅ 100% (planned €99-599) | ❌ 0% | ❌ 0% |
+| Romanian native | ✅ 100% | ✅ 100% | ❌ 0% (DE/EN) |
+
+**Verdict NIS2 OS**: nimeni în RO NU oferă SaaS multi-client pentru NIS2. Sectio Aurea + HIFENCE = consultanță services-led. Spațiu real. Lansare Q1 2027 cu sprint dedicat.
+
+### 14.3. Fiscal OS vs SmartBill + Saga + Oblio (validat)
+
+**Important**: SmartBill/Saga/Oblio NU sunt concurenți — sunt **facturare**, NU compliance fiscal. Nu există în RO SaaS dedicat **compliance fiscal pentru contabili CECCAR** (validator UBL CIUS-RO + signals e-TVA + SAF-T discrepancies).
+
+| Aspect | CompliScan Fiscal OS azi | SmartBill | Saga / Oblio |
+|---|---|---|---|
+| e-Factura validator UBL CIUS-RO | ✅ 80% | ❌ 0% (doar emite, nu validează) | ❌ 0% |
+| ANAF SPV signals + prefill | ⚠️ 60% | ❌ 0% | ❌ 0% |
+| e-TVA discrepancy detection | ✅ 70% | ❌ 0% | ❌ 0% |
+| SAF-T D406 export | ⚠️ 50% | ⚠️ 60% | ⚠️ 50% |
+| Multi-client cabinet view | ✅ 80% | ⚠️ 30% | ❌ 0% |
+| Romanian native | ✅ 100% | ✅ 100% | ✅ 100% |
+
+**Verdict Fiscal OS**: gap real. Concurenții fac facturare, NU compliance. CompliScan = primul SaaS fiscal compliance pentru cabinete contabile. Lansare Q3 2027.
+
+### 14.4. AI Act OS vs Decalex Code AI Practice + emerging
+
+Piață emergentă în RO. Decalex are "CE Code AI Practice" (consultanță), Wolf Theiss + Bird & Bird au advisory legal. **Nimeni nu oferă SaaS dedicat AI Act**.
+
+| Aspect | CompliScan AI Act OS azi | Decalex CE Code AI | Avocați (Wolf Theiss, etc.) |
+|---|---|---|---|
+| AI inventar + Annex III risk | ⚠️ 60% | ⚠️ 50% (consultanță) | ⚠️ 30% (advisory) |
+| Annex IV documentation generator | ⚠️ 50% | ❌ 30% | ❌ 20% |
+| Risk classification automat | ⚠️ 60% | ❌ 0% | ❌ 0% |
+
+**Verdict AI Act OS**: spațiu mare. Lansare 2028 cu sprint dedicat 8-10 săpt.
+
+### 14.5. DORA OS vs Big 4 + boutique financial (validat)
+
+DORA = framework specializat fintech/banking. Big 4 (PwC, Deloitte, EY, KPMG) îl fac la enterprise pricing €100K+/an.
+
+| Aspect | CompliScan DORA OS azi | Big 4 RO | Boutique financial |
+|---|---|---|---|
+| DORA full implementation | ❌ 15% | ✅ 90% (services) | ⚠️ 60% (services) |
+| ICT third-party register | ❌ 10% | ✅ 80% | ⚠️ 50% |
+| BNR reporting | ❌ 0% | ✅ 90% | ⚠️ 40% |
+| Pricing accessibility | ✅ 100% (planned €499-1.499) | ❌ 0% (€100K+/an) | ⚠️ 30% (€10K+/an) |
+
+**Verdict DORA OS**: piața e captată de Big 4 + boutique services. CompliScan = primul SaaS la pricing accesibil pentru fintech mid-market. Sprint MAJOR 12+ săpt în 2028.
 
 **Verdict revizuit (post market validation)**:
 
