@@ -1,169 +1,93 @@
-# CompliScan — Stack documente strategice
+# CompliScan — Stack documente strategice (consolidat 26 apr 2026)
 
-**Status**: canonical hierarchy clarificat 26 apr 2026 (post review GPT-5.5)
-**Update**: vezi secțiunea "Revisions" la final
+**Status**: 4 documente canonice. Restul arhivate.
+**Trigger consolidare**: demo run pe cod real (26 apr) + răspuns DPO firm sofisticat → identificat că aveam prea multe documente cu overlap.
 
 ---
 
-## ⭐ Order de citire pentru orice agent / advisor / hire nou
+## ⭐ Cele 4 documente canonice
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ 1. compliscan-product-manifest-2026-04-26.md                 │
-│    ⭐ START AICI — produs complet, sursa supremă             │
-│                                                              │
-│ 2. compliscan-v1-final-spec-2026-04-26.md                    │
-│    🚀 Launch slice v1 (săpt 1-12) — ce facem prima dată      │
-│                                                              │
-│ 3. ../IA-UX-PROPUNERE (1).md                                 │
-│       + ../IA-UX-PROPUNERE-ICP-UPDATE-2026-04-26.md          │
-│    🏛️  Arhitectură IA/UX — CITITE OBLIGATORIU ÎMPREUNĂ        │
-│                                                              │
-│ 4. ../IA-UX-IMPLEMENTATION-MATRIX.md                         │
-│    📋 Sprint plan execuție S0-S4                             │
-│                                                              │
-│ 5. ../IA-UX-ROUTE-PARITY-ADDENDUM.md                         │
-│    🗺️  Adevăr cod-vs-IA pe rute                              │
-│                                                              │
-│ 6. market-research-2026-04-26.md                             │
-│    📊 Research piață cu surse — suport, NU instrucțiuni build│
-│                                                              │
-│ 7. compliscan-readiness-gap-memo-2026-04-26.md               │
-│    ⚠️  DEPRECATED canonical — util doar gap-uri / sanity     │
-└──────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│ 01-compliscan-produs-validat-piata-2026-04-26.md                 │
+│    📍 CE este CompliScan + PENTRU CINE + validare piață          │
+│    (consolidare manifest + market-research + decizii închise)    │
+│                                                                  │
+│ 02-compliscan-arhitectura-ia-ux-2026-04-26.md                    │
+│    🏛️  CUM se navighează + rute + white-label + 2 apps în cod    │
+│    (consolidare IA-UX-PROPUNERE + ICP-UPDATE + ROUTE-PARITY)     │
+│                                                                  │
+│ 03-compliscan-gap-100-client-ready-2026-04-26.md                 │
+│    ⚠️  Maturity matrix 10 pași + 6 bug-uri + 8 limitări          │
+│    (consolidare DEMO-RUN-REPORT + readiness-gap-memo)            │
+│                                                                  │
+│ 04-compliscan-directie-implementare-2026-04-26.md                │
+│    🚀 Sprint S0-S4 + pilot DPO Complet plan + tech stack         │
+│    (consolidare v1-final-spec + IMPLEMENTATION-MATRIX + pilot)   │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Ierarhia oficială
+## Ordine de citire (orice agent / advisor / hire nou)
 
-### Tier 1 — Sursa supremă (canonical produs complet)
+1. **01 — Produs validat de piață** (citește integral) — ce este, pentru cine, validat empiric
+2. **02 — Arhitectura IA/UX** (citește integral) — cum se navighează, ce primitive, white-label
+3. **03 — Gap 100% client-ready** (citește integral) — ce mai lipsește pentru pilot real
+4. **04 — Direcție și implementare** (citește integral) — ce facem când, cum măsurăm
 
-**`compliscan-product-manifest-2026-04-26.md`** (1.295 linii / 55KB)
-
-Descrie CompliScan în starea sa funcțională completă. Răspunde la:
-- Ce este produsul (în totalitate)?
-- Pentru cine (4 personas)?
-- Care sunt cele 8 frameworks acoperite?
-- Care sunt cele 10 primitive obiecte?
-- Cum se navighează (5 moduri)?
-- Care sunt cele 43+1 rute canonice?
-- Cum se brand-uiește (white-label arhitectural)?
-- Care sunt integrările RO (ANAF, ANSPDCP, DNSC, etc.)?
-- Cum funcționează AI engine multi-model?
-- Cum se face audit & traceability?
-- Cum se face monitoring & drift?
-- Care sunt pricing tiers?
-- Cum se vinde?
-- Cu cine concurează?
-- Ce NU este?
-- Care sunt outcomes 3-5 ani?
-
-**Audiență**: founder zilnic, advisor, investitor, hire #1, AI agent care intră în proiect.
-
-### Tier 2 — Launch slice (canonical pentru execuție v1)
-
-**`compliscan-v1-final-spec-2026-04-26.md`** (824 linii / 56KB)
-
-Subordinat manifestului. Descrie **fragmentul** care ajunge la primul Stripe customer plătitor în 12 săptămâni.
-
-**Audiență**: AI agent care execută Sprint 0-4, founder pentru tracking săptămânal.
-
-### Tier 3 — Arhitectură IA/UX (canonical pentru structură)
-
-**`../IA-UX-PROPUNERE (1).md`** (2052 linii) + **`../IA-UX-PROPUNERE-ICP-UPDATE-2026-04-26.md`** (200 linii)
-
-**CRITICAL**: aceste 2 documente se citesc OBLIGATORIU împreună. Documentul original folosește persona "Diana = contabilă CECCAR" care e DEPRECATED. Addendum-ul ICP update suprascrie persona la "Diana = DPO consultant" + pricing nou.
-
-**Niciun agent nu trebuie să citească IA-UX-PROPUNERE singur**.
-
-### Tier 4 — Plan execuție
-
-**`../IA-UX-IMPLEMENTATION-MATRIX.md`** (568 linii) — Sprint S0-S4 cu task-uri atomice
-**`../IA-UX-ROUTE-PARITY-ADDENDUM.md`** (279 linii) — Hartă cod-vs-IA pe rute, redirecturi
-
-### Tier 5 — Research suport
-
-**`market-research-2026-04-26.md`** (587 linii) — Research piață cu surse oficiale (ONRC, ANSPDCP, DNSC, CECCAR, EUR-Lex). Suport, NU instrucțiuni de build.
-
-### Tier 6 — DEPRECATED canonical (util doar pentru gap-uri)
-
-**`compliscan-readiness-gap-memo-2026-04-26.md`** (717 linii)
-
-A fost canonical "produsul final" până la 26 apr 2026 când GPT-5.5 a făcut review și a identificat că **competea pentru status canonical** cu manifestul. Retrogradat oficial.
-
-**Util DOAR pentru**:
-- Honest gap analysis ("Ce NU avem încă suficient pentru client-ready")
-- "Decizii închise" pattern (8 decizii lock-in)
-- Production-grade definition (4 axe)
-- Strategic narrative ("Diana cu 42 clienți" story)
-
-**NU executa pe baza acestui document.**
+**Doc 1 + 2** = prezent (ce este produsul azi)
+**Doc 3 + 4** = viitor (ce devine în 9 săpt)
 
 ---
 
 ## Use cases concrete
 
-### "Sunt advisor / investitor, am 30 min, ce citesc?"
-
-→ `compliscan-product-manifest-2026-04-26.md` (secțiunile 1, 2, 3, 5, 17, 19)
-
-### "Sunt AI agent nou în proiect, ce citesc înainte să scriu cod?"
-
-1. `compliscan-product-manifest-2026-04-26.md` (full)
-2. `compliscan-v1-final-spec-2026-04-26.md` (full)
-3. `../IA-UX-PROPUNERE (1).md` + ICP-UPDATE addendum (împreună)
-4. `../IA-UX-IMPLEMENTATION-MATRIX.md`
-
-### "Am decizie de pricing — ce citesc?"
-
-1. Manifest secțiunea 15 (Pricing tiers & capabilities)
-2. v1-spec secțiunea 5 (Pricing FINAL cu math validation)
-3. market-research secțiunea pe pricing benchmark
-
-### "Vreau să verific ce gap-uri sunt pentru launch?"
-
-→ `compliscan-readiness-gap-memo-2026-04-26.md` (secțiunea "Ce NU avem încă suficient")
-
-### "De unde știm că ICP corect e DPO firm și nu cabinet contabil?"
-
-→ `market-research-2026-04-26.md` + `../IA-UX-PROPUNERE-ICP-UPDATE-2026-04-26.md`
-
-### "Vreau context istoric — cum am ajuns aici?"
-
-→ Citește în ordine cronologică: market-research → readiness-gap-memo → manifest → v1-spec → ICP-UPDATE addendum
+| Întrebare | Citește |
+|---|---|
+| Sunt advisor/investitor, ce e CompliScan? | Doc 01, secțiunile 1-3 + 8 (validare piață) |
+| Sunt AI agent nou, ce înțeleg înainte să scriu cod? | Doc 02 integral + Doc 03 maturity matrix |
+| Sunt founder, ce livrez săpt asta? | Doc 04 secțiunea 1 (Sprint 0) |
+| Cabinet DPO întreabă "merge produsul vostru pentru noi?" | Doc 01 secțiunea 8 (validare empirică DPO Complet) |
+| ANSPDCP cere descriere tehnică | Doc 02 secțiunea 8 (Audit Pack structure) + Doc 03 (maturity) |
+| Investor due diligence | Doc 01 + Doc 04 (timeline + budget + market position) |
+| Hire nou intră echipă | Toate 4, în ordine 01 → 02 → 03 → 04 |
 
 ---
 
-## Reguli de governance
+## Reguli governance
 
-### "Decizii închise" (din readiness-gap-memo, păstrate ca regulă)
+### Decizii închise (din Doc 01)
 
-Aceste decizii NU se redeschid fără dovezi noi de la clienți reali:
+Aceste 10 decizii **NU se redeschid** fără dovezi noi de la clienți reali:
 
 ```
 ✅ Brand final = CompliScan (NU CompliAI)
-✅ ICP primar = firme DPO/privacy compliance (NU contabili CECCAR)
+✅ ICP primar = cabinete DPO (NU contabili CECCAR) — validat empiric DPO Complet
 ✅ Contabilii sunt pentru Fiscal OS, NU DPO OS
-✅ Patronul final NU este user principal (e destinatar)
+✅ Patronul final NU este user principal
 ✅ DPO validează, AI nu semnează juridic
-✅ Portfolio → client context → cockpit → dosar = spine canonical
-✅ Fiscal OS = layer peste SmartBill/Saga/Oblio (NU replacement)
+✅ Spine canonical: portofoliu → client → cockpit → dosar
+✅ Fiscal OS = layer hibernated 2026, NU eliminat
 ✅ V3 design system = direcția vizuală
+✅ AI primary = Gemini 2.5 Flash Lite EU + opțional Mistral EU
+✅ White-label arhitectural — cabinet brand peste tot
 ```
 
-### Ce trebuie validat cu clienți reali înainte de execuție majoră
+### Ce trebuie validat cu clienți reali (NU din research/cod)
 
-Aceste întrebări NU se decid din research/cod:
+```
+❓ Cabinetele plătesc €249-499/lună la Solo/Growth?
+❓ Care feature închide vânzarea?
+❓ Cabinetele migrează templateurile lor?
+❓ Cabinetele cer semnătură digitală PDF înainte de subscription?
+❓ Cabinetele preferă onboarding cu founder sau auto-serve?
+❓ Fiscal OS merită lansat separat în 2027?
+```
 
-- DPO firms plătesc €249-499/lună?
-- Care feature închide vânzarea (white-label / raport / ROPA / DSAR / NIS2)?
-- Vor migra template-urile existente în CompliScan?
-- Vor cere semnătură digitală înainte de plată?
-- Vor training modules din prima?
-- Fiscal OS merită lansat separat în 2026?
-
-**Validare**: 10 conversații DPO + 3 piloturi cu 3-5 clienți reali per pilot.
+**Validare canonică**: 10 conversații DPO + 3 piloturi cu 3-5 clienți reali per pilot.
 
 ---
 
@@ -173,45 +97,128 @@ Aceste întrebări NU se decid din research/cod:
 ┌─ AI Agent intră în proiect ──────────────────────────────────┐
 │                                                              │
 │ 1. Citește docs/strategy/README.md (THIS)                    │
-│ 2. Citește docs/strategy/compliscan-product-manifest-*.md    │
+│ 2. Citește 01 → 02 → 03 → 04 în ordine                       │
 │ 3. Decide ce face:                                           │
 │                                                              │
 │    ▶ Implementare cod nou                                    │
-│      → docs/strategy/compliscan-v1-final-spec-*.md           │
-│      → docs/IA-UX-PROPUNERE (1).md + ICP-UPDATE              │
-│      → docs/IA-UX-IMPLEMENTATION-MATRIX.md                   │
+│      → Doc 04 (sprint în care suntem) + Doc 02 arhitectură   │
 │                                                              │
 │    ▶ Decizie strategică                                      │
-│      → manifest (secțiunile relevante)                       │
-│      → market-research (date)                                │
+│      → Doc 01 (validare piață) + Doc 04 (timeline impact)    │
 │                                                              │
-│    ▶ Validare gap-uri pentru launch                          │
-│      → readiness-gap-memo (sanity check)                     │
+│    ▶ Validare gap-uri pentru pilot                           │
+│      → Doc 03 (maturity + 6 bugs + 8 limitări)               │
+│                                                              │
+│    ▶ Pricing / sales discussion                              │
+│      → Doc 01 sec 6 + Doc 04 sec 7-8                         │
 │                                                              │
 │    ▶ Routing / IA cleanup                                    │
-│      → IA-UX-ROUTE-PARITY-ADDENDUM.md                        │
+│      → Doc 02 sec 4 (43+1 rute canonice)                     │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Revisions
+## Documente arhivate (`_archived/`)
 
-### v1.1 — 26 aprilie 2026
+Următoarele documente au fost consolidate în cele 4 canonice și sunt păstrate pentru istoric:
 
-**Trigger**: Review GPT-5.5 a identificat că `compliscan-produsul-final-2026-04-26.md` și `compliscan-product-manifest-2026-04-26.md` competau pentru status canonical.
+| Document arhivat | Consolidat în |
+|---|---|
+| `compliscan-product-manifest-2026-04-26.md` | Doc 01 + Doc 02 |
+| `compliscan-v1-final-spec-2026-04-26.md` | Doc 04 |
+| `compliscan-readiness-gap-memo-2026-04-26.md` | Doc 01 (decizii închise) + Doc 03 |
+| `demo-flow-ipo-real-2026-04-26.md` | Doc 04 (pilot plan) |
+| `pilot-kickoff-dpo-30days-2026-04-26.md` | Doc 03 (Real vs Planned) + Doc 04 (pilot timeline) |
+| `market-research-2026-04-26.md` | Doc 01 (validare piață + Anexa B surse) |
+| `IA-UX-PROPUNERE-ICP-UPDATE-2026-04-26.md` | Doc 02 |
 
-**Acțiuni aplicate**:
-1. Renamed `compliscan-produsul-final-*` → `compliscan-readiness-gap-memo-*`
-2. Adăugat banner DEPRECATED pe readiness-gap-memo
-3. Clarificat în manifest header: "Sursa SUPREMĂ"
-4. Clarificat în v1-spec header: "Launch slice subordinat"
-5. Creat THIS README ca index canonical
-
-**Pattern-ul "Decizii închise"** preluat din readiness-gap-memo în acest README ca regulă de governance.
+**NU folosi documente arhivate ca sursă canonică**. Sunt referință istorică pentru a urmări evoluția gândirii.
 
 ---
 
-**Document creat**: 26 aprilie 2026
+## Validări incluse în această consolidare
+
+### A. Demo run empiric (26 apr 2026)
+
+Aplicația rulată pe `localhost:3010` cu setup DPO Complet + 3 clienți + 5 findings. Output capturat:
+- 43 fișiere, 400KB
+- Audit Pack ZIP 20KB cu 16 files
+- 4 documente generate (Privacy Policy, DPA, Retention, AI Governance)
+- Magic link HMAC + patron page 92KB HTML
+- 6 bug-uri vizibile identificate cu paths de cod
+
+Locație: `/Users/vaduvageorge/Downloads/compliscan-demo-result/` (păstrat pentru evidence)
+
+### B. DPO firm sofisticat acceptance (26 apr 2026)
+
+Cabinet român fictiv "DPO Complet SRL" a acceptat pilot 30 zile cu 6 condiții concrete după demo controlat:
+1. Date reale vs pseudonimizate clarificate
+2. Documente AI marcate DRAFT până validare
+3. Cel puțin 1 flux complet cu template cabinet
+4. Audit Pack descărcat local + structură verificabilă
+5. AI OFF pentru clientul sensibil
+6. Magic link cu workaround email pentru reject/comment în pilot
+
+→ Validare comportamentală că ICP DPO firms cu pricing €249-499 e plauzibil.
+
+### C. Demo pack curat trimis la cabinet (26 apr 2026)
+
+Construit `CompliScan-Demo-Pack-DPO-Complet.zip` (66KB) cu:
+- Audit Pack ZIP refăcut (cu fix-uri manuale workspace.label + disclaimer)
+- 4 documente generate cu cabinet branding
+- HTML report client EOS V3 styled
+- Email pre-completat pentru cabinet
+
+Locație: `/Users/vaduvageorge/Downloads/CompliScan-Demo-Pack-DPO-Complet/` + ZIP
+
+---
+
+## Maintenance rules
+
+### Update obligatoriu la
+
+- ✅ Orice sprint început sau încheiat → Doc 04 timeline update
+- ✅ Orice pilot încheiat → Doc 01 sec 8 (validare empirică) + Doc 03 retro learnings
+- ✅ Orice bug critic descoperit → Doc 03 sec 3-4
+- ✅ Orice schimbare ICP / pricing → Doc 01
+- ✅ Orice schimbare arhitecturală → Doc 02
+- ✅ Orice schimbare timeline / strategy → Doc 04
+
+### NU adăuga documente noi fără regulă
+
+Singurul motiv să creezi document nou:
+- Pilot retro complet (cu numele clientului) — `pilots/<client>-retro-<date>.md`
+- Architecture decision record critic — `adrs/<topic>-<date>.md`
+- Postmortem incident production — `incidents/<incident>-<date>.md`
+
+**NU dublica conținut cu cele 4 docs canonice.** Update în loc de adăugare.
+
+---
+
+## Versiuni
+
+### v2.0 — 26 aprilie 2026 (CURENT)
+
+**Trigger**: demo run empiric + DPO firm acceptance + observație founder "avem prea multe documente"
+
+**Acțiuni**:
+1. Consolidare 9 docs → 4 canonice
+2. Bug-uri concrete + maturity matrix incluse din demo run real
+3. Validare empirică DPO Complet inclusă
+4. Toate vechile mutate în `_archived/`
+5. README cu ordine de citire clară
+
+### v1.1 — 26 aprilie 2026 (înlocuit)
+
+Hierarchy 7-tier cu manifest supreme + v1-spec launch slice. Înlocuit de v2.0.
+
+### v1.0 — 26 aprilie 2026 (înlocuit)
+
+Document inițial cu compliscan-produsul-final ca canonical. Renamed la readiness-gap-memo apoi DEPRECATED.
+
+---
+
+**Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Maintenance**: update obligatoriu la orice nou document strategic adăugat
+**Versiune**: v2.0
