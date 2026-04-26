@@ -17,6 +17,8 @@ Cabinet → Client → Cockpit → Dosar → Audit Pack ZIP
 
 Tot restul (43+1 rute, 5 moduri navigare, 4 personas, 10 primitive) e atașat la acest spine.
 
+**Diferențiator arhitectural cheie vs concurenți**: **cockpit finding-first**. Privacy Manager, MyDPO, Wolters Kluwer au workflows fragmentate cross-tabs (separat pentru documente, separat pentru DSAR, separat pentru vendori). CompliScan are **o pagină per caz** care strânge tot — bază legală + draft + dovezi + history + CTA. Asta e UX-ul care face diferența zilnic, nu AI-ul.
+
 **Codul conține DOUĂ aplicații coexistente**: DPO OS (primary 2026) și Fiscal OS (hibernated până 2027). Soluția arhitecturală: feature flag `module.fiscal.enabled` per cabinet.
 
 **Design system**: V3 — Space Grotesk (display) + IBM Plex Mono (eyebrows) + Inter (body) + cobalt accent. Aplicat 100% peste tot deja.
@@ -482,16 +484,21 @@ return detectedFindings
 
 ## 11. Romanian-native integrations
 
-### Existente în cod
+### Existente în cod (verificat post code audit 26 apr)
 
 | Integrare | Endpoint/utility | Status | Ce face |
 |---|---|---|---|
 | **ANAF SPV** | `/api/anaf/oauth-state`, `lib/server/anaf-prefill.ts` | ⚠️ 60% | Prefill firma după CUI |
 | **ANSPDCP** | forms locale + ghiduri | ⚠️ 50% | Format declarații DPO |
-| **DNSC** | `lib/compliance/nis2-dnsc.ts` | ⚠️ 50% | Incident reporting OUG 155/2024 |
+| **DNSC NIS2** | `lib/server/nis2-store.ts` (300+ linii), `lib/server/dnsc-monitor.ts`, `lib/compliscan/nis2-eligibility.ts` | ✅ 85% | Incident reporting 3 stages (early warning 24h + full report 72h + final), vendor risk matrix, maturity assessment, governance training tracking, OUG 155/2024 + Lege 124/2025 + Ordin 1/2025 |
 | **e-Factura UBL** | `lib/compliance/efactura-validator.ts` | ✅ 80% | Validator CIUS-RO complet (hibernated DPO mode) |
 | **ONRC** | căutare CUI | ⚠️ 40% | Statut firmă |
 | **Monitorul Oficial** | feed legislativ | ❌ 0% | Sprint 4 — alerts noi acte normative |
+
+**Deadline-uri NIS2 corectate (26 apr 2026)**:
+- Înregistrare DNSC = **22 septembrie 2025** (TRECUT, mulți încă neînregistrați)
+- Implementare măsuri raportare = **octombrie 2026** (viitor — window 6 luni rămase)
+- 12.000-20.000 entități obligate (LegalUp + Wolf Theiss + NNDKP estimări)
 
 ### De ce contează
 
@@ -780,7 +787,7 @@ M4 Dosar ←──────doc lifecycle update
 
 ## 17. Direcții ferme pentru Sprint 0+
 
-Bazat pe demo run + 6 condiții DPO Complet, cele 5 priorități arhitecturale sunt:
+Bazat pe demo run + 6 condiții DPO Complet + audit cod (26 apr 2026), cele 5 priorități arhitecturale sunt:
 
 1. **Fix `workspace.label`** să propage `orgName` din session în toate output-urile (5+ locuri)
 2. **Reframe disclaimer documente generate** la "Pregătit de {cabinet} — {consultant}, status DRAFT"
@@ -789,6 +796,31 @@ Bazat pe demo run + 6 condiții DPO Complet, cele 5 priorități arhitecturale s
 5. **Feature flag `module.fiscal.enabled`** — ascunde rute 25-28 + state fields fiscal pentru DPO ICP
 
 Detaliu execuție în `04-compliscan-directie-implementare-2026-04-26.md`.
+
+## 18. Differentiation arhitecturală vs concurenți (validat empiric)
+
+Concurenții identificați: Privacy Manager (privacymanager.ro), MyDPO (Decalex), Wolters Kluwer GDPR Soft, kitgdpr.ro. Toate au workflows fragmentate cross-tabs.
+
+**Cele 5 alegeri arhitecturale care diferențiază CompliScan**:
+
+1. **Cockpit finding-first** — un finding = o pagină. Concurenții despart documente / DSAR / vendori în tabs diferite. CompliScan strânge tot în cockpit.
+
+2. **Spine canonical strict** — `cabinet → client → cockpit → dosar → audit pack`. Concurenții oferă multe rute paralele care diluează workflow-ul. CompliScan forțează spinul; nu există feature care nu se ancorează.
+
+3. **White-label arhitectural complet** — brand cabinet în patron page, documents, reports, audit pack ZIP, monthly digest, emails. Concurenții au white-label limitat (logo + footer). Pentru cabinet, brand-ul e produs.
+
+4. **Multi-AI provider abstraction cu EU sovereignty default** — Gemini EU primary + Mistral EU optional + fallback template. Concurenții (cei cu AI) sunt mostly single-provider non-EU. CompliScan permite cabinet să aleagă provider per client.
+
+5. **Feature flag modulare per cabinet** (DPO OS / Fiscal OS / Internal Compliance) — concurenții vând module separate. CompliScan are toate în cod, activabile prin flag — onboarding instant la upsell, fără migrație.
+
+**Cele 5 lucruri în care NU suntem unici** (transparență):
+- AI document generation (MyDPO are din 2023)
+- Portofoliu multi-client (Privacy Manager are)
+- GDPR coverage (toate concurenții au)
+- Audit Pack export (variante peste tot)
+- Magic link patron (Privacy Manager are similar)
+
+**Implicație**: nu vindem AI sau "GDPR software". Vindem **cockpit finding-first cu spine strict + white-label complet + multi-framework RO native + pricing transparent self-serve**.
 
 ---
 

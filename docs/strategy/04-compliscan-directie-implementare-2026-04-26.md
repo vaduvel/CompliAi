@@ -9,15 +9,19 @@
 
 ## TL;DR
 
-**Sprint roadmap S0-S4 = 9 săptămâni la 100% client-ready.**
+**Sprint roadmap revizuit post code audit + market validation: S0-S3 = 6-7 săptămâni la 100% client-ready** (redus de la 9 săpt în versiunea inițială).
 
 | Sprint | Durată | Ce livrăm | Validare |
 |---|---|---|---|
 | **S0** | 5 zile (saptămâna asta) | Fix 6 bug-uri demo run + Audit Pack 100% mature | Demo refăcut fără bug-uri vizibile |
-| **S1** | 2 săpt | Custom templates UI + reject/comment flow + AI on/off + feature flag fiscal hide | Pilot kickoff DPO Complet |
-| **S2** | 2 săpt | Stripe billing live + Mistral EU optional + Supabase cutover + drift detection schema | Primii clienți reali în pilot DPO Complet |
-| **S3** | 2 săpt | Drift detection auto + reopen lifecycle + NIS2 integration full + onboarding flow | Pilot DPO Complet retro + extension la 5 cabinete |
-| **S4** | 2 săpt | Production launch (multi-cabinet, custom domain, signature canvas, security hardening) | First paying customers |
+| **S1** | 2 săpt | Custom templates UI + reject/comment flow + AI on/off + feature flag fiscal hide + signature upload | Pilot kickoff DPO Complet |
+| **S2** | 2 săpt | Stripe billing live + Mistral EU optional + Supabase cutover + monthly digest | Primii clienți reali în pilot |
+| **S3** | 1 săpt (redus de la 2) | Drift cron scheduling + legislation monitoring + NIS2 polish + onboarding wizard final | Pilot retro + extension la 5 cabinete |
+| **S4** | OPȚIONAL | Production launch features extra (custom domain, signature canvas, multi-cabinet Studio tier) | Post first paying customers |
+
+**De ce S3 redus**: code audit revelează drift detection la 90% maturity (era estimat 20% în DEMO-RUN-REPORT) — algoritm + schema + lifecycle deja există. Doar cron daily scheduling lipsește.
+
+**De ce S4 opțional**: Capabilities mature descoperite (NIS2 85%, Onboarding 80%, Stripe 70%, White-label 75%) elimină nevoia de S4 pentru pilot DPO Complet. Features S4 (multi-cabinet Studio, custom domain) devin "post-pilot enhancement".
 
 **Pilot DPO Complet kickoff target**: **Joi 7 mai 2026, 15:00** (slot original Joi 30 apr amânat 1 săptămână ca să livrăm S0).
 
@@ -286,19 +290,40 @@ Dacă DPO Complet semnează subscription Growth după pilot → testimonial pent
 
 ### Etapa 2 — Outreach 5 cabinete RO target (iulie 2026)
 
-Lista țintă (din `01-compliscan-produs-validat-piata`, Anexa A):
-1. GDPR Complet
-2. LegalUp Privacy
-3. Decalex Privacy
-4. WestGDPR
-5. Privacy Romania
+**Strategie diferențiată per concurent actual** (post market validation 26 apr 2026):
 
-Outreach format:
-- LinkedIn DM personalizat (consultant DPO senior)
-- Subject: "Diana de la DPO Complet folosește acum CompliScan — îți pot arăta în 15 min?"
-- Body: 1 paragraph value prop + link demo video (3 min) + propunere call
+**Target A** — Cabinete care folosesc Privacy Manager azi (frustrate de UX legacy + sales-led pricing):
+1. iGDPR (CIPP/E + CIPM)
+2. DPO Consulting
+3. WestGDPR
+4. EuroMarket (Iași)
 
-Target: 2-3 piloturi noi în iulie-august.
+**Pitch**: "Privacy Manager funcționează, dar a îmbătrânit pe UX. CompliScan e next-gen cu cockpit finding-first + pricing transparent self-serve. 30 zile pilot gratis, în 5 minute pe Stripe după."
+
+**Target B** — Cabinete care folosesc Excel/Word (5-30 clienți, sub 5 oameni):
+5. DPO Expert (€79-360/lună servicii)
+6. iTProtection (€100/lună DPO entry)
+7. NeoPrivacy
+8. PrivacyON
+9. DPO Safety
+
+**Pitch**: "Ai 15 clienți. Drive-ul devine haos. Tier Mini €99/lună, prim SaaS profesional cu cabinet operations real."
+
+**Target C** — Cabinete top tier care NU sunt MyDPO/Decalex (cer multi-framework):
+10. LegalUp (există deja, are 800-3500 RON pricing)
+11. Accace (multi-country)
+12. Setrio MyBiz GDPR
+
+**Pitch**: "GDPR + AI Act + NIS2 într-un singur cabinet view + ANAF integrations native. Tier Pro €699 sau Studio €999."
+
+**Format outreach**:
+- LinkedIn DM personalizat (consultant DPO senior, NU general info@)
+- Subject: "DPO Complet folosește acum CompliScan după pilot — îți pot arăta în 15 min?"
+- Body: 1 paragraph diferențiator concret per target type + link demo video (3 min) + propunere call
+
+Target: **3-5 piloturi noi în iulie-august**.
+
+**NU outreach la** Decalex/MyDPO (concurent direct cu propriu produs), Wolters Kluwer Romania (enterprise channel diferit), Privacy Manager (vendor — nu vinzi la el).
 
 ### Etapa 3 — Channel via comunități (sept 2026)
 
@@ -313,7 +338,17 @@ DPO firms din BG, HU, PL, GR — piețele EE/SE cu legislație similară RO. Pri
 
 ---
 
-## 8. Pricing rollout — sequence
+## 8. Pricing rollout — sequence (post market validation cu Mini €99 introdus)
+
+### Pricing tiers final (5 tiers, +Mini)
+
+| Tier | Preț/lună | Clienți | Target |
+|---|---|---|---|
+| **Mini** | €99 | 10 | Cabinete sub 15 clienți, exit Excel |
+| **Solo** | €149 | 15 | DPO solo cu portofoliu activ |
+| **Growth** | €349 | 50 | Cabinet în creștere — TARGET PRINCIPAL |
+| **Pro** | €699 | 100 | Cabinet stabilit |
+| **Studio** | €999 | Multi-cabinet | Firmă mare cu sub-cabinete |
 
 ### Fază 1 — Pilot prețuri (4-6 mai → final pilot DPO Complet)
 
@@ -323,20 +358,32 @@ DPO firms din BG, HU, PL, GR — piețele EE/SE cu legislație similară RO. Pri
 
 ### Fază 2 — Stripe live (S2, 18 mai)
 
-- Cabinet pe pilot face self-serve upgrade la Growth
+- Cabinet pe pilot face self-serve upgrade la Growth (sau Solo dacă portofoliu mai mic)
 - Stripe Checkout + webhook funcțional
 - Trial countdown UI activ
+- **Mini tier** disponibil pentru outreach Target B (cabinete 5-30 clienți)
 
-### Fază 3 — Public pricing page (S4, 15 iun)
+### Fază 3 — Public pricing page (S3 final, ~15 iun)
 
 - compliscan.ro/pricing live cu 5 tiers
-- "Start free trial 14 days" CTA
-- Comparison table cu DataGuard / OneTrust
+- "Start free trial 14 days" CTA self-serve
+- **Comparison table cu Privacy Manager + MyDPO + Wolters Kluwer** (NU cu DataGuard/OneTrust care nu sunt în RO):
+  - "Pricing transparent vs sales-led" (diferențiator)
+  - "Cockpit finding-first vs workflows fragmentate"
+  - "Multi-framework RO native vs GDPR-only"
+  - "Self-serve onboarding 5 min vs 2 săpt sales cycle"
 
-### Fază 4 — Annual discount (S4, 27 iun)
+### Fază 4 — Annual discount (post-S3, ~22 iun)
 
 - Annual billing 20% off vizibil în pricing page
 - Per cabinet: opțiune monthly sau annual
+- Marketing email "annual = -20%" către pilot cabinete
+
+### Fază 5 — Migration offer pentru cabinete pe Privacy Manager (Q3 2026)
+
+- Outreach diferențiat la cabinete care folosesc Privacy Manager azi
+- Offer: "Migrare cu CSV import gratuit + 3 luni discount 50% dacă semnezi annual"
+- Target: 3-5 cabinete switch în primele 3 luni post-launch
 
 ---
 
@@ -417,33 +464,47 @@ Cu pricing media €350/lună (mix Solo + Growth):
 
 ---
 
-## 11. Long-term vision — 2026 → 2030
+## 11. Long-term vision — 2026 → 2030 (revizuit post market validation)
 
 ### 2026 (year 1) — DPO OS validat + 30 cabinete plătitoare
 
-**Q1**: pilot DPO Complet → S0-S2 → primii clienți
-**Q2**: S3-S4 production launch + 5 cabinete plătitoare (€2K MRR)
-**Q3**: outreach EU adjacent (BG, HU, PL) → 15 cabinete (€6K MRR)
-**Q4**: 30 cabinete plătitoare (€10K MRR), case study + thought leadership
+**Q1-Q2**: pilot DPO Complet → S0-S3 → production launch 15 iun (cu 2 săpt mai devreme)
+**Q3**: outreach Target A/B/C + Mini tier disponibil → 15 cabinete plătitoare (€3-5K MRR)
+**Q4**: 30 cabinete plătitoare mix tiers (€8-12K MRR), case study + thought leadership LinkedIn
 
 ### 2027 (year 2) — Expansiune RO + Fiscal OS unhibernate
 
-**Q1-Q2**: 60 cabinete RO (€20K MRR), începe planning Fiscal OS
+**Q1-Q2**: 60-80 cabinete RO (€20-30K MRR), migration offer Privacy Manager users
 **Q3**: Fiscal OS unhibernate ca produs separat pentru contabili (€149-499 tier)
-**Q4**: 100 cabinete DPO + 20 contabili Fiscal OS = €35K MRR
+**Q4**: 100 cabinete DPO + 20 contabili Fiscal OS = €35-50K MRR
 
-### 2028 (year 3) — Multi-product + EU expansion
+### 2028 (year 3) — Multi-product + EU expansion adjacent
 
-**Q1-Q2**: 150 cabinete DPO RO + 50 contabili + 30 cabinete EU = €50K+ MRR
+**Q1-Q2**: 150 cabinete DPO RO + 50 contabili + 20-30 cabinete EU adjacent (BG, HU, PL) = €50-70K MRR
 **Q3**: Adaugă AI Act Annex IV automation (high-risk system documentation)
-**Q4**: NIS2 integration full cu DNSC end-to-end
+**Q4**: NIS2 integration full cu DNSC end-to-end + DORA pentru fintech
 
 ### 2029-2030 — Maturitate market position
 
-- 300+ cabinete DPO + 100+ contabili = €100K+ MRR
+- 300+ cabinete DPO + 100+ contabili = €100-150K MRR (€1-2M ARR)
 - Brand de referință în compliance RO + adjacent EU
-- Posibilă achiziție / parteneriat strategic (DataGuard / Aircall RO / RO unicorn)
-- Sau continuă bootstrapped pentru maximizare profitability
+- Posibilă achiziție / parteneriat strategic:
+  - **Decalex** (potențial M&A — au 800+ clienți, complementar)
+  - **Privacy Manager** (potențial buyout dacă ei își îmbătrânesc, noi creștem)
+  - **DataGuard EU expansion** (parteneriat partener regional)
+  - **CECCAR** (parteneriat distribuție pe Fiscal OS în 2027+)
+- Sau continuă bootstrapped pentru maximizare profitability (founder + 2-3 hires)
+
+### Risc strategic post-market validation
+
+**Risc mare**: Decalex/MyDPO investește în multi-client + cabinet operations → competitor mai puternic decât azi.
+**Mitigare**: viteză execuție S0-S3, win cabinete primii înainte ca Decalex să mute.
+
+**Risc mediu**: Privacy Manager modernizează UX + scade pricing → pierdem diferențiator.
+**Mitigare**: cockpit finding-first e structural unic, greu de copiat fără rewrite complet.
+
+**Risc mic**: DataGuard intră RO cu localizare + pricing redus → competitor enterprise.
+**Mitigare**: targeting cabinete <100 clienți, DataGuard rămâne pe enterprise corporate.
 
 ---
 
@@ -487,7 +548,7 @@ Email de transparență trimis astăzi:
 
 ---
 
-## 13. Master timeline visual
+## 13. Master timeline visual (revizuit post code audit + market validation)
 
 ```
 APRILIE 2026
@@ -501,33 +562,46 @@ MAI 2026
 ├── 4-6 mai          Pre-kickoff prep (template import founder, asseturi finali)
 ├── 7 mai (Joi)      ⭐ KICKOFF DPO COMPLET 15:00
 ├── 7-13 mai         Săpt 1 pilot (internal-only)
-├── 14-16 mai        S1 finalizate parallel (custom templates UI, reject/comment, AI on/off, feature flag)
+├── 14-16 mai        S1 finalizate parallel (custom templates UI, reject/comment, AI on/off, feature flag fiscal, signature upload)
 ├── 14-20 mai        Săpt 2 pilot (primul client real)
 ├── 18 mai           ⭐ S1 LIVRAT
 ├── 21-27 mai        Săpt 3 pilot (magic link patron real)
-├── 18-30 mai        S2 dev (Stripe + Mistral + Supabase + drift schema)
+├── 18-30 mai        S2 dev (Stripe + Mistral + Supabase + monthly digest)
 └── 28 mai - 5 iun   Săpt 4 pilot (drill complet)
 
 IUNIE 2026
 ├── 4 iun            ⭐ PILOT RETRO 90min
 ├── 5 iun            ⭐ DECIZIE SUBSCRIPTION DPO COMPLET
-├── 1-13 iun         S3 dev (drift detection auto, NIS2 integration, reopen lifecycle)
-├── 13 iun           ⭐ S3 LIVRAT
-├── 15-27 iun        S4 dev (production launch)
-└── 27 iun           ⭐ S4 LIVRAT — PRODUCTION LAUNCH
+├── 1-7 iun          S3 dev (drift cron + legislation alerts + NIS2 polish + onboarding wizard final) — REDUS la 1 săpt
+├── 7 iun            ⭐ S3 LIVRAT — 100% client-ready (in 6 săpt total)
+├── 8-15 iun         Production deploy + Vercel/Supabase final + monitoring setup
+├── 15 iun           ⭐ PRODUCTION LAUNCH
+├── 15-30 iun        Outreach Target B (cabinete Excel/Word) — Mini €99 tier
+└── 30 iun           Marketing landing page + pricing page live
 
 IULIE 2026
-├── 1-15 iul         Outreach 5 cabinete RO target (LinkedIn + email)
-└── 15-31 iul        Onboarding 2-3 piloturi noi paralele
+├── 1-15 iul         Outreach Target A (cabinete care folosesc Privacy Manager) — switch offer
+├── 15-31 iul        Outreach Target C (cabinete top tier — multi-framework)
+└── Target: 3-5 piloturi noi paralele
 
 AUGUST 2026
-└── Maturity per pilot retro + extension la 5 cabinete plătitoare
+├── Maturity per pilot retro
+├── 5-10 cabinete plătitoare
+└── Case study DPO Complet + LinkedIn thought leadership
 
 SEPT-DEC 2026 (Q4)
-├── Public landing page + pricing page live
 ├── 15-30 cabinete plătitoare
-└── Case study DPO Complet + thought leadership
+├── Migration offer pentru cabinete pe Privacy Manager
+├── S4 features (custom domain, signature canvas, multi-cabinet Studio)
+└── ARR €5K-10K/lună
 ```
+
+**Diferență critică vs versiunea inițială**:
+- Production launch mutată de la 27 iun → **15 iun** (cu 2 săpt mai devreme)
+- S4 originally "production launch features" → mutat post-launch ca "enhancement"
+- Outreach Target B Mini tier mutat la iunie (paralel cu pilot final), NU iulie
+
+**De ce e fezabilă scurtarea**: code audit revelează 87% maturity globală (era 66% în DEMO-RUN-REPORT). Drift detection 90% (era 20%). NIS2 85% (era 50%). Stripe 70%, Onboarding 80%, White-label 75% — toate mai mature decât crezut. Sprint 3 + 4 originale combinate într-o săptămână plus production deploy.
 
 ---
 

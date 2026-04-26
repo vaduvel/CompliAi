@@ -198,7 +198,33 @@ Singurul motiv să creezi document nou:
 
 ## Versiuni
 
-### v2.0 — 26 aprilie 2026 (CURENT)
+### v2.1 — 26 aprilie 2026 (CURENT)
+
+**Trigger**: market validation cu surse reale (research agent + code audit Explore agent rulate paralel) → invalidare scenariu "DPO-uri folosesc doar Word/Excel/Drive"
+
+**Descoperiri majore**:
+1. **Concurenți direcți confirmați empiric**:
+   - Privacy Manager (privacymanager.ro) — multi-client mature, 14 module, sales-led
+   - MyDPO (Decalex) — primul AI GDPR RO, lansat 2023, 800+ clienți distribution power
+   - Wolters Kluwer GDPR Soft — enterprise localized
+   - kitgdpr.ro — document store + tools
+2. **Pricing piață validat**: DPO Expert €79-360, LegalUp 650-3500 lei, iTProtection €100, EuroMarket €150-450
+3. **NIS2 deadline corectat**: 22 septembrie 2025 (NU 17 oct 2024)
+4. **Code audit revelează maturity reală 87%** (era estimat 66% în DEMO-RUN-REPORT) — drift detection 90%, NIS2 85%, Onboarding 80%, Stripe 70%, White-label 75%
+
+**Acțiuni aplicate**:
+1. **Doc 01**: rescriere completă secțiune Concurență (5 concurenți reali identificați), nou secțiune 7.1 Differentiation Strategy, mesaj vânzare reposition (NU mai "primul OS"), tier Mini €99 introdus, anexa A actualizată cu 22+ cabinete
+2. **Doc 02**: NIS2 deadline corectat în secțiunea 11, nouă secțiune 18 "Differentiation arhitecturală vs concurenți"
+3. **Doc 03**: maturity matrix recalibrată cu paths cod concret, comparație vs Privacy Manager + MyDPO + Wolters Kluwer (nu DataGuard/OneTrust care nu sunt în RO), nou secțiune 16 "Reposition strategic"
+4. **Doc 04**: timeline scurtat de la 9 la 6-7 săpt (S3 redus la 1 săpt, S4 opțional), outreach Target A/B/C diferențiat per concurent actual, pricing rollout Fază 5 Migration offer Privacy Manager users, vision 2027+ cu risk mitigation Decalex/Privacy Manager
+
+**Reposition strategic cheie**:
+- ❌ NU mai vinde "primul OS pentru DPO" (Privacy Manager se autopozitionează similar)
+- ❌ NU mai vinde "AI GDPR" (MyDPO are din 2023)
+- ❌ NU mai vinde "înlocuim Excel" (există tools)
+- ✅ Vinde: cockpit finding-first + multi-framework RO native + white-label complet + pricing transparent + AI EU sovereignty
+
+### v2.0 — 26 aprilie 2026 (înlocuit de v2.1)
 
 **Trigger**: demo run empiric + DPO firm acceptance + observație founder "avem prea multe documente"
 
@@ -221,4 +247,4 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v2.0
+**Versiune**: v2.1

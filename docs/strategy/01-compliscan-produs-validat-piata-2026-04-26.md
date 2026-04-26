@@ -9,11 +9,13 @@
 
 ## TL;DR
 
-**CompliScan** este Operating System pentru **cabinete DPO** din România care gestionează GDPR, NIS2 și AI Act pentru portofoliul lor de 5-50+ clienți finali (operatori obligați).
+**CompliScan** este **next-generation DPO Operations OS** pentru cabinete DPO din România. NU primul tool — există deja Privacy Manager, MyDPO (Decalex), Wolters Kluwer GDPR Soft, kitgdpr.ro. Suntem layer-ul operațional modern care strânge fragmentarea actuală: portofoliu → client → finding → cockpit → dovadă → dosar → raport.
 
-**Cabinetul** intră dimineața, vede portofoliul colorat după risc, deschide cockpit-ul cazului care arde cel mai tare, AI-ul a pregătit deja draft-ul (Privacy Policy, DPA, RoPA, DSAR), DPO-ul validează în 5 minute, trimite link semnat patronului pentru aprobare, dosarul se construiește singur. La sfârșit de lună descarcă **Audit Pack ZIP** semnat criptografic pentru ANSPDCP.
+**Poziționare**: red ocean cu under-tooling. Concurenții existenți sunt fie GDPR-only, fie enterprise sales-led (sales call obligatoriu), fie kit/document-first (template store), fie training-management. Nu există încă un workflow finding-first cu lifecycle audit-ready și multi-framework RO native (GDPR + NIS2 + AI Act).
 
-**Pricing**: €49 → €999/lună, validat împotriva benchmark-ului european (Vanta €99-149/lună compliance manager, OneTrust $5K+/lună enterprise).
+**Cabinetul** intră dimineața, vede portofoliul colorat după risc, deschide cockpit-ul cazului care arde cel mai tare, AI-ul a pregătit draft-ul, DPO-ul validează în 5 minute, trimite link semnat patronului pentru aprobare, dosarul se construiește singur. La sfârșit de lună descarcă **Audit Pack ZIP** semnat criptografic pentru ANSPDCP.
+
+**Pricing**: €99 (Mini) → €999/lună (Studio), pricing transparent vs Privacy Manager (sales-led demo obligatoriu). Cabinet 47 clienți × €130 retainer = €6.110 revenue/lună → €349 CompliScan = 5.7% (acceptabil).
 
 **Validare empirică (azi)**: cabinet DPO român sofisticat a acceptat pilot 30 zile internal-first cu 6 condiții concrete, după demo controlat.
 
@@ -136,26 +138,36 @@ Restul de rute (43+1) sunt sub-căi în aceste 5 moduri.
 
 ---
 
-## 6. Pricing tiers — validat împotriva pieței
+## 6. Pricing tiers — validat împotriva pieței (corectat post research piață)
 
 | Tier | Preț/lună | Scope | Target |
 |---|---|---|---|
-| **Starter** | €49 | 1 cabinet, 5 clienți, branding limitat, AI Gemini EU, Audit Pack | DPO solo cu portofoliu mic |
+| **Mini** | €99 | 1 cabinet, 10 clienți, branding limitat, AI Gemini EU, Audit Pack | DPO solo / consultant nou cu 5-10 clienți |
 | **Solo** | €149 | 1 cabinet, 15 clienți, white-label complet, custom templates, magic link | DPO solo cu portofoliu activ |
-| **Growth** | €349 | 1 cabinet, 50 clienți, multi-DPO seats (3), Mistral EU optional, monthly report cron | Cabinet în creștere |
+| **Growth** | €349 | 1 cabinet, 50 clienți, multi-DPO seats (3), Mistral EU optional, monthly report cron | Cabinet în creștere — **target principal** |
 | **Pro** | €699 | 1 cabinet, 100 clienți, multi-DPO (10 seats), drift detection auto, NIS2 integration | Cabinet stabilit |
 | **Studio** | €999 | Multi-cabinet, partner-of-partners, white-label sub-cabinete, API access | Firmă mare cu sub-cabinete (LegalUp, Decalex) |
 
-### Math validation
+**De ce Mini €99 introdus**: piața RO are cabinete mici la pragul de jos retainer DPO (650 lei = €131/client). La 10 clienți × €131 = €1.310 revenue/lună → €99 = 7.5%. **€349 la cabinet sub 15 clienți = 8.7%, prea mult**. Mini deschide market segmentul de jos.
+
+### Math validation (corectat cu pricing real piață)
+
+**Pricing real cabinet DPO RO** (validat empiric 26 apr 2026):
+- DPO Expert: €79.4 basic / €250 dedicat / €360 premium
+- LegalUp: 650 lei (~€131) firme <10 ang. / 1.250 lei (€251) 10-50 ang. / 3.500 lei (€703) 50+ ang.
+- iTProtection: €100 entry / €40 monitoring
+- EuroMarket: €150-450 trepte sisteme
 
 **Cost economic per client la cabinet** (la Growth €349/lună / 50 clienți):
 = **€7/lună per client** la cost direct pentru cabinet
 
-Cabinet vinde monthly retainer DPO la patron: €100-300/client/lună.
+Cabinet vinde retainer DPO mediu €130-250/client/lună (validat).
 
-Marja: **93-97%** la cabinetul plătitor.
+**Marja**: 95-97% la cabinet pentru tool. Acceptabil.
 
-→ Pricing CompliScan e ridicol de mic față de ce câștigă cabinetul. Pricing-ul e **acceptabil** pentru orice cabinet cu 5+ clienți activi.
+**Stress test**: cabinet 20 clienți × €130 = €2.600 revenue → €349 = **13.4%** (limita superioară "tool budget" rezonabil). Pentru cabinet 20 clienți → recomand tier **Solo €149 = 5.7%**, NU Growth.
+
+**Ușa principală**: cabinet 30-50 clienți × €130 mediu = €3.900-6.500 revenue → Growth €349 = 5-9%. **Sweet spot.**
 
 ### Comparație europeană
 
@@ -175,57 +187,132 @@ Marja: **93-97%** la cabinetul plătitor.
 
 ---
 
-## 7. Concurență — ce înlocuim concret
+## 7. Concurență — peisajul real RO (validat 26 apr 2026)
 
-### Concurent #1: Excel + Word + Drive
+**Important**: scenariul vechi "DPO-urile folosesc Word/Excel/Drive" e parțial real (cabinete mici sub 5 oameni) dar **invalid ca poziționare market**. Există deja produse RO/EU mature care atacă durerea asta. CompliScan **NU e first-mover** — e next-gen layer operațional.
 
-**Cota de piață estimată**: 80% din cabinetele DPO RO.
+### Concurent #1: Privacy Manager (privacymanager.ro) — **CONCURENT DIRECT**
 
-**De ce câștigă azi**: gratis, familiar, suficient pentru cabinet cu 5-10 clienți.
+**Identificat empiric**: 14 module integrate (eIDAS, RoPA, DPIA, incident, vendor risk, training), targeting explicit "DPO extern" cu "număr nelimitat de clienți". Excel import users/firme. Pricing **nepublic** (sales-led demo obligatoriu).
 
-**Cum câștigăm**: la 15+ clienți Drive devine haos (versiuni multiple, fără audit trail, fără magic link). Demo de 30 minute pe portofoliu colorat = momentul "aha".
+**De ce câștigă azi**: 
+- Portofoliu multi-client real
+- Multi-framework GDPR + NIS2 + ISO27001
+- Targeting RO native cu suport în limbă
 
-### Concurent #2: Privacy Manager (RO local)
+**Slabe puncte**:
+- UX legacy (interfață heavy, dashboarde dense)
+- Pricing opac (sales call obligatoriu — friction)
+- Fără AI document generator
+- Audit pack format custom (nu ZIP cu hash chain standard)
+- White-label limitat (brand tool vizibil)
 
-**Identificat**: există deja câteva tool-uri locale RO pentru DPO.
+**Cum câștigăm**: pricing transparent self-serve (€99-999), UX modern V3, cockpit finding-first, AI Act + ANAF integrations native, Audit Pack ZIP standard cu SHA-256.
 
-**Slabe puncte**: fără AI generation, fără white-label complet (cabinetul vede brand-ul tool-ului în output), fără portofoliu multi-client real (workspace per client izolat).
+### Concurent #2: MyDPO (Decalex) — **PLAYER MATUR**
 
-**Cum câștigăm**: white-label complet + AI cu Gemini EU + portofoliu agregator + Audit Pack ZIP semnat.
+**Identificat empiric**: lansat 2023 ca **primul AI GDPR RO** by Decalex (800+ clienți, 300+ servicii DPO, 15 specialiști). Targeting end-client SME, NU multi-client portfolio.
 
-### Concurent #3: DataGuard (DE)
+**De ce câștigă azi**:
+- Brand Decalex puternic (top 3 implementator GDPR RO)
+- AI primary (Gemini sau echivalent — confirmat presă)
+- Distribuție via clienții existenți Decalex (300+ DPO clients)
 
-**Slot**: cabinete DPO mari cu portofoliu 100+ clienți.
+**Slabe puncte**:
+- Targeting end-client, NU cabinet portfolio (lipsă layer multi-tenant)
+- AI ca produs nu cabinet operations
+- Fără cockpit finding-first vizibil
 
-**Slabe puncte pentru piața RO**:
-- Pricing €500-3000/lună prea mare pentru cabinet cu 5-30 clienți
-- Limba DE/EN, nu RO native
-- Nu e integrat cu ANAF / ANSPDCP / DNSC
-- Suport pe fus german
+**Cum câștigăm**: cabinet operations multi-client cu lifecycle finding (NU just AI doc generator). Diferențiere clară: Decalex e distribuitor de software pentru clienții lor finali; CompliScan e tool de operare pentru cabinet care servește 30-50 clienți.
 
-**Cum câștigăm**: pricing 30-50%, RO-native, integrări locale.
+### Concurent #3: Wolters Kluwer GDPR Soft — **ENTERPRISE LOCALIZED**
 
-### Concurent #4: OneTrust / TrustArc
+**Identificat empiric**: soluție custom enterprise, prezent în RO via Wolters Kluwer Romania.
 
-**Slot**: enterprise global ($5K-50K/lună).
+**Slabe puncte pentru ICP nostru**:
+- Pricing enterprise (€1K-5K+/lună estimat)
+- Sales-led, friction mare la achiziție
+- UX corporate, nu modern
+- Targeting firme mari cu DPO intern, NU cabinete consultanță cu portofoliu
 
-**De ce e irelevant pentru ICP nostru**: cabinete RO cu max 50-100 clienți operatori NU plătesc niciodată acest tier.
+**Cum câștigăm**: pricing 5-20× mai accesibil, self-serve, cabinet-focused.
+
+### Concurent #4: kitgdpr.ro — **DOCUMENT STORE**
+
+**Identificat empiric**: pachete documente + soft modular. Mai degrabă marketplace de template-uri decât SaaS workflow.
+
+**Slabe puncte**:
+- Document delivery, NU operations management
+- Fără finding lifecycle
+- Fără audit trail integrat
+
+**Cum câștigăm**: workflow operational vs document download.
+
+### Concurent #5: Excel + Word + Drive (cabinete mici sub 5 oameni)
+
+**Cota reală**: probabil 30-40% cabinete sub 10 clienți (NU 80% cum credeam).
+
+**Cum câștigăm**: la 10+ clienți Drive devine haos. Demo cockpit finding-first = momentul "aha". Pricing Mini €99/lună acceptabil pentru cabinet la marginea decizie "Word/Excel vs tool".
+
+### Concurent #6: DataGuard (DE) — **NU E ÎN RO**
+
+**Slot**: enterprise global EU.
+
+**De ce nu e barieră directă**:
+- Fără localizare RO publică (limbi: EN + DE only)
+- Pricing enterprise (€1K-5K+/lună)
+- Targeting end-client SME corporate, NU cabinete DPO multi-client RO
+
+**Implicație**: irelevant pentru ICP nostru. NU mai folosim DataGuard ca benchmark principal.
+
+---
+
+## 7.1. Differentiation strategy — cum suntem diferiți concret
+
+CompliScan NU câștigă pe "AI", "GDPR software" sau "primul tool". Concurenții au deja AI (MyDPO), GDPR coverage (toate), portofoliu multi-client (Privacy Manager).
+
+**5 diferențiatori concreți**:
+
+1. **Cockpit finding-first**: pagină unică per finding cu titlu + bază legală + draft + dovezi + history + CTA "Marchează rezolvat". Concurenții au workflows fragmentate cross-tabs. Diferența = UX zilnic dramatic.
+
+2. **Multi-framework RO native**: GDPR + AI Act + NIS2 + e-Factura într-un singur cabinet view. Concurenții sunt mostly GDPR-only sau adaugă NIS2 ca module separat. CompliScan = unified compliance kernel cu feature flags per cabinet.
+
+3. **White-label operational complet**: brand cabinet peste TOT output (patron page, documents, reports, audit pack ZIP, monthly digest). Concurenții au white-label limitat (logo + footer).
+
+4. **Pricing transparent self-serve**: €99-999/lună listat public, Stripe Checkout instant. Concurenții (Privacy Manager, Wolters Kluwer, DataGuard) sunt sales-led — friction mare. Diferența = onboarding 5 minute vs 2 săpt sales cycle.
+
+5. **ANAF + ANSPDCP + DNSC integrations native**: e-Factura UBL CIUS-RO validator, ANAF SPV prefill CUI, DNSC incident reporting OUG 155/2024. Concurenții (DataGuard, OneTrust) NU au; concurenții RO (Privacy Manager) au parțial.
+
+**În ce nu suntem unici**:
+- ❌ NU primii cu AI (MyDPO are din 2023)
+- ❌ NU primii cu portofoliu multi-client (Privacy Manager are)
+- ❌ NU primii cu Audit Pack (concurenții au variante)
+- ❌ NU primii cu GDPR coverage
+
+**Mesajul corect**:
+> "Există GDPR tools în România. Nu există încă un workflow modern, multi-framework, finding-first, white-label, audit-ready, gândit ca sistem zilnic de operare pentru cabinete DPO. CompliScan e acel sistem."
 
 ---
 
 ## 8. Validare piață — dovezi concrete
 
-### A. Ofertă de piață
+### A. Ofertă de piață (validat empiric 26 apr 2026)
 
-**40+ cabinete DPO identificate în RO** (sursă: căutări LinkedIn + ANSPDCP DPO listing public + Google Maps + recomandări):
+**22+ cabinete DPO active identificate cu prezență publică** (sursă: web research direct):
 
-GDPR Complet, LegalUp, Decalex, WestGDPR, Privacy Romania, GDPR Expert, DataLegal, Privacy Hub, GDPR Solutions, Compliance Plus, DPO România, GDPR Direct, Privacy Center, etc.
+GDPR Complet (Decalex — 800+ clienți, 300+ servicii DPO, 15 specialiști), iGDPR, DPO Consulting, GDPShield, EuroMarket (Iași), Consultia, Privacy Manager (vendor + cabinet), DP Solutions, Ancora Protect, IT Protection, eu-gdpr.ro, LegalUp, WestGDPR, Avocat Data Protection, DPO Expert, Setrio MyBiz GDPR, Accace, NeoPrivacy, PrivacyON, gdpr-bucuresti.ro, DPO Safety, dpo-timisoara, kitgdpr.ro, Vlăntoiu.
 
-Mărimea medie: 5-25 clienți operatori în portofoliu.
+Plus alte cabinete avocaturale care fac DPO ca line-of-business secundar.
+
+**ASCPD** (Asociația Specialiștilor în Confidențialitate și Protecția Datelor) are 21 membri în Consiliul Consultativ — total membri nepublicat.
+
+**Estimat total piață**: 40-80 cabinete DPO active (incl. avocați cu DPO services).
+
+**Mărimea medie portofoliu**: 5-30 clienți (cabinete mici), 30-100 clienți (cabinete medii), 300-800+ clienți (cabinete top tip Decalex).
 
 ### B. Cerere de piață
 
-**12.000+ entități obligate NIS2** (sursă: ONRC sectorul reglementat + DNSC public listing 2024):
+**12.000-20.000+ entități obligate NIS2** (sursă: LegalUp Substack 12K, Wolf Theiss 15-20K, NNDKP analiză juridică):
 
 - Energie: ~800
 - Sănătate: ~3.500
@@ -233,18 +320,30 @@ Mărimea medie: 5-25 clienți operatori în portofoliu.
 - Apă potabilă: ~150
 - Servicii digitale: ~1.500
 - Producție alimente: ~2.000
-- Restul: ~3.500
+- Restul: ~3.500-7.500
 
-Termen de implementare expirat: **17 octombrie 2024**. Multe entități încă neconforme — adquisition driver natural pentru cabinetele DPO care le servesc.
+**Deadline-uri reale (corectat)**:
+- 17 octombrie 2024 = data UE pentru transpunere directivă (NU deadline pentru entități)
+- RO transpus prin OUG 155/2024 (în vigoare 31 dec 2024) + Lege 124/2025 (iulie 2025)
+- **Deadline înregistrare DNSC = 22 septembrie 2025** (Ordin DNSC 1/2025) — TRECUT, mulți încă neînregistrați
+- **Deadline implementare măsuri (raportare incidente) = octombrie 2026** — viitor
 
-### C. Benchmark de pricing
+Amenzi NIS2: până la €10M / 2% cifră afaceri (entități esențiale), €7M / 1.4% (importante).
+
+→ **Acquisition driver real** = cabinetele DPO preiau NIS2 ca service secondar pentru clienții lor. Deadlines trecute (sept 2025 înregistrare) + viitoare (oct 2026 raportare) = window de 1-2 ani de cerere mare.
+
+### C. Benchmark de pricing (validat empiric)
 
 | Sursă | Comparable | Implicație CompliScan |
 |---|---|---|
-| **Vanta pricing 2024** | $99-149/lună compliance manager | Tier Solo €149 e aliniat cu piața europeană |
-| **OneTrust pricing 2024** | $5.000+/lună enterprise | Tier Studio €999 e mult sub el = atractiv |
-| **DPO outsourcing rates RO** | €100-300/lună per client | Math: €7 cost/client la Growth e neglijabil |
-| **DataGuard pricing 2024** | €500-3.000/lună | Tier Pro €699 e sub el cu RO-native |
+| **DPO Expert RO** | €79-360/lună servicii DPO | Cabinet plătește pentru tool max 5-10% din retainer încasat |
+| **LegalUp RO** | 650-3.500 lei/lună (€131-703) servicii DPO | Tier Mini €99 e accesibil la cabinet care încasează €131/client |
+| **iTProtection RO** | €100/lună DPO entry | Cabinet bandă jos își poate permite tier Mini €99 |
+| **Privacy Manager RO** | Pricing nepublic (sales-led) | Diferențiere CompliScan = pricing transparent self-serve |
+| **MyDPO Decalex** | Pricing nepublic | Diferențiere = cabinet operations vs end-client AI |
+| **Wolters Kluwer GDPR Soft** | Enterprise (€1K-5K+/lună estimat) | Tier Studio €999 e 5× mai accesibil |
+| **DataGuard (DE, NU în RO)** | €500-3.000/lună | Irrelevant — fără localizare RO |
+| **Vanta (US, adjacent)** | $99-149/lună | Tier Solo €149 aliniat cu piața europeană |
 
 ### D. Validare empirică — 26 aprilie 2026
 
@@ -362,36 +461,80 @@ Pentru claritate finală — produsul **NU**:
 
 ---
 
-## 13. Mesajul de vânzare — cum se prezintă în 30 secunde
+## 13. Mesajul de vânzare — cum se prezintă în 30 secunde (post-corecție)
 
-> **"Ești cabinet DPO cu 15-50 de clienți. Lucrezi pe Word, Excel și Drive. Documentele se duplică. Versiunile se pierd. Patronii nu răspund la emailuri. ANSPDCP cere audit pack și nu ai dosarul gata.
+### Mesaj corect
+
+> **"Ai cabinet DPO cu 15-50 de clienți. Folosești poate Privacy Manager, MyDPO, sau încă Word + Excel + Drive. Indiferent ce, ai aceeași durere: fragmentare între documente, emailuri, foldere și clienți. Versiunile se pierd. Patronii nu răspund la emailuri. La control ANSPDCP, dosarul nu e gata.**
 >
-> CompliScan îți dă un cockpit pentru fiecare problemă, AI care pregătește draft-ul, link semnat pentru patron să aprobe, și un Audit Pack ZIP gata în 2 minute. Ești în continuare DPO-ul. Documentul e al tău. Brand-ul e al cabinetului tău. Pricing de la €49/lună.
+> **CompliScan e next-gen DPO Operations OS: cockpit unic pe fiecare caz de conformitate, AI care pregătește draft-ul, link semnat pentru patron să aprobe, Audit Pack ZIP cu hash chain SHA-256 gata în 2 minute. Multi-framework: GDPR + AI Act + NIS2 + ANAF integrations.**
 >
-> Pilot 30 zile gratis cu 2-3 clienți reali."
+> **Pricing transparent: €99 → €999/lună, Stripe Checkout instant. NU sales call. Ești în continuare DPO-ul. Documentul e al tău. Brand-ul e al cabinetului tău.**
+>
+> **Pilot 30 zile gratis cu 2-3 clienți reali."**
+
+### Mesaje TĂIATE (NU mai folosim)
+
+| Greșit (taie) | De ce e greșit |
+|---|---|
+| "Înlocuim Excel/Word/Drive pentru DPO-uri" | Validat empiric — există Privacy Manager, MyDPO, Wolters Kluwer. Nu suntem first-mover |
+| "AI GDPR autonom" | MyDPO are deja AI din 2023. AI nu e diferențiator |
+| "Nu există așa ceva în România" | Există. Privacy Manager + MyDPO + WK + kitgdpr |
+| "Suntem primul OS pentru DPO" | Privacy Manager se autopozitionează ca OS multi-client |
+| "GDPR software pentru cabinete" | Toate concurenții fac asta. Trebuie clar "operations OS" nu "GDPR software" |
+
+### Mesaje CORECTE (folosim)
+
+| Mesaj | De ce funcționează |
+|---|---|
+| "Next-gen DPO Operations OS" | Poziționare onestă — există tools, dar nu workflow modern operations |
+| "Cockpit finding-first" | Diferențiere clară vs concurenți cu workflows fragmentate |
+| "Multi-framework RO native: GDPR + AI Act + NIS2 + ANAF" | Concurenții sunt mostly GDPR-only |
+| "Pricing transparent self-serve" | Privacy Manager + Wolters Kluwer sunt sales-led — friction |
+| "AI pregătește, DPO validează, sistemul ține dovada" | Onesty profesională — nu vinde "AI replace DPO" |
+| "Brand cabinet peste tot output" | White-label arhitectural complet (patron page, docs, reports, ZIP) |
 
 ---
 
-## Anexa A — Lista cabinete DPO RO identificate (sursă: căutări publice + LinkedIn + recomandări)
+## Anexa A — Lista cabinete DPO RO identificate (validat empiric 26 apr 2026)
 
-1. GDPR Complet
-2. LegalUp Privacy
-3. Decalex Privacy
-4. WestGDPR
-5. Privacy Romania
-6. GDPR Expert
-7. DataLegal
-8. Privacy Hub
-9. GDPR Solutions
-10. Compliance Plus
-11. DPO România
-12. GDPR Direct
-13. Privacy Center
-14. Optime Privacy
-15. NextLegal Privacy
-... (totalul depinde de sursă, estimat 40+ cabinete active)
+**22+ cabinete DPO active confirmate cu prezență publică**:
 
-**Notă**: numele specifice trebuie verificate/actualizate periodic. Lista servește ca referință de mărime piață, nu ca listă oficială.
+1. **GDPR Complet** (gdprcomplet.ro) — by Decalex, 800+ clienți, 300+ DPO clients
+2. **Decalex** (decalex.ro) — top 3 implementator, MyDPO product owner
+3. **LegalUp** (legalup.ro) — pricing public 650-3500 lei
+4. **DPO Expert** (dpoexpert.ro) — pricing public €79-360
+5. **iTProtection** (itprotection.ro) — DPO entry €100/lună
+6. **EuroMarket** (euromarket.ro) — Iași, €150-450 trepte
+7. **iGDPR** (igdpr.ro) — CIPP/E + CIPM
+8. **DPO Consulting** — CIPP/E
+9. **GDPShield**
+10. **Consultia**
+11. **Privacy Manager** (privacymanager.ro) — vendor + cabinet
+12. **DP Solutions**
+13. **Ancora Protect**
+14. **eu-gdpr.ro**
+15. **WestGDPR**
+16. **Avocat Data Protection**
+17. **Setrio MyBiz GDPR**
+18. **Accace** — multi-country
+19. **NeoPrivacy**
+20. **PrivacyON**
+21. **gdpr-bucuresti.ro**
+22. **DPO Safety**
+23. **dpo-timisoara**
+24. **Vlăntoiu**
+25. **kitgdpr.ro** — document store + tools
+
+Plus alte cabinete avocaturale care fac DPO ca line-of-business secundar (estimat 20-50 firme).
+
+**Estimat total piață**: 40-80 cabinete active.
+
+**ASCPD** (Asociația Specialiștilor în Confidențialitate și Protecția Datelor) — 21 membri în Consiliul Consultativ.
+
+**Surse**: web research direct 26 apr 2026 — site-uri publice, presă RO (start-up.ro, profit.ro, juridice.ro), LinkedIn pages.
+
+**Notă**: lista actualizată trimestrial. Servește ca referință target outreach + mărime piață.
 
 ---
 
