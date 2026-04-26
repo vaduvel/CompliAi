@@ -782,6 +782,18 @@ Toate sursele consultabile pentru due diligence.
 
 ---
 
+## Anexa C — Idei alternative considerate (păstrate pentru decision finală)
+
+Acest doc conține **direcția curentă (v4.0 Compliance Loop OS)**. Pentru toate iterations alternative considerate (cabinet contabil CECCAR, DPO OS GDPR-only, Multi-framework all-in-one, GRC pentru mid-market, 5 produse vertical Stripe-pattern, NIS2 sector public, vinzi cod ca asset), vezi **Doc 05 — Evoluția ideilor** (`05-compliscan-evolutia-ideilor-2026-04-26.md`).
+
+**Direcția curentă**: v4.0 Compliance Loop OS cu 4-5 ICP-uri orizontale (acest doc).
+**Backup options păstrate** (în caz că v4.0 eșuează): vezi Doc 05 secțiunea "Decision framework".
+
+**Regula maintainerului**: NU șterge idei alternative. Marchează status (valid / invalid / backup). Decision la final după pilot DPO Complet + Q3 2026 lansare.
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Update obligatoriu la**: orice nou pilot încheiat / orice schimbare ICP / orice modificare pricing
-**Versiune**: v1.0 (consolidare după demo run + validare DPO sofisticată)
+**Versiune**: v4.0 (Compliance Loop OS — direcția curentă)
+**Vezi și**: Doc 05 (Evoluția ideilor) pentru toate alternativele considerate

@@ -740,6 +740,25 @@ Codul e mai matur decât crezut, dar piața are concurenți direcți (Privacy Ma
 
 ---
 
+## Anexa: Maturity matrix v3.0 (per produs vertical) — păstrată ca alternative
+
+În v3.0 evaluam maturity per **5 produse comerciale**, NU per 3 layers:
+
+| Produs (v3.0) | Maturity globală | Status pentru pilot |
+|---|---|---|
+| **DPO OS** | 87% | ✅ Pilot DPO Complet OK cu Sprint 0 fix-uri |
+| **NIS2 OS** | 75% | ⚠️ Schema mature, lipsește UI module switching |
+| **Fiscal OS** | 80% | ⚠️ Validator UBL mature, lipsește cabinet contabil UI |
+| **AI Act OS** | 60% | ⚠️ AI inventar partial, lipsește deployer/provider workflow |
+| **DORA OS** | 15% | ❌ Schema gândită, NU implementat |
+
+**Status v4.0**: înlocuit cu maturity per layer (Infrastructure 87% / Framework rules variabil / ICP segment variabil) — vezi sec 1-2 ale acestui doc. Maturity v3.0 e păstrată aici pentru referință.
+
+Pentru context complet (de ce v3.0 a fost înlocuit cu v4.0), vezi **Doc 05 — Evoluția ideilor**, Iteration 6 → 7.
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Update obligatoriu la**: orice nou bug descoperit / orice gap închis / orice nou pilot retro
-**Versiune**: v1.0 (consolidare după demo run + DPO Complet feedback empiric)
+**Versiune**: v4.0 (maturity per layer: Infrastructure + Framework rules + ICP segment)
+**Vezi și**: Doc 05 (Evoluția ideilor) pentru maturity matrix v3.0 alternative

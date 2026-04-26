@@ -753,6 +753,47 @@ Pilot e considerat **EȘEC** dacă:
 
 ---
 
+## Anexa: Roadmap-uri alternative considerate
+
+### Roadmap v3.0 (5 produse vertical) — păstrat ca alternative
+
+| Sprint v3.0 | Durată | Ce livram (v3.0 invalidat) |
+|---|---|---|
+| **S0** | 5 zile | Fix 6 bug-uri DPO OS demo run |
+| **S1** | 2 săpt | Custom templates UI + reject/comment + AI on/off + feature flags 5 produse hide non-DPO |
+| **S2** | 2 săpt | Stripe billing DPO OS tiers |
+| **S3** | 1 săpt | Drift cron + landing pages "Coming soon" pentru NIS2/Fiscal/AI/DORA |
+| **PROD** | 1 săpt | DPO OS production launch only |
+
+**Etapa 2 v3.0 (Q1 2027)**: NIS2 OS launch separat
+**Etapa 3 v3.0 (Q3 2027)**: Fiscal OS launch separat
+**Etapa 4-5 v3.0 (2028)**: AI Act OS + DORA OS lansate separat
+
+**De ce schimbat la v4.0**: lansare 1 produs primar (DPO OS) era prea îngustă pentru un cod care servește deja 5 segmente. v4.0 schimbă la 3 segmente paralel Q3 2026 (Solo + IMM + Cabinet) pentru a maximiza cod existing usage.
+
+### Roadmap NIS2 sector public RO (Iteration 5.C.3A) — backup option
+
+Dacă v4.0 multi-segment privat eșuează în pilot:
+- Q3 2026: pivot la NIS2 OS pentru sector public
+- ICP: 3.180 UAT-uri RO + autorități locale
+- Sales cycle public 6-9 luni
+- Distribuție ACoR (Asociația Comunelor) + procurement SEAP
+- Tarif: €2K-10K/an per UAT
+- TAM: €15.9M
+
+### Roadmap "vinzi cod ca asset" (Iteration 5.B) — exit option
+
+Dacă niciun pivot nu prinde în 12-18 luni:
+- Listezi MicroAcquire
+- Cumpărători potențiali: Decalex, Privacy Manager, Big 4 RO offices
+- Cer €40-80K + earnout pe revenue
+- Cash certain + 6-12 luni libertate
+
+Pentru context complet, vezi **Doc 05 — Evoluția ideilor**, Iteration 5 + 6.
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Update obligatoriu la**: orice sprint început/încheiat / orice pilot închis / orice schimbare timeline
-**Versiune**: v1.0 (consolidare după demo run + DPO Complet pilot acceptance)
+**Versiune**: v4.0 (3 segmente paralel Q3 2026 + Fiscal Q1 2027 + Enterprise 2028)
+**Vezi și**: Doc 05 (Evoluția ideilor) pentru roadmap-uri alternative

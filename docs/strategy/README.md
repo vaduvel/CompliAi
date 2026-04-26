@@ -1,6 +1,8 @@
-# CompliScan — Stack documente strategice (v4.0 — Compliance Loop OS)
+# CompliScan — Stack documente strategice (v4.1 — Compliance Loop OS + muzeul ideilor)
 
-**Status**: 4 documente canonice. Restul arhivate.
+**Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
+
+**Regulă maintainerului**: NU șterge idei alternative din docs. Marchează status (valid / invalid / backup). Decision finală se ia citind tot stack-ul.
 **Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
 
 ## ⭐ THESIS-ul final — Compliance Loop OS
@@ -40,6 +42,44 @@ CompliScan vinde **loop-ul**, configurat per framework + per ICP. Nu mai vinde "
 **TAM RO 5 ani**: €30-80M ARR realist atingibil pe combinația 4-5 segmente.
 
 **Lansare faseată**: 3 segmente paralel Q3 2026 (Solo + IMM Internal + Cabinet) → Fiscal Q1 2027 → Enterprise + EU expansion 2028.
+
+---
+
+## Cele 5 documente canonice
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│ 01-compliscan-produs-validat-piata-2026-04-26.md                 │
+│    📍 CE este CompliScan + PENTRU CINE + validare piață          │
+│    DIRECȚIA CURENTĂ v4.0 (Compliance Loop OS)                    │
+│                                                                  │
+│ 02-compliscan-arhitectura-ia-ux-2026-04-26.md                    │
+│    🏛️  CUM se navighează + 3 layers + ICP segments + rute        │
+│    DIRECȚIA CURENTĂ v4.0 (3 layers architecture)                 │
+│                                                                  │
+│ 03-compliscan-gap-100-client-ready-2026-04-26.md                 │
+│    ⚠️  Maturity per layer + 6 bug-uri + 8 limitări               │
+│    DIRECȚIA CURENTĂ v4.0 (Infrastructure 87% / Frameworks variat)│
+│                                                                  │
+│ 04-compliscan-directie-implementare-2026-04-26.md                │
+│    🚀 Sprint S0-S4 + roadmap 3 segmente paralel + tech stack     │
+│    DIRECȚIA CURENTĂ v4.0 (Solo + IMM + Cabinet Q3 2026)          │
+│                                                                  │
+│ 05-compliscan-evolutia-ideilor-2026-04-26.md                     │
+│    🧠 MUZEUL DE IDEI — toate iterations 1-7 + brainstorms        │
+│    Decision framework + backup options + învățăminte cumulate    │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Ordinea de citire**:
+1. README (acest doc) — overview rapid
+2. Doc 01 — ce e CompliScan azi (direcția curentă)
+3. Doc 02 — cum se construiește (arhitectura curentă)
+4. Doc 03 — ce mai lipsește (gap-uri pentru pilot)
+5. Doc 04 — cum ajungem acolo (sprint plan)
+6. Doc 05 — istoricul gândirii + alternative (citește dacă vrei context complet sau decision pivot)
 
 ---
 
@@ -356,6 +396,31 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 ---
 
+## Versiunea v4.1 — adăugat doc 05 (Muzeul de idei)
+
+**Trigger**: founder a observat că ștergeam conținut v3.0 când scriam v4.0 — pierdere de context pentru decision finală.
+
+**Acțiuni v4.1**:
+1. **Creat Doc 05** (`05-compliscan-evolutia-ideilor-2026-04-26.md`) — muzeul de idei cu toate iterations 1-7 + brainstorms + învățăminte cumulate + decision framework
+2. **Adăugat anexe** în Doc 01-04 cu pointer la Doc 05 pentru alternative considerate
+3. **Update README** cu structura 5 docs (4 direcție curentă + 1 evoluție)
+
+**Regula nouă maintainer**:
+- NU șterge idei când rescrii docs. Marchează status (valid / invalid / backup).
+- La rescriere majoră, mută conținutul vechi în Doc 05 ca iteration arhivă.
+- Decision finală se ia după citirea **tot** stack-ul (incl. Doc 05).
+
+**Iterations păstrate ca backup options** în Doc 05:
+1. Cabinet OS pentru CECCAR (invalidat)
+2. DPO OS pentru cabinet GDPR (parțial integrat în Cabinet segment)
+3. Multi-framework all-in-one (invalidat)
+4. GRC pentru mid-market RO (parțial integrat în IMM Internal)
+5. 3 căi alternative (Calea A GDPR-only, B vinzi acum, C niche specific 3A NIS2 public + 3B DORA fintech + 3C Healthcare)
+6. 5 produse vertical Stripe-pattern (v3.0 — backup option)
+7. Compliance Loop OS Salesforce-pattern (v4.0 — DIRECȚIA CURENTĂ)
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v4.0 — Compliance Loop OS (4-5 ICP-uri orizontale, 1 cod, 3 layers arhitecturale)
+**Versiune**: v4.1 — Compliance Loop OS + Muzeul de idei (5 documente canonice)

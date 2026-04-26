@@ -1133,6 +1133,23 @@ Concurenții identificați: Privacy Manager (privacymanager.ro), MyDPO (Decalex)
 
 ---
 
+## Anexa: Arhitecturi alternative considerate
+
+Acest doc conține arhitectura curentă **v4.0 (3 layers: Infrastructure + Framework rules + ICP segment)**. Arhitecturi alternative considerate:
+
+- **v3.0**: 5 produse vertical separate (Stripe pattern) cu feature flags `module.{name}.enabled` per produs — abandonat pentru că forța code separation care nu exista în CompliScan real
+- **v2.x**: 2 aplicații în cod (DPO OS + Fiscal OS hibernated) — înlocuit de v3.0 apoi v4.0
+- Pattern Atlassian (1 stack, 4 produse) — invalidat similar cu Stripe
+- Pattern Notion (Solo → Team → Enterprise growth path) — parțial integrat în v4.0 (pricing tier scaling)
+- Pattern Vanta (vertical specialist single-framework) — backup option dacă v4.0 eșuează
+
+Pentru detalii pe fiecare iteration arhitecturală, vezi **Doc 05 — Evoluția ideilor**.
+
+**Regula**: arhitectura curentă v4.0 e propunere de implementare. Sprint 1 va valida în pilot DPO Complet. Dacă v4.0 nu prinde piața → fallback la v3.0 (cu code separation explicit) sau Vanta-pattern (single framework focus).
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Update obligatoriu la**: orice nouă persona / mod / rută adăugată / schimbare design system
-**Versiune**: v1.0 (consolidare după demo run + 2 aplicații discovered)
+**Versiune**: v4.0 (3 layers: Infrastructure + Framework rules + ICP segment)
+**Vezi și**: Doc 05 (Evoluția ideilor) pentru arhitecturi alternative considerate
