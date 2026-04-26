@@ -1,9 +1,18 @@
-# CompliScan v1 — Final Product Specification
+# CompliScan v1 — Launch Slice Specification
+
+> 🚀 **LAUNCH SLICE** — ce lansăm prima dată (săpt 1-12), subordinat manifestului produs.
+>
+> **Hierarchy canonical**:
+> - **PRODUS COMPLET** (start here) → `compliscan-product-manifest-2026-04-26.md`
+> - **LAUNCH SLICE v1** (THIS) → ce facem în primele 12 săpt
+>
+> Acest document NU descrie produsul complet. Descrie **fragmentul** care ajunge la primul Stripe customer plătitor real. Pentru full picture al produsului → manifest.
 
 **Data**: 26 aprilie 2026
-**Status**: canonical reference — sursă unică de adevăr pentru ce construim, pentru cine, cât luăm
+**Status**: canonical pentru launch slice v1 (subordinat manifestului produs)
 **Decizii de bază**: pivot ICP la DPO consultant, brand CompliScan, AI Claude Sonnet 4.6, 2 produse în 1 cod
 **Bazat pe**: cele 25 puncte critică + research piață 4 agenți + analiza GPT-5.5 + 3 docs IA-UX + research DPO competiție + research liability/AI engine
+**Părintele canonical**: `compliscan-product-manifest-2026-04-26.md` (PRODUS COMPLET)
 
 ---
 

@@ -1,10 +1,22 @@
 # CompliScan — THE PRODUCT
 
+> ⭐ **START AICI** — Sursa supremă pentru CE ESTE CompliScan ca produs complet.
+>
+> **Hierarchy canonical (clarificat 26 apr 2026)**:
+> 1. **THIS** = produs complet, full functional state (canonical supreme)
+> 2. `compliscan-v1-final-spec-2026-04-26.md` = launch slice v1 (12 săpt)
+> 3. `IA-UX-PROPUNERE (1).md` + `IA-UX-PROPUNERE-ICP-UPDATE-2026-04-26.md` = arhitectură IA/UX (citite OBLIGATORIU împreună)
+> 4. `IA-UX-IMPLEMENTATION-MATRIX.md` = sprint plan execuție
+> 5. `IA-UX-ROUTE-PARITY-ADDENDUM.md` = adevăr cod-vs-IA pe rute
+> 6. `market-research-2026-04-26.md` = suport piață (research, NU instrucțiuni build)
+> 7. `compliscan-readiness-gap-memo-2026-04-26.md` = readiness memo (DEPRECATED canonical, util doar gap-uri)
+
 **Document type**: Canonical product manifest
-**Status**: Sursa unică de adevăr pentru CE ESTE CompliScan ca produs complet
+**Status**: Sursa SUPREMĂ pentru CE ESTE CompliScan ca produs complet
 **Data**: 26 aprilie 2026
 **NU este**: roadmap, sprint plan, MVP spec
 **ESTE**: descrierea integrală a produsului în starea sa funcțională completă (codul actual + decizii strategice consolidate)
+**Subordinat acestuia**: `compliscan-v1-final-spec-2026-04-26.md` (launch slice care implementează acest produs faza 1)
 
 ---
 
