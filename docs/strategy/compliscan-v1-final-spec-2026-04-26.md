@@ -148,14 +148,21 @@
 │                │      │                │      │                │
 │ Module active: │      │ Module active: │      │ Module active: │
 │ ✓ GDPR         │      │ ✓ e-Factura    │      │ ✓ GDPR         │
-│ ✓ NIS2         │      │ ✓ ANAF SPV     │      │ ✓ NIS2 (opt)   │
-│ ✓ AI Act       │      │ ✓ SAF-T        │      │ ✓ AI Act (opt) │
-│ ✓ DSAR         │      │ ✓ Discrepancies│      │ ✓ Approvals    │
-│ ✓ ROPA         │      │ ✓ Filing log   │      │ ✓ Review cycles│
-│ ✓ Whistleblow  │      │ ✓ Signal log   │      │ ✓ Agents       │
-│ ✓ Pay Transp.  │      │                │      │ ✓ Audit log    │
-│ ✓ Vendor mgmt  │      │ ✗ GDPR (off)   │      │                │
-│ ✓ DORA (fin)   │      │ ✗ NIS2 (off)   │      │                │
+│ ✓ NIS2         │      │   validator UBL│      │ ✓ NIS2 (opt)   │
+│ ✓ AI Act       │      │   CIUS-RO      │      │ ✓ AI Act (opt) │
+│ ✓ DSAR         │      │ ✓ ANAF SPV     │      │ ✓ Approvals    │
+│ ✓ ROPA         │      │ ✓ Discrepancies│      │ ✓ Review cycles│
+│ ✓ Whistleblow  │      │   e-TVA        │      │ ✓ Agents       │
+│ ✓ Pay Transp.  │      │ ✓ Filing log   │      │ ✓ Audit log    │
+│ ✓ Vendor mgmt  │      │ ✓ Signal log   │      │                │
+│ ✓ DORA (fin)   │      │ ✓ Read-only    │      │                │
+│                │      │   SmartBill /  │      │                │
+│                │      │   Saga / Oblio │      │                │
+│                │      │                │      │                │
+│                │      │ ⏸ SAF-T (post  │      │                │
+│                │      │   v1, complex) │      │                │
+│                │      │ ✗ GDPR (off)   │      │                │
+│                │      │ ✗ NIS2 (off)   │      │                │
 │                │      │ ✗ AI Act (off) │      │                │
 ├────────────────┤      ├────────────────┤      ├────────────────┤
 │ €99-€999/lună  │      │ €49-€299/lună  │      │ €499-€1.499/lună│
@@ -184,6 +191,33 @@
 | **DPO OS** | ✅ Primary launch (Q3 2026) | Marketing focus, pricing pe site, sales motion |
 | **Fiscal OS** | ⏸️ Hibernate code, decide Q4 2026 | Cod păstrat, ascuns marketing, post-launch DPO OS decizie |
 | **Internal Compliance** | ✅ Sub-mode DPO OS (single workspace) | Acelasi cod, plan Studio dedicat |
+
+### ⚠️ Clarificare critică Fiscal OS
+
+**Fiscal OS NU e înlocuitor SmartBill/Saga/Oblio.** E **layer compliance peste** programul de facturare existent al contabilului.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Contabilul folosește deja:                              │
+│   • SmartBill (170K firme RO) — facturare zilnică       │
+│   • Saga / Oblio / FGO — alternative                    │
+│                                                         │
+│ Fiscal OS = LAYER PESTE (nu replacement):               │
+│   • Read-only API integration cu SmartBill/Saga         │
+│   • Citește facturi → validează UBL CIUS-RO             │
+│   • Detectează discrepanțe e-TVA                        │
+│   • Monitorizează signals ANAF                          │
+│   • Audit trail pe filing-uri                           │
+│   • Generează rapoarte compliance fiscal                │
+│                                                         │
+│ Contabilul:                                             │
+│   • Continuă să factureze în SmartBill                  │
+│   • Vede în Fiscal OS: status compliance, alerte,       │
+│     dashboards cross-client, audit pack                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+Fără integrare bidirecțională cu SmartBill/Saga/Oblio, Fiscal OS = dead on arrival pentru contabili. Aceasta e prerequisit absolut.
 
 ---
 
@@ -349,57 +383,99 @@ Ce vede Mihai (patron) când Diana îi trimite linkul:
 ## 5. Pricing FINAL
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│ DPO OS pricing                                           │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  Solo DPO              €99/lună    < 20 clienți          │
-│    • 1 user                                              │
-│    • Brand cabinet basic                                 │
-│    • Lifecycle GDPR + DSAR                               │
-│    • Magic links pentru patroni (limitate)               │
-│                                                          │
-│  Growth boutique       €249/lună   20-50 clienți    ⭐   │
-│    • 3 users + 1 GuestAuditor                            │
-│    • Full white-label                                    │
-│    • + NIS2 + Pay Transparency                           │
-│    • Magic links unlimited                               │
-│    • Audit Pack lunar                                    │
-│                                                          │
-│  Pro firm              €499/lună   50-150 clienți        │
-│    • 10 users                                            │
-│    • + AI Act + DORA                                     │
-│    • Monitoring suite                                    │
-│    • Console access                                      │
-│    • Priority support                                    │
-│    • API access                                          │
-│                                                          │
-│  Studio                €999/lună   150+ clienți          │
-│    • Unlimited users                                     │
-│    • Custom integrations                                 │
-│    • SLA 99.9%                                           │
-│    • Dedicated CSM                                       │
-│    • White-label complet (incl. domain custom)           │
-│                                                          │
-│  Enterprise            quote       enterprise/custom     │
-│    • Multi-region (CEE expansion)                        │
-│    • SSO/SAML                                            │
-│    • Audit Q&A direct                                    │
-└──────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ DPO OS pricing                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  Starter (rampă funnel)  €49/lună     < 5 clienți              │
+│    • 1 user                                                    │
+│    • Brand cabinet basic                                       │
+│    • GDPR + DSAR module only                                   │
+│    • Magic links Mihai: 50 views/lună                          │
+│    • Auto-upgrade prompt la 5+ clienți                         │
+│                                                                │
+│  Solo DPO              €99/lună    5-19 clienți                │
+│    • 1 user                                                    │
+│    • Brand cabinet basic                                       │
+│    • Lifecycle GDPR + DSAR                                     │
+│    • Magic links Mihai: 200 views/lună                         │
+│                                                                │
+│  Growth boutique       €249/lună   20-49 clienți    ⭐         │
+│    • 3 users + 1 GuestAuditor                                  │
+│    • Full white-label                                          │
+│    • + NIS2 + Pay Transparency                                 │
+│    • Magic links Mihai: 1.000 views/lună                       │
+│    • Audit Pack lunar                                          │
+│                                                                │
+│  Pro firm              €499/lună   50-149 clienți              │
+│    • 10 users                                                  │
+│    • + AI Act + DORA                                           │
+│    • Monitoring suite                                          │
+│    • Console access                                            │
+│    • Priority support                                          │
+│    • API access                                                │
+│    • Magic links Mihai: 5.000 views/lună                       │
+│                                                                │
+│  Studio                €999/lună   150+ clienți                │
+│    • Unlimited users                                           │
+│    • Custom integrations                                       │
+│    • SLA 99.9%                                                 │
+│    • Dedicated CSM                                             │
+│    • White-label complet (incl. domain custom)                 │
+│    • Magic links Mihai: unlimited                              │
+│                                                                │
+│  Enterprise            quote       enterprise/custom           │
+│    • Multi-region (CEE expansion)                              │
+│    • SSO/SAML                                                  │
+│    • Audit Q&A direct                                          │
+│    • Magic links: unlimited + dedicated CDN                    │
+└────────────────────────────────────────────────────────────────┘
 
 Trial:        14 zile Growth gratuit, fără card
 Pricing add:  +€100/lună pentru Mistral EU sovereignty
               +€50/lună pentru fiecare 25 clienți peste limită
+
+Magic link views = orice acces patron la trust profile, raport, DPA, magic link
+                   approval. Limitele protejează costul AWS/Vercel infra.
 ```
 
-### Math validation pentru ICP sweet spot
+### Math validation pentru ICP
 
 ```
-Growth tier (€249/lună), DPO firm cu 30 clienți:
+Starter tier (€49/lună), Diana începătoare cu 4 clienți:
+  Revenue cabinet: 4 × €100/lună markup = €400/lună
+  CompliScan cost: €49/lună = 12% din revenue
+  ACCEPTABIL — funnel pentru creștere
+
+Solo tier (€99/lună), DPO cu 15 clienți:
+  Revenue cabinet: 15 × €100/lună markup = €1.500/lună
+  CompliScan cost: €99/lună = 6.6% din revenue
+  ROI clar
+
+Growth tier (€249/lună), DPO firm cu 30 clienți:        ⭐ SWEET SPOT
   Revenue cabinet: 30 × €120/lună markup = €3.600/lună
   CompliScan cost: €249/lună = 7% din revenue
-  ROI: BRUTAL — un singur client salvat din churn = 50x payback
+  ROI BRUTAL — un singur client salvat din churn = 50x payback
+
+Pro tier (€499/lună), DPO firm cu 80 clienți:
+  Revenue cabinet: 80 × €150/lună markup = €12.000/lună
+  CompliScan cost: €499/lună = 4% din revenue
+  ROI EXCELENT
 ```
+
+### Logica funnel-ului
+
+```
+Diana începătoare (3-4 clienți)         → Starter €49
+   ↓ 6 luni cu 5+ clienți
+Diana Solo (15 clienți)                 → Solo €99
+   ↓ 12 luni cu 20+ clienți
+Diana Growth (30 clienți)               → Growth €249
+   ↓ 18-24 luni cu 50+ clienți
+Diana Pro (80 clienți)                  → Pro €499
+```
+
+Starter NU e pierdere — e **acquisition funnel**. Diana plătește puțin acum, crește cu CompliScan, ajunge Growth/Pro în 12-18 luni.
 
 ---
 
@@ -510,11 +586,16 @@ RO language native  ❌         ❌       ✅         ✅         ✅
 - "Limitation of liability cap = 12 luni subscription"
 - "Indemnification by user for misuse"
 
-### Insurance roadmap
+### Insurance roadmap (realist, nu Lloyds prematur)
 
-- **0-50 clienți**: T&C + disclaimer = sufficient
-- **50+ clienți**: Look pentru insurance partner (Lloyds, Munich Re EU SaaS)
-- **Enterprise sales**: PII insurance €500K-2M obligatoriu (Fortune 500 cere)
+| Stadiu | Acțiune | Rationale |
+|---|---|---|
+| **0-30 cabinete** | T&C + disclaimer = sufficient | Solo founder, low risk surface |
+| **30-100 cabinete** | Broker RO local: **Generali Romania, Allianz Romania** pentru Cyber Liability + GDPR Breach Insurance | Accesibil, broker local răspunde |
+| **100-500 cabinete (€1M+ ARR)** | Step up la broker EU specializat în SaaS (Howden, Marsh) | Volum justifică premium |
+| **500+ cabinete (€5M+ ARR)** | Lloyds / Munich Re enterprise | Doar la enterprise sales (Fortune 500 cere) |
+
+**De ce nu Lloyds direct**: Lloyds = enterprise. Pentru CompliScan la 50 clienți, parteneriat cu Lloyds = supradimensionat și nu vor răspunde la email. Brokerii RO (Generali, Allianz) au discuții reale la volum mic.
 
 ---
 
@@ -579,13 +660,24 @@ Mistral Large 2 (France, GDPR by design) ca opțiune `+€100/lună`. Diferentia
 ## 9. Roadmap până la launch
 
 ```
-┌──── SĂPT 1-2 ────────── VALIDATION + S0 ────────────────┐
+┌──── SĂPT 1-2 ────────── OUTREACH START + S0 ────────────┐
 │                                                          │
 │ Tu (founder):                                            │
-│   • 5 telefoane DPO firms (DPO Data, WestGDPR,           │
-│     Decalex, Privacy Manager, DPO Consulting)            │
-│   • 1 conversație DataGuard                              │
-│   • Decision gate: 5+ piloti acceptați?                  │
+│   • 10 emailuri DPO firms (NU doar 5):                   │
+│     - DPO Data Protection                                │
+│     - WestGDPR                                           │
+│     - DPO Consulting                                     │
+│     - Decalex                                            │
+│     - Intercris                                          │
+│     - Privacy Manager (concurent — intel + partnership)  │
+│     - GDPR Complet (intel-only — au sistem propriu)      │
+│     - LegalUp (intel — avocatură)                        │
+│     - Sectio Aurea (cybersec)                            │
+│     - HIFENCE (NIS2 implementation)                      │
+│   • 1 email DataGuard                                    │
+│   • 1 post FB "Contabili pe Facebook" (50K) + grup       │
+│     e-Factura (34K) — pretext: feedback request          │
+│   • Realitate: replyuri vin în săpt 2-3, NU săpt 1       │
 │                                                          │
 │ Eu (Claude code):                                        │
 │   • Brand sweep CompliAI → CompliScan (57 fișiere)       │
@@ -593,6 +685,27 @@ Mistral Large 2 (France, GDPR by design) ca opțiune `+€100/lună`. Diferentia
 │   • S0 Spine Integrity (10 patches bug fix)              │
 │   • AI provider abstraction (pregătire Sonnet 4.6)       │
 └──────────────────────────────────────────────────────────┘
+
+┌──── SĂPT 3-4 ────────── CONVERSAȚII REALE ──────────────┐
+│                                                          │
+│ Tu:                                                      │
+│   • 5-7 conversații DPO programate (30 min/each)         │
+│   • Validare ipoteze: ICP, pricing, GTM A vs B           │
+│   • Decision gate săpt 4: 5+ piloti acceptați?           │
+│                                                          │
+│ Eu:                                                      │
+│   • Continui S0 close                                    │
+│   • Pregătire repositioning code (gata pt schimbare)     │
+└──────────────────────────────────────────────────────────┘
+
+⚠️ Realitate B2B sales RO:
+   • Email luni → reply joi-vineri
+   • Reply: "pot săptămâna viitoare"
+   • Conversație: săpt 2-3
+   • LOI / pilot acceptat: săpt 3-5
+
+   5 piloti acceptați în 2 săpt = unrealistic.
+   5 piloti acceptați în 4 săpt = realist.
 
 ┌──── SĂPT 3-6 ────────── S1 SHELL/NAV/ROUTING ───────────┐
 │                                                          │
@@ -649,13 +762,21 @@ Mistral Large 2 (France, GDPR by design) ca opțiune `+€100/lună`. Diferentia
 │ • Public DSAR portal                                     │
 │ • Templates jurat-validate library (10 docs)             │
 │ • Training modules (5-10 cursuri)                        │
-│ • IAPP RO Chapter outreach                               │
+│ • Community building canale RO REALE:                    │
+│   - juridice.ro articole expert                          │
+│   - avocatnet.ro                                         │
+│   - dpo-net.ro (NeoPrivacy portal)                       │
+│   - ANSPDCP webinars (sponsor)                           │
+│   - LinkedIn outreach CIPP/E RO certificați              │
+│   - IAPP RO Chapter (verificat să existe; dacă nu,       │
+│     fundezi tu chapter local — strategic moat)           │
 │ • Webinar lunar cu DPO experts                           │
 │ • CRM intern DPO                                         │
 │ • Cookie consent module                                  │
-│ • Insurance partner Lloyds (după 50+ clienți)            │
+│ • Insurance partner: broker RO (Generali / Allianz)      │
+│   pentru Cyber + GDPR Breach Insurance                   │
 │                                                          │
-│ Target: 30 cabinete plătitoare, €15K MRR                 │
+│ Target: 30 cabinete plătitoare, €10-15K MRR              │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -663,9 +784,10 @@ Mistral Large 2 (France, GDPR by design) ca opțiune `+€100/lună`. Diferentia
 
 ## 10. Definiția "v1 launched"
 
-CompliScan = launched v1 când:
+CompliScan = launched v1 când TOATE de mai jos sunt adevărate:
 
 ```
+PRE-CONDIȚII (necesare, nu suficiente):
 ✓ Landing public la compliscan.ro cu mesaj DPO clar
 ✓ Onboarding pas 1 funcțional (3 trasee)
 ✓ DPO firm poate adăuga 50 clienți și gestiona findings
@@ -673,13 +795,27 @@ CompliScan = launched v1 când:
 ✓ Magic links pentru patroni funcționează
 ✓ Dosar unified, Monitoring suite live
 ✓ AI engine = Claude Sonnet 4.6 + Gemini OCR
-✓ Pricing tiers active (Stripe)
-✓ Free trial 14 zile
-✓ 5+ DPO firms beta-tester (gratuit)
-✓ 3+ DPO firms cu pilot semnat (€249-499/lună)
+✓ Pricing tiers active (Stripe billing live, NU test mode)
+✓ Free trial 14 zile cu auto-conversion la card
 ✓ Disclaimer "validare CIPP/E" în loc de "verifică cu specialist"
 ✓ Brand: CompliScan peste tot (zero CompliAI)
 ✓ Documentat: T&C, Privacy Policy, DPA, Trust Center
+
+THE ACTUAL "LAUNCHED" CRITERION:
+🎯 Stripe live cu primul Customer Subscribed plătitor REAL
+   • NU pilot gratuit
+   • NU test mode
+   • NU "going to pay next month"
+   • Primul euro real în Stripe Dashboard din contul real
+   • Asta e momentul "lansat"
+
+Restul sunt PRE-CONDIȚII tehnice care permit lansarea.
+Lansarea = revenue real.
+
+Bonus criterii pentru "launch validation":
+✓ 3+ DPO firms cu Stripe Subscription activ
+✓ MRR > €750/lună (3 × Growth tier)
+✓ Churn rate la 30 zile < 30% (pilot conversion)
 ```
 
 ---
@@ -820,5 +956,26 @@ Onboarding finish:
 
 **Document creat**: 26 aprilie 2026
 **Bazat pe**: 25 puncte critică + 4 agenți research piață + analiza GPT-5.5 + 3 docs IA-UX existente + research DPO competiție + research liability/AI engine
-**Următoarea revizuire**: după 5 conversații DPO firms (decision gate săpt 2)
+**Următoarea revizuire**: după 5 conversații DPO firms (decision gate săpt 4)
 **Status**: canonical reference — sursa unică de adevăr pentru produs v1
+
+---
+
+## Revisions
+
+### v1.1 — 26 aprilie 2026 (same day)
+
+7 corecții aplicate după review independent de instanță Opus secundară:
+
+| # | Corecție | Secțiune afectată |
+|---|---|---|
+| 1 | Adăugat tier **Starter €49/lună** pentru < 5 clienți (funnel rampă) | Sec 5 Pricing |
+| 2 | Decision gate **săpt 4 (nu 2)** — realist B2B sales cycle RO | Sec 9 Roadmap |
+| 3 | **IAPP RO Chapter** marcat "verifică să existe" + alternative reale (juridice.ro, avocatnet, dpo-net.ro, ANSPDCP) | Sec 9 Roadmap luna 4-6 |
+| 4 | Fiscal OS **clarificat ca layer peste SmartBill/Saga/Oblio**, NU înlocuitor + integrare bidirecțională read-only obligatorie | Sec 3 Arhitectură |
+| 5 | **Magic link views per tier** explicit (Starter 50 / Solo 200 / Growth 1.000 / Pro 5.000 / Studio unlimited) — protejează cost AWS/Vercel | Sec 5 Pricing |
+| 6 | Insurance roadmap **realist**: brokeri RO (Generali, Allianz) la 30-100 cabinete; Lloyds NU prematur | Sec 7 Liability |
+| 7 | Definiția "v1 launched" updated: **primul euro real Stripe**, nu doar pre-condiții tehnice | Sec 10 Definiție |
+| 8 | Documentation drift fix: addendum la IA-UX-PROPUNERE.md cu update Diana persona + pricing | Anexă (separată) |
+
+**Decision**: Toate 7 corecții acceptate fără modificare. Document v1.1 = canonical.
