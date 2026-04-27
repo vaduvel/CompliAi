@@ -74,6 +74,32 @@
 
 **Asta e direcția mare, NU primul pas comercial.**
 
+### Propoziția strategică Faza 3 (versiune finală user-validated)
+
+> **"CompliScan nu așteaptă să existe GRC officer-ul în toate IMM-urile. Îl face posibil."**
+
+Adică:
+- **Azi** îl folosește consultantul (Faza 1: DPO/CISO/contabil/HR/AI advisor)
+- **Mâine** îl folosește HR/COO/CFO intern (Faza 2: bundle IMM)
+- **Peste 3-5 ani**, când rolul devine normal, CompliScan e **deja sistemul pe care omul ăla îl vrea**
+
+### Timeline concret emergența rol RO
+
+| Perioadă | Segment | Status |
+|---|---|---|
+| **2026-2027** (azi) | IMM reglementate (fintech, healthcare, energie) | 200-400 firme angajează primul "Compliance Specialist" |
+| **3-5 ani (2029-2031)** | IMM 100-500 ang în sectoare reglementate | Rol vizibil ca "Responsabil Compliance / GRC Coordinator" |
+| **5-7 ani (2031-2033)** | Firme mid-market 100-500 ang general | Devine normal ca funcție internă |
+| **Niciodată full-time** | Micro / SRL mic (<50 ang) | Rămâne owner + contabil + consultant + tool (Solo tier €29-49) |
+
+### Diferentiator strategic vs concurenți tool-uri SMB
+
+**Vanta / Drata / Sprinto / Hyperproof** au intrat în piața US/UK unde "compliance manager" era deja formalizat (50K+ joburi). Au construit produs **pentru categoria existentă**.
+
+**CompliScan** intră în piața RO unde **categoria încă se naște**. Vinzi în 3 faze cu evoluție narrativă, NU dintr-odată.
+
+→ **CompliScan e prima generație de tool care permite categoria să se nască în RO**, NU al doilea-generation tool într-o piață deja matură. **Asta e diferentiator strategic vs Vanta-style products**.
+
 **Distribuție Faza 3**:
 - Conferințe industrie ("How to internalize compliance in mid-market")
 - White papers cu data din baza de clienți

@@ -23,7 +23,18 @@ FAZA 3 (2028+): CREEZI CATEGORIA "Compliance Officer IMM"
    ↓ KPI: 200-500 IMM cu rol intern dedicat, €500K-1M MRR
 ```
 
-**De ce 3 faze, NU paralel**: rolul "Compliance Officer IMM" nu există încă la scară în RO. Vine în 2-5 ani prin NIS2/DORA/AI Act/Pay Transp pressure EU. Azi vinzi pe roluri existente. Categoria o creezi după ce ai validare empirică (20-50 IMM-uri cu om intern).
+**De ce 3 faze, NU paralel**: rolul "Compliance Officer IMM" nu există încă la scară în RO.
+
+**Timeline emergența rol RO**:
+- 2026-2027 (azi): 200-400 firme reglementate (fintech, healthcare) angajează primul "Compliance Specialist"
+- 3-5 ani (2029-2031): vizibil ca "Responsabil Compliance / GRC Coordinator" la IMM 100-500 ang
+- 5-7 ani (2031-2033): normal ca funcție internă la firme mid-market
+- **Niciodată** la micro/SRL mic — rămâne owner + contabil + consultant + tool
+
+**Propoziția strategică**:
+> **"CompliScan nu așteaptă să existe GRC officer-ul. Îl face posibil."**
+
+Vanta/Drata au intrat în piață US/UK cu categoria deja formalizată. CompliScan intră în RO unde categoria **se naște** — diferentiator strategic vs Vanta-style products.
 
 **Reguli simple**:
 1. Azi: modular către specialiști existenți

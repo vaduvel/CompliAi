@@ -381,19 +381,108 @@ Doar după 20-50 IMM-uri unde **un om intern chiar folosește platforma**, atunc
 - Vanta, Drata, Sprinto = produse construite presupunând rolul există
 - LinkedIn 2.000 joburi compliance RO = mostly enterprise + banking + multinaționale
 
-**Driveri pentru categorie nouă RO 2027-2030**:
-- NIS2 enforcement DNSC (12-20K entități obligate)
-- DORA enforcement BNR (250-300 fintech-uri)
-- AI Act enforcement EU AI Office (5-30 firme cu produse AI)
-- Pay Transparency 7 iun 2026 (firme 50+ ang)
-- Whistleblowing Lege 361/2022 (firme 50+ ang)
+### Timeline detaliat emergența rol RO (3-5 / 5-7 / niciodată micro)
 
-**Predicție realistă RO**:
-- 2026-2027: 200-400 firme angajează primul "Compliance Specialist"
-- 2028-2029: 1.000-2.000 firme cu rol dedicat
-- 2030+: standard pentru firme >100 angajați în sectoare reglementate
+| Perioadă | Segment | Status emergent |
+|---|---|---|
+| **2026-2027** (azi) | IMM reglementate (fintech, healthcare, energie) | 200-400 firme angajează primul "Compliance Specialist" |
+| **3-5 ani (2029-2031)** | IMM mid-market 100-500 ang în sectoare reglementate (healthcare, fintech, IT, manufacturing, logistică, energie, retail mare) | Rol vizibil ca "Responsabil Compliance / GRC Coordinator" |
+| **5-7 ani (2031-2033)** | Firme mid-market 100-500 ang general | Devine **normal** ca funcție internă, nu opțional |
+| **Niciodată full-time** | Micro / SRL mic (<50 ang) | Rămâne owner + contabil + consultant extern + tool |
 
-→ **CompliScan e early în piață, dar piața vine la noi în 3-5 ani prin EU pressure**.
+→ **CompliScan e early. Piața vine la noi în 3-5 ani prin EU pressure**. Pentru micro segment, NU vinde niciodată "officer intern" — vinde DIY tool (Solo tier €29-49).
+
+### De ce NU există acum în România (5 motive validate empiric)
+
+1. **Legile au venit separat → specialiști separați**:
+   - GDPR (2018) → DPO consultant
+   - NIS2 (2024) → CISO/cyber consultant
+   - DORA (2025) → financial compliance Big 4
+   - e-Factura (2022) → contabil CECCAR
+   - Whistleblowing (2022) + Pay Transp (2026) → HR/legal
+   - **Niciun rol unificator** nu a apărut natural — fiecare lege a creat propriul specialist
+
+2. **IMM-ul român e reactiv, nu proactiv**:
+   - Face compliance când **cere clientul mare** (B2B contracte cu cerințe)
+   - Sau când **cere banca** (loan covenants compliance)
+   - Sau când **cere auditorul** (financial/cyber)
+   - Sau când **cere autoritatea** (control ANSPDCP/DNSC/ANAF)
+   - Mentalitatea "funcție internă permanentă" NU e încă răspândită
+
+3. **Bugetul nu permite GRC officer dedicat**:
+   - Salariu GRC manager RO: €30-50K/an entry, €60-100K senior
+   - IMM 100 ang preferă "consultant când am nevoie" (€10-30K/an ad-hoc) decât full-time
+   - Math: angajat full-time NU e justificat până când compliance devine continuu, NU sezonier
+
+4. **NU există tool simplu pentru omul ăla**:
+   - ServiceNow GRC / OneTrust / RSA Archer = **enterprise** ($50K-500K/an), îl omori pe IMM
+   - Excel = NU scalează la 5+ frameworks
+   - Privacy Manager / Eramba = vertical specialist, NU multi-framework
+   - **Slot-ul "tool simplu pentru GRC mid-market RO" = gol** ← aici e CompliScan
+
+5. **Piața nu a fost forțată destul** (până acum):
+   - Pre-2024: doar GDPR enforcement ANSPDCP modest (€213-472K/an)
+   - 2024+: NIS2 + DORA + AI Act + Pay Transp + Whistleblowing simultan
+   - Compounding pressure → mid-market trebuie să se organizeze
+   - **Asta se schimbă acum**
+
+### De ce EXISTĂ în alte țări (5 motive validate empiric)
+
+1. **Piețe mature pe audit + vendor due diligence**:
+   - SOC 2 audit standard pentru SaaS US
+   - ISO 27001 cerut pentru fintech UK/EU
+   - Cyber insurance cere ISO/NIST baseline
+   - Risk management + board governance = funcții cu istoric
+
+2. **B2B cere dovadă compliance înainte de cumpărare**:
+   - Enterprise procurement cere DPA + ISO 27001 + SOC 2 înainte de contract
+   - Firme SMB trebuie să răspundă rapid → angajează GRC pentru "audit-ready continuous"
+
+3. **Istoric litigii + amenzi mai dur**:
+   - SUA: lawsuits CCPA, HIPAA fines în milioane $
+   - UK: ICO fines în milioane £ (BA, Marriott, Equifax)
+   - EU: GDPR fines (€746M Amazon, €405M Meta)
+   - Compliance NU e "hârtie", e **risc operațional cuantificat**
+
+4. **Bugetele permit salarii GRC**:
+   - US: GRC analyst $80-130K, GRC manager $130-200K, GRC director $180-300K
+   - UK: £60-150K standardizat
+   - EU enterprise: €70-150K
+   - În RO: rolurile există DOAR la enterprise + financial care își permit salarii similare
+
+5. **Tool-urile au educat piața**:
+   - Vanta (2018), Drata (2020), Sprinto (2020), Hyperproof (2018) — fast-growing SMB SaaS
+   - 12-30K customers fiecare = piață educată că "compliance e funcție continuă"
+   - Când tool-urile există accesibile, apare **omul care le operează**
+
+### Driveri pentru categorie nouă RO 2027-2030 (când vine valul)
+
+- **NIS2 enforcement DNSC** (12-20K entități obligate, deadline implementare oct 2026)
+- **DORA enforcement BNR** (250-300 fintech-uri, intrat în vigoare 17 ian 2025)
+- **AI Act enforcement EU AI Office** (5-30 firme RO cu produse AI, timeline 2025-2027)
+- **Pay Transparency** (7 iun 2026 transpunere, firme 50+ ang)
+- **Whistleblowing** (Legea 361/2022 RO, firme 50+ ang)
+- **Cyber insurance** require compliance baseline (creștere RO)
+- **B2B procurement** la corporate care cer dovezi compliance la furnizori IMM
+
+### Predicție realistă RO
+
+- **2026-2027**: 200-400 firme angajează primul "Compliance Specialist"
+- **2028-2029** (3 ani): 1.000-2.000 firme cu rol dedicat
+- **2030+** (5-7 ani): standard pentru firme >100 angajați în sectoare reglementate
+
+### Propoziția strategică pentru CompliScan v4.4
+
+> **"CompliScan nu așteaptă să existe GRC officer-ul în toate IMM-urile. Îl face posibil."**
+
+Adică:
+- **Azi** îl folosește consultantul (Faza 1: DPO/CISO/contabil/HR/AI advisor)
+- **Mâine** îl folosește HR/COO/CFO intern (Faza 2: bundle pentru IMM cu user role-flexibil)
+- **Peste 3-5 ani**, când rolul devine normal, CompliScan e **deja sistemul pe care omul ăla îl vrea**
+
+CompliScan e **prima generație de tool care permite categoria să se nască**, NU al doilea-generation tool care intră într-o categorie existentă (cum era Vanta/Drata în piața US care avea deja "compliance manager" formalizat).
+
+→ Diferentiator strategic vs Vanta-style products: **CompliScan creează piața în RO, nu doar produs pentru o piață existentă**.
 
 ### Status v4.4
 
