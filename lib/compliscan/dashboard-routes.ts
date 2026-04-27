@@ -33,6 +33,8 @@ export const dashboardRoutes = {
   approvals: "/dashboard/approvals",
   // S1.7 — Cabinet view pentru magic links trimise patroni (approve/reject/comment).
   magicLinks: "/dashboard/magic-links",
+  // S1.1 — Cabinet templates upload (Markdown personalizat per documentType).
+  cabinetTemplates: "/dashboard/cabinet/templates",
   settings: "/dashboard/settings",
   settingsScheduledReports: "/dashboard/settings/scheduled-reports",
   settingsBilling: "/dashboard/settings/abonament",

@@ -1,7 +1,10 @@
 import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export async function generateAuditPackPdfBuffer(auditPack: AuditPackV2): Promise<Buffer> {
+  const whiteLabel = await getWhiteLabelConfig(auditPack.workspace.id).catch(() => null)
+  const signerName = whiteLabel?.signerName?.trim() || whiteLabel?.partnerName?.trim() || null
   const md: string[] = []
 
   md.push(`# Dosar de Audit: ${auditPack.workspace.name}`)
@@ -88,5 +91,7 @@ export async function generateAuditPackPdfBuffer(auditPack: AuditPackV2): Promis
     generatedAt: auditPack.generatedAt,
     // Issue 7 DPO — watermark vizual "AUDIT READY" pe fiecare pagină.
     auditReadiness: auditPack.executiveSummary.auditReadiness,
+    // S1.5 — Signer name pe ultima pagină
+    signerName,
   })
 }

@@ -25,7 +25,15 @@ import { resolveOnboardingDestination } from "@/lib/compliscan/onboarding-destin
 
 type ModeId = "solo" | "partner" | "compliance"
 
-type ModeAccent = "primary" | "violet" | "success"
+// S1.6 — ICP segment (Doc 06): 5 segmente Faza 1, mapate la 3 userMode-uri.
+type IcpSegmentId =
+  | "solo"
+  | "cabinet-dpo"
+  | "cabinet-fiscal"
+  | "imm-internal"
+  | "enterprise"
+
+type ModeAccent = "primary" | "violet" | "success" | "amber" | "indigo"
 
 type OnboardingFormProps = {
   initialUserMode: ModeId | null
@@ -34,44 +42,88 @@ type OnboardingFormProps = {
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-type ModeOption = {
+type IcpSegmentOption = {
+  id: IcpSegmentId
+  label: string
+  description: string
+  icon: typeof Building2
+  badge: string
+  accent: ModeAccent
+  // Mapare la userMode tehnic existent (auth.ts).
+  mapsTo: ModeId
+}
+
+const ICP_OPTIONS: IcpSegmentOption[] = [
+  {
+    id: "solo",
+    label: "Proprietar / Manager",
+    description:
+      "Gestionezi conformitatea firmei tale (1 organizație). Tablou de bord simplificat, primul risc rezolvat.",
+    icon: Building2,
+    badge: "Solo",
+    accent: "primary",
+    mapsTo: "solo",
+  },
+  {
+    id: "cabinet-dpo",
+    label: "Cabinet DPO / Privacy Manager",
+    description:
+      "Gestionezi GDPR + EU AI Act pentru mai mulți clienți. Portofoliu agregat, magic links, white-label cabinet.",
+    icon: ShieldCheck,
+    badge: "Cabinet DPO",
+    accent: "violet",
+    mapsTo: "partner",
+  },
+  {
+    id: "cabinet-fiscal",
+    label: "Contabil CECCAR",
+    description:
+      "Layer compliance peste SmartBill/Saga/Oblio. Validator UBL CIUS-RO + e-TVA + GDPR lite per client.",
+    icon: Briefcase,
+    badge: "Cabinet Fiscal",
+    accent: "amber",
+    mapsTo: "partner",
+  },
+  {
+    id: "imm-internal",
+    label: "Responsabil Compliance Intern",
+    description:
+      "Lucrezi intern pe o singură firmă (IMM 50-250 ang). Drepturi extinse de audit, raportare, control.",
+    icon: ShieldCheck,
+    badge: "IMM Internal",
+    accent: "success",
+    mapsTo: "compliance",
+  },
+  {
+    id: "enterprise",
+    label: "CISO / Multi-framework",
+    description:
+      "Acoperire NIS2 + DORA + ISO 27001 + AI Act. Governance layer pentru organizații reglementate. Sales-led.",
+    icon: ShieldCheck,
+    badge: "Enterprise",
+    accent: "indigo",
+    mapsTo: "compliance",
+  },
+]
+
+// Backward-compat: păstrăm MODE_OPTIONS-style array pentru steps și progress bar.
+const MODE_OPTIONS: Array<{
   id: ModeId
   label: string
   description: string
   icon: typeof Building2
   badge: string
   accent: ModeAccent
-}
-
-const MODE_OPTIONS: ModeOption[] = [
-  {
-    id: "solo",
-    label: "Proprietar / Manager",
-    description:
-      "Gestionezi conformitatea firmei tale. Tablou de bord simplificat, axat pe acțiuni concrete și primul risc rezolvat.",
-    icon: Building2,
-    badge: "Solo",
-    accent: "primary",
-  },
-  {
-    id: "partner",
-    label: "Consultant / Contabil / Auditor",
-    description:
-      "Gestionezi mai multe firme simultan. Portofoliu agregat cu vedere cross-client și livrabile pentru clienți.",
-    icon: Briefcase,
-    badge: "Partner",
-    accent: "violet",
-  },
-  {
-    id: "compliance",
-    label: "Responsabil conformitate",
-    description:
-      "Lucrezi intern pe o singură firmă, cu drepturi extinse de audit, raportare și instrumente de control.",
-    icon: ShieldCheck,
-    badge: "Compliance",
-    accent: "success",
-  },
-]
+}> = ICP_OPTIONS.filter((opt, idx, arr) =>
+  arr.findIndex((o) => o.mapsTo === opt.mapsTo) === idx
+).map((opt) => ({
+  id: opt.mapsTo,
+  label: opt.label,
+  description: opt.description,
+  icon: opt.icon,
+  badge: opt.badge,
+  accent: opt.accent,
+}))
 
 const ACCENT_CLASSES: Record<
   ModeAccent,
@@ -115,6 +167,26 @@ const ACCENT_CLASSES: Record<
     badgeBg: "bg-eos-success/15",
     badgeText: "text-eos-success",
     progressBar: "bg-eos-success",
+  },
+  amber: {
+    border: "border-amber-500/40",
+    bg: "bg-amber-500/[0.06]",
+    text: "text-amber-300",
+    iconBox: "border-amber-500/30 bg-amber-500/10",
+    iconColor: "text-amber-300",
+    badgeBg: "bg-amber-500/15",
+    badgeText: "text-amber-300",
+    progressBar: "bg-amber-500",
+  },
+  indigo: {
+    border: "border-indigo-500/40",
+    bg: "bg-indigo-500/[0.06]",
+    text: "text-indigo-300",
+    iconBox: "border-indigo-500/30 bg-indigo-500/10",
+    iconColor: "text-indigo-300",
+    badgeBg: "bg-indigo-500/15",
+    badgeText: "text-indigo-300",
+    progressBar: "bg-indigo-500",
   },
 }
 
@@ -168,6 +240,8 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   const router = useRouter()
   const [currentMode, setCurrentMode] = useState<ModeId | null>(initialUserMode)
   const [selectedMode, setSelectedMode] = useState<ModeId | null>(initialUserMode)
+  // S1.6 — ICP segment selectat (5 carduri, mapează la 3 userMode-uri).
+  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(null)
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
     initialUserMode ? "cui" : null
   )
@@ -179,15 +253,19 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   const currentMeta = currentMode ? MODE_OPTIONS.find((o) => o.id === currentMode) ?? null : null
   const phases = getPhasesForMode(currentMode ?? selectedMode)
 
-  // accent picked from current/selected mode
+  // accent picked from current/selected segment (5 carduri)
+  const selectedIcp = selectedSegment
+    ? ICP_OPTIONS.find((o) => o.id === selectedSegment) ?? null
+    : null
   const accentMode: ModeAccent =
+    selectedIcp?.accent ??
     currentMeta?.accent ??
     MODE_OPTIONS.find((o) => o.id === selectedMode)?.accent ??
     "primary"
   const accent = ACCENT_CLASSES[accentMode]
 
   async function handleConfirm() {
-    if (!selectedMode) return
+    if (!selectedSegment || !selectedMode) return
     setError(null)
     setLoading(true)
 
@@ -204,6 +282,15 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
         setError(data.error || "Eroare la salvarea modului de utilizare.")
         return
       }
+
+      // S1.6 — persist sub-segment ICP în white-label (best-effort, NU blocăm flow-ul).
+      void fetch("/api/partner/white-label", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ icpSegment: selectedSegment }),
+      }).catch(() => {
+        // ignore — userMode e salvat, sub-segment e nice-to-have
+      })
 
       setCurrentMode(selectedMode)
       setWizardStep("cui")
@@ -399,14 +486,17 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               </p>
 
               <div className="mt-8 space-y-3">
-                {MODE_OPTIONS.map((option) => {
-                  const isSelected = selectedMode === option.id
+                {ICP_OPTIONS.map((option) => {
+                  const isSelected = selectedSegment === option.id
                   const optAccent = ACCENT_CLASSES[option.accent]
                   return (
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => setSelectedMode(option.id)}
+                      onClick={() => {
+                        setSelectedSegment(option.id)
+                        setSelectedMode(option.mapsTo)
+                      }}
                       className={[
                         "group w-full rounded-eos-lg border bg-eos-surface p-5 text-left transition-all duration-150",
                         isSelected
@@ -476,7 +566,7 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  disabled={!selectedMode || loading}
+                  disabled={!selectedSegment || loading}
                   onClick={() => void handleConfirm()}
                   className={[
                     "inline-flex items-center gap-2 rounded-eos-sm px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.45)] transition-all",

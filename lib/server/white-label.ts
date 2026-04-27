@@ -18,10 +18,31 @@ export type WhiteLabelConfig = {
   // Default true (AI enabled). Cabinet poate seta `false` pentru clienți
   // care cer template-only (ex: clienți sensibili / banking / public sector).
   aiEnabled: boolean
+  // S1.5 — Signature upload în brand setup.
+  // URL imagine semnătură consultant (PNG transparent recomandat). Apare
+  // în footer document generat când e setat. NULL = nu se afișează semnătură.
+  signatureUrl: string | null
+  // Numele afișat sub semnătură (ex: "Diana Popescu, DPO")
+  signerName: string | null
+  // S1.6 — ICP segment selectat la onboarding (Doc 06 cere 5 segmente Faza 1).
+  // Mapare la userMode tehnic:
+  //   "solo"          → userMode: solo (owner/manager IMM mic)
+  //   "cabinet-dpo"   → userMode: partner (DPO/Privacy Manager consultant)
+  //   "cabinet-fiscal"→ userMode: partner (contabil CECCAR + GDPR lite)
+  //   "imm-internal"  → userMode: compliance (responsabil intern IMM)
+  //   "enterprise"    → userMode: compliance (CISO/multi-framework, sales-led)
+  icpSegment: IcpSegment | null
   updatedAtISO: string | null
   storageBackend?: "supabase" | "local_fallback"
   persistenceStatus?: "synced" | "fallback"
 }
+
+export type IcpSegment =
+  | "solo"
+  | "cabinet-dpo"
+  | "cabinet-fiscal"
+  | "imm-internal"
+  | "enterprise"
 
 type WhiteLabelRow = {
   org_id: string
@@ -30,7 +51,23 @@ type WhiteLabelRow = {
   logo_url: string | null
   brand_color: string
   ai_enabled: boolean | null
+  signature_url: string | null
+  signer_name: string | null
+  icp_segment: string | null
   updated_at: string | null
+}
+
+const ICP_SEGMENTS: readonly IcpSegment[] = [
+  "solo",
+  "cabinet-dpo",
+  "cabinet-fiscal",
+  "imm-internal",
+  "enterprise",
+] as const
+
+function parseIcpSegment(value: unknown): IcpSegment | null {
+  if (typeof value !== "string") return null
+  return (ICP_SEGMENTS as readonly string[]).includes(value) ? (value as IcpSegment) : null
 }
 
 const DEFAULT_BRAND_COLOR = "#6366f1"
@@ -49,6 +86,9 @@ function rowToConfig(row: WhiteLabelRow): WhiteLabelConfig {
     logoUrl: row.logo_url ?? null,
     brandColor: row.brand_color ?? DEFAULT_BRAND_COLOR,
     aiEnabled: row.ai_enabled !== false, // null/undefined → true (default ON)
+    signatureUrl: row.signature_url ?? null,
+    signerName: row.signer_name ?? null,
+    icpSegment: parseIcpSegment(row.icp_segment),
     updatedAtISO: row.updated_at ?? null,
     storageBackend: "supabase",
     persistenceStatus: "synced",
@@ -75,6 +115,9 @@ async function readLocalWhiteLabelConfig(orgId: string): Promise<WhiteLabelConfi
           ? parsed.brandColor
           : DEFAULT_BRAND_COLOR,
       aiEnabled: parsed.aiEnabled !== false, // missing/true → true; only false disables AI
+      signatureUrl: typeof parsed.signatureUrl === "string" ? parsed.signatureUrl : null,
+      signerName: typeof parsed.signerName === "string" ? parsed.signerName : null,
+      icpSegment: parseIcpSegment(parsed.icpSegment),
       updatedAtISO: typeof parsed.updatedAtISO === "string" ? parsed.updatedAtISO : null,
       storageBackend: "local_fallback",
       persistenceStatus: "fallback",
@@ -119,6 +162,9 @@ export async function getWhiteLabelConfig(orgId: string): Promise<WhiteLabelConf
       logoUrl: null,
       brandColor: DEFAULT_BRAND_COLOR,
       aiEnabled: true, // default ON; cabinet trebuie să dezactiveze explicit
+      signatureUrl: null,
+      signerName: null,
+      icpSegment: null,
       updatedAtISO: null,
       storageBackend: "local_fallback",
       persistenceStatus: "fallback",
@@ -151,6 +197,9 @@ export async function saveWhiteLabelConfig(
         logo_url: updated.logoUrl,
         brand_color: updated.brandColor,
         ai_enabled: updated.aiEnabled,
+        signature_url: updated.signatureUrl,
+        signer_name: updated.signerName,
+        icp_segment: updated.icpSegment,
         updated_at: updated.updatedAtISO,
       }
       await supabaseUpsert<WhiteLabelRow, WhiteLabelRow>("partner_white_label", row)

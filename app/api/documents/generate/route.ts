@@ -16,6 +16,7 @@ import {
   type DocumentGenerationInput,
 } from "@/lib/server/document-generator"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
+import { getActiveTemplateForType } from "@/lib/server/cabinet-templates-store"
 import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
@@ -71,6 +72,22 @@ export async function POST(request: Request) {
       paymentTerms: typeof body.paymentTerms === "string" ? body.paymentTerms.trim() || undefined : undefined,
       // S1.3 — AI ON/OFF per client. Default true daca whiteLabel lipseste.
       aiEnabled: whiteLabel?.aiEnabled ?? true,
+    }
+
+    // S1.1 — Daca cabinetul a uploadat template activ pentru acest documentType,
+    // il propagam in input pentru ca generatorul (fallback + prompt Gemini) sa-l
+    // foloseasca.
+    try {
+      const activeTemplate = await getActiveTemplateForType(
+        session.orgId,
+        documentType as DocumentType
+      )
+      if (activeTemplate) {
+        input.cabinetTemplateContent = activeTemplate.content
+        input.cabinetTemplateName = activeTemplate.name
+      }
+    } catch {
+      // missing template store nu blocheaza generarea
     }
 
     const sourceFindingId = body.sourceFindingId?.trim() || undefined

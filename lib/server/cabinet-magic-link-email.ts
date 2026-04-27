@@ -177,6 +177,9 @@ export async function sendCabinetMagicLinkEmail(
       logoUrl: null,
       brandColor: "#6366f1",
       aiEnabled: true,
+      signatureUrl: null,
+      signerName: null,
+      icpSegment: null,
       updatedAtISO: null,
     },
     orgName

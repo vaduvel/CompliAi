@@ -70,6 +70,15 @@ export type DocumentGenerationInput = {
    * Setat din `WhiteLabelConfig.aiEnabled` per org de catre cabinet.
    */
   aiEnabled?: boolean
+  /**
+   * S1.1 — Custom template upload cabinet.
+   * Markdown content cu variabile {{ORG_NAME}}, {{ORG_CUI}} etc. Daca exista,
+   * folosit ca template-ul de baza pentru fallback (in loc de skeleton intern)
+   * si trimis la Gemini ca structura de urmat. NULL = folosim CompliScan default.
+   */
+  cabinetTemplateContent?: string
+  /** Numele template-ului cabinet (informativ in metadata generated document). */
+  cabinetTemplateName?: string
 }
 
 export type GeneratedDocument = {
@@ -659,7 +668,35 @@ Cerințe:
 `,
   }
 
-  return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}`
+  // S1.1 — Dacă cabinetul a uploadat un template propriu, îl injectăm la final
+  // ca structură de bază pe care Gemini trebuie să o respecte (păstrând tonul
+  // și secțiunile cabinetului).
+  const cabinetTemplateBlock = input.cabinetTemplateContent?.trim()
+    ? [
+        "",
+        "=== TEMPLATE CABINET (urmează exact structura, secțiunile și tonul de mai jos; înlocuiește placeholder-urile {{VAR}} cu datele din Context) ===",
+        input.cabinetTemplateContent.trim(),
+        "=== SFÂRȘIT TEMPLATE CABINET ===",
+      ].join("\n")
+    : ""
+
+  return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}${cabinetTemplateBlock}`
+}
+
+// ── S1.1 helper — template variable substitution ──────────────────────────────
+
+/**
+ * Înlocuiește `{{VAR_NAME}}` cu valori din mapping. Variabilele lipsă rămân
+ * vizibile (NU le ștergem — semnalează cabinet că template-ul cere date noi).
+ */
+function applyTemplateVariables(content: string, vars: Record<string, string>): string {
+  return content.replace(/\{\{\s*([A-Z][A-Z0-9_]*)\s*\}\}/g, (match, name: string) => {
+    const value = vars[name]
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value
+    }
+    return match // păstrează `{{VAR}}` ca semnal ca lipsește data
+  })
 }
 
 // ── Static fallback templates ─────────────────────────────────────────────────
@@ -676,6 +713,32 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
   const serviceFallbackNote =
     "Draft pregătit cu CompliScan pentru revizia consultantului. Completează câmpurile operaționale înainte de utilizare oficială."
   const preparedBy = input.preparedBy?.trim() || "DPO Complet"
+
+  // S1.1 — Dacă cabinetul a uploadat un template activ pentru acest documentType,
+  // folosim conținutul template-ului ca bază (cu variabile substituite). NU mai
+  // construim skeleton-ul intern de mai jos.
+  if (input.cabinetTemplateContent && input.cabinetTemplateContent.trim().length > 0) {
+    const substituted = applyTemplateVariables(input.cabinetTemplateContent, {
+      ORG_NAME: input.orgName,
+      ORG_CUI: input.orgCui ?? "",
+      ORG_WEBSITE: websiteHost ?? "",
+      ORG_SECTOR: input.orgSector ?? "",
+      DPO_EMAIL: input.dpoEmail ?? "",
+      PREPARED_BY: preparedBy,
+      DOCUMENT_TITLE: title,
+      DOCUMENT_DATE: formattedDate,
+      DATE_LABEL: preferredDateLabel,
+    })
+    const expiry = calculateExpiryDates(input.documentType, now)
+    return {
+      documentType: input.documentType,
+      title,
+      content: normalizeGeneratedDocumentContent(substituted, input.documentType, now),
+      generatedAtISO: now,
+      llmUsed: false,
+      ...expiry,
+    }
+  }
 
   const contentMap: Record<DocumentType, string> = {
     "privacy-policy": [

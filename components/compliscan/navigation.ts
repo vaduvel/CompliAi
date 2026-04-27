@@ -48,6 +48,7 @@ export type DashboardNavId =
   | "pay-transparency"
   | "approvals"
   | "magic-links"
+  | "cabinet-templates"
   | "review-cycles"
   | "scheduled-reports"
   | "agenti"
@@ -230,6 +231,7 @@ export const dashboardSecondaryNavSections: DashboardNavSection[] = [
     items: [
       { id: "approvals", label: "Aprobări", href: dashboardRoutes.approvals, icon: CheckCircle, matchers: [dashboardRoutes.approvals] },
       { id: "magic-links", label: "Magic links", href: dashboardRoutes.magicLinks, icon: Send, matchers: [dashboardRoutes.magicLinks] },
+      { id: "cabinet-templates", label: "Template-uri cabinet", href: dashboardRoutes.cabinetTemplates, icon: BookOpen, matchers: [dashboardRoutes.cabinetTemplates] },
       { id: "review-cycles", label: "Review-uri", href: dashboardRoutes.reviewCycles, icon: CalendarClock, matchers: [dashboardRoutes.reviewCycles] },
       { id: "scheduled-reports", label: "Rapoarte programate", href: dashboardRoutes.settingsScheduledReports, icon: CalendarClock, matchers: [dashboardRoutes.settingsScheduledReports] },
       { id: "agenti", label: "Agenți AI", href: dashboardRoutes.agents, icon: Bot, matchers: [dashboardRoutes.agents] },

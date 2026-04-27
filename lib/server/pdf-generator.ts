@@ -11,6 +11,10 @@ type PDFMetadata = {
   // `audit_ready` = bandă verde "AUDIT READY" în header dreapta.
   // `review_required` (sau lipsă) = nicio bandă (default behaviour).
   auditReadiness?: "audit_ready" | "review_required" | null
+  // S1.5 — Numele consultantului (apare în footer ca "semnat de").
+  // signatureUrl nu e folosit aici (PDFKit nu randează URL remote sigur);
+  // dacă vrei semnătură vizuală, foloseste HTML preview din audit-pack-client.ts.
+  signerName?: string | null
 }
 
 let cachedPdfFont: Buffer | null = null
@@ -174,6 +178,20 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
             doc.page.height - 44,
             { width: W, align: "center" }
           )
+
+        // S1.5 — Signer line on last page only (sub footer text)
+        if (i === pages.count - 1 && metadata.signerName) {
+          doc
+            .fontSize(8)
+            .fillColor("#475569")
+            .font("CompliSans-Bold")
+            .text(
+              `Pregătit de: ${metadata.signerName}`,
+              doc.page.margins.left,
+              doc.page.height - 60,
+              { width: W, align: "right" }
+            )
+        }
 
         // Page number
         doc

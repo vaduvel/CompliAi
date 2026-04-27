@@ -213,6 +213,8 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
         // Issue 7 DPO — watermark vizual "AUDIT READY" pe fiecare pagină
         // când dosarul atinge stadiul canonic (toate cele 8 preconditii incl. baseline).
         auditReadiness: auditPack.executiveSummary.auditReadiness,
+        // S1.5 — Signer name pe ultima pagină (footer "Pregătit de: ...")
+        signerName: whiteLabel?.signerName?.trim() || preparedByName,
       })
       await fs.writeFile(path.join(bundleDir, "MANIFEST.pdf"), manifestPdf)
     } catch {

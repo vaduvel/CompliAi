@@ -39,6 +39,9 @@ export async function PATCH(request: Request) {
       brandColor?: string
       // S1.3 — AI ON/OFF per client. Cabinet poate dezactiva AI pentru clienti sensibili.
       aiEnabled?: boolean
+      // S1.5 — Signature upload (URL imagine PNG transparent, max 2MB)
+      signatureUrl?: string | null
+      signerName?: string | null
     }
 
     // Validate brandColor format if provided
@@ -52,6 +55,8 @@ export async function PATCH(request: Request) {
       ...(body.logoUrl !== undefined && { logoUrl: body.logoUrl }),
       ...(body.brandColor !== undefined && { brandColor: body.brandColor }),
       ...(typeof body.aiEnabled === "boolean" && { aiEnabled: body.aiEnabled }),
+      ...(body.signatureUrl !== undefined && { signatureUrl: body.signatureUrl }),
+      ...(body.signerName !== undefined && { signerName: body.signerName }),
     })
 
     return NextResponse.json({ ok: true, config })

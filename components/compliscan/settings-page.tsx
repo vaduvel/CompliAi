@@ -279,6 +279,9 @@ export function SettingsPageSurface() {
   const [wlLogoUrl, setWlLogoUrl] = useState("")
   // S1.3 — AI ON/OFF per client. Default true.
   const [wlAiEnabled, setWlAiEnabled] = useState(true)
+  // S1.5 — Signature upload + signer name pentru footer document.
+  const [wlSignatureUrl, setWlSignatureUrl] = useState("")
+  const [wlSignerName, setWlSignerName] = useState("")
   const [wlLoading, setWlLoading] = useState(false)
   const [wlSaving, setWlSaving] = useState(false)
   const [wlStorageBackend, setWlStorageBackend] = useState<"supabase" | "local_fallback">("supabase")
@@ -298,6 +301,8 @@ export function SettingsPageSurface() {
         setWlBrandColor(c.brandColor ?? "#6366f1")
         setWlLogoUrl(c.logoUrl ?? "")
         setWlAiEnabled(c.aiEnabled !== false) // missing/true → true
+        setWlSignatureUrl(c.signatureUrl ?? "")
+        setWlSignerName(c.signerName ?? "")
         setWlStorageBackend(c.storageBackend ?? "supabase")
         setWlPersistenceStatus(c.persistenceStatus ?? "synced")
       })
@@ -318,6 +323,8 @@ export function SettingsPageSurface() {
           brandColor: wlBrandColor,
           logoUrl: wlLogoUrl || null,
           aiEnabled: wlAiEnabled,
+          signatureUrl: wlSignatureUrl || null,
+          signerName: wlSignerName || null,
         }),
       })
       if (res.ok) {
@@ -1762,6 +1769,54 @@ export function SettingsPageSurface() {
                           />
                         </button>
                       </div>
+                    </div>
+
+                    {/* S1.5 — Signature upload pentru footer document */}
+                    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                      <div className="mb-3">
+                        <p className="text-sm font-semibold text-eos-text-muted">
+                          Semnătură consultant (opțional)
+                        </p>
+                        <p className="mt-1 text-xs text-eos-text-tertiary">
+                          Apare în footer-ul documentelor generate sau exportate. Recomandat: PNG cu fundal transparent, max 400×120px.
+                        </p>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <label className="block">
+                          <span className="text-xs font-medium text-eos-text-muted">URL imagine semnătură</span>
+                          <input
+                            className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            placeholder="https://..."
+                            value={wlSignatureUrl}
+                            onChange={(e) => setWlSignatureUrl(e.target.value)}
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="text-xs font-medium text-eos-text-muted">Numele afișat sub semnătură</span>
+                          <input
+                            className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            placeholder="Diana Popescu, DPO"
+                            value={wlSignerName}
+                            onChange={(e) => setWlSignerName(e.target.value)}
+                          />
+                        </label>
+                      </div>
+                      {wlSignatureUrl && /^https?:\/\//.test(wlSignatureUrl) && (
+                        <div className="mt-3 rounded-eos-md border border-dashed border-eos-border bg-white/5 p-3">
+                          <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary mb-2">
+                            Preview
+                          </p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={wlSignatureUrl}
+                            alt="Semnătură consultant"
+                            className="max-h-16 max-w-[280px] object-contain"
+                          />
+                          {wlSignerName && (
+                            <p className="mt-1 text-xs text-eos-text-muted">{wlSignerName}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
