@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
+import { sendCabinetMagicLinkEmail } from "@/lib/server/cabinet-magic-link-email"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { findSharedApprovalDocument } from "@/lib/server/shared-approval"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
@@ -67,6 +68,8 @@ export async function POST(request: Request, { params }: Params) {
   const commentId = `share-comment-${Date.now().toString(36)}`
   const nowISO = new Date().toISOString()
   let commentedDocument: { id: string; title: string } | null = null
+  // S1.8 — captură pentru email cabinet (după mutateStateForOrg).
+  let emailContext: { documentId: string; documentTitle: string; documentType: string } | null = null
 
   try {
     await mutateStateForOrg(payload.orgId, (current) => {
@@ -97,6 +100,11 @@ export async function POST(request: Request, { params }: Params) {
       commentedDocument = {
         id: nextDocument.id,
         title: nextDocument.title,
+      }
+      emailContext = {
+        documentId: nextDocument.id,
+        documentTitle: nextDocument.title,
+        documentType: nextDocument.documentType,
       }
 
       return {
@@ -135,6 +143,22 @@ export async function POST(request: Request, { params }: Params) {
         ]),
       }
     })
+
+    // S1.8 — Notify cabinet via Resend (best-effort, fără să blocheze response).
+    if (emailContext) {
+      const ctx = emailContext as { documentId: string; documentTitle: string; documentType: string }
+      void sendCabinetMagicLinkEmail(payload.orgId, "commented", {
+        documentId: ctx.documentId,
+        documentTitle: ctx.documentTitle,
+        documentType: ctx.documentType,
+        recipientType: payload.recipientType,
+        occurredAtISO: nowISO,
+        comment,
+        authorName,
+      }).catch(() => {
+        // email failure nu rupe comment flow-ul
+      })
+    }
 
     return NextResponse.json({
       ok: true,

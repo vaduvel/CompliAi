@@ -31,6 +31,8 @@ export const dashboardRoutes = {
   trustCenter: "/dashboard/reports/trust-center",
   generator: "/dashboard/generator",
   approvals: "/dashboard/approvals",
+  // S1.7 — Cabinet view pentru magic links trimise patroni (approve/reject/comment).
+  magicLinks: "/dashboard/magic-links",
   settings: "/dashboard/settings",
   settingsScheduledReports: "/dashboard/settings/scheduled-reports",
   settingsBilling: "/dashboard/settings/abonament",

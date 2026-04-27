@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { getDocumentAdoptionFeedback } from "@/lib/compliance/document-adoption"
 import { jsonError } from "@/lib/server/api-response"
+import { sendCabinetMagicLinkEmail } from "@/lib/server/cabinet-magic-link-email"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { findSharedApprovalDocument } from "@/lib/server/shared-approval"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
@@ -96,6 +97,8 @@ export async function POST(request: Request, { params }: Params) {
 
   const nowISO = new Date().toISOString()
   let rejectedDocument: { id: string; title: string; adoptionStatus: string } | null = null
+  // S1.8 — captură pentru email cabinet (după mutateStateForOrg).
+  let emailContext: { documentId: string; documentTitle: string; documentType: string } | null = null
 
   try {
     await mutateStateForOrg(payload.orgId, (current) => {
@@ -124,6 +127,11 @@ export async function POST(request: Request, { params }: Params) {
       })
       const rejectionEvidenceJson = JSON.stringify(rejectionEvidencePayload, null, 2)
 
+      emailContext = {
+        documentId: nextDocument.id,
+        documentTitle: nextDocument.title,
+        documentType: nextDocument.documentType,
+      }
       rejectedDocument = {
         id: nextDocument.id,
         title: nextDocument.title,
@@ -195,6 +203,21 @@ export async function POST(request: Request, { params }: Params) {
         ]),
       }
     })
+
+    // S1.8 — Notify cabinet via Resend (best-effort, fără să blocheze response).
+    if (emailContext) {
+      const ctx = emailContext as { documentId: string; documentTitle: string; documentType: string }
+      void sendCabinetMagicLinkEmail(payload.orgId, "rejected", {
+        documentId: ctx.documentId,
+        documentTitle: ctx.documentTitle,
+        documentType: ctx.documentType,
+        recipientType: payload.recipientType,
+        occurredAtISO: nowISO,
+        comment,
+      }).catch(() => {
+        // email failure nu rupe reject flow-ul
+      })
+    }
 
     return NextResponse.json({
       ok: true,

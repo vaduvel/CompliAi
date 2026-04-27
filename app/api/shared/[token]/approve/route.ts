@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { getDocumentAdoptionFeedback } from "@/lib/compliance/document-adoption"
 import { jsonError } from "@/lib/server/api-response"
+import { sendCabinetMagicLinkEmail } from "@/lib/server/cabinet-magic-link-email"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { findSharedApprovalDocument } from "@/lib/server/shared-approval"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
@@ -56,6 +57,8 @@ export async function POST(_request: Request, { params }: Params) {
 
   const nowISO = new Date().toISOString()
   let approvedDocument: { id: string; title: string; adoptionStatus: string } | null = null
+  // Captură pentru email-ul S1.8 (după mutateStateForOrg, în afara reducer-ului).
+  let emailContext: { documentId: string; documentTitle: string; documentType: string } | null = null
 
   try {
     await mutateStateForOrg(payload.orgId, (current) => {
@@ -87,6 +90,11 @@ export async function POST(_request: Request, { params }: Params) {
         id: nextDocument.id,
         title: nextDocument.title,
         adoptionStatus: nextDocument.adoptionStatus,
+      }
+      emailContext = {
+        documentId: nextDocument.id,
+        documentTitle: nextDocument.title,
+        documentType: nextDocument.documentType,
       }
 
       return {
@@ -151,6 +159,20 @@ export async function POST(_request: Request, { params }: Params) {
         ]),
       }
     })
+
+    // S1.8 — Notify cabinet via Resend (best-effort, fără să blocheze response).
+    if (emailContext) {
+      const ctx = emailContext as { documentId: string; documentTitle: string; documentType: string }
+      void sendCabinetMagicLinkEmail(payload.orgId, "approved", {
+        documentId: ctx.documentId,
+        documentTitle: ctx.documentTitle,
+        documentType: ctx.documentType,
+        recipientType: payload.recipientType,
+        occurredAtISO: nowISO,
+      }).catch(() => {
+        // email failure nu rupe approve flow-ul; signal e deja în alerts + events
+      })
+    }
 
     return NextResponse.json({
       ok: true,
