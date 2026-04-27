@@ -37,6 +37,8 @@ export async function PATCH(request: Request) {
       tagline?: string | null
       logoUrl?: string | null
       brandColor?: string
+      // S1.3 — AI ON/OFF per client. Cabinet poate dezactiva AI pentru clienti sensibili.
+      aiEnabled?: boolean
     }
 
     // Validate brandColor format if provided
@@ -49,6 +51,7 @@ export async function PATCH(request: Request) {
       ...(body.tagline !== undefined && { tagline: body.tagline }),
       ...(body.logoUrl !== undefined && { logoUrl: body.logoUrl }),
       ...(body.brandColor !== undefined && { brandColor: body.brandColor }),
+      ...(typeof body.aiEnabled === "boolean" && { aiEnabled: body.aiEnabled }),
     })
 
     return NextResponse.json({ ok: true, config })

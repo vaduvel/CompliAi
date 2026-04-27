@@ -277,6 +277,8 @@ export function SettingsPageSurface() {
   const [wlTagline, setWlTagline] = useState("")
   const [wlBrandColor, setWlBrandColor] = useState("#6366f1")
   const [wlLogoUrl, setWlLogoUrl] = useState("")
+  // S1.3 — AI ON/OFF per client. Default true.
+  const [wlAiEnabled, setWlAiEnabled] = useState(true)
   const [wlLoading, setWlLoading] = useState(false)
   const [wlSaving, setWlSaving] = useState(false)
   const [wlStorageBackend, setWlStorageBackend] = useState<"supabase" | "local_fallback">("supabase")
@@ -295,6 +297,7 @@ export function SettingsPageSurface() {
         setWlTagline(c.tagline ?? "")
         setWlBrandColor(c.brandColor ?? "#6366f1")
         setWlLogoUrl(c.logoUrl ?? "")
+        setWlAiEnabled(c.aiEnabled !== false) // missing/true → true
         setWlStorageBackend(c.storageBackend ?? "supabase")
         setWlPersistenceStatus(c.persistenceStatus ?? "synced")
       })
@@ -314,6 +317,7 @@ export function SettingsPageSurface() {
           tagline: wlTagline || null,
           brandColor: wlBrandColor,
           logoUrl: wlLogoUrl || null,
+          aiEnabled: wlAiEnabled,
         }),
       })
       if (res.ok) {
@@ -1724,6 +1728,40 @@ export function SettingsPageSurface() {
                         />
                         <p className="mt-1 text-xs text-eos-text-tertiary">URL public accesibil — apare în antetul rapoartelor exportate.</p>
                       </label>
+                    </div>
+
+                    {/* S1.3 — AI ON/OFF toggle per client */}
+                    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-eos-text-muted">
+                            Generare AI documente
+                          </p>
+                          <p className="mt-1 text-xs text-eos-text-tertiary">
+                            {wlAiEnabled
+                              ? "Documentele se generează cu Gemini EU pe baza șabloanelor + datele organizației. Ideal pentru viteză."
+                              : "Documentele se construiesc deterministic din șabloane validate, fără apel AI. Recomandat pentru clienți sensibili (banking, healthcare, public sector)."}
+                          </p>
+                          <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                            stare curentă: {wlAiEnabled ? "AI ON · Gemini EU" : "AI OFF · template-only"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={wlAiEnabled}
+                          onClick={() => setWlAiEnabled((prev) => !prev)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+                            wlAiEnabled ? "bg-eos-primary" : "bg-eos-border"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              wlAiEnabled ? "translate-x-6" : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

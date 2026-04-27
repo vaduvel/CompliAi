@@ -38,6 +38,8 @@ export type DocumentGenerationInput = {
   dataFlows?: string
   counterpartyName?: string
   counterpartyReferenceUrl?: string
+  /** Cabinet / partner name that prepared the draft for the client. */
+  preparedBy?: string
   // ── Sprint 16/16 — Extended fields ──────────────────────────────────────
   /** Job description: title of the position */
   jobTitle?: string
@@ -61,6 +63,13 @@ export type DocumentGenerationInput = {
   targetSystem?: string
   /** Deletion attestation: data category */
   dataCategory?: string
+  /**
+   * S1.3 — AI ON/OFF toggle per client (Issue 4 DPO follow-up).
+   * Default `true` (AI enabled). Cand `false`, generatorul ocoleste apelul Gemini
+   * si returneaza direct template-ul determinist (`buildFallbackDocument`).
+   * Setat din `WhiteLabelConfig.aiEnabled` per org de catre cabinet.
+   */
+  aiEnabled?: boolean
 }
 
 export type GeneratedDocument = {
@@ -663,9 +672,10 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
   const formattedDate = formatDocumentDateRo(now)
   const websiteHost = normalizeWebsiteForDocument(input.orgWebsite)
   const reviewWarning =
-    "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+    "⚠️ DRAFT — necesită validarea consultantului înainte de utilizare oficială."
   const serviceFallbackNote =
-    "Serviciul AI a fost indisponibil temporar, așa că acest draft a fost construit din șablonul de siguranță CompliAI."
+    "Draft pregătit cu CompliScan pentru revizia consultantului. Completează câmpurile operaționale înainte de utilizare oficială."
+  const preparedBy = input.preparedBy?.trim() || "DPO Complet"
 
   const contentMap: Record<DocumentType, string> = {
     "privacy-policy": [
@@ -740,9 +750,12 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       `# ${title}`,
       "",
       `**${preferredDateLabel}:** ${formattedDate}`,
-      `**Operator:** ${input.orgName}`,
-      `**Procesator / furnizor:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+      `**Client / Operator:** ${input.orgName}`,
+      `**Furnizor / Procesator:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
       `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare înainte de utilizare oficială`,
       "",
       `> ${serviceFallbackNote}`,
       "",
@@ -1239,6 +1252,15 @@ export async function generateDocument(
 ): Promise<GeneratedDocument> {
   const now = new Date().toISOString()
   const title = getGeneratedDocumentTitle(input)
+
+  // S1.3 — AI ON/OFF toggle per client.
+  // Cand cabinet-ul a dezactivat AI pentru acest client (ex: client sensibil),
+  // returnam template-ul determinist fara apel la Gemini. `llmUsed: false`
+  // ramane vizibil in metadata generated document, deci dosarul stie ca
+  // documentul a fost construit doar din sablon.
+  if (input.aiEnabled === false) {
+    return buildFallbackDocument(input)
+  }
 
   if (!GEMINI_API_KEY) {
     return buildFallbackDocument(input)

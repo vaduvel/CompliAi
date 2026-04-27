@@ -16,6 +16,7 @@ import {
   type DocumentGenerationInput,
 } from "@/lib/server/document-generator"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
 
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
       return jsonError("orgName este obligatoriu.", 400, "ORG_NAME_REQUIRED")
     }
 
+    const whiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
     const input: DocumentGenerationInput = {
       documentType: documentType as DocumentType,
       orgName,
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
         typeof body.counterpartyReferenceUrl === "string"
           ? body.counterpartyReferenceUrl.trim() || undefined
           : undefined,
+      preparedBy: whiteLabel?.partnerName?.trim() || undefined,
       // Per-role job description fields
       jobTitle: typeof body.jobTitle === "string" ? body.jobTitle.trim() || undefined : undefined,
       department: typeof body.department === "string" ? body.department.trim() || undefined : undefined,
@@ -66,6 +69,8 @@ export async function POST(request: Request) {
       // Contracts
       serviceDescription: typeof body.serviceDescription === "string" ? body.serviceDescription.trim() || undefined : undefined,
       paymentTerms: typeof body.paymentTerms === "string" ? body.paymentTerms.trim() || undefined : undefined,
+      // S1.3 — AI ON/OFF per client. Default true daca whiteLabel lipseste.
+      aiEnabled: whiteLabel?.aiEnabled ?? true,
     }
 
     const sourceFindingId = body.sourceFindingId?.trim() || undefined
