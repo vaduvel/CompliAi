@@ -282,6 +282,8 @@ export function SettingsPageSurface() {
   // S1.5 — Signature upload + signer name pentru footer document.
   const [wlSignatureUrl, setWlSignatureUrl] = useState("")
   const [wlSignerName, setWlSignerName] = useState("")
+  // S2B.1 — AI provider override (gemini | mistral). null = default env.
+  const [wlAiProvider, setWlAiProvider] = useState<"gemini" | "mistral" | null>(null)
   const [wlLoading, setWlLoading] = useState(false)
   const [wlSaving, setWlSaving] = useState(false)
   const [wlStorageBackend, setWlStorageBackend] = useState<"supabase" | "local_fallback">("supabase")
@@ -303,6 +305,7 @@ export function SettingsPageSurface() {
         setWlAiEnabled(c.aiEnabled !== false) // missing/true → true
         setWlSignatureUrl(c.signatureUrl ?? "")
         setWlSignerName(c.signerName ?? "")
+        setWlAiProvider(c.aiProvider ?? null)
         setWlStorageBackend(c.storageBackend ?? "supabase")
         setWlPersistenceStatus(c.persistenceStatus ?? "synced")
       })
@@ -325,6 +328,7 @@ export function SettingsPageSurface() {
           aiEnabled: wlAiEnabled,
           signatureUrl: wlSignatureUrl || null,
           signerName: wlSignerName || null,
+          aiProvider: wlAiProvider,
         }),
       })
       if (res.ok) {
@@ -1771,6 +1775,50 @@ export function SettingsPageSurface() {
                       </div>
                     </div>
 
+                    {/* S2B.1 — AI provider selector (Gemini default / Mistral EU sovereignty) */}
+                    {wlAiEnabled && (
+                      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                        <p className="text-sm font-semibold text-eos-text-muted">
+                          Provider AI
+                        </p>
+                        <p className="mt-1 text-xs text-eos-text-tertiary">
+                          Default-ul de sistem este Google Gemini (US/EU regional). Pentru
+                          clienți care cer suveranitate strictă (banking/healthcare/public
+                          sector EU), poți comuta la Mistral Large 2 (sediu Paris, hosting EU).
+                        </p>
+                        <div className="mt-3 grid gap-2 md:grid-cols-3">
+                          <ProviderOption
+                            id={null}
+                            currentValue={wlAiProvider}
+                            label="Default sistem"
+                            sublabel="Folosește setarea env (gemini)"
+                            onSelect={() => setWlAiProvider(null)}
+                          />
+                          <ProviderOption
+                            id="gemini"
+                            currentValue={wlAiProvider}
+                            label="Google Gemini"
+                            sublabel="Rapid · regional EU/US"
+                            onSelect={() => setWlAiProvider("gemini")}
+                          />
+                          <ProviderOption
+                            id="mistral"
+                            currentValue={wlAiProvider}
+                            label="Mistral EU"
+                            sublabel="Suveranitate · sediu Paris"
+                            onSelect={() => setWlAiProvider("mistral")}
+                          />
+                        </div>
+                        <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                          stare: {wlAiProvider === "mistral"
+                            ? "MISTRAL EU forțat"
+                            : wlAiProvider === "gemini"
+                              ? "GEMINI forțat"
+                              : "default sistem (config env)"}
+                        </p>
+                      </div>
+                    )}
+
                     {/* S1.5 — Signature upload pentru footer document */}
                     <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
                       <div className="mb-3">
@@ -2110,4 +2158,42 @@ export function SettingsPageSurface() {
       setRemovingMembershipId(null)
     }
   }
+}
+
+// ── S2B.1 — AI provider option card ──────────────────────────────────────────
+
+function ProviderOption({
+  id,
+  currentValue,
+  label,
+  sublabel,
+  onSelect,
+}: {
+  id: "gemini" | "mistral" | null
+  currentValue: "gemini" | "mistral" | null
+  label: string
+  sublabel: string
+  onSelect: () => void
+}) {
+  const selected = id === currentValue
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={[
+        "rounded-eos-md border p-3 text-left transition-colors",
+        selected
+          ? "border-eos-primary bg-eos-primary/[0.08]"
+          : "border-eos-border bg-eos-surface hover:border-eos-border-strong",
+      ].join(" ")}
+    >
+      <p className={[
+        "text-sm font-semibold",
+        selected ? "text-eos-primary" : "text-eos-text-muted",
+      ].join(" ")}>
+        {label}
+      </p>
+      <p className="mt-0.5 text-[11px] text-eos-text-tertiary">{sublabel}</p>
+    </button>
+  )
 }

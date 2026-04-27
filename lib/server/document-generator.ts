@@ -2,12 +2,14 @@
 // Generates: Privacy Policy, Cookie Policy, DPA, Retention Policy, NIS2 Incident Response Plan,
 // AI Governance Policy, Job Description, HR Internal Procedures, REGES Correction Brief,
 // Contract Template, Deletion Attestation.
-// Uses Gemini API. Falls back to a static skeleton when GEMINI_API_KEY is absent.
+// S2B.1 — Suport Gemini + Mistral EU prin ai-provider abstraction.
+// Falls back to a static skeleton când niciun provider nu e disponibil.
 
-import { fetchWithOperationalGuard } from "@/lib/server/http-client"
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite"
+import {
+  generateContent,
+  isGeminiAvailable,
+  isMistralAvailable,
+} from "@/lib/server/ai-provider"
 
 export type DocumentType =
   | "privacy-policy"
@@ -79,6 +81,12 @@ export type DocumentGenerationInput = {
   cabinetTemplateContent?: string
   /** Numele template-ului cabinet (informativ in metadata generated document). */
   cabinetTemplateName?: string
+  /**
+   * S2B.1 — AI provider override per request.
+   * Lipsă = folosim default-ul env (gemini). "mistral" cere MISTRAL_API_KEY
+   * + tier Pro+ în registry. Setat din WhiteLabelConfig.aiProvider.
+   */
+  aiProvider?: "gemini" | "mistral"
 }
 
 export type GeneratedDocument = {
@@ -1325,60 +1333,24 @@ export async function generateDocument(
     return buildFallbackDocument(input)
   }
 
-  if (!GEMINI_API_KEY) {
+  // S2B.1 — Verificăm disponibilitatea provider-ului. Dacă cabinet a setat
+  // mistral dar lipsesc credentialele, ai-provider face fallback la gemini.
+  if (!isGeminiAvailable() && !isMistralAvailable()) {
     return buildFallbackDocument(input)
   }
 
   const prompt = buildPrompt(input, now)
 
   try {
-    const response = await fetchWithOperationalGuard(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            topP: 0.95,
-            maxOutputTokens: 4096,
-          },
-        }),
-        cache: "no-store",
-        timeoutMs: 55_000,
-        retries: 2,
-        retryDelayMs: 800,
-        label: `document-generator:${input.documentType}`,
-      }
-    )
+    const result = await generateContent({
+      prompt,
+      provider: input.aiProvider,
+      temperature: 0.2,
+      maxOutputTokens: 4096,
+      label: `document-generator:${input.documentType}`,
+    })
 
-    if (!response.ok) {
-      const text = await response.text()
-
-      if ([408, 429, 500, 502, 503, 504].includes(response.status)) {
-        return buildFallbackDocument(input)
-      }
-
-      throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 200)}`)
-    }
-
-    const json = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
-    }
-
-    const content =
-      json.candidates?.[0]?.content?.parts
-        ?.map((p) => p.text ?? "")
-        .join("")
-        .trim() ?? ""
-
-    if (!content) {
-      throw new Error("Gemini a returnat un document gol.")
-    }
-
-    const normalizedContent = normalizeGeneratedDocumentContent(content, input.documentType, now)
-
+    const normalizedContent = normalizeGeneratedDocumentContent(result.content, input.documentType, now)
     const expiry = calculateExpiryDates(input.documentType, now)
 
     return {
@@ -1391,6 +1363,7 @@ export async function generateDocument(
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
+    // Retryable errors (timeout / 5xx) → fallback determinist.
     if (
       message.includes("HTTP_TIMEOUT") ||
       message.includes("Gemini API error 408") ||
@@ -1398,7 +1371,13 @@ export async function generateDocument(
       message.includes("Gemini API error 500") ||
       message.includes("Gemini API error 502") ||
       message.includes("Gemini API error 503") ||
-      message.includes("Gemini API error 504")
+      message.includes("Gemini API error 504") ||
+      message.includes("Mistral API error 408") ||
+      message.includes("Mistral API error 429") ||
+      message.includes("Mistral API error 500") ||
+      message.includes("Mistral API error 502") ||
+      message.includes("Mistral API error 503") ||
+      message.includes("Mistral API error 504")
     ) {
       return buildFallbackDocument(input)
     }

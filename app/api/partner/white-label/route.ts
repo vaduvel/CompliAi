@@ -42,6 +42,10 @@ export async function PATCH(request: Request) {
       // S1.5 — Signature upload (URL imagine PNG transparent, max 2MB)
       signatureUrl?: string | null
       signerName?: string | null
+      // S1.6 — ICP segment selectat la onboarding
+      icpSegment?: "solo" | "cabinet-dpo" | "cabinet-fiscal" | "imm-internal" | "enterprise" | null
+      // S2B.1 — AI provider override per cabinet
+      aiProvider?: "gemini" | "mistral" | null
     }
 
     // Validate brandColor format if provided
@@ -57,6 +61,8 @@ export async function PATCH(request: Request) {
       ...(typeof body.aiEnabled === "boolean" && { aiEnabled: body.aiEnabled }),
       ...(body.signatureUrl !== undefined && { signatureUrl: body.signatureUrl }),
       ...(body.signerName !== undefined && { signerName: body.signerName }),
+      ...(body.icpSegment !== undefined && { icpSegment: body.icpSegment }),
+      ...(body.aiProvider !== undefined && { aiProvider: body.aiProvider }),
     })
 
     return NextResponse.json({ ok: true, config })

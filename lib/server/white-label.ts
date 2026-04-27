@@ -32,6 +32,9 @@ export type WhiteLabelConfig = {
   //   "imm-internal"  → userMode: compliance (responsabil intern IMM)
   //   "enterprise"    → userMode: compliance (CISO/multi-framework, sales-led)
   icpSegment: IcpSegment | null
+  // S2B.1 — AI provider override per cabinet (EU sovereignty option).
+  // null/undefined → default env (gemini). "mistral" doar pentru Pro+ tiers.
+  aiProvider: "gemini" | "mistral" | null
   updatedAtISO: string | null
   storageBackend?: "supabase" | "local_fallback"
   persistenceStatus?: "synced" | "fallback"
@@ -54,6 +57,7 @@ type WhiteLabelRow = {
   signature_url: string | null
   signer_name: string | null
   icp_segment: string | null
+  ai_provider: string | null
   updated_at: string | null
 }
 
@@ -68,6 +72,11 @@ const ICP_SEGMENTS: readonly IcpSegment[] = [
 function parseIcpSegment(value: unknown): IcpSegment | null {
   if (typeof value !== "string") return null
   return (ICP_SEGMENTS as readonly string[]).includes(value) ? (value as IcpSegment) : null
+}
+
+function parseAiProvider(value: unknown): "gemini" | "mistral" | null {
+  if (value === "gemini" || value === "mistral") return value
+  return null
 }
 
 const DEFAULT_BRAND_COLOR = "#6366f1"
@@ -89,6 +98,7 @@ function rowToConfig(row: WhiteLabelRow): WhiteLabelConfig {
     signatureUrl: row.signature_url ?? null,
     signerName: row.signer_name ?? null,
     icpSegment: parseIcpSegment(row.icp_segment),
+    aiProvider: parseAiProvider(row.ai_provider),
     updatedAtISO: row.updated_at ?? null,
     storageBackend: "supabase",
     persistenceStatus: "synced",
@@ -118,6 +128,7 @@ async function readLocalWhiteLabelConfig(orgId: string): Promise<WhiteLabelConfi
       signatureUrl: typeof parsed.signatureUrl === "string" ? parsed.signatureUrl : null,
       signerName: typeof parsed.signerName === "string" ? parsed.signerName : null,
       icpSegment: parseIcpSegment(parsed.icpSegment),
+      aiProvider: parseAiProvider(parsed.aiProvider),
       updatedAtISO: typeof parsed.updatedAtISO === "string" ? parsed.updatedAtISO : null,
       storageBackend: "local_fallback",
       persistenceStatus: "fallback",
@@ -165,6 +176,7 @@ export async function getWhiteLabelConfig(orgId: string): Promise<WhiteLabelConf
       signatureUrl: null,
       signerName: null,
       icpSegment: null,
+      aiProvider: null,
       updatedAtISO: null,
       storageBackend: "local_fallback",
       persistenceStatus: "fallback",
@@ -200,6 +212,7 @@ export async function saveWhiteLabelConfig(
         signature_url: updated.signatureUrl,
         signer_name: updated.signerName,
         icp_segment: updated.icpSegment,
+        ai_provider: updated.aiProvider,
         updated_at: updated.updatedAtISO,
       }
       await supabaseUpsert<WhiteLabelRow, WhiteLabelRow>("partner_white_label", row)

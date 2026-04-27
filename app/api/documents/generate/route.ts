@@ -72,6 +72,8 @@ export async function POST(request: Request) {
       paymentTerms: typeof body.paymentTerms === "string" ? body.paymentTerms.trim() || undefined : undefined,
       // S1.3 — AI ON/OFF per client. Default true daca whiteLabel lipseste.
       aiEnabled: whiteLabel?.aiEnabled ?? true,
+      // S2B.1 — Provider override per cabinet (default env: gemini).
+      aiProvider: whiteLabel?.aiProvider ?? undefined,
     }
 
     // S1.1 — Daca cabinetul a uploadat template activ pentru acest documentType,

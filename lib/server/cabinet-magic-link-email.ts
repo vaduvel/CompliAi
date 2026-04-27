@@ -180,6 +180,7 @@ export async function sendCabinetMagicLinkEmail(
       signatureUrl: null,
       signerName: null,
       icpSegment: null,
+      aiProvider: null,
       updatedAtISO: null,
     },
     orgName
