@@ -46,7 +46,10 @@ export function buildAuditPack({
     snapshot,
   })
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
-  const validatedEvidenceItems = controlsMatrix.filter((item) => item.auditDecision === "pass").length
+  const validatedEvidenceItems = Math.max(
+    controlsMatrix.filter((item) => item.auditDecision === "pass").length,
+    evidenceLedgerSummary.sufficient
+  )
   const missingEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
 
   return {
@@ -60,7 +63,8 @@ export function buildAuditPack({
         compliancePack,
         activeDrifts,
         missingEvidenceItems,
-        auditQualityGates
+        auditQualityGates,
+        validatedBaseline
       ),
       baselineStatus: validatedBaseline ? "validated" : "missing",
       systemsInScope: compliancePack.entries.length,
@@ -417,18 +421,30 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
         taskId.startsWith("finding-")
           ? state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
           : undefined
+      const approvalDocumentId = taskId.startsWith("document-approval-")
+        ? taskId.replace(/^document-approval-/, "")
+        : null
+      const approvalDocument = approvalDocumentId
+        ? state.generatedDocuments.find((item) => item.id === approvalDocumentId)
+        : undefined
+      const approvalLawReference =
+        approvalDocument?.documentType === "dpa" ? "GDPR Art. 28" : null
 
       return {
         taskId,
-        title: remediation?.title || finding?.title || "Task fara titlu",
-        lawReference: remediation?.lawReference || finding?.legalReference || null,
+        title:
+          remediation?.title ||
+          finding?.title ||
+          (approvalDocument ? `Aprobare client: ${approvalDocument.title}` : "Task fara titlu"),
+        lawReference:
+          remediation?.lawReference || finding?.legalReference || approvalLawReference || null,
         status: taskState.status,
         validationStatus: taskState.validationStatus ?? "idle",
         validationMessage: taskState.validationMessage ?? null,
         updatedAtISO: taskState.updatedAtISO,
         evidence: taskState.attachedEvidenceMeta ?? null,
         evidenceQuality: taskState.attachedEvidenceMeta?.quality ?? null,
-        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || null,
+        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || approvalDocument?.title || null,
       }
     })
     .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
@@ -481,12 +497,15 @@ function deriveAuditReadiness(
   compliancePack: AICompliancePack,
   activeDrifts: ComplianceState["driftRecords"],
   missingEvidenceItems: number,
-  auditQualityGates: AuditPackV2["auditQualityGates"]
+  auditQualityGates: AuditPackV2["auditQualityGates"],
+  validatedBaseline: CompliScanSnapshot | null
 ): AuditPackV2["executiveSummary"]["auditReadiness"] {
   const activeDriftCount = activeDrifts.length
   const blockingDrifts = activeDrifts.filter((drift) => drift.blocksAudit).length
   const breachedDrifts = activeDrifts.filter((drift) => Boolean(drift.escalationBreachedAtISO)).length
 
+  // Issue 7 DPO — `audit_ready` cere reper stabil validat (baseline freeze).
+  // Fără baseline, nu există comparatie auditabilă; rămâne `review_required`.
   if (
     auditQualityGates.decision === "pass" &&
     compliancePack.summary.reviewRequiredEntries === 0 &&
@@ -494,7 +513,8 @@ function deriveAuditReadiness(
     activeDriftCount === 0 &&
     blockingDrifts === 0 &&
     breachedDrifts === 0 &&
-    missingEvidenceItems === 0
+    missingEvidenceItems === 0 &&
+    validatedBaseline !== null
   ) {
     return "audit_ready"
   }

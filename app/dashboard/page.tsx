@@ -164,16 +164,22 @@ export default function DashboardPage() {
     ? dashboardFindingRoute(nextBestActionFindingId)
     : dashboardRoutes.resolve
 
+  // Issue 7 DPO — folosim stadiul canonic deriveAuditReadiness ca sursă unică.
+  // "Audit ready" implică acum și baseline validat (a 8-a precondiție).
+  const canonicalAuditReadiness = data.auditReadinessSummary?.auditReadiness
+  const hasValidatedBaseline = Boolean(state.validatedBaselineSnapshotId)
   const auditStatusLabel =
-    data.summary.score >= 90
-      ? "Pregătit"
-      : activeDrifts.some((d) => d.blocksAudit)
-        ? "Blocat"
-        : missingEvidenceCount > 0
-          ? "Dovezi slabe"
-          : data.summary.score >= 60
-            ? "În progres"
-            : "Neînceput"
+    canonicalAuditReadiness === "audit_ready"
+      ? "Audit ready"
+      : data.summary.score >= 90
+        ? "Pregătit"
+        : activeDrifts.some((d) => d.blocksAudit)
+          ? "Blocat"
+          : missingEvidenceCount > 0
+            ? "Dovezi slabe"
+            : data.summary.score >= 60
+              ? "În progres"
+              : "Neînceput"
 
   // Per-framework status derived from findings
   const frameworkItems = applicableEntries
@@ -288,18 +294,23 @@ export default function DashboardPage() {
       label: "Audit dosar",
       value: auditStatusLabel,
       stripe:
-        auditStatusLabel === "Pregătit"
+        auditStatusLabel === "Audit ready" || auditStatusLabel === "Pregătit"
           ? "success"
           : auditStatusLabel === "Blocat"
             ? "critical"
             : undefined,
       valueTone:
-        auditStatusLabel === "Pregătit"
+        auditStatusLabel === "Audit ready" || auditStatusLabel === "Pregătit"
           ? "success"
           : auditStatusLabel === "Blocat"
             ? "critical"
             : "warning",
-      detail: missingEvidenceCount > 0 ? `${missingEvidenceCount} dovezi lipsă` : "dosar complet",
+      // Issue 2 DPO — semnal vizibil pe cockpit când baseline e validat.
+      detail: hasValidatedBaseline
+        ? "Baseline validat ✓"
+        : missingEvidenceCount > 0
+          ? `${missingEvidenceCount} dovezi lipsă`
+          : "dosar complet",
     },
     {
       id: "aplicabil",

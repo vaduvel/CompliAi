@@ -84,45 +84,45 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
 
     await fs.writeFile(
       path.join(bundleDir, "README.txt"),
-      buildReadme(auditPack, { hasAnnexLiteContent, hasNis2Content, preparedByName }),
+      replaceLegacyBrand(buildReadme(auditPack, { hasAnnexLiteContent, hasNis2Content, preparedByName })),
       "utf8"
     )
     await fs.writeFile(
       path.join(reportsDir, "executive-summary.txt"),
-      buildExecutiveSummary(auditPack, { preparedByName }),
+      replaceLegacyBrand(buildExecutiveSummary(auditPack, { preparedByName })),
       "utf8"
     )
     await fs.writeFile(
       path.join(dataDir, "audit-pack-v2-1.json"),
-      JSON.stringify(auditPack, null, 2),
+      stringifyBundleJson(auditPack),
       "utf8"
     )
     await fs.writeFile(
       path.join(dataDir, "ai-compliance-pack.json"),
-      JSON.stringify(auditPack.appendix.compliancePack, null, 2),
+      stringifyBundleJson(auditPack.appendix.compliancePack),
       "utf8"
     )
     await fs.writeFile(
       path.join(dataDir, "traceability-matrix.json"),
-      JSON.stringify(auditPack.traceabilityMatrix, null, 2),
+      stringifyBundleJson(auditPack.traceabilityMatrix),
       "utf8"
     )
     await fs.writeFile(
       path.join(dataDir, "evidence-ledger.json"),
-      JSON.stringify(auditPack.evidenceLedger, null, 2),
+      stringifyBundleJson(auditPack.evidenceLedger),
       "utf8"
     )
     await fs.writeFile(
       path.join(reportsDir, clientDocument.fileName),
-      clientDocument.html,
+      replaceLegacyBrand(clientDocument.html),
       "utf8"
     )
     if (annexLiteDocument) {
-      await fs.writeFile(
-        path.join(reportsDir, annexLiteDocument.fileName),
-        annexLiteDocument.html,
-        "utf8"
-      )
+        await fs.writeFile(
+          path.join(reportsDir, annexLiteDocument.fileName),
+          replaceLegacyBrand(annexLiteDocument.html),
+          "utf8"
+        )
     }
 
     if (hasNis2Content) {
@@ -194,22 +194,25 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
 
     // MANIFEST.md — lizibil de orice inspector, cu hash-uri pentru artefactele deja generate.
     const manifestFileHashes = await computeBundleFileHashes(bundleDir)
-    const manifestMd = buildManifestMarkdown(
+    const manifestMd = replaceLegacyBrand(buildManifestMarkdown(
       auditPack,
       nis2State,
       includedEvidence,
       maturityAssessment,
       manifestFileHashes,
       { hasAnnexLiteContent, hasNis2Content, preparedByName }
-    )
+    ))
     await fs.writeFile(path.join(bundleDir, "MANIFEST.md"), manifestMd, "utf8")
 
     // MANIFEST.pdf — generat din Markdown
     try {
       const manifestPdf = await buildPDFFromMarkdown(manifestMd, {
-        orgName: auditPack.workspace.label,
+        orgName: getAuditPackDisplayName(auditPack),
         documentType: "Dosar de Control — Manifest",
         generatedAt: auditPack.generatedAt,
+        // Issue 7 DPO — watermark vizual "AUDIT READY" pe fiecare pagină
+        // când dosarul atinge stadiul canonic (toate cele 8 preconditii incl. baseline).
+        auditReadiness: auditPack.executiveSummary.auditReadiness,
       })
       await fs.writeFile(path.join(bundleDir, "MANIFEST.pdf"), manifestPdf)
     } catch {
@@ -220,7 +223,7 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
 
     await fs.writeFile(
       path.join(dataDir, "bundle-manifest.json"),
-      JSON.stringify(
+      stringifyBundleJson(
         {
           manifestVersion: "1.1",
           hashAlgorithm: "sha256",
@@ -230,9 +233,7 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
           bundleEvidenceSummary: auditPack.bundleEvidenceSummary,
           includedEvidence,
           files: finalFileHashes,
-        },
-        null,
-        2
+        }
       ),
       "utf8"
     )
@@ -326,7 +327,7 @@ async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {
           },
           null,
           2
-        ),
+        ).replaceAll("CompliAI", "CompliScan"),
         "utf8"
       )
       includedEvidence.push({
@@ -357,10 +358,19 @@ async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {
   return includedEvidence
 }
 
+function replaceLegacyBrand(value: string) {
+  return value.replaceAll("CompliAI", "CompliScan")
+}
+
+function stringifyBundleJson(value: unknown) {
+  return replaceLegacyBrand(JSON.stringify(value, null, 2))
+}
+
 function buildReadme(
   auditPack: AuditPackV2,
   options: { hasAnnexLiteContent: boolean; hasNis2Content: boolean; preparedByName: string | null }
 ) {
+  const workspaceName = getAuditPackDisplayName(auditPack)
   const recommendedOrder = [
     "1. reports/executive-summary.txt",
     "2. reports/audit-pack-client-*.html",
@@ -383,7 +393,7 @@ function buildReadme(
   return [
     "CompliScan Audit Pack Dossier",
     "",
-    `Workspace: ${auditPack.workspace.label}`,
+    `Workspace: ${workspaceName}`,
     ...(options.preparedByName ? [`Prepared by: ${options.preparedByName}`] : []),
     `Generated at: ${auditPack.generatedAt}`,
     `Audit readiness: ${auditPack.executiveSummary.auditReadiness}`,
@@ -403,8 +413,9 @@ function buildExecutiveSummary(
   auditPack: AuditPackV2,
   options: { preparedByName: string | null }
 ) {
+  const workspaceName = getAuditPackDisplayName(auditPack)
   return [
-    `Workspace: ${auditPack.workspace.label}`,
+    `Workspace: ${workspaceName}`,
     ...(options.preparedByName ? [`Prepared by: ${options.preparedByName}`] : []),
     `Generated at: ${auditPack.generatedAt}`,
     `Compliance score: ${auditPack.executiveSummary.complianceScore ?? "n/a"}`,
@@ -476,8 +487,12 @@ function buildManifestMarkdown(
     preparedByName: null,
   }
 ): string {
-  const orgName = sanitizeForMarkdown(auditPack.workspace.label)
-  const cui = sanitizeForMarkdown(auditPack.workspace.name ?? "—")
+  const orgName = sanitizeForMarkdown(getAuditPackDisplayName(auditPack))
+  const cui = sanitizeForMarkdown(
+    auditPack.workspace.label && auditPack.workspace.label !== auditPack.workspace.name
+      ? auditPack.workspace.label
+      : auditPack.workspace.id
+  )
   const date = new Date(auditPack.generatedAt).toLocaleDateString("ro-RO", {
     day: "numeric", month: "long", year: "numeric",
   })
@@ -567,4 +582,8 @@ function buildManifestMarkdown(
   )
 
   return lines.join("\n")
+}
+
+function getAuditPackDisplayName(auditPack: AuditPackV2) {
+  return auditPack.workspace.name || auditPack.workspace.label || "Workspace"
 }

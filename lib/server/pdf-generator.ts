@@ -7,16 +7,22 @@ type PDFMetadata = {
   orgName: string
   documentType: string
   generatedAt?: string
+  // Issue 7 DPO — watermark vizual pe fiecare pagină când stadiul canonic e atins.
+  // `audit_ready` = bandă verde "AUDIT READY" în header dreapta.
+  // `review_required` (sau lipsă) = nicio bandă (default behaviour).
+  auditReadiness?: "audit_ready" | "review_required" | null
 }
 
 let cachedPdfFont: Buffer | null = null
 let pdfkitDataLookupPatched = false
 
-const PDFKIT_RUNTIME_DATA_SEGMENT = `${path.sep}.next${path.sep}server${path.sep}chunks${path.sep}data${path.sep}`
+const PDFKIT_RUNTIME_DATA_SEGMENT = new RegExp(
+  `${path.sep.replace("\\", "\\\\")}\\.next${path.sep.replace("\\", "\\\\")}server${path.sep.replace("\\", "\\\\")}(?:chunks|vendor-chunks)${path.sep.replace("\\", "\\\\")}data${path.sep.replace("\\", "\\\\")}`
+)
 const PDFKIT_VENDOR_DATA_DIR = path.join(process.cwd(), "node_modules", "pdfkit", "js", "data")
 
 export function resolvePdfkitRuntimeDataFallback(filePath: string) {
-  if (!filePath.includes(PDFKIT_RUNTIME_DATA_SEGMENT)) {
+  if (!PDFKIT_RUNTIME_DATA_SEGMENT.test(filePath)) {
     return undefined
   }
 
@@ -102,6 +108,7 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
 
     function drawPageDecorations() {
       const pages = doc.bufferedPageRange()
+      const isAuditReady = metadata.auditReadiness === "audit_ready"
       for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(pages.start + i)
 
@@ -111,18 +118,41 @@ export async function buildPDFFromMarkdown(content: string, metadata: PDFMetadat
           .fillColor("#94a3b8")
           .font("CompliSans")
           .text(
-            `Generat de CompliAI · ${metadata.orgName} · ${date}`,
+            `Generat cu CompliScan · ${metadata.orgName} · ${date}`,
             doc.page.margins.left,
             24,
             { width: W, align: "left" }
           )
 
+        // Issue 7 DPO — watermark "AUDIT READY" în colțul dreapta-sus al header-ului.
+        // Apare DOAR când deriveAuditReadiness a returnat "audit_ready" (toate
+        // preconditiile, inclusiv baseline validat, sunt indeplinite).
+        if (isAuditReady) {
+          const badgeText = "AUDIT READY"
+          const badgeWidth = 70
+          const badgeHeight = 14
+          const badgeX = doc.page.margins.left + W - badgeWidth
+          const badgeY = 18
+          doc
+            .roundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 3)
+            .fillColor("#10b981")
+            .fill()
+          doc
+            .fontSize(7.5)
+            .fillColor("#ffffff")
+            .font("CompliSans-Bold")
+            .text(badgeText, badgeX, badgeY + 3.5, {
+              width: badgeWidth,
+              align: "center",
+            })
+        }
+
         // Header separator
         doc
           .moveTo(doc.page.margins.left, 38)
           .lineTo(doc.page.margins.left + W, 38)
-          .strokeColor("#e2e8f0")
-          .lineWidth(0.5)
+          .strokeColor(isAuditReady ? "#10b981" : "#e2e8f0")
+          .lineWidth(isAuditReady ? 1 : 0.5)
           .stroke()
 
         // Footer separator

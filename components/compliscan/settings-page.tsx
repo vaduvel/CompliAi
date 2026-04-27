@@ -534,6 +534,26 @@ export function SettingsPageSurface() {
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
+
+  // Issue 2 DPO — preconditii pentru "Valideaza snapshot ca baseline".
+  // Doc 07 cere: 0 findings open + 0 remediations active + 0 missing evidence.
+  const auditSummary = cockpit.data.auditReadinessSummary
+  const baselineOpenFindings = auditSummary?.openFindings ?? 0
+  const baselineRemediationOpen = auditSummary?.remediationOpen ?? 0
+  const baselineMissingEvidence = auditSummary?.missingEvidenceItems ?? 0
+  const baselineActiveDrifts = auditSummary?.activeDrifts ?? 0
+  const baselinePreconditionsBlocked =
+    baselineOpenFindings > 0 ||
+    baselineRemediationOpen > 0 ||
+    baselineMissingEvidence > 0 ||
+    baselineActiveDrifts > 0
+  const baselineBlockerReasons = [
+    baselineOpenFindings > 0 ? `${baselineOpenFindings} finding-uri deschise` : null,
+    baselineRemediationOpen > 0 ? `${baselineRemediationOpen} sarcini de remediere active` : null,
+    baselineMissingEvidence > 0 ? `${baselineMissingEvidence} dovezi pendinte` : null,
+    baselineActiveDrifts > 0 ? `${baselineActiveDrifts} drift-uri deschise` : null,
+  ].filter((reason): reason is string => reason !== null)
+
   return (
     <div className="space-y-6">
       <V3PageHero
@@ -686,8 +706,15 @@ export function SettingsPageSurface() {
                       <div className="flex flex-col gap-2">
                         <button
                           type="button"
-                          disabled={cockpit.busy || !activeSnapshot}
+                          disabled={cockpit.busy || !activeSnapshot || baselinePreconditionsBlocked}
                           onClick={() => void cockpitActions.setValidatedBaseline()}
+                          title={
+                            baselinePreconditionsBlocked
+                              ? `Închide întâi: ${baselineBlockerReasons.join(", ")}.`
+                              : !activeSnapshot
+                                ? "Generează întâi un snapshot prin scanare."
+                                : "Marchează snapshot-ul curent ca reper stabil pentru drift."
+                          }
                           className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Valideaza snapshot-ul curent
@@ -700,6 +727,11 @@ export function SettingsPageSurface() {
                         >
                           Elimina baseline-ul
                         </button>
+                        {baselinePreconditionsBlocked && !validatedBaseline ? (
+                          <p className="text-xs text-eos-warning">
+                            Închide întâi: {baselineBlockerReasons.join(", ")}.
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </div>

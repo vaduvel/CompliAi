@@ -86,5 +86,7 @@ export async function generateAuditPackPdfBuffer(auditPack: AuditPackV2): Promis
     orgName: auditPack.workspace.name,
     documentType: "Audit Pack Dosar",
     generatedAt: auditPack.generatedAt,
+    // Issue 7 DPO — watermark vizual "AUDIT READY" pe fiecare pagină.
+    auditReadiness: auditPack.executiveSummary.auditReadiness,
   })
 }
