@@ -43,6 +43,33 @@ const routes = [
     priority: 0.5,
     changeFrequency: "yearly" as const,
   },
+  // S3.2 — ICP landing pages public (4 segmente Faza 1 Doc 06)
+  {
+    path: "/dpo",
+    priority: 0.95,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/fiscal",
+    priority: 0.9,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/imm",
+    priority: 0.9,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/nis2",
+    priority: 0.85,
+    changeFrequency: "weekly" as const,
+  },
+  // S3.3 — Waitlist pentru segmente coming-soon
+  {
+    path: "/waitlist",
+    priority: 0.6,
+    changeFrequency: "monthly" as const,
+  },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
