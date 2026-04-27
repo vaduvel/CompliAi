@@ -480,17 +480,37 @@ Bug 6 (PDF font) (independent) ─┘
 
 **Sâmbătă 2 mai**: email DPO Complet pre-pilot question (1h, non-coding).
 
-### Sprint 0 Done When (7 fix-uri, NU 6)
+### Sprint 0 Done When (7 fix-uri + 2 imperfections discovered post-runtime)
 
-- [ ] Bug 1: re-run demo, Audit Pack ZIP fără "Workspace local"
-- [ ] Bug 2: 4 documente generate cu cabinet footer, NU disclaimer toxic
-- [ ] Bug 3: patron page cu consultant card complet (Diana + cert + email + phone)
-- [ ] Bug 4: Aprob button funcțional, document → signed status (fără email — alert in-app)
-- [ ] Bug 5: bundle-manifest.json cu SHA-256 + MANIFEST.md hash table
-- [ ] Bug 6: PDF endpoint returnează 200 + valid PDF
-- [ ] Bug 7: feature flag fiscal hide pentru DPO mode (0 fiscal routes vizibile)
-- [ ] Demo refăcut, output capturat în `/Users/.../Downloads/compliscan-demo-result-v2/`
-- [ ] Pachet ZIP nou trimis pre-kickoff la DPO Complet
+- [x] Bug 1: re-run demo, Audit Pack ZIP fără "Workspace local" — `workspace.label: "Apex Logistic SRL"` ✅ verificat 27 apr
+- [x] Bug 2: 4 documente generate cu cabinet footer, NU disclaimer toxic ✅
+- [x] Bug 3: patron page cu consultant card complet (Diana + cert + email + phone) ✅ screenshots `shared-page-before/after-approval.png`
+- [x] Bug 4: Aprob button funcțional, document → signed status (fără email — alert in-app) ✅ Evidence Ledger DPA approved
+- [x] Bug 5: bundle-manifest.json cu SHA-256 + MANIFEST.md hash table ✅
+- [x] Bug 6: PDF endpoint returnează 200 + valid PDF ✅ `audit-pack.pdf` 10KB
+- [x] Bug 7: feature flag fiscal hide pentru DPO mode (0 fiscal routes vizibile) ✅
+- [x] 46/46 runtime checks passed ✅ verificat în `runtime-demo-report.json`
+- [x] 24/24 vitest passed ✅
+- [x] npm run build passed ✅
+- [x] Pachet ZIP `compliscan-dpo-complet-sprint0-package-2026-04-27.zip` (31KB) ✅
+
+### Sprint 0.5 — Imperfections discovered post-runtime (ETA marți 28 apr, +1 zi)
+
+- [ ] **Issue 2 (CRITICAL)**: DPA aprobat magic link nu populează traceability matrix
+  - Fix: `app/api/shared/[token]/approve/route.ts` + `lib/server/audit-pack-bundle.ts`
+  - Test: post-approval → 1/5 traceability validated, NOT 0/4 blocked
+  - ETA: 4-6h
+
+- [ ] **Issue 1 (Important)**: label clarity "Open findings: 0" vs "Remediation: 3"
+  - Fix: `lib/server/audit-pack-bundle.ts` manifest template + `lib/server/audit-pack-pdf.ts`
+  - Schimbare label: "Probleme deschise" → "Findings de business deschise" + "Sarcini de remediere active" + "Dovezi pendinte"
+  - ETA: 2h
+
+- [ ] **Issue 3 (Comunicare, NU cod)**: Audit Pack "work in progress" presentation
+  - Fix: comunicare în demo script (Doc 07 pilot/dpo-complet-demo-script-2026-05-07.md)
+  - Mesaj demo: "review_required e CORECT, sistemul nu minte"
+
+**Done when**: post-fix re-run runtime demo → 46/46 + 1 traceability validated + label clarity → re-export package final.
 
 ---
 
