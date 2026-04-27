@@ -7,6 +7,108 @@
 
 ---
 
+## ⭐⭐ GTM Evolution v4.4 — 3 faze (modular → bundle → category creation)
+
+**Realitatea pieței RO 2026**: rolul de "Compliance Officer IMM" abia se formează. Există la bănci, fintech, corporații, multinaționale, dar **NU e normal încă în IMM-uri**. Dacă pornim cu mesajul "GRC general pentru officer intern", educăm piața prea mult și ardem timp + bani.
+
+**Formula corectă**: vinzi în 3 faze cu evoluție narrativă, NU paralel sau salt direct.
+
+### Faza 1 — Azi (mai 2026 → mar 2027): MODULAR pe oameni existenți
+
+**Vinzi către oameni care există deja și au buget azi.**
+
+| Specialist | Module | Mesaj |
+|---|---|---|
+| **DPO consultant** | GDPR + DSAR + RoPA + DPA + dosar + raportare | "Îți fac workflow-ul GDPR actual mai ordonat" |
+| **Contabil CECCAR** | e-Factura + e-TVA + SAF-T + evidențe | "Layer peste SmartBill, nu înlocuiește" |
+| **CISO/NIS2 consultant** | NIS2 governance + incidente + audit pack | "Governance layer, nu înlocuiește Wireshark/SIEM" |
+| **HR/legal consultant** | Whistleblowing + Pay Transparency | "Add-on pentru workflow HR existent" |
+| **AI advisor** | AI inventory + Annex IV draft | "Tool pentru documentation AI, nu replacement legal advice" |
+
+**Mesaj-cheie Faza 1**: NU vinzi "schimbă profesia". Vinzi "îți fac workflow-ul actual mai ordonat".
+
+**Distribuție Faza 1**:
+- LinkedIn DM personal (cabinete DPO RO, CISO consultanți)
+- Facebook groups (Contabili pe Facebook 50K + Nicoleta Banciu 34K)
+- Outreach direct la 30-50 cabinete identificate empiric
+
+**KPI Faza 1 (target final mar 2027)**:
+- 20-30 cabinete plătitoare distribuite pe specialisti existenți
+- €15-30K MRR
+- Modules validate empiric per segment
+
+### Faza 2 — Mâine (apr 2027 → dec 2027): BUNDLE pentru IMM
+
+**După ce ai module validate separat, le împachetezi pentru IMM mid-market.**
+
+**Mesaj Faza 2**:
+> "Ai GDPR + NIS2 + Whistleblowing + Pay Transparency + fiscal în locuri diferite? CompliScan le pune într-un singur control tower. €299-999/lună."
+
+**User în IMM = role-flexibil** (NU presupune rol nou):
+- CFO la firma 50-150 ang care nu vrea să angajeze 4 consultanți
+- COO la fintech care vrea consolidare governance
+- HR Manager la firmă cu obligații Pay Transp + Whistleblowing
+- Legal Counsel intern (dacă există) cu compliance ca 30% job
+- Office Manager la cabinet care orchestrează totul
+
+**Math validare Faza 2**:
+- IMM 100 ang plătește azi: DPO €200 + CISO €1.5K + avocat €3K/an + HR consultant €500 + auditor €5K/an = **€60-100K/an consultanță fragmentată**
+- CompliScan Internal Pro €599/lună × 12 = **€7.2K/an** + 1 angajat existing role + ad-hoc consultant ad-hoc €3-5K/an = **€10-12K/an total**
+- **Reducere 80-90%** + control intern + vizibilitate completă
+
+**Distribuție Faza 2**:
+- Outreach LinkedIn la CFO/COO la IMM mid-market RO
+- Content marketing "ROI 2-5× vs 4 consultanți"
+- Migration offer pentru IMM-uri care plătesc azi 4-8 firme
+
+**KPI Faza 2 (target final dec 2027)**:
+- 50-100 IMM plătitoare bundle
+- €50-100K MRR
+- Pattern de uzage validate (ce module activează IMM-urile reale)
+
+### Faza 3 — Poimâine (2028+): CREEZI CATEGORIA "Compliance Officer IMM"
+
+**Doar după ce ai 20-50 IMM-uri unde un om intern chiar folosește platforma**, atunci împingi mesajul big:
+
+> "CompliScan permite IMM-ului să aibă funcție de compliance internă fără departament enterprise. Nu mai sună la Big 4. Nu mai plătește €100K/an. Are tool + 1 om intern."
+
+**Asta e direcția mare, NU primul pas comercial.**
+
+**Distribuție Faza 3**:
+- Conferințe industrie ("How to internalize compliance in mid-market")
+- White papers cu data din baza de clienți
+- Parteneriate cu firme de recruiting pentru "Compliance Specialist" role
+- Influence policy makers ANSPDCP / DNSC
+
+**KPI Faza 3 (target 2028-2029)**:
+- 200-500 IMM-uri cu rol intern dedicat
+- €500K-1M MRR
+- Categoria "Compliance Officer IMM" recunoscută în piață RO
+- Brand de referință pentru consolidarea compliance
+
+### De ce 3 faze, NU paralel
+
+| Versiune | Strategie | Probleme |
+|---|---|---|
+| **v4.0** | Lansare paralelă 3 segmente Q3 2026 | Solo founder = focus issue, mesaj diluat |
+| **v4.3** | Lansare secvențială 5 segmente per ICP în 12 luni | IMM Internal (luna 6-9) prea devreme — categoria nu e gata |
+| **v4.4** | 3 faze cu evoluție narrativă: modular → bundle → category | ✅ Vinzi pe roluri existente, NU forțezi categorie |
+
+**Diferența critică v4.3 → v4.4**: în v4.3 IMM Internal era segment în luna 6-9. În v4.4 **IMM bundle vine în Faza 2 (apr 2027+)** după module validate separat. NU forțezi piața să cumpere "GRC pentru rol care nu există încă".
+
+**Reguli simple v4.4**:
+1. **Azi**: vinzi modular către specialiști care există (DPO/CISO/contabil/HR/AI advisor)
+2. **Mâine**: vinzi bundle către IMM cu user role-flexibil (CFO/COO/HR/Legal/Office Manager)
+3. **Poimâine**: creezi categoria "Compliance Officer IMM" — în 2-5 ani vine prin NIS2/DORA/AI Act/Pay Transp/Whistleblowing pressure EU
+
+**Ce NU faci**:
+- ❌ NU pitch-ezi azi "GRC pentru IMM officer intern" (categoria nu există)
+- ❌ NU forțezi reprofilare DPO/CISO/contabil în "GRC officer" (ei rămân specialiști)
+- ❌ NU lansezi paralel toate 5 segmente Q3 2026 (focus issue solo founder)
+- ❌ NU vinzi "schimbă profesia" — vinzi "ordonez workflow-ul tău"
+
+---
+
 ## ⭐ GTM Rule v4.3 — Segment ranking pentru lansare focused (validată 27 apr)
 
 **Regula validă post-audit tools/specialiști**: NU lansăm 3 segmente paralel Q3 2026 (prea ambitios pentru solo). Lansăm **focused per segment în ordine de prioritate**, bazat pe **rolul CompliScan vs concurența existentă**.

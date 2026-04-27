@@ -325,6 +325,98 @@ Q3 2026  Q1 2027 2028   2028     Q3 2027
 
 ---
 
+## Iteration 10 — GTM Evolution în 3 faze (v4.4, validat 27 apr 2026)
+
+**Source**: user a observat că rolul "Compliance Officer IMM" nu există încă în RO la scară. În alte țări există (banking, fintech, corporații, multinaționale), dar în RO IMM-urile **NU au om dedicat**. Întrebarea critică: putem ține modular azi, apoi împingem ca tool intern după ce categoria se formează?
+
+**Răspuns user-validated**: DA. Formula corectă = **3 faze cu evoluție narrativă**.
+
+### Faza 1 — Modular pe oameni existenți (azi → mar 2027)
+
+Vinzi specialiștilor care **există deja și au buget azi**:
+- DPO consultant (GDPR core)
+- Contabil CECCAR (e-Factura layer)
+- CISO/NIS2 consultant (governance layer)
+- HR/legal consultant (whistleblowing + pay transp add-on)
+- AI advisor (AI inventory + Annex IV draft)
+
+**Mesaj-cheie**: "îți fac workflow-ul actual mai ordonat" (NU "schimbă profesia")
+
+### Faza 2 — Bundle pentru IMM (apr 2027 → dec 2027)
+
+După module validate separat, **împachetezi pentru IMM mid-market**:
+
+> "Ai GDPR + NIS2 + Whistleblowing + Pay Transparency + fiscal în locuri diferite? CompliScan le pune într-un singur control tower."
+
+**User role-flexibil**: CFO / COO / HR Manager / Legal Counsel / Office Manager. **NU presupui rol nou** "Compliance Officer".
+
+**Math**: IMM 100 ang plătește €60-100K/an la 4-8 consultanți → CompliScan €7.2K/an + 1 angajat existing role + ad-hoc consultant €3-5K/an = €10-12K/an total = **reducere 80-90%**.
+
+### Faza 3 — Creezi categoria "Compliance Officer IMM" (2028+)
+
+Doar după 20-50 IMM-uri unde **un om intern chiar folosește platforma**, atunci împingi mesajul big:
+
+> "CompliScan permite IMM-ului să aibă funcție de compliance internă fără departament enterprise."
+
+**Direcția mare**, dar **NU primul pas comercial**.
+
+### De ce v4.4 e mai matură decât v4.3
+
+| Aspect | v4.3 (5 segmente secvențial) | v4.4 (3 faze evoluție narrative) |
+|---|---|---|
+| IMM Internal poziție | luna 6-9 (octombrie 2026 - ianuarie 2027) | Faza 2 (apr 2027+) |
+| Forțare categorie | da (presupune "Compliance Officer IMM" există) | NU (creezi categoria după valididare) |
+| Mesaj per fază | mesaje per segment fragmentate | mesaj evoluează: "ordonez workflow" → "control tower" → "internalizezi compliance" |
+| Realitate piață RO | parțial corect | aliniat cu timing real (rol vine în 2-5 ani) |
+
+### Realitatea pieței RO 2026 vs alte țări
+
+**În RO**:
+- Compliance Officer dedicat la IMM = **NU există** la scară
+- Există la bănci, fintech, corporații, multinaționale (200-400 firme)
+- Mass-market IMM (25.000 firme mid-market) = **role diluat în CFO/COO/HR/Legal**
+
+**În alte țări (US/UK)**:
+- Compliance Officer la SMB e mai răspândit (50K+ joburi)
+- Vanta, Drata, Sprinto = produse construite presupunând rolul există
+- LinkedIn 2.000 joburi compliance RO = mostly enterprise + banking + multinaționale
+
+**Driveri pentru categorie nouă RO 2027-2030**:
+- NIS2 enforcement DNSC (12-20K entități obligate)
+- DORA enforcement BNR (250-300 fintech-uri)
+- AI Act enforcement EU AI Office (5-30 firme cu produse AI)
+- Pay Transparency 7 iun 2026 (firme 50+ ang)
+- Whistleblowing Lege 361/2022 (firme 50+ ang)
+
+**Predicție realistă RO**:
+- 2026-2027: 200-400 firme angajează primul "Compliance Specialist"
+- 2028-2029: 1.000-2.000 firme cu rol dedicat
+- 2030+: standard pentru firme >100 angajați în sectoare reglementate
+
+→ **CompliScan e early în piață, dar piața vine la noi în 3-5 ani prin EU pressure**.
+
+### Status v4.4
+
+✅ **Direcția curentă pentru execuție** — înlocuiește v4.3 IMM positioning (era prea devreme)
+
+✅ **Aplicat în Doc 04** — secțiune nouă "GTM Evolution v4.4" la început, înainte de v4.3 GTM Rule
+
+✅ **Compatibil cu thesis v4.2** (Modular + Integrat) — v4.2 = ce vinde produsul, v4.4 = cum evoluează narrative pe 3 faze
+
+### Reguli simple v4.4 pentru execuție
+
+1. **Azi**: vinzi modular către specialiști existenți (DPO/CISO/contabil/HR/AI advisor)
+2. **Mâine**: vinzi bundle către IMM cu user role-flexibil (CFO/COO/HR/Legal/Office Manager)
+3. **Poimâine**: creezi categoria "Compliance Officer IMM"
+
+**NU**:
+- NU pitch azi "GRC pentru IMM officer intern" (categoria nu există)
+- NU forțezi reprofilare DPO/CISO în "GRC officer"
+- NU lansezi paralel toate 5 segmente Q3 2026
+- NU vinzi "schimbă profesia"
+
+---
+
 ## Iteration 9 — GTM Rule per segment (v4.3, validat 27 apr 2026)
 
 **Source**: după audit tools/specialiști (răspuns la "ce folosesc cei 10 oameni care fac acum cele 10 frameworks?"), user a sintetizat o regulă GTM concretă cu **5 niveluri de prioritate**.

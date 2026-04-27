@@ -1,11 +1,45 @@
-# CompliScan — Stack documente strategice (v4.3 — GTM Rule per segment)
+# CompliScan — Stack documente strategice (v4.4 — GTM Evolution în 3 faze)
 
 **Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
 
 **Regulă maintainerului**: NU șterge idei alternative din docs. Marchează status (valid / invalid / backup). Decision finală se ia citind tot stack-ul.
 **Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
 
-## ⭐ GTM Rule v4.3 — Order de lansare focused (validat 27 apr)
+## ⭐⭐ GTM Evolution v4.4 — 3 faze (modular → bundle → category)
+
+```
+FAZA 1 (azi → mar 2027): MODULAR pe oameni existenți
+   ↓ vinzi specialiștilor: DPO + CISO + contabil + HR + AI advisor
+   ↓ mesaj: "îți fac workflow-ul actual mai ordonat"
+   ↓ KPI: 20-30 cabinete plătitoare, €15-30K MRR
+
+FAZA 2 (apr 2027 → dec 2027): BUNDLE pentru IMM
+   ↓ vinzi IMM mid-market: CFO/COO/HR/Legal/Office Manager
+   ↓ mesaj: "control tower — 4-8 consultanți într-un singur tool"
+   ↓ KPI: 50-100 IMM plătitoare, €50-100K MRR
+
+FAZA 3 (2028+): CREEZI CATEGORIA "Compliance Officer IMM"
+   ↓ împingi mesajul big: "internalizezi compliance fără enterprise dept"
+   ↓ KPI: 200-500 IMM cu rol intern dedicat, €500K-1M MRR
+```
+
+**De ce 3 faze, NU paralel**: rolul "Compliance Officer IMM" nu există încă la scară în RO. Vine în 2-5 ani prin NIS2/DORA/AI Act/Pay Transp pressure EU. Azi vinzi pe roluri existente. Categoria o creezi după ce ai validare empirică (20-50 IMM-uri cu om intern).
+
+**Reguli simple**:
+1. Azi: modular către specialiști existenți
+2. Mâine: bundle pentru IMM cu role flexibil
+3. Poimâine: categorie nouă "Compliance Officer IMM"
+
+**NU**:
+- NU pitch azi "GRC pentru officer intern" (categoria NU există)
+- NU forțezi reprofilare DPO/CISO în "GRC officer"
+- NU vinzi "schimbă profesia"
+
+Detalii complet în Doc 04 secțiunea "GTM Evolution v4.4" + Doc 05 Iteration 10.
+
+---
+
+## GTM Rule v4.3 — Order de lansare focused (în Faza 1)
 
 | # | Segment | Rol CompliScan | Vindem? | Order |
 |---|---|---|---|---|
@@ -454,6 +488,24 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 ---
 
+## Versiunea v4.4 — GTM Evolution în 3 faze (27 apr 2026)
+
+**Trigger**: user a observat că rolul "Compliance Officer IMM" nu există în RO la scară. În alte țări există, dar IMM-urile RO **NU au om dedicat**. Întrebarea: putem ține modular azi, apoi împingem ca tool intern după ce categoria se formează?
+
+**Răspuns user-validated**: 3 faze cu evoluție narrativă:
+1. **Faza 1 (azi → mar 2027)**: MODULAR pe oameni existenți (DPO/CISO/contabil/HR/AI advisor)
+2. **Faza 2 (apr 2027 → dec 2027)**: BUNDLE pentru IMM cu user role-flexibil (CFO/COO/HR/Legal/Office Manager)
+3. **Faza 3 (2028+)**: CREEZI CATEGORIA "Compliance Officer IMM" după 20-50 IMM-uri cu om intern validat
+
+**Diferența critică v4.3 → v4.4**: în v4.3 IMM Internal era luna 6-9 (oct 2026). În v4.4 **IMM bundle vine în Faza 2 (apr 2027+)** după module validate separat. NU forțezi piața să cumpere "GRC pentru rol care nu există încă".
+
+**Acțiuni**:
+1. Doc 04: secțiune nouă "GTM Evolution v4.4" la început, înainte de v4.3 GTM Rule
+2. Doc 05: Iteration 10 cu istoric + comparație v4.3 vs v4.4 + predicție timing rol RO 2026-2030
+3. README: top section cu 3 faze + reguli simple
+
+---
+
 ## Versiunea v4.3 — GTM Rule per segment (27 apr 2026)
 
 **Trigger**: după audit tools/specialiști pentru cele 10 frameworks, user a sintetizat o GTM rule cu 5 niveluri de prioritate per segment + rol CompliScan diferit per segment.
@@ -475,4 +527,4 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v4.3 — GTM Rule per segment (5 documente canonice + decision matrix)
+**Versiune**: v4.4 — GTM Evolution în 3 faze (modular → bundle → category creation)
