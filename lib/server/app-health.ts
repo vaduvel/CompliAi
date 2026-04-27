@@ -24,8 +24,8 @@ export type ApplicationHealthStatus = {
   warnings: string[]
   checks: AppHealthCheck[]
   config: {
-    authBackend: "local" | "supabase" | "hybrid"
-    dataBackend: "local" | "supabase" | "hybrid"
+    authBackend: "local" | "supabase" | "hybrid" | "dual-write"
+    dataBackend: "local" | "supabase" | "hybrid" | "dual-write"
     localFallbackAllowed: boolean
     production: boolean
   }
@@ -77,7 +77,12 @@ export async function getApplicationHealthStatus(): Promise<ApplicationHealthSta
   checks.push({
     key: "data_backend",
     label: "Backend date",
-    state: dataBackend === "supabase" ? "healthy" : dataBackend === "hybrid" ? "degraded" : "degraded",
+    state:
+      dataBackend === "supabase"
+        ? "healthy"
+        : dataBackend === "dual-write"
+          ? "healthy" // dual-write e cale spre cutover, nu degradare
+          : "degraded",
     summary: formatBackendSummary(dataBackend),
   })
 
@@ -174,8 +179,8 @@ function deriveOverallState(checks: AppHealthCheck[]): AppHealthState {
 
 function buildSummary(
   state: AppHealthState,
-  authBackend: "local" | "supabase" | "hybrid",
-  dataBackend: "local" | "supabase" | "hybrid"
+  authBackend: "local" | "supabase" | "hybrid" | "dual-write",
+  dataBackend: "local" | "supabase" | "hybrid" | "dual-write"
 ) {
   if (state === "healthy") {
     return "Traseul de operare este suficient de curat pentru pilot și health checks de bază."
@@ -188,8 +193,9 @@ function buildSummary(
   return `Aplicația rulează, dar are încă piese degradate pentru o operare mai liniștită (${authBackend}/${dataBackend}).`
 }
 
-function formatBackendSummary(backend: "local" | "supabase" | "hybrid") {
+function formatBackendSummary(backend: "local" | "supabase" | "hybrid" | "dual-write") {
   if (backend === "supabase") return "Cloud-first strict."
   if (backend === "hybrid") return "Cloud + fallback controlat."
+  if (backend === "dual-write") return "Dual-write activ — primary local + secondary Supabase pentru cutover safe."
   return "Local-first; util pentru development, mai slab pentru operare matură."
 }

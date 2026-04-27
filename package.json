@@ -17,7 +17,9 @@
     "verify:supabase:sprint5": "node scripts/verify-supabase-sprint5.mjs",
     "verify:supabase:strict": "node scripts/verify-supabase-strict.mjs",
     "preflight:release": "node scripts/preflight-release.mjs",
-    "verify:supabase:rls": "node scripts/verify-supabase-rls.mjs"
+    "verify:supabase:rls": "node scripts/verify-supabase-rls.mjs",
+    "migrate:fs-to-supabase": "node scripts/migrate-fs-to-supabase.mjs",
+    "migrate:fs-to-supabase:apply": "node scripts/migrate-fs-to-supabase.mjs --apply"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.44.0",

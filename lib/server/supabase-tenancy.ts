@@ -5,12 +5,15 @@ import type {
 } from "@/lib/server/auth"
 import { hasSupabaseConfig, supabaseUpsert } from "@/lib/server/supabase-rest"
 
-export type DataBackend = "local" | "supabase" | "hybrid"
+// S2A.7 — adăugat "dual-write" pentru cutover safe (write paralel local + supabase,
+// read din local, log discrepancies). Folosit 1 săpt înainte de switch la "supabase".
+export type DataBackend = "local" | "supabase" | "hybrid" | "dual-write"
 
 export function getConfiguredDataBackend(): DataBackend {
   const value = process.env.COMPLISCAN_DATA_BACKEND?.trim().toLowerCase()
   if (value === "supabase") return "supabase"
   if (value === "hybrid") return "hybrid"
+  if (value === "dual-write" || value === "dual_write" || value === "dual") return "dual-write"
   if (value === "local") return "local"
   // On serverless platforms (Vercel), auto-use Supabase when credentials are present
   // so state persists across serverless instances without explicit env var
