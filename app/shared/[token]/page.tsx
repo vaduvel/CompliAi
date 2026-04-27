@@ -7,6 +7,7 @@ import { AlertTriangle, CheckCircle2, Clock, ShieldCheck, XCircle } from "lucide
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { SharedApprovalPanel } from "@/components/compliscan/shared-approval-panel"
+import { SharedCookieBanner } from "@/components/compliscan/shared-cookie-banner"
 import { V3ScoreRing } from "@/components/compliscan/v3"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
@@ -437,6 +438,9 @@ export default async function SharedCompliancePage({
           <span className="ml-auto text-eos-text-muted">© 2026</span>
         </div>
       </footer>
+
+      {/* S1.5 — Issue 5 DPO: Discreet GDPR cookie consent banner */}
+      <SharedCookieBanner />
     </div>
   )
 }
