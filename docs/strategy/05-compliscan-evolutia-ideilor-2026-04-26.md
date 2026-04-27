@@ -325,6 +325,88 @@ Q3 2026  Q1 2027 2028   2028     Q3 2027
 
 ---
 
+## Iteration 9 — GTM Rule per segment (v4.3, validat 27 apr 2026)
+
+**Source**: după audit tools/specialiști (răspuns la "ce folosesc cei 10 oameni care fac acum cele 10 frameworks?"), user a sintetizat o regulă GTM concretă cu **5 niveluri de prioritate**.
+
+**Trigger conceptual**: pentru fiecare framework, am întrebat "pe cine putem disloca azi?" în loc de "ce framework acoperim?". Răspunsul a generat un decision matrix per segment cu rol CompliScan diferit per segment.
+
+### Cele 5 niveluri de prioritate
+
+1. **DA — vindem acum** (replacement / control tower):
+   - DPO pe Word/Excel/Drive (#1 prioritate)
+   - IMM Internal cu HR/Office Manager existing role (control tower)
+
+2. **DA, cu grijă** (challenger):
+   - DPO frustrat de Privacy Manager (#2 prioritate)
+   - Mesaj: "modern, finding-first, AI, pricing clar" — NU "batem Privacy Manager"
+
+3. **DA, după DPO** (layer peste tool):
+   - Contabil pe SmartBill/Saga/Oblio (#3 prioritate)
+   - Mesaj: "păstrezi facturarea, adăugăm validator + e-TVA + GDPR lite"
+
+4. **DA, selectiv** (governance layer):
+   - CISO consultant NIS2 (#5 prioritate)
+   - NU înlocuim Wireshark/Nessus/SIEM — adăugăm governance layer
+
+5. **NU standalone** (add-on doar):
+   - HR consultant Pay Transp + Whistleblowing — în pachet IMM Internal
+   - AI Governance — în pachet Cabinet Studio
+
+6. **NU acum** (out of segment 2026-2027):
+   - DORA (Sprint MAJOR 2028)
+   - Auditor ISO 27001 (NU certificăm, never)
+   - Enterprise GRC (ServiceNow GRC teritoriu)
+
+### De ce v4.3 e mai bună decât v4.0 paralel
+
+v4.0 zicea: "lansează 3 segmente paralel Q3 2026 (Solo + IMM + Cabinet)".
+
+v4.3 zice: "lansează SECVENȚIAL în ordine de prioritate, validează #1 înainte de a trece la #2".
+
+**Solo founder = disciplină operațională, nu ambitie strategică**. Lansare paralelă 3 segmente = 3× efort marketing simultan + risc total dacă #1 eșuează.
+
+### Întrebarea critică pre-pilot DPO Complet
+
+Înainte de Joi 7 mai, trebuie întrebat:
+
+> "Ce folosiți la cabinet pentru gestionarea clienților DPO? Word + Excel + Drive? Privacy Manager? MyDPO Decalex? Custom in-house?"
+
+Răspunsul determină **rolul CompliScan în pitch**:
+- Excel/Word → Replacement
+- Privacy Manager → Challenger cu grijă
+- MyDPO Decalex → WARNING (pitch complementar, NU replacement)
+- Custom → Layer + integrare
+
+### Status v4.3
+
+✅ **Direcția curentă pentru execuție** — înlocuiește roadmap v4.0 lansare paralelă
+
+✅ **Aplicat în Doc 04** — secțiune nouă "GTM Rule v4.3" la început
+
+✅ **Compatibil cu thesis v4.2** (Modular + Integrat) — v4.2 = ce vinde produsul, v4.3 = cum și cui vindem
+
+### Order temporal final pentru execuție
+
+```
+Săpt 1-4 (mai 2026):       Pilot DPO Complet (#1 sau #2 dependent răspuns)
+Săpt 4-8 (iunie):          Outreach #1 DPO Word/Excel (replacement)
+Luna 3-4 (iulie-aug):      Outreach #2 DPO Privacy Manager (challenger)
+Luna 4-6 (sept-oct):       Outreach #3 Contabil SmartBill (layer)
+Luna 6-9 (nov-jan 2027):   Outreach #4 IMM Internal (control tower)
+Luna 9-12 (feb-mar 2027):  Outreach #5 CISO NIS2 (governance layer)
+```
+
+### Lecții pentru execuție
+
+1. **Per segment = mesaj specific**. NU folosi același mesaj pentru DPO Word/Excel și DPO Privacy Manager.
+2. **Întrebă pre-pilot ce folosesc**. Răspunsul determină rolul CompliScan.
+3. **NU concura cu MyDPO Decalex pe brand**. Pitch complementar dacă răspunsul e "MyDPO".
+4. **NU concura cu Drata/Vanta pe automated evidence**. Pierdem connect AWS/GitHub.
+5. **Layer/governance, NU replacement** pentru CISO + Contabil. Vinde complementaritate, NU înlocuire.
+
+---
+
 ## Iteration 8 — Titan Modular (versiune finală user-validated 27 apr 2026)
 
 **Source**: distillare finală user după 48h de iterații + question critic "există cineva care le face pe toate? IMM la câte părți merge?".

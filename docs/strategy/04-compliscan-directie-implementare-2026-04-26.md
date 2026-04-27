@@ -7,6 +7,105 @@
 
 ---
 
+## ⭐ GTM Rule v4.3 — Segment ranking pentru lansare focused (validată 27 apr)
+
+**Regula validă post-audit tools/specialiști**: NU lansăm 3 segmente paralel Q3 2026 (prea ambitios pentru solo). Lansăm **focused per segment în ordine de prioritate**, bazat pe **rolul CompliScan vs concurența existentă**.
+
+### Tabelul de decision
+
+| # | Segment | Rol CompliScan | Concurența azi | Vindem acum? | Order |
+|---|---|---|---|---|---|
+| 1 | **DPO pe Word/Excel/Drive** | Replacement | haos pur (cabinete sub 5 oameni, 30-40% piață) | ✅ DA | **#1 priority** |
+| 2 | **DPO frustrat de Privacy Manager** | Challenger | Privacy Manager 12 ani brand, sales-led, UX legacy | ⚠️ DA, cu grijă | **#2 priority** |
+| 3 | **Contabil pe SmartBill/Saga/Oblio** | Layer peste tool | facturare emite, NU compliance | ⚠️ DA, după DPO | **#3 priority** |
+| 4 | **IMM Internal cu HR/Office Manager** | Control tower | 4-8 consultanți fragmentați €60-150K/an | ✅ DA, pilot selectiv | **#4 priority** |
+| 5 | **CISO consultant NIS2** | Governance layer | Eramba/ISMS.online/vsRisk + tools tehnice (Wireshark/Nessus rămân) | ⚠️ DA, selectiv | **#5 priority** |
+| 6 | **HR consultant pe BambooHR/Personio** | Add-on (NU standalone) | HRIS rămâne, WhistlePower €500/lună separat | ❌ NU standalone | **doar în IMM Internal** |
+| 7 | **AI Governance specialist** | Early module | piață emergentă (5-30 firme RO), Credo AI/Decalex | ❌ NU standalone | **doar în Cabinet/Studio** |
+| 8 | **DORA financial specialist** | Roadmap | Big 4 enterprise + ServiceNow GRC | ❌ NU | **2028 launch** |
+| 9 | **Auditor ISO 27001** | Readiness only | TÜV/BSI/Bureau Veritas certificare obligatorie | ❌ NU | **never** (NU certificăm) |
+| 10 | **Compliance Officer enterprise** | Too early | ServiceNow GRC, RSA Archer enterprise | ❌ NU | **2028+** |
+
+### Cele 4 mesaje principale per rol
+
+| Rol | Mesaj corect |
+|---|---|
+| **Replacement** (#1) | "Înlocuim haosul: portofoliu, cockpit, dosar, raport, audit trail, white-label." |
+| **Challenger cu grijă** (#2) | "Mai modern, finding-first, AI-assisted, white-label, pricing clar." NU "batem Privacy Manager." |
+| **Layer peste tool** (#3) | "Păstrezi SmartBill/Saga, adăugăm validator UBL + e-TVA + GDPR lite per client." |
+| **Control tower** (#4) | "1 angajat existent peste 10 frameworks, în loc de 4-8 consultanți fragmentați (€60-150K/an)." |
+| **Governance layer** (#5) | "NU înlocuim Nessus/SIEM/Wireshark. Adăugăm NIS2 evidence + incident register + DNSC readiness + audit pack." |
+
+### Întrebare pre-pilot obligatorie (DPO Complet + outreach)
+
+Înainte de orice demo/pilot, **întreabă explicit ce folosesc acum**:
+
+> "Ce folosiți la cabinet/firmă pentru gestionarea clienților DPO/compliance? Word + Excel + Drive? Privacy Manager? MyDPO Decalex? Custom in-house? Altceva?"
+
+Răspunsul determină pitch-ul:
+
+| Răspuns | Pitch CompliScan |
+|---|---|
+| Excel/Word/Drive | **Replacement** — "înlocuim haosul" |
+| Privacy Manager | **Challenger** — "modern, finding-first, AI, pricing clar" (NU "mai bun") |
+| MyDPO Decalex | **WARNING** — pitch complementar (Decalex 800+ clienți, brand recognition imposibil de bătut) |
+| Eramba / ISMS.online | **Governance layer RO native** — paritate funcțională + multi-tenant + RO |
+| Drata / Vanta | **NU pitch direct** — pierdem pe automated evidence (NU avem connect AWS) |
+| Custom in-house | **Layer + integrare** — "păstrăm tool-ul vostru" |
+| Big 4 outsourced | **NU concura** — out of segment |
+
+### Order temporal de execuție (NU paralel, ci secvențial)
+
+```
+SĂPT 1-4 (mai 2026)
+└── Pilot DPO Complet (#2 Privacy Manager challenger SAU #1 Replacement, depending on răspuns pre-pilot)
+
+SĂPT 4-8 (iunie 2026)
+└── Outreach #1 DPO Word/Excel/Drive — categoria cea mai vandabilă
+    Target: 30-50 cabinete (LinkedIn DM + Facebook groups antreprenori)
+
+LUNA 3-4 (iulie-august 2026)
+└── Outreach #2 DPO Privacy Manager — categoria challenger
+    Target: 10-15 cabinete frustrate de UX/sales-led
+    Migration offer (CSV import + 3 luni 50% off)
+
+LUNA 4-6 (sept-oct 2026)
+└── Outreach #3 Contabil SmartBill — categoria layer
+    Distribuție: Facebook groups Contabili (50K + 34K)
+    Pricing complementar (€29-99/lună)
+
+LUNA 6-9 (nov 2026 - jan 2027)
+└── Outreach #4 IMM Internal selectiv (control tower)
+    Pitch: "ROI 2-5× vs 4-8 consultanți"
+    Target: 5-10 IMM mid-market obligate (fintech/healthcare/ecommerce)
+    Include HR/Whistleblowing/Pay Transp ca add-on automat
+
+LUNA 9-12 (feb-mar 2027)
+└── Outreach #5 CISO consultant NIS2 selectiv
+    Pitch: "governance layer, NU tool tehnic"
+    Target: 3-5 cabinete cyber RO (Sectio Aurea, HIFENCE, Prodefence stil)
+
+NU 2026:
+- AI Governance specialist (categoria 7)
+- DORA financial (categoria 8)
+- Auditor ISO (categoria 9)
+- Enterprise GRC (categoria 10)
+```
+
+### De ce v4.3 e mai bună decât v4.0 lansare paralelă
+
+| Aspect | v4.0 (lansare paralelă 3 segmente Q3 2026) | v4.3 (lansare focused secvențial) |
+|---|---|---|
+| Solo founder bandă | ⚠️ 3× efort marketing simultan | ✅ 1 segment la timp |
+| Mesaj clarity | ⚠️ Risc dilație ("4 ICP-uri într-un mesaj") | ✅ Mesaj per segment, focus singular |
+| Validare iterativă | ⚠️ Greu să testezi 3 segmente paralel | ✅ Validezi #1, învăți, treci la #2 |
+| Risk dacă #1 eșuează | ❌ Toate 3 eșuează simultan | ✅ Pivot la #2 fără să reset tot |
+| Distribuție channel | ⚠️ 3 channels paralel | ✅ 1 channel optim per segment |
+
+→ **v4.3 e disciplină operațională**. v4.0 era ambitie strategică. Solo founder = disciplină.
+
+---
+
 ## TL;DR — Roadmap v4.0 (lansare per ICP segment, NU per produs)
 
 **Compliance Loop OS lansare faseată: 3 segmente paralele Q3 2026 (Solo + IMM Internal + Cabinet) → Fiscal Q1 2027 → Enterprise + EU expansion 2028.**

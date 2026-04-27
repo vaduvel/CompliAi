@@ -1,11 +1,34 @@
-# CompliScan — Stack documente strategice (v4.2 — Titan Modular thesis)
+# CompliScan — Stack documente strategice (v4.3 — GTM Rule per segment)
 
 **Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
 
 **Regulă maintainerului**: NU șterge idei alternative din docs. Marchează status (valid / invalid / backup). Decision finală se ia citind tot stack-ul.
 **Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
 
-## ⭐ THESIS-ul final v4.2 — Modular + Integrat
+## ⭐ GTM Rule v4.3 — Order de lansare focused (validat 27 apr)
+
+| # | Segment | Rol CompliScan | Vindem? | Order |
+|---|---|---|---|---|
+| 1 | DPO pe Word/Excel/Drive | Replacement | ✅ | **Săpt 4-8 iunie 2026** |
+| 2 | DPO frustrat de Privacy Manager | Challenger (cu grijă) | ⚠️ | **Luna 3-4 iulie-aug** |
+| 3 | Contabil pe SmartBill/Saga | Layer peste tool | ⚠️ | **Luna 4-6 sept-oct** |
+| 4 | IMM Internal HR/Office Manager | Control tower | ✅ | **Luna 6-9 nov-jan 2027** |
+| 5 | CISO consultant NIS2 | Governance layer | ⚠️ | **Luna 9-12 feb-mar 2027** |
+| 6 | HR consultant standalone | Add-on | ❌ | doar în pachet IMM |
+| 7 | AI Governance specialist | Early module | ❌ | doar în Cabinet Studio |
+| 8 | DORA financial | Roadmap | ❌ | 2028 |
+| 9 | Auditor ISO 27001 | Readiness only | ❌ | never (NU certificăm) |
+| 10 | Enterprise GRC | Too early | ❌ | 2028+ |
+
+**Întrebare obligatorie pre-pilot DPO Complet**: "Ce folosesc acum?" → determină pitch (Replacement / Challenger / Layer / WARNING dacă MyDPO Decalex).
+
+**De ce v4.3 e mai bună decât v4.0 paralel**: solo founder = disciplină operațională, NU ambitie strategică. Lansare secvențială cu validare iterativă, NU 3 segmente simultan.
+
+Detalii complet în Doc 04 secțiunea GTM Rule v4.3 + Doc 05 Iteration 9.
+
+---
+
+## THESIS-ul produsului v4.2 — Modular + Integrat
 
 > **CompliScan funcționează SEPARAT per framework pentru specialiști single-domain (DPO/CISO/contabil/HR/avocat) și INTEGRAT pentru IMM mid-market care vrea 1 angajat existent peste 10 frameworks. Același cod, 4 ICP-uri, 16 SKU-uri, pricing scalat.**
 
@@ -431,6 +454,25 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 ---
 
+## Versiunea v4.3 — GTM Rule per segment (27 apr 2026)
+
+**Trigger**: după audit tools/specialiști pentru cele 10 frameworks, user a sintetizat o GTM rule cu 5 niveluri de prioritate per segment + rol CompliScan diferit per segment.
+
+**Acțiuni**:
+1. Doc 04: secțiune nouă "GTM Rule v4.3" la început cu tabel decision matrix + order temporal secvențial
+2. Doc 05: Iteration 9 cu istoric + de ce v4.3 înlocuiește v4.0 paralel
+3. README: tabel sintetic cu order de lansare per segment
+
+**Order de execuție concret**:
+- Săpt 1-4 (mai): pilot DPO Complet
+- Săpt 4-8 (iunie): outreach DPO Word/Excel/Drive
+- Luna 3-4 (iul-aug): outreach DPO Privacy Manager
+- Luna 4-6 (sept-oct): outreach Contabil SmartBill
+- Luna 6-9 (nov-jan 2027): outreach IMM Internal
+- Luna 9-12 (feb-mar 2027): outreach CISO NIS2
+
+---
+
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v4.1 — Compliance Loop OS + Muzeul de idei (5 documente canonice)
+**Versiune**: v4.3 — GTM Rule per segment (5 documente canonice + decision matrix)
