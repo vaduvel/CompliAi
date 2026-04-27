@@ -1,9 +1,18 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v5.3 — 27 apr 2026, cele 7 cerințe DPO mapate)
+# 07 — CompliScan: Execution Roadmap tehnic (v5.6 — 27 apr 2026, audit Stripe + Supabase real)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v5.6 — audit cod real Stripe + Supabase pe v3-unified (27 apr 2026, 18:30 EEST)**:
+
+Audit-ul fișierelor v3-unified a arătat că **Sprint 2A scope era supraestimat în doc 07 v5.3-v5.5**:
+
+- **Stripe**: există `app/api/stripe/checkout/route.ts` + `webhook/route.ts` + `portal/route.ts` cu teste, webhook actualizează `setOrgPlan/setPartnerAccountPlan` end-to-end. Lipsesc doar **16 ICP SKU mapping** (vs 5 partner-centric curent) + **cabinet billing UI ICP-aware**. **~6h vs 2 zile estimate**.
+- **Supabase**: există 17 fișiere `lib/server/supabase-*.ts` + `storage-adapter.ts` cu toggle `COMPLISCAN_DATA_BACKEND=local|supabase` + RLS verification + strict preflight. Lipsește doar **dual-write pattern** (write paralel safety net) + **migration script .data → Supabase**. **~1.5 zile vs 3 zile estimate**.
+
+**Sprint 2A revizuit**: 2 zile lucru real, nu 10 zile. Se poate topi în Sprint 1 hardening sau în prima săpt Sprint 2B.
 
 **Versiune v5.4 — runtime cleanup v3-unified — cele 7 cerințe DPO mutate din roadmap în execuție funcțională**:
 
@@ -30,7 +39,27 @@ DPO Complet (post pachet Sprint 0.5 trimis 27 apr) a confirmat: "produs suficien
 | 6 | Raport lunar din activitate reală | Sprint 2A | ✅ **DONE S2A.4** — cron monthly digest + agregare state real |
 | 7 | Export "audit_ready" după dovezi 100% | Sprint 2A | ✅ **DONE S2A.6** — `audit_ready` derivat canonic și surfacat în Vault |
 
-Total task-uri DPO: **7/7 funcționale pe v3-unified**. Rămâne validarea runtime cu pachet ZIP nou pentru DPO Complet.
+Total task-uri DPO: **7/7 funcționale pe v3-unified**. Validarea runtime cu pachet ZIP nou pentru DPO Complet este completă în v5.5.
+
+**Update v5.5 — runtime demo rerun final (27 apr 2026, 18:03 EEST)**:
+
+- Runtime script: `/tmp/dpo-runtime-demo-rerun.mjs`
+- Base URL testat: `http://localhost:3025`
+- Rezultat: **46/46 checks passed, 0 failed**
+- ZIP client pilot: `/Users/vaduvageorge/Downloads/compliscan-dpo-complet-sprint0-package-2026-04-27.zip`
+- Demo pack complet: `/Users/vaduvageorge/Downloads/compliscan-demo-result-v2/CompliScan-Demo-Pack-DPO-Complet-2026-04-27.zip`
+- Raport runtime: `/Users/vaduvageorge/Downloads/compliscan-demo-result-v2/runtime-demo-report.json`
+
+Fixuri maturizate în rerun:
+
+- `/api/shared/[token]/approve|reject|comment` este public allowlisted strict în middleware pentru magic link fără sesiune.
+- White-label fallback persistă pe disc, nu doar în Map per route bundle.
+- DPA fallback nu mai menționează AI indisponibil / CompliAI și separă corect Client / Operator, Furnizor / Procesator, Pregătit de.
+- Partner scan ascunde finding-uri fiscale/e-Factura în DPO flow.
+- Approval evidence păstrează quality sufficient + GDPR Art. 28 în Evidence Ledger.
+- Audit Pack bundle folosește Apex Logistic SRL ca workspace client și DPO Complet ca prepared by.
+- PDFKit AFM fallback acoperă și `.next/server/vendor-chunks/data`.
+- Shared page afișează emailul consultantului lowercase, lizibil pentru client.
 
 **Sprint 1 ETA extension**: 2 săpt → **3 săpt** (8 mai → 30 mai). Pilot week paralel.
 **Sprint 2A ETA**: 2 săpt (1-15 iun). 
@@ -60,25 +89,25 @@ Acest doc răspunde la întrebarea: **"Pornesc mâine dimineață (marți 28 apr
 | **Pre-kickoff prep** | **3 zile** (luni 4 → miercuri 6 mai) | Răspuns DPO + import templates + slide deck + dry-run | 0/3 done |
 | **Joi 7 mai 15:00** | ⭐ **PILOT KICKOFF** | DPO Complet 60min | — |
 | **S1 — Pilot-week hardening (paralel cu pilot)** | 7 zile (joi 8 → vineri 16 mai) | Custom templates + reject/comment + AI on/off + signature + ICP onboarding | 0/5 done |
-| **S2A — Stripe + Digest + Supabase prep** | 2 săpt (18 → 30 mai) | Stripe Checkout + monthly digest cron + Supabase schema dual-write | 0/3 done |
+| **S2A — Stripe ICP tiers + Supabase dual-write** | **~2 zile real** (era 2 săpt, audit v5.6) | 16 ICP SKU mapping + cabinet billing UI + dual-write pattern + migration script | Stripe 85% + Supabase 80% |
 | **S2B — Mistral + Supabase cutover** | 2 săpt (1 → 15 iun) | Mistral EU + Supabase production cutover + monitoring | 0/2 done |
 | **S3 — Drift + landing pages** | 1 săpt (8 → 14 iun) | Drift cron + 4 landing pages + waitlist | 0/3 done |
 | **PROD launch** | 1 săpt (22 iun) | compliscan.ro live + first paying customer | 0/1 done |
 
-**Critical path** (calendar corectat):
+**Critical path** (calendar revizuit v5.6 după audit Stripe + Supabase real):
 ```
-marți 28 apr → S0 fix-uri (4 zile) → 1 mai email DPO
+marți 28 apr → S0 fix-uri DONE pe v3-unified (Sprint 0 + 0.5 + 7 cerinte DPO complete)
 luni 4 → mier 6 mai → pre-kickoff prep (3 zile)
 joi 7 mai 15:00 → ⭐ KICKOFF DPO COMPLET
-joi 8 mai → ven 16 mai → S1 pilot-week hardening
-luni 18 mai → ven 30 mai → S2A Stripe + digest + Supabase prep
-luni 1 iun → ven 12 iun → S2B Mistral + Supabase cutover
+joi 8 mai → ven 30 mai → S1 pilot-week hardening (3 săpt, paralel cu pilot)
+                       + S2A.1 Stripe ICP tiers (~6h) + S2A.7 Supabase dual-write (~1.5z) topite în Sprint 1
+luni 1 iun → ven 12 iun → S2B Mistral EU + Supabase prod cutover
 joi 5 iun → ⭐ PILOT RETRO 90min — DECISION GATE #1
 luni 15 iun → ven 19 iun → S3 drift + landing pages
-luni 22 iun → ⭐ PRODUCTION LAUNCH (slipped din 15 iun cu 1 săpt — Supabase complexity)
+luni 22 iun → ⭐ PRODUCTION LAUNCH (slipped din 15 iun cu 1 săpt — Supabase cutover complexity)
 ```
 
-**Total**: ~8 săpt de la azi (luni 27 apr) la production launch (luni 22 iun).
+**Total**: ~8 săpt de la azi (luni 27 apr) la production launch (luni 22 iun). Sprint 2A original (10 zile) **comprimat la ~2 zile** după audit v5.6 — buffer recâștigat pentru Sprint 1 features cabinet (S1.1 templates, S1.6 ICP onboarding).
 
 ---
 
@@ -740,40 +769,39 @@ Sprint 1 extended (8-30 mai, 3 săpt — paralel cu pilot week):
 
 ---
 
-## SPRINT 2A — Stripe + Digest + Supabase prep (luni 18 → vineri 30 mai 2026)
+## SPRINT 2A — Stripe ICP tiers + Digest + Supabase dual-write (luni 18 → vineri 30 mai 2026)
 
-**Obiectiv**: Stripe live (cabinet poate plăti real), monthly digest cron, Supabase schema preparation (NU cutover încă).
+**Obiectiv**: Stripe ICP tier mapping (cabinet-solo / cabinet-pro / cabinet-studio etc.) + Supabase dual-write pattern pentru cutover safe în S2B.
+
+⚠️ **v5.6 — Audit real al codului v3-unified (27 apr 2026)**: secțiunea originală S2A era scrisă presupunând că Stripe și Supabase nu există. **Audit-ul cod a confirmat că ambele sunt deja integrate la 80-85%**. Update mai jos.
 
 ⚠️ **Sprint 2 split post-review**: original "Stripe + Mistral + Supabase + digest în 2 săpt" era **nerealist**. Supabase production cutover NU e "2-3 zile" — e 1-2 săpt cu dual-write + verify + monitoring. Split:
-- **S2A** (18-30 mai): Stripe + digest + Supabase schema
+- **S2A** (18-30 mai): Stripe ICP tiers + digest + Supabase dual-write enable
 - **S2B** (1-15 iun): Mistral + Supabase cutover
 
-### S2.1 — Stripe Checkout integration (2 zile)
+### S2A.1 — Stripe ICP tier mapping + cabinet billing UI (~6h, era 2 zile)
 
-**File-uri noi**:
-- `app/api/stripe/checkout-session/route.ts` — POST create checkout
-- `app/api/stripe/webhook/route.ts` — POST webhook handler
-- `lib/server/stripe-client.ts` — Stripe SDK wrapper
-- `app/dashboard/cabinet/billing/page.tsx` — UI billing
+**Audit real v3-unified — ce EXISTĂ deja (~85%):**
+- ✅ `app/api/stripe/checkout/route.ts` — POST create checkout (NB: path `checkout`, nu `checkout-session`)
+- ✅ `app/api/stripe/webhook/route.ts` — handler `checkout.session.completed`, `customer.subscription.deleted/updated`, `invoice.payment_failed`
+- ✅ `app/api/stripe/portal/route.ts` — Stripe Customer Portal pentru self-service
+- ✅ Teste pentru toate 3 endpoint-uri (`route.test.ts`)
+- ✅ Webhook actualizează `setOrgPlan` / `setPartnerAccountPlan` în `lib/server/plan.ts` — flow end-to-end funcțional
+- ✅ Plan mapping curent în env vars: `pro`, `partner`, `partner_10`, `partner_25`, `partner_50` (5 SKU)
 
-**Plan tier mapping** (din Doc 01 sec 6):
-```typescript
-const STRIPE_PRICE_IDS = {
-  // DPO OS (cabinet segment)
-  "cabinet-solo": "price_xxx_499eur_month",
-  "cabinet-pro": "price_xxx_999eur_month",
-  "cabinet-studio": "price_xxx_1999eur_month",
-  // ... 16 SKU total
-}
-```
+**Ce LIPSEȘTE real (~15%, ~6h work):**
+1. **ICP tier mapping** — în cod sunt 5 SKU partner-centric. Doc 06 cere **16 SKU pentru cele 5 ICP segments**:
+   - cabinet-solo €499 / cabinet-pro €999 / cabinet-studio €1999
+   - imm-internal-solo €99 / imm-internal-pro €299
+   - solo-starter €49 / solo-pro €99
+   - fiscal-solo €299 / fiscal-pro €699
+   - enterprise-custom (sales-led)
+   - Adaugă în `STRIPE_PRICES` map din `app/api/stripe/checkout/route.ts` + env vars Stripe Dashboard — **~2h**
+2. **UI billing dedicat per ICP segment** — există billing global (`/pricing`, settings tab), lipsește view ICP-aware care arată "you're on cabinet-pro €999, upgrade to cabinet-studio for X" — **~4h**
 
-**Workflow**:
-1. Cabinet click "Upgrade Pro" → POST `/api/stripe/checkout-session` cu tier
-2. Stripe Checkout URL returnat → redirect
-3. Plată → Stripe webhook `/api/stripe/webhook` → update `plans-global.json`
-4. Cabinet refresh → vede tier nou activ + features unlocked
+**Done când**: cabinet pe plan free → click "Upgrade Cabinet Pro" în settings → Stripe Checkout `cabinet-pro` SKU → webhook → `plans-global.json` updated cu `tier: "cabinet-pro"` → features unlock per ICP config.
 
-**Done când**: cabinet cu plan free → upgrade Pro €999 prin Stripe Checkout → plan auto-update.
+⚠️ **Notă**: nu mai facem `lib/server/stripe-client.ts` ca wrapper — folosim Stripe REST API direct prin `fetch` (cum e deja în route.ts), e mai puțin overhead.
 
 ### ~~S2A.2 — Mistral EU sovereignty option~~ → **MUTAT în Sprint 2B (post-review)**
 
@@ -808,16 +836,43 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 **Done când**: cabinet Pro can switch Mistral în settings → next document generation folosește Mistral.
 
-### S2A.3 — Supabase schema preparation (3 zile, NU cutover)
+### S2A.3 — Supabase dual-write pattern + migration script (~1.5 zile, era 3 zile)
 
-⚠️ **Cutover mutat în Sprint 2B (post-review)**. S2A face DOAR schema + dual-write enable, NU cutover production.
+⚠️ **Cutover mutat în Sprint 2B (post-review)**. S2A face DOAR dual-write enable + migration prod data, NU cutover production.
 
-**Pași S2A**:
-1. Setup Supabase Postgres + RLS policies (1 zi)
-2. Migration scripts pentru `users`, `orgs`, `memberships`, `plans-global`, `state-org-*` → Supabase tables (1 zi)
-3. Dual-write enable (file system + Supabase paralel) (1 zi)
+**Audit real v3-unified — ce EXISTĂ deja (~80%):**
+- ✅ `lib/server/storage-adapter.ts` — abstracție `IStateStorage<T>` cu `LocalFileStorage` + Supabase implementation
+- ✅ 17 fișiere `lib/server/supabase-*.ts`: `org-state`, `tenancy`, `evidence`, `storage`, `auth`, `rest`, `strict-preflight`, `status` + read variants + tests
+- ✅ Toggle: `COMPLISCAN_DATA_BACKEND=local|supabase` (1 flag flip = cutover)
+- ✅ RLS verification: `npm run verify:supabase:rls` + `verify:supabase:strict` + `verify:supabase:sprint5`
+- ✅ Strict preflight: `supabase-strict-preflight.ts` (blochează start dacă RLS lipsește în production)
+- ✅ Auth integration: `supabase-auth.ts`
+- ✅ Schema completă pentru `users`, `orgs`, `memberships`, `plans-global`, `state-org-*`, `evidence`, `tenancy`
 
-**S2A done când**: dual-write activ, ambele backends scriu identic. Verify integrity 1 săpt.
+**Ce LIPSEȘTE real (~20%, ~1.5 zile work):**
+1. **Dual-write pattern** — `storage-adapter.ts` curent e **fie/fie** (toggle `local|supabase`), nu **și/și** (write paralel, read primary, log discrepancies). Pattern-ul de safety pentru cutover production fără data loss:
+   ```typescript
+   // În storage-adapter.ts — adaugă DualWriteStorage<T>
+   export class DualWriteStorage<T> implements IStateStorage<T> {
+     constructor(
+       private primary: IStateStorage<T>,    // local file
+       private secondary: IStateStorage<T>,  // Supabase
+       private onDiscrepancy: (orgId: string, p: T | null, s: T | null) => void,
+     ) {}
+     async write(orgId: string, state: T) {
+       await Promise.all([this.primary.write(orgId, state), this.secondary.write(orgId, state)])
+     }
+     async read(orgId: string): Promise<T | null> {
+       const [p, s] = await Promise.all([this.primary.read(orgId), this.secondary.read(orgId)])
+       if (JSON.stringify(p) !== JSON.stringify(s)) this.onDiscrepancy(orgId, p, s)
+       return p  // primary still authoritative
+     }
+   }
+   ```
+   Toggle nou: `COMPLISCAN_DATA_BACKEND=dual-write` — **~1 zi**
+2. **Migration script production data** — schema există dar nu există un `scripts/migrate-fs-to-supabase.mjs` care să copieze `.data/state-{orgId}.json` → Supabase tables o singură dată înainte de dual-write enable — **~4h**
+
+**S2A done când**: `COMPLISCAN_DATA_BACKEND=dual-write` activ pe staging, ambele backends scriu identic, log monitoring 1 săpt fără discrepancies.
 
 **Cutover (S2B)**: setează `COMPLISCAN_DATA_BACKEND=supabase` DOAR după 1 săpt dual-write verify clean.
 
@@ -839,7 +894,7 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ⚠️ **Sprint 2A reschedule**: 18-30 mai → 1-15 iun (Sprint 1 extended la 3 săpt cu cele 4 cerințe DPO noi).
 
-- [ ] **S2A.1** Stripe Checkout live + webhook + plan auto-update — 2 zile
+- [ ] **S2A.1** Stripe ICP tier mapping (16 SKU) + cabinet billing UI — ~6h *(era 2 zile; audit v5.6 a arătat 85% deja gata)*
 - [x] **S2A.4** ⭐ **Issue 6 DPO** — Monthly digest cron funcțional cu activitate reală — livrat pe `v3-unified`
   - Cron Vercel schedule "0 9 1 * *" (prima zi a lunii 09:00)
   - Per cabinet activ: aggregate findings closed + documents sent + magic links signed + evidence count
@@ -859,9 +914,11 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
     - `bundleEvidenceSummary.pendingControls === 0`
   - UI pe cockpit + dashboard: badge tranziție automată review_required → audit_ready
   - Audit Pack PDF cu watermark "AUDIT_READY" la export final
-- [ ] **S2A.7** Supabase schema + dual-write enable — 3 zile
+- [ ] **S2A.7** Supabase dual-write pattern + migration script — ~1.5 zile *(era 3 zile; audit v5.6 a arătat 80% deja gata)*
 
-**Sprint 2A total**: ~10 zile lucru = 2 săpt (1-15 iun).
+**Sprint 2A total revizuit (v5.6)**: ~2 zile lucru real, NU 10 zile. Stripe + Supabase sunt 80-85% gata pe v3-unified — Sprint 2A devine task secundar care se poate topi în Sprint 1 sau în week 1 din Sprint 2B.
+
+**Sprint 2A original (v5.3)**: ~10 zile lucru = 2 săpt (1-15 iun) — **invalidat de audit v5.6**.
 
 ---
 
