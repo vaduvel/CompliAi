@@ -5,21 +5,32 @@
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
 
-**Versiune v5.3 — feedback DPO Complet post Sprint 0.5 — cele 7 cerințe mapate la sprints**:
+**Versiune v5.4 — runtime cleanup v3-unified — cele 7 cerințe DPO mutate din roadmap în execuție funcțională**:
+
+Update 27 apr 2026, după integrarea pe `v3-unified`: nu mai tratăm cele 7 cerințe ca patch-uri izolate. Flow-ul matur este:
+
+- `Trust Profile`, `Vault` și `Audit Pack` folosesc aceeași sursă canonică pentru readiness: `buildAuditPack`.
+- Baseline-ul are backend + UI în `Settings`, iar payload-ul returnat după set/clear actualizează dashboard-ul.
+- Magic link are approve + reject + comment, cu dovadă/traceability.
+- Monthly digest folosește activitate reală din state prin cron.
+- Cookie-ul de pe `/shared` rămâne discret prin componenta globală existentă; nu se mai dublează banner local.
+- Test suite verde: `236 passed`, `1188 tests passed`, `6 skipped` pe `v3-unified`.
+
+**Status runtime real al celor 7 cerințe DPO**:
 
 DPO Complet (post pachet Sprint 0.5 trimis 27 apr) a confirmat: "produs suficient de matur pentru demo + pilot. Pentru folosire operațională completă, aș mai vrea să văd 7 lucruri." → mapat:
 
 | # | Cerința DPO | Sprint | Task ID |
 |---|---|---|---|
-| 1 | Scoruri consistente Trust Profile vs Audit Pack | Sprint 1 | **S1.9** (NEW, 1 zi) |
-| 2 | Baseline validat post-remediere | Sprint 2A | **S2A.5** (NEW, 1.5 zile) |
-| 3 | Comentariu/respingere magic link | Sprint 1 | **S1.2** (planificat, 1.5 zile) |
+| 1 | Scoruri consistente Trust Profile vs Audit Pack | Sprint 1 | ✅ **DONE S1.9** — `auditReadinessSummary` derivat din Audit Pack canonic |
+| 2 | Baseline validat post-remediere | Sprint 2A | ✅ **DONE S2A.5** — `POST /api/state/baseline` + UI Settings set/clear |
+| 3 | Comentariu/respingere magic link | Sprint 1 | ✅ **DONE S1.2** — approve/reject/comment + evidence/event/alert |
 | 4 | Documente fără "AI indisponibil" | Sprint 0.5 | ✅ DONE (commit `cac754e` — patch include în doc generator) |
-| 5 | Cookie banner discret pe `/shared` | Sprint 1 | **S1.5+** (extension signature, 4h) |
-| 6 | Raport lunar din activitate reală | Sprint 2A | **S2A.4** (planificat, 4h) |
-| 7 | Export "audit_ready" după dovezi 100% | Sprint 2A | **S2A.6** (NEW, 1 zi, depinde S2A.5) |
+| 5 | Cookie banner discret pe `/shared` | Sprint 1 | ✅ **DONE S1.5+** — banner compact existent, fără dublură locală |
+| 6 | Raport lunar din activitate reală | Sprint 2A | ✅ **DONE S2A.4** — cron monthly digest + agregare state real |
+| 7 | Export "audit_ready" după dovezi 100% | Sprint 2A | ✅ **DONE S2A.6** — `audit_ready` derivat canonic și surfacat în Vault |
 
-Total task-uri NEW: **3 task-uri adăugate** (S1.9, S2A.5, S2A.6) + **3 task-uri planificate**: S1.2, S1.5+, S2A.4 + **1 done**: Issue 4 în Sprint 0.5.
+Total task-uri DPO: **7/7 funcționale pe v3-unified**. Rămâne validarea runtime cu pachet ZIP nou pentru DPO Complet.
 
 **Sprint 1 ETA extension**: 2 săpt → **3 săpt** (8 mai → 30 mai). Pilot week paralel.
 **Sprint 2A ETA**: 2 săpt (1-15 iun). 
@@ -706,24 +717,24 @@ Pre-kickoff (Sprint 0 + 0.5):
 Sprint 1 extended (8-30 mai, 3 săpt — paralel cu pilot week):
 
 - [ ] **S1.1** Custom templates UI funcțional (cabinet upload → folosit în cockpit) — 3 zile
-- [ ] **S1.2** ⭐ **Issue 3 DPO** — Reject + comment flow complet pe magic link — 1.5 zile (8-13 mai)
+- [x] **S1.2** ⭐ **Issue 3 DPO** — Reject + comment flow complet pe magic link — livrat pe `v3-unified`
   - POST `/api/shared/[token]/reject` (mandatory comment field)
   - POST `/api/shared/[token]/comment` (optional comment, no reject)
   - UI cabinet `/dashboard/cabinet/pending-approvals` cu badges
 - [ ] **S1.3** AI ON/OFF toggle per client — 4h
 - [ ] **S1.5** Signature upload în brand setup — 1 zi
-- [ ] **S1.5+** ⭐ **Issue 5 DPO** — Cookie banner discret pe `/shared/[token]` — 4h
+- [x] **S1.5+** ⭐ **Issue 5 DPO** — Cookie banner discret pe `/shared/[token]` — livrat fără banner duplicat
   - Variant compact (NU full-width modal)
   - Localstorage simple, NU layered consent UI
   - Dismiss button vizibil
 - [ ] **S1.6** ICP segment choice onboarding pentru cabinete noi — 2 zile
 - [ ] **S1.7** UI cabinet pentru pending approvals + comments — 1 zi
 - [ ] **S1.8** Email notifications via Resend — 4h
-- [ ] **S1.9** ⭐ **Issue 1 DPO** — Trust Profile ↔ Audit Pack score consistency — 1 zi (28-30 mai)
-  - Source of truth unic: `lib/compliance/engine.ts → computeDashboardSummary`
-  - Trust Profile public page reuse same computation
-  - Audit Pack executiveSummary.complianceScore = same value
-  - Test: integration test verify both endpoints returnează same score
+- [x] **S1.9** ⭐ **Issue 1 DPO** — Trust Profile ↔ Audit Pack score consistency — livrat pe `v3-unified`
+  - Source of truth unic pentru readiness: `lib/server/audit-pack.ts → buildAuditPack`
+  - Dashboard full payload expune `auditReadinessSummary`
+  - Vault consumă același summary canonic, nu mai recalculează local starea finală
+  - Test: `lib/server/dashboard-response.test.ts` + `lib/server/audit-pack.test.ts`
 
 **Sprint 1 total**: ~13 zile lucru. ETA: 3 săpt (8-30 mai) — overlap cu pilot week (Diana folosește incremental).
 
@@ -829,17 +840,17 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 ⚠️ **Sprint 2A reschedule**: 18-30 mai → 1-15 iun (Sprint 1 extended la 3 săpt cu cele 4 cerințe DPO noi).
 
 - [ ] **S2A.1** Stripe Checkout live + webhook + plan auto-update — 2 zile
-- [ ] **S2A.4** ⭐ **Issue 6 DPO** — Monthly digest cron funcțional cu activitate reală — 4h
+- [x] **S2A.4** ⭐ **Issue 6 DPO** — Monthly digest cron funcțional cu activitate reală — livrat pe `v3-unified`
   - Cron Vercel schedule "0 9 1 * *" (prima zi a lunii 09:00)
   - Per cabinet activ: aggregate findings closed + documents sent + magic links signed + evidence count
   - Email cabinet cu raport HTML brand-uit
   - Cabinet poate forward către clienți individual ca raport lunar per client
-- [ ] **S2A.5** ⭐ **Issue 2 DPO** — Baseline validate workflow — 1.5 zile
+- [x] **S2A.5** ⭐ **Issue 2 DPO** — Baseline validate workflow — livrat pe `v3-unified`
   - UI cabinet: "Validează snapshot ca baseline" button după toate remedierile closed
   - Backend: set `state.validatedBaselineSnapshotId` la snapshot curent
   - Trigger conditions: 0 findings open + 0 remediations active + 100% evidence validated
   - UI badge "BASELINE VALIDAT" pe cockpit + Audit Pack
-- [ ] **S2A.6** ⭐ **Issue 7 DPO** — Audit_ready transition workflow — 1 zi
+- [x] **S2A.6** ⭐ **Issue 7 DPO** — Audit_ready transition workflow — livrat pe `v3-unified`
   - Logic: `auditReadiness = "audit_ready"` doar când:
     - `validatedBaselineSnapshotId !== null`
     - `executiveSummary.openFindings === 0`

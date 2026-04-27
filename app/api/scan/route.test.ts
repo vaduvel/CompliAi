@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   buildDashboardPayloadMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
+  readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   requireFreshAuthenticatedSessionMock: vi.fn(),
 }))
@@ -29,6 +30,7 @@ vi.mock("@/lib/server/dashboard-response", () => ({
 
 vi.mock("@/lib/server/auth", () => ({
   AuthzError: mocks.AuthzErrorClass,
+  readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
   requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
 }))
@@ -44,6 +46,14 @@ describe("POST /api/scan", () => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
     mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      userId: "user-1",
+      orgId: "org-1",
+      orgName: "Demo Org SRL",
+      email: "owner@example.com",
+      role: "owner",
+    })
+    mocks.readFreshSessionFromRequestMock.mockResolvedValue({
+      userId: "user-1",
       orgId: "org-1",
       orgName: "Demo Org SRL",
       email: "owner@example.com",

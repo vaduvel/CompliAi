@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   buildRemediationPlanMock: vi.fn(),
   buildCompliScanSnapshotMock: vi.fn(),
   buildAICompliancePackMock: vi.fn(),
+  buildAuditPackMock: vi.fn(),
   buildComplianceTraceRecordsMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   hydrateEvidenceAttachmentsFromSupabaseMock: vi.fn(),
@@ -29,6 +30,10 @@ vi.mock("@/lib/server/compliscan-export", () => ({
 
 vi.mock("@/lib/server/ai-compliance-pack", () => ({
   buildAICompliancePack: mocks.buildAICompliancePackMock,
+}))
+
+vi.mock("@/lib/server/audit-pack", () => ({
+  buildAuditPack: mocks.buildAuditPackMock,
 }))
 
 vi.mock("@/lib/server/compliance-trace", () => ({
@@ -59,6 +64,33 @@ describe("lib/server/dashboard-response", () => {
     vi.clearAllMocks()
     mocks.buildOrgKnowledgeStaleFindingMock.mockReturnValue(null)
     mocks.readDsarStateMock.mockResolvedValue({ requests: [] })
+    mocks.buildAuditPackMock.mockReturnValue({
+      executiveSummary: {
+        auditReadiness: "review_required",
+        baselineStatus: "missing",
+        complianceScore: 77,
+        riskLabel: "medium",
+        topBlockers: ["Nu exista baseline validat pentru comparatie auditabila."],
+        nextActions: ["Valideaza snapshot-ul curent ca baseline pentru comparatii viitoare."],
+        activeDrifts: 0,
+        openFindings: 1,
+        remediationOpen: 1,
+        validatedEvidenceItems: 0,
+        missingEvidenceItems: 1,
+        evidenceLedgerSummary: {
+          total: 0,
+          sufficient: 0,
+          weak: 0,
+          unrated: 0,
+        },
+        auditQualityDecision: "review",
+        blockedQualityGates: 0,
+        reviewQualityGates: 1,
+      },
+      bundleEvidenceSummary: {
+        status: "review_required",
+      },
+    })
   })
 
   it("hidrateaza state-ul din registrul cloud inainte sa construiasca pachetul pentru dashboard si audit", async () => {
@@ -144,6 +176,38 @@ describe("lib/server/dashboard-response", () => {
         snapshot,
       })
     )
+    expect(mocks.buildAuditPackMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: expect.objectContaining(hydratedState),
+        remediationPlan,
+        workspace,
+        compliancePack,
+        snapshot,
+      })
+    )
+    expect(payload.auditReadinessSummary).toEqual({
+      auditReadiness: "review_required",
+      baselineStatus: "missing",
+      complianceScore: 77,
+      riskLabel: "medium",
+      topBlockers: ["Nu exista baseline validat pentru comparatie auditabila."],
+      nextActions: ["Valideaza snapshot-ul curent ca baseline pentru comparatii viitoare."],
+      activeDrifts: 0,
+      openFindings: 1,
+      remediationOpen: 1,
+      validatedEvidenceItems: 0,
+      missingEvidenceItems: 1,
+      evidenceLedgerSummary: {
+        total: 0,
+        sufficient: 0,
+        weak: 0,
+        unrated: 0,
+      },
+      auditQualityDecision: "review",
+      blockedQualityGates: 0,
+      reviewQualityGates: 1,
+      bundleStatus: "review_required",
+    })
     expect(payload.state.taskState["rem-task-1"]?.attachedEvidenceMeta?.storageProvider).toBe(
       "supabase_private"
     )

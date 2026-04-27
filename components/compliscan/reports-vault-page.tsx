@@ -106,7 +106,8 @@ export function ReportsVaultPageSurface() {
 
   const needsCompliancePack = Boolean(cockpit.data && !cockpit.data.compliancePack)
   const needsTraceability = Boolean(cockpit.data && !cockpit.data.traceabilityMatrix)
-  const needsHeavyPayload = needsCompliancePack || needsTraceability
+  const needsAuditReadinessSummary = Boolean(cockpit.data && !cockpit.data.auditReadinessSummary)
+  const needsHeavyPayload = needsCompliancePack || needsTraceability || needsAuditReadinessSummary
 
   useEffect(() => {
     if (needsHeavyPayload && !heavyPayloadRequested.current) {
@@ -136,19 +137,27 @@ export function ReportsVaultPageSurface() {
   )
   const recentEvents = cockpit.data.state.events.slice(0, 8)
   const activeDrifts = cockpit.activeDrifts
+  const auditSummary = cockpit.data.auditReadinessSummary
   const validationEntries = buildValidationEntries(
     cockpit.tasks,
     cockpit.data.state.taskState,
     cockpit.data.state.events
   )
-  const auditReadiness =
+  const fallbackAuditReadiness =
     validatedBaseline && activeDrifts.length === 0 && evidenceMissingTasks.length === 0
       ? "audit_ready"
       : "review_required"
+  const auditReadiness = auditSummary?.auditReadiness ?? fallbackAuditReadiness
   const evidenceLedger = cockpit.data.evidenceLedger ?? []
-  const ledgerReadyCount = evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
-  const savedEvidenceCount = evidenceLedger.length > 0 ? evidenceLedger.length : evidenceReadyTasks.length
-  const blockers = [
+  const ledgerReadyCount =
+    auditSummary?.evidenceLedgerSummary.sufficient ??
+    evidenceLedger.filter((entry) => entry.quality?.status === "sufficient").length
+  const savedEvidenceCount =
+    auditSummary?.evidenceLedgerSummary.total ??
+    (evidenceLedger.length > 0 ? evidenceLedger.length : evidenceReadyTasks.length)
+  const activeDriftCount = auditSummary?.activeDrifts ?? activeDrifts.length
+  const missingEvidenceCount = auditSummary?.missingEvidenceItems ?? evidenceMissingTasks.length
+  const fallbackBlockers = [
     !validatedBaseline
       ? "Nu ai încă un baseline validat pentru comparația de audit."
       : null,
@@ -159,6 +168,7 @@ export function ReportsVaultPageSurface() {
       ? `${activeDrifts.length} drift-uri deschise pot bloca susținerea pachetului.`
       : null,
   ].filter(Boolean) as string[]
+  const blockers = auditSummary ? auditSummary.topBlockers : fallbackBlockers
   const summaryItems: SummaryStripItem[] = [
     {
       label: "Dovezi valide",
@@ -171,21 +181,21 @@ export function ReportsVaultPageSurface() {
     },
     {
       label: "Gap-uri active",
-      value: `${evidenceMissingTasks.length}`,
+      value: `${missingEvidenceCount}`,
       hint:
-        evidenceMissingTasks.length > 0
+        missingEvidenceCount > 0
           ? "controale fără dovadă sau validare completă"
           : "dovezile esențiale sunt acoperite",
-      tone: evidenceMissingTasks.length > 0 ? "warning" : "success",
+      tone: missingEvidenceCount > 0 ? "warning" : "success",
     },
     {
       label: "Drift deschis",
-      value: `${activeDrifts.length}`,
+      value: `${activeDriftCount}`,
       hint:
-        activeDrifts.length > 0
+        activeDriftCount > 0
           ? "schimbări care cer explicație sau revenire în execuție"
           : "nu există drift deschis",
-      tone: activeDrifts.length > 0 ? "danger" : "success",
+      tone: activeDriftCount > 0 ? "danger" : "success",
     },
   ]
 
@@ -212,7 +222,7 @@ export function ReportsVaultPageSurface() {
                 {auditReadiness === "audit_ready" ? "gata" : "în lucru"}
               </p>
               <p className="text-xs text-eos-text-muted">
-                drift {activeDrifts.length} · gap dovezi {evidenceMissingTasks.length}
+                drift {activeDriftCount} · gap dovezi {missingEvidenceCount}
               </p>
             </div>
             <Button asChild>

@@ -31,6 +31,7 @@ import type {
   WorkspaceContext,
 } from "@/lib/compliance/types"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
+import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
@@ -44,6 +45,24 @@ export type DashboardPayload = {
   workspace: WorkspaceContext
   compliancePack?: AICompliancePack
   traceabilityMatrix?: ComplianceTraceRecord[]
+  auditReadinessSummary?: {
+    auditReadiness: AuditPackV2["executiveSummary"]["auditReadiness"]
+    baselineStatus: AuditPackV2["executiveSummary"]["baselineStatus"]
+    complianceScore: AuditPackV2["executiveSummary"]["complianceScore"]
+    riskLabel: AuditPackV2["executiveSummary"]["riskLabel"]
+    topBlockers: string[]
+    nextActions: string[]
+    activeDrifts: number
+    openFindings: number
+    remediationOpen: number
+    validatedEvidenceItems: number
+    missingEvidenceItems: number
+    evidenceLedgerSummary: AuditPackV2["executiveSummary"]["evidenceLedgerSummary"]
+    auditQualityDecision: AuditPackV2["executiveSummary"]["auditQualityDecision"]
+    blockedQualityGates: number
+    reviewQualityGates: number
+    bundleStatus: AuditPackV2["bundleEvidenceSummary"]["status"]
+  }
   evidenceLedger?: EvidenceRegistryEntry[]
 }
 
@@ -171,7 +190,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
 
   async function ensureHeavyPayload() {
     if (!data) return
-    if (data.compliancePack && data.traceabilityMatrix) return
+    if (data.compliancePack && data.traceabilityMatrix && data.auditReadinessSummary) return
 
     await withBusyOperation(async () => {
       const response = await fetch(DASHBOARD_FULL_ENDPOINT, { cache: "no-store" })
