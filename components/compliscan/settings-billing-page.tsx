@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { IcpBillingTiersPanel } from "@/components/compliscan/icp-billing-tiers"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { V3Panel } from "@/components/compliscan/v3/panel"
 import { useTrackEvent } from "@/lib/client/use-track-event"
@@ -232,6 +233,9 @@ export function SettingsBillingPageSurface() {
               </p>
             ) : null}
           </V3Panel>
+
+          {/* S2A.1 — ICP-aware billing tiers (afișat sub planul curent) */}
+          <IcpBillingTiersPanel />
 
           {/* Trial expiry warning */}
           {isTrialActive && currentPlan === "free" && (
