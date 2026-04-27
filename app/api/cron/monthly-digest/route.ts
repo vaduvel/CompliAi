@@ -15,7 +15,9 @@ import { normalizeComplianceState, computeDashboardSummary } from "@/lib/complia
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { safeListNotifications } from "@/lib/server/notifications-store"
 import { readDsarState } from "@/lib/server/dsar-store"
+import { loadEvidenceLedgerFromSupabase } from "@/lib/server/supabase-evidence-read"
 import {
+  buildMonthlyActivitySummary,
   buildMonthlyDigestEmail,
   buildMonthlySubject,
   type MonthlyDigest,
@@ -24,7 +26,8 @@ import {
 } from "@/lib/server/monthly-digest"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI <onboarding@resend.dev>"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan <onboarding@resend.dev>"
+const APP_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro").replace(/\/+$/, "")
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -201,9 +204,10 @@ export async function POST(request: Request) {
 
         const state = normalizeComplianceState(rawState)
         const summary = computeDashboardSummary(state)
-        const [notifications, dsarState] = await Promise.all([
+        const [notifications, dsarState, evidenceLedger] = await Promise.all([
           safeListNotifications(org.id),
           readDsarState(org.id),
+          loadEvidenceLedgerFromSupabase({ orgId: org.id, limit: 50 }).catch(() => []),
         ])
 
         const openDsar = dsarState.requests.filter(
@@ -212,6 +216,11 @@ export async function POST(request: Request) {
 
         const event = extractExternalEvent(notifications)
         const statusItems = buildStatusItems(state, openDsar)
+        const activity = buildMonthlyActivitySummary({
+          state,
+          evidenceLedger,
+          generatedAtISO: generatedAt,
+        })
 
         // Build CTA: if there's an event-relevant finding, link to it; otherwise dashboard
         const openFindings = (state.findings ?? []).filter(
@@ -237,10 +246,12 @@ export async function POST(request: Request) {
           emailAddress: prefs.emailAddress,
           event,
           statusItems,
+          activity,
           currentScore: summary.score,
           openFindings: openFindings.length,
           ctaHref,
           ctaLabel,
+          appBaseUrl: APP_BASE_URL,
           generatedAt,
         }
 
