@@ -65,7 +65,19 @@ export function buildComplianceTraceRecords({
       })
     )
 
-  return [...records, ...orphanFindingRecords].sort((left, right) => {
+  // Sprint 0.5 — Issue 2 fix: include document approvals (signed via magic link)
+  // ca traceability records validated. Înainte, evidence ledger conținea aprobările
+  // dar traceability matrix nu le reflecta — DPO vede 4 controale blocked chiar și
+  // cu DPA approved. Acum approval direct apare ca trace `validated` cu evidence atașat.
+  const documentApprovalRecords = (state.generatedDocuments ?? [])
+    .filter(
+      (doc) => doc.adoptionStatus === "signed" || doc.adoptionStatus === "active"
+    )
+    .map((doc) =>
+      buildTraceRecordFromApprovedDocument({ state, document: doc, currentSnapshot })
+    )
+
+  return [...records, ...orphanFindingRecords, ...documentApprovalRecords].sort((left, right) => {
     const severityOrder = ["critical", "high", "medium", "low"]
     const severityDelta =
       severityOrder.indexOf(left.severity) - severityOrder.indexOf(right.severity)
@@ -417,6 +429,103 @@ function getFindingLawReferences(finding: ScanFinding) {
     finding.legalReference,
     ...(finding.legalMappings ?? []).map((mapping) => `${mapping.regulation} ${mapping.article}`),
   ])
+}
+
+// Sprint 0.5 — Issue 2 fix: build traceability record pentru document semnat
+// prin magic link. Documents `signed` sau `active` apar ca trace records `validated`,
+// cu evidence atașat și auditDecision `pass`. Asta închide loop-ul vizual:
+// "DPA aprobat → traceability validat" (era 4 controale blocked chiar cu DPA signed).
+function buildTraceRecordFromApprovedDocument({
+  state,
+  document,
+  currentSnapshot,
+}: {
+  state: ComplianceState
+  document: ComplianceState["generatedDocuments"][number]
+  currentSnapshot: CompliScanSnapshot | null
+}): ComplianceTraceRecord {
+  const approvalTaskId = `document-approval-${document.id}`
+  const approvalTask = state.taskState[approvalTaskId]
+  const evidence = approvalTask?.attachedEvidenceMeta ?? null
+  const linkedFinding = document.sourceFindingId
+    ? state.findings.find((finding) => finding.id === document.sourceFindingId) ?? null
+    : null
+
+  const lawReferences = linkedFinding ? getFindingLawReferences(linkedFinding) : []
+  const principles = linkedFinding?.principles ?? []
+  const sourceDocuments = unique([linkedFinding?.sourceDocument])
+  const isFullyValidated =
+    document.adoptionStatus === "signed" || document.adoptionStatus === "active"
+
+  return {
+    id: `trace-${approvalTaskId}`,
+    entryKind: "document_approval",
+    entryId: approvalTaskId,
+    title: `Aprobare client: ${document.title}`,
+    severity: linkedFinding?.severity ?? "medium",
+    remediationMode: null,
+    controlFamily: getControlFamily({
+      validationKind: null,
+      lawReference: lawReferences[0] ?? null,
+      principles,
+      title: document.title,
+    }),
+    lawReferences,
+    principles,
+    sourceDocuments,
+    sourceKinds: [],
+    linkedFindingIds: linkedFinding ? [linkedFinding.id] : [],
+    linkedDriftIds: [],
+    linkedAlertIds: [],
+    findingRefs: linkedFinding
+      ? [
+          {
+            id: linkedFinding.id,
+            title: linkedFinding.title,
+            severity: linkedFinding.severity,
+            sourceDocument: linkedFinding.sourceDocument,
+            lawReferences: getFindingLawReferences(linkedFinding),
+            status: "resolved" as const,
+          },
+        ]
+      : [],
+    driftRefs: [],
+    evidence: {
+      attached: Boolean(evidence),
+      validationStatus: approvalTask?.validationStatus ?? "passed",
+      validationBasis: approvalTask?.validationBasis ?? "direct_signal",
+      validationConfidence: approvalTask?.validationConfidence ?? "high",
+      fileName: evidence?.fileName ?? null,
+      kind: evidence?.kind ?? null,
+      quality: evidence?.quality ?? null,
+      updatedAtISO: approvalTask?.validatedAtISO ?? document.adoptionUpdatedAtISO ?? null,
+    },
+    evidenceRequired: null,
+    bundleCoverageStatus: evidence ? "covered" : "partial",
+    bundleFiles: evidence?.fileName ? [evidence.fileName] : [],
+    snapshotContext: {
+      currentSnapshotId: currentSnapshot?.snapshotId ?? null,
+      comparedToSnapshotId: currentSnapshot?.comparedToSnapshotId ?? null,
+      validatedBaselineSnapshotId: null,
+    },
+    review: {
+      confirmedByUser: isFullyValidated,
+      note: isFullyValidated
+        ? `Aprobat de client prin magic link la ${
+            document.adoptionUpdatedAtISO
+              ? new Date(document.adoptionUpdatedAtISO).toLocaleString("ro-RO")
+              : "—"
+          }.`
+        : null,
+      updatedAtISO: document.adoptionUpdatedAtISO ?? null,
+    },
+    traceStatus: isFullyValidated ? "validated" : "evidence_required",
+    auditDecision: isFullyValidated ? "pass" : "review",
+    auditGateCodes: [],
+    nextStep: isFullyValidated
+      ? `Document aprobat și semnat de client. Atașat la dosar pentru audit.`
+      : `Document trimis spre aprobare. Așteaptă semnătura clientului prin magic link.`,
+  }
 }
 
 function unique(values: Array<string | null | undefined>) {

@@ -16,7 +16,7 @@ export type ComplianceTraceStatus = "validated" | "evidence_required" | "action_
 
 export type ComplianceTraceRecord = {
   id: string
-  entryKind: "control_task" | "finding_task"
+  entryKind: "control_task" | "finding_task" | "document_approval"
   entryId: string
   title: string
   severity: ComplianceSeverity
