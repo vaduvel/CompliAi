@@ -36,11 +36,14 @@ export type GeneratedDocumentKind =
   | "pay-gap-report"
   | "ropa"
 
+// Sprint 1.2 — Issue 3 DPO: adăugat "rejected" pentru flow magic link reject.
+// Sincron cu DocumentAdoptionStatus din lib/compliance/document-adoption.ts.
 export type GeneratedDocumentAdoptionStatus =
   | "reviewed_internally"
   | "sent_for_signature"
   | "signed"
   | "active"
+  | "rejected"
 
 export type HrRegistryReconciliationRecord = {
   findingId: string
@@ -212,6 +215,16 @@ export type GeneratedDocumentRecord = {
   adoptionStatus?: GeneratedDocumentAdoptionStatus
   adoptionUpdatedAtISO?: string
   adoptionEvidenceNote?: string
+  // Sprint 1.2 — Issue 3 DPO: comentarii primite prin magic link (NU reject)
+  // Patron poate trimite feedback fără să respingă/aprobe documentul.
+  shareComments?: Array<{
+    id: string
+    authorName: string
+    comment: string
+    recipientType: string
+    createdAtISO: string
+    channel: "public_magic_link"
+  }>
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
   nextReviewDateISO?: string      // when to review this document

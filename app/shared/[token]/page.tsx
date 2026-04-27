@@ -4,9 +4,17 @@
 
 import { AlertTriangle, CheckCircle2, Clock, ShieldCheck, XCircle } from "lucide-react"
 
+import { SharedApprovalPanel } from "@/components/compliscan/shared-approval-panel"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
+import {
+  findSharedApprovalDocument,
+  getSharedDocumentComments,
+  isSharedDocumentApproved,
+  isSharedDocumentRejected,
+} from "@/lib/server/shared-approval"
+import { getWhiteLabelConfig, type WhiteLabelConfig } from "@/lib/server/white-label"
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -43,6 +51,36 @@ function recipientLabel(type: string) {
   return "Raport contabil"
 }
 
+function envValue(name: string) {
+  return process.env[name]?.trim() || null
+}
+
+function initialsFromName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean).slice(0, 2)
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "CS"
+}
+
+function buildConsultantProfile(config: WhiteLabelConfig, orgName: string) {
+  const cabinetName =
+    config.partnerName?.trim() ||
+    envValue("COMPLISCAN_CABINET_NAME") ||
+    "Cabinet DPO"
+  const consultantName =
+    envValue("COMPLISCAN_CONSULTANT_NAME") ||
+    "Diana Popescu"
+
+  return {
+    cabinetName,
+    consultantName,
+    title: envValue("COMPLISCAN_CONSULTANT_TITLE") || "Consultant DPO",
+    certification: envValue("COMPLISCAN_CONSULTANT_CERTIFICATION") || "CIPP/E",
+    email: envValue("COMPLISCAN_CONSULTANT_EMAIL") || "diana@dpocomplet.ro",
+    phone: envValue("COMPLISCAN_CONSULTANT_PHONE") || "+40 700 000 000",
+    brandColor: config.brandColor || "#6366f1",
+    clientName: orgName,
+  }
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function SharedCompliancePage({
@@ -73,6 +111,8 @@ export default async function SharedCompliancePage({
   // 2. Load org state
   const rawState = await readStateForOrg(payload.orgId)
   const orgName = await readOrgName(payload.orgId)
+  const whiteLabel = await getWhiteLabelConfig(payload.orgId)
+  const consultant = buildConsultantProfile(whiteLabel, orgName)
 
   if (!rawState) {
     return (
@@ -106,6 +146,15 @@ export default async function SharedCompliancePage({
   const efacturaOk = state.efacturaConnected && state.efacturaSignalsCount === 0
   const hasAiSystems = state.aiSystems.length > 0
   const driftCount = (state.driftRecords ?? []).filter((d) => d.open).length
+  const approvalDocument = findSharedApprovalDocument(state, payload.documentId)
+  const approvalDocumentApproved = isSharedDocumentApproved(approvalDocument)
+  const approvalDocumentRejected = isSharedDocumentRejected(approvalDocument)
+  const approvalDocumentComments = getSharedDocumentComments(approvalDocument).map((c) => ({
+    id: c.id,
+    authorName: c.authorName,
+    comment: c.comment,
+    createdAtISO: c.createdAtISO,
+  }))
 
   const generatedAt = new Date().toLocaleDateString("ro-RO", {
     day: "numeric", month: "long", year: "numeric",
@@ -121,8 +170,11 @@ export default async function SharedCompliancePage({
             <div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-5 text-indigo-600" strokeWidth={2} />
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
-                  CompliAI · {recipientLabel(payload.recipientType)}
+                <span
+                  className="text-xs font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: consultant.brandColor }}
+                >
+                  {consultant.cabinetName} · {recipientLabel(payload.recipientType)}
                 </span>
               </div>
               <h1 className="mt-2 text-xl font-bold text-slate-900">{orgName}</h1>
@@ -145,6 +197,30 @@ export default async function SharedCompliancePage({
           </div>
         </div>
 
+        {/* Consultant identity */}
+        <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div
+              className="flex size-12 shrink-0 items-center justify-center rounded-eos-md text-sm font-bold text-white"
+              style={{ background: consultant.brandColor }}
+            >
+              {initialsFromName(consultant.cabinetName)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Pregătit pentru {consultant.clientName}
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-slate-900">{consultant.consultantName}</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {consultant.title} · {consultant.certification} · {consultant.cabinetName}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                {consultant.email} · {consultant.phone}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Framework status */}
         <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
@@ -156,17 +232,19 @@ export default async function SharedCompliancePage({
               ok={gdprOk}
               detail={gdprOk ? `${state.gdprProgress}% — acoperire satisfăcătoare` : `${state.gdprProgress}% — necesită remediere`}
             />
-            <FrameworkRow
-              name="e-Factura / SPV ANAF"
-              ok={efacturaOk}
-              detail={
-                !state.efacturaConnected
-                  ? "Conexiune SPV neconfigurată"
-                  : state.efacturaSignalsCount > 0
-                    ? `${state.efacturaSignalsCount} semnale active de monitorizat`
-                    : "Conexiune activă, fără probleme detectate"
-              }
-            />
+            {payload.recipientType === "accountant" && (
+              <FrameworkRow
+                name="e-Factura / SPV ANAF"
+                ok={efacturaOk}
+                detail={
+                  !state.efacturaConnected
+                    ? "Conexiune SPV neconfigurată"
+                    : state.efacturaSignalsCount > 0
+                      ? `${state.efacturaSignalsCount} semnale active de monitorizat`
+                      : "Conexiune activă, fără probleme detectate"
+                }
+              />
+            )}
             {hasAiSystems && (
               <FrameworkRow
                 name="EU AI Act / Sisteme AI"
@@ -225,10 +303,20 @@ export default async function SharedCompliancePage({
           </div>
         )}
 
+        {approvalDocument ? (
+          <SharedApprovalPanel
+            token={token}
+            documentTitle={payload.documentTitle ?? approvalDocument.title}
+            initialApproved={approvalDocumentApproved}
+            initialRejected={approvalDocumentRejected}
+            initialComments={approvalDocumentComments}
+          />
+        ) : null}
+
         {/* Disclaimer */}
         <div className="rounded-eos-lg border border-eos-warning/10 bg-eos-warning-soft p-5">
           <p className="text-xs leading-relaxed text-eos-warning">
-            <strong>Notă juridică:</strong> Acest document este un rezumat automatizat generat de CompliAI
+            <strong>Notă juridică:</strong> Acest document este un rezumat de lucru pregătit de cabinet
             și nu constituie consultanță juridică sau contabilă. Informațiile reflectă starea internă
             a workspace-ului la momentul generării și necesită validare profesională înainte de utilizare
             în scop oficial, contractual sau de audit.
@@ -237,7 +325,7 @@ export default async function SharedCompliancePage({
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-400">
-          Generat de <strong>CompliAI</strong> · compliscanag.vercel.app ·{" "}
+          Pregătit de <strong>{consultant.cabinetName}</strong> ·{" "}
           Link expiră în 72 ore de la generare
         </p>
 
