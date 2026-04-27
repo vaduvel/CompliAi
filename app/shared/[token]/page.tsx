@@ -15,7 +15,7 @@ import {
   isSharedDocumentRejected,
 } from "@/lib/server/shared-approval"
 import { getWhiteLabelConfig, type WhiteLabelConfig } from "@/lib/server/white-label"
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,12 +32,6 @@ function scoreColor(score: number) {
   if (score >= 75) return "#10b981"
   if (score >= 50) return "#f59e0b"
   return "#ef4444"
-}
-
-function scoreLabel(score: number) {
-  if (score >= 75) return "Risc Scăzut"
-  if (score >= 50) return "Risc Mediu"
-  return "Risc Ridicat"
 }
 
 function formatExpiry(iso: string) {
@@ -129,11 +123,17 @@ export default async function SharedCompliancePage({
   }
 
   // 3. Build summary
-  const state = normalizeComplianceState(rawState)
-  const summary = computeDashboardSummary(state)
-  const score = summary.score
+  const profile = await buildPublicReadinessProfile(rawState, {
+    orgId: payload.orgId,
+    orgName,
+    workspaceLabel: orgName,
+    workspaceOwner: consultant.consultantName,
+    workspaceInitials: initialsFromName(orgName),
+  })
+  const state = profile.state
+  const score = profile.score
   const color = scoreColor(score)
-  const label = scoreLabel(score)
+  const label = profile.riskLabel
 
   const openFindings = state.findings.filter(
     (f) => f.findingStatus !== "resolved" && f.findingStatus !== "dismissed"
@@ -179,7 +179,7 @@ export default async function SharedCompliancePage({
               </div>
               <h1 className="mt-2 text-xl font-bold text-slate-900">{orgName}</h1>
               <p className="mt-1 text-sm text-slate-500">
-                Profil de conformitate generat la {generatedAt}
+                Profil de readiness generat la {generatedAt}
               </p>
             </div>
             <div
@@ -223,9 +223,22 @@ export default async function SharedCompliancePage({
 
         {/* Framework status */}
         <div className="rounded-eos-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
-            Stare framework-uri
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-slate-400">
+              Stare framework-uri
+            </h2>
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                profile.auditPack.executiveSummary.auditReadiness === "audit_ready"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-amber-50 text-amber-700"
+              }`}
+            >
+              {profile.auditPack.executiveSummary.auditReadiness === "audit_ready"
+                ? "audit_ready"
+                : "review_required"}
+            </span>
+          </div>
           <div className="mt-4 space-y-3">
             <FrameworkRow
               name="GDPR / Protecția datelor personale"

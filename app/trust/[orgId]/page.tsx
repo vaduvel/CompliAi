@@ -1,13 +1,18 @@
 import { CheckCircle2, Lock, ShieldCheck, XCircle } from "lucide-react"
 
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
+import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
 function isValidOrgId(id: string): boolean {
   return /^org-[a-z0-9]{8,}$/.test(id)
+}
+
+function initialsFromName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean).slice(0, 2)
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "TC"
 }
 
 async function readOrgName(orgId: string): Promise<string> {
@@ -101,8 +106,16 @@ export default async function TrustPage({
     return <NotFound />
   }
 
-  const normalizedState = normalizeComplianceState(state)
-  const summary = computeDashboardSummary(normalizedState)
+  const profile = await buildPublicReadinessProfile(state, {
+    orgId,
+    orgName,
+    workspaceLabel: orgName,
+    workspaceOwner: "Trust Center public",
+    workspaceInitials: initialsFromName(orgName),
+  })
+  const normalizedState = profile.state
+  const score = profile.score
+  const riskLabel = profile.riskLabel
   const { gdprProgress, highRisk, efacturaConnected } = normalizedState
 
   const isGdprGood = gdprProgress >= 70
@@ -139,36 +152,44 @@ export default async function TrustPage({
         {/* Score hero */}
         <div className="mb-6 rounded-eos-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-gray-900">{summary.score}%</span>
+            <span className="text-5xl font-bold text-gray-900">{score}%</span>
             <div className="mb-1">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                  summary.score >= 70
+                  score >= 70
                     ? "bg-eos-success-soft text-eos-success ring-1 ring-emerald-200"
-                    : summary.score >= 40
+                    : score >= 40
                     ? "bg-eos-warning-soft text-eos-warning ring-1 ring-amber-200"
                     : "bg-eos-error-soft text-eos-error ring-1 ring-red-200"
                 }`}
               >
-                {summary.riskLabel}
+                {riskLabel}
               </span>
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-400">Scor global de conformitate</p>
+          <p className="mt-2 text-sm text-gray-400">
+            Scor public de readiness, aliniat cu Audit Pack-ul
+          </p>
 
           {/* Progress bar */}
           <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100">
             <div
               className={`h-full rounded-full transition-all ${
-                summary.score >= 70
+                score >= 70
                   ? "bg-eos-success"
-                  : summary.score >= 40
+                  : score >= 40
                   ? "bg-eos-warning"
                   : "bg-eos-error"
               }`}
-              style={{ width: `${summary.score}%` }}
+              style={{ width: `${score}%` }}
             />
           </div>
+          {profile.auditPack.executiveSummary.auditReadiness !== "audit_ready" ? (
+            <p className="mt-3 text-xs leading-5 text-gray-400">
+              Profilul rămâne în review până când baseline-ul, dovezile și controalele cerute de
+              Audit Pack sunt validate.
+            </p>
+          ) : null}
         </div>
 
         {/* Metrics grid */}
