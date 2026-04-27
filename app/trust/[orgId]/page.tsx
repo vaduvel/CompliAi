@@ -2,15 +2,20 @@ import Link from "next/link"
 import { CheckCircle2, Lock, ShieldCheck, XCircle } from "lucide-react"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
-import { V3ScoreRing, V3RiskPill } from "@/components/compliscan/v3"
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { V3RiskPill, V3ScoreRing } from "@/components/compliscan/v3"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
+import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
 function isValidOrgId(id: string): boolean {
   return /^org-[a-z0-9]{8,}$/.test(id)
+}
+
+function initialsFromName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean).slice(0, 2)
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "TC"
 }
 
 async function readOrgName(orgId: string): Promise<string> {
@@ -106,8 +111,16 @@ export default async function TrustPage({
     return <NotFound />
   }
 
-  const normalizedState = normalizeComplianceState(state)
-  const summary = computeDashboardSummary(normalizedState)
+  const profile = await buildPublicReadinessProfile(state, {
+    orgId,
+    orgName,
+    workspaceLabel: orgName,
+    workspaceOwner: "Trust Center public",
+    workspaceInitials: initialsFromName(orgName),
+  })
+  const normalizedState = profile.state
+  const score = profile.score
+  const riskLabel = profile.riskLabel
   const { gdprProgress, highRisk, efacturaConnected } = normalizedState
 
   const isGdprGood = gdprProgress >= 70
@@ -119,8 +132,7 @@ export default async function TrustPage({
     year: "numeric",
   })
 
-  const scoreTone = summary.score >= 70 ? "ok" : summary.score >= 40 ? "high" : "critical"
-  const riskTone = summary.score >= 70 ? "ok" : summary.score >= 40 ? "high" : "critical"
+  const scoreTone = score >= 70 ? "ok" : score >= 40 ? "high" : "critical"
 
   return (
     <div className="min-h-screen bg-eos-bg text-eos-text">
@@ -158,22 +170,22 @@ export default async function TrustPage({
         {/* ── Score hero card ── */}
         <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface p-6">
           <div className="flex items-center gap-5">
-            <V3ScoreRing value={summary.score} tone={scoreTone} size={72} strokeWidth={5} />
+            <V3ScoreRing value={score} tone={scoreTone} size={72} strokeWidth={5} />
             <div className="flex-1">
               <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
-                Scor global
+                Scor public de readiness
               </p>
               <div className="mt-1 flex items-baseline gap-1.5">
                 <span
                   data-display-text="true"
                   className="font-display text-[44px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
                 >
-                  {summary.score}
+                  {score}
                 </span>
                 <span className="text-[13px] font-medium text-eos-text-tertiary">%</span>
               </div>
               <div className="mt-2">
-                <V3RiskPill tone={riskTone}>{summary.riskLabel}</V3RiskPill>
+                <V3RiskPill tone={scoreTone}>{riskLabel}</V3RiskPill>
               </div>
             </div>
           </div>
@@ -183,15 +195,21 @@ export default async function TrustPage({
             <div
               className={[
                 "h-full transition-all duration-500",
-                summary.score >= 70
+                score >= 70
                   ? "bg-eos-success"
-                  : summary.score >= 40
+                  : score >= 40
                     ? "bg-eos-warning"
                     : "bg-eos-error",
               ].join(" ")}
-              style={{ width: `${summary.score}%` }}
+              style={{ width: `${score}%` }}
             />
           </div>
+          {profile.auditPack.executiveSummary.auditReadiness !== "audit_ready" ? (
+            <p className="mt-3 text-[12px] leading-[1.6] text-eos-text-muted">
+              Profilul rămâne în review până când baseline-ul, dovezile și controalele cerute de
+              Audit Pack sunt validate.
+            </p>
+          ) : null}
         </div>
 
         {/* ── KPI metrics grid ── */}

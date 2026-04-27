@@ -17,8 +17,8 @@ import {
   isSharedDocumentApproved,
   isSharedDocumentRejected,
 } from "@/lib/server/shared-approval"
+import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 import { getWhiteLabelConfig, type WhiteLabelConfig } from "@/lib/server/white-label"
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,12 +35,6 @@ function scoreTone(score: number): "ok" | "high" | "critical" {
   if (score >= 75) return "ok"
   if (score >= 50) return "high"
   return "critical"
-}
-
-function scoreLabel(score: number) {
-  if (score >= 75) return "Risc Scăzut"
-  if (score >= 50) return "Risc Mediu"
-  return "Risc Ridicat"
 }
 
 function formatExpiry(iso: string) {
@@ -150,11 +144,17 @@ export default async function SharedCompliancePage({
     )
   }
 
-  const state = normalizeComplianceState(rawState)
-  const summary = computeDashboardSummary(state)
-  const score = summary.score
+  const profile = await buildPublicReadinessProfile(rawState, {
+    orgId: payload.orgId,
+    orgName,
+    workspaceLabel: orgName,
+    workspaceOwner: consultant.consultantName,
+    workspaceInitials: initialsFromName(orgName),
+  })
+  const state = profile.state
+  const score = profile.score
   const tone = scoreTone(score)
-  const label = scoreLabel(score)
+  const label = profile.riskLabel
 
   const openFindings = state.findings.filter(
     (f) => f.findingStatus !== "resolved" && f.findingStatus !== "dismissed"
@@ -185,7 +185,6 @@ export default async function SharedCompliancePage({
 
   return (
     <div className="min-h-screen bg-eos-bg text-eos-text">
-      {/* ── Top nav ── */}
       <header className="border-b border-eos-border bg-eos-bg/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
           <Link href="/">
@@ -199,7 +198,6 @@ export default async function SharedCompliancePage({
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-12">
-        {/* ── Hero ── */}
         <div className="mb-8">
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
             Profil de conformitate · partajat
@@ -221,7 +219,6 @@ export default async function SharedCompliancePage({
           </div>
         </div>
 
-        {/* ── Score hero card ── */}
         <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface p-6">
           <div className="flex items-center gap-5">
             <V3ScoreRing value={score} tone={tone} size={72} strokeWidth={5} />
@@ -257,11 +254,16 @@ export default async function SharedCompliancePage({
               >
                 {label}
               </p>
+              {profile.auditPack.executiveSummary.auditReadiness !== "audit_ready" ? (
+                <p className="mt-3 text-[12px] leading-[1.6] text-eos-text-muted">
+                  Profilul rămâne în review până când baseline-ul, dovezile și controalele cerute
+                  de Audit Pack sunt validate.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
 
-        {/* ── Consultant identity ── */}
         <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="flex items-start gap-4">
             <div
@@ -290,7 +292,6 @@ export default async function SharedCompliancePage({
           </div>
         </div>
 
-        {/* ── Framework status ── */}
         <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface">
           <div className="border-b border-eos-border px-5 py-3.5">
             <p
@@ -347,7 +348,6 @@ export default async function SharedCompliancePage({
           </div>
         </div>
 
-        {/* ── Open risks ── */}
         {criticalFindings.length > 0 && (
           <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface">
             <div className="flex items-center gap-2 border-b border-eos-border px-5 py-3.5">
@@ -415,7 +415,6 @@ export default async function SharedCompliancePage({
           </div>
         ) : null}
 
-        {/* ── Disclaimer ── */}
         <div className="rounded-eos-lg border border-eos-warning/25 bg-eos-warning-soft px-5 py-4">
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
             Notă juridică
