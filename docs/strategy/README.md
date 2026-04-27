@@ -127,7 +127,7 @@ CompliScan vinde **loop-ul**, configurat per framework + per ICP. Nu mai vinde "
 
 ---
 
-## Cele 6 documente canonice (final lock 27 apr 2026)
+## Cele 7 documente canonice (final lock 27 apr 2026)
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -153,21 +153,28 @@ CompliScan vinde **loop-ul**, configurat per framework + per ICP. Nu mai vinde "
 │    Decision framework + backup options + învățăminte             │
 │                                                                  │
 │ 06-compliscan-decision-lock-2026-04-27.md   🔒 LOCK              │
-│    ⭐ DECISION LOCK + execution mode + plan 11 zile / 30 / 90    │
-│    12 decizii closed + decision gates + anti-patterns + checklist│
+│    ⭐ DECISION LOCK strategic + 12 decizii closed                │
+│    Decision gates + anti-patterns + checklist                    │
+│                                                                  │
+│ 07-compliscan-execution-roadmap-2026-04-27.md  🛠️ EXECUTION       │
+│    ⭐ ROADMAP TEHNIC pas cu pas — Sprint 0 până production       │
+│    File paths exacte + code changes + critical path + ETA        │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 **Ordinea de citire (post-lock)**:
 
-1. **Doc 06** (LOCK + execution) — **citește ZILNIC** dacă ai impuls să schimbi ceva
-2. **README** (acest doc) — overview rapid pentru advisor / hire / AI agent
-3. **Doc 01** — ce e CompliScan azi (direcția curentă)
-4. **Doc 02** — cum se construiește (arhitectura curentă)
-5. **Doc 03** — ce mai lipsește (gap-uri pentru pilot)
-6. **Doc 04** — cum ajungem acolo (3 faze GTM + sprint plan)
-7. **Doc 05** — istoricul gândirii + alternative (citește dacă vrei context complet sau decision pivot)
+1. **Doc 06** (Decision Lock strategic) — **citește ZILNIC** dacă ai impuls să schimbi ceva
+2. **Doc 07** (Execution Roadmap tehnic) — **citește ZILNIC** înainte de coding (file paths, ETA, critical path)
+3. **README** (acest doc) — overview rapid pentru advisor / hire / AI agent
+4. **Doc 01** — ce e CompliScan azi (direcția curentă)
+5. **Doc 02** — cum se construiește (arhitectura curentă)
+6. **Doc 03** — ce mai lipsește (gap-uri pentru pilot)
+7. **Doc 04** — cum ajungem acolo (3 faze GTM + sprint plan)
+8. **Doc 05** — istoricul gândirii + alternative (citește dacă vrei context complet sau decision pivot)
+
+**Regulă de aur**: dacă există conflict între Doc 06 (strategic) și Doc 07 (tehnic), **Doc 06 câștigă**. Doc 07 se updatează cu `[x]` la done items, NU cu schimbări de scope.
 
 ---
 
@@ -548,5 +555,5 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v5.0 — Decision Lock + Execution Mode (6 documente canonice + lock final)
+**Versiune**: v5.1 — Decision Lock + Execution Roadmap (7 documente canonice = strategic lock + tehnic roadmap)
 **Status**: 🔒 LOCK — re-pivot doar la Decision Gates (5 iun, 30 aug, 30 nov, Q1 2027)
