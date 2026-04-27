@@ -14,12 +14,28 @@ export async function POST(request: Request) {
       "generarea linkului securizat de partajare"
     )
 
-    const body = (await request.json()) as { recipientType?: string }
+    const body = (await request.json()) as {
+      recipientType?: string
+      documentId?: string
+      documentTitle?: string
+    }
     const recipientType = (body.recipientType === "counsel" || body.recipientType === "partner")
       ? body.recipientType
       : "accountant" as const
 
-    const token = generateSignedShareToken(session.orgId, recipientType, new Date().toISOString())
+    const document =
+      typeof body.documentId === "string" && body.documentId.trim().length > 0
+        ? {
+            documentId: body.documentId.trim(),
+            documentTitle:
+              typeof body.documentTitle === "string" && body.documentTitle.trim().length > 0
+                ? body.documentTitle.trim()
+                : undefined,
+          }
+        : undefined
+    const token = document
+      ? generateSignedShareToken(session.orgId, recipientType, new Date().toISOString(), document)
+      : generateSignedShareToken(session.orgId, recipientType, new Date().toISOString())
     const expiresAtISO = new Date(Date.now() + 72 * 3_600_000).toISOString()
 
     return NextResponse.json({ ok: true, token, expiresAtISO })

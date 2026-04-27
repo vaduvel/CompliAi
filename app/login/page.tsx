@@ -494,7 +494,7 @@ function LoginContent() {
 
             <blockquote className="mt-12 max-w-md border-l-2 border-eos-primary pl-5">
               <p className="text-[15px] italic leading-[1.6] text-eos-text-muted">
-                „Îmi recuperez o zi pe săptămână. CompliScan face scanarea, eu fac deciziile."
+                „Îmi recuperez o zi pe săptămână. CompliScan face scanarea, eu fac deciziile.&quot;
               </p>
               <footer className="mt-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
                 — Ramona Ilie · expert contabil · 22 clienți
