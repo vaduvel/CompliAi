@@ -1,4 +1,8 @@
-# CompliScan — Stack documente strategice (v4.4 — GTM Evolution în 3 faze)
+# CompliScan — Stack documente strategice (v5.0 — DECISION LOCK + execution mode)
+
+🔒 **STACK LOCK 27 APR 2026** — toate deciziile strategice închise. Doar execuție până post-pilot DPO Complet (5 iunie 2026).
+
+**6 documente canonice + 1 doc lock**. Re-pivot thesis-ul: doar la Decision Gates (5 iun, 30 aug, 30 nov, Q1 2027).
 
 **Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
 
@@ -123,41 +127,47 @@ CompliScan vinde **loop-ul**, configurat per framework + per ICP. Nu mai vinde "
 
 ---
 
-## Cele 5 documente canonice
+## Cele 6 documente canonice (final lock 27 apr 2026)
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                                                                  │
 │ 01-compliscan-produs-validat-piata-2026-04-26.md                 │
 │    📍 CE este CompliScan + PENTRU CINE + validare piață          │
-│    DIRECȚIA CURENTĂ v4.0 (Compliance Loop OS)                    │
+│    THESIS v4.2 (Modular + Integrat — Photoshop analogy)          │
 │                                                                  │
 │ 02-compliscan-arhitectura-ia-ux-2026-04-26.md                    │
 │    🏛️  CUM se navighează + 3 layers + ICP segments + rute        │
-│    DIRECȚIA CURENTĂ v4.0 (3 layers architecture)                 │
+│    ARCHITECTURE v4.0 (Infrastructure + Framework rules + ICP)    │
 │                                                                  │
 │ 03-compliscan-gap-100-client-ready-2026-04-26.md                 │
 │    ⚠️  Maturity per layer + 6 bug-uri + 8 limitări               │
-│    DIRECȚIA CURENTĂ v4.0 (Infrastructure 87% / Frameworks variat)│
+│    GAPS v4.0 (Infrastructure 87% / Frameworks variabil)          │
 │                                                                  │
 │ 04-compliscan-directie-implementare-2026-04-26.md                │
-│    🚀 Sprint S0-S4 + roadmap 3 segmente paralel + tech stack     │
-│    DIRECȚIA CURENTĂ v4.0 (Solo + IMM + Cabinet Q3 2026)          │
+│    🚀 Sprint S0-S4 + GTM Evolution în 3 faze + roadmap           │
+│    GTM v4.4 (modular → bundle → category creation)               │
 │                                                                  │
 │ 05-compliscan-evolutia-ideilor-2026-04-26.md                     │
-│    🧠 MUZEUL DE IDEI — toate iterations 1-7 + brainstorms        │
-│    Decision framework + backup options + învățăminte cumulate    │
+│    🧠 MUZEUL DE IDEI — 10 iterations documentate                 │
+│    Decision framework + backup options + învățăminte             │
+│                                                                  │
+│ 06-compliscan-decision-lock-2026-04-27.md   🔒 LOCK              │
+│    ⭐ DECISION LOCK + execution mode + plan 11 zile / 30 / 90    │
+│    12 decizii closed + decision gates + anti-patterns + checklist│
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Ordinea de citire**:
-1. README (acest doc) — overview rapid
-2. Doc 01 — ce e CompliScan azi (direcția curentă)
-3. Doc 02 — cum se construiește (arhitectura curentă)
-4. Doc 03 — ce mai lipsește (gap-uri pentru pilot)
-5. Doc 04 — cum ajungem acolo (sprint plan)
-6. Doc 05 — istoricul gândirii + alternative (citește dacă vrei context complet sau decision pivot)
+**Ordinea de citire (post-lock)**:
+
+1. **Doc 06** (LOCK + execution) — **citește ZILNIC** dacă ai impuls să schimbi ceva
+2. **README** (acest doc) — overview rapid pentru advisor / hire / AI agent
+3. **Doc 01** — ce e CompliScan azi (direcția curentă)
+4. **Doc 02** — cum se construiește (arhitectura curentă)
+5. **Doc 03** — ce mai lipsește (gap-uri pentru pilot)
+6. **Doc 04** — cum ajungem acolo (3 faze GTM + sprint plan)
+7. **Doc 05** — istoricul gândirii + alternative (citește dacă vrei context complet sau decision pivot)
 
 ---
 
@@ -538,4 +548,5 @@ Document inițial cu compliscan-produsul-final ca canonical. Renamed la readines
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: canonical index al stack-ului strategic CompliScan
-**Versiune**: v4.4 — GTM Evolution în 3 faze (modular → bundle → category creation)
+**Versiune**: v5.0 — Decision Lock + Execution Mode (6 documente canonice + lock final)
+**Status**: 🔒 LOCK — re-pivot doar la Decision Gates (5 iun, 30 aug, 30 nov, Q1 2027)
