@@ -7,9 +7,27 @@
 
 ---
 
-## ⭐ THESIS-ul — Compliance Loop OS
+## ⭐ THESIS-ul final v4.2 — Modular + Integrat (titan modular)
 
-**CompliScan NU este "GDPR software", "GRC platform", sau "5 produse separate"**. CompliScan este **Sistemul Operațional pentru Compliance Loop** din România.
+**Single-line thesis** (versiune user-validated 27 apr 2026):
+
+> CompliScan funcționează **SEPARAT** per framework pentru specialiști single-domain (DPO/CISO/contabil/HR/avocat) **și INTEGRAT** pentru IMM mid-market care vrea 1 angajat existent peste 10 frameworks. Același cod, 4 ICP-uri, 16 SKU-uri, pricing scalat.
+
+**De ce thesis-ul corect**: piața RO e segmentată — fiecare specialist e expert pe 1-2 legi (Doc 05 Iteration 4 confirmare empirico). Dar IMM-ul mid-market care plătește 4-8 firme fragmentate (€60-150K/an) vrea consolidare prin 1 angajat existent + 1 tool (€299-999/lună).
+
+**CompliScan este UNICUL produs RO care servește AMBELE mode**:
+- Specialist solo → cumpără 1 modul (€29-499)
+- IMM cu officer intern → cumpără tot stack-ul (€299-999)
+- Cabinet consultant → cumpără multi-tenant white-label (€499-1999)
+- Enterprise → custom (€5K-20K)
+
+**NU certifică nimic, NU emite atestări, NU se substituie autorităților sau auditorilor** — doar generează documentele, organizează workflow-ul și păstrează totul audit-ready, în timp ce specialiștii validează și autoritățile decid.
+
+**Photoshop-ul compliance-ului românesc** — intri, importezi firma sau pleci de la zero, editezi cu tool-urile potrivite, salvezi cu audit trail, exporți la cine îți cere.
+
+---
+
+## TL;DR background — Compliance Loop OS
 
 **Pattern universal validat**: indiferent de framework (GDPR, NIS2, AI Act, DORA, e-Factura, Pay Transparency, Whistleblowing) și indiferent de cumpărător (Solo, IMM, Cabinet, Contabil, Enterprise), toată activitatea de compliance urmează același 5-step loop:
 

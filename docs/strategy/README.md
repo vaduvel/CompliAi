@@ -1,11 +1,21 @@
-# CompliScan — Stack documente strategice (v4.1 — Compliance Loop OS + muzeul ideilor)
+# CompliScan — Stack documente strategice (v4.2 — Titan Modular thesis)
 
 **Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
 
 **Regulă maintainerului**: NU șterge idei alternative din docs. Marchează status (valid / invalid / backup). Decision finală se ia citind tot stack-ul.
 **Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
 
-## ⭐ THESIS-ul final — Compliance Loop OS
+## ⭐ THESIS-ul final v4.2 — Modular + Integrat
+
+> **CompliScan funcționează SEPARAT per framework pentru specialiști single-domain (DPO/CISO/contabil/HR/avocat) și INTEGRAT pentru IMM mid-market care vrea 1 angajat existent peste 10 frameworks. Același cod, 4 ICP-uri, 16 SKU-uri, pricing scalat.**
+
+**Photoshop-ul compliance-ului românesc** — intri, importezi firma sau pleci de la zero, editezi cu tool-urile potrivite, salvezi cu audit trail, exporți la cine îți cere.
+
+**NU certifică nimic, NU emite atestări, NU se substituie autorităților sau auditorilor** — generează documentele, organizează workflow-ul, păstrează totul audit-ready, în timp ce specialiștii validează și autoritățile decid.
+
+---
+
+## Background — Compliance Loop OS (formularea v4.0 internă)
 
 **Pattern universal validat**: indiferent de framework (GDPR, NIS2, AI Act, DORA, e-Factura, Pay Transp, Whistleblowing) și indiferent de cumpărător (Solo, IMM, Cabinet, Contabil, Enterprise), toată activitatea de compliance urmează același 5-step loop:
 

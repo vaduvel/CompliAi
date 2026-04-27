@@ -325,7 +325,118 @@ Q3 2026  Q1 2027 2028   2028     Q3 2027
 
 ---
 
-## Iteration 7 — Compliance Loop OS (Salesforce pattern) [v4.0 — DIRECȚIA CURENTĂ]
+## Iteration 8 — Titan Modular (versiune finală user-validated 27 apr 2026)
+
+**Source**: distillare finală user după 48h de iterații + question critic "există cineva care le face pe toate? IMM la câte părți merge?".
+
+**Răspuns validat empiric**: NU există în RO un consultant single boutique care să acopere tot stack-ul compliance. IMM mid-market merge la 5-8 firme diferite (€60-150K/an consultanță fragmentată).
+
+**Thesis-ul în 1 propoziție**:
+
+> CompliScan funcționează SEPARAT per framework pentru specialiști single-domain (DPO/CISO/contabil/HR/avocat) și INTEGRAT pentru IMM mid-market care vrea 1 angajat existent peste 10 frameworks. Același cod, 4 ICP-uri, 16 SKU-uri, pricing scalat.
+
+**De ce e corectă această formulare** vs v4.0 "Compliance Loop OS":
+
+| Aspect | v4.0 "Compliance Loop OS" | v4.2 "Titan Modular" |
+|---|---|---|
+| Mesaj | Abstract (loop universal) | Concret (modular + integrat) |
+| Cumpărător înțelege în 5 sec | ⚠️ Necesită explicații | ✅ "Cumpăr ce am nevoie sau cumpăr tot" |
+| Pattern recognizable | Salesforce (rar utilizat ca analogie) | "Funcționează separat ȘI împreună" — clear |
+| Compatibil cu landing pages segmentate | ✅ | ✅ |
+
+→ **v4.2 e formulare verbală mai bună** decât v4.0. Conținut identic (4-5 ICP, 16 SKU, 10 frameworks), dar mesaj mai concret.
+
+### Claims validate empiric (intră în docs canonice)
+
+1. ✅ **10 frameworks în cod** (verificat în Doc 03 + audit cod):
+   - GDPR (90%), NIS2 (85%), e-Factura (80%), AI Act (60%), Pay Transparency (50%), Whistleblowing (40%), DORA (15%), CER (10%), SAF-T (40%), ISO 27001 (referințe)
+2. ✅ **4 ICP-uri active simultan** în architecture (Solo + IMM Internal + Cabinet + Fiscal + Enterprise)
+3. ✅ **16 SKU-uri pricing** distribuite pe 5 grupuri segment
+4. ✅ **NU există în RO concurent direct cu această combinație** breadth + RO native + accesibilitate
+5. ✅ **IMM mid-market plătește €60-150K/an** la 5-8 specialiști fragmentați (math validat empiric)
+6. ✅ **Privacy Manager GDPR-only**, MyDPO single-SME, Big 4 enterprise-only — slot-ul intermediate gol
+
+### Claims SPECULATIVE (NU intră în docs canonice — păstrate aici cu disclaimer)
+
+1. ⚠️ **"Code base titan" — comparație LOC cu Vanta/Drata**:
+   - Sinteza zice: 34K+ LOC vs Vanta 25K, Drata 30K, Privacy Manager 15K
+   - **Realitate**: LOC ≠ valoare. Vanta MVP 25K LOC + PMF + 1.000+ customers la lansare. CompliScan 34K LOC + 0 paying customers.
+   - **Mai mult cod = mai multă maintenance burden**, NU advantage automat
+   - 6 bug-uri vizibile + 8 limitări announced = cod mare dar nu polished
+   - **NU intră în docs ca punct de mândrie comparativă**
+
+2. ⚠️ **"Maturity coverage" inflată**:
+   - Sinteza: DORA 25%, CER 30%, SAF-T 50%
+   - Doc 03 conservator: DORA 15%, CER 5-10%, SAF-T 35-40%
+   - **Doc 03 are matricea corectă** — sinteza inflație 5-10pp pe fiecare
+
+3. ⚠️ **"Acquisition value €15-30M la 36 luni"**:
+   - Sinteza: pre-revenue €60-150K → cu 5-10 piloți €150-400K → cu 20-30 paying €500K-1.5M → cu PMF la 18 luni €2-5M → lider RO la 36 luni €15-30M
+   - **Realiste pentru RO** (post-validare empirică):
+     - Pre-revenue: €40-80K acquihire (Decalex / Privacy Manager / Big 4 RO)
+     - Cu 5-10 piloți: €100-300K
+     - Cu 20-30 paying: €500K-1.5M ✅
+     - Cu PMF la 18 luni (€500K-1M ARR): €2-5M ✅
+     - **€15-30M la 36 luni** → necesită €3-5M ARR confirmat → **improbabil pentru solo founder RO fără echipă + funding**
+   - **NU baza decision pe €15-30M**. Bazează pe €500K-1.5M la 18 luni.
+
+4. ⚠️ **"Tot ce ai nevoie e închis. Doar execuție"**:
+   - **PERICULOS pentru founder mindset**
+   - NU e închis până NU avem 1 paying customer real
+   - DPO Complet pilot e validare proxy (cabinet fictiv), NU validare reală
+   - Stack-ul docs e închis. Piața NU e.
+   - Risk-uri rămase: Privacy Manager / MyDPO copy features în 12 luni; DPO Complet poate refuza la final pilot; IMM Internal segment nepilotat; solo founder focus issue; cash runway 6-12 luni
+
+5. ⚠️ **"Greu de copiat în 12-18 luni"**:
+   - Tehnic: da (34K LOC, 5 framework rules)
+   - Comercial: NU
+   - Privacy Manager are 12 ani brand recognition + clienți captivi
+   - Decalex are 800+ clienți distribution power
+   - Big 4 au resources nelimitate
+   - CompliScan advantage doar dacă PMF în 12 luni **înainte** ca competitor să identifice segment
+
+### Status v4.2
+
+✅ **Thesis "modular + integrat" → DIRECȚIA CURENTĂ** (înlocuiește formularea v4.0 "Compliance Loop OS abstract")
+
+✅ **Photoshop analogy → hero pe homepage** (post-validare DPO Complet pilot)
+
+⚠️ **Hype claims (titan, exit values, "totul închis") → NU intră în docs canonice** — păstrate doar aici pentru context istoric
+
+### Mesaj public corectat (post-disclaimer hype)
+
+**Hero homepage** (compliscan.ro/):
+> "CompliScan — operating system de readiness compliance pentru România.
+>
+> Funcționează modular per lege pentru specialiști. Integrat pentru IMM care vrea 1 angajat intern peste 10 frameworks. €29-1.999/lună.
+>
+> Photoshop-ul compliance-ului românesc."
+
+**NU folosi**:
+- "Titan modular" (intern doar)
+- "Greu de copiat" (claim nevalidat)
+- "€15-30M exit" (speculation)
+- "Tot e închis" (periculos pentru execuție)
+
+### Ce intră concret în docs canonice (prin acest update)
+
+1. **Doc 01 hero**: thesis "modular + integrat" + Photoshop analogy
+2. **Doc 05 (acest doc)**: Iteration 8 cu disclaimer separat (validate vs speculative)
+3. **README v4.2**: actualizat cu thesis-ul nou
+
+### Răspuns final pentru founder
+
+Thesis-ul **modular + integrat** e corect și solid. Restul (titan, comparații LOC, exit values €15-30M, "totul închis") sunt **hype încurajator**, NU strategic. 
+
+**Ce contează pentru execuție**:
+- 7 mai 2026: pilot kickoff DPO Complet (Cabinet segment)
+- 5 iunie 2026: retro pilot + decision point
+- Q3 2026: lansare 3 segmente paralel SAU pivot la NIS2 sector public SAU exit
+- Rest e specculation până avem 1 paying customer real
+
+---
+
+## Iteration 7 — Compliance Loop OS (Salesforce pattern) [v4.0 — înlocuit de v4.2]
 
 **Source**: discovery user "engine-ul face bine toate 5 → împart per ICP segment orizontal, NU per produs vertical. Pattern universal: găsire → rezolvare → dosariat → monitorizat → dovedit".
 
