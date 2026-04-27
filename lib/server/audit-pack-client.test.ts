@@ -136,6 +136,7 @@ function createState(
     snapshotHistory: overrides?.snapshotHistory ?? [],
     validatedBaselineSnapshotId: overrides?.validatedBaselineSnapshotId,
     events: [],
+    generatedDocuments: [],
   }
 }
 
