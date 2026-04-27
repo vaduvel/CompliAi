@@ -1,31 +1,58 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v5.0 — 27 apr 2026)
+# 07 — CompliScan: Execution Roadmap tehnic (v5.2 — 27 apr 2026, post-review)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
 
+**Versiune v5.2 — corectat post-review GPT (7 erori)**:
+1. ✅ Calendar fix: 27 apr 2026 = LUNI (azi), 28 apr = MARȚI
+2. ✅ Sprint 1 split: pre-kickoff (must-have) vs pilot-week hardening
+3. ✅ Feature flag fiscal hide mutat în Sprint 0 (Bug 7) — critic pentru DPO demo
+4. ✅ Bug 4 path corectat: `app/api/shared/[token]/approve/route.ts`
+5. ✅ Sprint 2 split (S2A: Stripe + digest / S2B: Mistral + Supabase)
+6. ✅ Bug 4 fallback fără email Resend (event + dashboard alert)
+7. ✅ Commit rule nuanțat: doar după test/lint pass
+
 ---
 
 ## TL;DR
 
-Acest doc răspunde la întrebarea: **"Pornesc luni dimineață. Ce fac concret?"**
+Acest doc răspunde la întrebarea: **"Pornesc mâine dimineață (marți 28 apr). Ce fac concret?"**
 
 | Sprint | Durată | Output | Status azi |
 |---|---|---|---|
-| **S0 — Fix bug-uri vizibile** | 5 zile (28 apr → 1 mai) | 6 bug-uri rezolvate, demo refăcut | 0/6 done |
-| **S1 — Pilot prerequisites** | 2 săpt (4-16 mai) | Custom templates + reject/comment + AI on/off + signature + onboarding ICP choice | 0/8 done |
-| **S2 — Stripe + Mistral + Supabase** | 2 săpt (18-30 mai) | Production billing + EU sovereignty + persistence | 0/4 done |
-| **S3 — Drift + landing pages** | 1 săpt (1-7 iun) | Drift cron + 4 landing pages publice + waitlist | 0/3 done |
-| **PROD launch** | 1 săpt (15 iun) | compliscan.ro live + first paying customer | 0/1 done |
+| **S0 — Fix 7 bug-uri vizibile + feature flag fiscal** | **4 zile** (marți 28 apr → vineri 1 mai) | 7 fix-uri + demo refăcut + ZIP package nou | 0/7 done |
+| **Pre-kickoff prep** | **3 zile** (luni 4 → miercuri 6 mai) | Răspuns DPO + import templates + slide deck + dry-run | 0/3 done |
+| **Joi 7 mai 15:00** | ⭐ **PILOT KICKOFF** | DPO Complet 60min | — |
+| **S1 — Pilot-week hardening (paralel cu pilot)** | 7 zile (joi 8 → vineri 16 mai) | Custom templates + reject/comment + AI on/off + signature + ICP onboarding | 0/5 done |
+| **S2A — Stripe + Digest + Supabase prep** | 2 săpt (18 → 30 mai) | Stripe Checkout + monthly digest cron + Supabase schema dual-write | 0/3 done |
+| **S2B — Mistral + Supabase cutover** | 2 săpt (1 → 15 iun) | Mistral EU + Supabase production cutover + monitoring | 0/2 done |
+| **S3 — Drift + landing pages** | 1 săpt (8 → 14 iun) | Drift cron + 4 landing pages + waitlist | 0/3 done |
+| **PROD launch** | 1 săpt (22 iun) | compliscan.ro live + first paying customer | 0/1 done |
 
-**Critical path**: S0 → pilot DPO Complet → S1 → Stripe live (S2) → first paying. Total 7 săpt de la azi la production.
+**Critical path** (calendar corectat):
+```
+marți 28 apr → S0 fix-uri (4 zile) → 1 mai email DPO
+luni 4 → mier 6 mai → pre-kickoff prep (3 zile)
+joi 7 mai 15:00 → ⭐ KICKOFF DPO COMPLET
+joi 8 mai → ven 16 mai → S1 pilot-week hardening
+luni 18 mai → ven 30 mai → S2A Stripe + digest + Supabase prep
+luni 1 iun → ven 12 iun → S2B Mistral + Supabase cutover
+joi 5 iun → ⭐ PILOT RETRO 90min — DECISION GATE #1
+luni 15 iun → ven 19 iun → S3 drift + landing pages
+luni 22 iun → ⭐ PRODUCTION LAUNCH (slipped din 15 iun cu 1 săpt — Supabase complexity)
+```
+
+**Total**: ~8 săpt de la azi (luni 27 apr) la production launch (luni 22 iun).
 
 ---
 
-## SPRINT 0 — Fix 6 bug-uri vizibile (28 apr → 1 mai 2026)
+## SPRINT 0 — Fix 7 bug-uri vizibile + feature flag fiscal (marți 28 apr → vineri 1 mai 2026)
 
-**Obiectiv**: la Joi 1 mai, demo-ul rerulat NU mai are bug-urile descoperite în run-ul de azi. Pachet curat trimis la DPO Complet pre-kickoff.
+**Obiectiv**: la Joi 1 mai, demo-ul rerulat NU mai are bug-urile descoperite în run-ul de azi + DPO Complet NU vede fiscal routes (e-Factura/SPV/e-TVA/SAF-T) în sidebar. Pachet curat trimis pre-kickoff.
+
+**Calendar corectat**: 4 zile lucrătoare (marți-vineri), NU 5. **Bug 7 (feature flag fiscal)** mutat din Sprint 1 în Sprint 0 pentru că DPO demo trebuie să fie focusat GDPR + NIS2, fără fiscal noise.
 
 ### Bug 1 — workspace.label propagare cabinet/client name
 
@@ -162,10 +189,12 @@ curl -s http://localhost:3010/shared/$TOKEN | grep -c "CIPP/E"
 
 ### Bug 4 — Aprob button pe `/shared/[token]` (Sprint 0 minimum, Sprint 1 complet)
 
-**File nou**: `app/shared/[token]/approve/route.ts`
+**File nou**: `app/api/shared/[token]/approve/route.ts` ⚠️ **path corect post-review (era greșit `app/shared/[token]/approve/route.ts` fără `/api/`)**
 **Issue**: patron page e read-only momentan. 0 ocurențe "Aprob" în 92KB HTML.
 
-**Fix Sprint 0** (minimum viable — doar Aprob, NU Respinge/Comentariu):
+**Fix Sprint 0** (minimum viable — doar Aprob, NU Respinge/Comentariu, NU email cabinet):
+
+⚠️ **Email cabinet îndepărtat din Sprint 0** (Resend NU e setup încă). Sprint 0 fallback: **event în compliance log + dashboard alert in-app** (NU email). Email infrastructure = Sprint 1.8 task dedicat.
 
 1. Endpoint nou:
 ```typescript
@@ -183,23 +212,32 @@ export async function POST(request: Request, { params }: { params: { token: stri
         ? { ...doc, adoptionStatus: "signed", signedAtISO: new Date().toISOString(), signedByPatron: true }
         : doc
     )
+    // Adaugă alert in-app pentru cabinet (replace email dependency)
+    state.alerts = [...(state.alerts ?? []), {
+      id: `alert-doc-signed-${resolved.documentId}`,
+      message: `Document ${resolved.documentId} aprobat de patron prin magic link`,
+      severity: "low",
+      open: true,
+      createdAtISO: new Date().toISOString(),
+    }]
   })
   
-  // Log event
+  // Log event în compliance log
   await appendComplianceEvents(resolved.orgId, [
-    createComplianceEvent("document_signed_via_magic_link", { documentId: resolved.documentId, signedAt: new Date().toISOString() })
+    createComplianceEvent("document_signed_via_magic_link", { 
+      documentId: resolved.documentId, 
+      signedAt: new Date().toISOString() 
+    })
   ])
   
-  // Email cabinet
-  await sendEmail({
-    to: brandConfig.consultant.email,
-    subject: `Document semnat de patron — ${clientName}`,
-    body: `Patronul a aprobat documentul. Vezi în CompliScan.`,
-  })
+  // Email cabinet — POSTPONED la Sprint 1.8 (Resend setup)
+  // TODO Sprint 1.8: trimite email diana@dpocomplet.ro cu notificare
   
   return jsonOk({ approved: true, signedAtISO: new Date().toISOString() })
 }
 ```
+
+**Rollback/fallback**: dacă endpoint cade → patron primește 500 → cabinet vede în logs Sentry. NU e silent failure.
 
 2. UI button în `app/shared/[token]/page.tsx`:
 ```tsx
@@ -359,42 +397,126 @@ file /tmp/test.pdf
 
 ---
 
-### Sprint 0 Critical Path
+### Bug 7 — Feature flag fiscal hide (NEW Sprint 0, mutat din Sprint 1)
+
+**File-uri**:
+- `lib/shared/cabinet-modules.ts` (nou) — types `ProductModules`
+- `lib/server/cabinet-config.ts` (nou) — `getEnabledProducts/setEnabledProducts`
+- `.data/cabinet-modules-{orgId}.json` (nou) — storage adapter
+- `components/compliscan/dashboard-shell.tsx` (update) — sidebar conditional
+- `lib/server/findings-detector.ts` (update) — filter findings per module
+
+**De ce Sprint 0 (NU Sprint 1)**: dacă DPO Complet vede `/dashboard/[client]/efactura`, `/spv`, `/etva`, `/saft` în sidebar la kickoff → se rupe focusul GDPR + NIS2. Critical pentru DPO demo cleanliness.
+
+**Fix minimum viable Sprint 0**:
+```typescript
+// lib/shared/cabinet-modules.ts
+export interface ProductModules {
+  dpoOs: boolean       // true default for DPO Complet
+  fiscalOs: boolean    // false default for cabinet
+  // restul în Sprint 1+
+}
+
+// lib/server/cabinet-config.ts
+export async function getEnabledProducts(orgId: string): Promise<ProductModules> {
+  const data = await readFromAdapter(`cabinet-modules-${orgId}`)
+  return data ?? { dpoOs: true, fiscalOs: false }  // default cabinet DPO mode
+}
+```
+
+**Sidebar update**:
+```tsx
+// components/compliscan/dashboard-shell.tsx
+const products = await getEnabledProducts(session.orgId)
+
+<Sidebar>
+  {products.dpoOs && <DPONavGroup />}
+  {products.fiscalOs && <FiscalNavGroup />}
+</Sidebar>
+```
+
+**Pre-pilot setup pentru DPO Complet**:
+```bash
+echo '{"dpoOs":true,"fiscalOs":false}' > .data/cabinet-modules-org-06ab1c67c756cb61.json
+```
+
+**Verifică**:
+```bash
+# Cabinet DPO Complet → 0 fiscal routes vizibile
+curl -s http://localhost:3010/dashboard -b cookies.txt | grep -c "e-Factura\|SPV\|e-TVA\|SAF-T"
+# Expected: 0
+```
+
+**Rollback/fallback**: dacă feature flag rupe sidebar → revert la default `{ dpoOs: true, fiscalOs: true }` (vechiul comportament).
+
+**ETA**: 4 ore
+**Dependencies**: niciuna
+**Done când**: cabinet DPO Complet → 0 fiscal links vizibile în sidebar.
+
+---
+
+### Sprint 0 Critical Path (calendar corectat: marți 28 → vineri 1 mai = 4 zile)
 
 ```
 Bug 1 (workspace.label)      ──┐
                                 ├──→ Bug 5 (SHA-256 manifest)
                                 │
 Bug 2 (disclaimer)             ─┤
+Bug 7 (feature flag fiscal)    ─┤
                                 │
-Bug 3 (Diana branding) ──→ Bug 4 (Aprob button)
+Bug 3 (Diana branding) ──→ Bug 4 (Aprob button minimum, fără email)
                                 │
 Bug 6 (PDF font) (independent) ─┘
 ```
 
-**Order optim**:
-- **Luni 28 apr**: Bug 1 + Bug 2 (paralel, ambele 4h)
-- **Marți 29 apr**: Bug 3 (6h)
-- **Miercuri 30 apr**: Bug 4 (6h, dependent Bug 3) + Bug 5 (4h, dependent Bug 1)
-- **Joi 1 mai**: Bug 6 (4h) + re-run demo + ZIP package (4h)
-- **Vineri 2 mai**: email DPO Complet pre-pilot question
+**Order optim revizuit (4 zile lucrătoare, 32h total)**:
 
-### Sprint 0 Done When
+| Zi | Task | ETA | Cumulativ |
+|---|---|---|---|
+| **Marți 28 apr** | Bug 1 workspace.label (4h) + Bug 2 disclaimer (2h) + Bug 7 feature flag fiscal (2h) | 8h | 8h |
+| **Miercuri 29 apr** | Bug 3 Diana branding card (6h) + finish Bug 7 polish (2h) | 8h | 16h |
+| **Joi 30 apr** | Bug 4 Aprob button minimum (4h) + Bug 5 SHA-256 (4h) | 8h | 24h |
+| **Vineri 1 mai** | Bug 6 PDF font (4h) + re-run demo + ZIP package (4h) | 8h | 32h |
+
+**Sâmbătă 2 mai**: email DPO Complet pre-pilot question (1h, non-coding).
+
+### Sprint 0 Done When (7 fix-uri, NU 6)
 
 - [ ] Bug 1: re-run demo, Audit Pack ZIP fără "Workspace local"
 - [ ] Bug 2: 4 documente generate cu cabinet footer, NU disclaimer toxic
 - [ ] Bug 3: patron page cu consultant card complet (Diana + cert + email + phone)
-- [ ] Bug 4: Aprob button funcțional, document → signed status
+- [ ] Bug 4: Aprob button funcțional, document → signed status (fără email — alert in-app)
 - [ ] Bug 5: bundle-manifest.json cu SHA-256 + MANIFEST.md hash table
 - [ ] Bug 6: PDF endpoint returnează 200 + valid PDF
+- [ ] Bug 7: feature flag fiscal hide pentru DPO mode (0 fiscal routes vizibile)
 - [ ] Demo refăcut, output capturat în `/Users/.../Downloads/compliscan-demo-result-v2/`
 - [ ] Pachet ZIP nou trimis pre-kickoff la DPO Complet
 
 ---
 
-## SPRINT 1 — Pilot prerequisites (4 → 16 mai 2026)
+## PRE-KICKOFF PREP (luni 4 → miercuri 6 mai, 3 zile, 24h)
 
-**Obiectiv**: cabinet DPO Complet poate face TOT pilot 30 zile **fără workaround-uri founder**, exclusiv prin UI și API standard.
+**Obiectiv**: pregătire finală pentru kickoff DPO Complet Joi 7 mai 15:00. **NU coding nou** — doar prep + dry-run.
+
+| Zi | Task | ETA |
+|---|---|---|
+| **Luni 4 mai** | Răspuns DPO Complet la întrebarea pre-pilot (2h) + ajustare pitch (2h) + import templates manual (4h) | 8h |
+| **Marți 5 mai** | Slide deck demo final (4h) + Q&A prep (2h) + Slack channel setup (2h) | 8h |
+| **Miercuri 6 mai** | Final dry-run demo (2h) + ajustări last-minute (3h) + final ZIP package (3h) | 8h |
+
+**Joi 7 mai 15:00**: ⭐ **PILOT KICKOFF DPO COMPLET 60min**.
+
+---
+
+## SPRINT 1 — Pilot-week hardening (joi 8 → vineri 16 mai 2026, paralel cu pilot)
+
+**Obiectiv**: features livrate **DURING pilot**, NU before. Cabinet DPO Complet folosește produsul în Sprint 1, simultan cu development.
+
+⚠️ **Schimbare critică post-review**: Sprint 1 NU mai e "ready înainte de kickoff". Sprint 1 rulează **8-16 mai (7 zile lucrătoare)** = în timpul pilotului. Cabinet folosește Sprint 0 product la kickoff, primește features Sprint 1 incremental.
+
+**Must-have features pre-kickoff** (în Sprint 0): feature flag fiscal hide. **Nimic altceva.**
+
+**Sprint 1 features livrate during pilot week**:
 
 ### S1.1 — Custom templates upload UI (3 zile)
 
@@ -474,18 +596,9 @@ async function generateDocument(input: DocumentGenerationInput): Promise<Generat
 
 **Done când**: client cu `aiEnabled: false` → document generator returnează template-only (NU call la Gemini).
 
-### S1.4 — Feature flag fiscal hide (1.5 zile)
+### ~~S1.4 — Feature flag fiscal hide~~ → **MUTAT în Sprint 0 ca Bug 7** (post-review)
 
-**File-uri noi**:
-- `lib/shared/cabinet-modules.ts` — types ProductModules
-- `lib/server/cabinet-config.ts` — getEnabledProducts/setEnabledProducts
-- `.data/cabinet-modules-{orgId}.json` — storage
-
-**Update**:
-- `components/compliscan/dashboard-shell.tsx` — sidebar conditional render per module
-- `lib/server/findings-detector.ts` — check modules per finding type
-
-**Done când**: cabinet DPO mode → 0 fiscal routes vizibile + 0 fiscal findings detected.
+Feature flag fiscal hide e acum în Sprint 0 (Bug 7). NU mai e în Sprint 1.
 
 ### S1.5 — Signature upload în brand setup (1 zi)
 
@@ -530,28 +643,40 @@ Vezi S1.2 — adăugat aici pentru tracking.
 
 **Done când**: patron approve → cabinet primește email + dashboard alert.
 
-### Sprint 1 Total: ~14 zile lucru
+### Sprint 1 Total: ~10 zile lucru disponibile (8-16 mai = 7 zile + extension dacă needed)
 
-Dacă încape în 10 zile lucru (2 săpt) → ok. Dacă nu:
-- **Tăiem S1.5 (signature upload)** — workaround: founder upload manual prin DB
-- **Tăiem S1.7 (UI pending approvals separat)** — workaround: cabinet vede în dashboard general
+S1.4 (feature flag fiscal) mutat în Sprint 0. Total Sprint 1 features: 7 (NU 8).
 
-### Sprint 1 Done When
+Estimare ETA Sprint 1: ~10 zile lucru pentru toate 7 features. Disponibile = 7 zile lucrătoare. **Strâns**. Cut-list dacă timeline tight:
+- **Tăiem S1.5 (signature upload)** — workaround: founder upload manual prin DB direct
+- **Tăiem S1.7 (UI pending approvals separat)** — workaround: cabinet vede notificare în dashboard general
+- **Tăiem S1.8 (email notifications Resend)** — workaround: alert in-app + manual Slack notification
 
-- [ ] Custom templates UI funcțional (cabinet upload → folosit în cockpit)
-- [ ] Reject/comment flow complet pe magic link
-- [ ] AI ON/OFF toggle per client
-- [ ] Feature flag fiscal hide pentru DPO mode
-- [ ] Signature upload în brand setup
-- [ ] ICP segment choice onboarding pentru cabinete noi
-- [ ] Email notifications cabinet on patron action
-- [ ] Pilot DPO Complet started Joi 7 mai cu produs Sprint 1 ready
+**Email infrastructure (S1.8) e prerequisite pentru email notifications cabinet.** Resend setup + DNS + SPF/DKIM = 1 zi work. Dacă nu se face în Sprint 1 → fallback alert in-app permanent în Sprint 0.
+
+### Sprint 1 Done When (revizuit post-review)
+
+Pre-kickoff (Sprint 0):
+- [x] Feature flag fiscal hide (mutat Bug 7) — done în Sprint 0
+
+Pilot-week hardening (Sprint 1, 8-16 mai):
+- [ ] Custom templates UI funcțional (cabinet upload → folosit în cockpit) — S1.1
+- [ ] Reject/comment flow complet pe magic link — S1.2
+- [ ] AI ON/OFF toggle per client — S1.3
+- [ ] Signature upload în brand setup — S1.5 (poate fi tăiat dacă timeline tight)
+- [ ] ICP segment choice onboarding pentru cabinete noi — S1.6
+- [ ] UI cabinet pentru pending approvals + comments — S1.7 (poate fi tăiat)
+- [ ] Email notifications via Resend — S1.8 (Sprint 1 dacă timeline ok, altfel Sprint 2A)
 
 ---
 
-## SPRINT 2 — Stripe + Mistral + Supabase (18 → 30 mai 2026)
+## SPRINT 2A — Stripe + Digest + Supabase prep (luni 18 → vineri 30 mai 2026)
 
-**Obiectiv**: produs care suportă primii clienți plătitori reali. Stripe live. Mistral EU optional. Supabase production.
+**Obiectiv**: Stripe live (cabinet poate plăti real), monthly digest cron, Supabase schema preparation (NU cutover încă).
+
+⚠️ **Sprint 2 split post-review**: original "Stripe + Mistral + Supabase + digest în 2 săpt" era **nerealist**. Supabase production cutover NU e "2-3 zile" — e 1-2 săpt cu dual-write + verify + monitoring. Split:
+- **S2A** (18-30 mai): Stripe + digest + Supabase schema
+- **S2B** (1-15 iun): Mistral + Supabase cutover
 
 ### S2.1 — Stripe Checkout integration (2 zile)
 
@@ -580,7 +705,11 @@ const STRIPE_PRICE_IDS = {
 
 **Done când**: cabinet cu plan free → upgrade Pro €999 prin Stripe Checkout → plan auto-update.
 
-### S2.2 — Mistral EU sovereignty option (1 zi)
+### ~~S2A.2 — Mistral EU sovereignty option~~ → **MUTAT în Sprint 2B (post-review)**
+
+Mistral EU mutat în Sprint 2B (1-15 iun) pentru a libera Sprint 2A pentru Stripe + Supabase prep critical path.
+
+### S2A.2 (vechiul S2.2) — Mistral EU PĂSTRAT pentru referință în Sprint 2B
 
 **File-uri**:
 - `lib/server/ai-provider.ts` — abstract provider
@@ -609,17 +738,18 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 **Done când**: cabinet Pro can switch Mistral în settings → next document generation folosește Mistral.
 
-### S2.3 — Supabase migration cutover (2-3 zile)
+### S2A.3 — Supabase schema preparation (3 zile, NU cutover)
 
-**Pași**:
+⚠️ **Cutover mutat în Sprint 2B (post-review)**. S2A face DOAR schema + dual-write enable, NU cutover production.
+
+**Pași S2A**:
 1. Setup Supabase Postgres + RLS policies (1 zi)
-2. Migration scripts pentru `users`, `orgs`, `memberships`, `plans-global`, `state-org-*` → Supabase tables
-3. Dual-write 1 săpt (file system + Supabase paralel)
-4. Verify identical behavior pe staging
-5. Cutover: setează `COMPLISCAN_DATA_BACKEND=supabase`
-6. Monitoring 48h post-cutover
+2. Migration scripts pentru `users`, `orgs`, `memberships`, `plans-global`, `state-org-*` → Supabase tables (1 zi)
+3. Dual-write enable (file system + Supabase paralel) (1 zi)
 
-**Done când**: production folosește Supabase, file-system rămâne doar pentru dev local.
+**S2A done când**: dual-write activ, ambele backends scriu identic. Verify integrity 1 săpt.
+
+**Cutover (S2B)**: setează `COMPLISCAN_DATA_BACKEND=supabase` DOAR după 1 săpt dual-write verify clean.
 
 ### S2.4 — Monthly digest email cron (4 ore)
 
@@ -635,17 +765,50 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 **Done când**: 1 iunie 2026, DPO Complet primește digest email automat.
 
-### Sprint 2 Done When
+### Sprint 2A Done When (18-30 mai)
 
 - [ ] Stripe Checkout live + webhook + plan auto-update
-- [ ] Mistral EU optional pentru tier Pro+
-- [ ] Supabase production cutover complet
 - [ ] Monthly digest cron funcțional
+- [ ] Supabase schema + dual-write enable
 - [ ] First paying customer (DPO Complet?) prin Stripe
 
 ---
 
-## SPRINT 3 — Drift + Landing pages (1 → 7 iunie 2026)
+## SPRINT 2B — Mistral EU + Supabase cutover (luni 1 → vineri 12 iun 2026)
+
+**Obiectiv**: Mistral EU sovereignty option live + Supabase production cutover (după 1 săpt dual-write verify clean).
+
+### S2B.1 — Mistral EU sovereignty option (1 zi)
+
+(Detalii la fel ca S2.2 originalul, mutat aici post-review)
+
+### S2B.2 — Supabase production cutover (1 săpt)
+
+**Pași**:
+1. Verify dual-write 1 săpt clean (no discrepancies între file-system și Supabase)
+2. Cutover: setează `COMPLISCAN_DATA_BACKEND=supabase` în production env
+3. Monitor Sentry + Supabase logs 48h
+4. Rollback plan: dacă issues critice → revert env var, file-system rămâne authoritative
+
+**Rollback/fallback**: dual-write rămâne enable post-cutover pentru 1 săpt extra. Revert posibil prin env var change, NU code change.
+
+### S2B.3 — Hash chain end-to-end events ledger (1 zi)
+
+(Bonus task pentru audit trail criptografic — dacă timeline ok)
+
+### Sprint 2B Done When (1-12 iun)
+
+- [ ] Mistral EU live pentru Pro+ tier
+- [ ] Supabase production cutover complet, 48h post-cutover stabil
+- [ ] Hash chain events ledger (bonus)
+
+---
+
+## SPRINT 3 — Drift + Landing pages (luni 15 → vineri 19 iun 2026)
+
+⚠️ **Calendar corectat post-review**: Sprint 3 mutat la 15-19 iun (după Sprint 2B cutover Supabase 12 iun) pentru a evita supervolume work paralel.
+
+
 
 **Obiectiv**: drift detection automat + 4 landing pages publice.
 
@@ -694,7 +857,11 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ---
 
-## PRODUCTION LAUNCH — 15 iunie 2026
+## PRODUCTION LAUNCH — luni 22 iunie 2026 (slipped din 15 iun)
+
+⚠️ **Slip 1 săpt post-review**: production launch mutat 15 iun → 22 iun pentru a permite Sprint 2B Supabase cutover + Sprint 3 polish proper. Nu fac launch pe Supabase fresh-cutover.
+
+
 
 **Obiectiv**: compliscan.ro live cu first paying customer + marketing landing complet.
 
@@ -774,14 +941,18 @@ Seara (17:30):
 
 ---
 
-## REGULI EXECUTION
+## REGULI EXECUTION (corectat post-review)
 
 1. **NU începe Sprint 1 înainte de Sprint 0 done**. Critical path strict.
 2. **NU sari peste teste** chiar dacă "merge mâna". Vitest run obligatoriu pre-commit.
 3. **NU schimba arhitectura** fără citire Doc 02 + Doc 06. Lock-ul e real.
 4. **NU rescrie cod working** ca să fie "mai elegant". Polish doar la production launch.
 5. **NU adăuga features noi** care nu sunt în Doc 07 fără update Doc 06 + decision gate.
-6. **DA commit zilnic** chiar dacă incremental. Push origin.
+6. **DA commit zilnic — DAR doar după test/lint pass** ⚠️ (corectat post-review):
+   - `npm run lint` pass
+   - `vitest run` (sau test-uri relevante) pass
+   - Dacă e WIP, push pe branch local separat, NU `v3-unified`
+   - Niciodată push cu test fail "doar ca să bifez rutina"
 7. **DA test deploy preview** după fiecare bug fix major (Vercel preview URL).
 
 ---
@@ -812,10 +983,21 @@ Dacă există conflict între Doc 06 (strategic) și Doc 07 (tehnic), **Doc 06 c
 
 ---
 
-🛠️ **EXECUTION ROADMAP LOCK 27 APR 2026**
+🛠️ **EXECUTION ROADMAP LOCK 27 APR 2026 (v5.2 post-review)**
 
 **Document maintainer**: Daniel Vaduva, founder
 **Status**: 🛠️ EXECUTION — citește zilnic înainte de coding
-**Versiune**: v5.0 — Execution Roadmap (27 apr 2026)
+**Versiune**: v5.2 — Execution Roadmap (27 apr 2026, corectat post-GPT review)
+**Corecturi post-review v5.2 (7 erori GPT identificate)**:
+1. Calendar fix: 27 apr = LUNI, 28 apr = MARȚI (era greșit "luni")
+2. Sprint 0 = 4 zile (mar-vin), NU 5 zile
+3. Sprint 1 split: pre-kickoff 3 zile + pilot-week hardening 7 zile
+4. Bug 7 (feature flag fiscal hide) mutat din S1.4 în Sprint 0 (critic DPO demo)
+5. Bug 4 path corectat: `app/api/shared/[token]/approve/route.ts`
+6. Bug 4 fallback fără email Resend (event + alert in-app)
+7. Sprint 2 split: S2A (Stripe + digest + Supabase prep) / S2B (Mistral + cutover)
+8. Production launch slip: 15 iun → 22 iun (1 săpt pentru Supabase stabilization)
+9. Commit rule: doar după test/lint pass
+
 **Update obligatoriu**: la fiecare task done `[x]` + la fiecare decision gate
 **Vezi și**: Doc 06 (Decision Lock) pentru contextul strategic
