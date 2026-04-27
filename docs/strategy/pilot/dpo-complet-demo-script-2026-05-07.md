@@ -140,7 +140,16 @@
 
 **Highlight**: white-label complet + signature card + Aprob button funcțional + audit trail.
 
-### Min 20-30 — Cele 6 condiții (10 min)
+### Min 20-30 — Cele 6 condiții + transparency "review_required" (10 min)
+
+⚠️ **Nou post Sprint 0.5 (Issue 3 fix)**: în Audit Pack, `auditReadiness: review_required` apare în output. **NU e bug — e comportament corect**. Comunică explicit:
+
+**Speaker (1 min adăugat în secțiune)**:
+> "Diana, observă în Audit Pack că `auditReadiness: review_required`, NU `audit_ready`. Asta e CORECT — sistemul nu raportează fals 'audit_ready' când mai sunt dovezi pendinte.
+>
+> Avem 1 dovadă validată (DPA Stripe approved via magic link) și 3 controale rămase fără evidență. Audit Pack-ul e **dosar de lucru**, NU certificat — tu decizi când trimiți extern.
+>
+> Asta e diferentiator vs concurenți care raportează fals '100% compliant' prematur. Privacy Manager / MyDPO scor mereu pozitiv. CompliScan onest: 'work in progress, X validate, Y pendinte'."
 
 **Slide 3**: tabel cu cele 6 condiții DPO Complet + cum le-am rezolvat.
 
