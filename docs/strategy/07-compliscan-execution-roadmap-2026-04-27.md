@@ -1,11 +1,34 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v5.2 — 27 apr 2026, post-review)
+# 07 — CompliScan: Execution Roadmap tehnic (v5.3 — 27 apr 2026, cele 7 cerințe DPO mapate)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
 
-**Versiune v5.2 — corectat post-review GPT (7 erori)**:
+**Versiune v5.3 — feedback DPO Complet post Sprint 0.5 — cele 7 cerințe mapate la sprints**:
+
+DPO Complet (post pachet Sprint 0.5 trimis 27 apr) a confirmat: "produs suficient de matur pentru demo + pilot. Pentru folosire operațională completă, aș mai vrea să văd 7 lucruri." → mapat:
+
+| # | Cerința DPO | Sprint | Task ID |
+|---|---|---|---|
+| 1 | Scoruri consistente Trust Profile vs Audit Pack | Sprint 1 | **S1.9** (NEW, 1 zi) |
+| 2 | Baseline validat post-remediere | Sprint 2A | **S2A.5** (NEW, 1.5 zile) |
+| 3 | Comentariu/respingere magic link | Sprint 1 | **S1.2** (planificat, 1.5 zile) |
+| 4 | Documente fără "AI indisponibil" | Sprint 0.5 | ✅ DONE (commit `cac754e` — patch include în doc generator) |
+| 5 | Cookie banner discret pe `/shared` | Sprint 1 | **S1.5+** (extension signature, 4h) |
+| 6 | Raport lunar din activitate reală | Sprint 2A | **S2A.4** (planificat, 4h) |
+| 7 | Export "audit_ready" după dovezi 100% | Sprint 2A | **S2A.6** (NEW, 1 zi, depinde S2A.5) |
+
+Total task-uri NEW: **3 task-uri adăugate** (S1.9, S2A.5, S2A.6) + **3 task-uri planificate**: S1.2, S1.5+, S2A.4 + **1 done**: Issue 4 în Sprint 0.5.
+
+**Sprint 1 ETA extension**: 2 săpt → **3 săpt** (8 mai → 30 mai). Pilot week paralel.
+**Sprint 2A ETA**: 2 săpt (1-15 iun). 
+
+**Pilot strategy revizuit**: Diana folosește Sprint 0.5 product la kickoff Joi 7 mai pentru **internal-first săpt 1**. Săpt 2-4: primește features Sprint 1 incremental. Final retro **5 iunie 2026**: produs cap-coadă cu 7/7 cerințe livrate.
+
+---
+
+**Versiune v5.2 — corectat post-review GPT (7 erori, mențin)**:
 1. ✅ Calendar fix: 27 apr 2026 = LUNI (azi), 28 apr = MARȚI
 2. ✅ Sprint 1 split: pre-kickoff (must-have) vs pilot-week hardening
 3. ✅ Feature flag fiscal hide mutat în Sprint 0 (Bug 7) — critic pentru DPO demo
@@ -674,19 +697,35 @@ Estimare ETA Sprint 1: ~10 zile lucru pentru toate 7 features. Disponibile = 7 z
 
 **Email infrastructure (S1.8) e prerequisite pentru email notifications cabinet.** Resend setup + DNS + SPF/DKIM = 1 zi work. Dacă nu se face în Sprint 1 → fallback alert in-app permanent în Sprint 0.
 
-### Sprint 1 Done When (revizuit post-review)
+### Sprint 1 Done When (revizuit post DPO Complet feedback — 7 cerințe mapate)
 
-Pre-kickoff (Sprint 0):
-- [x] Feature flag fiscal hide (mutat Bug 7) — done în Sprint 0
+Pre-kickoff (Sprint 0 + 0.5):
+- [x] Bug 1-7 + Issue 1-3 done (vezi Sprint 0 + Sprint 0.5)
+- [x] **Issue 4 DPO** done (mesaj "AI indisponibil" eliminat din `document-generator.ts`)
 
-Pilot-week hardening (Sprint 1, 8-16 mai):
-- [ ] Custom templates UI funcțional (cabinet upload → folosit în cockpit) — S1.1
-- [ ] Reject/comment flow complet pe magic link — S1.2
-- [ ] AI ON/OFF toggle per client — S1.3
-- [ ] Signature upload în brand setup — S1.5 (poate fi tăiat dacă timeline tight)
-- [ ] ICP segment choice onboarding pentru cabinete noi — S1.6
-- [ ] UI cabinet pentru pending approvals + comments — S1.7 (poate fi tăiat)
-- [ ] Email notifications via Resend — S1.8 (Sprint 1 dacă timeline ok, altfel Sprint 2A)
+Sprint 1 extended (8-30 mai, 3 săpt — paralel cu pilot week):
+
+- [ ] **S1.1** Custom templates UI funcțional (cabinet upload → folosit în cockpit) — 3 zile
+- [ ] **S1.2** ⭐ **Issue 3 DPO** — Reject + comment flow complet pe magic link — 1.5 zile (8-13 mai)
+  - POST `/api/shared/[token]/reject` (mandatory comment field)
+  - POST `/api/shared/[token]/comment` (optional comment, no reject)
+  - UI cabinet `/dashboard/cabinet/pending-approvals` cu badges
+- [ ] **S1.3** AI ON/OFF toggle per client — 4h
+- [ ] **S1.5** Signature upload în brand setup — 1 zi
+- [ ] **S1.5+** ⭐ **Issue 5 DPO** — Cookie banner discret pe `/shared/[token]` — 4h
+  - Variant compact (NU full-width modal)
+  - Localstorage simple, NU layered consent UI
+  - Dismiss button vizibil
+- [ ] **S1.6** ICP segment choice onboarding pentru cabinete noi — 2 zile
+- [ ] **S1.7** UI cabinet pentru pending approvals + comments — 1 zi
+- [ ] **S1.8** Email notifications via Resend — 4h
+- [ ] **S1.9** ⭐ **Issue 1 DPO** — Trust Profile ↔ Audit Pack score consistency — 1 zi (28-30 mai)
+  - Source of truth unic: `lib/compliance/engine.ts → computeDashboardSummary`
+  - Trust Profile public page reuse same computation
+  - Audit Pack executiveSummary.complianceScore = same value
+  - Test: integration test verify both endpoints returnează same score
+
+**Sprint 1 total**: ~13 zile lucru. ETA: 3 săpt (8-30 mai) — overlap cu pilot week (Diana folosește incremental).
 
 ---
 
@@ -785,12 +824,33 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 **Done când**: 1 iunie 2026, DPO Complet primește digest email automat.
 
-### Sprint 2A Done When (18-30 mai)
+### Sprint 2A Done When (1-15 iun, extins post DPO feedback)
 
-- [ ] Stripe Checkout live + webhook + plan auto-update
-- [ ] Monthly digest cron funcțional
-- [ ] Supabase schema + dual-write enable
-- [ ] First paying customer (DPO Complet?) prin Stripe
+⚠️ **Sprint 2A reschedule**: 18-30 mai → 1-15 iun (Sprint 1 extended la 3 săpt cu cele 4 cerințe DPO noi).
+
+- [ ] **S2A.1** Stripe Checkout live + webhook + plan auto-update — 2 zile
+- [ ] **S2A.4** ⭐ **Issue 6 DPO** — Monthly digest cron funcțional cu activitate reală — 4h
+  - Cron Vercel schedule "0 9 1 * *" (prima zi a lunii 09:00)
+  - Per cabinet activ: aggregate findings closed + documents sent + magic links signed + evidence count
+  - Email cabinet cu raport HTML brand-uit
+  - Cabinet poate forward către clienți individual ca raport lunar per client
+- [ ] **S2A.5** ⭐ **Issue 2 DPO** — Baseline validate workflow — 1.5 zile
+  - UI cabinet: "Validează snapshot ca baseline" button după toate remedierile closed
+  - Backend: set `state.validatedBaselineSnapshotId` la snapshot curent
+  - Trigger conditions: 0 findings open + 0 remediations active + 100% evidence validated
+  - UI badge "BASELINE VALIDAT" pe cockpit + Audit Pack
+- [ ] **S2A.6** ⭐ **Issue 7 DPO** — Audit_ready transition workflow — 1 zi
+  - Logic: `auditReadiness = "audit_ready"` doar când:
+    - `validatedBaselineSnapshotId !== null`
+    - `executiveSummary.openFindings === 0`
+    - `executiveSummary.remediationOpen === 0`
+    - `executiveSummary.missingEvidenceItems === 0`
+    - `bundleEvidenceSummary.pendingControls === 0`
+  - UI pe cockpit + dashboard: badge tranziție automată review_required → audit_ready
+  - Audit Pack PDF cu watermark "AUDIT_READY" la export final
+- [ ] **S2A.7** Supabase schema + dual-write enable — 3 zile
+
+**Sprint 2A total**: ~10 zile lucru = 2 săpt (1-15 iun).
 
 ---
 
