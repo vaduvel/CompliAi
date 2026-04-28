@@ -259,13 +259,21 @@ async function main() {
   const urgencyQueue = await request("/api/partner/urgency-queue")
   await writeText("04-work-queue-today.json", JSON.stringify(urgencyQueue.body, null, 2))
   const topUrgency = urgencyQueue.body.items?.[0]
+  const queueKeys = (urgencyQueue.body.items || []).map((item) => `${item.orgId}:${item.findingId}`)
+  const uniqueQueueKeys = new Set(queueKeys)
   record(urgencyQueue.res.ok, "Partner urgency queue loads", `HTTP ${urgencyQueue.res.status}`)
+  record(queueKeys.length === uniqueQueueKeys.size, "Work queue deduplicates findings and alerts", `${uniqueQueueKeys.size}/${queueKeys.length}`)
   record(
     topUrgency?.orgName === "Lumen Clinic SRL" &&
       topUrgency?.severity === "critical" &&
       String(topUrgency?.title || "").toLowerCase().includes("dsar"),
     "Work queue prioritizes Lumen critical DSAR first",
     topUrgency ? `${topUrgency.orgName} · ${topUrgency.title}` : "missing"
+  )
+  record(topUrgency?.deadlineStatus === "overdue", "Work queue computes overdue DSAR deadline", topUrgency?.deadlineLabel || "missing")
+  record(
+    !(urgencyQueue.body.items || []).some((item) => item.findingId === "apex-gdpr-dpa-stripe"),
+    "Work queue hides already resolved Apex DPA"
   )
 
   await switchToOrg(memberships, "Apex Logistic SRL")
@@ -296,6 +304,11 @@ async function main() {
   const apexAuditJson = await request("/api/exports/audit-pack")
   record(apexAuditJson.res.ok, "Apex Audit Pack JSON exports", `HTTP ${apexAuditJson.res.status}`)
   record(apexAuditJson.body.executiveSummary?.openFindings >= 2, "Apex summary counts RoPA + cookie as open findings", `${apexAuditJson.body.executiveSummary?.openFindings}`)
+  record(apexAuditJson.body.executiveSummary?.missingEvidenceItems >= 2, "Apex summary counts missing evidence per open finding", `${apexAuditJson.body.executiveSummary?.missingEvidenceItems}`)
+  record(
+    !(apexAuditJson.body.controlsMatrix || []).some((control) => String(control.title || "").toLowerCase().includes("ai high-risk")),
+    "Apex Audit Pack hides AI high-risk control when no AI systems are in scope"
+  )
   record(apexAuditJson.body.bundleEvidenceSummary?.status === "review_required", "Apex bundle summary stays review_required until all evidence closes", apexAuditJson.body.bundleEvidenceSummary?.status || "missing")
   record(apexAuditJson.body.bundleEvidenceSummary?.attachedFiles > 0, "Apex bundle summary counts attached evidence", `${apexAuditJson.body.bundleEvidenceSummary?.attachedFiles}`)
   record(apexAuditJson.body.bundleEvidenceSummary?.validatedFiles > 0, "Apex bundle summary counts validated evidence", `${apexAuditJson.body.bundleEvidenceSummary?.validatedFiles}`)
@@ -307,6 +320,10 @@ async function main() {
 
   const apexBundle = await request("/api/exports/audit-pack/bundle")
   record(apexBundle.res.ok, "Apex Audit Pack ZIP exports", `HTTP ${apexBundle.res.status}`)
+  record(
+    apexBundle.body.includes(Buffer.from("dpa-apex-stripe-approved.pdf")),
+    "Apex Audit Pack ZIP physically includes DPA PDF evidence"
+  )
   await writeBuffer("exports/apex-audit-pack-bundle.zip", apexBundle.body)
 
   await switchToOrg(memberships, "Lumen Clinic SRL")
@@ -393,6 +410,9 @@ async function main() {
   record(monthly.res.ok, "Partner monthly report preview endpoint runs", `HTTP ${monthly.res.status}`)
   record(monthlyReport?.clientEntries?.length === 3, "Monthly report covers exactly 3 client orgs", `${monthlyReport?.clientEntries?.length ?? 0}`)
   record(Boolean(monthlyReport?.html?.includes("DPO Complet") || monthlyReport?.html?.includes("Raport lunar")), "Monthly report HTML is generated")
+  record(String(monthlyReport?.html || "").includes("Activitate lunară pe client"), "Monthly report includes client activity section")
+  record(String(monthlyReport?.html || "").includes("DPA — Apex Logistic SRL × Stripe Payments Europe"), "Monthly report includes worked DPA item")
+  record(String(monthlyReport?.html || "").includes("DSAR pacient neînchis"), "Monthly report includes Lumen DSAR next action")
   record(!String(monthlyReport?.html || "").includes("CompliAI"), "Monthly report contains zero CompliAI mentions")
   await writeText("reports/partner-monthly-report.json", JSON.stringify(monthly.body, null, 2))
   if (monthlyReport?.html) {

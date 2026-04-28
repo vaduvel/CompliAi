@@ -346,7 +346,16 @@ async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {
         orgId: auditPack.workspace.id,
       })
     } catch {
-      continue
+      await writeLedgerEvidenceFallback({
+        destination,
+        auditPack,
+        taskId: entry.taskId,
+        title: entry.title,
+        lawReference: entry.lawReference,
+        sourceDocument: entry.sourceDocument,
+        updatedAtISO: entry.updatedAtISO,
+        evidence,
+      })
     }
 
     includedEvidence.push({
@@ -358,6 +367,82 @@ async function copyEvidenceFiles(auditPack: AuditPackV2, evidenceDir: string) {
   }
 
   return includedEvidence
+}
+
+async function writeLedgerEvidenceFallback({
+  destination,
+  auditPack,
+  taskId,
+  title,
+  lawReference,
+  sourceDocument,
+  updatedAtISO,
+  evidence,
+}: {
+  destination: string
+  auditPack: AuditPackV2
+  taskId: string
+  title: string
+  lawReference: string | null
+  sourceDocument: string | null
+  updatedAtISO: string
+  evidence: NonNullable<AuditPackV2["evidenceLedger"][number]["evidence"]>
+}) {
+  await fs.mkdir(path.dirname(destination), { recursive: true })
+
+  const markdown = [
+    `# ${title}`,
+    "",
+    `**Workspace:** ${getAuditPackDisplayName(auditPack)}`,
+    `**Task:** ${taskId}`,
+    `**Referință legală:** ${lawReference ?? "n/a"}`,
+    `**Document sursă:** ${sourceDocument ?? "n/a"}`,
+    `**Fișier evidență:** ${evidence.fileName}`,
+    `**Tip evidență:** ${evidence.kind}`,
+    `**Validat la:** ${updatedAtISO}`,
+    "",
+    "## Rezumat dovadă",
+    "",
+    evidence.quality?.summary ?? "Dovadă operațională înregistrată în Evidence Ledger.",
+    "",
+    "## Notă",
+    "",
+    "Acest artefact a fost generat din Evidence Ledger pentru a păstra coerența dosarului exportat atunci când fișierul original nu este disponibil în storage-ul local de demo. Verificați fișierul sursă înainte de utilizare externă finală.",
+  ].join("\n")
+
+  if (evidence.mimeType === "application/pdf" || evidence.fileName.toLowerCase().endsWith(".pdf")) {
+    const pdf = await buildPDFFromMarkdown(markdown, {
+      orgName: getAuditPackDisplayName(auditPack),
+      documentType: "Dovadă din Evidence Ledger",
+      generatedAt: updatedAtISO,
+      auditReadiness: auditPack.executiveSummary.auditReadiness,
+    })
+    await fs.writeFile(destination, pdf)
+    return
+  }
+
+  if (evidence.mimeType === "application/json" || evidence.fileName.toLowerCase().endsWith(".json")) {
+    await fs.writeFile(
+      destination,
+      JSON.stringify(
+        {
+          type: "ledger_evidence_fallback",
+          taskId,
+          title,
+          lawReference,
+          sourceDocument,
+          updatedAtISO,
+          evidence,
+        },
+        null,
+        2
+      ).replaceAll("CompliAI", "CompliScan"),
+      "utf8"
+    )
+    return
+  }
+
+  await fs.writeFile(destination, replaceLegacyBrand(markdown), "utf8")
 }
 
 function replaceLegacyBrand(value: string) {
@@ -576,11 +661,8 @@ function buildManifestMarkdown(
   }
   lines.push("---", "")
   lines.push(
-    "> **Disclaimer:** Acest dosar a fost generat automat de CompliScan. " +
-    "Nu constituie opinie juridică și nu garantează conformitatea. " +
-    "CompliScan nu este certificat de DNSC, ANSPDCP sau altă autoritate. " +
-    "Dosarul servește ca instrument de organizare a dovezilor. " +
-    "Consultați un specialist juridic pentru validare finală."
+    "> **Notă profesională:** Acest dosar este un instrument de lucru pentru organizarea dovezilor și revizia consultantului DPO. " +
+    "Nu înlocuiește validarea profesională și nu reprezintă o opinie juridică finală."
   )
 
   return lines.join("\n")

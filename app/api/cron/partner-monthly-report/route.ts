@@ -15,6 +15,7 @@ import {
   normalizeComplianceState,
   computeDashboardSummary,
 } from "@/lib/compliance/engine"
+import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
@@ -29,6 +30,13 @@ type ClientReportEntry = {
   riskLabel: string
   openAlerts: number
   scoreDelta30d: number | null
+  openFindings: number
+  validatedEvidence: number
+  pendingEvidence: number
+  auditReadiness: "audit_ready" | "review_required"
+  workDone: string[]
+  openFindingTitles: string[]
+  nextActions: string[]
 }
 
 function buildPartnerMonthlyHtml(
@@ -72,6 +80,46 @@ function buildPartnerMonthlyHtml(
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center">${c.openAlerts}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center">${c.riskLabel}</td>
       </tr>`
+  }
+
+  function listItems(items: string[], empty: string): string {
+    if (items.length === 0) {
+      return `<li style="color:#94a3b8">${escapeHtml(empty)}</li>`
+    }
+
+    return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+  }
+
+  function activityCard(c: ClientReportEntry): string {
+    const readinessColor = c.auditReadiness === "audit_ready" ? "#10b981" : "#f59e0b"
+    return `
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin:10px 0;background:#fff">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div>
+            <h4 style="margin:0 0 4px;color:#0f172a;font-size:14px">${escapeHtml(c.orgName)}</h4>
+            <p style="margin:0;color:#64748b;font-size:12px">
+              ${c.validatedEvidence} dovezi validate · ${c.pendingEvidence} dovezi pendinte · ${c.openFindings} findings deschise
+            </p>
+          </div>
+          <span style="color:${readinessColor};font-size:12px;font-weight:700">${c.auditReadiness}</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;font-size:12px;color:#334155">
+          <div>
+            <strong>Ce s-a lucrat</strong>
+            <ul style="margin:6px 0 0;padding-left:18px">${listItems(c.workDone, "Nicio acțiune nouă în perioada raportată.")}</ul>
+          </div>
+          <div>
+            <strong>Rămâne deschis</strong>
+            <ul style="margin:6px 0 0;padding-left:18px">${listItems(c.openFindingTitles, "Nu există findings deschise.")}</ul>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;font-size:12px;color:#334155">
+          <strong>Următorul pas</strong>
+          <ul style="margin:6px 0 0;padding-left:18px">${listItems(c.nextActions, "Menține monitorizarea lunară.")}</ul>
+        </div>
+      </div>`
   }
 
   return `
@@ -118,6 +166,9 @@ function buildPartnerMonthlyHtml(
     </table>
     ` : ""}
 
+    <h3 style="color:#0f172a;margin:20px 0 8px;font-size:14px">Activitate lunară pe client</h3>
+    ${clients.map(activityCard).join("")}
+
     <div style="margin-top:24px;text-align:center">
       <a href="${APP_URL}/portfolio"
          style="display:inline-block;background:#6366f1;color:#fff;padding:10px 24px;
@@ -132,6 +183,85 @@ function buildPartnerMonthlyHtml(
   </div>
 </body>
 </html>`
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function buildMonthlyActivity(state: ComplianceState) {
+  const openFindings = state.findings.filter(isOpenMonthlyFinding)
+  const validatedEvidence = Object.values(state.taskState).filter(
+    (task) => task.attachedEvidenceMeta?.quality?.status === "sufficient"
+  ).length
+  const workDone = buildWorkDoneItems(state)
+  const nextActions = openFindings
+    .slice()
+    .sort(compareMonthlyFindings)
+    .slice(0, 3)
+    .map((finding) => finding.remediationHint || finding.resolution?.action || finding.title)
+
+  return {
+    openFindings: openFindings.length,
+    validatedEvidence,
+    pendingEvidence: openFindings.length,
+    auditReadiness: openFindings.length === 0 && Boolean(state.validatedBaselineSnapshotId)
+      ? "audit_ready" as const
+      : "review_required" as const,
+    workDone,
+    openFindingTitles: openFindings
+      .slice()
+      .sort(compareMonthlyFindings)
+      .slice(0, 4)
+      .map((finding) => `${finding.title}${finding.legalReference ? ` · ${finding.legalReference}` : ""}`),
+    nextActions,
+  }
+}
+
+function isOpenMonthlyFinding(finding: ScanFinding) {
+  return !["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus ?? "open")
+}
+
+function buildWorkDoneItems(state: ComplianceState) {
+  const eventItems = state.events
+    .filter((event) =>
+      [
+        "document.shared_approved",
+        "document.shared_rejected",
+        "document.shared_commented",
+        "document_generated",
+        "ai.off_configured",
+      ].includes(event.type)
+    )
+    .slice()
+    .sort((left, right) => right.createdAtISO.localeCompare(left.createdAtISO))
+    .slice(0, 4)
+    .map((event) => event.message)
+
+  const documentItems = state.generatedDocuments
+    .filter((document) => ["signed", "rejected", "reviewed_internally"].includes(document.adoptionStatus ?? ""))
+    .slice()
+    .sort((left, right) => right.generatedAtISO.localeCompare(left.generatedAtISO))
+    .slice(0, 3)
+    .map((document) => {
+      if (document.adoptionStatus === "signed") return `${document.title} aprobat prin magic link.`
+      if (document.adoptionStatus === "rejected") return `${document.title} respins de client, necesită revizie.`
+      return `${document.title} pregătit pentru review.`
+    })
+
+  return [...new Set([...eventItems, ...documentItems])].slice(0, 5)
+}
+
+function compareMonthlyFindings(left: ScanFinding, right: ScanFinding) {
+  const severityRank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+  const bySeverity = (severityRank[left.severity] ?? 3) - (severityRank[right.severity] ?? 3)
+  if (bySeverity !== 0) return bySeverity
+  return left.createdAtISO.localeCompare(right.createdAtISO)
 }
 
 export async function POST(request: Request) {
@@ -201,11 +331,19 @@ export async function POST(request: Request) {
                 riskLabel: "Fără date",
                 openAlerts: 0,
                 scoreDelta30d: null,
+                openFindings: 0,
+                validatedEvidence: 0,
+                pendingEvidence: 0,
+                auditReadiness: "review_required",
+                workDone: [],
+                openFindingTitles: [],
+                nextActions: ["Completează onboarding-ul clientului și rulează primul scan."],
               }
             }
 
             const normalized = normalizeComplianceState(state)
             const summary = computeDashboardSummary(normalized)
+            const activity = buildMonthlyActivity(normalized)
 
             let scoreDelta30d: number | null = null
             try {
@@ -222,6 +360,7 @@ export async function POST(request: Request) {
               riskLabel: summary.riskLabel,
               openAlerts: summary.openAlerts,
               scoreDelta30d,
+              ...activity,
             }
           })
         )

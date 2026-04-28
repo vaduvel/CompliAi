@@ -880,7 +880,7 @@ function buildClientAuditPackHtml(
       </section>
 
       <p class="footer">
-        Acest document a fost generat automat de CompliScan pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. Consultați un specialist juridic pentru validare. Varianta JSON rămâne sursa structurată de adevăr, iar acest format este optimizat pentru citire, discuție și export PDF.
+        Acest dosar este un instrument de lucru pentru organizarea dovezilor și revizia consultantului DPO. Nu înlocuiește validarea profesională și nu reprezintă o opinie juridică finală. Varianta JSON rămâne sursa structurată de adevăr, iar acest format este optimizat pentru citire, discuție și export PDF.
       </p>
     </main>
   </body>

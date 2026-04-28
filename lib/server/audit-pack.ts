@@ -47,11 +47,12 @@ export function buildAuditPack({
   })
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
   const openBusinessFindings = countOpenBusinessFindings(state)
+  const missingControlEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
   const validatedEvidenceItems = Math.max(
     controlsMatrix.filter((item) => item.auditDecision === "pass").length,
     evidenceLedgerSummary.sufficient
   )
-  const missingEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
+  const missingEvidenceItems = Math.max(missingControlEvidenceItems, openBusinessFindings)
 
   return {
     version: "2.1",
@@ -599,7 +600,7 @@ function buildTopBlockers({
   if (humanApprovalDrifts.length > 0) {
     blockers.push(`${humanApprovalDrifts.length} drift-uri cer aprobare umana explicita inainte de inchidere.`)
   }
-  if (missingEvidenceItems > 0) blockers.push(`${missingEvidenceItems} controale nu au dovada validata.`)
+  if (missingEvidenceItems > 0) blockers.push(`${missingEvidenceItems} dovezi pendinte trebuie atasate sau validate.`)
   if (blockedQualityItems.length > 0) {
     blockers.push(
       `${blockedQualityItems.length} controale sunt blocate de quality gates (dovada lipsa sau drift nerezolvat).`
@@ -657,7 +658,7 @@ function buildNextActions({
   if (breachedDrifts.length > 0) {
     actions.push("Preia sau escaladeaza drift-urile cu SLA depasit si noteaza explicit owner-ul responsabil in audit trail.")
   }
-  if (missingEvidenceItems > 0) actions.push("Completeaza dovezile lipsa si ruleaza rescan pe task-urile deschise.")
+  if (missingEvidenceItems > 0) actions.push("Completeaza dovezile lipsa pe finding-urile deschise si ruleaza rescan pe task-urile active.")
   if (weakEvidenceItems.length > 0) {
     actions.push("Inlocuieste dovezile slabe cu capturi, loguri sau bundle-uri mai specifice inainte de export.")
   }

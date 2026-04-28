@@ -31,15 +31,18 @@ export function buildRemediationPlan(state: ComplianceState): RemediationAction[
     .filter((finding) => finding.category === "E_FACTURA")
     .map((finding) => finding.id)
 
-  if (
-    openAlerts.some(
-      (alert) =>
-        alert.severity === "critical" ||
-        alert.severity === "high" ||
-        alert.message.toLowerCase().includes("impact ridicat") ||
-        alert.message.toLowerCase().includes("high-risk")
-    )
-  ) {
+  const aiHighRiskAlertIds = openAlerts
+    .filter((alert) => {
+      const message = alert.message.toLowerCase()
+      return (
+        message.includes("impact ridicat") ||
+        message.includes("high-risk") ||
+        (alert.findingId ? highRiskFindingIds.includes(alert.findingId) : false)
+      )
+    })
+    .map((alert) => alert.id)
+
+  if (highRiskFindingIds.length > 0 || aiHighRiskAlertIds.length > 0) {
     const recipe = getRemediationRecipe("high-risk-flow")
     plan.push({
       id: recipe.id,
@@ -69,14 +72,7 @@ export function buildRemediationPlan(state: ComplianceState): RemediationAction[
       readyTextLabel: recipe.readyTextLabel,
       readyText: recipe.readyText,
       relatedAlertIds: openAlerts
-        .filter(
-          (alert) =>
-            alert.severity === "critical" ||
-            alert.severity === "high" ||
-            alert.message.toLowerCase().includes("impact ridicat") ||
-            alert.message.toLowerCase().includes("high-risk") ||
-            (alert.findingId ? highRiskFindingIds.includes(alert.findingId) : false)
-        )
+        .filter((alert) => aiHighRiskAlertIds.includes(alert.id))
         .map((alert) => alert.id),
       relatedFindingIds: highRiskFindingIds,
       validationKind: recipe.validationKind,

@@ -274,6 +274,30 @@ la "supabase" (post 1 săpt dual-write clean).
 
 ---
 
+## DPO acceptance runtime v3 — polish produs pentru pilot (28 apr 2026) ✅ PASS
+
+**Input feedback:** demo 9/10, pilot DA, dar cu 7 gap-uri de produs: work queue duplicat, deadline-uri lipsă, PDF evidence listat dar absent fizic în ZIP, `missingEvidenceItems` confuz, control AI high-risk afișat fără AI systems în scope, raport lunar prea superficial, disclaimer prea defensiv.
+
+**Fixuri aplicate:**
+- `app/api/partner/urgency-queue/route.ts` — work queue deduplicat by `orgId:findingId`, filtrează findings rezolvate, unește alertă + finding în același rând, adaugă badge-uri și deadline calculat.
+- `app/api/partner/urgency-queue/route.ts` — deadline DSAR calculat din data cererii (`2026-03-25 + 30 zile`) și afișat ca `depășit cu 4 zile`.
+- `lib/compliance/remediation.ts` — controlul `AI high-risk` nu mai apare pentru orice alertă high; apare doar dacă există finding AI Act high/critical sau alertă high-risk reală.
+- `lib/server/audit-pack.ts` — `missingEvidenceItems` reflectă maximul dintre controale pending și findings business deschise; Apex arată 2 dovezi pendinte pentru RoPA + cookie.
+- `lib/server/audit-pack-bundle.ts` — dacă o dovadă din ledger nu există în storage local, bundle-ul generează artefact fallback fizic; Apex ZIP include acum `evidence/apex-gdpr-dpa-stripe-dpa-apex-stripe-approved.pdf`.
+- `app/api/cron/partner-monthly-report/route.ts` — raport lunar îmbogățit cu “ce s-a lucrat”, findings rămase, dovezi validate, dovezi pendinte și next actions per client.
+- `lib/server/audit-pack-client.ts` + `lib/server/audit-pack-bundle.ts` — disclaimer client-facing mai calm: instrument de lucru pentru revizia consultantului DPO, nu opinie juridică finală.
+- `scripts/smoke-dpo-consultant-runtime-demo.mjs` — smoke extins la 62 verificări: dedupe queue, deadline DSAR, DPA rezolvat ascuns din queue, AI control ascuns, PDF evidence fizic în ZIP, raport lunar cu activitate reală.
+
+**Artefact client nou:**
+- `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v3-2026-04-28.zip`
+- SHA-256: `eec507254b7fdbd2045b12e7cc41c4cfa25ab07e2d99072a8062eb36e3324f39`
+
+**Verificări runtime:** 62/62 PASS pe `http://127.0.0.1:3034`.
+
+**Validare:** `npm test -- app/api/partner/urgency-queue/route.test.ts lib/server/audit-pack.test.ts lib/server/demo-seed.test.ts app/api/exports/audit-pack/bundle/route.test.ts app/api/exports/audit-pack/route.test.ts` → 20/20 PASS; `npm run build` → PASS cu warning-uri lint pre-existente.
+
+---
+
 ## Commit history v3-unified — relevante
 
 ```
