@@ -35,24 +35,35 @@ export function buildAuditPack({
   const validatedBaseline =
     state.snapshotHistory.find((item) => item.snapshotId === state.validatedBaselineSnapshotId) ?? null
   const activeDrifts = state.driftRecords.filter((item) => item.open)
-  const auditQualityGates = buildAuditQualityGates({ state, remediationPlan, nowISO: generatedAt })
-  const controlsMatrix = buildControlsMatrix(state, remediationPlan, auditQualityGates)
-  const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
+  const auditRemediationPlan = validatedBaseline
+    ? remediationPlan.filter((task) => task.id !== "baseline-maintenance")
+    : remediationPlan
+  const auditQualityGates = buildAuditQualityGates({
+    state,
+    remediationPlan: auditRemediationPlan,
+    nowISO: generatedAt,
+  })
+  const controlsMatrix = buildControlsMatrix(state, auditRemediationPlan, auditQualityGates)
+  const evidenceLedger = buildEvidenceLedger(state, auditRemediationPlan)
   const evidenceLedgerSummary = summarizeEvidenceLedger(evidenceLedger)
   const validationLog = buildValidationLog(controlsMatrix)
   const traceabilityMatrix = buildComplianceTraceRecords({
     state,
-    remediationPlan,
+    remediationPlan: auditRemediationPlan,
     snapshot,
   })
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
-  const openBusinessFindings = countOpenBusinessFindings(state)
+  const openBusinessFindings = countOpenBusinessFindings(state, auditRemediationPlan)
   const missingControlEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
   const validatedEvidenceItems = Math.max(
     controlsMatrix.filter((item) => item.auditDecision === "pass").length,
     evidenceLedgerSummary.sufficient
   )
   const missingEvidenceItems = Math.max(missingControlEvidenceItems, openBusinessFindings)
+  const effectiveCompliancePack = withAuditSummaryOverrides(compliancePack, {
+    openFindings: openBusinessFindings,
+    missingEvidenceItems,
+  })
 
   return {
     version: "2.1",
@@ -62,16 +73,16 @@ export function buildAuditPack({
       complianceScore: snapshot?.summary.complianceScore ?? null,
       riskLabel: snapshot?.summary.riskLabel ?? null,
       auditReadiness: deriveAuditReadiness(
-        compliancePack,
+        effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
         auditQualityGates,
         validatedBaseline
       ),
       baselineStatus: validatedBaseline ? "validated" : "missing",
-      systemsInScope: compliancePack.entries.length,
+      systemsInScope: effectiveCompliancePack.entries.length,
       sourcesInScope: snapshot?.sources.length ?? 0,
-      openFindings: Math.max(compliancePack.summary.openFindings, openBusinessFindings),
+      openFindings: openBusinessFindings,
       activeDrifts: activeDrifts.length,
       remediationOpen: openControls,
       validatedEvidenceItems,
@@ -82,20 +93,20 @@ export function buildAuditPack({
       reviewQualityGates: auditQualityGates.reviewCount,
       topBlockers: buildTopBlockers({
         validatedBaseline,
-        compliancePack,
+        compliancePack: effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
         auditQualityGates,
       }),
       nextActions: buildNextActions({
         validatedBaseline,
-        compliancePack,
+        compliancePack: effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
         auditQualityGates,
       }),
     },
-    bundleEvidenceSummary: buildBundleEvidenceSummary(compliancePack, controlsMatrix, evidenceLedger),
+    bundleEvidenceSummary: buildBundleEvidenceSummary(effectiveCompliancePack, controlsMatrix, evidenceLedger),
     scope: {
       snapshot: {
         id: snapshot?.snapshotId ?? null,
@@ -221,7 +232,20 @@ export function buildAuditPack({
     appendix: {
       snapshot,
       validatedBaseline,
-      compliancePack,
+      compliancePack: effectiveCompliancePack,
+    },
+  }
+}
+
+function withAuditSummaryOverrides(
+  compliancePack: AICompliancePack,
+  overrides: Pick<AICompliancePack["summary"], "openFindings" | "missingEvidenceItems">
+): AICompliancePack {
+  return {
+    ...compliancePack,
+    summary: {
+      ...compliancePack.summary,
+      ...overrides,
     },
   }
 }
@@ -450,7 +474,7 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
     .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
 }
 
-function countOpenBusinessFindings(state: ComplianceState) {
+function countOpenBusinessFindings(state: ComplianceState, remediationPlan: RemediationAction[]) {
   return state.findings.filter((finding) => {
     if (
       finding.findingStatus === "resolved" ||
@@ -460,9 +484,27 @@ function countOpenBusinessFindings(state: ComplianceState) {
       return false
     }
 
-    const taskState = state.taskState[finding.id] ?? state.taskState[`finding-${finding.id}`]
-    return taskState?.status !== "done" || taskState?.validationStatus !== "passed"
+    return !isFindingOperationallyClosed(state, remediationPlan, finding.id)
   }).length
+}
+
+function isFindingOperationallyClosed(
+  state: ComplianceState,
+  remediationPlan: RemediationAction[],
+  findingId: string
+) {
+  const relatedRemediationTaskIds = remediationPlan
+    .filter((task) => (task.relatedFindingIds ?? []).includes(findingId))
+    .map((task) => `rem-${task.id}`)
+  const candidateTaskStates = [
+    state.taskState[findingId],
+    state.taskState[`finding-${findingId}`],
+    ...relatedRemediationTaskIds.map((taskId) => state.taskState[taskId]),
+  ].filter(Boolean)
+
+  return candidateTaskStates.some(
+    (taskState) => taskState.status === "done" && taskState.validationStatus === "passed"
+  )
 }
 
 function resolveFindingForTaskId(state: ComplianceState, taskId: string) {
@@ -470,7 +512,11 @@ function resolveFindingForTaskId(state: ComplianceState, taskId: string) {
   if (direct) return direct
 
   if (taskId.startsWith("finding-")) {
-    return state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
+    const canonical = resolveFindingIdFromTaskId(taskId)
+    return (
+      state.findings.find((item) => item.id === canonical) ??
+      state.findings.find((item) => item.id === taskId.replace(/^finding-/, ""))
+    )
   }
 
   return undefined

@@ -4,7 +4,13 @@ export const maxDuration = 60
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
-import { requireFreshRole, AuthzError } from "@/lib/server/auth"
+import {
+  requireFreshRole,
+  AuthzError,
+  listUserMemberships,
+  resolveUserMode,
+  type UserMode,
+} from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { RequestValidationError } from "@/lib/server/request-validation"
@@ -80,10 +86,12 @@ export async function POST(request: Request) {
     // il propagam in input pentru ca generatorul (fallback + prompt Gemini) sa-l
     // foloseasca.
     try {
-      const activeTemplate = await getActiveTemplateForType(
-        session.orgId,
-        documentType as DocumentType
-      )
+      const activeTemplate = await resolveActiveTemplateForSession({
+        orgId: session.orgId,
+        userId: session.userId,
+        userMode: session.userMode,
+        documentType: documentType as DocumentType,
+      })
       if (activeTemplate) {
         input.cabinetTemplateContent = activeTemplate.content
         input.cabinetTemplateName = activeTemplate.name
@@ -190,4 +198,40 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Generarea a eșuat."
     return jsonError(message, 500, "DOCUMENT_GENERATION_FAILED")
   }
+}
+
+async function resolveActiveTemplateForSession({
+  orgId,
+  userId,
+  userMode,
+  documentType,
+}: {
+  orgId: string
+  userId: string
+  userMode?: UserMode
+  documentType: DocumentType
+}) {
+  const currentOrgTemplate = await getActiveTemplateForType(orgId, documentType)
+  if (currentOrgTemplate) return currentOrgTemplate
+
+  const mode = await resolveUserMode({ userId, userMode }).catch(() => null)
+  if (mode !== "partner") return null
+
+  const memberships = await listUserMemberships(userId).catch(() => [])
+  const cabinetMemberships = memberships.filter(
+    (membership) =>
+      membership.status === "active" &&
+      membership.orgId !== orgId &&
+      membership.role === "owner"
+  )
+
+  for (const membership of cabinetMemberships) {
+    const inheritedTemplate = await getActiveTemplateForType(
+      membership.orgId,
+      documentType
+    )
+    if (inheritedTemplate) return inheritedTemplate
+  }
+
+  return null
 }

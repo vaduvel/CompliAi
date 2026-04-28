@@ -45,7 +45,11 @@ function record(ok, label, details = "") {
 
 async function request(pathname, options = {}) {
   const headers = new Headers(options.headers || {})
-  if (options.body && !headers.has("content-type")) headers.set("content-type", "application/json")
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData
+  if (options.body && !headers.has("content-type") && !isFormData) {
+    headers.set("content-type", "application/json")
+  }
   const cookie = jar.header()
   if (cookie) headers.set("cookie", cookie)
 
@@ -200,7 +204,11 @@ function latestActions(orgName, state, limit = 5) {
 
 function openFindingTitles(state) {
   return (state?.findings ?? [])
-    .filter((finding) => !["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus))
+    .filter((finding) => {
+      if (["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus)) return false
+      const task = state?.taskState?.[finding.id] ?? state?.taskState?.[`finding-${finding.id}`]
+      return !(task?.status === "done" && task?.validationStatus === "passed")
+    })
     .map((finding) => `${finding.title} (${finding.legalReference || finding.category})`)
 }
 
@@ -223,6 +231,40 @@ async function loadDashboardFor(orgName) {
   const state = dashboard.body.state || {}
   await writeText(`dashboards/${slug(orgName)}.json`, JSON.stringify(summarizeState(state), null, 2))
   return { dashboard, state }
+}
+
+async function uploadTaskEvidence(taskId, { kind, fileName, mimeType, content }) {
+  const formData = new FormData()
+  formData.set("kind", kind)
+  formData.set("file", new Blob([content], { type: mimeType }), fileName)
+
+  return request(`/api/tasks/${encodeURIComponent(taskId)}/evidence`, {
+    method: "POST",
+    body: formData,
+  })
+}
+
+async function closeOperationalFinding(taskId, label, evidenceInput) {
+  const evidence = await uploadTaskEvidence(taskId, evidenceInput)
+  record(evidence.res.ok, `${label}: evidence uploaded`, evidence.body?.evidence?.fileName || evidence.text)
+
+  const done = await request(`/api/tasks/${encodeURIComponent(taskId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: "done" }),
+  })
+  record(done.res.ok, `${label}: task marked done`, done.body?.feedback?.status || done.text)
+
+  const validated = await request(`/api/tasks/${encodeURIComponent(taskId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ action: "validate" }),
+  })
+  record(
+    validated.body?.feedback?.validationStatus === "passed",
+    `${label}: operational validation passed`,
+    validated.body?.feedback?.validationMessage || validated.text
+  )
+
+  return { evidence, done, validated }
 }
 
 async function main() {
@@ -254,6 +296,33 @@ async function main() {
       (portfolio.body.clientScores || []).some((client) => client.name === name)
     ),
     "Portfolio includes Apex, Lumen, Cobalt"
+  )
+
+  const cabinetTemplate = await request("/api/cabinet/templates", {
+    method: "POST",
+    body: JSON.stringify({
+      documentType: "dpa",
+      name: "DPO Complet — DPA procesatori v2026",
+      active: true,
+      content: [
+        "# Template DPA DPO Complet — {{ORG_NAME}}",
+        "",
+        "**Pregătit de cabinet:** DPO Complet SRL",
+        "**Client / Operator:** {{ORG_NAME}}",
+        "**Procesator:** {{COUNTERPARTY_NAME}}",
+        "",
+        "Clauză cabinet custom: procesatorul notifică operatorul fără întârziere nejustificată pentru orice incident care poate afecta datele personale.",
+        "Documentul rămâne draft de lucru până la validarea consultantului DPO.",
+      ].join("\n"),
+    }),
+  })
+  record(cabinetTemplate.res.ok, "Cabinet DPO can upload active DPA template", cabinetTemplate.body?.template?.name || cabinetTemplate.text)
+
+  const cabinetTemplates = await request("/api/cabinet/templates")
+  await writeText("reports/cabinet-templates.json", JSON.stringify(cabinetTemplates.body, null, 2))
+  record(
+    (cabinetTemplates.body.templates || []).some((template) => template.documentType === "dpa" && template.active),
+    "Cabinet template library lists active DPA template"
   )
 
   const urgencyQueue = await request("/api/partner/urgency-queue")
@@ -294,6 +363,22 @@ async function main() {
     apexCookie?.legalReference || "missing"
   )
 
+  const inheritedTemplateDoc = await request("/api/documents/generate", {
+    method: "POST",
+    body: JSON.stringify({
+      documentType: "dpa",
+      orgName: "Apex Logistic SRL",
+      counterpartyName: "Stripe Payments Europe",
+      counterpartyReferenceUrl: "https://stripe.com/legal/dpa",
+    }),
+  })
+  await writeText("reports/apex-inherited-template-document.json", JSON.stringify(inheritedTemplateDoc.body, null, 2))
+  record(inheritedTemplateDoc.res.ok, "Apex can generate document while inheriting cabinet template", `HTTP ${inheritedTemplateDoc.res.status}`)
+  record(
+    String(inheritedTemplateDoc.body.content || "").includes("Clauză cabinet custom"),
+    "Generated Apex DPA contains DPO Complet custom template clause"
+  )
+
   const apexClientHtml = await request("/api/exports/audit-pack/client")
   record(apexClientHtml.res.ok, "Apex Audit Pack HTML exports", `HTTP ${apexClientHtml.res.status}`)
   record(apexClientHtml.text.includes("Apex Logistic SRL"), "Apex Audit Pack is for Apex")
@@ -325,6 +410,86 @@ async function main() {
     "Apex Audit Pack ZIP physically includes DPA PDF evidence"
   )
   await writeBuffer("exports/apex-audit-pack-bundle.zip", apexBundle.body)
+
+  await closeOperationalFinding("finding-apex-gdpr-ropa-stripe", "Apex RoPA remediation", {
+    kind: "document_bundle",
+    fileName: "ropa-apex-v3-stripe-processor.pdf",
+    mimeType: "application/pdf",
+    content: `${[
+      "%PDF-1.4",
+      "Apex Logistic SRL — RoPA v3",
+      "Procesator nou: Stripe Payments Europe",
+      "Scop: procesare plăți online; categorii: identificatori tranzacție, date facturare, confirmări plată.",
+      "Revizuit de Diana Popescu, CIPP/E — DPO Complet SRL.",
+    ].join("\n")}\n${"Control RoPA actualizat cu Stripe ca procesator. ".repeat(40)}`,
+  })
+
+  await closeOperationalFinding("finding-apex-gdpr-cookie-reject", "Apex cookie remediation", {
+    kind: "screenshot",
+    fileName: "apex-cookie-banner-accept-refuz-setari.png",
+    mimeType: "image/png",
+    content:
+      "PNG demo evidence: banner CMP cu Accept / Refuz / Setări; cookie-uri non-esențiale blocate până la acord explicit.\n".repeat(260),
+  })
+
+  const apexAfterRemediation = await loadDashboardFor("Apex Logistic SRL after remediation")
+  const apexAfterRopaTask = apexAfterRemediation.state.taskState?.["finding-apex-gdpr-ropa-stripe"]
+  const apexAfterCookieTask = apexAfterRemediation.state.taskState?.["finding-apex-gdpr-cookie-reject"]
+  record(
+    apexAfterRopaTask?.status === "done" && apexAfterRopaTask?.validationStatus === "passed",
+    "Apex RoPA task is done + validated after evidence"
+  )
+  record(
+    apexAfterCookieTask?.status === "done" && apexAfterCookieTask?.validationStatus === "passed",
+    "Apex cookie task is done + validated after evidence"
+  )
+
+  const apexBaseline = await request("/api/state/baseline", {
+    method: "POST",
+    body: JSON.stringify({ action: "set" }),
+  })
+  await writeText("exports/apex-baseline-validation-response.json", JSON.stringify(apexBaseline.body, null, 2))
+  record(
+    apexBaseline.res.ok && Boolean(apexBaseline.body.state?.validatedBaselineSnapshotId),
+    "Apex baseline validates after all remediation evidence closes",
+    apexBaseline.body.state?.validatedBaselineSnapshotId || apexBaseline.text
+  )
+
+  const apexAuditReadyJson = await request("/api/exports/audit-pack")
+  await writeText("exports/apex-after-audit-ready-v2-1.json", JSON.stringify(apexAuditReadyJson.body, null, 2))
+  record(apexAuditReadyJson.res.ok, "Apex after-state Audit Pack JSON exports", `HTTP ${apexAuditReadyJson.res.status}`)
+  record(
+    apexAuditReadyJson.body.executiveSummary?.baselineStatus === "validated",
+    "Apex after-state baseline is validated",
+    apexAuditReadyJson.body.executiveSummary?.baselineStatus || "missing"
+  )
+  record(
+    apexAuditReadyJson.body.executiveSummary?.openFindings === 0,
+    "Apex after-state has zero open findings",
+    `${apexAuditReadyJson.body.executiveSummary?.openFindings}`
+  )
+  record(
+    apexAuditReadyJson.body.executiveSummary?.missingEvidenceItems === 0,
+    "Apex after-state has zero missing evidence",
+    `${apexAuditReadyJson.body.executiveSummary?.missingEvidenceItems}`
+  )
+  record(
+    apexAuditReadyJson.body.executiveSummary?.auditReadiness === "audit_ready",
+    "Apex after-state transitions to audit_ready",
+    apexAuditReadyJson.body.executiveSummary?.auditReadiness || "missing"
+  )
+  record(
+    apexAuditReadyJson.body.bundleEvidenceSummary?.status === "bundle_ready",
+    "Apex after-state bundle is ready",
+    apexAuditReadyJson.body.bundleEvidenceSummary?.status || "missing"
+  )
+
+  const apexAuditReadyHtml = await request("/api/exports/audit-pack/client")
+  await writeText("exports/apex-after-audit-ready-client.html", apexAuditReadyHtml.text)
+
+  const apexAuditReadyBundle = await request("/api/exports/audit-pack/bundle")
+  record(apexAuditReadyBundle.res.ok, "Apex after-state Audit Pack ZIP exports", `HTTP ${apexAuditReadyBundle.res.status}`)
+  await writeBuffer("exports/apex-after-audit-ready-bundle.zip", apexAuditReadyBundle.body)
 
   await switchToOrg(memberships, "Lumen Clinic SRL")
   const lumen = await loadDashboardFor("Lumen Clinic SRL")
@@ -424,7 +589,7 @@ async function main() {
     "",
     "1. Ultimele 5 lucruri făcute:",
     ...[
-      ...latestActions("Apex Logistic SRL", apex.state),
+      ...latestActions("Apex Logistic SRL", apexAfterRemediation.state),
       ...latestActions("Lumen Clinic SRL", lumen.state),
       ...latestActions("Cobalt Fintech IFN", cobaltAfter.state),
     ]
@@ -437,9 +602,10 @@ async function main() {
     "",
     "3. Livrabile trimise clientului:",
     "   - Apex DPA Stripe semnat; Cobalt DPA payroll trimis prin magic link; Audit Pack HTML/ZIP pentru Apex; raport lunar portofoliu.",
+    "   - Apex after-state: RoPA actualizat, cookie screenshot atașat, baseline validat și Audit Pack `audit_ready`.",
     "",
     "4. Dovezi păstrate:",
-    "   - Magic-link approval Apex, AI OFF evidence Cobalt, comment/reject Cobalt, manifest SHA-256 în Audit Pack bundle.",
+    "   - Magic-link approval Apex, RoPA v3 Apex, cookie banner screenshot Apex, AI OFF evidence Cobalt, comment/reject Cobalt, manifest SHA-256 în Audit Pack bundle.",
     "",
     "5. Prioritate azi:",
     `   - ${topUrgency?.orgName || "n/a"} · ${topUrgency?.severity || "n/a"} · ${topUrgency?.title || "n/a"}`,
@@ -451,13 +617,13 @@ async function main() {
     "   - `reports/partner-monthly-report.html` generat din portofoliul real al consultantului demo.",
     "",
     "8. RoPA / DPA / DSAR în practică:",
-    `   - Apex RoPA: ${apexRopa?.title || "missing"}; Apex DPA: ${apexDoc?.adoptionStatus || "missing"}; Lumen DSAR: ${lumen.state.taskState?.["lumen-dsar-overdue"]?.validationStatus || "missing"}.`,
+    `   - Apex RoPA: ${apexAfterRemediation.state.taskState?.["finding-apex-gdpr-ropa-stripe"]?.validationStatus || "missing"}; Apex DPA: ${apexDoc?.adoptionStatus || "missing"}; Lumen DSAR: ${lumen.state.taskState?.["lumen-dsar-overdue"]?.validationStatus || "missing"}.`,
     "",
     "9. Tool vs email/Word/Drive:",
     "   - În tool: status, livrabile, approvals, evidence, audit pack, raport lunar. În afara tool-ului rămân validarea profesională și portalurile oficiale.",
     "",
     "10. Ce nu ar trebui arătat încă într-un audit final:",
-    ...openFindingTitles(apex.state).map((title) => `   - Apex: ${title}`),
+    ...openFindingTitles(apexAfterRemediation.state).map((title) => `   - Apex: ${title}`),
     ...openFindingTitles(lumen.state).map((title) => `   - Lumen: ${title}`),
     ...openFindingTitles(cobaltAfter.state).map((title) => `   - Cobalt: ${title}`),
     "",
@@ -496,6 +662,7 @@ async function main() {
       "- `/api/demo/dpo-consultant` seedează cabinet + 3 clienți.",
       "- Portfolio partner vede Apex, Lumen și Cobalt.",
       "- Apex are DPA Stripe semnat și Audit Pack exportabil.",
+      "- Apex are after-state complet: RoPA + cookie închise, baseline validat, Audit Pack `audit_ready`.",
       "- Lumen are DSAR critic în `needs_review` până la dovada trimiterii.",
       "- Cobalt are AI OFF evidence și flow comment/reject prin magic link.",
       "",
@@ -507,6 +674,8 @@ async function main() {
       "- `04-work-queue-today.json`",
       "- `dashboards/*.json`",
       "- `exports/*.html` + `exports/apex-audit-pack-bundle.zip`",
+      "- `exports/apex-after-audit-ready-v2-1.json` + `exports/apex-after-audit-ready-bundle.zip`",
+      "- `reports/cabinet-templates.json` + `reports/apex-inherited-template-document.json`",
       "- `reports/partner-monthly-report.html`",
       "- `reports/dpo-acceptance-checklist.md`",
       "- `shared/cobalt-before-feedback.html` + `shared/cobalt-after-rejection.html`",

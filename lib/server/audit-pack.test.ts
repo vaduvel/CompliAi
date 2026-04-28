@@ -224,6 +224,125 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.evidenceLedger[0]?.lawReference).toBe("GDPR Art. 30")
   })
 
+  it("trece in audit_ready dupa inchiderea operationala a finding-urilor si validarea baseline-ului", () => {
+    const auditPack = buildAuditPack({
+      state: createState({
+        findings: [
+          {
+            id: "apex-gdpr-ropa-stripe",
+            title: "RoPA nu include Stripe ca procesator",
+            detail: "Registrul Art. 30 nu include procesatorul de plati.",
+            category: "GDPR",
+            severity: "medium",
+            risk: "high",
+            principles: ["privacy_data_governance"],
+            createdAtISO: "2026-04-28T10:00:00.000Z",
+            sourceDocument: "RoPA_Apex_v2.xlsx",
+            legalReference: "GDPR Art. 30",
+          },
+          {
+            id: "apex-gdpr-cookie-reject",
+            title: "Cookie banner fără opțiune reală de respingere",
+            detail: "Bannerul nu oferă refuz simetric cu acceptarea.",
+            category: "GDPR",
+            severity: "high",
+            risk: "high",
+            principles: ["tracking_consent"],
+            createdAtISO: "2026-04-28T10:05:00.000Z",
+            sourceDocument: "Website_Apex_Cookie_Check.html",
+            legalReference: "GDPR Art. 5, Art. 6 + ePrivacy",
+          },
+        ],
+        snapshotHistory: [
+          {
+            snapshotId: "snap-apex-validated",
+            generatedAt: "2026-04-28T11:00:00.000Z",
+            highRisk: 0,
+            lowRisk: 0,
+            gdprProgress: 100,
+            efacturaConnected: false,
+            scannedDocuments: 2,
+          } as unknown as ComplianceState["snapshotHistory"][number],
+        ],
+        validatedBaselineSnapshotId: "snap-apex-validated",
+        taskState: {
+          "apex-gdpr-ropa-stripe": {
+            status: "todo",
+            updatedAtISO: "2026-04-28T10:20:00.000Z",
+            validationStatus: "idle",
+          },
+          "apex-gdpr-cookie-reject": {
+            status: "todo",
+            updatedAtISO: "2026-04-28T10:20:00.000Z",
+            validationStatus: "idle",
+          },
+          "finding-apex-gdpr-ropa-stripe": {
+            status: "done",
+            updatedAtISO: "2026-04-28T10:40:00.000Z",
+            validationStatus: "passed",
+            validationBasis: "manual_confirmation",
+            validatedAtISO: "2026-04-28T10:45:00.000Z",
+            attachedEvidenceMeta: {
+              id: "evidence-ropa",
+              fileName: "ropa-apex-v3-stripe-processor.pdf",
+              mimeType: "application/pdf",
+              sizeBytes: 2000,
+              uploadedAtISO: "2026-04-28T10:35:00.000Z",
+              kind: "document_bundle",
+              quality: {
+                status: "sufficient",
+                summary: "Dovada pare suficientă.",
+                reasonCodes: [],
+                checkedAtISO: "2026-04-28T10:35:00.000Z",
+              },
+            },
+          },
+          "finding-apex-gdpr-cookie-reject": {
+            status: "done",
+            updatedAtISO: "2026-04-28T10:50:00.000Z",
+            validationStatus: "passed",
+            validationBasis: "manual_confirmation",
+            validatedAtISO: "2026-04-28T10:55:00.000Z",
+            attachedEvidenceMeta: {
+              id: "evidence-cookie",
+              fileName: "apex-cookie-banner-accept-refuz-setari.png",
+              mimeType: "image/png",
+              sizeBytes: 30_000,
+              uploadedAtISO: "2026-04-28T10:48:00.000Z",
+              kind: "screenshot",
+              quality: {
+                status: "sufficient",
+                summary: "Dovada pare suficientă.",
+                reasonCodes: [],
+                checkedAtISO: "2026-04-28T10:48:00.000Z",
+              },
+            },
+          },
+        },
+      }),
+      remediationPlan: [
+        createTask({
+          id: "baseline-maintenance",
+          title: "Menținere conformitate curentă",
+          severity: "low",
+          priority: "P3",
+          lawReference: "Control intern / verificare umană",
+          relatedFindingIds: [],
+        }),
+      ],
+      workspace: createWorkspace(),
+      compliancePack: createCompliancePack({ openFindings: 2, missingEvidenceItems: 2 }),
+      snapshot: null,
+    })
+
+    expect(auditPack.executiveSummary.openFindings).toBe(0)
+    expect(auditPack.executiveSummary.missingEvidenceItems).toBe(0)
+    expect(auditPack.executiveSummary.auditReadiness).toBe("audit_ready")
+    expect(auditPack.executiveSummary.auditQualityDecision).toBe("pass")
+    expect(auditPack.bundleEvidenceSummary.status).toBe("bundle_ready")
+    expect(auditPack.controlsMatrix).toHaveLength(0)
+  })
+
   it("marcheaza review cand dovada este slaba si controlul ramane inferat", () => {
     const auditPack = buildAuditPack({
       state: createState({

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import { computeDashboardSummary } from "@/lib/compliance/engine"
+import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
+import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { eventActorFromSession } from "@/lib/server/event-actor"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { getOrgContext } from "@/lib/server/org-context"
@@ -40,13 +43,29 @@ export async function POST(request: Request) {
         }
       }
 
-      const currentSnapshot = current.snapshotHistory[0]
-      if (!currentSnapshot) {
-        throw new Error("BASELINE_REQUIRES_SNAPSHOT")
-      }
+      const currentSnapshot =
+        current.snapshotHistory[0] ??
+        buildCompliScanSnapshot({
+          state: current,
+          summary: computeDashboardSummary(current),
+          remediationPlan: buildRemediationPlan(current),
+          workspace: {
+            orgId: session.orgId,
+            orgName: session.orgName,
+            workspaceLabel: session.orgName,
+            workspaceOwner: session.email,
+            workspaceInitials: initialsFromName(session.orgName),
+            userRole: session.role,
+          },
+        })
+      const snapshotHistory =
+        current.snapshotHistory[0]?.snapshotId === currentSnapshot.snapshotId
+          ? current.snapshotHistory
+          : [currentSnapshot, ...current.snapshotHistory].slice(0, 12)
 
       return {
         ...current,
+        snapshotHistory,
         validatedBaselineSnapshotId: currentSnapshot.snapshotId,
         events: appendComplianceEvents(current, [
           createComplianceEvent({
@@ -89,4 +108,14 @@ export async function POST(request: Request) {
       "BASELINE_UPDATE_FAILED"
     )
   }
+}
+
+function initialsFromName(value: string) {
+  const parts = value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "CS"
 }

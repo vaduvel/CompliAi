@@ -20,9 +20,24 @@ const mocks = vi.hoisted(() => ({
     }
   },
   buildDashboardPayloadMock: vi.fn(),
+  buildCompliScanSnapshotMock: vi.fn(),
+  buildRemediationPlanMock: vi.fn(),
+  computeDashboardSummaryMock: vi.fn(),
   getOrgContextMock: vi.fn(),
   mutateStateForOrgMock: vi.fn(),
   requireFreshRoleMock: vi.fn(),
+}))
+
+vi.mock("@/lib/compliance/engine", () => ({
+  computeDashboardSummary: mocks.computeDashboardSummaryMock,
+}))
+
+vi.mock("@/lib/compliance/remediation", () => ({
+  buildRemediationPlan: mocks.buildRemediationPlanMock,
+}))
+
+vi.mock("@/lib/server/compliscan-export", () => ({
+  buildCompliScanSnapshot: mocks.buildCompliScanSnapshotMock,
 }))
 
 vi.mock("@/lib/server/dashboard-response", () => ({
@@ -62,9 +77,35 @@ describe("POST /api/state/baseline", () => {
       userRole: "compliance",
     })
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.computeDashboardSummaryMock.mockReturnValue({ score: 100, riskLabel: "low" })
+    mocks.buildRemediationPlanMock.mockReturnValue([])
+    mocks.buildCompliScanSnapshotMock.mockReturnValue({
+      version: "1.0",
+      snapshotId: "snap-generated",
+      generatedAt: "2026-04-28T10:00:00.000Z",
+      comparedToSnapshotId: null,
+      workspace: {
+        id: "org-1",
+        name: "Org Demo",
+        label: "Org Demo",
+        owner: "demo@site.ro",
+      },
+      sources: [],
+      systems: [],
+      findings: [],
+      drift: [],
+      summary: {
+        complianceScore: 100,
+        riskLabel: "low",
+        openFindings: 0,
+        openAlerts: 0,
+        systemsDetected: 0,
+        highRiskSystems: 0,
+      },
+    })
   })
 
-  it("respinge set daca nu exista snapshot", async () => {
+  it("creeaza snapshot curent daca nu exista inca snapshot persistat", async () => {
     mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: MockBaselineState) => unknown) =>
       updater({
         snapshotHistory: [],
@@ -82,8 +123,9 @@ describe("POST /api/state/baseline", () => {
 
     const payload = await response.json()
 
-    expect(response.status).toBe(400)
-    expect(payload.error).toContain("cel putin un snapshot real")
+    expect(response.status).toBe(200)
+    expect(payload.state.validatedBaselineSnapshotId).toBe("snap-generated")
+    expect(payload.state.snapshotHistory[0].snapshotId).toBe("snap-generated")
   })
 
   it("seteaza baseline-ul pe snapshot-ul curent", async () => {

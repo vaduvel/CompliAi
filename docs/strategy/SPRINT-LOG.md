@@ -274,6 +274,29 @@ la "supabase" (post 1 săpt dual-write clean).
 
 ---
 
+## DPO acceptance runtime v4 — before/after production loop (28 apr 2026) ✅ PASS
+
+**Input feedback:** pentru “100% producție DPO” lipseau încă 4 piese de produs matur: baseline validation flow, închiderea completă RoPA + cookie după dovadă, template cabinet folosit în workspace client, limbaj juridic calm.
+
+**Fixuri aplicate:**
+- `app/api/state/baseline/route.ts` — `POST /api/state/baseline` poate valida baseline-ul curent chiar dacă snapshot history nu există încă; generează snapshot din state real și îl marchează ca baseline validat.
+- `lib/compliance/task-validation.ts` + `lib/compliance/task-resolution.ts` — task-urile legate de finding se pot valida operațional după dovadă suficientă + alerte închise, inclusiv când id-ul runtime este `finding-*`.
+- `lib/server/audit-pack.ts` — Audit Pack calculează findings deschise din starea operațională reală (`done + passed`), inclusiv task-uri directe, task-uri `finding-*` și task-uri `rem-*`; task-ul generic `baseline-maintenance` nu mai blochează auditul după baseline validat.
+- `app/api/documents/generate/route.ts` — documentele generate în workspace-ul clientului moștenesc template-ul activ al cabinetului DPO când consultantul lucrează în partner mode.
+- `scripts/smoke-dpo-consultant-runtime-demo.mjs` — scenariul runtime include acum before/after: Apex pornește cu RoPA + cookie deschise, atașează dovezi, validează taskurile, îngheață baseline-ul și exportă Audit Pack `audit_ready`.
+
+**Artefact client nou:**
+- `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v4-2026-04-28.zip`
+- SHA-256: `8fef6a7715065b8bfbebc24dc28c704b186b6726adeabb3aef1c2ccc98c17fed`
+
+**Verificări runtime:** 83/83 PASS pe `http://127.0.0.1:3000`.
+
+**Validare cod:** `npm test` → 241 files passed, 1248 tests passed, 1 skipped. `npm run build` → PASS cu warning-uri lint pre-existente.
+
+**Verdict:** DPO Cabinet flow are acum demo before/after matur: portfolio, work queue, approve/reject/comment, evidence ledger, monthly report, template cabinet, baseline validation și Audit Pack final `audit_ready` după închiderea dovezilor.
+
+---
+
 ## DPO acceptance runtime v3 — polish produs pentru pilot (28 apr 2026) ✅ PASS
 
 **Input feedback:** demo 9/10, pilot DA, dar cu 7 gap-uri de produs: work queue duplicat, deadline-uri lipsă, PDF evidence listat dar absent fizic în ZIP, `missingEvidenceItems` confuz, control AI high-risk afișat fără AI systems în scope, raport lunar prea superficial, disclaimer prea defensiv.

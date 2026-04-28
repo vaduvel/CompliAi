@@ -1,6 +1,10 @@
-# CompliScan — Stack documente strategice (v6.0 — CODE-SIDE LAUNCH READY)
+# CompliScan — Stack documente strategice (v6.2 — DPO BEFORE/AFTER AUDIT-READY VERIFIED)
 
-🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. Doar founder-side setup rămas.
+🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. DPO Cabinet flow are runtime demo before/after cu **83/83 PASS** și Apex trece în `audit_ready` după dovezi + baseline validat. Doar founder-side setup + pilot rămân înainte de deploy production.
+
+📦 **Pachet DPO runtime v4**: `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v4-2026-04-28.zip`
+
+🔐 **SHA-256**: `8fef6a7715065b8bfbebc24dc28c704b186b6726adeabb3aef1c2ccc98c17fed`
 
 📋 **Începe cu**: [`RELEASE-READY-CHECKLIST.md`](./RELEASE-READY-CHECKLIST.md) — singura listă de care ai nevoie ca founder pentru launch.
 

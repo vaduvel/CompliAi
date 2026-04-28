@@ -41,7 +41,7 @@ export function getTaskResolutionTargets(
   taskId: string
 ): TaskResolutionTargets {
   if (taskId.startsWith("finding-")) {
-    const findingId = resolveFindingIdFromTaskId(taskId)
+    const findingId = resolveFindingIdForState(state, taskId)
     if (!findingId) return { alertIds: [], findingIds: [], driftIds: [] }
     return {
       findingIds: [findingId],
@@ -62,6 +62,16 @@ export function getTaskResolutionTargets(
   }
 
   return { alertIds: [], findingIds: [], driftIds: [] }
+}
+
+function resolveFindingIdForState(state: ComplianceState, taskId: string) {
+  const canonical = resolveFindingIdFromTaskId(taskId)
+  if (canonical && state.findings.some((item) => item.id === canonical)) return canonical
+
+  const stripped = taskId.replace(/^finding-/, "")
+  if (stripped && state.findings.some((item) => item.id === stripped)) return stripped
+
+  return canonical || stripped
 }
 
 export function getResolvedFindingIds(state: ComplianceState) {
