@@ -40,6 +40,21 @@ type ClientReportEntry = {
   nextActions: string[]
 }
 
+type ClientFacingReport = {
+  orgId: string
+  orgName: string
+  month: string
+  html: string
+  summary: {
+    score: number
+    riskLabel: string
+    auditReadiness: ClientReportEntry["auditReadiness"]
+    openFindings: number
+    validatedEvidence: number
+    pendingEvidence: number
+  }
+}
+
 function buildPartnerMonthlyHtml(
   consultantEmail: string,
   clients: ClientReportEntry[],
@@ -186,6 +201,74 @@ function buildPartnerMonthlyHtml(
 </html>`
 }
 
+function buildClientFacingMonthlyHtml(
+  client: ClientReportEntry,
+  month: string,
+  branding?: { partnerName: string; brandColor: string; tagline: string | null }
+): string {
+  const headerBg = branding?.brandColor ?? "#1e293b"
+  const cabinetName = branding?.partnerName ?? "Cabinet DPO"
+  const readinessColor = client.auditReadiness === "audit_ready" ? "#10b981" : "#f59e0b"
+  const scoreColor = client.score >= 75 ? "#10b981" : client.score >= 50 ? "#f59e0b" : "#ef4444"
+
+  const listItems = (items: string[], empty: string) =>
+    items.length > 0
+      ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+      : `<li style="color:#94a3b8">${escapeHtml(empty)}</li>`
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:system-ui,sans-serif;max-width:680px;margin:0 auto;padding:24px;background:#f8fafc;color:#0f172a">
+  <div style="background:${headerBg};padding:18px 24px;border-radius:12px 12px 0 0">
+    <p style="margin:0 0 4px;color:rgba(255,255,255,0.72);font-size:12px;text-transform:uppercase;letter-spacing:.08em">${escapeHtml(cabinetName)}</p>
+    <h1 style="color:#fff;margin:0;font-size:20px">Raport lunar DPO — ${escapeHtml(client.orgName)}</h1>
+    <p style="color:rgba(255,255,255,0.68);margin:6px 0 0;font-size:13px">${escapeHtml(month)}</p>
+  </div>
+  <div style="border:1px solid #e2e8f0;border-top:none;background:#fff;padding:24px;border-radius:0 0 12px 12px">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px">
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+        <div style="font-size:11px;color:#64748b">Scor</div>
+        <strong style="font-size:22px;color:${scoreColor}">${client.score}</strong><span style="font-size:12px;color:#94a3b8">/100</span>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+        <div style="font-size:11px;color:#64748b">Readiness</div>
+        <strong style="font-size:13px;color:${readinessColor}">${client.auditReadiness}</strong>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+        <div style="font-size:11px;color:#64748b">Dovezi validate</div>
+        <strong style="font-size:22px;color:#0f172a">${client.validatedEvidence}</strong>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px">
+        <div style="font-size:11px;color:#64748b">Findings deschise</div>
+        <strong style="font-size:22px;color:#0f172a">${client.openFindings}</strong>
+      </div>
+    </div>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:15px;margin:0 0 8px">Ce s-a lucrat luna aceasta</h2>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.55;color:#334155">${listItems(client.workDone, "Nu există acțiuni noi în perioada raportată.")}</ul>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:15px;margin:0 0 8px">Rămâne deschis</h2>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.55;color:#334155">${listItems(client.openFindingTitles, "Nu există findings deschise.")}</ul>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:15px;margin:0 0 8px">Următorul pas recomandat</h2>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.55;color:#334155">${listItems(client.nextActions, "Menține monitorizarea lunară.")}</ul>
+    </section>
+
+    <p style="margin-top:22px;border-top:1px solid #e2e8f0;padding-top:12px;color:#64748b;font-size:11px">
+      Document de lucru pregătit de ${escapeHtml(cabinetName)}. Necesită validare profesională înainte de utilizare oficială.
+    </p>
+  </div>
+</body>
+</html>`
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -307,6 +390,7 @@ export async function POST(request: Request) {
       month: string
       clientEntries: ClientReportEntry[]
       html: string
+      clientFacingReports: ClientFacingReport[]
     }> = []
 
     for (const { user, memberships } of partners) {
@@ -373,6 +457,20 @@ export async function POST(request: Request) {
         }
 
         const html = buildPartnerMonthlyHtml(user.email, clientEntries, month, branding)
+        const clientFacingReports: ClientFacingReport[] = clientEntries.map((client) => ({
+          orgId: client.orgId,
+          orgName: client.orgName,
+          month,
+          html: buildClientFacingMonthlyHtml(client, month, branding),
+          summary: {
+            score: client.score,
+            riskLabel: client.riskLabel,
+            auditReadiness: client.auditReadiness,
+            openFindings: client.openFindings,
+            validatedEvidence: client.validatedEvidence,
+            pendingEvidence: client.pendingEvidence,
+          },
+        }))
 
         if (preview) {
           previewReports.push({
@@ -380,6 +478,7 @@ export async function POST(request: Request) {
             month,
             clientEntries,
             html,
+            clientFacingReports,
           })
           sent++
           continue

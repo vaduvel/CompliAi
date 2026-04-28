@@ -1,9 +1,36 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v6.3 — 28 apr 2026, DPO state sync verified)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.4 — 28 apr 2026, DPO migration confidence pack)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.4 — DPO Migration Confidence Pack (28 apr 2026, 19:35 EEST)**:
+
+✅ **DPO Cabinet are acum pachet de migrare graduală, nu doar demo flow.** Sprintul răspunde explicit motivelor pentru care un consultant DPO nu ar migra tot cabinetul din prima: securitate/contractual, roluri, cazuri reale murdare, template-uri proprii, export complet și raport lunar client-facing.
+
+Validare cod:
+- Build: `npm run build` ✅
+- Tests: `npm test` → **243 files passed**, **1257 tests passed**, 1 skipped ✅
+- Lint: `npm run lint` ✅ (doar warning-uri vechi)
+- Runtime smoke DPO Migration Confidence Pack: `scripts/smoke-dpo-consultant-runtime-demo.mjs` → **103/103 checks passed** ✅
+
+Pachet nou pentru validare DPO:
+- Folder: `/Users/vaduvageorge/Downloads/compliscan-dpo-migration-confidence-pack-2026-04-28`
+- ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-migration-confidence-pack-2026-04-28.zip`
+- SHA-256: `cb110b1705acfd6272a366bf5ac7cac93894734d371b6ba9b3f1096189079130`
+
+Acoperire nouă verificată end-to-end:
+- Security + contractual pack: DPA draft, subprocessori, hosting, retenție, AI ON/OFF/no-training, offboarding/export.
+- RBAC permission matrix: acțiuni sensibile mapate pe roluri, cu teste.
+- Messy cases: document respins nu poate fi supra-aprobat cu același magic link; token alterat afișează blocked state.
+- Template library matură: versiune, sursă migrare, descriere, revision/status.
+- Export complet cabinet/client: `/api/partner/export` + UI în `Portfolio → Reports`.
+- Rapoarte lunare client-facing: `reports/client-monthly-*.html` separate per client.
+
+Verdict: **DPO Cabinet este pregătit pentru pilot controlat + discuție serioasă de migrare graduală.** Migrarea completă rămâne etapizată după 30-60 zile pilot real, nu promisiune de demo.
+
+---
 
 **Versiune v6.3 — DPO state sync runtime verification (28 apr 2026, 18:45 EEST)**:
 

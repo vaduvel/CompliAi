@@ -25,6 +25,10 @@ export function isSharedDocumentRejected(document?: GeneratedDocumentRecord | nu
   return document?.adoptionStatus === "rejected"
 }
 
+export function isSharedDocumentFinal(document?: GeneratedDocumentRecord | null) {
+  return isSharedDocumentApproved(document) || isSharedDocumentRejected(document)
+}
+
 export function getSharedDocumentComments(document?: GeneratedDocumentRecord | null) {
   return Array.isArray(document?.shareComments) ? document!.shareComments! : []
 }

@@ -30,6 +30,11 @@ type CabinetTemplate = {
   orgId: string
   documentType: DocumentType
   name: string
+  description?: string | null
+  versionLabel: string
+  sourceFileName?: string | null
+  status: "draft" | "active" | "archived"
+  revision: number
   content: string
   uploadedAtISO: string
   updatedAtISO: string
@@ -76,6 +81,9 @@ export function CabinetTemplatesPageSurface() {
   const [formOpen, setFormOpen] = useState(false)
   const [formDocumentType, setFormDocumentType] = useState<DocumentType>("privacy-policy")
   const [formName, setFormName] = useState("")
+  const [formDescription, setFormDescription] = useState("")
+  const [formVersionLabel, setFormVersionLabel] = useState("v1")
+  const [formSourceFileName, setFormSourceFileName] = useState("")
   const [formContent, setFormContent] = useState("")
 
   async function loadTemplates() {
@@ -112,6 +120,9 @@ export function CabinetTemplatesPageSurface() {
         body: JSON.stringify({
           documentType: formDocumentType,
           name: formName.trim(),
+          description: formDescription.trim() || null,
+          versionLabel: formVersionLabel.trim() || "v1",
+          sourceFileName: formSourceFileName.trim() || null,
           content: formContent,
           active: true,
         }),
@@ -124,6 +135,9 @@ export function CabinetTemplatesPageSurface() {
       toast.success("Template salvat și activat.")
       setFormOpen(false)
       setFormName("")
+      setFormDescription("")
+      setFormVersionLabel("v1")
+      setFormSourceFileName("")
       setFormContent("")
       await loadTemplates()
     } finally {
@@ -267,6 +281,38 @@ export function CabinetTemplatesPageSurface() {
               />
             </label>
           </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <label className="block md:col-span-2">
+              <span className="text-xs font-medium text-eos-text-muted">Descriere / scop pilot</span>
+              <input
+                className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong"
+                placeholder="ex: DPA standard pentru procesatori SaaS, validat de cabinet"
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                maxLength={240}
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-medium text-eos-text-muted">Versiune</span>
+              <input
+                className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong"
+                placeholder="v2026.1"
+                value={formVersionLabel}
+                onChange={(e) => setFormVersionLabel(e.target.value)}
+                maxLength={80}
+              />
+            </label>
+            <label className="block md:col-span-3">
+              <span className="text-xs font-medium text-eos-text-muted">Fișier sursă / istoric migrare (opțional)</span>
+              <input
+                className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong"
+                placeholder="ex: Drive:/DPO Complet/Templates/DPA-procesatori-v2026.docx"
+                value={formSourceFileName}
+                onChange={(e) => setFormSourceFileName(e.target.value)}
+                maxLength={180}
+              />
+            </label>
+          </div>
           <label className="mt-4 block">
             <span className="text-xs font-medium text-eos-text-muted">
               Conținut Markdown (variabile permise: {"{{ORG_NAME}}"}, {"{{ORG_CUI}}"}, {"{{ORG_WEBSITE}}"}, {"{{DPO_EMAIL}}"}, {"{{PREPARED_BY}}"}, {"{{DOCUMENT_DATE}}"}, {"{{DOCUMENT_TITLE}}"})
@@ -297,6 +343,9 @@ export function CabinetTemplatesPageSurface() {
               onClick={() => {
                 setFormOpen(false)
                 setFormName("")
+                setFormDescription("")
+                setFormVersionLabel("v1")
+                setFormSourceFileName("")
                 setFormContent("")
               }}
               disabled={busy}
@@ -373,8 +422,18 @@ function TemplateRow({
             {template.name}
           </h3>
           <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.04em] text-eos-text-tertiary">
-            uploadat {formatDate(template.uploadedAtISO)} · {Math.round(template.sizeBytes / 1024)}KB
+            {template.versionLabel} · rev. {template.revision} · {template.status} · uploadat {formatDate(template.uploadedAtISO)} · {Math.round(template.sizeBytes / 1024)}KB
           </p>
+          {template.description && (
+            <p className="mt-2 max-w-2xl text-[12.5px] leading-relaxed text-eos-text-muted">
+              {template.description}
+            </p>
+          )}
+          {template.sourceFileName && (
+            <p className="mt-1 font-mono text-[10.5px] text-eos-text-tertiary">
+              sursă: {template.sourceFileName}
+            </p>
+          )}
           {template.detectedVariables.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {template.detectedVariables.map((v) => (

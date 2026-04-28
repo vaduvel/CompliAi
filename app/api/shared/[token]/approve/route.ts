@@ -7,7 +7,7 @@ import { getDocumentAdoptionFeedback } from "@/lib/compliance/document-adoption"
 import { jsonError } from "@/lib/server/api-response"
 import { sendCabinetMagicLinkEmail } from "@/lib/server/cabinet-magic-link-email"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
-import { findSharedApprovalDocument } from "@/lib/server/shared-approval"
+import { findSharedApprovalDocument, isSharedDocumentFinal } from "@/lib/server/shared-approval"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
 
 type Params = {
@@ -65,6 +65,9 @@ export async function POST(_request: Request, { params }: Params) {
       const targetDocument = findSharedApprovalDocument(current, payload.documentId)
       if (!targetDocument) {
         throw new Error("APPROVABLE_DOCUMENT_NOT_FOUND")
+      }
+      if (isSharedDocumentFinal(targetDocument)) {
+        throw new Error("APPROVABLE_DOCUMENT_ALREADY_FINAL")
       }
 
       const nextDocument = {
@@ -185,6 +188,13 @@ export async function POST(_request: Request, { params }: Params) {
         "Nu am găsit un document care poate fi aprobat prin acest link.",
         404,
         "APPROVABLE_DOCUMENT_NOT_FOUND"
+      )
+    }
+    if (error instanceof Error && error.message === "APPROVABLE_DOCUMENT_ALREADY_FINAL") {
+      return jsonError(
+        "Documentul are deja o decizie finală. Generează o versiune nouă pentru o nouă aprobare.",
+        409,
+        "APPROVABLE_DOCUMENT_ALREADY_FINAL"
       )
     }
 

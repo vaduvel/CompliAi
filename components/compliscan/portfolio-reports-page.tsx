@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Calendar, Check, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, Trash2 } from "lucide-react"
+import { Calendar, Check, Download, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, ShieldCheck, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
@@ -451,6 +451,7 @@ export function PortfolioReportsPage() {
   const [reports, setReports] = useState<PortfolioReportRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exportingCabinet, setExportingCabinet] = useState(false)
 
   useEffect(() => {
     void (async () => {
@@ -477,6 +478,35 @@ export function PortfolioReportsPage() {
   const openAlertsTotal = reports.reduce((sum, report) => sum + report.openAlerts, 0)
   const withRecentScan = reports.filter((report) => report.lastScanAtISO).length
   const withGeneratedDocs = reports.filter((report) => report.generatedDocumentsCount > 0).length
+
+  async function handleCabinetExport() {
+    setExportingCabinet(true)
+    try {
+      const response = await fetch("/api/partner/export", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Exportul complet cabinet a eșuat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "compliscan-cabinet-export.json"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Export cabinet generat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul cabinetului.")
+    } finally {
+      setExportingCabinet(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -530,6 +560,39 @@ export function PortfolioReportsPage() {
           },
         ]}
       />
+
+      <V3Panel padding="default">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-eos-lg bg-eos-primary/10 text-eos-primary">
+              <ShieldCheck className="size-5" strokeWidth={1.8} />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Migration confidence pack
+              </p>
+              <h2 data-display-text="true" className="font-display text-[17px] font-semibold tracking-[-0.015em] text-eos-text">
+                Export complet cabinet + security pack
+              </h2>
+              <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-eos-text-muted">
+                Descarcă arhiva JSON cu white-label, template-uri cabinet, clienți, state operațional,
+                security/contractual pack și matrice RBAC. Este pachetul pentru backup, pilot exit
+                și discuția de migrare treptată.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="default"
+            disabled={exportingCabinet}
+            onClick={() => void handleCabinetExport()}
+            className="shrink-0"
+          >
+            {exportingCabinet ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Export cabinet
+          </Button>
+        </div>
+      </V3Panel>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {reports.length === 0 ? (

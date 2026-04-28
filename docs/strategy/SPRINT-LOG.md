@@ -9,6 +9,33 @@
 
 ---
 
+## ✅ Update 28 apr 2026 (DPO Migration Confidence Pack)
+
+**Sprint nou închis runtime:** pachetul care răspunde obiecției “nu migrez tot cabinetul până nu văd securitate, roluri, template-uri, export, raport lunar și cazuri murdare”.
+
+- Fix cod:
+  - `lib/server/dpo-security-contractual-pack.ts` — pack security + contractual: DPA draft, subprocessori, hosting, retenție, AI ON/OFF/no-training, incident/export/offboarding.
+  - `lib/server/rbac.ts` — matrice explicită de permisiuni pe acțiuni sensibile: `send_magic_link`, `validate_baseline`, `export_cabinet_archive`, `manage_templates`, `delete_evidence`.
+  - `app/api/partner/export/route.ts` — export complet cabinet + clienți + template-uri + state + security pack + RBAC.
+  - `components/compliscan/portfolio-reports-page.tsx` — buton UI “Export cabinet” în Portofoliu → Rapoarte.
+  - `lib/server/cabinet-templates-store.ts` + UI/API template-uri — metadata matură: descriere, versiune, sursă migrare, status, revision.
+  - `app/api/cron/partner-monthly-report/route.ts` — rapoarte lunare client-facing separate per client, nu doar raport de portofoliu pentru consultant.
+  - `app/api/shared/[token]/approve|reject` — documentele cu decizie finală nu mai pot fi supra-scrise cu același magic link.
+  - `scripts/smoke-dpo-consultant-runtime-demo.mjs` — scenariu extins cu messy cases + export complet + security pack + client-facing reports.
+- Validare:
+  - Runtime smoke DPO Migration Confidence Pack: **103/103 PASS** ✅
+  - Tests: `npm test` → **243 files passed**, **1257 tests passed**, 1 skipped ✅
+  - Build: `npm run build` → PASS ✅
+  - Lint: `npm run lint` → PASS cu warning-uri vechi ✅
+- Pachet nou:
+  - Folder: `/Users/vaduvageorge/Downloads/compliscan-dpo-migration-confidence-pack-2026-04-28`
+  - ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-migration-confidence-pack-2026-04-28.zip`
+  - SHA-256: `cb110b1705acfd6272a366bf5ac7cac93894734d371b6ba9b3f1096189079130`
+
+**Verdict:** DPO Cabinet nu este doar demo/pilot flow. Are acum pachet de încredere pentru migrare graduală: security docs, roluri, cazuri murdare, template-uri cabinet, export complet și raport lunar client-facing.
+
+---
+
 ## ✅ Update 28 apr 2026 (DPO state sync v5)
 
 **Fix feedback v4:** Apex nu mai apare `audit_ready` într-un artefact și `review_required` în altul.

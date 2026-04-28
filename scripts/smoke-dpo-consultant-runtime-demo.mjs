@@ -337,6 +337,9 @@ async function main() {
     body: JSON.stringify({
       documentType: "dpa",
       name: "DPO Complet — DPA procesatori v2026",
+      description: "Template cabinet validat pentru procesatori SaaS, folosit în pilotul DPO.",
+      versionLabel: "v2026.1",
+      sourceFileName: "Drive:/DPO Complet/Templates/DPA-procesatori-v2026.docx",
       active: true,
       content: [
         "# Template DPA DPO Complet — {{ORG_NAME}}",
@@ -357,6 +360,15 @@ async function main() {
   record(
     (cabinetTemplates.body.templates || []).some((template) => template.documentType === "dpa" && template.active),
     "Cabinet template library lists active DPA template"
+  )
+  const activeDpaTemplate = (cabinetTemplates.body.templates || []).find(
+    (template) => template.documentType === "dpa" && template.active
+  )
+  record(activeDpaTemplate?.versionLabel === "v2026.1", "Cabinet template stores version label", activeDpaTemplate?.versionLabel || "missing")
+  record(
+    String(activeDpaTemplate?.sourceFileName || "").includes("DPA-procesatori-v2026.docx"),
+    "Cabinet template stores source file / migration history",
+    activeDpaTemplate?.sourceFileName || "missing"
   )
 
   const urgencyQueue = await request("/api/partner/urgency-queue")
@@ -581,6 +593,24 @@ async function main() {
   })
   record(reject.res.ok, "Cobalt client rejection captured with reason", reject.text)
 
+  const approveAfterReject = await publicRequest(`/api/shared/${token}/approve`, {
+    method: "POST",
+  })
+  record(
+    approveAfterReject.res.status === 409,
+    "Messy case: rejected document cannot be approved with same magic link",
+    `HTTP ${approveAfterReject.res.status}`
+  )
+
+  const tamperedShared = await publicRequest(`/shared/${token}tampered`)
+  record(
+    tamperedShared.res.status === 401 ||
+      tamperedShared.res.status === 404 ||
+      stripScripts(tamperedShared.text).includes("Link invalid sau expirat"),
+    "Messy case: tampered magic link shows blocked state",
+    `HTTP ${tamperedShared.res.status}`
+  )
+
   const sharedAfter = await publicRequest(`/shared/${token}`)
   record(sharedAfter.text.includes("Respins") || sharedAfter.text.includes("respins"), "Cobalt shared page shows rejected state")
   await writeText("shared/cobalt-after-rejection.html", sharedAfter.text)
@@ -626,6 +656,11 @@ async function main() {
   record(String(monthlyReport?.html || "").includes("DPA — Apex Logistic SRL × Stripe Payments Europe"), "Monthly report includes worked DPA item")
   record(String(monthlyReport?.html || "").includes("DSAR pacient neînchis"), "Monthly report includes Lumen DSAR next action")
   record(!String(monthlyReport?.html || "").includes("CompliAI"), "Monthly report contains zero CompliAI mentions")
+  record(
+    monthlyReport?.clientFacingReports?.length === 3,
+    "Monthly report includes client-facing report for each client",
+    `${monthlyReport?.clientFacingReports?.length ?? 0}`
+  )
   const monthlyApex = (monthlyReport?.clientEntries || []).find((client) => client.orgName === "Apex Logistic SRL")
   record(
     monthlyApex?.auditReadiness === "audit_ready",
@@ -646,6 +681,42 @@ async function main() {
   if (monthlyReport?.html) {
     await writeText("reports/partner-monthly-report.html", monthlyReport.html)
   }
+  for (const clientReport of monthlyReport?.clientFacingReports || []) {
+    const reportSlug = slug(clientReport.orgName)
+    await writeText(`reports/client-monthly-${reportSlug}.html`, clientReport.html)
+    record(
+      String(clientReport.html || "").includes(clientReport.orgName) &&
+        String(clientReport.html || "").includes("Ce s-a lucrat luna aceasta") &&
+        !String(clientReport.html || "").includes("CompliAI"),
+      `Client-facing monthly report is usable for ${clientReport.orgName}`
+    )
+  }
+
+  await switchToOrg(memberships, "DPO Complet SRL")
+  const cabinetExport = await request("/api/partner/export")
+  record(cabinetExport.res.ok, "Cabinet complete migration export downloads", `HTTP ${cabinetExport.res.status}`)
+  record(
+    cabinetExport.body?._meta?.clientCount === 3,
+    "Cabinet export includes all 3 client workspaces",
+    `${cabinetExport.body?._meta?.clientCount ?? "missing"}`
+  )
+  record(
+    (cabinetExport.body?.cabinet?.templates || []).some((template) => template.documentType === "dpa"),
+    "Cabinet export includes template library"
+  )
+  record(
+    cabinetExport.body?.securityContractualPack?.permissionMatrix?.some((row) => row.action === "validate_baseline"),
+    "Cabinet export includes RBAC permission matrix"
+  )
+  record(
+    String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("DPA CompliScan ↔ cabinet DPO"),
+    "Cabinet export includes security + contractual pack markdown"
+  )
+  await writeText("exports/cabinet-complete-migration-export.json", JSON.stringify(cabinetExport.body, null, 2))
+  await writeText(
+    "reports/security-contractual-pack.md",
+    cabinetExport.body?.securityContractualPackMarkdown || ""
+  )
 
   const acceptanceChecklist = [
     "# DPO pilot acceptance checklist",
@@ -678,6 +749,7 @@ async function main() {
     "",
     "7. Raportare lunară:",
     "   - `reports/partner-monthly-report.html` generat din portofoliul real al consultantului demo.",
+    "   - `reports/client-monthly-*.html` sunt rapoarte client-facing separate, cu activitate reală per client.",
     "",
     "8. RoPA / DPA / DSAR în practică:",
     `   - Apex RoPA: ${apexAfterRemediation.state.taskState?.["finding-apex-gdpr-ropa-stripe"]?.validationStatus || "missing"}; Apex DPA: ${apexDoc?.adoptionStatus || "missing"}; Lumen DSAR: ${lumen.state.taskState?.["lumen-dsar-overdue"]?.validationStatus || "missing"}.`,
@@ -728,6 +800,8 @@ async function main() {
       "- Apex are after-state complet: RoPA + cookie închise, baseline validat, Audit Pack `audit_ready`.",
       "- Lumen are DSAR critic în `needs_review` până la dovada trimiterii.",
       "- Cobalt are AI OFF evidence și flow comment/reject prin magic link.",
+      "- Messy cases: token alterat respins; document respins nu poate fi supra-aprobat cu același link.",
+      "- Export cabinet complet include template-uri, clienți, RBAC și security/contractual pack.",
       "",
       "## Artefacte",
       "",
@@ -740,6 +814,9 @@ async function main() {
       "- `exports/apex-after-audit-ready-v2-1.json` + `exports/apex-after-audit-ready-bundle.zip`",
       "- `reports/cabinet-templates.json` + `reports/apex-inherited-template-document.json`",
       "- `reports/partner-monthly-report.html`",
+      "- `reports/client-monthly-*.html`",
+      "- `reports/security-contractual-pack.md`",
+      "- `exports/cabinet-complete-migration-export.json`",
       "- `reports/dpo-acceptance-checklist.md`",
       "- `shared/cobalt-before-feedback.html` + `shared/cobalt-after-rejection.html`",
       "- `runtime-demo-report.json`",

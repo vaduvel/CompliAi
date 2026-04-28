@@ -89,6 +89,9 @@ export async function POST(request: Request) {
       name: body.name,
       content: body.content,
       active: body.active !== false,
+      description: typeof body.description === "string" ? body.description : null,
+      versionLabel: typeof body.versionLabel === "string" ? body.versionLabel : null,
+      sourceFileName: typeof body.sourceFileName === "string" ? body.sourceFileName : null,
     })
 
     if (!result.ok) {

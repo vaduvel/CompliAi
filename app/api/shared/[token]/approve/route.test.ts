@@ -79,4 +79,40 @@ describe("POST /api/shared/[token]/approve", () => {
     expect((savedState?.alerts as Array<{ message: string }>)[0]?.message).toContain("Document aprobat prin magic link")
     expect((savedState?.events as Array<{ type: string }>)[0]?.type).toBe("document.shared_approved")
   })
+
+  it("nu permite aprobarea peste o decizie finala existenta", async () => {
+    mocks.resolveSignedShareTokenMock.mockReturnValue({
+      orgId: "org-demo",
+      recipientType: "partner",
+      createdAtISO: "2026-04-27T07:00:00.000Z",
+      expiresAtISO: "2026-04-30T07:00:00.000Z",
+      documentId: "doc-dpa-1",
+    })
+
+    mocks.mutateStateForOrgMock.mockImplementation(async (_orgId, updater) => {
+      await updater({
+        generatedDocuments: [
+          {
+            id: "doc-dpa-1",
+            documentType: "dpa",
+            title: "DPA Stripe",
+            generatedAtISO: "2026-04-27T07:00:00.000Z",
+            llmUsed: true,
+            adoptionStatus: "rejected",
+          },
+        ],
+        alerts: [],
+        events: [],
+        taskState: {},
+      })
+    })
+
+    const response = await POST(new Request("http://test.local/api/shared/good/approve", { method: "POST" }), {
+      params: Promise.resolve({ token: "good" }),
+    })
+
+    expect(response.status).toBe(409)
+    const body = (await response.json()) as { code?: string }
+    expect(body.code).toBe("APPROVABLE_DOCUMENT_ALREADY_FINAL")
+  })
 })
