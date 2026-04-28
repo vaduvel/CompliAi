@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs"
 import path from "node:path"
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3000"
-const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 20_000)
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 60_000)
 const OUT_DIR =
   process.env.OUT_DIR ||
   `/private/tmp/compliscan-dpo-consultant-runtime-demo-${new Date()
@@ -185,6 +185,25 @@ function summarizeState(state) {
   }
 }
 
+function latestActions(orgName, state, limit = 5) {
+  return [...(state?.events ?? [])]
+    .sort((left, right) => String(right.createdAtISO).localeCompare(String(left.createdAtISO)))
+    .slice(0, limit)
+    .map((event) => ({
+      orgName,
+      createdAtISO: event.createdAtISO,
+      type: event.type,
+      message: event.message,
+      entityId: event.entityId,
+    }))
+}
+
+function openFindingTitles(state) {
+  return (state?.findings ?? [])
+    .filter((finding) => !["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus))
+    .map((finding) => `${finding.title} (${finding.legalReference || finding.category})`)
+}
+
 async function switchToOrg(memberships, orgName) {
   const membership = memberships.find((item) => item.orgName === orgName)
   record(Boolean(membership), `Membership exists for ${orgName}`, membership?.membershipId ?? "")
@@ -237,14 +256,34 @@ async function main() {
     "Portfolio includes Apex, Lumen, Cobalt"
   )
 
+  const urgencyQueue = await request("/api/partner/urgency-queue")
+  await writeText("04-work-queue-today.json", JSON.stringify(urgencyQueue.body, null, 2))
+  const topUrgency = urgencyQueue.body.items?.[0]
+  record(urgencyQueue.res.ok, "Partner urgency queue loads", `HTTP ${urgencyQueue.res.status}`)
+  record(
+    topUrgency?.orgName === "Lumen Clinic SRL" &&
+      topUrgency?.severity === "critical" &&
+      String(topUrgency?.title || "").toLowerCase().includes("dsar"),
+    "Work queue prioritizes Lumen critical DSAR first",
+    topUrgency ? `${topUrgency.orgName} · ${topUrgency.title}` : "missing"
+  )
+
   await switchToOrg(memberships, "Apex Logistic SRL")
   const apex = await loadDashboardFor("Apex Logistic SRL")
   const apexDoc = (apex.state.generatedDocuments || []).find((doc) => doc.id === "apex-doc-dpa-stripe")
   const apexApprovalTask = apex.state.taskState?.["document-approval-apex-doc-dpa-stripe"]
+  const apexRopa = (apex.state.findings || []).find((finding) => finding.id === "apex-gdpr-ropa-stripe")
+  const apexCookie = (apex.state.findings || []).find((finding) => finding.id === "apex-gdpr-cookie-reject")
   record(apexDoc?.adoptionStatus === "signed", "Apex DPA Stripe is signed", apexDoc?.adoptionStatus || "missing")
   record(
     apexApprovalTask?.attachedEvidenceMeta?.quality?.status === "sufficient",
     "Apex magic-link approval evidence is sufficient"
+  )
+  record(apexRopa?.legalReference === "GDPR Art. 30", "Apex RoPA gap remains visible", apexRopa?.legalReference || "missing")
+  record(
+    apexCookie?.legalReference?.includes("ePrivacy"),
+    "Apex cookie banner gap remains visible",
+    apexCookie?.legalReference || "missing"
   )
 
   const apexClientHtml = await request("/api/exports/audit-pack/client")
@@ -253,6 +292,18 @@ async function main() {
   record(apexClientHtml.text.includes("DPO Complet") || apexClientHtml.text.includes("Diana Popescu"), "Apex Audit Pack carries cabinet identity")
   record(!apexClientHtml.text.includes("CompliAI"), "Apex Audit Pack contains zero CompliAI mentions")
   await writeText("exports/apex-audit-pack-client.html", apexClientHtml.text)
+
+  const apexAuditJson = await request("/api/exports/audit-pack")
+  record(apexAuditJson.res.ok, "Apex Audit Pack JSON exports", `HTTP ${apexAuditJson.res.status}`)
+  record(apexAuditJson.body.executiveSummary?.openFindings >= 2, "Apex summary counts RoPA + cookie as open findings", `${apexAuditJson.body.executiveSummary?.openFindings}`)
+  record(apexAuditJson.body.bundleEvidenceSummary?.status === "review_required", "Apex bundle summary stays review_required until all evidence closes", apexAuditJson.body.bundleEvidenceSummary?.status || "missing")
+  record(apexAuditJson.body.bundleEvidenceSummary?.attachedFiles > 0, "Apex bundle summary counts attached evidence", `${apexAuditJson.body.bundleEvidenceSummary?.attachedFiles}`)
+  record(apexAuditJson.body.bundleEvidenceSummary?.validatedFiles > 0, "Apex bundle summary counts validated evidence", `${apexAuditJson.body.bundleEvidenceSummary?.validatedFiles}`)
+  record(
+    !(apexAuditJson.body.evidenceLedger || []).some((entry) => String(entry.title || "").includes("Task fara titlu") || String(entry.title || "").includes("Task fără titlu")),
+    "Apex evidence ledger has no untitled tasks"
+  )
+  await writeText("exports/apex-audit-pack-v2-1.json", JSON.stringify(apexAuditJson.body, null, 2))
 
   const apexBundle = await request("/api/exports/audit-pack/bundle")
   record(apexBundle.res.ok, "Apex Audit Pack ZIP exports", `HTTP ${apexBundle.res.status}`)
@@ -287,7 +338,7 @@ async function main() {
       documentTitle: "DPA salarizare — Cobalt Fintech IFN × PayFlow HR",
     }),
   })
-  record(share.res.ok && share.body.token, "Create Cobalt magic link for client feedback", share.body.token || share.text)
+  record(Boolean(share.res.ok && share.body.token), "Create Cobalt magic link for client feedback", share.body.token ? "token generated" : share.text)
   const token = share.body.token
 
   const sharedBefore = await publicRequest(`/shared/${token}`)
@@ -334,6 +385,65 @@ async function main() {
   await writeText("03-portfolio-final.json", JSON.stringify(finalPortfolio.body, null, 2))
   record(finalPortfolio.res.ok, "Partner portfolio still loads after client actions")
 
+  const monthly = await request(
+    `/api/cron/partner-monthly-report?preview=1&consultantEmail=${encodeURIComponent(me.body.user?.email || "")}`,
+    { method: "POST" }
+  )
+  const monthlyReport = monthly.body.reports?.[0]
+  record(monthly.res.ok, "Partner monthly report preview endpoint runs", `HTTP ${monthly.res.status}`)
+  record(monthlyReport?.clientEntries?.length === 3, "Monthly report covers exactly 3 client orgs", `${monthlyReport?.clientEntries?.length ?? 0}`)
+  record(Boolean(monthlyReport?.html?.includes("DPO Complet") || monthlyReport?.html?.includes("Raport lunar")), "Monthly report HTML is generated")
+  record(!String(monthlyReport?.html || "").includes("CompliAI"), "Monthly report contains zero CompliAI mentions")
+  await writeText("reports/partner-monthly-report.json", JSON.stringify(monthly.body, null, 2))
+  if (monthlyReport?.html) {
+    await writeText("reports/partner-monthly-report.html", monthlyReport.html)
+  }
+
+  const acceptanceChecklist = [
+    "# DPO pilot acceptance checklist",
+    "",
+    "1. Ultimele 5 lucruri făcute:",
+    ...[
+      ...latestActions("Apex Logistic SRL", apex.state),
+      ...latestActions("Lumen Clinic SRL", lumen.state),
+      ...latestActions("Cobalt Fintech IFN", cobaltAfter.state),
+    ]
+      .sort((left, right) => String(right.createdAtISO).localeCompare(String(left.createdAtISO)))
+      .slice(0, 5)
+      .map((item) => `   - ${item.createdAtISO} · ${item.orgName} · ${item.type} · ${item.message}`),
+    "",
+    "2. Unde sunt notate:",
+    "   - `dashboards/*.json`, `runtime-demo-report.json`, `exports/apex-audit-pack-v2-1.json`, event ledger și evidence ledger.",
+    "",
+    "3. Livrabile trimise clientului:",
+    "   - Apex DPA Stripe semnat; Cobalt DPA payroll trimis prin magic link; Audit Pack HTML/ZIP pentru Apex; raport lunar portofoliu.",
+    "",
+    "4. Dovezi păstrate:",
+    "   - Magic-link approval Apex, AI OFF evidence Cobalt, comment/reject Cobalt, manifest SHA-256 în Audit Pack bundle.",
+    "",
+    "5. Prioritate azi:",
+    `   - ${topUrgency?.orgName || "n/a"} · ${topUrgency?.severity || "n/a"} · ${topUrgency?.title || "n/a"}`,
+    "",
+    "6. Aprobări client:",
+    "   - Apex aprobat; Cobalt comentat și respins; statusurile sunt reflectate în dashboard și event ledger.",
+    "",
+    "7. Raportare lunară:",
+    "   - `reports/partner-monthly-report.html` generat din portofoliul real al consultantului demo.",
+    "",
+    "8. RoPA / DPA / DSAR în practică:",
+    `   - Apex RoPA: ${apexRopa?.title || "missing"}; Apex DPA: ${apexDoc?.adoptionStatus || "missing"}; Lumen DSAR: ${lumen.state.taskState?.["lumen-dsar-overdue"]?.validationStatus || "missing"}.`,
+    "",
+    "9. Tool vs email/Word/Drive:",
+    "   - În tool: status, livrabile, approvals, evidence, audit pack, raport lunar. În afara tool-ului rămân validarea profesională și portalurile oficiale.",
+    "",
+    "10. Ce nu ar trebui arătat încă într-un audit final:",
+    ...openFindingTitles(apex.state).map((title) => `   - Apex: ${title}`),
+    ...openFindingTitles(lumen.state).map((title) => `   - Lumen: ${title}`),
+    ...openFindingTitles(cobaltAfter.state).map((title) => `   - Cobalt: ${title}`),
+    "",
+  ].join("\n")
+  await writeText("reports/dpo-acceptance-checklist.md", acceptanceChecklist)
+
   const failed = checks.filter((check) => !check.ok)
   const report = {
     generatedAtISO: new Date().toISOString(),
@@ -374,8 +484,11 @@ async function main() {
       "- `01-memberships.json`",
       "- `02-portfolio-initial.json`",
       "- `03-portfolio-final.json`",
+      "- `04-work-queue-today.json`",
       "- `dashboards/*.json`",
       "- `exports/*.html` + `exports/apex-audit-pack-bundle.zip`",
+      "- `reports/partner-monthly-report.html`",
+      "- `reports/dpo-acceptance-checklist.md`",
       "- `shared/cobalt-before-feedback.html` + `shared/cobalt-after-rejection.html`",
       "- `runtime-demo-report.json`",
       "",

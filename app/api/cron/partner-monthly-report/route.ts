@@ -19,7 +19,7 @@ import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
 const FROM_ADDRESS =
-  process.env.ALERT_EMAIL_FROM ?? "CompliAI Partner <onboarding@resend.dev>"
+  process.env.ALERT_EMAIL_FROM ?? "CompliScan Partner <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliai.ro"
 
 type ClientReportEntry = {
@@ -38,7 +38,7 @@ function buildPartnerMonthlyHtml(
   branding?: { partnerName: string; brandColor: string; tagline: string | null }
 ): string {
   const headerBg = branding?.brandColor ?? "#1e293b"
-  const headerTitle = branding?.partnerName ? `${branding.partnerName} · Raport lunar` : "CompliAI · Raport lunar portofoliu"
+  const headerTitle = branding?.partnerName ? `${branding.partnerName} · Raport lunar` : "CompliScan · Raport lunar portofoliu"
   const headerSub = branding?.tagline ?? `${month} · ${clients.length} clienți`
   const urgent = clients.filter(
     (c) => c.openAlerts > 0 || (c.scoreDelta30d !== null && c.scoreDelta30d < -5)
@@ -127,7 +127,7 @@ function buildPartnerMonthlyHtml(
     </div>
 
     <p style="color:#94a3b8;font-size:11px;margin-top:24px;text-align:center">
-      Raport generat automat de CompliAI · ${new Date().toLocaleDateString("ro-RO")}
+      Raport generat automat de CompliScan · ${new Date().toLocaleDateString("ro-RO")}
     </p>
   </div>
 </body>
@@ -135,6 +135,9 @@ function buildPartnerMonthlyHtml(
 }
 
 export async function POST(request: Request) {
+  const requestUrl = new URL(request.url)
+  const preview = requestUrl.searchParams.get("preview") === "1"
+  const consultantEmailFilter = requestUrl.searchParams.get("consultantEmail")?.trim().toLowerCase()
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret) {
     const auth = request.headers.get("Authorization")
@@ -159,10 +162,20 @@ export async function POST(request: Request) {
       })
     )
 
-    const partners = partnerCandidates.filter((p) => p.memberships.length > 1)
+    const partners = partnerCandidates.filter(
+      (p) =>
+        p.memberships.length > 1 &&
+        (!consultantEmailFilter || p.user.email.toLowerCase() === consultantEmailFilter)
+    )
 
     let sent = 0
     let skipped = 0
+    const previewReports: Array<{
+      consultantEmail: string
+      month: string
+      clientEntries: ClientReportEntry[]
+      html: string
+    }> = []
 
     for (const { user, memberships } of partners) {
       try {
@@ -173,8 +186,12 @@ export async function POST(request: Request) {
           ? { partnerName: wl.partnerName, brandColor: wl.brandColor, tagline: wl.tagline }
           : undefined
 
+        const clientMemberships = memberships
+          .filter((membership) => membership.orgId !== user.orgId)
+          .slice(0, 30)
+
         const clientEntries: ClientReportEntry[] = await Promise.all(
-          memberships.slice(0, 30).map(async (m) => {
+          clientMemberships.map(async (m) => {
             const state = await readStateForOrg(m.orgId)
             if (!state) {
               return {
@@ -216,6 +233,17 @@ export async function POST(request: Request) {
 
         const html = buildPartnerMonthlyHtml(user.email, clientEntries, month, branding)
 
+        if (preview) {
+          previewReports.push({
+            consultantEmail: user.email,
+            month,
+            clientEntries,
+            html,
+          })
+          sent++
+          continue
+        }
+
         const apiKey = process.env.RESEND_API_KEY
         if (apiKey) {
           await fetch("https://api.resend.com/emails", {
@@ -246,6 +274,15 @@ export async function POST(request: Request) {
     }
 
     await flushCronTelemetry()
+    if (preview) {
+      return NextResponse.json({
+        preview: true,
+        generated: previewReports.length,
+        skipped,
+        totalPartners: partners.length,
+        reports: previewReports,
+      })
+    }
     return NextResponse.json({ sent, skipped, totalPartners: partners.length })
   } catch (err) {
     captureCronError(err, { cron: "partner-monthly-report" })

@@ -252,6 +252,28 @@ la "supabase" (post 1 săpt dual-write clean).
 
 ---
 
+## DPO acceptance runtime v2 — feedback demo aplicat (28 apr 2026) ✅ PASS
+
+**Input feedback:** DPO demo score 9/10, dar cu 5 gap-uri concrete: bundle summary incoerent, Apex open findings ascunse, `Task fara titlu` în evidence ledger, test harness `ok` non-boolean, raport lunar lipsă din pachet.
+
+**Fixuri aplicate:**
+- `lib/server/audit-pack.ts` — `executiveSummary.openFindings` include finding-uri business reale din state, nu doar `AICompliancePack.summary.openFindings`.
+- `lib/server/audit-pack.ts` — `bundleEvidenceSummary` numără dovezile reale din evidence ledger și rămâne `review_required` când există controale pending.
+- `lib/server/audit-pack.ts` — evidence ledger rezolvă task-uri directe pe finding id și task-uri `document-rejection-*`; nu mai cade pe `Task fara titlu`.
+- `app/api/exports/audit-pack/route.ts` — JSON Audit Pack are același partner/trial export gate ca ZIP-ul.
+- `app/api/cron/partner-monthly-report/route.ts` — preview HTML pentru raport lunar pe consultant (`preview=1&consultantEmail=...`), fără `CompliAI`, cu client memberships filtrate.
+- `scripts/smoke-dpo-consultant-runtime-demo.mjs` — runtime script verifică cele 10 întrebări DPO: work queue azi, RoPA/DPA/DSAR, Audit Pack JSON/HTML/ZIP, monthly report, last 5 actions, audit shame list.
+
+**Artefact client nou:**
+- `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v2-2026-04-28.zip`
+- SHA-256: `2360fbcfcb44e5afb884701f28cf628faec882c09c015c892aa8d27fade8ae47`
+
+**Verificări runtime:** 53/53 PASS pe `http://127.0.0.1:3034`.
+
+**Validare:** `npm test -- lib/server/audit-pack.test.ts lib/compliance/engine.test.ts lib/server/demo-seed.test.ts lib/server/monthly-digest.test.ts app/api/exports/audit-pack/route.test.ts app/api/exports/audit-pack/bundle/route.test.ts` → 27/27 PASS; `npm run build` → PASS cu warning-uri lint pre-existente.
+
+---
+
 ## Commit history v3-unified — relevante
 
 ```

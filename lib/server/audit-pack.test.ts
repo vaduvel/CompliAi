@@ -187,6 +187,43 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.auditQualityGates.items.map((item) => item.code)).toContain("missing_evidence")
   })
 
+  it("raporteaza finding-urile business deschise si pastreaza titlul taskurilor directe in evidence ledger", () => {
+    const auditPack = buildAuditPack({
+      state: createState({
+        findings: [
+          {
+            id: "apex-gdpr-ropa-stripe",
+            title: "RoPA nu include Stripe ca procesator",
+            detail: "Registrul Art. 30 nu include procesatorul de plati.",
+            category: "GDPR",
+            severity: "medium",
+            risk: "high",
+            principles: ["privacy_data_governance"],
+            createdAtISO: "2026-04-28T10:00:00.000Z",
+            sourceDocument: "RoPA_Apex_v2.xlsx",
+            legalReference: "GDPR Art. 30",
+          },
+        ],
+        taskState: {
+          "apex-gdpr-ropa-stripe": {
+            status: "todo",
+            updatedAtISO: "2026-04-28T10:20:00.000Z",
+            validationStatus: "needs_review",
+            validationMessage: "RoPA trebuie actualizat cu Stripe.",
+          },
+        },
+      }),
+      remediationPlan: [],
+      workspace: createWorkspace(),
+      compliancePack: createCompliancePack({ openFindings: 0 }),
+      snapshot: null,
+    })
+
+    expect(auditPack.executiveSummary.openFindings).toBe(1)
+    expect(auditPack.evidenceLedger[0]?.title).toBe("RoPA nu include Stripe ca procesator")
+    expect(auditPack.evidenceLedger[0]?.lawReference).toBe("GDPR Art. 30")
+  })
+
   it("marcheaza review cand dovada este slaba si controlul ramane inferat", () => {
     const auditPack = buildAuditPack({
       state: createState({

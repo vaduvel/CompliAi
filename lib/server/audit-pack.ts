@@ -46,6 +46,7 @@ export function buildAuditPack({
     snapshot,
   })
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
+  const openBusinessFindings = countOpenBusinessFindings(state)
   const validatedEvidenceItems = Math.max(
     controlsMatrix.filter((item) => item.auditDecision === "pass").length,
     evidenceLedgerSummary.sufficient
@@ -69,7 +70,7 @@ export function buildAuditPack({
       baselineStatus: validatedBaseline ? "validated" : "missing",
       systemsInScope: compliancePack.entries.length,
       sourcesInScope: snapshot?.sources.length ?? 0,
-      openFindings: compliancePack.summary.openFindings,
+      openFindings: Math.max(compliancePack.summary.openFindings, openBusinessFindings),
       activeDrifts: activeDrifts.length,
       remediationOpen: openControls,
       validatedEvidenceItems,
@@ -93,7 +94,7 @@ export function buildAuditPack({
         auditQualityGates,
       }),
     },
-    bundleEvidenceSummary: buildBundleEvidenceSummary(compliancePack, controlsMatrix),
+    bundleEvidenceSummary: buildBundleEvidenceSummary(compliancePack, controlsMatrix, evidenceLedger),
     scope: {
       snapshot: {
         id: snapshot?.snapshotId ?? null,
@@ -226,7 +227,8 @@ export function buildAuditPack({
 
 function buildBundleEvidenceSummary(
   compliancePack: AICompliancePack,
-  controlsMatrix: ReturnType<typeof buildControlsMatrix>
+  controlsMatrix: ReturnType<typeof buildControlsMatrix>,
+  evidenceLedger: ReturnType<typeof buildEvidenceLedger>
 ): AuditPackV2["bundleEvidenceSummary"] {
   const evidenceByKind = new Map<string, number>()
   const lawCoverage = new Map<
@@ -273,6 +275,13 @@ function buildBundleEvidenceSummary(
     }
   }
 
+  for (const entry of evidenceLedger) {
+    const evidence = entry.evidence
+    if (!evidence) continue
+    evidenceByKind.set(evidence.kind, (evidenceByKind.get(evidence.kind) ?? 0) + 1)
+    includedFiles.add(evidence.fileName)
+  }
+
   for (const control of controlsMatrix) {
     const current = familyCoverage.get(control.controlFamily.key) ?? {
       familyLabel: control.controlFamily.label,
@@ -307,23 +316,21 @@ function buildBundleEvidenceSummary(
     (entry) => entry.evidenceBundle.status === "missing_evidence"
   ).length
 
+  const pendingControls = controlsMatrix.filter((control) => control.auditDecision !== "pass").length
+  const attachedEvidenceItems = evidenceLedger.filter((entry) => entry.evidence).length
+  const validatedEvidenceItems = evidenceLedger.filter(
+    (entry) => entry.evidenceQuality?.status === "sufficient"
+  ).length
   const status: AuditPackV2["bundleEvidenceSummary"]["status"] =
-    missingBundles === 0 && partialBundles === 0 ? "bundle_ready" : "review_required"
+    pendingControls === 0 && missingBundles === 0 && partialBundles === 0
+      ? "bundle_ready"
+      : "review_required"
 
   return {
     status,
-    attachedFiles: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.attachedItems,
-      0
-    ),
-    validatedFiles: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.validatedItems,
-      0
-    ),
-    pendingControls: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.pendingItems,
-      0
-    ),
+    attachedFiles: attachedEvidenceItems,
+    validatedFiles: validatedEvidenceItems,
+    pendingControls,
     readyBundles,
     partialBundles,
     missingBundles,
@@ -417,37 +424,71 @@ function buildEvidenceLedger(state: ComplianceState, remediationPlan: Remediatio
     .filter(([, taskState]) => taskState.attachedEvidenceMeta || taskState.validationStatus)
     .map(([taskId, taskState]) => {
       const remediation = remediationPlan.find((item) => `rem-${item.id}` === taskId)
-      const finding =
-        taskId.startsWith("finding-")
-          ? state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
-          : undefined
-      const approvalDocumentId = taskId.startsWith("document-approval-")
-        ? taskId.replace(/^document-approval-/, "")
-        : null
-      const approvalDocument = approvalDocumentId
-        ? state.generatedDocuments.find((item) => item.id === approvalDocumentId)
-        : undefined
-      const approvalLawReference =
-        approvalDocument?.documentType === "dpa" ? "GDPR Art. 28" : null
+      const finding = resolveFindingForTaskId(state, taskId)
+      const documentAction = resolveDocumentActionForTaskId(state, taskId)
+      const documentLawReference =
+        documentAction?.document.documentType === "dpa" ? "GDPR Art. 28" : null
 
       return {
         taskId,
         title:
           remediation?.title ||
           finding?.title ||
-          (approvalDocument ? `Aprobare client: ${approvalDocument.title}` : "Task fara titlu"),
+          (documentAction ? `${documentAction.label}: ${documentAction.document.title}` : "Task fără titlu"),
         lawReference:
-          remediation?.lawReference || finding?.legalReference || approvalLawReference || null,
+          remediation?.lawReference || finding?.legalReference || documentLawReference || null,
         status: taskState.status,
         validationStatus: taskState.validationStatus ?? "idle",
         validationMessage: taskState.validationMessage ?? null,
         updatedAtISO: taskState.updatedAtISO,
         evidence: taskState.attachedEvidenceMeta ?? null,
         evidenceQuality: taskState.attachedEvidenceMeta?.quality ?? null,
-        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || approvalDocument?.title || null,
+        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || documentAction?.document.title || null,
       }
     })
     .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+}
+
+function countOpenBusinessFindings(state: ComplianceState) {
+  return state.findings.filter((finding) => {
+    if (
+      finding.findingStatus === "resolved" ||
+      finding.findingStatus === "dismissed" ||
+      finding.findingStatus === "under_monitoring"
+    ) {
+      return false
+    }
+
+    const taskState = state.taskState[finding.id] ?? state.taskState[`finding-${finding.id}`]
+    return taskState?.status !== "done" || taskState?.validationStatus !== "passed"
+  }).length
+}
+
+function resolveFindingForTaskId(state: ComplianceState, taskId: string) {
+  const direct = state.findings.find((item) => item.id === taskId)
+  if (direct) return direct
+
+  if (taskId.startsWith("finding-")) {
+    return state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
+  }
+
+  return undefined
+}
+
+function resolveDocumentActionForTaskId(state: ComplianceState, taskId: string) {
+  const prefixes = [
+    { prefix: "document-approval-", label: "Aprobare client" },
+    { prefix: "document-rejection-", label: "Respingere client" },
+  ]
+
+  for (const { prefix, label } of prefixes) {
+    if (!taskId.startsWith(prefix)) continue
+    const documentId = taskId.replace(prefix, "")
+    const document = state.generatedDocuments.find((item) => item.id === documentId)
+    if (document) return { label, document }
+  }
+
+  return null
 }
 
 function summarizeEvidenceLedger(ledger: AuditPackV2["evidenceLedger"]) {
