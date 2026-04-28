@@ -262,7 +262,8 @@ function normalizeGeneratedDocuments(
         item.adoptionStatus === "reviewed_internally" ||
         item.adoptionStatus === "sent_for_signature" ||
         item.adoptionStatus === "signed" ||
-        item.adoptionStatus === "active"
+        item.adoptionStatus === "active" ||
+        item.adoptionStatus === "rejected"
           ? item.adoptionStatus
           : undefined
       const adoptionUpdatedAtISO = isValidIso(item.adoptionUpdatedAtISO) ? item.adoptionUpdatedAtISO : undefined

@@ -97,6 +97,53 @@ describe("normalizeComplianceState", () => {
     expect(normalized.generatedDocuments[0]?.adoptionEvidenceNote).toBe("Trimis la semnare către client.")
   })
 
+  it("păstrează statusul rejected pentru documentele respinse prin magic link", () => {
+    const normalized = normalizeComplianceState({
+      highRisk: 0,
+      lowRisk: 0,
+      gdprProgress: 0,
+      efacturaSyncedAtISO: "",
+      efacturaConnected: false,
+      efacturaSignalsCount: 0,
+      scannedDocuments: 0,
+      alerts: [],
+      findings: [],
+      scans: [],
+      generatedDocuments: [
+        {
+          id: "doc-dpa-rejected",
+          documentType: "dpa",
+          title: "DPA respins prin magic link",
+          generatedAtISO: "2026-04-28T11:00:00.000Z",
+          llmUsed: false,
+          sourceFindingId: "finding-dpa",
+          adoptionStatus: "rejected",
+          adoptionUpdatedAtISO: "2026-04-28T11:10:00.000Z",
+          adoptionEvidenceNote: "Respins cu motivare scrisă de client.",
+        },
+      ],
+      chat: [],
+      taskState: {},
+      aiComplianceFieldOverrides: {},
+      traceabilityReviews: {},
+      aiSystems: [],
+      detectedAISystems: [],
+      efacturaValidations: [],
+      driftRecords: [],
+      driftSettings: {
+        severityOverrides: {},
+      },
+      snapshotHistory: [],
+      validatedBaselineSnapshotId: undefined,
+      events: [],
+    })
+
+    expect(normalized.generatedDocuments[0]?.adoptionStatus).toBe("rejected")
+    expect(normalized.generatedDocuments[0]?.adoptionEvidenceNote).toBe(
+      "Respins cu motivare scrisă de client."
+    )
+  })
+
   it("păstrează documentele ROPA în generatedDocuments", () => {
     const normalized = normalizeComplianceState({
       highRisk: 0,

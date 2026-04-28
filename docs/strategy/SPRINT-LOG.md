@@ -228,6 +228,30 @@ la "supabase" (post 1 săpt dual-write clean).
 
 ---
 
+## Runtime demo smoke — DPO consultant portfolio (28 apr 2026) ✅ PASS
+
+**Scop:** test real pe aplicația locală, nu document static. Scriptul mimează un consultant DPO care pornește demo-ul, vede portofoliul cabinetului, intră pe clienți, verifică findings/evidence, exportă Audit Pack și folosește magic link pentru comentariu/respingere client.
+
+**Script:** `scripts/smoke-dpo-consultant-runtime-demo.mjs`
+
+**Artefacte generate local:**
+- `/private/tmp/compliscan-dpo-consultant-runtime-demo-2026-04-28`
+- `/private/tmp/compliscan-dpo-consultant-runtime-demo-2026-04-28.zip`
+
+**Verificări runtime:** 39/39 PASS pe `http://127.0.0.1:3034`
+- Cabinet DPO Complet SRL + 3 clienți fictivi realiști: Apex Logistic SRL, Lumen Clinic SRL, Cobalt Fintech IFN.
+- Apex: DPA Stripe semnat, evidence suficient, Audit Pack HTML + ZIP exportate, zero `CompliAI` în export.
+- Lumen: DSAR critic rămâne `needs_review` până la dovadă, Audit Pack HTML exportabil.
+- Cobalt: AI OFF evidence suficient + DPA payroll trimis la client, comment/reject prin magic link, event ledger include `document.shared_commented` și `document.shared_rejected`.
+
+**Bug matur prins de smoke:** `adoptionStatus: "rejected"` era salvat de endpoint, dar era pierdut în `normalizeComplianceState`.
+
+**Fix:** `lib/compliance/engine.ts` păstrează acum `rejected`; test nou în `lib/compliance/engine.test.ts`.
+
+**Validare:** `npm test -- lib/compliance/engine.test.ts lib/server/demo-seed.test.ts` → 12/12 PASS; `npm run build` → PASS cu warning-uri lint pre-existente.
+
+---
+
 ## Commit history v3-unified — relevante
 
 ```

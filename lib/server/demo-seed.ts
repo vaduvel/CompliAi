@@ -1856,6 +1856,17 @@ function buildCobaltFintechDpoState(): ComplianceState {
         adoptionUpdatedAtISO: "2026-04-28T12:10:00.000Z",
         refreshStatus: "current",
       },
+      {
+        id: "cobalt-doc-payroll-dpa",
+        documentType: "dpa",
+        title: "DPA salarizare — Cobalt Fintech IFN × PayFlow HR",
+        generatedAtISO: "2026-04-28T12:20:00.000Z",
+        llmUsed: false,
+        sourceFindingId: "cobalt-payroll-dpa",
+        adoptionStatus: "sent_for_signature",
+        adoptionUpdatedAtISO: "2026-04-28T12:25:00.000Z",
+        refreshStatus: "current",
+      },
     ],
     chat: [],
     taskState: {
