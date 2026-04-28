@@ -152,9 +152,9 @@ function summarizeState(state) {
       category: finding.category,
       severity: finding.severity,
       legalReference: finding.legalReference,
-      taskStatus: taskState[finding.id]?.status ?? "todo",
-      validationStatus: taskState[finding.id]?.validationStatus ?? null,
-      evidenceQuality: taskState[finding.id]?.attachedEvidenceMeta?.quality?.status ?? null,
+      taskStatus: resolveFindingTaskState(state, finding.id)?.status ?? "todo",
+      validationStatus: resolveFindingTaskState(state, finding.id)?.validationStatus ?? null,
+      evidenceQuality: resolveFindingTaskState(state, finding.id)?.attachedEvidenceMeta?.quality?.status ?? null,
     })),
     alerts: alerts.map((alert) => ({
       id: alert.id,
@@ -206,10 +206,44 @@ function openFindingTitles(state) {
   return (state?.findings ?? [])
     .filter((finding) => {
       if (["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus)) return false
-      const task = state?.taskState?.[finding.id] ?? state?.taskState?.[`finding-${finding.id}`]
-      return !(task?.status === "done" && task?.validationStatus === "passed")
+      return !isFindingOperationallyClosedForDemo(state, finding.id)
     })
     .map((finding) => `${finding.title} (${finding.legalReference || finding.category})`)
+}
+
+function resolveFindingTaskState(state, findingId) {
+  const taskState = state?.taskState ?? {}
+  const candidates = [
+    taskState[findingId],
+    taskState[`finding-${findingId}`],
+    ...Object.entries(taskState)
+      .filter(([, task]) =>
+        Array.isArray(task?.relatedFindingIds) && task.relatedFindingIds.includes(findingId)
+      )
+      .map(([, task]) => task),
+  ].filter(Boolean)
+
+  return (
+    candidates.find((task) => task.status === "done" && task.validationStatus === "passed") ||
+    candidates.find((task) => task.status === "done") ||
+    candidates[0] ||
+    null
+  )
+}
+
+function isFindingOperationallyClosedForDemo(state, findingId) {
+  const finding = (state?.findings ?? []).find((item) => item.id === findingId)
+  if (["resolved", "dismissed", "under_monitoring"].includes(finding?.findingStatus)) return true
+
+  const direct = resolveFindingTaskState(state, findingId)
+  if (direct?.status === "done" && direct.validationStatus === "passed") return true
+
+  const taskState = state?.taskState ?? {}
+  return Object.entries(taskState).some(([taskId, task]) => {
+    if (task?.status !== "done" || task.validationStatus !== "passed") return false
+    if (taskId === findingId || taskId === `finding-${findingId}`) return true
+    return Array.isArray(task?.relatedFindingIds) && task.relatedFindingIds.includes(findingId)
+  })
 }
 
 async function switchToOrg(memberships, orgName) {
@@ -566,6 +600,19 @@ async function main() {
   const finalPortfolio = await request("/api/partner/portfolio")
   await writeText("03-portfolio-final.json", JSON.stringify(finalPortfolio.body, null, 2))
   record(finalPortfolio.res.ok, "Partner portfolio still loads after client actions")
+  const finalApexPortfolio = (finalPortfolio.body.clientScores || []).find(
+    (client) => client.name === "Apex Logistic SRL"
+  )
+  record(
+    finalApexPortfolio?.criticalFindings === 0,
+    "Final portfolio shows Apex with zero critical findings after audit_ready",
+    `${finalApexPortfolio?.criticalFindings ?? "missing"}`
+  )
+  record(
+    finalApexPortfolio?.alertCount === 0,
+    "Final portfolio shows Apex with zero open alerts after audit_ready",
+    `${finalApexPortfolio?.alertCount ?? "missing"}`
+  )
 
   const monthly = await request(
     `/api/cron/partner-monthly-report?preview=1&consultantEmail=${encodeURIComponent(me.body.user?.email || "")}`,
@@ -579,6 +626,22 @@ async function main() {
   record(String(monthlyReport?.html || "").includes("DPA — Apex Logistic SRL × Stripe Payments Europe"), "Monthly report includes worked DPA item")
   record(String(monthlyReport?.html || "").includes("DSAR pacient neînchis"), "Monthly report includes Lumen DSAR next action")
   record(!String(monthlyReport?.html || "").includes("CompliAI"), "Monthly report contains zero CompliAI mentions")
+  const monthlyApex = (monthlyReport?.clientEntries || []).find((client) => client.orgName === "Apex Logistic SRL")
+  record(
+    monthlyApex?.auditReadiness === "audit_ready",
+    "Monthly report shows Apex audit_ready after baseline validation",
+    monthlyApex?.auditReadiness || "missing"
+  )
+  record(
+    monthlyApex?.openFindings === 0,
+    "Monthly report shows Apex with zero open findings after remediation",
+    `${monthlyApex?.openFindings ?? "missing"}`
+  )
+  record(
+    monthlyApex?.pendingEvidence === 0,
+    "Monthly report shows Apex with zero pending evidence after remediation",
+    `${monthlyApex?.pendingEvidence ?? "missing"}`
+  )
   await writeText("reports/partner-monthly-report.json", JSON.stringify(monthly.body, null, 2))
   if (monthlyReport?.html) {
     await writeText("reports/partner-monthly-report.html", monthlyReport.html)

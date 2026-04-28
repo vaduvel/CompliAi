@@ -9,6 +9,29 @@
 
 ---
 
+## ✅ Update 28 apr 2026 (DPO state sync v5)
+
+**Fix feedback v4:** Apex nu mai apare `audit_ready` într-un artefact și `review_required` în altul.
+
+- Root cause: `Audit Pack` folosea logica nouă `done + passed = finding închis`, dar portfolio, raportul lunar și sumarul runtime citeau încă starea veche a finding-ului sau `taskState[finding.id]` fără fallback la `finding-*`.
+- Fix cod:
+  - `lib/compliance/task-resolution.ts` — helper canonic pentru finding-uri operațional închise.
+  - `lib/compliance/engine.ts` — `normalizeComplianceState` returnează efectiv `alerts`, `findings`, `scans` normalizate, nu doar scor recalculat.
+  - `lib/server/portfolio.ts` — portfolio exclude alertele/finding-urile închise operațional.
+  - `app/api/cron/partner-monthly-report/route.ts` — raportul lunar folosește aceeași regulă de închidere ca Audit Pack.
+  - `scripts/smoke-dpo-consultant-runtime-demo.mjs` — verifică explicit Apex final în portfolio + raport lunar.
+- Validare:
+  - Runtime smoke DPO consultant: `scripts/smoke-dpo-consultant-runtime-demo.mjs` → **88/88 PASS** ✅
+  - Tests: `npm test` → **241 files passed**, **1248 tests passed**, 1 skipped ✅
+  - Build: `npm run build` → PASS ✅
+- Pachet nou:
+  - `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v5-2026-04-28.zip`
+  - SHA-256: `415b85ffc4c88f242e53a32629f42f720d7e6f8ccc98a4908179050786ca25ba`
+
+**Verdict:** baseline-ul nu lipsea în after-state. Problema era sincronizarea stării între suprafețe. v5 aliniază portfolio, monthly report, dashboard summary și Audit Pack pe aceeași stare operațională.
+
+---
+
 ## 🎬 Update 28 apr 2026 (runtime demo consultant DPO)
 
 **Scenariu nou rulabil**: `/demo/dpo-consultant`.

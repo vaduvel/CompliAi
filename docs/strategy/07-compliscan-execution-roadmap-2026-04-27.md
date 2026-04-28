@@ -1,9 +1,33 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v6.2 — 28 apr 2026, DPO before/after audit-ready verified)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.3 — 28 apr 2026, DPO state sync verified)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.3 — DPO state sync runtime verification (28 apr 2026, 18:45 EEST)**:
+
+✅ **DPO Cabinet after-state este acum sincronizat global.** Apex Logistic nu mai apare `audit_ready` în Audit Pack și `review_required` în raport lunar/portfolio. Aceeași regulă canonică decide dacă un finding este închis operațional: task asociat `done + passed`, dovezi suficiente și alerte aferente rezolvate.
+
+Validare cod:
+- Build: `npm run build` ✅
+- Tests: `npm test` → **241 files passed**, **1248 tests passed**, 1 skipped ✅
+- Runtime smoke consultant DPO: `scripts/smoke-dpo-consultant-runtime-demo.mjs` → **88/88 checks passed** ✅
+
+Pachet nou pentru validare DPO:
+- Folder: `/private/tmp/compliscan-dpo-consultant-runtime-demo-2026-04-28`
+- ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-consultant-runtime-demo-v5-2026-04-28.zip`
+- SHA-256: `415b85ffc4c88f242e53a32629f42f720d7e6f8ccc98a4908179050786ca25ba`
+
+Acoperire nouă verificată end-to-end:
+- `Audit Pack` Apex after-state: `baselineStatus=validated`, `auditReadiness=audit_ready`, `openFindings=0`, `missingEvidenceItems=0`.
+- `Portfolio final` Apex: `criticalFindings=0`, `alertCount=0`.
+- `Raport lunar` Apex: `auditReadiness=audit_ready`, `openFindings=0`, `pendingEvidence=0`.
+- `Dashboard after-remediation` Apex: RoPA + cookie au `taskStatus=done`, `validationStatus=passed`, `evidenceQuality=sufficient`.
+
+Verdict: **DPO demo v5 poate fi trimis pentru validare fără contradicția “baseline lipsă” în suprafețele finale.**
+
+---
 
 **Versiune v6.2 — DPO before/after audit-ready runtime verification (28 apr 2026, 18:05 EEST)**:
 

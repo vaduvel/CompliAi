@@ -1,5 +1,6 @@
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
+import { getResolvedAlertIds, isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type {
   ComplianceAlert,
   ComplianceState,
@@ -197,9 +198,11 @@ export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): Portf
     const lastScanAtISO = getLastScanAtISO(state)
     const criticalFindings = state.findings.filter(
       (finding) =>
-        isFindingActive(finding) && (finding.severity === "critical" || finding.severity === "high")
+        isFindingActive(finding) &&
+        !isFindingOperationallyClosed(state, finding.id) &&
+        (finding.severity === "critical" || finding.severity === "high")
     ).length
-    const totalTasks = remediationPlan.filter((task) => isPortfolioTaskOpen(task, state.taskState)).length
+    const totalTasks = remediationPlan.filter((task) => isPortfolioTaskOpen(task, state.taskState, state)).length
 
     return {
       orgId: membership.orgId,
@@ -236,8 +239,9 @@ export function buildPortfolioAlertRows(bundles: PortfolioOrgBundle[]): Portfoli
     .flatMap(({ membership, state }) => {
       if (!state) return []
 
+      const resolvedAlertIds = getResolvedAlertIds(state)
       return state.alerts
-        .filter((alert) => alert.open)
+        .filter((alert) => alert.open && !resolvedAlertIds.has(alert.id))
         .map((alert) => ({
           orgId: membership.orgId,
           orgName: membership.orgName,
@@ -259,7 +263,7 @@ export function buildPortfolioTaskRows(bundles: PortfolioOrgBundle[]): Portfolio
       if (!state) return []
 
       return remediationPlan
-        .filter((task) => isPortfolioTaskOpen(task, state.taskState))
+        .filter((task) => isPortfolioTaskOpen(task, state.taskState, state))
         .map((task) => {
           const taskState = state.taskState[task.id]
           return {
@@ -442,9 +446,16 @@ function countEfacturaRisks(state: ComplianceState) {
 
 function isPortfolioTaskOpen(
   task: RemediationAction,
-  taskState: ComplianceState["taskState"]
+  taskState: ComplianceState["taskState"],
+  state?: ComplianceState
 ) {
   if (task.id === "baseline-maintenance") return false
+  if (state && (task.relatedFindingIds ?? []).length > 0) {
+    const allRelatedFindingsClosed = task.relatedFindingIds?.every((findingId) =>
+      isFindingOperationallyClosed(state, findingId)
+    )
+    if (allRelatedFindingsClosed) return false
+  }
   return taskState[task.id]?.status !== "done"
 }
 

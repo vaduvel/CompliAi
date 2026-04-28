@@ -15,6 +15,7 @@ import {
   normalizeComplianceState,
   computeDashboardSummary,
 } from "@/lib/compliance/engine"
+import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
@@ -195,7 +196,7 @@ function escapeHtml(value: string) {
 }
 
 function buildMonthlyActivity(state: ComplianceState) {
-  const openFindings = state.findings.filter(isOpenMonthlyFinding)
+  const openFindings = state.findings.filter((finding) => isOpenMonthlyFinding(state, finding))
   const validatedEvidence = Object.values(state.taskState).filter(
     (task) => task.attachedEvidenceMeta?.quality?.status === "sufficient"
   ).length
@@ -223,8 +224,9 @@ function buildMonthlyActivity(state: ComplianceState) {
   }
 }
 
-function isOpenMonthlyFinding(finding: ScanFinding) {
+function isOpenMonthlyFinding(state: ComplianceState, finding: ScanFinding) {
   return !["resolved", "dismissed", "under_monitoring"].includes(finding.findingStatus ?? "open")
+    && !isFindingOperationallyClosed(state, finding.id)
 }
 
 function buildWorkDoneItems(state: ComplianceState) {

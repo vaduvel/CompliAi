@@ -90,14 +90,43 @@ export function getResolvedFindingIds(state: ComplianceState) {
   return resolved
 }
 
+export function getOperationallyClosedFindingIds(state: ComplianceState) {
+  const closed = new Set<string>(
+    state.findings
+      .filter((finding) => isFindingResolvedLike(finding.findingStatus))
+      .map((finding) => finding.id)
+  )
+
+  for (const [taskId, taskState] of Object.entries(state.taskState ?? {})) {
+    if (taskState?.status !== "done" || taskState.validationStatus !== "passed") continue
+
+    const directFinding = state.findings.find((finding) => finding.id === taskId)
+    if (directFinding) {
+      closed.add(directFinding.id)
+      continue
+    }
+
+    const targets = getTaskResolutionTargets(state, taskId)
+    for (const findingId of targets.findingIds) {
+      closed.add(findingId)
+    }
+  }
+
+  return closed
+}
+
+export function isFindingOperationallyClosed(state: ComplianceState, findingId: string) {
+  return getOperationallyClosedFindingIds(state).has(findingId)
+}
+
 export function getResolvedAlertIds(state: ComplianceState) {
   const resolved = new Set<string>(
     state.alerts.filter((alert) => !alert.open).map((alert) => alert.id)
   )
-  const resolvedFindingIds = getResolvedFindingIds(state)
+  const resolvedFindingIds = getOperationallyClosedFindingIds(state)
 
   for (const [taskId, taskState] of Object.entries(state.taskState ?? {})) {
-    if (taskState?.status !== "done") continue
+    if (taskState?.status !== "done" || taskState.validationStatus !== "passed") continue
     const targets = getTaskResolutionTargets(state, taskId)
 
     for (const alertId of targets.alertIds) resolved.add(alertId)

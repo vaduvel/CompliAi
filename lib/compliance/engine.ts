@@ -14,7 +14,10 @@ import type {
   ScanRecord,
 } from "@/lib/compliance/types"
 import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
-import { applyTaskResolutionToAlerts, getResolvedFindingIds } from "@/lib/compliance/task-resolution"
+import {
+  applyTaskResolutionToAlerts,
+  getOperationallyClosedFindingIds,
+} from "@/lib/compliance/task-resolution"
 import {
   inferPrinciplesFromCategory,
   normalizeCompliancePrinciples,
@@ -87,7 +90,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
   const events = normalizeEvents(state.events)
   const hrRegistryReconciliations = normalizeHrRegistryReconciliations(state.hrRegistryReconciliations)
-  const resolvedFindingIds = getResolvedFindingIds({
+  const resolvedFindingIds = getOperationallyClosedFindingIds({
     ...state,
     alerts: rawAlerts,
     findings,
@@ -153,6 +156,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
 
   return {
     ...state,
+    alerts,
+    findings,
+    scans,
     highRisk,
     lowRisk,
     scannedDocuments,

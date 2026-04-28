@@ -4,6 +4,7 @@ import { toAuditPackWorkspace } from "@/lib/compliance/audit-pack"
 import { getControlFamily, getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import { normalizeDriftLifecycleStatus } from "@/lib/compliance/drift-lifecycle"
 import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
+import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type {
   ComplianceState,
   RemediationAction,
@@ -484,27 +485,25 @@ function countOpenBusinessFindings(state: ComplianceState, remediationPlan: Reme
       return false
     }
 
-    return !isFindingOperationallyClosed(state, remediationPlan, finding.id)
+    return !isAuditPackFindingOperationallyClosed(state, remediationPlan, finding.id)
   }).length
 }
 
-function isFindingOperationallyClosed(
+function isAuditPackFindingOperationallyClosed(
   state: ComplianceState,
   remediationPlan: RemediationAction[],
   findingId: string
 ) {
+  if (isFindingOperationallyClosed(state, findingId)) return true
+
   const relatedRemediationTaskIds = remediationPlan
     .filter((task) => (task.relatedFindingIds ?? []).includes(findingId))
     .map((task) => `rem-${task.id}`)
-  const candidateTaskStates = [
-    state.taskState[findingId],
-    state.taskState[`finding-${findingId}`],
-    ...relatedRemediationTaskIds.map((taskId) => state.taskState[taskId]),
-  ].filter(Boolean)
 
-  return candidateTaskStates.some(
-    (taskState) => taskState.status === "done" && taskState.validationStatus === "passed"
-  )
+  return relatedRemediationTaskIds.some((taskId) => {
+    const taskState = state.taskState[taskId]
+    return taskState?.status === "done" && taskState.validationStatus === "passed"
+  })
 }
 
 function resolveFindingForTaskId(state: ComplianceState, taskId: string) {
