@@ -25,6 +25,9 @@ export function getTaskStateByTaskId<T>(taskState: Record<string, T>, taskId: st
 
   if (!taskId.startsWith("finding-")) return undefined
 
+  const rawFindingId = taskId.replace(/^finding-/, "")
+  if (taskState[rawFindingId]) return taskState[rawFindingId]
+
   const findingId = resolveFindingIdFromTaskId(taskId)
   const legacyTaskId = findingId ? getLegacyFindingTaskId(findingId) : ""
 

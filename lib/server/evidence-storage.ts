@@ -4,6 +4,7 @@ import path from "node:path"
 import type { TaskEvidenceAttachment, TaskEvidenceKind } from "@/lib/compliance/types"
 import {
   createSignedSupabaseObjectUrl,
+  deleteSupabaseObject,
   downloadSupabaseObject,
   ensureSupabaseBucket,
   hasSupabaseStorageConfig,
@@ -133,6 +134,32 @@ export async function getStoredEvidenceSignedUrl(
     resolvedEvidence.storageKey,
     options?.expiresInSeconds ?? getEvidenceSignedUrlTtlSeconds()
   )
+}
+
+export async function deleteStoredEvidenceFile(
+  evidence: TaskEvidenceAttachment,
+  options?: { orgId?: string }
+) {
+  const resolvedEvidence = await resolveOperationalEvidenceAttachment(evidence, options)
+
+  if (resolvedEvidence.storageProvider === "supabase_private" && resolvedEvidence.storageKey) {
+    return deleteSupabaseObject(SUPABASE_PRIVATE_EVIDENCE_BUCKET, resolvedEvidence.storageKey)
+  }
+
+  if (resolvedEvidence.storageProvider === "local_private" && resolvedEvidence.storageKey) {
+    const absolutePath = resolveLocalPrivateEvidencePath(resolvedEvidence.storageKey)
+    try {
+      await fs.unlink(absolutePath)
+      return { deleted: true }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === "ENOENT") {
+        return { deleted: false }
+      }
+      throw error
+    }
+  }
+
+  return { deleted: false }
 }
 
 export async function copyStoredEvidenceFile(

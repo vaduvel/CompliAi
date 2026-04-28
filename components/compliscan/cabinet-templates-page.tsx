@@ -85,6 +85,7 @@ export function CabinetTemplatesPageSurface() {
   const [formVersionLabel, setFormVersionLabel] = useState("v1")
   const [formSourceFileName, setFormSourceFileName] = useState("")
   const [formContent, setFormContent] = useState("")
+  const [formFile, setFormFile] = useState<File | null>(null)
 
   async function loadTemplates() {
     try {
@@ -108,25 +109,27 @@ export function CabinetTemplatesPageSurface() {
   }, [])
 
   async function handleUpload() {
-    if (!formName.trim() || formContent.trim().length < 50) {
-      toast.error("Completează numele și un conținut de minim 50 caractere.")
+    if (!formName.trim() || (!formFile && formContent.trim().length < 50)) {
+      toast.error("Completează numele și un conținut de minim 50 caractere sau atașează un fișier .docx/.md/.txt.")
       return
     }
     setBusy(true)
     try {
-      const res = await fetch("/api/cabinet/templates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentType: formDocumentType,
-          name: formName.trim(),
-          description: formDescription.trim() || null,
-          versionLabel: formVersionLabel.trim() || "v1",
-          sourceFileName: formSourceFileName.trim() || null,
-          content: formContent,
-          active: true,
-        }),
-      })
+      const res = formFile
+        ? await uploadTemplateFile()
+        : await fetch("/api/cabinet/templates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              documentType: formDocumentType,
+              name: formName.trim(),
+              description: formDescription.trim() || null,
+              versionLabel: formVersionLabel.trim() || "v1",
+              sourceFileName: formSourceFileName.trim() || null,
+              content: formContent,
+              active: true,
+            }),
+          })
       const data = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok) {
         toast.error(data.error ?? "Eroare la upload.")
@@ -139,10 +142,28 @@ export function CabinetTemplatesPageSurface() {
       setFormVersionLabel("v1")
       setFormSourceFileName("")
       setFormContent("")
+      setFormFile(null)
       await loadTemplates()
     } finally {
       setBusy(false)
     }
+  }
+
+  async function uploadTemplateFile() {
+    const body = new FormData()
+    body.set("documentType", formDocumentType)
+    body.set("name", formName.trim())
+    body.set("description", formDescription.trim())
+    body.set("versionLabel", formVersionLabel.trim() || "v1")
+    body.set("sourceFileName", formSourceFileName.trim() || formFile?.name || "")
+    body.set("active", "true")
+    if (formContent.trim()) body.set("content", formContent)
+    if (formFile) body.set("file", formFile)
+
+    return fetch("/api/cabinet/templates", {
+      method: "POST",
+      body,
+    })
   }
 
   async function handleToggleActive(template: CabinetTemplate) {
@@ -313,9 +334,32 @@ export function CabinetTemplatesPageSurface() {
               />
             </label>
           </div>
+          <label className="mt-4 block rounded-eos-lg border border-dashed border-eos-border bg-eos-bg-inset p-4">
+            <span className="text-xs font-medium text-eos-text-muted">
+              Import fișier real cabinet (.docx, .md, .txt)
+            </span>
+            <input
+              className="mt-2 block w-full text-sm text-eos-text-muted file:mr-3 file:rounded-eos-sm file:border-0 file:bg-eos-surface-variant file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-eos-text"
+              type="file"
+              accept=".docx,.md,.markdown,.txt"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null
+                setFormFile(file)
+                if (file && !formSourceFileName.trim()) setFormSourceFileName(file.name)
+              }}
+            />
+            <p className="mt-2 text-[11px] leading-5 text-eos-text-tertiary">
+              Pentru pilot, importăm documente Word murdare din cabinet și extragem textul în template editabil. Poți păstra textarea ca override manual.
+            </p>
+            {formFile ? (
+              <p className="mt-2 font-mono text-[11px] text-eos-text-muted">
+                selectat: {formFile.name} · {Math.round(formFile.size / 1024)}KB
+              </p>
+            ) : null}
+          </label>
           <label className="mt-4 block">
             <span className="text-xs font-medium text-eos-text-muted">
-              Conținut Markdown (variabile permise: {"{{ORG_NAME}}"}, {"{{ORG_CUI}}"}, {"{{ORG_WEBSITE}}"}, {"{{DPO_EMAIL}}"}, {"{{PREPARED_BY}}"}, {"{{DOCUMENT_DATE}}"}, {"{{DOCUMENT_TITLE}}"})
+              Conținut Markdown / override manual (variabile permise: {"{{ORG_NAME}}"}, {"{{ORG_CUI}}"}, {"{{ORG_WEBSITE}}"}, {"{{DPO_EMAIL}}"}, {"{{PREPARED_BY}}"}, {"{{DOCUMENT_DATE}}"}, {"{{DOCUMENT_TITLE}}"})
             </span>
             <textarea
               className="mt-1.5 h-72 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 font-mono text-[12.5px] text-eos-text outline-none focus:border-eos-border-strong"
@@ -347,6 +391,7 @@ export function CabinetTemplatesPageSurface() {
                 setFormVersionLabel("v1")
                 setFormSourceFileName("")
                 setFormContent("")
+                setFormFile(null)
               }}
               disabled={busy}
               className="inline-flex items-center gap-2 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition-colors hover:text-eos-text disabled:opacity-50"

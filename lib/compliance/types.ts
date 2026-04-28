@@ -297,6 +297,21 @@ export type TaskEvidenceAttachment = {
   quality?: EvidenceQualityAssessment
 }
 
+export type DeletedTaskEvidenceAttachment = TaskEvidenceAttachment & {
+  deletionStatus: "soft_deleted" | "permanently_deleted"
+  deletedAtISO: string
+  deletedByUserId?: string
+  deletedByEmail?: string
+  deletedByRole?: WorkspaceContext["userRole"]
+  deleteReason: string
+  restoreUntilISO: string
+  restoredAtISO?: string
+  restoredByEmail?: string
+  permanentDeletedAtISO?: string
+  permanentDeletedByEmail?: string
+  permanentDeleteReason?: string
+}
+
 export type EvidenceRegistryEntry = TaskEvidenceAttachment & {
   taskId?: string | null
 }
@@ -418,6 +433,8 @@ export type PersistedTaskState = {
   status: PersistedTaskStatus
   attachedEvidence?: string
   attachedEvidenceMeta?: TaskEvidenceAttachment
+  deletedEvidence?: string
+  deletedEvidenceMeta?: DeletedTaskEvidenceAttachment
   updatedAtISO: string
   validationStatus?: TaskValidationStatus
   validationMessage?: string

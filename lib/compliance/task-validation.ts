@@ -1,5 +1,6 @@
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { inferValidationKindFromFinding } from "@/lib/compliance/remediation-recipes"
+import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import { getTaskResolutionTargets } from "@/lib/compliance/task-resolution"
 import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
 import type {
@@ -35,7 +36,7 @@ export function validateTaskAgainstState(
   const validationKind =
     remediation?.validationKind ?? inferValidationKindFromFinding(primaryFinding)
   const latestSource = getLatestRelevantSourceText(state, remediation?.sourceDocument, primaryFinding)
-  const currentTaskState = state.taskState[taskId]
+  const currentTaskState = getTaskStateByTaskId(state.taskState, taskId)
   const openRelatedAlerts = relatedAlerts.some((alert) => alert.open)
   const activeRelatedFindings = relatedFindings.filter((finding) => !isResolvedFindingStatus(finding.findingStatus))
   const openIssueStillPresent = activeRelatedFindings.length > 0 || openRelatedAlerts

@@ -1,10 +1,10 @@
-# CompliScan — Stack documente strategice (v6.4 — DPO MIGRATION CONFIDENCE PACK)
+# CompliScan — Stack documente strategice (v6.5 — DPO PRODUCTION TRUST HARDENING)
 
-🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. DPO Cabinet flow are acum **Migration Confidence Pack** cu runtime demo **103/103 PASS**: security + contractual docs, RBAC matrix, messy cases, template library matur, export complet cabinet/client și rapoarte lunare client-facing. Doar founder-side setup + pilot rămân înainte de deploy production.
+🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. DPO Cabinet flow are acum **Production Trust Hardening** cu runtime demo **118/118 PASS**: DPA semnabil ca template contractual, subprocessori fără formulări vagi, storage production Supabase Frankfurt, template import `.docx/.md/.txt`, evidence delete hardening, restore window, export complet cabinet/client și rapoarte lunare client-facing. Doar founder-side setup + pilot rămân înainte de deploy production.
 
-📦 **Pachet DPO Migration Confidence Pack**: `/Users/vaduvageorge/Downloads/compliscan-dpo-migration-confidence-pack-2026-04-28.zip`
+📦 **Pachet DPO Production Trust Hardening**: `/Users/vaduvageorge/Downloads/compliscan-dpo-production-trust-hardening-2026-04-28.zip`
 
-🔐 **SHA-256**: `cb110b1705acfd6272a366bf5ac7cac93894734d371b6ba9b3f1096189079130`
+🔐 **SHA-256**: `54fbf2003a5f405b0ea10d78e6b0d810b22b920592fa279891653ade3e71c743`
 
 📋 **Începe cu**: [`RELEASE-READY-CHECKLIST.md`](./RELEASE-READY-CHECKLIST.md) — singura listă de care ai nevoie ca founder pentru launch.
 

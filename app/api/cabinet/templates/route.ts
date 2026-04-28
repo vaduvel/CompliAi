@@ -10,6 +10,7 @@ import {
   type CabinetTemplateInput,
 } from "@/lib/server/cabinet-templates-store"
 import type { DocumentType } from "@/lib/server/document-generator"
+import { parseCabinetTemplateUpload } from "@/lib/server/template-upload-parser"
 
 const VALID_TYPES = new Set<DocumentType>([
   "privacy-policy",
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
     const userMode = await resolveUserMode(session)
     ensurePartnerMode(userMode)
 
-    const body = (await request.json()) as Partial<CabinetTemplateInput>
+    const body = await readTemplateRequestBody(request)
     if (!body.documentType || !VALID_TYPES.has(body.documentType as DocumentType)) {
       return jsonError(
         `documentType invalid. Tipuri acceptate: ${[...VALID_TYPES].join(", ")}.`,
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
     }
     if (typeof body.name !== "string" || typeof body.content !== "string") {
       return jsonError(
-        "Câmpurile name (string) și content (string) sunt obligatorii.",
+        "Câmpurile name și content sunt obligatorii. Poți trimite content JSON sau un fișier .docx/.md/.txt în multipart.",
         400,
         "INVALID_REQUEST_BODY"
       )
@@ -100,6 +101,55 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, template: result.template })
   } catch (error) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
+    if (error instanceof Error && error.message.startsWith("TEMPLATE_UPLOAD_INVALID:")) {
+      return jsonError(
+        error.message.replace("TEMPLATE_UPLOAD_INVALID:", "").trim(),
+        400,
+        "CABINET_TEMPLATE_UPLOAD_INVALID"
+      )
+    }
     return jsonError("Eroare la salvarea template-ului.", 500, "CABINET_TEMPLATE_SAVE_FAILED")
   }
+}
+
+async function readTemplateRequestBody(request: Request): Promise<Partial<CabinetTemplateInput>> {
+  const contentType = request.headers.get("content-type") ?? ""
+  if (!contentType.toLowerCase().includes("multipart/form-data")) {
+    return (await request.json()) as Partial<CabinetTemplateInput>
+  }
+
+  const formData = await request.formData()
+  const uploaded = formData.get("file") ?? formData.get("templateFile")
+  const parsed =
+    uploaded instanceof File && uploaded.size > 0
+      ? await parseCabinetTemplateUpload(uploaded)
+      : null
+
+  if (parsed && !parsed.ok) {
+    throw new Error(`TEMPLATE_UPLOAD_INVALID: ${parsed.error}`)
+  }
+
+  const contentFromField = textValue(formData.get("content"))
+  const parsedTemplate = parsed?.ok ? parsed.template : null
+
+  return {
+    documentType: textValue(formData.get("documentType")) as DocumentType | undefined,
+    name: textValue(formData.get("name")) ?? parsedTemplate?.sourceFileName,
+    description: textValue(formData.get("description")),
+    versionLabel: textValue(formData.get("versionLabel")),
+    sourceFileName: textValue(formData.get("sourceFileName")) ?? parsedTemplate?.sourceFileName,
+    content: parsedTemplate?.content ?? contentFromField,
+    active: parseBoolean(formData.get("active")),
+  }
+}
+
+function textValue(value: FormDataEntryValue | null) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined
+}
+
+function parseBoolean(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") return undefined
+  if (value === "true") return true
+  if (value === "false") return false
+  return undefined
 }

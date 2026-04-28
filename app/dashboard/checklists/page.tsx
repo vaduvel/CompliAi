@@ -146,6 +146,10 @@ export default function RemediationPage() {
           onMarkDone={cockpitActions.handleMarkDone}
           onBulkMarkDone={cockpitActions.handleBulkMarkDone}
           onAttachEvidence={cockpitActions.attachEvidence}
+          onSoftDeleteEvidence={cockpitActions.softDeleteEvidence}
+          onRestoreEvidence={cockpitActions.restoreEvidence}
+          onPermanentlyDeleteEvidence={cockpitActions.permanentlyDeleteEvidence}
+          canPermanentlyDeleteEvidence={cockpit.data.workspace.userRole === "owner"}
           onExport={cockpitActions.handleTaskExport}
         />
       )}

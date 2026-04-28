@@ -1,5 +1,5 @@
 import type { TaskEvidenceAttachment } from "@/lib/compliance/types"
-import { hasSupabaseConfig, supabaseUpsert } from "@/lib/server/supabase-rest"
+import { hasSupabaseConfig, supabaseDelete, supabaseUpsert } from "@/lib/server/supabase-rest"
 import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
 
 export function shouldMirrorEvidenceToSupabase() {
@@ -50,6 +50,29 @@ export async function syncEvidenceObjectToSupabase(input: {
   return {
     synced: true,
     attachmentId: input.evidence.id,
+    orgId: input.orgId,
+    taskId: input.taskId,
+  }
+}
+
+export async function deleteEvidenceObjectFromSupabase(input: {
+  orgId: string
+  taskId: string
+  attachmentId: string
+}) {
+  if (!shouldMirrorEvidenceToSupabase()) {
+    return { deleted: false, reason: "DATA_BACKEND_LOCAL" as const }
+  }
+
+  await supabaseDelete(
+    "evidence_objects",
+    `org_id=eq.${input.orgId}&task_id=eq.${input.taskId}&attachment_id=eq.${input.attachmentId}`,
+    "public"
+  )
+
+  return {
+    deleted: true,
+    attachmentId: input.attachmentId,
     orgId: input.orgId,
     taskId: input.taskId,
   }

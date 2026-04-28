@@ -8,6 +8,8 @@ import {
   FileDown,
   Paperclip,
   RefreshCcw,
+  RotateCcw,
+  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -30,6 +32,10 @@ type TaskCardProps = {
   highlighted?: boolean
   onMarkDone: (id: string) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }
 
@@ -180,6 +186,10 @@ export function TaskCard({
   highlighted,
   onMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: TaskCardProps) {
   const { track } = useTrackEvent()
@@ -239,6 +249,45 @@ export function TaskCard({
     if (!file) return
     void onAttachEvidence(task.id, file, selectedEvidenceKind)
     event.target.value = ""
+  }
+
+  async function handleSoftDeleteEvidence() {
+    if (!task.attachedEvidence) return
+    const reason = window.prompt(
+      "Motiv ștergere dovadă (obligatoriu, minim 8 caractere). Exemplu: document încărcat greșit / versiune depășită."
+    )
+    if (reason === null) return
+    const normalizedReason = reason.trim()
+    if (normalizedReason.length < 8) {
+      toast.error("Motiv prea scurt", {
+        description: "Pentru audit trail, ștergerea cere minim 8 caractere.",
+      })
+      return
+    }
+
+    await onSoftDeleteEvidence(task.id, task.attachedEvidence.id, normalizedReason)
+  }
+
+  async function handleRestoreEvidence() {
+    if (!task.deletedEvidence) return
+    await onRestoreEvidence(task.id, task.deletedEvidence.id)
+  }
+
+  async function handlePermanentDeleteEvidence() {
+    if (!task.deletedEvidence || !onPermanentlyDeleteEvidence) return
+    const reason = window.prompt(
+      "Motiv ștergere definitivă (doar owner). Această acțiune elimină fișierul și metadata operațională."
+    )
+    if (reason === null) return
+    const normalizedReason = reason.trim()
+    if (normalizedReason.length < 8) {
+      toast.error("Motiv prea scurt", {
+        description: "Pentru audit trail, ștergerea definitivă cere minim 8 caractere.",
+      })
+      return
+    }
+
+    await onPermanentlyDeleteEvidence(task.id, task.deletedEvidence.id, normalizedReason)
   }
 
   return (
@@ -324,10 +373,16 @@ export function TaskCard({
                   className={
                     task.attachedEvidence
                       ? evidenceQualityTone(task.attachedEvidence.quality?.status)
+                      : task.deletedEvidence
+                        ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
                       : "border-eos-border bg-eos-surface text-eos-text-muted"
                   }
                 >
-                  {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
+                  {task.attachedEvidence
+                    ? "dovada atasata"
+                    : task.deletedEvidence
+                      ? "dovada stearsa soft"
+                      : "fara dovada"}
                 </Badge>
               </div>
 
@@ -429,6 +484,58 @@ export function TaskCard({
                         {evidenceQualitySummary ? (
                           <p className="[overflow-wrap:anywhere]">{evidenceQualitySummary}</p>
                         ) : null}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button
+                            type="button"
+                            onClick={() => void handleSoftDeleteEvidence()}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-eos-warning-border text-eos-warning hover:bg-eos-warning-soft"
+                          >
+                            <Trash2 className="size-3.5" strokeWidth={2} />
+                            Șterge cu motiv
+                          </Button>
+                        </div>
+                      </div>
+                    ) : task.deletedEvidence ? (
+                      <div className="space-y-2">
+                        <p className="font-medium text-eos-text">Dovadă ștearsă controlat</p>
+                        <p className="break-all text-eos-text">{task.deletedEvidence.fileName}</p>
+                        <div className="space-y-1 text-eos-text-muted">
+                          <p>
+                            Motiv: <span className="text-eos-text">{task.deletedEvidence.deleteReason}</span>
+                          </p>
+                          <p>
+                            Restore până la:{" "}
+                            <span className="text-eos-text">
+                              {formatEvidenceRecoveryDate(task.deletedEvidence.restoreUntilISO)}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button
+                            type="button"
+                            onClick={() => void handleRestoreEvidence()}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <RotateCcw className="size-3.5" strokeWidth={2} />
+                            Restaurează
+                          </Button>
+                          {canPermanentlyDeleteEvidence && onPermanentlyDeleteEvidence ? (
+                            <Button
+                              type="button"
+                              onClick={() => void handlePermanentDeleteEvidence()}
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 border-eos-error-border text-eos-error hover:bg-eos-error-soft"
+                            >
+                              <Trash2 className="size-3.5" strokeWidth={2} />
+                              Ștergere definitivă
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-1">
@@ -649,6 +756,20 @@ function acceptForEvidenceKind(kind: TaskEvidenceKind) {
   if (kind === "yaml_evidence") return ".yaml,.yml,.json,.txt"
   if (kind === "document_bundle") return ".pdf,.zip,.json,.csv,.txt,.doc,.docx"
   return undefined
+}
+
+function formatEvidenceRecoveryDate(iso: string) {
+  try {
+    return new Intl.DateTimeFormat("ro-RO", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(iso))
+  } catch {
+    return iso
+  }
 }
 
 // ── Validation Level Block ────────────────────────────────────────────────────

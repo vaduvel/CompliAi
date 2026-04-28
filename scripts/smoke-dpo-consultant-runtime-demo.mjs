@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs"
 import path from "node:path"
+import { deflateRawSync } from "node:zlib"
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3000"
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 60_000)
@@ -278,6 +279,60 @@ async function uploadTaskEvidence(taskId, { kind, fileName, mimeType, content })
   })
 }
 
+async function uploadCabinetTemplateFile({ documentType, name, description, versionLabel, fileName, mimeType, content }) {
+  const formData = new FormData()
+  formData.set("documentType", documentType)
+  formData.set("name", name)
+  formData.set("description", description)
+  formData.set("versionLabel", versionLabel)
+  formData.set("sourceFileName", fileName)
+  formData.set("active", "true")
+  formData.set("file", new Blob([content], { type: mimeType }), fileName)
+
+  return request("/api/cabinet/templates", {
+    method: "POST",
+    body: formData,
+  })
+}
+
+function buildMinimalDocx(paragraphs) {
+  const xml = [
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`,
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`,
+    ...paragraphs.map(
+      (paragraph) => `<w:p><w:r><w:t>${escapeXml(paragraph)}</w:t></w:r></w:p>`
+    ),
+    `</w:body></w:document>`,
+  ].join("")
+  return buildZipEntry("word/document.xml", Buffer.from(xml, "utf8"))
+}
+
+function buildZipEntry(fileName, content) {
+  const compressed = deflateRawSync(content)
+  const fileNameBytes = Buffer.from(fileName, "utf8")
+  const header = Buffer.alloc(30)
+  header.writeUInt32LE(0x04034b50, 0)
+  header.writeUInt16LE(20, 4)
+  header.writeUInt16LE(0, 6)
+  header.writeUInt16LE(8, 8)
+  header.writeUInt16LE(0, 10)
+  header.writeUInt16LE(0, 12)
+  header.writeUInt32LE(0, 14)
+  header.writeUInt32LE(compressed.length, 18)
+  header.writeUInt32LE(content.length, 22)
+  header.writeUInt16LE(fileNameBytes.length, 26)
+  header.writeUInt16LE(0, 28)
+  return Buffer.concat([header, fileNameBytes, compressed])
+}
+
+function escapeXml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
 async function closeOperationalFinding(taskId, label, evidenceInput) {
   const evidence = await uploadTaskEvidence(taskId, evidenceInput)
   record(evidence.res.ok, `${label}: evidence uploaded`, evidence.body?.evidence?.fileName || evidence.text)
@@ -355,6 +410,55 @@ async function main() {
   })
   record(cabinetTemplate.res.ok, "Cabinet DPO can upload active DPA template", cabinetTemplate.body?.template?.name || cabinetTemplate.text)
 
+  const dirtyDpaTemplate = await uploadCabinetTemplateFile({
+    documentType: "dpa",
+    name: "DPO Complet — DPA Word murdar importat v2026.2",
+    description: "Document Word real importat: antet, comentariu intern, clauze cabinet și variabile.",
+    versionLabel: "v2026.2-docx",
+    fileName: "DPA-procesatori-murdar-cu-comentarii.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    content: buildMinimalDocx([
+      "Template DPA DPO Complet — {{ORG_NAME}}",
+      "Client / Operator: {{ORG_NAME}}",
+      "Procesator: {{COUNTERPARTY_NAME}}",
+      "Comentariu intern cabinet: păstrează această clauză doar pentru procesatori SaaS.",
+      "Clauză cabinet custom: procesatorul notifică operatorul fără întârziere nejustificată pentru orice incident care poate afecta datele personale.",
+      "Status: draft de lucru până la validarea consultantului DPO.",
+    ]),
+  })
+  record(
+    dirtyDpaTemplate.res.ok,
+    "Cabinet can import dirty Word .docx DPA template",
+    dirtyDpaTemplate.body?.template?.sourceFileName || dirtyDpaTemplate.text
+  )
+
+  const dirtyRopaTemplate = await uploadCabinetTemplateFile({
+    documentType: "ropa",
+    name: "DPO Complet — RoPA import Markdown",
+    description: "RoPA cabinet importat din arhiva existentă, cu variabile client.",
+    versionLabel: "v2026.1-md",
+    fileName: "RoPA-template-cabinet.md",
+    mimeType: "text/markdown",
+    content: [
+      "# RoPA — {{ORG_NAME}}",
+      "",
+      "Comentariu intern cabinet: verificați temeiul legal înainte de trimitere.",
+      "Activitate, categorii date, destinatari, transferuri și retenție.",
+    ].join("\n"),
+  })
+  record(dirtyRopaTemplate.res.ok, "Cabinet can import RoPA Markdown template", dirtyRopaTemplate.body?.template?.sourceFileName || dirtyRopaTemplate.text)
+
+  const dirtyRetentionTemplate = await uploadCabinetTemplateFile({
+    documentType: "retention-policy",
+    name: "DPO Complet — Retention Policy TXT import",
+    description: "Politică retenție veche, importată ca text curățat pentru pilot.",
+    versionLabel: "v2026.1-txt",
+    fileName: "retentie-date-clienti-vechi.txt",
+    mimeType: "text/plain",
+    content: "Politică de retenție {{ORG_NAME}}. Datele se păstrează conform scopului, temeiului legal și termenelor contractuale. Revizuire anuală de cabinet DPO Complet. ".repeat(6),
+  })
+  record(dirtyRetentionTemplate.res.ok, "Cabinet can import retention TXT template", dirtyRetentionTemplate.body?.template?.sourceFileName || dirtyRetentionTemplate.text)
+
   const cabinetTemplates = await request("/api/cabinet/templates")
   await writeText("reports/cabinet-templates.json", JSON.stringify(cabinetTemplates.body, null, 2))
   record(
@@ -364,11 +468,17 @@ async function main() {
   const activeDpaTemplate = (cabinetTemplates.body.templates || []).find(
     (template) => template.documentType === "dpa" && template.active
   )
-  record(activeDpaTemplate?.versionLabel === "v2026.1", "Cabinet template stores version label", activeDpaTemplate?.versionLabel || "missing")
+  record(activeDpaTemplate?.versionLabel === "v2026.2-docx", "Cabinet template stores version label", activeDpaTemplate?.versionLabel || "missing")
   record(
-    String(activeDpaTemplate?.sourceFileName || "").includes("DPA-procesatori-v2026.docx"),
+    String(activeDpaTemplate?.sourceFileName || "").includes("DPA-procesatori-murdar"),
     "Cabinet template stores source file / migration history",
     activeDpaTemplate?.sourceFileName || "missing"
+  )
+  record(
+    (cabinetTemplates.body.templates || []).filter((template) =>
+      ["dpa", "ropa", "retention-policy"].includes(template.documentType)
+    ).length >= 3,
+    "Cabinet template library stores 3 migrated dirty templates"
   )
 
   const urgencyQueue = await request("/api/partner/urgency-queue")
@@ -551,12 +661,81 @@ async function main() {
 
   await switchToOrg(memberships, "Cobalt Fintech IFN")
   const cobalt = await loadDashboardFor("Cobalt Fintech IFN")
-  const cobaltAiTask = cobalt.state.taskState?.["cobalt-ai-inventory-chatgpt"]
+  const cobaltAiStateKey = "cobalt-ai-inventory-chatgpt"
+  const cobaltAiTaskId = "finding-cobalt-ai-inventory-chatgpt"
+  const cobaltAiTask = cobalt.state.taskState?.[cobaltAiStateKey]
   record(cobaltAiTask?.status === "done", "Cobalt AI minimization task is closed", cobaltAiTask?.status || "missing")
   record(
     cobaltAiTask?.attachedEvidenceMeta?.quality?.status === "sufficient",
     "Cobalt AI OFF evidence is sufficient"
   )
+  const cobaltAiEvidenceId = cobaltAiTask?.attachedEvidenceMeta?.id
+  if (cobaltAiEvidenceId) {
+    const softDelete = await request(
+      `/api/tasks/${encodeURIComponent(cobaltAiTaskId)}/evidence/${encodeURIComponent(cobaltAiEvidenceId)}`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({ reason: "test restore window pentru document incarcat gresit" }),
+      }
+    )
+    record(softDelete.res.ok, "Evidence delete hardening: soft delete requires reason and succeeds", softDelete.body?.evidenceDeletion?.status || softDelete.text)
+    record(
+      Boolean(softDelete.body?.state?.taskState?.[cobaltAiStateKey]?.deletedEvidenceMeta?.restoreUntilISO),
+      "Evidence delete hardening: restore window is recorded",
+      softDelete.body?.state?.taskState?.[cobaltAiStateKey]?.deletedEvidenceMeta?.restoreUntilISO || "missing"
+    )
+
+    const deletedDownload = await request(
+      `/api/tasks/${encodeURIComponent(cobaltAiTaskId)}/evidence/${encodeURIComponent(cobaltAiEvidenceId)}`
+    )
+    record(
+      deletedDownload.res.status === 410,
+      "Evidence delete hardening: soft-deleted evidence cannot be downloaded",
+      `HTTP ${deletedDownload.res.status}`
+    )
+
+    if (me.body.user?.role !== "owner") {
+      const permanentDenied = await request(
+        `/api/tasks/${encodeURIComponent(cobaltAiTaskId)}/evidence/${encodeURIComponent(cobaltAiEvidenceId)}?permanent=1`,
+        {
+          method: "DELETE",
+          body: JSON.stringify({ reason: "test owner only permanent deletion" }),
+        }
+      )
+      record(
+        permanentDenied.res.status === 403,
+        "Evidence delete hardening: permanent delete is owner-only",
+        `HTTP ${permanentDenied.res.status}`
+      )
+    } else {
+      record(
+        true,
+        "Evidence delete hardening: permanent delete owner-only rule covered by unit/RBAC tests",
+        "runtime demo user is owner; skip destructive hard delete"
+      )
+    }
+
+    const restoreEvidence = await request(
+      `/api/tasks/${encodeURIComponent(cobaltAiTaskId)}/evidence/${encodeURIComponent(cobaltAiEvidenceId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ action: "restore" }),
+      }
+    )
+    record(restoreEvidence.res.ok, "Evidence delete hardening: soft-deleted evidence restores", restoreEvidence.body?.evidenceDeletion?.status || restoreEvidence.text)
+
+    const revalidateCobaltAi = await request(`/api/tasks/${encodeURIComponent(cobaltAiTaskId)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "mark_done_and_validate" }),
+    })
+    record(
+      revalidateCobaltAi.body?.feedback?.validationStatus === "passed",
+      "Evidence delete hardening: restored evidence can be revalidated",
+      revalidateCobaltAi.body?.feedback?.validationMessage || revalidateCobaltAi.text
+    )
+  } else {
+    record(false, "Evidence delete hardening: Cobalt AI evidence id exists", "missing")
+  }
 
   const share = await request("/api/reports/share-token", {
     method: "POST",
@@ -712,6 +891,32 @@ async function main() {
     String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("DPA CompliScan ↔ cabinet DPO"),
     "Cabinet export includes security + contractual pack markdown"
   )
+  record(
+    cabinetExport.body?.securityContractualPack?.contractualDocuments?.some(
+      (doc) => doc.id === "dpa-controller-processor" && doc.status === "signature_ready_template"
+    ),
+    "Production trust pack includes signature-ready DPA template"
+  )
+  record(
+    String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("Storage production") &&
+      String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("eu-central-1 — Frankfurt"),
+    "Production trust pack documents Supabase production storage clearly"
+  )
+  record(
+    (cabinetExport.body?.securityContractualPack?.subprocessors || []).every(
+      (item) => item.exactProvider && item.region && item.dataProcessed && item.trainingUse
+    ),
+    "Production trust pack has exact subprocessor table fields"
+  )
+  record(
+    String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("Evidence delete policy") &&
+      String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("30 zile restore window"),
+    "Production trust pack documents evidence delete hardening"
+  )
+  record(
+    !String(cabinetExport.body?.securityContractualPackMarkdown || "").includes("draft_for_review"),
+    "Production trust pack has no draft_for_review blocker"
+  )
   await writeText("exports/cabinet-complete-migration-export.json", JSON.stringify(cabinetExport.body, null, 2))
   await writeText(
     "reports/security-contractual-pack.md",
@@ -740,6 +945,7 @@ async function main() {
     "",
     "4. Dovezi păstrate:",
     "   - Magic-link approval Apex, RoPA v3 Apex, cookie banner screenshot Apex, AI OFF evidence Cobalt, comment/reject Cobalt, manifest SHA-256 în Audit Pack bundle.",
+    "   - Evidence delete hardening testat: soft delete cu motiv, blocare download, restore window și revalidare după restore.",
     "",
     "5. Prioritate azi:",
     `   - ${topUrgency?.orgName || "n/a"} · ${topUrgency?.severity || "n/a"} · ${topUrgency?.title || "n/a"}`,
@@ -755,7 +961,7 @@ async function main() {
     `   - Apex RoPA: ${apexAfterRemediation.state.taskState?.["finding-apex-gdpr-ropa-stripe"]?.validationStatus || "missing"}; Apex DPA: ${apexDoc?.adoptionStatus || "missing"}; Lumen DSAR: ${lumen.state.taskState?.["lumen-dsar-overdue"]?.validationStatus || "missing"}.`,
     "",
     "9. Tool vs email/Word/Drive:",
-    "   - În tool: status, livrabile, approvals, evidence, audit pack, raport lunar. În afara tool-ului rămân validarea profesională și portalurile oficiale.",
+    "   - În tool: status, livrabile, approvals, evidence, audit pack, raport lunar, template-uri Word importate. În afara tool-ului rămân validarea profesională și portalurile oficiale.",
     "",
     "10. Ce nu ar trebui arătat încă într-un audit final:",
     ...openFindingTitles(apexAfterRemediation.state).map((title) => `   - Apex: ${title}`),
@@ -800,8 +1006,10 @@ async function main() {
       "- Apex are after-state complet: RoPA + cookie închise, baseline validat, Audit Pack `audit_ready`.",
       "- Lumen are DSAR critic în `needs_review` până la dovada trimiterii.",
       "- Cobalt are AI OFF evidence și flow comment/reject prin magic link.",
+      "- Template import real: DPA .docx murdar + RoPA .md + retenție .txt intră în biblioteca cabinetului.",
+      "- Evidence delete hardening: soft delete cu motiv, download blocat, restore window, restore + revalidare.",
       "- Messy cases: token alterat respins; document respins nu poate fi supra-aprobat cu același link.",
-      "- Export cabinet complet include template-uri, clienți, RBAC și security/contractual pack.",
+      "- Export cabinet complet include template-uri, clienți, RBAC, DPA semnabil și production trust pack.",
       "",
       "## Artefacte",
       "",

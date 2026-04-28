@@ -40,6 +40,7 @@ export type RbacAction =
   | "manage_branding"
   | "manage_members"
   | "delete_evidence"
+  | "permanently_delete_evidence"
   | "reset_workspace"
 
 export type PermissionMatrixRow = {
@@ -136,9 +137,17 @@ export const PERMISSION_MATRIX: PermissionMatrixRow[] = [
   },
   {
     action: "delete_evidence",
-    label: "Șterge dovezi",
-    description: "Poate elimina dovezi operaționale. Acțiune sensibilă, logată în audit trail.",
+    label: "Șterge dovezi soft",
+    description:
+      "Poate șterge soft dovezi operaționale cu motiv obligatoriu, audit trail și fereastră de restore.",
     roles: DELETE_ROLES,
+  },
+  {
+    action: "permanently_delete_evidence",
+    label: "Șterge definitiv dovezi",
+    description:
+      "Poate elimina definitiv fișierul și metadata evidence după soft delete. Acțiune owner-only.",
+    roles: ["owner"],
   },
   {
     action: "reset_workspace",

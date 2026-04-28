@@ -35,6 +35,10 @@ type RemediationBoardProps = {
   onMarkDone: (id: string) => void
   onBulkMarkDone?: (ids: string[]) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }
 
@@ -67,6 +71,10 @@ export function RemediationBoard({
   onMarkDone,
   onBulkMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: RemediationBoardProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -241,6 +249,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -257,6 +269,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -273,6 +289,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -289,6 +309,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -314,6 +338,10 @@ export function RemediationBoard({
                   highlighted={highlightedTaskId === task.id}
                   onMarkDone={onMarkDone}
                   onAttachEvidence={onAttachEvidence}
+                  onSoftDeleteEvidence={onSoftDeleteEvidence}
+                  onRestoreEvidence={onRestoreEvidence}
+                  onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+                  canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
                   onExport={onExport}
                 />
               </div>
@@ -375,6 +403,10 @@ function TaskGroup({
   onToggleSelect,
   onMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: {
   title: string
@@ -387,6 +419,10 @@ function TaskGroup({
   onToggleSelect?: (id: string) => void
   onMarkDone: (id: string) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }) {
   const toneClass =
@@ -430,6 +466,10 @@ function TaskGroup({
               highlighted={highlightedTaskId === task.id}
               onMarkDone={onMarkDone}
               onAttachEvidence={onAttachEvidence}
+              onSoftDeleteEvidence={onSoftDeleteEvidence}
+              onRestoreEvidence={onRestoreEvidence}
+              onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+              canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
               onExport={onExport}
             />
           </div>

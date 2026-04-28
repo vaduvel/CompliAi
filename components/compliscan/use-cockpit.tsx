@@ -108,6 +108,18 @@ type TaskEvidenceUploadResponse = DashboardPayload & {
   evidence?: TaskEvidenceAttachment
 }
 
+type TaskEvidenceMutationResponse = DashboardPayload & {
+  message?: string
+  error?: string
+  evidenceDeletion?: {
+    status: "soft_deleted" | "restored" | "permanently_deleted"
+    evidenceId: string
+    deletedAtISO?: string
+    restoredAtISO?: string
+    restoreUntilISO?: string
+  }
+}
+
 function useCockpitStore(initialData?: DashboardPayload | null) {
   const DASHBOARD_CORE_ENDPOINT = "/api/dashboard/core"
   const DASHBOARD_FULL_ENDPOINT = "/api/dashboard"
@@ -1076,6 +1088,76 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function softDeleteEvidence(taskId: string, evidenceId: string, reason: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "DELETE",
+      reason,
+      successTitle: "Dovada ștearsă soft",
+      successDescription: "Poate fi restaurată din task în fereastra de recovery.",
+    })
+  }
+
+  async function restoreEvidence(taskId: string, evidenceId: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "PATCH",
+      action: "restore",
+      successTitle: "Dovada restaurată",
+      successDescription: "Revalidează task-ul înainte de audit_ready.",
+    })
+  }
+
+  async function permanentlyDeleteEvidence(taskId: string, evidenceId: string, reason: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "DELETE",
+      permanent: true,
+      reason,
+      successTitle: "Dovada ștearsă definitiv",
+      successDescription: "Fișierul și metadata operațională au fost eliminate.",
+    })
+  }
+
+  async function mutateEvidenceDeletion(
+    taskId: string,
+    evidenceId: string,
+    options: {
+      method: "DELETE" | "PATCH"
+      action?: "restore"
+      permanent?: boolean
+      reason?: string
+      successTitle: string
+      successDescription: string
+    }
+  ) {
+    await withBusyOperation(async () => {
+      try {
+        const response = await fetch(
+          `/api/tasks/${encodeURIComponent(taskId)}/evidence/${encodeURIComponent(evidenceId)}${
+            options.permanent ? "?permanent=1" : ""
+          }`,
+          {
+            method: options.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: options.action,
+              reason: options.reason,
+            }),
+          }
+        )
+        const payload = (await response.json()) as TaskEvidenceMutationResponse
+        if (!response.ok) {
+          throw new Error(payload.error || "Operația pe dovadă a eșuat.")
+        }
+
+        applyDashboardPayload(payload)
+        toast.success(options.successTitle, { description: options.successDescription })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Eroare la operația pe dovadă."
+        toast.error("Evidence control eșuat", { description: message })
+        throw err
+      }
+    })
+  }
+
   function handleTaskExport(taskId: string) {
     const task = tasks.find((item) => item.id === taskId)
     if (!task) return
@@ -1185,6 +1267,9 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleMarkDone,
     handleBulkMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,
@@ -1281,6 +1366,9 @@ export type CockpitActionSlice = Pick<
   | "handleSyncNow"
   | "handleMarkDone"
   | "attachEvidence"
+  | "softDeleteEvidence"
+  | "restoreEvidence"
+  | "permanentlyDeleteEvidence"
   | "handleTaskExport"
   | "handleSandbox"
   | "addAISystem"
@@ -1446,6 +1534,9 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleSyncNow,
     handleMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,
@@ -1489,6 +1580,9 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleSyncNow,
     handleMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,

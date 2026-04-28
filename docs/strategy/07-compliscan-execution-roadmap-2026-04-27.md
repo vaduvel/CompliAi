@@ -1,9 +1,37 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v6.4 — 28 apr 2026, DPO migration confidence pack)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.5 — 28 apr 2026, DPO production trust hardening)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.5 — DPO Production Trust Hardening (28 apr 2026, 21:10 EEST)**:
+
+✅ **DPO Cabinet are acum pachet de încredere production-grade pentru pilot real controlat.** Sprintul răspunde explicit ultimelor blocaje de migrare: DPA semnabil ca template contractual, subprocessori fără wording vag, storage production clar, template import real din documente murdare, evidence delete controlat și compatibilitate cu task-uri istorice/legacy.
+
+Validare cod:
+- Build: `npm run build` ✅
+- Tests: `npm test` → **244 files passed**, **1263 tests passed**, 1 skipped ✅
+- Lint: `npm run lint` ✅ (doar warning-uri vechi)
+- Targeted hardening tests: `npx vitest run 'app/api/tasks/[id]/route.test.ts' 'app/api/tasks/[id]/evidence/[evidenceId]/route.test.ts' lib/compliance/task-validation.test.ts lib/server/template-upload-parser.test.ts lib/server/dpo-security-contractual-pack.test.ts lib/server/rbac.test.ts` → **6 files / 34 tests PASS** ✅
+- Runtime smoke DPO Production Trust Hardening: `scripts/smoke-dpo-consultant-runtime-demo.mjs` → **118/118 checks passed** ✅
+
+Pachet nou pentru validare DPO:
+- Folder: `/private/tmp/compliscan-dpo-production-trust-hardening-2026-04-28`
+- ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-production-trust-hardening-2026-04-28.zip`
+- SHA-256: `54fbf2003a5f405b0ea10d78e6b0d810b22b920592fa279891653ade3e71c743`
+
+Acoperire nouă verificată end-to-end:
+- Contractual pack: DPA `signature_ready_template`, termeni retention/deletion, incident response și AI processing.
+- Subprocessor table exact: provider, regiune, date procesate, AI ON/OFF, training use, EU-only mode și condiții de activare.
+- Production storage clarity: Supabase production, Frankfurt, bucket evidence, backup, retention, export și deletion policy.
+- Template import real: `.docx` murdar din cabinet, `.md` RoPA și `.txt` retenție, cu source file + migration history.
+- Evidence delete hardening: soft delete cu motiv, audit event, download blocat `410`, restore window 30 zile, restore + revalidate, hard delete owner-only.
+- Compatibilitate legacy: task-uri `finding-*` și state keys istorice fără prefix se validează/restaurează corect.
+
+Verdict: **DPO Cabinet este pregătit pentru pilot controlat cu pachet de trust mult mai aproape de producție.** Migrarea completă rămâne etapizată după 30-60 zile pilot real și semnarea/finalizarea documentelor juridice de către consultant/founder.
+
+---
 
 **Versiune v6.4 — DPO Migration Confidence Pack (28 apr 2026, 19:35 EEST)**:
 

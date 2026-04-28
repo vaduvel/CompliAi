@@ -69,6 +69,7 @@ describe("lib/server/rbac", () => {
         "export_cabinet_archive",
         "manage_templates",
         "delete_evidence",
+        "permanently_delete_evidence",
       ])
     )
     expect(canPerform("partner_manager", "send_magic_link")).toBe(true)
@@ -76,6 +77,9 @@ describe("lib/server/rbac", () => {
     expect(canPerform("partner_manager", "export_cabinet_archive")).toBe(true)
     expect(canPerform("reviewer", "export_client_audit_pack")).toBe(true)
     expect(canPerform("reviewer", "validate_baseline")).toBe(false)
+    expect(canPerform("partner_manager", "delete_evidence")).toBe(true)
+    expect(canPerform("partner_manager", "permanently_delete_evidence")).toBe(false)
+    expect(canPerform("owner", "permanently_delete_evidence")).toBe(true)
     expect(canPerform("viewer", "send_magic_link")).toBe(false)
     expect(canPerform(undefined, "view_workspace")).toBe(false)
   })

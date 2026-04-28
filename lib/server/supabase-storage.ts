@@ -118,6 +118,19 @@ export async function downloadSupabaseObject(bucketName: string, objectPath: str
   return Buffer.from(await response.arrayBuffer())
 }
 
+export async function deleteSupabaseObject(bucketName: string, objectPath: string) {
+  const response = await storageRequest(`/object/${encodePath(bucketName, objectPath)}`, {
+    method: "DELETE",
+  })
+
+  if (!response.ok && response.status !== 404) {
+    const text = await response.text()
+    throw new Error(`Supabase Storage delete error ${response.status}: ${text}`)
+  }
+
+  return { deleted: response.ok }
+}
+
 export async function createSignedSupabaseObjectUrl(
   bucketName: string,
   objectPath: string,
@@ -195,7 +208,7 @@ export async function runSupabaseKeepalive(options?: { source?: string; note?: s
 async function storageRequest(
   endpoint: string,
   options: {
-    method: "GET" | "POST"
+    method: "GET" | "POST" | "DELETE"
     body?: string | Uint8Array
     headers?: Record<string, string>
   }

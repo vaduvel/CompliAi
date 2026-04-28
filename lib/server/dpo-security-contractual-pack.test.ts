@@ -25,11 +25,34 @@ describe("dpo-security-contractual-pack", () => {
         "ai-processing-brief",
       ])
     )
-    expect(pack.subprocessors.map((item) => item.name)).toEqual(
-      expect.arrayContaining(["Vercel", "Supabase", "Resend", "Google Gemini / Mistral EU"])
+    expect(pack.contractualDocuments.find((doc) => doc.id === "dpa-controller-processor")?.status).toBe(
+      "signature_ready_template"
     )
+    expect(pack.subprocessors.map((item) => item.name)).toEqual(
+      expect.arrayContaining(["Vercel", "Supabase", "Resend", "Mistral AI", "Google Gemini"])
+    )
+    expect(pack.subprocessors.every((item) => item.exactProvider && item.dataProcessed)).toBe(true)
+    expect(pack.subprocessors.find((item) => item.name === "Supabase")?.region).toContain("Frankfurt")
+    expect(pack.productionStorage.backend).toBe("supabase_production")
+    expect(pack.legalTerms.map((term) => term.id)).toEqual(
+      expect.arrayContaining([
+        "dpa-signable-terms",
+        "retention-deletion-terms",
+        "incident-response-terms",
+        "ai-processing-terms",
+      ])
+    )
+    expect(pack.evidenceDeletionPolicy.permanentDelete).toContain("owner")
     expect(pack.securityControls.map((control) => control.id)).toEqual(
-      expect.arrayContaining(["rbac", "audit-trail", "evidence-ledger", "exports", "ai-off", "baseline"])
+      expect.arrayContaining([
+        "rbac",
+        "audit-trail",
+        "evidence-ledger",
+        "evidence-delete-hardening",
+        "exports",
+        "ai-off",
+        "baseline",
+      ])
     )
     expect(pack.permissionMatrix.some((row) => row.action === "validate_baseline")).toBe(true)
     expect(pack.aiAssurance.aiMode).toBe("configurable_on_off")
@@ -47,8 +70,12 @@ describe("dpo-security-contractual-pack", () => {
 
     expect(markdown).toContain("DPO Migration Confidence Pack")
     expect(markdown).toContain("DPA CompliScan ↔ cabinet DPO")
+    expect(markdown).toContain("Storage production")
+    expect(markdown).toContain("Evidence delete policy")
+    expect(markdown).toContain("Mistral AI")
     expect(markdown).toContain("Matrice RBAC")
     expect(markdown).toContain("- [ ] DPA CompliScan")
     expect(markdown).not.toContain("CompliAI")
+    expect(markdown).not.toContain("draft_for_review")
   })
 })

@@ -671,6 +671,140 @@ function normalizeTaskState(
                   : undefined,
             }
           : undefined
+      const rawDeletedEvidenceMeta = entry.deletedEvidenceMeta
+      const deletedEvidence =
+        typeof entry.deletedEvidence === "string" && entry.deletedEvidence.trim()
+          ? entry.deletedEvidence.trim()
+          : undefined
+      const deletedEvidenceMeta =
+        rawDeletedEvidenceMeta &&
+        typeof rawDeletedEvidenceMeta === "object" &&
+        typeof rawDeletedEvidenceMeta.fileName === "string" &&
+        rawDeletedEvidenceMeta.fileName.trim() &&
+        typeof rawDeletedEvidenceMeta.deleteReason === "string" &&
+        rawDeletedEvidenceMeta.deleteReason.trim()
+          ? {
+              id:
+                typeof rawDeletedEvidenceMeta.id === "string" &&
+                rawDeletedEvidenceMeta.id.trim()
+                  ? rawDeletedEvidenceMeta.id
+                  : `deleted-evidence-${taskId}`,
+              fileName: rawDeletedEvidenceMeta.fileName.trim(),
+              mimeType:
+                typeof rawDeletedEvidenceMeta.mimeType === "string" &&
+                rawDeletedEvidenceMeta.mimeType.trim()
+                  ? rawDeletedEvidenceMeta.mimeType
+                  : "application/octet-stream",
+              sizeBytes:
+                typeof rawDeletedEvidenceMeta.sizeBytes === "number"
+                  ? rawDeletedEvidenceMeta.sizeBytes
+                  : 0,
+              uploadedAtISO: isValidIso(rawDeletedEvidenceMeta.uploadedAtISO)
+                ? rawDeletedEvidenceMeta.uploadedAtISO
+                : updatedAtISO,
+              kind: isTaskEvidenceKind(rawDeletedEvidenceMeta.kind)
+                ? rawDeletedEvidenceMeta.kind
+                : "other",
+              storageProvider:
+                rawDeletedEvidenceMeta.storageProvider === "public_local" ||
+                rawDeletedEvidenceMeta.storageProvider === "local_private" ||
+                rawDeletedEvidenceMeta.storageProvider === "supabase_private"
+                  ? rawDeletedEvidenceMeta.storageProvider
+                  : undefined,
+              storageKey:
+                typeof rawDeletedEvidenceMeta.storageKey === "string" &&
+                rawDeletedEvidenceMeta.storageKey.trim()
+                  ? rawDeletedEvidenceMeta.storageKey
+                  : undefined,
+              accessPath:
+                typeof rawDeletedEvidenceMeta.accessPath === "string" &&
+                rawDeletedEvidenceMeta.accessPath.trim()
+                  ? rawDeletedEvidenceMeta.accessPath
+                  : undefined,
+              publicPath:
+                typeof rawDeletedEvidenceMeta.publicPath === "string" &&
+                rawDeletedEvidenceMeta.publicPath.trim()
+                  ? rawDeletedEvidenceMeta.publicPath
+                  : undefined,
+              quality:
+                rawDeletedEvidenceMeta.quality &&
+                typeof rawDeletedEvidenceMeta.quality === "object" &&
+                (rawDeletedEvidenceMeta.quality.status === "sufficient" ||
+                  rawDeletedEvidenceMeta.quality.status === "weak")
+                  ? {
+                      status: rawDeletedEvidenceMeta.quality.status,
+                      summary:
+                        typeof rawDeletedEvidenceMeta.quality.summary === "string"
+                          ? rawDeletedEvidenceMeta.quality.summary
+                          : "",
+                      reasonCodes: Array.isArray(rawDeletedEvidenceMeta.quality.reasonCodes)
+                        ? rawDeletedEvidenceMeta.quality.reasonCodes.filter(
+                            (code): code is import("@/lib/compliance/types").EvidenceQualityReasonCode =>
+                              code === "generic_kind" ||
+                              code === "generic_filename" ||
+                              code === "unknown_mime" ||
+                              code === "very_small_file" ||
+                              code === "tiny_text_payload" ||
+                              code === "tiny_bundle"
+                          )
+                        : [],
+                      checkedAtISO: isValidIso(rawDeletedEvidenceMeta.quality.checkedAtISO)
+                        ? rawDeletedEvidenceMeta.quality.checkedAtISO
+                        : updatedAtISO,
+                    }
+                  : undefined,
+              deletionStatus:
+                rawDeletedEvidenceMeta.deletionStatus === "permanently_deleted"
+                  ? "permanently_deleted" as const
+                  : "soft_deleted" as const,
+              deletedAtISO: isValidIso(rawDeletedEvidenceMeta.deletedAtISO)
+                ? rawDeletedEvidenceMeta.deletedAtISO
+                : updatedAtISO,
+              deletedByUserId:
+                typeof rawDeletedEvidenceMeta.deletedByUserId === "string" &&
+                rawDeletedEvidenceMeta.deletedByUserId.trim()
+                  ? rawDeletedEvidenceMeta.deletedByUserId.trim()
+                  : undefined,
+              deletedByEmail:
+                typeof rawDeletedEvidenceMeta.deletedByEmail === "string" &&
+                rawDeletedEvidenceMeta.deletedByEmail.trim()
+                  ? rawDeletedEvidenceMeta.deletedByEmail.trim()
+                  : undefined,
+              deletedByRole:
+                rawDeletedEvidenceMeta.deletedByRole === "owner" ||
+                rawDeletedEvidenceMeta.deletedByRole === "partner_manager" ||
+                rawDeletedEvidenceMeta.deletedByRole === "compliance" ||
+                rawDeletedEvidenceMeta.deletedByRole === "reviewer" ||
+                rawDeletedEvidenceMeta.deletedByRole === "viewer"
+                  ? rawDeletedEvidenceMeta.deletedByRole
+                  : undefined,
+              deleteReason: rawDeletedEvidenceMeta.deleteReason.trim(),
+              restoreUntilISO: isValidIso(rawDeletedEvidenceMeta.restoreUntilISO)
+                ? rawDeletedEvidenceMeta.restoreUntilISO
+                : updatedAtISO,
+              restoredAtISO: isValidIso(rawDeletedEvidenceMeta.restoredAtISO)
+                ? rawDeletedEvidenceMeta.restoredAtISO
+                : undefined,
+              restoredByEmail:
+                typeof rawDeletedEvidenceMeta.restoredByEmail === "string" &&
+                rawDeletedEvidenceMeta.restoredByEmail.trim()
+                  ? rawDeletedEvidenceMeta.restoredByEmail.trim()
+                  : undefined,
+              permanentDeletedAtISO: isValidIso(rawDeletedEvidenceMeta.permanentDeletedAtISO)
+                ? rawDeletedEvidenceMeta.permanentDeletedAtISO
+                : undefined,
+              permanentDeletedByEmail:
+                typeof rawDeletedEvidenceMeta.permanentDeletedByEmail === "string" &&
+                rawDeletedEvidenceMeta.permanentDeletedByEmail.trim()
+                  ? rawDeletedEvidenceMeta.permanentDeletedByEmail.trim()
+                  : undefined,
+              permanentDeleteReason:
+                typeof rawDeletedEvidenceMeta.permanentDeleteReason === "string" &&
+                rawDeletedEvidenceMeta.permanentDeleteReason.trim()
+                  ? rawDeletedEvidenceMeta.permanentDeleteReason.trim()
+                  : undefined,
+            }
+          : undefined
       const validationStatus =
         entry.validationStatus === "passed" ||
         entry.validationStatus === "failed" ||
@@ -702,6 +836,8 @@ function normalizeTaskState(
           status,
           attachedEvidence,
           attachedEvidenceMeta,
+          deletedEvidence,
+          deletedEvidenceMeta,
           updatedAtISO,
           validationStatus,
           validationMessage,

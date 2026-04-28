@@ -9,6 +9,32 @@
 
 ---
 
+## ✅ Update 28 apr 2026 (DPO Production Trust Hardening)
+
+**Sprint închis runtime:** ultimul pachet de încredere pentru pilot DPO real controlat: contractual, subprocessori, storage production, template import real și evidence delete hardening.
+
+- Fix cod:
+  - `lib/server/dpo-security-contractual-pack.ts` — DPA `signature_ready_template`, termeni retention/deletion, incident response, AI processing, subprocessori cu provider/regiune/date/AI/training/EU-only clare.
+  - `lib/server/template-upload-parser.ts` + `app/api/cabinet/templates/route.ts` — import real `.docx`, `.md`, `.txt` pentru template-uri de cabinet, inclusiv Word murdar cu variabile/comentarii/clauze custom.
+  - `app/api/tasks/[id]/evidence/[evidenceId]/route.ts` — soft delete cu motiv, audit event, restore window 30 zile, download blocat `410`, hard delete owner-only.
+  - `app/api/tasks/[id]/route.ts` + `lib/compliance/task-validation.ts` — revalidare corectă după restore și compatibilitate între task id nou `finding-*` și state keys istorice fără prefix.
+  - `components/compliscan/task-card.tsx` + `use-cockpit.tsx` — UI pentru ștergere controlată, restore și delete definitiv owner-only.
+  - `scripts/smoke-dpo-consultant-runtime-demo.mjs` — runtime extins la Production Trust Hardening: template import, security pack exact, evidence delete/restore/revalidate.
+- Validare:
+  - Runtime smoke DPO Production Trust Hardening: **118/118 PASS** ✅
+  - Tests: `npm test` → **244 files passed**, **1263 tests passed**, 1 skipped ✅
+  - Build: `npm run build` → PASS ✅
+  - Lint: `npm run lint` → PASS cu warning-uri vechi ✅
+  - Targeted hardening tests: **6 files / 34 tests PASS** ✅
+- Pachet nou:
+  - Folder: `/private/tmp/compliscan-dpo-production-trust-hardening-2026-04-28`
+  - ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-production-trust-hardening-2026-04-28.zip`
+  - SHA-256: `54fbf2003a5f405b0ea10d78e6b0d810b22b920592fa279891653ade3e71c743`
+
+**Verdict:** DPO Cabinet are acum pachet production-trust pentru pilot controlat. Nu este încă promisiune de migrare instant pe tot cabinetul, dar răspunde blocajelor reale: contract, subprocessori, storage, template-uri proprii, ștergere dovezi și export verificabil.
+
+---
+
 ## ✅ Update 28 apr 2026 (DPO Migration Confidence Pack)
 
 **Sprint nou închis runtime:** pachetul care răspunde obiecției “nu migrez tot cabinetul până nu văd securitate, roluri, template-uri, export, raport lunar și cazuri murdare”.
