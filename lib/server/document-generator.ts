@@ -273,6 +273,36 @@ export function normalizeGeneratedDocumentContent(
   return lines.join("\n").replace(/\n{3,}/g, "\n\n")
 }
 
+function ensureGeneratedDocumentIdentity(
+  content: string,
+  input: DocumentGenerationInput,
+  generatedAtISO: string
+) {
+  if (input.documentType !== "dpa") return content
+
+  const preferredLabel = getPreferredDocumentDateLabel(input.documentType)
+  const formattedDate = formatDocumentDateRo(generatedAtISO)
+  const preparedBy = input.preparedBy?.trim()
+  const metadataLines = [
+    `**${preferredLabel}:** ${formattedDate}`,
+    `**Client / Operator:** ${input.orgName}`,
+    `**Furnizor / Procesator:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+    ...(preparedBy ? [`**Pregătit de:** ${preparedBy}`] : []),
+    ...(input.dpoEmail ? [`**Contact consultant / DPO:** ${input.dpoEmail}`] : []),
+    `**Status:** DRAFT — necesită validare înainte de utilizare oficială`,
+  ]
+
+  const lines = content.split("\n")
+  const firstHeadingIndex = lines.findIndex((line) => line.startsWith("# "))
+  const insertAt = firstHeadingIndex >= 0 ? firstHeadingIndex + 1 : 0
+  const bodyWithoutDuplicateMetadata = lines.filter((line) => {
+    return !/^\*\*(Data generării|Client \/ Operator|Operator|Furnizor \/ Procesator|Procesator \/ furnizor|Pregătit de|Contact consultant \/ DPO|Status)\*\*:/i.test(line.trim())
+  })
+
+  bodyWithoutDuplicateMetadata.splice(insertAt, 0, "", ...metadataLines, "")
+  return bodyWithoutDuplicateMetadata.join("\n").replace(/\n{3,}/g, "\n\n")
+}
+
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
 function buildPrompt(input: DocumentGenerationInput, generatedAtISO: string): string {
@@ -1350,7 +1380,11 @@ export async function generateDocument(
       label: `document-generator:${input.documentType}`,
     })
 
-    const normalizedContent = normalizeGeneratedDocumentContent(result.content, input.documentType, now)
+    const normalizedContent = ensureGeneratedDocumentIdentity(
+      normalizeGeneratedDocumentContent(result.content, input.documentType, now),
+      input,
+      now
+    )
     const expiry = calculateExpiryDates(input.documentType, now)
 
     return {

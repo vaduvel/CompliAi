@@ -9,6 +9,26 @@
 
 ---
 
+## ✅ Update 28 apr 2026 (DPO client-ready hardening)
+
+**DPO Cabinet flow este validat runtime pentru pilot controlat.**
+
+- Build: `npm run build` ✅
+- Tests: `npm test` → **241 files passed**, **1240 tests passed**, 1 skipped ✅
+- Runtime smoke: `/private/tmp/dpo-client-ready-smoke.mjs` → **44/44 checks passed** ✅
+- Runtime package: `/private/tmp/dpo-client-ready-package.mjs` → **32/32 checks passed** ✅
+- Pachet nou: `/Users/vaduvageorge/Downloads/compliscan-dpo-complet-client-ready-2026-04-28.zip`
+
+Fixuri incluse în hardening:
+- DPO Complet rămâne cabinet/prepared by; Apex Logistic SRL rămâne client/operator în Audit Pack și documente.
+- White-label cabinet se moștenește la clientul importat.
+- DPA-ul separă corect client/procesator/cabinet/consultant.
+- Magic link approve/comment/reject alimentează evidence/task/event/traceability.
+- Partner-managed client poate exporta Audit Pack ZIP chiar dacă org-ul client este pe plan free local.
+- Audit Pack HTML/ZIP nu mai cade pe `Workspace local` și nu afișează `CompliAI`.
+
+---
+
 ## 🚀 Update 28 apr 2026 (release-ready wave)
 
 **Sprint 0 → Sprint 3 + S3.4 ICP login + S2B.3 hash chain + release-ready preflight + SEO homepage**

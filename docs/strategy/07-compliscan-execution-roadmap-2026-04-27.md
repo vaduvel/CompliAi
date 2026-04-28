@@ -1,9 +1,37 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v6.0 — 28 apr 2026, code-side launch ready)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.1 — 28 apr 2026, DPO client-ready verified)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.1 — DPO client-ready runtime verification (28 apr 2026, 13:20 EEST)**:
+
+✅ **DPO Cabinet flow este client-ready pentru pilot controlat.** Nu este deploy-uit production; este validat local pe `v3-unified` cu runtime real și pachet ZIP nou.
+
+Validare cod:
+- Build: `npm run build` ✅
+- Tests: `npm test` → **241 files passed**, **1240 tests passed**, 1 skipped ✅
+- Runtime smoke hardening: `/private/tmp/dpo-client-ready-smoke.mjs` → **44/44 checks passed** ✅
+- Runtime package generation: `/private/tmp/dpo-client-ready-package.mjs` → **32/32 checks passed** ✅
+
+Pachet nou pentru DPO Complet:
+- Folder: `/Users/vaduvageorge/Downloads/compliscan-dpo-complet-client-ready-2026-04-28`
+- ZIP: `/Users/vaduvageorge/Downloads/compliscan-dpo-complet-client-ready-2026-04-28.zip`
+- Conține: DPA Apex × Stripe, shared page before/after approval, dashboard state summary, Audit Pack client HTML, Audit Pack dossier ZIP, runtime report.
+
+Acoperire verificată end-to-end:
+- DPO Complet SRL este cabinetul; Apex Logistic SRL este clientul/operatorul.
+- White-label cabinet se moștenește corect pe workspace-ul clientului importat.
+- DPA-ul separă corect `Client / Operator`, `Furnizor / Procesator`, `Pregătit de`, `Consultant`.
+- Magic link public are approve + reject + comment, fără login client și fără brand CompliAI în HTML vizibil.
+- Aprobarea devine `adoptionStatus=signed`, evidence task `sufficient`, event ledger și traceability.
+- Audit Pack HTML și ZIP folosesc Apex Logistic ca workspace client și DPO Complet / Diana Popescu ca prepared by.
+- Monthly digest rulează peste state real; trimiterea email depinde de Resend/domain production.
+
+Verdict: **DPO flow poate intra în pilot controlat pe 1-2 clienți reali/pseudonimizați.** Următorul pas nu este încă deploy production general, ci verificare manuală founder-side + pilot kickoff.
+
+---
 
 **Versiune v6.0 — code-side launch ready (28 apr 2026)**:
 
@@ -66,7 +94,7 @@ DPO Complet (post pachet Sprint 0.5 trimis 27 apr) a confirmat: "produs suficien
 | 6 | Raport lunar din activitate reală | Sprint 2A | ✅ **DONE S2A.4** — cron monthly digest + agregare state real |
 | 7 | Export "audit_ready" după dovezi 100% | Sprint 2A | ✅ **DONE S2A.6** — `audit_ready` derivat canonic și surfacat în Vault |
 
-Total task-uri DPO: **7/7 funcționale pe v3-unified**. Validarea runtime cu pachet ZIP nou pentru DPO Complet este completă în v5.5.
+Total task-uri DPO: **7/7 funcționale pe v3-unified**. Validarea runtime cu pachet ZIP nou pentru DPO Complet este completă în v6.1: smoke **44/44**, package **32/32**.
 
 **Update v5.5 — runtime demo rerun final (27 apr 2026, 18:03 EEST)**:
 

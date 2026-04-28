@@ -18,6 +18,7 @@ import {
 import { createClaimInvite } from "@/lib/server/claim-ownership"
 import { getPartnerAccountPlanStatus, hasLegacyPartnerOrgPlan } from "@/lib/server/plan"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
+import { getWhiteLabelConfig, saveWhiteLabelConfig } from "@/lib/server/white-label"
 
 type ConfirmedRow = {
   orgName: string
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
     }
 
     const results: ImportRowResult[] = []
+    const partnerWhiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
 
     for (const row of activeRows) {
       if (!row.orgName?.trim()) {
@@ -106,6 +108,20 @@ export async function POST(request: Request) {
           row.orgName.trim(),
           "partner_manager"
         )
+
+        if (partnerWhiteLabel?.partnerName?.trim()) {
+          await saveWhiteLabelConfig(newOrg.orgId, {
+            partnerName: partnerWhiteLabel.partnerName,
+            tagline: partnerWhiteLabel.tagline,
+            logoUrl: partnerWhiteLabel.logoUrl,
+            brandColor: partnerWhiteLabel.brandColor,
+            aiEnabled: partnerWhiteLabel.aiEnabled,
+            signatureUrl: partnerWhiteLabel.signatureUrl,
+            signerName: partnerWhiteLabel.signerName,
+            icpSegment: partnerWhiteLabel.icpSegment,
+            aiProvider: partnerWhiteLabel.aiProvider,
+          })
+        }
 
         // Create claim invite if email present
         if (row.email?.includes("@")) {

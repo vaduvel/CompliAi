@@ -15,6 +15,8 @@ export function buildClientAuditPackDocument(
   auditPack: AuditPackV2,
   options?: {
     annexHrefBase?: string
+    preparedByName?: string | null
+    consultantName?: string | null
   }
 ): ClientAuditPackDocument {
   const dateLabel = auditPack.generatedAt.slice(0, 10)
@@ -23,11 +25,21 @@ export function buildClientAuditPackDocument(
 
   return {
     fileName,
-    html: buildClientAuditPackHtml(auditPack, annexHrefBase),
+    html: buildClientAuditPackHtml(auditPack, annexHrefBase, {
+      preparedByName: options?.preparedByName ?? null,
+      consultantName: options?.consultantName ?? null,
+    }),
   }
 }
 
-function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string) {
+function buildClientAuditPackHtml(
+  auditPack: AuditPackV2,
+  annexHrefBase: string,
+  options: {
+    preparedByName: string | null
+    consultantName: string | null
+  }
+) {
   const evidenceLedgerSummary =
     auditPack.executiveSummary.evidenceLedgerSummary ?? summarizeEvidenceLedger(auditPack.evidenceLedger)
   const hasEvidenceLedger = auditPack.evidenceLedger.length > 0
@@ -523,10 +535,17 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
     <main class="wrap">
       <section class="hero">
         <p class="eyebrow">CompliScan · Audit Pack client-facing</p>
-        <h1>Dosar de audit pentru ${escapeHtml(auditPack.workspace.label)}</h1>
+        <h1>Dosar de audit pentru ${escapeHtml(auditPack.workspace.name)}</h1>
         <p class="sub">
           Acest pachet leaga sursele analizate, sistemele AI identificate, drift-ul activ, controalele recomandate si dovezile validate intr-o forma printabila pentru stakeholderi non-tehnici si audit operational.
         </p>
+        ${
+          options.preparedByName || options.consultantName
+            ? `<p class="sub"><strong>Pregătit de:</strong> ${escapeHtml(
+                [options.preparedByName, options.consultantName].filter(Boolean).join(" · ")
+              )}</p>`
+            : ""
+        }
         <div class="tag-row">
           <span class="chip ${auditPack.executiveSummary.auditReadiness === "audit_ready" ? "success" : "warning"}">${escapeHtml(
             formatAuditReadiness(auditPack.executiveSummary.auditReadiness)
