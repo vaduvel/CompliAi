@@ -493,6 +493,94 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── ICP discovery band (link to landing pages per segment) ── */}
+        <section className="border-b border-eos-border px-6 py-16">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-10 max-w-2xl">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Pe rolul tău
+              </p>
+              <h2
+                data-display-text="true"
+                className="mt-3 font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text md:text-[34px]"
+              >
+                CompliScan se pliază pe segmentul tău.
+              </h2>
+              <p className="mt-3 max-w-xl text-[14px] leading-[1.6] text-eos-text-muted">
+                Patru ICP-uri Faza 1, fiecare cu workflow + pricing dedicat. Click pe segmentul tău pentru detalii și activare self-serve.
+              </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  href: "/dpo",
+                  badge: "Cabinet DPO",
+                  title: "DPO consultanți",
+                  desc: "Înlocuim Excel + Word + Drive. Magic links + Audit Pack + white-label.",
+                  accent: "violet",
+                },
+                {
+                  href: "/fiscal",
+                  badge: "Cabinet Fiscal",
+                  title: "Contabili CECCAR",
+                  desc: "Layer compliance peste SmartBill / Saga / Oblio. UBL CIUS-RO validator + e-TVA.",
+                  accent: "amber",
+                },
+                {
+                  href: "/imm",
+                  badge: "IMM Internal",
+                  title: "Compliance Officer",
+                  desc: "Control tower 50-250 ang. GDPR + AI Act + NIS2 + DORA într-un singur tool.",
+                  accent: "emerald",
+                },
+                {
+                  href: "/nis2",
+                  badge: "Enterprise",
+                  title: "CISO / multi-framework",
+                  desc: "Governance NIS2 + DORA + ISO 27001 readiness. Sales-led pricing.",
+                  accent: "indigo",
+                },
+              ].map((card) => {
+                const accentClass =
+                  card.accent === "violet"
+                    ? "border-violet-500/30 bg-violet-500/[0.04] hover:border-violet-500/50 text-violet-300"
+                    : card.accent === "amber"
+                      ? "border-amber-500/30 bg-amber-500/[0.04] hover:border-amber-500/50 text-amber-300"
+                      : card.accent === "emerald"
+                        ? "border-emerald-500/30 bg-emerald-500/[0.04] hover:border-emerald-500/50 text-emerald-300"
+                        : "border-indigo-500/30 bg-indigo-500/[0.04] hover:border-indigo-500/50 text-indigo-300"
+                return (
+                  <Link
+                    key={card.href}
+                    href={card.href}
+                    className={`group rounded-eos-lg border bg-eos-surface p-5 transition-all hover:scale-[1.01] ${accentClass.split(" ").slice(0, 3).join(" ")}`}
+                  >
+                    <span
+                      className={`inline-flex items-center rounded-sm px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${accentClass.split(" ").slice(3).join(" ")}`}
+                    >
+                      {card.badge}
+                    </span>
+                    <h3
+                      data-display-text="true"
+                      className="mt-3 font-display text-[16px] font-semibold tracking-[-0.015em] text-eos-text"
+                    >
+                      {card.title}
+                    </h3>
+                    <p className="mt-2 text-[12.5px] leading-[1.55] text-eos-text-muted">
+                      {card.desc}
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-eos-text-tertiary group-hover:text-eos-text-muted">
+                      Vezi detalii
+                      <ChevronRight className="size-3" strokeWidth={2.5} />
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* ── Cum merge — V3 4-values band ── */}
         <section className="border-b border-eos-border px-6 py-20">
           <div className="mx-auto max-w-6xl">

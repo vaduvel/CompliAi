@@ -9,6 +9,31 @@
 
 ---
 
+## 🚀 Update 28 apr 2026 (release-ready wave)
+
+**Sprint 0 → Sprint 3 + S3.4 ICP login + S2B.3 hash chain + release-ready preflight + SEO homepage**
+
+**Commits noi în această zi** (de la `41854bb` → `(final)`):
+- `b43e395` S2A.1 Stripe ICP tier registry
+- `96e0f47` S2A.7 Supabase dual-write + migration
+- `2a4f75e` S2B.1 Mistral EU
+- `8a8be85` S3 landing pages + waitlist
+- `5b5748f` SEO sitemap update
+- `290c44c` Unit tests +24 (waitlist + tiers + ai-provider)
+- `9213c4b` S3.4 ICP-aware login page (5 variants)
+- `6deea54` S2B.3 hash chain end-to-end events ledger
+- `(final)` Release-ready preflight script + .env.example complet + RELEASE-READY-CHECKLIST.md + homepage ICP discovery
+
+**Build**: clean, **1235 tests pass**, 0 fails, 6 skipped.
+
+**Documentație nouă pentru launch**:
+- `docs/strategy/RELEASE-READY-CHECKLIST.md` — singura listă pentru founder
+- `.env.example` — actualizat cu toate 14 Stripe ICP SKU + Mistral + cabinet email overrides
+- `scripts/verify-release-ready.mjs` — preflight automat (`npm run verify:release-ready[:strict]`)
+- `scripts/migrate-fs-to-supabase.mjs` — cutover playbook one-time copy
+
+---
+
 ## 🌙 Update auto-mode 27 apr 2026 (sesiune nocturnă)
 
 **Status final după sesiunea auto-mode**: Sprint 0 + 0.5 + 1 + 2A + 2B (parțial — Mistral) + 3 (drift + landing + waitlist) **DONE**.
