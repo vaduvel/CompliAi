@@ -12,7 +12,7 @@
 
 - [ ] Diana a răspuns la pre-pilot email → știu pitch type (Replacement / Challenger / Complementar / Layer)
 - [ ] Sprint 0 cele 7 bug-uri done + ZIP package nou trimis (joi 1 mai)
-- [ ] Setup demo data: 3 clienți (Apex Logistic, Lumen Energy, Cobalt Fintech) cu findings injected
+- [ ] Setup demo data: rulează `/demo/dpo-consultant` — 3 clienți (Apex Logistic, Lumen Clinic, Cobalt Fintech) cu findings DPO seed-uite
 - [ ] Brand DPO Complet activ în cabinet config (logo, signature Diana, color cobalt)
 - [ ] Templates DPO Complet importate manual (Sprint 1.1 workaround) — minim Privacy Policy + DPA
 - [ ] Slide deck final review (5 min intro + 15 min demo + 10 min cele 6 condiții + 15 min plan + 10 Q&A + 5 next steps)

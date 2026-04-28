@@ -9,6 +9,20 @@
 
 ---
 
+## 🎬 Update 28 apr 2026 (runtime demo consultant DPO)
+
+**Scenariu nou rulabil**: `/demo/dpo-consultant`.
+
+- Rol: Diana Popescu, CIPP/E — DPO Complet SRL.
+- Seed: 3 clienți fictivi în portofoliu partner:
+  - Apex Logistic SRL — DPA Stripe, RoPA, cookie banner.
+  - Lumen Clinic SRL — DSAR critic, DPIA date medicale, retenție.
+  - Cobalt Fintech IFN — DPIA scoring, AI minimizare, DPA payroll.
+- Include dovadă validată pentru DPA Apex × Stripe: document `signed`, evidence quality `sufficient`, event `document.shared_approved`.
+- Document demo: `docs/strategy/pilot/dpo-consultant-runtime-demo-scenario-2026-04-28.md`.
+
+---
+
 ## ✅ Update 28 apr 2026 (DPO client-ready hardening)
 
 **DPO Cabinet flow este validat runtime pentru pilot controlat.**

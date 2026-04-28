@@ -10,13 +10,19 @@ import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import type { Nis2OrgState, Nis2Vendor, Nis2Incident, BoardMember, MaturityAssessment } from "@/lib/server/nis2-store"
 
-export type DemoScenario = "imm" | "nis2" | "partner" | "revalidation"
+export type DemoScenario = "imm" | "nis2" | "partner" | "revalidation" | "dpo-consultant"
 
 export type DemoOrgConfig = {
   orgId: string
   orgName: string
   email: string
   role: "owner"
+}
+
+export type DemoPortfolioClientSeed = {
+  orgName: string
+  state: ComplianceState
+  nis2State?: Nis2OrgState | null
 }
 
 // ── Demo org identifiers ──────────────────────────────────────────────────────
@@ -44,6 +50,12 @@ export const DEMO_ORG: Record<DemoScenario, DemoOrgConfig> = {
     orgId: "org-demo-revalidation",
     orgName: "Demo Revalidation SRL",
     email: "demo@demo-revalidation.compliscan.ro",
+    role: "owner",
+  },
+  "dpo-consultant": {
+    orgId: "org-demo-dpo-consultant",
+    orgName: "DPO Complet SRL",
+    email: "diana@demo-dpo-consultant.compliscan.ro",
     role: "owner",
   },
 }
@@ -1214,6 +1226,790 @@ function buildRevalidationState(): ComplianceState {
   }
 }
 
+// ── Scenariul E — Consultant DPO cu 3 clienți fictivi ────────────────────────
+
+const DPO_DEMO_NOW = "2026-04-28T10:00:00.000Z"
+
+function buildDpoEvidence(
+  id: string,
+  fileName: string,
+  uploadedAtISO: string,
+  summary: string,
+  kind: "document_bundle" | "policy_text" | "screenshot" | "log_export" = "document_bundle"
+) {
+  return {
+    id,
+    fileName,
+    mimeType: fileName.endsWith(".json")
+      ? "application/json"
+      : fileName.endsWith(".pdf")
+        ? "application/pdf"
+        : "text/plain",
+    sizeBytes: 42_000,
+    uploadedAtISO,
+    kind,
+    quality: {
+      status: "sufficient" as const,
+      summary,
+      reasonCodes: [],
+      checkedAtISO: uploadedAtISO,
+    },
+  }
+}
+
+function buildApexLogisticDpoState(): ComplianceState {
+  const profile: OrgProfile = {
+    sector: "transport",
+    employeeCount: "50-249",
+    usesAITools: false,
+    requiresEfactura: false,
+    cui: "RO12345678",
+    completedAtISO: "2026-04-18T09:00:00.000Z",
+  }
+  const applicability = evaluateApplicability(profile)
+
+  const findings: ScanFinding[] = [
+    {
+      id: "apex-gdpr-dpa-stripe",
+      title: "DPA Stripe expirat / nelink-uit la dosar",
+      detail:
+        "Apex Logistic folosește Stripe pentru plăți, dar nu are dovada DPA-ului actualizat în dosar și nu poate demonstra baza contractuală Art. 28 la control.",
+      category: "GDPR",
+      severity: "high",
+      risk: "high",
+      principles: ["privacy_data_governance", "accountability"],
+      createdAtISO: "2026-04-18T09:10:00.000Z",
+      sourceDocument: "Contract_Stripe_Apex_2025.pdf",
+      legalReference: "GDPR Art. 28",
+      suggestedDocumentType: "dpa",
+      impactSummary: "Risc ANSPDCP: procesator critic fără dovadă contractuală actuală.",
+      remediationHint:
+        "Generează DPA Apex × Stripe, trimite patronului magic link și salvează aprobarea ca dovadă.",
+      evidenceRequired: "DPA actualizat + aprobare client prin magic link + intrare în evidence ledger.",
+      evidenceTypes: ["document_bundle", "log_export"],
+      resolution: {
+        problem: "DPA Stripe nu este dovedit în dosarul clientului",
+        impact: "Nu se poate demonstra conformitatea Art. 28 pentru procesator de plăți.",
+        action: "Generează DPA, validează profesional, trimite magic link și atașează aprobarea.",
+        closureEvidence: "DPA aprobat prin magic link + hash în Audit Pack.",
+      },
+      findingStatus: "resolved",
+      findingStatusUpdatedAtISO: "2026-04-28T10:18:50.000Z",
+      operationalEvidenceNote:
+        "DPA Apex × Stripe aprobat de Mihai Ionescu prin magic link în demo.",
+    },
+    {
+      id: "apex-gdpr-ropa-stripe",
+      title: "RoPA nu include Stripe ca procesator",
+      detail:
+        "Registrul Art. 30 menționează plăți online, dar nu include Stripe Payments Europe ca procesator și nu descrie categoriile de date de tranzacție.",
+      category: "GDPR",
+      severity: "medium",
+      risk: "high",
+      principles: ["privacy_data_governance", "accountability"],
+      createdAtISO: "2026-04-18T09:30:00.000Z",
+      sourceDocument: "RoPA_Apex_v2.xlsx",
+      legalReference: "GDPR Art. 30",
+      suggestedDocumentType: "ropa",
+      impactSummary: "Registrul nu reflectă fluxul real de plăți; auditul poate cere completare imediată.",
+      remediationHint:
+        "Actualizează RoPA cu Stripe: scop, categorii date, temei, destinatari și termen de păstrare.",
+      evidenceRequired: "RoPA actualizat, export PDF/XLSX și notă de revizie DPO.",
+      evidenceTypes: ["document_bundle"],
+      resolution: {
+        problem: "Procesator critic lipsește din RoPA.",
+        impact: "Accountability incompletă la control.",
+        action: "Actualizează RoPA și marchează versiunea nouă ca revizuită.",
+        closureEvidence: "RoPA v3 exportat + notă de revizie.",
+      },
+    },
+    {
+      id: "apex-gdpr-cookie-reject",
+      title: "Cookie banner fără opțiune reală de respingere",
+      detail:
+        "Site-ul Apex Logistic setează scripturi de analytics înainte de consimțământ și afișează doar buton de acceptare rapidă.",
+      category: "GDPR",
+      severity: "high",
+      risk: "high",
+      principles: ["transparency", "accountability"],
+      createdAtISO: "2026-04-19T11:00:00.000Z",
+      sourceDocument: "https://apex-logistic.example.test",
+      legalReference: "GDPR Art. 5, Art. 6 + ePrivacy",
+      suggestedDocumentType: "cookie-policy",
+      impactSummary: "Consimțământ invalid pentru analytics / marketing.",
+      remediationHint:
+        "Generează recomandarea cookie, actualizează bannerul și atașează screenshot după remediere.",
+      evidenceRequired: "Screenshot banner cu Accept / Respinge / Setări + log de consimțământ.",
+      evidenceTypes: ["screenshot", "log_export"],
+      resolution: {
+        problem: "Consimțământ cookie incomplet.",
+        impact: "Risc de practică neloială / prelucrare fără temei.",
+        action: "Adaugă respingere simetrică și blochează scripturile până la consimțământ.",
+        closureEvidence: "Screenshot banner + export log consent.",
+      },
+    },
+  ]
+
+  const generatedDocuments: GeneratedDocumentRecord[] = [
+    {
+      id: "apex-doc-dpa-stripe",
+      documentType: "dpa",
+      title: "DPA — Apex Logistic SRL × Stripe Payments Europe",
+      content:
+        "# Acord de Prelucrare a Datelor (DPA) — Apex Logistic SRL × Stripe Payments Europe\n\n**Data generării:** 28 aprilie 2026\n**Client / Operator:** Apex Logistic SRL\n**Furnizor / Procesator:** Stripe Payments Europe\n**Pregătit de:** DPO Complet SRL\n**Contact consultant / DPO:** diana@dpocomplet.ro\n**Status:** DRAFT — validat în demo prin magic link.\n",
+      generatedAtISO: "2026-04-28T10:12:00.000Z",
+      llmUsed: false,
+      sourceFindingId: "apex-gdpr-dpa-stripe",
+      adoptionStatus: "signed",
+      adoptionUpdatedAtISO: "2026-04-28T10:18:50.000Z",
+      adoptionEvidenceNote: "Mihai Ionescu a aprobat documentul prin magic link.",
+      approvalStatus: "approved_as_evidence",
+      approvedAtISO: "2026-04-28T10:18:50.000Z",
+      approvedByEmail: "mihai.ionescu@apex-logistic.example.test",
+      validationStatus: "passed",
+      validatedAtISO: "2026-04-28T10:18:50.000Z",
+      expiresAtISO: "2027-04-28T10:12:00.000Z",
+      refreshStatus: "current",
+    },
+    {
+      id: "apex-doc-cookie-draft",
+      documentType: "cookie-policy",
+      title: "Draft recomandare Cookie Banner — Apex Logistic SRL",
+      generatedAtISO: "2026-04-28T10:25:00.000Z",
+      llmUsed: false,
+      sourceFindingId: "apex-gdpr-cookie-reject",
+      adoptionStatus: "reviewed_internally",
+      adoptionUpdatedAtISO: "2026-04-28T10:30:00.000Z",
+      expiresAtISO: "2027-04-28T10:25:00.000Z",
+      refreshStatus: "current",
+    },
+  ]
+
+  return {
+    highRisk: 2,
+    lowRisk: 1,
+    gdprProgress: 68,
+    efacturaSyncedAtISO: "2026-04-18T09:00:00.000Z",
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 4,
+    orgProfile: profile,
+    applicability,
+    alerts: [
+      {
+        id: "apex-alert-cookie",
+        message: "Cookie banner fără opțiune de respingere — necesită screenshot după remediere.",
+        severity: "high",
+        open: true,
+        createdAtISO: "2026-04-19T11:05:00.000Z",
+        findingId: "apex-gdpr-cookie-reject",
+      },
+      {
+        id: "apex-alert-ropa",
+        message: "RoPA nu include Stripe ca procesator.",
+        severity: "medium",
+        open: true,
+        createdAtISO: "2026-04-18T09:35:00.000Z",
+        findingId: "apex-gdpr-ropa-stripe",
+      },
+    ],
+    findings,
+    scans: [
+      {
+        id: "apex-scan-contract",
+        documentName: "Contract_Stripe_Apex_2025.pdf",
+        contentPreview: "Contract servicii de plată Stripe — lipsă DPA atașat în dosar.",
+        createdAtISO: "2026-04-18T09:10:00.000Z",
+        findingsCount: 1,
+      },
+      {
+        id: "apex-scan-website",
+        documentName: "Website_Apex_Cookie_Check.html",
+        contentPreview: "Scan site: analytics încărcat înainte de consimțământ.",
+        createdAtISO: "2026-04-19T11:00:00.000Z",
+        findingsCount: 1,
+      },
+    ],
+    generatedDocuments,
+    chat: [],
+    taskState: {
+      "document-approval-apex-doc-dpa-stripe": {
+        status: "done",
+        updatedAtISO: "2026-04-28T10:18:50.000Z",
+        validationStatus: "passed",
+        validationMessage: "Aprobare client capturată prin magic link pentru DPA Stripe.",
+        validationConfidence: "high",
+        validationBasis: "direct_signal",
+        validatedAtISO: "2026-04-28T10:18:50.000Z",
+        attachedEvidenceMeta: buildDpoEvidence(
+          "evidence-document-approval-apex-doc-dpa-stripe",
+          "client-approval-apex-doc-dpa-stripe.json",
+          "2026-04-28T10:18:50.000Z",
+          "Aprobarea clientului a fost capturată prin magic link și intră în pachetul de audit."
+        ),
+      },
+      "apex-gdpr-dpa-stripe": {
+        status: "done",
+        updatedAtISO: "2026-04-28T10:18:50.000Z",
+        validationStatus: "passed",
+        validationMessage: "DPA Stripe validat prin magic link.",
+        validationConfidence: "high",
+        validationBasis: "direct_signal",
+        validatedAtISO: "2026-04-28T10:18:50.000Z",
+        attachedEvidence: "DPA Apex × Stripe aprobat prin magic link de Mihai Ionescu.",
+        attachedEvidenceMeta: buildDpoEvidence(
+          "evidence-apex-dpa-stripe",
+          "dpa-apex-stripe-approved.pdf",
+          "2026-04-28T10:18:50.000Z",
+          "DPA aprobat de client și legat de finding-ul Art. 28."
+        ),
+      },
+      "apex-gdpr-ropa-stripe": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T10:20:00.000Z",
+      },
+      "apex-gdpr-cookie-reject": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T10:30:00.000Z",
+      },
+    },
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events: [
+      {
+        id: "apex-event-scan",
+        type: "scan_completed",
+        entityType: "scan",
+        entityId: "apex-scan-contract",
+        message: "Scan DPA Stripe: lipsă dovadă Art. 28.",
+        createdAtISO: "2026-04-18T09:10:00.000Z",
+        actorSource: "system",
+        actorId: "demo-dpo-scanner",
+      },
+      {
+        id: "apex-event-dpa-generated",
+        type: "document_generated",
+        entityType: "system",
+        entityId: "apex-doc-dpa-stripe",
+        message: "DPA Apex × Stripe pregătit de DPO Complet.",
+        createdAtISO: "2026-04-28T10:12:00.000Z",
+        actorSource: "session",
+        actorId: "demo-user-dpo-consultant",
+      },
+      {
+        id: "apex-event-approved",
+        type: "document.shared_approved",
+        entityType: "system",
+        entityId: "apex-doc-dpa-stripe",
+        message: "Document aprobat prin magic link: DPA — Apex Logistic SRL × Stripe Payments Europe.",
+        createdAtISO: "2026-04-28T10:18:50.000Z",
+        actorLabel: "Mihai Ionescu",
+        actorSource: "system",
+        metadata: {
+          documentType: "dpa",
+          adoptionStatus: "signed",
+          shareRecipientType: "partner",
+        },
+      },
+    ],
+  }
+}
+
+function buildLumenClinicDpoState(): ComplianceState {
+  const profile: OrgProfile = {
+    sector: "health",
+    employeeCount: "50-249",
+    usesAITools: false,
+    requiresEfactura: false,
+    cui: "RO22334455",
+    completedAtISO: "2026-04-10T09:00:00.000Z",
+  }
+  const applicability = evaluateApplicability(profile)
+
+  const findings: ScanFinding[] = [
+    {
+      id: "lumen-dsar-overdue",
+      title: "DSAR pacient neînchis — termen 30 zile depășit",
+      detail:
+        "Cererea pacientului pentru acces la date medicale a fost primită acum 34 zile și nu are răspuns final documentat.",
+      category: "GDPR",
+      severity: "critical",
+      risk: "high",
+      principles: ["transparency", "accountability"],
+      createdAtISO: "2026-04-24T08:00:00.000Z",
+      sourceDocument: "Email_pacient_DSAR_2026-03-25.eml",
+      legalReference: "GDPR Art. 12 și Art. 15",
+      impactSummary: "Termen legal depășit; risc de plângere ANSPDCP.",
+      remediationHint:
+        "Pregătește răspuns DSAR, validează excepțiile medicale cu consultantul și salvează dovada trimiterii.",
+      evidenceRequired: "Răspuns DSAR trimis + dovadă transmitere + registru DSAR actualizat.",
+      evidenceTypes: ["document_bundle", "log_export"],
+      resolution: {
+        problem: "DSAR depășit fără răspuns final.",
+        impact: "Risc ridicat de reclamație și sancțiune.",
+        action: "Pregătește răspunsul, verifică datele medicale și trimite în regim urgent.",
+        closureEvidence: "Email / confirmare transmitere + registru DSAR completat.",
+      },
+    },
+    {
+      id: "lumen-dpia-special-categories",
+      title: "DPIA lipsă pentru portalul de programări medicale",
+      detail:
+        "Portalul colectează simptome și informații medicale, dar nu există DPIA actualizat pentru prelucrare de categorii speciale.",
+      category: "GDPR",
+      severity: "high",
+      risk: "high",
+      principles: ["privacy_data_governance", "oversight"],
+      createdAtISO: "2026-04-20T10:00:00.000Z",
+      sourceDocument: "Portal_Programari_Lumen.pdf",
+      legalReference: "GDPR Art. 35 + Art. 9",
+      suggestedDocumentType: "privacy-policy",
+      impactSummary: "Prelucrare cu risc ridicat fără evaluare documentată.",
+      remediationHint: "Creează DPIA, identifică riscuri și măsuri tehnice/organizatorice.",
+      evidenceRequired: "DPIA validat + aprobare management + măsuri implementate.",
+      evidenceTypes: ["document_bundle"],
+      resolution: {
+        problem: "DPIA lipsă pentru date medicale.",
+        impact: "Risc ridicat GDPR Art. 35.",
+        action: "Completează DPIA și atașează aprobarea conducerii.",
+        closureEvidence: "DPIA semnat + plan de măsuri.",
+      },
+    },
+    {
+      id: "lumen-retention-policy",
+      title: "Politica de retenție nu separă fișe medicale de date marketing",
+      detail:
+        "Politica actuală folosește același termen generic pentru dosare medicale, programări și newsletter.",
+      category: "GDPR",
+      severity: "medium",
+      risk: "high",
+      principles: ["privacy_data_governance", "accountability"],
+      createdAtISO: "2026-04-21T12:00:00.000Z",
+      sourceDocument: "Politica_Retentie_Lumen_2024.docx",
+      legalReference: "GDPR Art. 5(1)(e)",
+      suggestedDocumentType: "retention-policy",
+      impactSummary: "Risc de păstrare excesivă sau ștergere prematură a datelor medicale.",
+      remediationHint:
+        "Definește termene separate pentru documente medicale, programări, facturare și marketing.",
+      evidenceRequired: "Politică retenție revizuită + confirmare implementare operațională.",
+      evidenceTypes: ["policy_text"],
+      resolution: {
+        problem: "Retenție nediferențiată pentru categorii de date diferite.",
+        impact: "Risc GDPR Art. 5(1)(e).",
+        action: "Actualizează politica și calendarul de ștergere.",
+        closureEvidence: "Politică revizuită + jurnal implementare.",
+      },
+    },
+  ]
+
+  return {
+    highRisk: 2,
+    lowRisk: 1,
+    gdprProgress: 42,
+    efacturaSyncedAtISO: "2026-04-20T09:00:00.000Z",
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 3,
+    orgProfile: profile,
+    applicability,
+    alerts: [
+      {
+        id: "lumen-alert-dsar",
+        message: "DSAR pacient depășit — răspuns urgent necesar.",
+        severity: "critical",
+        open: true,
+        createdAtISO: "2026-04-24T08:10:00.000Z",
+        findingId: "lumen-dsar-overdue",
+      },
+      {
+        id: "lumen-alert-dpia",
+        message: "DPIA lipsă pentru portal cu date medicale.",
+        severity: "high",
+        open: true,
+        createdAtISO: "2026-04-20T10:15:00.000Z",
+        findingId: "lumen-dpia-special-categories",
+      },
+    ],
+    findings,
+    scans: [
+      {
+        id: "lumen-scan-dsar",
+        documentName: "Email_pacient_DSAR_2026-03-25.eml",
+        contentPreview: "Cerere acces date medicale primită de la pacient — termen depășit.",
+        createdAtISO: "2026-04-24T08:00:00.000Z",
+        findingsCount: 1,
+      },
+      {
+        id: "lumen-scan-portal",
+        documentName: "Portal_Programari_Lumen.pdf",
+        contentPreview: "Descriere portal programări medicale + formulare simptome.",
+        createdAtISO: "2026-04-20T10:00:00.000Z",
+        findingsCount: 1,
+      },
+    ],
+    generatedDocuments: [
+      {
+        id: "lumen-doc-dsar-draft",
+        documentType: "deletion-attestation",
+        title: "Draft răspuns DSAR pacient — Lumen Clinic SRL",
+        generatedAtISO: "2026-04-28T11:00:00.000Z",
+        llmUsed: false,
+        sourceFindingId: "lumen-dsar-overdue",
+        adoptionStatus: "reviewed_internally",
+        adoptionUpdatedAtISO: "2026-04-28T11:10:00.000Z",
+        refreshStatus: "current",
+      },
+    ],
+    chat: [],
+    taskState: {
+      "lumen-dsar-overdue": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T11:10:00.000Z",
+        validationStatus: "needs_review",
+        validationMessage: "Draftul DSAR există, dar lipsește dovada trimiterii către pacient.",
+        validationConfidence: "medium",
+        validationBasis: "operational_state",
+      },
+      "lumen-dpia-special-categories": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T11:00:00.000Z",
+      },
+      "lumen-retention-policy": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T11:00:00.000Z",
+      },
+    },
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events: [
+      {
+        id: "lumen-event-dsar-alert",
+        type: "alert_created",
+        entityType: "alert",
+        entityId: "lumen-alert-dsar",
+        message: "DSAR depășit detectat pentru Lumen Clinic SRL.",
+        createdAtISO: "2026-04-24T08:10:00.000Z",
+        actorSource: "system",
+        actorId: "demo-dpo-monitor",
+      },
+    ],
+  }
+}
+
+function buildCobaltFintechDpoState(): ComplianceState {
+  const profile: OrgProfile = {
+    sector: "finance",
+    employeeCount: "50-249",
+    usesAITools: true,
+    requiresEfactura: false,
+    cui: "RO33445566",
+    completedAtISO: "2026-04-12T09:00:00.000Z",
+  }
+  const applicability = evaluateApplicability(profile)
+
+  const findings: ScanFinding[] = [
+    {
+      id: "cobalt-gdpr-credit-dpia",
+      title: "DPIA lipsă pentru scoring credit / decizie asistată",
+      detail:
+        "Cobalt folosește scor intern pentru risc de credit, dar nu are DPIA validat și nu documentează suficient intervenția umană.",
+      category: "GDPR",
+      severity: "high",
+      risk: "high",
+      principles: ["oversight", "accountability"],
+      createdAtISO: "2026-04-22T09:00:00.000Z",
+      sourceDocument: "Procedura_Scoring_Cobalt_2026.pdf",
+      legalReference: "GDPR Art. 22 + Art. 35",
+      suggestedDocumentType: "ai-governance",
+      impactSummary: "Risc ridicat dacă scoring-ul produce efecte juridice fără control uman clar.",
+      remediationHint:
+        "Documentează DPIA, intervenția umană și dreptul de contestare pentru client.",
+      evidenceRequired: "DPIA + descriere human review + policy contestare decizie.",
+      evidenceTypes: ["document_bundle", "policy_text"],
+      resolution: {
+        problem: "Scoring cu risc ridicat fără DPIA validat.",
+        impact: "Risc GDPR Art. 22 și Art. 35.",
+        action: "Completează DPIA și descrie intervenția umană reală.",
+        closureEvidence: "DPIA semnat + procedură human review.",
+      },
+    },
+    {
+      id: "cobalt-ai-inventory-chatgpt",
+      title: "ChatGPT Enterprise folosit fără regulă de minimizare date",
+      detail:
+        "Echipa suport folosește ChatGPT Enterprise pentru drafturi către clienți, dar nu există instrucțiuni clare de minimizare / pseudonimizare.",
+      category: "EU_AI_ACT",
+      severity: "medium",
+      risk: "high",
+      principles: ["transparency", "privacy_data_governance"],
+      createdAtISO: "2026-04-23T09:00:00.000Z",
+      sourceDocument: "Inventar_AI_Cobalt.xlsx",
+      legalReference: "EU AI Act + GDPR Art. 5(1)(c)",
+      suggestedDocumentType: "ai-governance",
+      impactSummary: "Risc de introducere date personale în prompturi fără control suficient.",
+      remediationHint:
+        "Activează AI OFF pentru documente sensibile și generează procedură internă de utilizare AI.",
+      evidenceRequired: "Politică AI internă + atestare instruire echipă + AI OFF pentru client sensibil.",
+      evidenceTypes: ["policy_text", "log_export"],
+      resolution: {
+        problem: "Utilizare AI fără reguli de minimizare.",
+        impact: "Risc GDPR și AI governance.",
+        action: "Setează AI OFF, creează procedură și instruire.",
+        closureEvidence: "Politică AI + log atestare.",
+      },
+    },
+    {
+      id: "cobalt-payroll-dpa",
+      title: "DPA furnizor payroll fără clauză de incident",
+      detail:
+        "Contractul cu Payroll Cloud SRL include prelucrare salariați, dar nu are clauză explicită de notificare incident în 24h.",
+      category: "GDPR",
+      severity: "medium",
+      risk: "high",
+      principles: ["accountability"],
+      createdAtISO: "2026-04-24T09:00:00.000Z",
+      sourceDocument: "Contract_Payroll_Cloud_2025.pdf",
+      legalReference: "GDPR Art. 28",
+      suggestedDocumentType: "dpa",
+      impactSummary: "Procesator HR cu clauze incomplete pentru incident și audit.",
+      remediationHint:
+        "Generează addendum DPA și trimite spre aprobare furnizorului / managementului.",
+      evidenceRequired: "Addendum DPA semnat sau dovada solicitării trimise.",
+      evidenceTypes: ["document_bundle"],
+      resolution: {
+        problem: "Clauze DPA incomplete pentru payroll.",
+        impact: "Risc Art. 28 pe date angajați.",
+        action: "Pregătește addendum și urmărește semnarea.",
+        closureEvidence: "Addendum semnat / email de solicitare.",
+      },
+    },
+  ]
+
+  return {
+    highRisk: 1,
+    lowRisk: 2,
+    gdprProgress: 58,
+    efacturaSyncedAtISO: "2026-04-22T09:00:00.000Z",
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 3,
+    orgProfile: profile,
+    applicability,
+    alerts: [
+      {
+        id: "cobalt-alert-ai-off",
+        message: "Client sensibil: AI document generation este oprit; folosește template-uri cabinet.",
+        severity: "medium",
+        open: true,
+        createdAtISO: "2026-04-23T09:15:00.000Z",
+        findingId: "cobalt-ai-inventory-chatgpt",
+      },
+      {
+        id: "cobalt-alert-dpia",
+        message: "DPIA scoring credit lipsește — risc ridicat Art. 22/35.",
+        severity: "high",
+        open: true,
+        createdAtISO: "2026-04-22T09:05:00.000Z",
+        findingId: "cobalt-gdpr-credit-dpia",
+      },
+    ],
+    findings,
+    scans: [
+      {
+        id: "cobalt-scan-scoring",
+        documentName: "Procedura_Scoring_Cobalt_2026.pdf",
+        contentPreview: "Procedură scoring credit cu intervenție umană insuficient documentată.",
+        createdAtISO: "2026-04-22T09:00:00.000Z",
+        findingsCount: 1,
+      },
+      {
+        id: "cobalt-scan-ai",
+        documentName: "Inventar_AI_Cobalt.xlsx",
+        contentPreview: "Inventar AI: ChatGPT Enterprise folosit de suport și compliance.",
+        createdAtISO: "2026-04-23T09:00:00.000Z",
+        findingsCount: 1,
+      },
+    ],
+    generatedDocuments: [
+      {
+        id: "cobalt-doc-ai-policy",
+        documentType: "ai-governance",
+        title: "Procedură AI OFF + minimizare prompturi — Cobalt Fintech IFN",
+        generatedAtISO: "2026-04-28T12:00:00.000Z",
+        llmUsed: false,
+        sourceFindingId: "cobalt-ai-inventory-chatgpt",
+        adoptionStatus: "reviewed_internally",
+        adoptionUpdatedAtISO: "2026-04-28T12:10:00.000Z",
+        refreshStatus: "current",
+      },
+    ],
+    chat: [],
+    taskState: {
+      "cobalt-ai-inventory-chatgpt": {
+        status: "done",
+        updatedAtISO: "2026-04-28T12:10:00.000Z",
+        validationStatus: "passed",
+        validationMessage: "AI OFF confirmat pentru client sensibil; politica internă este în dosar.",
+        validationConfidence: "high",
+        validationBasis: "operational_state",
+        validatedAtISO: "2026-04-28T12:10:00.000Z",
+        attachedEvidence: "Config AI OFF + procedură minimizare prompturi.",
+        attachedEvidenceMeta: buildDpoEvidence(
+          "evidence-cobalt-ai-off",
+          "cobalt-ai-off-policy.txt",
+          "2026-04-28T12:10:00.000Z",
+          "Politica AI și configurarea AI OFF au fost atașate la dosar.",
+          "policy_text"
+        ),
+      },
+      "cobalt-gdpr-credit-dpia": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T12:00:00.000Z",
+      },
+      "cobalt-payroll-dpa": {
+        status: "todo",
+        updatedAtISO: "2026-04-28T12:00:00.000Z",
+      },
+    },
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [
+      {
+        id: "cobalt-ai-chatgpt",
+        name: "ChatGPT Enterprise",
+        vendor: "OpenAI",
+        purpose: "document-assistant",
+        modelType: "LLM generalist",
+        riskLevel: "limited",
+        usesPersonalData: true,
+        makesAutomatedDecisions: false,
+        impactsRights: false,
+        hasHumanReview: true,
+        recommendedActions: ["Pseudonimizare prompturi", "AI OFF pentru documente client-facing sensibile"],
+        createdAtISO: "2026-04-23T09:00:00.000Z",
+        approvalStatus: "approved",
+        approvedAtISO: "2026-04-28T12:10:00.000Z",
+        approvedByEmail: "diana@dpocomplet.ro",
+        policyAttestationStatus: "attested",
+        policyAttestedAtISO: "2026-04-28T12:10:00.000Z",
+        policyAttestedByEmail: "diana@dpocomplet.ro",
+      },
+    ],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events: [
+      {
+        id: "cobalt-event-ai-off",
+        type: "ai.off_configured",
+        entityType: "system",
+        entityId: "cobalt-ai-chatgpt",
+        message: "AI OFF configurat pentru Cobalt Fintech IFN în demo DPO.",
+        createdAtISO: "2026-04-28T12:10:00.000Z",
+        actorSource: "session",
+        actorId: "demo-user-dpo-consultant",
+      },
+    ],
+  }
+}
+
+function buildDpoConsultantCabinetState(): ComplianceState {
+  const profile: OrgProfile = {
+    sector: "professional-services",
+    employeeCount: "1-9",
+    usesAITools: true,
+    requiresEfactura: false,
+    cui: "RO55667788",
+    completedAtISO: DPO_DEMO_NOW,
+  }
+  const applicability = evaluateApplicability(profile)
+
+  return {
+    highRisk: 0,
+    lowRisk: 1,
+    gdprProgress: 92,
+    efacturaSyncedAtISO: DPO_DEMO_NOW,
+    efacturaConnected: false,
+    efacturaSignalsCount: 0,
+    scannedDocuments: 0,
+    orgProfile: profile,
+    applicability,
+    alerts: [
+      {
+        id: "dpo-cabinet-demo-alert",
+        message: "Demo cabinet pregătit: 3 clienți fictivi cu findings GDPR reale pentru pilot.",
+        severity: "low",
+        open: true,
+        createdAtISO: DPO_DEMO_NOW,
+      },
+    ],
+    findings: [],
+    scans: [],
+    generatedDocuments: [],
+    chat: [],
+    taskState: {},
+    aiComplianceFieldOverrides: {},
+    traceabilityReviews: {},
+    aiSystems: [],
+    detectedAISystems: [],
+    efacturaValidations: [],
+    driftRecords: [],
+    driftSettings: { severityOverrides: {} },
+    snapshotHistory: [],
+    validatedBaselineSnapshotId: undefined,
+    events: [
+      {
+        id: "dpo-cabinet-demo-start",
+        type: "demo_seeded",
+        entityType: "system",
+        entityId: "dpo-consultant",
+        message: "Scenariu demo DPO consultant seed-uit cu 3 clienți fictivi.",
+        createdAtISO: DPO_DEMO_NOW,
+        actorSource: "system",
+        actorId: "demo-seed",
+      },
+    ],
+  }
+}
+
+export function buildDemoPortfolioClientStates(
+  scenario: DemoScenario
+): DemoPortfolioClientSeed[] {
+  if (scenario !== "dpo-consultant") return []
+
+  return [
+    {
+      orgName: "Apex Logistic SRL",
+      state: buildApexLogisticDpoState(),
+    },
+    {
+      orgName: "Lumen Clinic SRL",
+      state: buildLumenClinicDpoState(),
+    },
+    {
+      orgName: "Cobalt Fintech IFN",
+      state: buildCobaltFintechDpoState(),
+    },
+  ]
+}
+
 // ── Public factory ────────────────────────────────────────────────────────────
 
 export function buildDemoState(scenario: DemoScenario): ComplianceState {
@@ -1226,6 +2022,8 @@ export function buildDemoState(scenario: DemoScenario): ComplianceState {
       return buildPartnerState()
     case "revalidation":
       return buildRevalidationState()
+    case "dpo-consultant":
+      return buildDpoConsultantCabinetState()
   }
 }
 
@@ -1238,11 +2036,18 @@ export function buildDemoNis2State(scenario: DemoScenario): Nis2OrgState | null 
   return null
 }
 
-export const DEMO_SCENARIOS: DemoScenario[] = ["imm", "nis2", "partner", "revalidation"]
+export const DEMO_SCENARIOS: DemoScenario[] = [
+  "imm",
+  "nis2",
+  "partner",
+  "revalidation",
+  "dpo-consultant",
+]
 
 export const DEMO_SCENARIO_LABELS: Record<DemoScenario, string> = {
   imm: "IMM clasic (GDPR + e-Factura)",
   nis2: "Firmă eligibilă NIS2",
   partner: "Partener / Contabil",
   revalidation: "Revalidare / SYS-002",
+  "dpo-consultant": "Consultant DPO — 3 clienți fictivi",
 }
