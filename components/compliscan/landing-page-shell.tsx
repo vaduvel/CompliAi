@@ -68,7 +68,7 @@ export function LandingPageShell(props: LandingPageProps) {
             <Link href="/nis2" className="hover:text-eos-text">NIS2</Link>
             <Link href="/pricing" className="hover:text-eos-text">Preț</Link>
             <Link
-              href="/login"
+              href={`/login?icp=${props.icpSegment}`}
               className="rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-1.5 text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text"
             >
               Login
@@ -106,7 +106,7 @@ export function LandingPageShell(props: LandingPageProps) {
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href={props.primaryCtaHref ?? "/register"}
+              href={props.primaryCtaHref ?? `/login?mode=register&icp=${props.icpSegment}`}
               className="inline-flex items-center gap-2 rounded-eos-sm bg-eos-primary px-5 py-3 text-[14px] font-semibold text-white shadow-[0_8px_24px_-6px_rgba(59,130,246,0.45)] transition-colors hover:bg-eos-primary-hover"
             >
               {props.primaryCtaLabel ?? "Începe gratuit"}
@@ -238,7 +238,7 @@ export function LandingPageShell(props: LandingPageProps) {
                     ))}
                   </ul>
                   <Link
-                    href={`/register?icp=${props.icpSegment}&tier=${tier.id}`}
+                    href={`/login?mode=register&icp=${props.icpSegment}&tier=${tier.id}`}
                     className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2 text-[12.5px] font-semibold text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
                   >
                     Începe cu {tier.label}
@@ -307,7 +307,7 @@ export function LandingPageShell(props: LandingPageProps) {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href={props.primaryCtaHref ?? "/register"}
+              href={props.primaryCtaHref ?? `/login?mode=register&icp=${props.icpSegment}`}
               className="inline-flex items-center gap-2 rounded-eos-sm bg-eos-primary px-6 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-eos-primary-hover"
             >
               {props.primaryCtaLabel ?? "Începe gratuit"}

@@ -13,6 +13,13 @@ import {
 import { toast } from "sonner"
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
+import {
+  getAccentBlobClasses,
+  getAccentBorderClass,
+  getAccentTextClass,
+  getLoginPaneContent,
+  parseLoginIcp,
+} from "@/lib/compliscan/login-icp-content"
 import { sanitizeInternalRoute } from "@/lib/compliscan/internal-route"
 
 type Mode = "login" | "register"
@@ -29,6 +36,12 @@ function LoginContent() {
   const searchParams = useSearchParams()
   const nextPath = sanitizeInternalRoute(searchParams.get("next"), "/dashboard")
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login"
+  // S3.4 — ICP-aware right-pane: detectează ?icp= din landing pages.
+  const icpSegment = parseLoginIcp(searchParams.get("icp"))
+  const paneContent = getLoginPaneContent(icpSegment)
+  const accentBlob = getAccentBlobClasses(paneContent.accent)
+  const accentText = getAccentTextClass(paneContent.accent)
+  const accentBorder = getAccentBorderClass(paneContent.accent)
   const [mode, setMode] = useState<Mode>(initialMode)
   const [orgName, setOrgName] = useState("")
   const [email, setEmail] = useState("")
@@ -438,44 +451,39 @@ function LoginContent() {
         <div className="relative hidden overflow-hidden border-l border-eos-border bg-gradient-to-br from-eos-surface via-eos-bg to-eos-bg lg:flex">
           {/* radial glow */}
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute right-[15%] top-[15%] size-[480px] rounded-full bg-eos-primary/15 blur-[100px]" />
-            <div className="absolute bottom-[10%] left-[10%] size-[380px] rounded-full bg-violet-500/10 blur-[100px]" />
+            <div className={`absolute right-[15%] top-[15%] size-[480px] rounded-full blur-[100px] ${accentBlob.primary}`} />
+            <div className={`absolute bottom-[10%] left-[10%] size-[380px] rounded-full blur-[100px] ${accentBlob.secondary}`} />
           </div>
 
           <div className="relative flex flex-col px-12 py-14 xl:px-16">
-            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
-              — Sincronizare live · acum 2 ore
+            <p className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] ${accentText}`}>
+              {paneContent.eyebrow}
             </p>
             <h2
               data-display-text="true"
               className="mt-4 max-w-md font-display text-[34px] font-semibold leading-[1.15] tracking-[-0.03em] text-eos-text xl:text-[38px]"
               style={{ textWrap: "balance" }}
             >
-              Conformitate operată continuu, nu doar verificată anual.
+              {paneContent.title}
             </h2>
 
-            {/* Framework grid (V3 ambient cards) */}
+            {/* Framework grid (V3 ambient cards) — ICP-aware */}
             <div className="mt-10 grid max-w-md grid-cols-2 gap-3">
-              {[
-                { fw: "GDPR", a: "47/47", t: "ok", l: "firme conforme" },
-                { fw: "AI Act", a: "12/47", t: "warning", l: "high-risk identificate" },
-                { fw: "NIS2", a: "8/47", t: "warning", l: "în maturitate" },
-                { fw: "e-Factura", a: "47/47", t: "ok", l: "sincronizate ANAF" },
-              ].map((f) => (
+              {paneContent.kpis.map((kpi) => (
                 <div
-                  key={f.fw}
+                  key={kpi.framework}
                   className="rounded-eos-lg border border-eos-border bg-eos-surface/60 p-3.5 backdrop-blur-md"
                 >
                   <div className="mb-2 flex items-center gap-2">
                     <span
                       className={[
                         "inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.05em]",
-                        f.t === "ok"
+                        kpi.tone === "ok"
                           ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
                           : "border-eos-warning/25 bg-eos-warning-soft text-eos-warning",
                       ].join(" ")}
                     >
-                      {f.fw}
+                      {kpi.framework}
                     </span>
                     <span className="ml-auto font-mono text-[9.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
                       monitor
@@ -485,19 +493,19 @@ function LoginContent() {
                     data-display-text="true"
                     className="font-display text-[22px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
                   >
-                    {f.a}
+                    {kpi.value}
                   </div>
-                  <p className="mt-1.5 text-[11px] leading-tight text-eos-text-muted">{f.l}</p>
+                  <p className="mt-1.5 text-[11px] leading-tight text-eos-text-muted">{kpi.label}</p>
                 </div>
               ))}
             </div>
 
-            <blockquote className="mt-12 max-w-md border-l-2 border-eos-primary pl-5">
+            <blockquote className={`mt-12 max-w-md border-l-2 pl-5 ${accentBorder}`}>
               <p className="text-[15px] italic leading-[1.6] text-eos-text-muted">
-                „Îmi recuperez o zi pe săptămână. CompliScan face scanarea, eu fac deciziile.&quot;
+                „{paneContent.testimonial.quote}&rdquo;
               </p>
               <footer className="mt-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
-                — Ramona Ilie · expert contabil · 22 clienți
+                — {paneContent.testimonial.author} · {paneContent.testimonial.role}
               </footer>
             </blockquote>
 
