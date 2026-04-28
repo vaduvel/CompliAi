@@ -22,9 +22,13 @@ const mocks = vi.hoisted(() => ({
   syncEvidenceObjectToSupabaseMock: vi.fn(),
 }))
 
-vi.mock("node:crypto", () => ({
-  randomUUID: mocks.randomUUIDMock,
-}))
+vi.mock("node:crypto", async () => {
+  const actual = await vi.importActual<typeof import("node:crypto")>("node:crypto")
+  return {
+    ...actual,
+    randomUUID: mocks.randomUUIDMock,
+  }
+})
 
 vi.mock("@/lib/server/dashboard-response", () => ({
   buildDashboardPayload: mocks.buildDashboardPayloadMock,

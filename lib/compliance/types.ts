@@ -446,6 +446,12 @@ export type ComplianceEvent = {
   actorRole?: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   actorSource?: "session" | "workspace" | "system"
   metadata?: Record<string, string | number | boolean>
+  // S2B.3 — Hash chain end-to-end (tamper-evident events ledger).
+  // selfHash = SHA-256(prevHash + JSON.stringify(eventWithoutHashes)).
+  // prevHash = selfHash al evenimentului anterior (sau "GENESIS" pentru primul).
+  // Câmpurile lipsesc pe evenimente vechi (pre-S2B.3) — backward compatible.
+  prevHash?: string
+  selfHash?: string
 }
 
 export type ComplianceDriftSeverity = ComplianceSeverity
