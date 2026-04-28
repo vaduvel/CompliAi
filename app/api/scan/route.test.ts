@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   requireFreshAuthenticatedSessionMock: vi.fn(),
+  resolveUserModeMock: vi.fn(),
 }))
 
 vi.mock("@/lib/server/mvp-store", () => ({
@@ -33,6 +34,7 @@ vi.mock("@/lib/server/auth", () => ({
   readFreshSessionFromRequest: mocks.readFreshSessionFromRequestMock,
   readSessionFromRequest: mocks.readSessionFromRequestMock,
   requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
+  resolveUserMode: mocks.resolveUserModeMock,
 }))
 
 vi.mock("@/lib/server/org-context", () => ({
@@ -45,6 +47,7 @@ describe("POST /api/scan", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.resolveUserModeMock.mockResolvedValue("solo")
     mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
       userId: "user-1",
       orgId: "org-1",

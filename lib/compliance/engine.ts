@@ -635,6 +635,33 @@ function normalizeTaskState(
                 entry.attachedEvidenceMeta.publicPath.trim()
                   ? entry.attachedEvidenceMeta.publicPath
                   : undefined,
+              quality:
+                entry.attachedEvidenceMeta.quality &&
+                typeof entry.attachedEvidenceMeta.quality === "object" &&
+                (entry.attachedEvidenceMeta.quality.status === "sufficient" ||
+                  entry.attachedEvidenceMeta.quality.status === "weak")
+                  ? {
+                      status: entry.attachedEvidenceMeta.quality.status,
+                      summary:
+                        typeof entry.attachedEvidenceMeta.quality.summary === "string"
+                          ? entry.attachedEvidenceMeta.quality.summary
+                          : "",
+                      reasonCodes: Array.isArray(entry.attachedEvidenceMeta.quality.reasonCodes)
+                        ? entry.attachedEvidenceMeta.quality.reasonCodes.filter(
+                            (code): code is import("@/lib/compliance/types").EvidenceQualityReasonCode =>
+                              code === "generic_kind" ||
+                              code === "generic_filename" ||
+                              code === "unknown_mime" ||
+                              code === "very_small_file" ||
+                              code === "tiny_text_payload" ||
+                              code === "tiny_bundle"
+                          )
+                        : [],
+                      checkedAtISO: isValidIso(entry.attachedEvidenceMeta.quality.checkedAtISO)
+                        ? entry.attachedEvidenceMeta.quality.checkedAtISO
+                        : updatedAtISO,
+                    }
+                  : undefined,
             }
           : undefined
       const validationStatus =

@@ -60,4 +60,18 @@ describe("buildPDFFromMarkdown", () => {
 
     expect(fallback).toBe(path.join(process.cwd(), "node_modules", "pdfkit", "js", "data", "Helvetica.afm"))
   })
+
+  it("redirijează lookup-ul AFM din vendor-chunks/data către assetele PDFKit trasate", () => {
+    const runtimePath = path.join(
+      process.cwd(),
+      ".next",
+      "server",
+      "vendor-chunks",
+      "data",
+      "Helvetica.afm"
+    )
+    const fallback = resolvePdfkitRuntimeDataFallback(runtimePath)
+
+    expect(fallback).toBe(path.join(process.cwd(), "node_modules", "pdfkit", "js", "data", "Helvetica.afm"))
+  })
 })

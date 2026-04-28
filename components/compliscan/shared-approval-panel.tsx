@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CheckCircle2, Loader2, MessageCircle, ShieldCheck, XCircle } from "lucide-react"
 
 // Sprint 1.2 — Issue 3 DPO: extension cu Reject + Comment flow.
@@ -38,9 +38,14 @@ export function SharedApprovalPanel({
   const [mode, setMode] = useState<Mode>("idle")
   const [commentInput, setCommentInput] = useState("")
   const [authorInput, setAuthorInput] = useState("")
+  const [hydrated, setHydrated] = useState(false)
 
   const isFinal = approved || rejected
   const showCommentBox = mode === "rejecting" || mode === "commenting"
+
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
 
   async function approveDocument() {
     setPending(true)
@@ -187,7 +192,7 @@ export function SharedApprovalPanel({
               <button
                 type="button"
                 onClick={() => void approveDocument()}
-                disabled={pending}
+                disabled={!hydrated || pending}
                 className="inline-flex items-center justify-center gap-2 rounded-eos-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending && mode === "idle" ? (
@@ -203,7 +208,7 @@ export function SharedApprovalPanel({
                   setMode("rejecting")
                   setError(null)
                 }}
-                disabled={pending}
+                disabled={!hydrated || pending}
                 className="inline-flex items-center justify-center gap-2 rounded-eos-md border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <XCircle className="size-4" strokeWidth={2} />
@@ -215,7 +220,7 @@ export function SharedApprovalPanel({
                   setMode("commenting")
                   setError(null)
                 }}
-                disabled={pending}
+                disabled={!hydrated || pending}
                 className="inline-flex items-center justify-center gap-2 rounded-eos-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <MessageCircle className="size-4" strokeWidth={2} />

@@ -7,7 +7,7 @@ import {
   type ExtractionResult,
   validateScanInputPayload,
 } from "@/lib/server/scan-workflow"
-import { AuthzError, requireFreshAuthenticatedSession } from "@/lib/server/auth"
+import { AuthzError, requireFreshAuthenticatedSession, resolveUserMode } from "@/lib/server/auth"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 import { getOrgContext } from "@/lib/server/org-context"
 import { logRouteError } from "@/lib/server/operational-logger"
@@ -31,12 +31,27 @@ export async function POST(request: Request) {
     }
     const body = validateScanInputPayload(await request.json())
     const actor = await resolveOptionalEventActor(request)
+    const userMode = await resolveUserMode(session)
     let extractionResult: ExtractionResult | undefined
 
     const nextState = await mutateStateForOrg(workspace.orgId, async (current) => {
       const extracted = await createExtractedScan(current, body, actor)
       extractionResult = extracted.result
-      return await analyzeExtractedScan(extracted.nextState, extracted.result.scan.id, body.content, actor)
+      const analyzed = await analyzeExtractedScan(
+        extracted.nextState,
+        extracted.result.scan.id,
+        body.content,
+        actor
+      )
+
+      if (userMode === "partner") {
+        return {
+          ...analyzed,
+          findings: analyzed.findings.filter((finding) => finding.category !== "E_FACTURA"),
+        }
+      }
+
+      return analyzed
     }, workspace.orgName)
 
     if (!extractionResult) {

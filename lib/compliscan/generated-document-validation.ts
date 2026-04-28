@@ -210,8 +210,11 @@ export function validateGeneratedDocumentEvidence(
       label: "Draftul păstrează avertismentul de review uman",
       help: "Dovada rămâne validă doar după verificare umană și aprobare explicită.",
       passed:
-        contentLower.includes("generat cu ajutorul ai") &&
-        contentLower.includes("verifică cu un specialist"),
+        (contentLower.includes("generat cu ajutorul ai") &&
+          contentLower.includes("verifică cu un specialist")) ||
+        (contentLower.includes("draft") &&
+          (contentLower.includes("validarea consultantului") ||
+            contentLower.includes("validare înainte de utilizare oficială"))),
     },
   ]
 

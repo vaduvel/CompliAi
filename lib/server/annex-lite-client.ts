@@ -228,7 +228,7 @@ function buildClientAnnexLiteHtml(compliancePack: AICompliancePack) {
       ${systemsMarkup}
 
       <p class="footer">
-        Acest document a fost generat automat de CompliAI pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. CompliAI nu este certificat de DNSC, ANSPDCP sau altă autoritate. Consultați un specialist juridic pentru validare. Varianta structurată rămâne AI Compliance Pack din snapshot-ul curent.
+        Acest document a fost generat automat de CompliScan pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. CompliScan nu este certificat de DNSC, ANSPDCP sau altă autoritate. Consultați un specialist juridic pentru validare. Varianta structurată rămâne AI Compliance Pack din snapshot-ul curent.
       </p>
     </main>
   </body>

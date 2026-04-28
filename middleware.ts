@@ -121,8 +121,16 @@ export async function middleware(request: NextRequest) {
   const isDemoBootRoute = pathname.startsWith("/api/demo/")
   const isStripeWebhookRoute = pathname === "/api/stripe/webhook"
   const isPublicWhistleblowingSubmit = pathname === "/api/whistleblowing/submit"
+  const isPublicSharedApprovalRoute = /^\/api\/shared\/[^/]+\/(?:approve|reject|comment)$/.test(
+    pathname
+  )
 
-  if (isDemoBootRoute || isStripeWebhookRoute || isPublicWhistleblowingSubmit) {
+  if (
+    isDemoBootRoute ||
+    isStripeWebhookRoute ||
+    isPublicWhistleblowingSubmit ||
+    isPublicSharedApprovalRoute
+  ) {
     return NextResponse.next()
   }
 

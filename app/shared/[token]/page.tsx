@@ -2,10 +2,8 @@
 // Accessible without authentication. Token is self-contained + HMAC-signed.
 // Route: /shared/[token]
 
-import Link from "next/link"
 import { AlertTriangle, CheckCircle2, Clock, ShieldCheck, XCircle } from "lucide-react"
 
-import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { SharedApprovalPanel } from "@/components/compliscan/shared-approval-panel"
 import { V3ScoreRing } from "@/components/compliscan/v3"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
@@ -187,9 +185,23 @@ export default async function SharedCompliancePage({
     <div className="min-h-screen bg-eos-bg text-eos-text">
       <header className="border-b border-eos-border bg-eos-bg/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/">
-            <CompliScanLogoLockup variant="flat" size="sm" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex size-8 shrink-0 items-center justify-center rounded-eos-sm text-xs font-bold text-white"
+              style={{ background: consultant.brandColor }}
+              aria-hidden
+            >
+              {initialsFromName(consultant.cabinetName)}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-eos-text">
+                {consultant.cabinetName}
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-eos-text-tertiary">
+                profil partajat client
+              </p>
+            </div>
+          </div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-eos-primary/25 bg-eos-primary/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             <ShieldCheck className="size-3" strokeWidth={2} />
             {consultant.cabinetName} · {recipientLabel(payload.recipientType)}
@@ -285,7 +297,7 @@ export default async function SharedCompliancePage({
               <p className="mt-1 text-[13px] text-eos-text-muted">
                 {consultant.title} · {consultant.certification} · {consultant.cabinetName}
               </p>
-              <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.04em] text-eos-text-tertiary">
+              <p className="mt-2 font-mono text-[10.5px] tracking-[0.02em] text-eos-text-tertiary">
                 {consultant.email} · {consultant.phone}
               </p>
             </div>
