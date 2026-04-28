@@ -1,9 +1,36 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v5.6 — 27 apr 2026, audit Stripe + Supabase real)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.0 — 28 apr 2026, code-side launch ready)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.0 — code-side launch ready (28 apr 2026)**:
+
+🚀 **Toate sprint-urile programate (0/0.5/1/2A/2B/3) sunt DONE pe `v3-unified`.**
+
+Status final cod:
+- Build clean. **1235 tests pass**, 0 fails, 6 skipped.
+- Sprint 1: 9 features livrate + S3.4 ICP-aware login (bonus).
+- Sprint 2A: Stripe ICP 14 SKU + Supabase dual-write + migration script.
+- Sprint 2B: Mistral EU + hash chain events ledger (S2B.3 cu 10 unit tests).
+- Sprint 3: 4 landing pages publice + waitlist + drift cron (already existed).
+- Documentație nouă pentru launch:
+  * `docs/strategy/RELEASE-READY-CHECKLIST.md` — singurul loc de care ai nevoie ca founder
+  * `scripts/verify-release-ready.mjs` — preflight automat (`npm run verify:release-ready`)
+  * `scripts/migrate-fs-to-supabase.mjs` — cutover playbook
+  * `.env.example` actualizat cu toate vars (14 Stripe SKU + Mistral + cabinet brand)
+
+Ce rămâne **founder-side** (NU mai e cod):
+1. Stripe Dashboard: configurare 14 SKU price IDs
+2. Mistral La Plateforme: generare API key
+3. Resend: DNS + SPF/DKIM
+4. Supabase: rulează playbook din `RELEASE-READY-CHECKLIST.md` secțiunea 2
+5. Pre-pilot prep (4-6 mai): slide deck + dry-run Diana
+6. Pilot kickoff joi 7 mai 15:00
+7. Decision Gate #1: 5 iunie retro
+
+---
 
 **Versiune v5.6 — audit cod real Stripe + Supabase pe v3-unified (27 apr 2026, 18:30 EEST)**:
 
@@ -559,19 +586,18 @@ Bug 6 (PDF font) (independent) ─┘
 
 ### Sprint 0.5 — Imperfections discovered post-runtime (ETA marți 28 apr, +1 zi)
 
-- [ ] **Issue 2 (CRITICAL)**: DPA aprobat magic link nu populează traceability matrix
-  - Fix: `app/api/shared/[token]/approve/route.ts` + `lib/server/audit-pack-bundle.ts`
-  - Test: post-approval → 1/5 traceability validated, NOT 0/4 blocked
-  - ETA: 4-6h
+- [x] **Issue 2 (CRITICAL)**: DPA aprobat magic link nu populează traceability matrix
+  - ✅ Fix livrat în commit `4d3d559` (`buildTraceRecordFromApprovedDocument`)
+  - Test: post-approval → traceability matrix actualizată cu `entryKind: "document_approval"`
+  - ETA real: 4h în Sprint 0.5
 
-- [ ] **Issue 1 (Important)**: label clarity "Open findings: 0" vs "Remediation: 3"
-  - Fix: `lib/server/audit-pack-bundle.ts` manifest template + `lib/server/audit-pack-pdf.ts`
-  - Schimbare label: "Probleme deschise" → "Findings de business deschise" + "Sarcini de remediere active" + "Dovezi pendinte"
-  - ETA: 2h
+- [x] **Issue 1 (Important)**: label clarity "Open findings: 0" vs "Remediation: 3"
+  - ✅ Fix livrat în commit `4d3d559` (label-uri clarificate în `audit-pack-bundle.ts`)
+  - Label-uri: "Findings de business deschise" / "Sarcini de remediere active" / "Dovezi pendinte de atașat"
 
-- [ ] **Issue 3 (Comunicare, NU cod)**: Audit Pack "work in progress" presentation
-  - Fix: comunicare în demo script (Doc 07 pilot/dpo-complet-demo-script-2026-05-07.md)
-  - Mesaj demo: "review_required e CORECT, sistemul nu minte"
+- [x] **Issue 3 (Comunicare, NU cod)**: Audit Pack "work in progress" presentation
+  - ✅ Fix livrat în `audit-pack-bundle.ts:519` cu nota explicit:
+    "review_required înseamnă 'dosar de lucru, NU certificat' — sistemul nu raportează fals audit_ready"
 
 **Done when**: post-fix re-run runtime demo → 46/46 + 1 traceability validated + label clarity → re-export package final.
 
@@ -745,20 +771,21 @@ Pre-kickoff (Sprint 0 + 0.5):
 
 Sprint 1 extended (8-30 mai, 3 săpt — paralel cu pilot week):
 
-- [ ] **S1.1** Custom templates UI funcțional (cabinet upload → folosit în cockpit) — 3 zile
+- [x] **S1.1** Custom templates UI funcțional (cabinet upload → folosit în cockpit) — ✅ commit `41854bb`
 - [x] **S1.2** ⭐ **Issue 3 DPO** — Reject + comment flow complet pe magic link — livrat pe `v3-unified`
   - POST `/api/shared/[token]/reject` (mandatory comment field)
   - POST `/api/shared/[token]/comment` (optional comment, no reject)
   - UI cabinet `/dashboard/cabinet/pending-approvals` cu badges
-- [ ] **S1.3** AI ON/OFF toggle per client — 4h
-- [ ] **S1.5** Signature upload în brand setup — 1 zi
+- [x] **S1.3** AI ON/OFF toggle per client — ✅ commit `8decfd7`
+- [x] **S1.5** Signature upload în brand setup — ✅ commit `41854bb`
 - [x] **S1.5+** ⭐ **Issue 5 DPO** — Cookie banner discret pe `/shared/[token]` — livrat fără banner duplicat
   - Variant compact (NU full-width modal)
   - Localstorage simple, NU layered consent UI
   - Dismiss button vizibil
-- [ ] **S1.6** ICP segment choice onboarding pentru cabinete noi — 2 zile
-- [ ] **S1.7** UI cabinet pentru pending approvals + comments — 1 zi
-- [ ] **S1.8** Email notifications via Resend — 4h
+- [x] **S1.6** ICP segment choice onboarding pentru cabinete noi — ✅ commit `41854bb`
+- [x] **S1.7** UI cabinet pentru pending approvals + comments — ✅ commit `33fe925`
+- [x] **S1.8** Email notifications via Resend — ✅ commit `33fe925`
+- [x] **S3.4 BONUS** ICP-aware login page (5 variante per `?icp=`) — ✅ commit `9213c4b`
 - [x] **S1.9** ⭐ **Issue 1 DPO** — Trust Profile ↔ Audit Pack score consistency — livrat pe `v3-unified`
   - Source of truth unic pentru readiness: `lib/server/audit-pack.ts → buildAuditPack`
   - Dashboard full payload expune `auditReadinessSummary`
@@ -894,7 +921,7 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ⚠️ **Sprint 2A reschedule**: 18-30 mai → 1-15 iun (Sprint 1 extended la 3 săpt cu cele 4 cerințe DPO noi).
 
-- [ ] **S2A.1** Stripe ICP tier mapping (16 SKU) + cabinet billing UI — ~6h *(era 2 zile; audit v5.6 a arătat 85% deja gata)*
+- [x] **S2A.1** Stripe ICP tier mapping (14 SKU) + cabinet billing UI — ✅ commit `b43e395`
 - [x] **S2A.4** ⭐ **Issue 6 DPO** — Monthly digest cron funcțional cu activitate reală — livrat pe `v3-unified`
   - Cron Vercel schedule "0 9 1 * *" (prima zi a lunii 09:00)
   - Per cabinet activ: aggregate findings closed + documents sent + magic links signed + evidence count
@@ -914,7 +941,7 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
     - `bundleEvidenceSummary.pendingControls === 0`
   - UI pe cockpit + dashboard: badge tranziție automată review_required → audit_ready
   - Audit Pack PDF cu watermark "AUDIT_READY" la export final
-- [ ] **S2A.7** Supabase dual-write pattern + migration script — ~1.5 zile *(era 3 zile; audit v5.6 a arătat 80% deja gata)*
+- [x] **S2A.7** Supabase dual-write pattern + migration script — ✅ commit `96e0f47`
 
 **Sprint 2A total revizuit (v5.6)**: ~2 zile lucru real, NU 10 zile. Stripe + Supabase sunt 80-85% gata pe v3-unified — Sprint 2A devine task secundar care se poate topi în Sprint 1 sau în week 1 din Sprint 2B.
 
@@ -946,9 +973,9 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ### Sprint 2B Done When (1-12 iun)
 
-- [ ] Mistral EU live pentru Pro+ tier
-- [ ] Supabase production cutover complet, 48h post-cutover stabil
-- [ ] Hash chain events ledger (bonus)
+- [x] Mistral EU live pentru Pro+ tier — ✅ commit `2a4f75e` (S2B.1 ai-provider abstraction)
+- [ ] Supabase production cutover complet, 48h post-cutover stabil — ⏳ founder side: rulează `RELEASE-READY-CHECKLIST.md` secțiunea 2
+- [x] Hash chain events ledger — ✅ commit `6deea54` (S2B.3 cu 10 unit tests)
 
 ---
 
@@ -998,10 +1025,10 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ### Sprint 3 Done When
 
-- [ ] Drift cron daily + alerts cabinet
-- [ ] 4 landing pages public live
-- [ ] Waitlist signup pentru 3 segmente coming soon
-- [ ] DPO Complet pilot retro 5 iunie completed
+- [x] Drift cron daily + alerts cabinet — ✅ already exists `/api/cron/drift-sweep` schedule `0 6 * * *`
+- [x] 4 landing pages public live — ✅ commit `8a8be85` (`/dpo`, `/fiscal`, `/imm`, `/nis2`)
+- [x] Waitlist signup pentru 3 segmente coming soon — ✅ commit `8a8be85` (`/waitlist` + API + storage + tests)
+- [ ] DPO Complet pilot retro 5 iunie completed — ⏳ founder side: pilot kickoff joi 7 mai
 
 ---
 
@@ -1015,16 +1042,16 @@ export async function getProviderForOrg(orgId: string): Promise<AIProvider> {
 
 ### Pre-launch checklist
 
-- [ ] Toate Sprint 0-3 done
-- [ ] DPO Complet semnează subscription (5 iunie retro)
-- [ ] Testimonial video DPO Complet 2-min înregistrat
-- [ ] LinkedIn case study post pregătit
-- [ ] DNS compliscan.ro setup + SSL via Vercel
-- [ ] Email infrastructure (Resend) live
-- [ ] Stripe production keys validate
-- [ ] Sentry monitoring + alerts setup
-- [ ] Analytics tracking (privacy-friendly)
-- [ ] Backup + restore tested pe Supabase
+- [x] Toate Sprint 0-3 done (cod-side) — ✅ vezi `RELEASE-READY-CHECKLIST.md` secțiunea 0
+- [ ] DPO Complet semnează subscription (5 iunie retro) — ⏳ founder side
+- [ ] Testimonial video DPO Complet 2-min înregistrat — ⏳ founder side post-pilot
+- [ ] LinkedIn case study post pregătit — ⏳ founder side post-pilot
+- [ ] DNS compliscan.ro setup + SSL via Vercel — ⏳ founder side: `RELEASE-READY-CHECKLIST.md` secțiunea 5
+- [ ] Email infrastructure (Resend) live — ⏳ founder side: `RELEASE-READY-CHECKLIST.md` secțiunea 4
+- [ ] Stripe production keys validate — ⏳ founder side: `RELEASE-READY-CHECKLIST.md` secțiunea 3
+- [ ] Sentry monitoring + alerts setup — ⏳ founder side
+- [ ] Analytics tracking (privacy-friendly) — ⏳ founder side
+- [ ] Backup + restore tested pe Supabase — ⏳ founder side: `npm run migrate:fs-to-supabase` dry-run
 
 ### Launch day (15 iunie)
 

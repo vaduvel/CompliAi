@@ -1,10 +1,16 @@
-# CompliScan — Stack documente strategice (v5.0 — DECISION LOCK + execution mode)
+# CompliScan — Stack documente strategice (v6.0 — CODE-SIDE LAUNCH READY)
+
+🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. Doar founder-side setup rămas.
+
+📋 **Începe cu**: [`RELEASE-READY-CHECKLIST.md`](./RELEASE-READY-CHECKLIST.md) — singura listă de care ai nevoie ca founder pentru launch.
+
+📓 **Status zilnic**: [`SPRINT-LOG.md`](./SPRINT-LOG.md) — jurnal de execuție continuu.
 
 🔒 **STACK LOCK 27 APR 2026** — toate deciziile strategice închise. Doar execuție până post-pilot DPO Complet (5 iunie 2026).
 
-**6 documente canonice + 1 doc lock**. Re-pivot thesis-ul: doar la Decision Gates (5 iun, 30 aug, 30 nov, Q1 2027).
+**6 documente canonice + 1 doc lock + sprint log + release checklist**. Re-pivot thesis-ul: doar la Decision Gates (5 iun, 30 aug, 30 nov, Q1 2027).
 
-**Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor). Restul arhivate.
+**Status**: **5 documente canonice** (4 docs direcție curentă + 1 doc evoluția ideilor) + 2 docs operaționale (sprint log + release checklist). Restul arhivate.
 
 **Regulă maintainerului**: NU șterge idei alternative din docs. Marchează status (valid / invalid / backup). Decision finală se ia citind tot stack-ul.
 **Trigger consolidare v4.0**: discovery final — pattern compliance loop universal. CompliScan vinde **infrastructura loop**, NU framework specific. Pattern Salesforce (CRM infrastructure) aplicat la compliance.
