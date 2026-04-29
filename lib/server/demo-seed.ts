@@ -9,6 +9,7 @@ import type { OrgProfile } from "@/lib/compliance/applicability"
 import type { ETVADiscrepancy } from "@/lib/compliance/etva-discrepancy"
 import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import type { Nis2OrgState, Nis2Vendor, Nis2Incident, BoardMember, MaturityAssessment } from "@/lib/server/nis2-store"
+import type { DsarOrgState } from "@/lib/server/dsar-store"
 
 export type DemoScenario = "imm" | "nis2" | "partner" | "revalidation" | "dpo-consultant"
 
@@ -23,6 +24,7 @@ export type DemoPortfolioClientSeed = {
   orgName: string
   state: ComplianceState
   nis2State?: Nis2OrgState | null
+  dsarState?: DsarOrgState | null
 }
 
 // ── Demo org identifiers ──────────────────────────────────────────────────────
@@ -2013,6 +2015,7 @@ export function buildDemoPortfolioClientStates(
     {
       orgName: "Lumen Clinic SRL",
       state: buildLumenClinicDpoState(),
+      dsarState: buildLumenClinicDsarState(),
     },
     {
       orgName: "Cobalt Fintech IFN",
@@ -2035,6 +2038,32 @@ export function buildDemoState(scenario: DemoScenario): ComplianceState {
       return buildRevalidationState()
     case "dpo-consultant":
       return buildDpoConsultantCabinetState()
+  }
+}
+
+function buildLumenClinicDsarState(): DsarOrgState {
+  return {
+    updatedAtISO: "2026-04-28T11:10:00.000Z",
+    requests: [
+      {
+        id: "dsar-lumen-patient-overdue",
+        orgId: "demo-lumen-clinic",
+        receivedAtISO: "2026-03-25T08:30:00.000Z",
+        deadlineISO: "2026-04-24T08:30:00.000Z",
+        requesterName: "Pacient pseudonimizat L-042",
+        requesterEmail: "pacient.l042@example.test",
+        requestType: "access",
+        status: "in_progress",
+        identityVerified: true,
+        draftResponseGenerated: true,
+        responseReviewedByHuman: false,
+        evidenceVaultIds: [],
+        notes:
+          "Corespunde finding-ului lumen-dsar-overdue. Draftul există, dar lipsește dovada trimiterii răspunsului final către pacient.",
+        createdAtISO: "2026-03-25T08:30:00.000Z",
+        updatedAtISO: "2026-04-28T11:10:00.000Z",
+      },
+    ],
   }
 }
 

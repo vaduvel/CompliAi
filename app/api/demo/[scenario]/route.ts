@@ -23,7 +23,9 @@ import {
 } from "@/lib/server/demo-seed"
 import { writeStateForOrg } from "@/lib/server/mvp-store"
 import { seedNis2State } from "@/lib/server/nis2-store"
+import { seedDsarState } from "@/lib/server/dsar-store"
 import { saveWhiteLabelConfig } from "@/lib/server/white-label"
+import { saveCabinetTemplate } from "@/lib/server/cabinet-templates-store"
 
 const DPO_DEMO_WHITE_LABEL = {
   partnerName: "DPO Complet",
@@ -36,6 +38,53 @@ const DPO_DEMO_WHITE_LABEL = {
   icpSegment: "cabinet-dpo",
   aiProvider: null,
 } as const
+
+const DPO_DEMO_TEMPLATES = [
+  {
+    documentType: "dpa" as const,
+    name: "DPA vendor — DPO Complet",
+    description: "Template cabinet pentru procesatori SaaS / payroll / plăți.",
+    sourceFileName: "DPO_Complet_DPA_vendor_v2026.docx",
+    content: `# DPA vendor — {{ORG_NAME}}
+
+Pregătit de {{PREPARED_BY}} pentru clientul {{ORG_NAME}}.
+
+## Obiect
+Procesatorul va prelucra datele personale strict conform instrucțiunilor operatorului.
+
+## Dovadă
+Documentul se trimite prin magic link, iar aprobarea / respingerea intră în evidence ledger.`,
+  },
+  {
+    documentType: "deletion-attestation" as const,
+    name: "Răspuns DSAR pacient — DPO Complet",
+    description: "Template pentru cereri de acces / răspuns DSAR în termen legal.",
+    sourceFileName: "DPO_Complet_DSAR_raspuns_pacient.docx",
+    content: `# Răspuns DSAR — {{ORG_NAME}}
+
+Stimate/Stimată [nume],
+
+Confirmăm primirea cererii și documentăm verificarea identității, sistemele verificate, excepțiile aplicabile și dovada transmiterii răspunsului final.
+
+Document de lucru pregătit de {{PREPARED_BY}}.`,
+  },
+  {
+    documentType: "ropa" as const,
+    name: "RoPA procesatori — DPO Complet",
+    description: "Template pentru actualizarea registrului RoPA cu furnizori noi.",
+    sourceFileName: "DPO_Complet_RoPA_procesatori.md",
+    content: `# RoPA procesatori — {{ORG_NAME}}
+
+## Activitate
+[completează activitatea]
+
+## Procesator / furnizor
+[completează furnizorul, rolul, categoriile de date și temeiul]
+
+## Dovadă
+Atașează DPA-ul aprobat și confirmarea internă în dosarul clientului.`,
+  },
+]
 
 export async function GET(
   request: Request,
@@ -106,6 +155,13 @@ async function startDpoConsultantDemo(request: Request) {
   const cabinetState = buildDemoState("dpo-consultant")
   await writeStateForOrg(user.orgId, cabinetState, user.orgName)
   await saveWhiteLabelConfig(user.orgId, DPO_DEMO_WHITE_LABEL)
+  for (const template of DPO_DEMO_TEMPLATES) {
+    await saveCabinetTemplate(user.orgId, {
+      ...template,
+      versionLabel: "v2026.1",
+      active: true,
+    })
+  }
 
   for (const client of buildDemoPortfolioClientStates("dpo-consultant")) {
     const membership = await createOrganizationForExistingUser(
@@ -117,6 +173,15 @@ async function startDpoConsultantDemo(request: Request) {
     await saveWhiteLabelConfig(membership.orgId, DPO_DEMO_WHITE_LABEL)
     if (client.nis2State) {
       await seedNis2State(membership.orgId, client.nis2State)
+    }
+    if (client.dsarState) {
+      await seedDsarState(membership.orgId, {
+        ...client.dsarState,
+        requests: client.dsarState.requests.map((entry) => ({
+          ...entry,
+          orgId: membership.orgId,
+        })),
+      })
     }
   }
 

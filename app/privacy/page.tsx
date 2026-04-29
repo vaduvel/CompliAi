@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 
 export const metadata = {
-  title: "Politica de Confidențialitate — CompliAI",
+  title: "Politica de Confidențialitate — CompliScan",
 }
 
 export default function PrivacyPage() {
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
               h: "Operatorul de Date",
               body: (
                 <p>
-                  Operatorul datelor cu caracter personal este CompliAI SRL (în curs de
+                  Operatorul datelor cu caracter personal este CompliScan SRL (în curs de
                   constituire), cu sediul în România. Contact:{" "}
                   <a
                     href="mailto:privacy@compliscan.ro"
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
                   </li>
                   <li>
                     <strong className="text-eos-text">Date de facturare</strong> — procesate
-                    integral de Stripe; CompliAI nu stochează date de card
+                    integral de Stripe; CompliScan nu stochează date de card
                   </li>
                 </ul>
               ),

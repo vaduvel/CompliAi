@@ -71,7 +71,7 @@ export async function buildDashboardCorePayload(
 ): Promise<DashboardCorePayload> {
   const workspace = workspaceOverride ?? (await getOrgContext())
   const hydratedState = await hydrateEvidenceAttachmentsFromSupabase(state, workspace.orgId)
-  const evidenceLedger = await loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId })
+  const supabaseEvidenceLedger = await loadEvidenceLedgerFromSupabase({ orgId: workspace.orgId })
 
   // MULT B — inject stale orgKnowledge finding at read time (time-dependent, computed from age)
   const staleFinding = buildOrgKnowledgeStaleFinding(hydratedState.orgKnowledge, new Date().toISOString())
@@ -87,6 +87,9 @@ export async function buildDashboardCorePayload(
     ...normalizedState,
     findings: (normalizedState.findings ?? []).map((finding) => normalizeFindingSuggestedDocumentType(finding)),
   }
+  const evidenceLedger = supabaseEvidenceLedger.length > 0
+    ? supabaseEvidenceLedger
+    : buildFallbackEvidenceLedger(runtimeTruthState)
   const summary = computeDashboardSummary(runtimeTruthState)
   const remediationPlan = buildRemediationPlan(runtimeTruthState)
   const snapshot =
@@ -106,6 +109,16 @@ export async function buildDashboardCorePayload(
     snapshot,
     evidenceLedger,
   }
+}
+
+function buildFallbackEvidenceLedger(state: ComplianceState): EvidenceRegistryEntry[] {
+  return Object.entries(state.taskState ?? {})
+    .flatMap(([taskId, entry]) => {
+      const evidence = entry.attachedEvidenceMeta
+      if (!evidence) return []
+      return [{ ...evidence, taskId } satisfies EvidenceRegistryEntry]
+    })
+    .sort((left, right) => right.uploadedAtISO.localeCompare(left.uploadedAtISO))
 }
 
 export async function buildDashboardPayload(

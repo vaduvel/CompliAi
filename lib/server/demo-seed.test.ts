@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest"
 
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
+import { computeDashboardSummary } from "@/lib/compliance/engine"
+import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import {
   buildDemoPortfolioClientStates,
   buildDemoNis2State,
   buildDemoState,
   DEMO_SCENARIOS,
 } from "@/lib/server/demo-seed"
+import {
+  buildPortfolioTaskRows,
+  buildPortfolioVendorRows,
+  type PortfolioOrgBundle,
+} from "@/lib/server/portfolio"
 
 describe("demo revalidation scenario", () => {
   it("include scenariul revalidation în lista demo publică", () => {
@@ -86,6 +93,61 @@ describe("demo DPO consultant scenario", () => {
           quality: expect.objectContaining({ status: "sufficient" }),
         }),
       })
+    )
+  })
+
+  it("seed-uiește cererea DSAR Lumen în store-ul dedicat, nu doar ca alertă", () => {
+    const lumen = buildDemoPortfolioClientStates("dpo-consultant").find(
+      (client) => client.orgName === "Lumen Clinic SRL"
+    )
+
+    expect(lumen?.dsarState?.requests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "dsar-lumen-patient-overdue",
+          status: "in_progress",
+          deadlineISO: "2026-04-24T08:30:00.000Z",
+          draftResponseGenerated: true,
+        }),
+      ])
+    )
+  })
+
+  it("populează task-uri și furnizori cross-client pentru browser demo", () => {
+    const bundles = buildDemoPortfolioClientStates("dpo-consultant").map((client, index) => {
+      const orgId = `org-demo-client-${index}`
+      return {
+        membership: {
+          membershipId: `membership-${index}`,
+          orgId,
+          orgName: client.orgName,
+          role: "partner_manager",
+          status: "active",
+          createdAtISO: "2026-04-28T10:00:00.000Z",
+        },
+        state: client.state,
+        summary: computeDashboardSummary(client.state),
+        remediationPlan: buildRemediationPlan(client.state),
+        nis2: { assessment: null, vendors: [], incidents: [], boardMembers: [], updatedAtISO: "2026-04-28T10:00:00.000Z" },
+        vendorReviews: [],
+        dsar: client.dsarState ?? { requests: [], updatedAtISO: "2026-04-28T10:00:00.000Z" },
+      } satisfies PortfolioOrgBundle
+    })
+
+    const tasks = buildPortfolioTaskRows(bundles)
+    const vendors = buildPortfolioVendorRows(bundles)
+
+    expect(tasks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          orgName: "Lumen Clinic SRL",
+          taskId: "lumen-dsar-overdue",
+          dueDate: "2026-04-24",
+        }),
+      ])
+    )
+    expect(vendors.map((vendor) => vendor.vendorName)).toEqual(
+      expect.arrayContaining(["Stripe Payments Europe", "PayFlow HR / Payroll Cloud"])
     )
   })
 })

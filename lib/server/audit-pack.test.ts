@@ -187,7 +187,7 @@ describe("lib/server/audit-pack", () => {
     expect(auditPack.auditQualityGates.items.map((item) => item.code)).toContain("missing_evidence")
   })
 
-  it("raporteaza finding-urile business deschise si pastreaza titlul taskurilor directe in evidence ledger", () => {
+  it("raporteaza finding-urile business deschise fara sa puna taskuri fara dovada in evidence ledger", () => {
     const auditPack = buildAuditPack({
       state: createState({
         findings: [
@@ -220,8 +220,13 @@ describe("lib/server/audit-pack", () => {
     })
 
     expect(auditPack.executiveSummary.openFindings).toBe(1)
-    expect(auditPack.evidenceLedger[0]?.title).toBe("RoPA nu include Stripe ca procesator")
-    expect(auditPack.evidenceLedger[0]?.lawReference).toBe("GDPR Art. 30")
+    expect(auditPack.evidenceLedger).toHaveLength(0)
+    expect(auditPack.executiveSummary.evidenceLedgerSummary).toEqual({
+      total: 0,
+      sufficient: 0,
+      weak: 0,
+      unrated: 0,
+    })
   })
 
   it("trece in audit_ready dupa inchiderea operationala a finding-urilor si validarea baseline-ului", () => {

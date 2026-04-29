@@ -447,7 +447,9 @@ function buildControlsMatrix(
 
 function buildEvidenceLedger(state: ComplianceState, remediationPlan: RemediationAction[]) {
   return Object.entries(state.taskState)
-    .filter(([, taskState]) => taskState.attachedEvidenceMeta || taskState.validationStatus)
+    // Evidence ledger must only contain real artifacts. Validation-only task
+    // events belong in validationLog, otherwise dashboard/API counts diverge.
+    .filter(([, taskState]) => taskState.attachedEvidenceMeta)
     .map(([taskId, taskState]) => {
       const remediation = remediationPlan.find((item) => `rem-${item.id}` === taskId)
       const finding = resolveFindingForTaskId(state, taskId)

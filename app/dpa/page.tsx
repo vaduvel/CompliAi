@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 
 export const metadata = {
-  title: "Acord de Prelucrare a Datelor (DPA) — CompliAI",
+  title: "Acord de Prelucrare a Datelor (DPA) — CompliScan",
 }
 
 export default function DpaPage() {
@@ -54,9 +54,9 @@ export default function DpaPage() {
         <div className="mb-10 rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.06] px-5 py-4">
           <p className="text-[13.5px] leading-[1.65] text-eos-text-muted">
             Prezentul Acord de Prelucrare a Datelor (&ldquo;DPA&rdquo;) se aplică automat
-            tuturor utilizatorilor CompliAI care, prin utilizarea Serviciului, acționează în
+            tuturor utilizatorilor CompliScan care, prin utilizarea Serviciului, acționează în
             calitate de <strong className="text-eos-text">operatori de date</strong> conform
-            GDPR, și implică CompliAI în calitate de{" "}
+            GDPR, și implică CompliScan în calitate de{" "}
             <strong className="text-eos-text">persoană împuternicită de operator (procesator)</strong>.
           </p>
         </div>
@@ -70,10 +70,10 @@ export default function DpaPage() {
                 <ul className="space-y-2">
                   <li>
                     <strong className="text-eos-text">Operator</strong> — organizația utilizatoare
-                    a CompliAI (clientul)
+                    a CompliScan (clientul)
                   </li>
                   <li>
-                    <strong className="text-eos-text">Procesator</strong> — CompliAI SRL
+                    <strong className="text-eos-text">Procesator</strong> — CompliScan SRL
                   </li>
                   <li>
                     <strong className="text-eos-text">Date Personale</strong> — orice date cu
@@ -90,10 +90,10 @@ export default function DpaPage() {
               h: "Obiectul Prelucrării",
               body: (
                 <p>
-                  CompliAI prelucrează datele introduse de Operator exclusiv pentru furnizarea
+                  CompliScan prelucrează datele introduse de Operator exclusiv pentru furnizarea
                   funcționalităților Serviciului: stocare, calcul scor conformitate, generare
                   documente, export rapoarte. Nu există prelucrare în scopuri proprii ale
-                  CompliAI fără consimțământ explicit.
+                  CompliScan fără consimțământ explicit.
                 </p>
               ),
             },
@@ -113,15 +113,15 @@ export default function DpaPage() {
               h: "Instrucțiunile Operatorului",
               body: (
                 <p>
-                  CompliAI prelucrează datele conform instrucțiunilor documentate ale
+                  CompliScan prelucrează datele conform instrucțiunilor documentate ale
                   Operatorului, transmise prin interfața Serviciului. Dacă o instrucțiune
-                  încalcă GDPR, CompliAI va notifica Operatorul înainte de executare.
+                  încalcă GDPR, CompliScan va notifica Operatorul înainte de executare.
                 </p>
               ),
             },
             {
               n: "05",
-              h: "Obligațiile CompliAI (Art. 28(3) GDPR)",
+              h: "Obligațiile CompliScan (Art. 28(3) GDPR)",
               body: (
                 <ul className="space-y-2">
                   <li>
@@ -191,7 +191,7 @@ export default function DpaPage() {
               h: "Notificare Incidente",
               body: (
                 <p>
-                  CompliAI va notifica Operatorul fără întârzieri nejustificate, și în cel mult
+                  CompliScan va notifica Operatorul fără întârzieri nejustificate, și în cel mult
                   72 de ore de la constatare, în cazul unui incident de securitate care
                   afectează datele Operatorului.
                 </p>
@@ -203,7 +203,7 @@ export default function DpaPage() {
               body: (
                 <p>
                   DPA este valabil pe durata contractului de servicii. La terminarea
-                  contractului, CompliAI va șterge sau returna datele în termen de 30 de zile,
+                  contractului, CompliScan va șterge sau returna datele în termen de 30 de zile,
                   conform opțiunii Operatorului.
                 </p>
               ),

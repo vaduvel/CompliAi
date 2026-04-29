@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 
 export const metadata = {
-  title: "Termeni și Condiții — CompliAI",
+  title: "Termeni și Condiții — CompliScan",
 }
 
 export default function TermsPage() {
@@ -56,7 +56,7 @@ export default function TermsPage() {
             Disclamer juridic
           </p>
           <p className="mt-2 text-[13.5px] leading-[1.65] text-eos-text-muted">
-            <strong className="text-eos-text">CompliAI NU oferă consultanță juridică.</strong>{" "}
+            <strong className="text-eos-text">CompliScan NU oferă consultanță juridică.</strong>{" "}
             Conținutul generat reprezintă instrumente de asistență — validează cu un avocat
             sau consultant juridic înainte de utilizare oficială.
           </p>
@@ -66,13 +66,13 @@ export default function TermsPage() {
           {[
             {
               n: "01",
-              h: "Serviciul CompliAI",
+              h: "Serviciul CompliScan",
               body: (
                 <p>
-                  CompliAI (&ldquo;Serviciul&rdquo;) este un instrument digital de asistență în
+                  CompliScan (&ldquo;Serviciul&rdquo;) este un instrument digital de asistență în
                   pregătirea conformității cu reglementările aplicabile în Uniunea Europeană:
                   GDPR, EU AI Act, NIS2 și cerințele e-Factura ANAF. Serviciul este operat de
-                  CompliAI SRL (în curs de constituire) cu sediul în România.
+                  CompliScan SRL (în curs de constituire) cu sediul în România.
                 </p>
               ),
             },
@@ -82,13 +82,13 @@ export default function TermsPage() {
               body: (
                 <>
                   <p>
-                    <strong className="text-eos-text">CompliAI NU oferă consultanță juridică.</strong>{" "}
+                    <strong className="text-eos-text">CompliScan NU oferă consultanță juridică.</strong>{" "}
                     Conținutul generat de Serviciu — documente, rapoarte, scoruri, recomandări — sunt
                     instrumente de asistență, nu avize juridice cu forță legală.
                   </p>
                   <p className="mt-3">
                     Utilizatorii sunt responsabili pentru validarea finală a documentelor
-                    împreună cu un avocat sau consultant calificat. CompliAI nu garantează
+                    împreună cu un avocat sau consultant calificat. CompliScan nu garantează
                     conformitatea deplină.
                   </p>
                 </>
@@ -129,7 +129,7 @@ export default function TermsPage() {
               body: (
                 <p>
                   Codul sursă, design-ul, algoritmii și modelele de date ale Serviciului sunt
-                  proprietatea CompliAI. Documentele generate de utilizator pe baza datelor
+                  proprietatea CompliScan. Documentele generate de utilizator pe baza datelor
                   proprii aparțin utilizatorului.
                 </p>
               ),
@@ -156,7 +156,7 @@ export default function TermsPage() {
               h: "Limitarea Răspunderii",
               body: (
                 <p>
-                  În măsura permisă de legea aplicabilă, CompliAI nu este răspunzătoare pentru:
+                  În măsura permisă de legea aplicabilă, CompliScan nu este răspunzătoare pentru:
                   decizii de afaceri luate pe baza informațiilor din Serviciu; amenzi sau
                   sancțiuni rezultate din conformitate incompletă; pierderi indirecte sau
                   daune consecvente.
@@ -168,7 +168,7 @@ export default function TermsPage() {
               h: "Modificarea Termenilor",
               body: (
                 <p>
-                  CompliAI poate modifica acești Termeni cu notificare de minim 30 de zile prin
+                  CompliScan poate modifica acești Termeni cu notificare de minim 30 de zile prin
                   email sau în aplicație. Continuarea utilizării după notificare constituie
                   acceptul noilor termeni.
                 </p>

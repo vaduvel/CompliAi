@@ -9,6 +9,28 @@
 
 ---
 
+## ✅ Update 29 apr 2026 (DPO browser acceptance fixes)
+
+**Răspuns la raportul live browser Sonnet:** am închis blocker-ele reale care făceau scenariul Diana să pară gol sau inconsistent în UI/API.
+
+- Fix cod:
+  - `/api/demo/dpo-consultant` seed-uiește acum DSAR-ul Lumen în store-ul real DSAR, nu doar ca alertă în urgency queue.
+  - `Portfolio → Rapoarte` are generare raport lunar on-demand prin `/api/partner/reports/monthly`, cu client-facing reports pentru cei 3 clienți.
+  - `Portfolio → Remediere clienți` și `Portfolio → Furnizori` nu mai sunt goale în demo: task-uri DPO fallback din findings reale + furnizori Stripe / PayFlow / OpenAI extrași din documente și sisteme.
+  - Template-urile cabinet DPO sunt prepopulate corect cu DPA, răspuns DSAR și RoPA; seed-ul a fost mutat secvențial ca să nu se suprascrie în storage local.
+  - Evidence Ledger nu mai amestecă task-uri fără fișier cu dovezi reale; `evidenceLedger.length` și `evidenceLedgerSummary.total` sunt acum coerente.
+  - `/privacy`, `/terms`, `/dpa` și process pack DSAR nu mai expun brand vechi `CompliAI`.
+  - Breadcrumb-ul dashboard client folosește numele organizației reale, nu `Firma mea`.
+- Validare:
+  - `npm test` → **244 files passed**, **1265 tests passed**, 1 skipped ✅
+  - `npm run lint` → PASS cu warning-uri istorice ✅
+  - `npm run build` → PASS ✅
+  - Live DPO browser/API smoke pe `localhost:3002` → PASS: DSAR, tasks, vendors, raport lunar, template-uri, legal rebrand și evidence consistency ✅
+
+**Verdict:** raportul Sonnet a fost corect ca semnal. Scenariul DPO consultant este acum mult mai aproape de pilot browser-ready: Diana vede cine arde, are DSAR acționabil, task queue, vendors, raport lunar generabil și ledger coerent.
+
+---
+
 ## ✅ Update 29 apr 2026 (DPO browser preflight)
 
 **Preflight pentru self-pilot "Daniel ca Diana":** server local pornit pe `v3-unified` în mod local/demo, runtime DPO smoke rerulat și verificare browser headless pentru Portofoliu, Apex dashboard și magic link Cobalt.

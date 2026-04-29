@@ -326,7 +326,7 @@ export default function DashboardPage() {
 
       {/* ── V3 hero ─────────────────────────────────────────────────────── */}
       <V3PageHero
-        breadcrumbs={[{ label: "Firma mea" }, { label: "Acasă", current: true }]}
+        breadcrumbs={[{ label: data.workspace?.orgName ?? "Firma mea" }, { label: "Acasă", current: true }]}
         title={data.workspace?.orgName ?? "Tablou de bord"}
         description={
           <>

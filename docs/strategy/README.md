@@ -1,6 +1,6 @@
-# CompliScan — Stack documente strategice (v6.5 — DPO PRODUCTION TRUST HARDENING)
+# CompliScan — Stack documente strategice (v6.6 — DPO BROWSER ACCEPTANCE FIXES)
 
-🚀 **STATUS 28 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`. DPO Cabinet flow are acum **Production Trust Hardening** cu runtime demo **118/118 PASS**: DPA semnabil ca template contractual, subprocessori fără formulări vagi, storage production Supabase Frankfurt, template import `.docx/.md/.txt`, evidence delete hardening, restore window, export complet cabinet/client și rapoarte lunare client-facing. Doar founder-side setup + pilot rămân înainte de deploy production.
+🚀 **STATUS 29 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`, iar testul live browser DPO Consultant a primit fix pack dedicat: DSAR Lumen seed-uit în store real, Portfolio Tasks/Vendors populate, raport lunar on-demand, template-uri cabinet prepopulate, legal pages rebranduite CompliScan și Evidence Ledger coerent cu summary-ul. Doar founder-side setup + pilot rămân înainte de deploy production.
 
 📦 **Pachet DPO Production Trust Hardening**: `/Users/vaduvageorge/Downloads/compliscan-dpo-production-trust-hardening-2026-04-28.zip`
 

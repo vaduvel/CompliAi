@@ -42,7 +42,7 @@ export function generateDsarProcessPack(params: { orgName: string }): DsarProces
   return {
     title: "Pachet minim DSAR",
     summary:
-      "CompliAI pregătește procedura, registrul și playbook-ul minim. Firma trebuie să desemneze responsabilul, să confirme circuitul real și să păstreze urma la dosar.",
+      "CompliScan pregătește procedura, registrul și playbook-ul minim. Firma trebuie să desemneze responsabilul, să confirme circuitul real și să păstreze urma la dosar.",
     assets: [
       {
         id: "dsar-procedure",

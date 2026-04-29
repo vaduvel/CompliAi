@@ -23,6 +23,35 @@ type WhiteLabelConfig = {
   persistenceStatus?: "synced" | "fallback"
 }
 
+type MonthlyPreviewClient = {
+  orgId: string
+  orgName: string
+  score: number
+  riskLabel: string
+  openFindings: number
+  validatedEvidence: number
+  pendingEvidence: number
+  auditReadiness: "audit_ready" | "review_required"
+  workDone: string[]
+  nextActions: string[]
+}
+
+type MonthlyPreviewPayload = {
+  preview: true
+  generated: number
+  reports: Array<{
+    consultantEmail: string
+    month: string
+    clientEntries: MonthlyPreviewClient[]
+    clientFacingReports: Array<{
+      orgId: string
+      orgName: string
+      html: string
+      summary: MonthlyPreviewClient
+    }>
+  }>
+}
+
 function WhiteLabelSection() {
   const [config, setConfig] = useState<WhiteLabelConfig>({
     partnerName: "",
@@ -452,6 +481,8 @@ export function PortfolioReportsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [exportingCabinet, setExportingCabinet] = useState(false)
+  const [generatingMonthly, setGeneratingMonthly] = useState(false)
+  const [monthlyPreview, setMonthlyPreview] = useState<MonthlyPreviewPayload | null>(null)
 
   useEffect(() => {
     void (async () => {
@@ -508,6 +539,27 @@ export function PortfolioReportsPage() {
     }
   }
 
+  async function handleGenerateMonthlyReport() {
+    setGeneratingMonthly(true)
+    try {
+      const response = await fetch("/api/partner/reports/monthly", {
+        method: "POST",
+        cache: "no-store",
+      })
+      const data = (await response.json().catch(() => null)) as MonthlyPreviewPayload & { error?: string } | null
+      if (!response.ok || !data?.preview) {
+        toast.error(data?.error ?? "Raportul lunar nu a putut fi generat.")
+        return
+      }
+      setMonthlyPreview(data)
+      toast.success("Raport lunar generat pentru portofoliu.")
+    } catch {
+      toast.error("Eroare de rețea la generarea raportului lunar.")
+    } finally {
+      setGeneratingMonthly(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <V3PageHero
@@ -520,6 +572,18 @@ export function PortfolioReportsPage() {
             <V3FrameworkTag label="livrabile" count={generatedTotal} tone={generatedTotal > 0 ? "info" : "neutral"} />
             {openAlertsTotal > 0 ? <V3RiskPill tone="high">{openAlertsTotal} alerte</V3RiskPill> : null}
           </div>
+        }
+        actions={
+          <Button
+            type="button"
+            size="sm"
+            disabled={generatingMonthly}
+            onClick={() => void handleGenerateMonthlyReport()}
+            className="gap-1.5"
+          >
+            {generatingMonthly ? <Loader2 className="size-4 animate-spin" /> : <FileSearch className="size-4" />}
+            Generează raport lunar
+          </Button>
         }
       />
 
@@ -593,6 +657,49 @@ export function PortfolioReportsPage() {
           </Button>
         </div>
       </V3Panel>
+
+      {monthlyPreview?.reports?.[0] ? (
+        <V3Panel padding="default">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Raport lunar on-demand
+              </p>
+              <h2 data-display-text="true" className="mt-1 font-display text-[17px] font-semibold tracking-[-0.015em] text-eos-text">
+                {monthlyPreview.reports[0].month} · {monthlyPreview.reports[0].clientEntries.length} clienți
+              </h2>
+              <p className="mt-1 text-[13px] text-eos-text-muted">
+                Preview client-facing generat din activitatea reală: documente, aprobări, respingeri, dovezi și next steps.
+              </p>
+            </div>
+            <V3FrameworkTag label="preview" count={monthlyPreview.generated} tone="info" />
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {monthlyPreview.reports[0].clientEntries.map((client) => (
+              <article key={client.orgId} className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{client.orgName}</p>
+                    <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
+                      Scor {client.score}% · {client.openFindings} findings deschise
+                    </p>
+                  </div>
+                  <V3RiskPill tone={client.auditReadiness === "audit_ready" ? "ok" : "medium"}>
+                    {client.auditReadiness === "audit_ready" ? "audit ready" : "review"}
+                  </V3RiskPill>
+                </div>
+                <div className="mt-3 space-y-2 text-[12px] leading-5 text-eos-text-muted">
+                  <p><strong className="text-eos-text">Lucrat:</strong> {client.workDone[0] ?? "Fără activitate nouă în perioada selectată."}</p>
+                  <p><strong className="text-eos-text">Următor:</strong> {client.nextActions[0] ?? "Monitorizare lunară."}</p>
+                  <p className="font-mono text-[11px]">
+                    Dovezi validate: {client.validatedEvidence} · pendinte: {client.pendingEvidence}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </V3Panel>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {reports.length === 0 ? (

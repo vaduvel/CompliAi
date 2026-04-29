@@ -64,6 +64,10 @@ async function writeDsarState(orgId: string, state: DsarOrgState): Promise<DsarO
   return updated
 }
 
+export async function seedDsarState(orgId: string, state: DsarOrgState): Promise<DsarOrgState> {
+  return writeDsarState(orgId, state)
+}
+
 // ── CRUD ──────────────────────────────────────────────────────────────────────
 
 function uid() {

@@ -1,9 +1,32 @@
-# 07 — CompliScan: Execution Roadmap tehnic (v6.5 — 28 apr 2026, DPO production trust hardening)
+# 07 — CompliScan: Execution Roadmap tehnic (v6.6 — 29 apr 2026, DPO browser acceptance fixes)
 
 **Status**: 🛠️ EXECUTION — traseul tehnic concret de la Sprint 0 până la production launch.
 **Complementar Doc 06** (Decision Lock strategic). **Doc 06** = ce facem strategic. **Doc 07** = cum facem tehnic, pas cu pas, cu file paths.
 
 **Audiență**: founder coding zilnic + AI agent care implementează + hire #1 dev.
+
+**Versiune v6.6 — DPO browser acceptance fixes (29 apr 2026, 15:00 EEST)**:
+
+✅ **DPO Consultant browser scenario a fost reparat după raportul Sonnet.** Nu am pivotat produsul; am închis golurile de runtime care apăreau când Diana naviga efectiv aplicația: DSAR gol, raport lunar lipsă, task/vendor pages goale, brand vechi pe pagini legale și Evidence Ledger inconsistent.
+
+Validare cod:
+- Build: `npm run build` ✅
+- Tests: `npm test` → **244 files passed**, **1265 tests passed**, 1 skipped ✅
+- Lint: `npm run lint` ✅ (doar warning-uri vechi)
+- Live browser/API acceptance smoke: `node /private/tmp/dpo-browser-acceptance-smoke.mjs` pe `localhost:3002` → PASS ✅
+
+Acoperire nouă verificată end-to-end:
+- Lumen DSAR alert are corespondent acționabil în `/api/dsar`.
+- `/portfolio/tasks` returnează queue DPO cross-client cu DSAR prioritar.
+- `/portfolio/vendors` returnează furnizori derivați din documente/findings/sisteme când nu există review NIS2 formal.
+- `/portfolio/reports` poate genera raport lunar on-demand prin `/api/partner/reports/monthly`.
+- Template-uri cabinet DPO: DPA, răspuns DSAR și RoPA prepopulate în demo.
+- Evidence Ledger dashboard: array-ul și summary-ul au același total.
+- `/privacy`, `/terms`, `/dpa` și process pack DSAR nu mai expun `CompliAI`.
+
+Verdict: **DPO demo este browser-acceptance ready pentru self-test Daniel ca Diana.** Pilotul real rămâne controlat, cu Supabase production și date pseudonimizate/low-risk.
+
+---
 
 **Versiune v6.5 — DPO Production Trust Hardening (28 apr 2026, 21:10 EEST)**:
 

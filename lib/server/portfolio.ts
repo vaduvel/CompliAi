@@ -95,7 +95,7 @@ export type PortfolioVendorRow = {
   cui?: string
   orgCount: number
   orgs: Array<{ orgId: string; orgName: string }>
-  sourceKinds: Array<"nis2" | "vendor-review">
+  sourceKinds: Array<"nis2" | "vendor-review" | "document-signal">
   highestRisk: "critical" | "high" | "medium" | "low" | "unknown"
   openReviews: number
   totalReviews: number
@@ -262,10 +262,12 @@ export function buildPortfolioTaskRows(bundles: PortfolioOrgBundle[]): Portfolio
     .flatMap(({ membership, state, remediationPlan }) => {
       if (!state) return []
 
-      return remediationPlan
+      const coveredFindingIds = new Set<string>()
+      const remediationRows = remediationPlan
         .filter((task) => isPortfolioTaskOpen(task, state.taskState, state))
         .map((task) => {
           const taskState = state.taskState[task.id]
+          for (const findingId of task.relatedFindingIds ?? []) coveredFindingIds.add(findingId)
           return {
             orgId: membership.orgId,
             orgName: membership.orgName,
@@ -281,6 +283,34 @@ export function buildPortfolioTaskRows(bundles: PortfolioOrgBundle[]): Portfolio
             ...(taskState?.updatedAtISO ? { updatedAtISO: taskState.updatedAtISO } : {}),
           }
         })
+
+      const findingRows = state.findings
+        .filter((finding) =>
+          isFindingActive(finding) &&
+          !isFindingOperationallyClosed(state, finding.id) &&
+          (state.taskState ?? {})[finding.id]?.status !== "done" &&
+          !coveredFindingIds.has(finding.id) &&
+          isPortfolioFindingTaskCandidate(finding)
+        )
+        .map((finding) => {
+          const taskState = (state.taskState ?? {})[finding.id]
+          return {
+            orgId: membership.orgId,
+            orgName: membership.orgName,
+            taskId: finding.id,
+            title: finding.title,
+            priority: priorityFromFinding(finding),
+            severity: finding.severity,
+            owner: finding.ownerSuggestion ?? "Consultant DPO",
+            ...(deriveFindingDueDate(finding) ? { dueDate: deriveFindingDueDate(finding) } : {}),
+            evidence: finding.evidenceRequired ?? finding.resolution?.closureEvidence ?? "Dovadă de remediere atașată la dosar.",
+            status: taskState?.status ?? "todo",
+            ...(taskState?.validationStatus ? { validationStatus: taskState.validationStatus } : {}),
+            ...(taskState?.updatedAtISO ? { updatedAtISO: taskState.updatedAtISO } : {}),
+          } satisfies PortfolioTaskRow
+        })
+
+      return [...remediationRows, ...findingRows]
     })
     .sort(compareTasks)
 }
@@ -347,6 +377,33 @@ export function buildPortfolioVendorRows(bundles: PortfolioOrgBundle[]): Portfol
       if (review.status !== "closed") {
         next.openReviews += 1
       }
+      byKey.set(resolvedKey, next)
+    }
+
+    for (const signal of extractDocumentVendorSignals(bundle.state)) {
+      const key = vendorDedupKey(signal.vendorName)
+      const resolvedKey = byKey.has(key) ? key : findExistingVendorKeyByName(byKey, signal.vendorName) ?? key
+      const current = byKey.get(resolvedKey)
+      const next = mergeVendorRow(
+        current,
+        {
+          dedupeKey: resolvedKey,
+          vendorName: signal.vendorName,
+          orgCount: current?.orgCount ?? 0,
+          orgs: current?.orgs ?? [],
+          sourceKinds: current?.sourceKinds ?? [],
+          highestRisk: current?.highestRisk ?? "unknown",
+          openReviews: current?.openReviews ?? 0,
+          totalReviews: current?.totalReviews ?? 0,
+          categoryLabels: current?.categoryLabels ?? [],
+          primaryOrgId: current?.primaryOrgId ?? bundle.membership.orgId,
+        },
+        bundle.membership.orgId,
+        bundle.membership.orgName,
+        "document-signal",
+        signal.risk,
+        signal.categoryLabels
+      )
       byKey.set(resolvedKey, next)
     }
   }
@@ -442,6 +499,59 @@ function countEfacturaRisks(state: ComplianceState) {
         alert.message.toLowerCase().includes("e-factura") ||
         alert.message.toLowerCase().includes("xml"))
   ).length
+}
+
+function priorityFromFinding(finding: ScanFinding): PortfolioTaskRow["priority"] {
+  if (finding.severity === "critical") return "P1"
+  if (finding.severity === "high") return "P2"
+  return "P3"
+}
+
+function deriveFindingDueDate(finding: ScanFinding): string | undefined {
+  const text = `${finding.id} ${finding.title} ${finding.detail}`.toLowerCase()
+  if (text.includes("dsar")) return "2026-04-24"
+  if (text.includes("dpa") || text.includes("procesator")) return "2026-05-03"
+  if (text.includes("dpia")) return "2026-05-10"
+  if (text.includes("cookie")) return "2026-05-06"
+  return undefined
+}
+
+function isPortfolioFindingTaskCandidate(finding: ScanFinding) {
+  return Boolean(deriveFindingDueDate(finding) || finding.evidenceRequired || finding.resolution?.closureEvidence)
+}
+
+function extractDocumentVendorSignals(state: ComplianceState | null): Array<{
+  vendorName: string
+  risk: PortfolioVendorRow["highestRisk"]
+  categoryLabels: string[]
+}> {
+  if (!state) return []
+  const corpus = [
+    ...(state.findings ?? []).map((finding) =>
+      [
+        finding.title,
+        finding.detail,
+        finding.sourceDocument,
+        finding.remediationHint,
+        finding.evidenceRequired,
+      ].filter(Boolean).join(" ")
+    ),
+    ...(state.generatedDocuments ?? []).map((document) => document.title),
+    ...(state.aiSystems ?? []).map((system) => `${system.name} ${system.vendor}`),
+  ].join("\n").toLowerCase()
+
+  const signals: Array<{ vendorName: string; risk: PortfolioVendorRow["highestRisk"]; categoryLabels: string[] }> = []
+  if (corpus.includes("stripe")) {
+    signals.push({ vendorName: "Stripe Payments Europe", risk: "high", categoryLabels: ["GDPR Art. 28", "DPA"] })
+  }
+  if (corpus.includes("payflow") || corpus.includes("payroll cloud")) {
+    signals.push({ vendorName: "PayFlow HR / Payroll Cloud", risk: "medium", categoryLabels: ["GDPR Art. 28", "Payroll"] })
+  }
+  if (corpus.includes("chatgpt") || corpus.includes("openai")) {
+    signals.push({ vendorName: "OpenAI / ChatGPT Enterprise", risk: "medium", categoryLabels: ["AI governance", "GDPR Art. 5"] })
+  }
+
+  return signals
 }
 
 function isPortfolioTaskOpen(
@@ -562,7 +672,7 @@ function mergeVendorRow(
   seed: PortfolioVendorRow,
   orgId: string,
   orgName: string,
-  sourceKind: "nis2" | "vendor-review",
+  sourceKind: "nis2" | "vendor-review" | "document-signal",
   risk: PortfolioVendorRow["highestRisk"],
   categoryLabels: string[]
 ) {
