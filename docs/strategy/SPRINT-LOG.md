@@ -9,6 +9,28 @@
 
 ---
 
+## ✅ Update 29 apr 2026 (DPO browser preflight)
+
+**Preflight pentru self-pilot "Daniel ca Diana":** server local pornit pe `v3-unified` în mod local/demo, runtime DPO smoke rerulat și verificare browser headless pentru Portofoliu, Apex dashboard și magic link Cobalt.
+
+- Runtime smoke: `scripts/smoke-dpo-consultant-runtime-demo.mjs` → **118/118 PASS** ✅
+- Browser check:
+  - Portofoliu DPO Complet se încarcă cu Apex, Lumen și Cobalt ✅
+  - Apex dashboard se deschide în context client + cabinet ✅
+  - Shared magic link Cobalt este brand-uit DPO Complet și include approve/reject/comment ✅
+  - Zero `CompliAI` vizibil pe suprafețele testate ✅
+  - Zero console errors după fixul de nesting interactiv ✅
+- Fix cod:
+  - `components/compliscan/v3/finding-row.tsx` — rândurile cu acțiuni trailing nu mai randau `button` în `button`, eliminând hydration warning-ul din Portofoliu.
+  - `components/compliscan/legal-disclaimer.tsx` — disclaimer public actualizat de la CompliAI la CompliScan.
+- Validare:
+  - `npm run lint` → PASS cu warning-uri istorice ✅
+  - `npm run build` → PASS ✅
+
+**Verdict:** aplicația este gata pentru test manual local ca "Diana" pe scenariul DPO, fără blocker cunoscut în browser preflight.
+
+---
+
 ## ✅ Update 29 apr 2026 (DPO Pilot Trust Pack v1)
 
 **Pack creat pentru pilot DPO Complet:** separă documentele de încredere din `security-contractual-pack.md` în fișiere scurte, trimisibile, cu status clar `pilot-ready draft`.

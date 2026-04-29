@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import type { KeyboardEvent } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 
@@ -83,6 +84,28 @@ export function V3FindingRow({
       <Link href={href} onClick={onClick} className="block">
         {body}
       </Link>
+    )
+  }
+  if (trailing && onClick) {
+    const handleClick = onClick
+
+    function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        handleClick()
+      }
+    }
+
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className="block w-full cursor-pointer text-left"
+      >
+        {body}
+      </div>
     )
   }
   return (
