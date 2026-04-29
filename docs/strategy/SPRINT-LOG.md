@@ -9,6 +9,27 @@
 
 ---
 
+## ✅ Update 29 apr 2026 (DPO migration/import audit)
+
+**Clarificare dupa drift-ul spre full-framework testing:** am separat strict ce tine de Diana DPO consultant de ce tine de CISO/NIS2, fiscal, HR, DORA sau viitorul compliance officer intern.
+
+- Doc nou:
+  - `docs/strategy/pilot/dpo-client-migration-import-audit-2026-04-29.md`
+  - Verdict: Diana poate importa portofoliul de firme, template-urile si dovezile critice pentru clienti pilot; nu poate inca importa tot istoricul cabinetului ca date structurate.
+  - Promisiune pilot corecta: import portofoliu + 1-2 clienti pilot + template-uri + dovezi + raport lunar + audit pack, nu migrare tot cabinetul din prima zi.
+- Doc parking:
+  - `docs/strategy/non-dpo-framework-findings-backlog-2026-04-29.md`
+  - Findings Sonnet pe NIS2/DORA/fiscal/HR/AI/whistleblowing sunt parcate pentru ICP-uri viitoare, nu blocheaza DPO pilot daca nu ating workflow-ul GDPR/DPO.
+- Fix cod mic, direct legat de migrare:
+  - `app/api/cabinet/templates/route.ts` accepta acum `dsar-response` ca tip valid de template cabinet.
+  - `lib/server/cabinet-templates-store.ts` detecteaza variabile mix-case/diacritice in template-uri (`{{orgName}}`, `{{nume_solicitant}}`, `{{responsabil_DPO}}`), nu doar uppercase.
+- Validare:
+  - `./node_modules/.bin/vitest run lib/server/cabinet-templates-store.test.ts` → PASS: 3/3 teste ✅
+
+**Verdict operational:** urmatorul test manual trebuie sa fie "Diana importa firma noua si ruleaza workflow DPO cap-coada", nu "hai sa apasam toate modulele ascunse".
+
+---
+
 ## ✅ Update 29 apr 2026 (DPO deep acceptance P0/P1 fix)
 
 **Răspuns la raportul “DPO Consultant Deep Acceptance”:** am închis blocajele care încă opreau pilotul controlat: pagina publică de magic link, urgent DSAR count, monthly report activities, email branding și issuer în Audit Pack.

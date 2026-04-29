@@ -68,7 +68,7 @@ function templatesFile(orgId: string): string {
 
 function detectVariables(content: string): string[] {
   const found = new Set<string>()
-  const regex = /\{\{\s*([A-Z][A-Z0-9_]*)\s*\}\}/g
+  const regex = /\{\{\s*([A-Za-zÀ-ž_][A-Za-zÀ-ž0-9_]*)\s*\}\}/g
   let match: RegExpExecArray | null
   while ((match = regex.exec(content)) !== null) {
     found.add(match[1])

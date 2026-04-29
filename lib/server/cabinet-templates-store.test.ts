@@ -66,4 +66,28 @@ describe("cabinet-templates-store", () => {
     expect(all[0]?.status).toBe("archived")
     await cleanup(orgId)
   })
+
+  it("detecteaza variabile cabinet cu litere mici si diacritice", async () => {
+    const orgId = `test-template-org-c-${Date.now()}`
+    await cleanup(orgId)
+    const result = await saveCabinetTemplate(orgId, {
+      documentType: "dsar-response",
+      name: "Răspuns DSAR cabinet",
+      active: true,
+      content:
+        "# Răspuns DSAR — {{orgName}}\n\n" +
+        "Solicitant: {{nume_solicitant}}\n\n" +
+        "DPO: {{responsabil_DPO}}\n\n" +
+        "Acest template este importat din arhiva cabinetului.",
+    })
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.template.detectedVariables).toEqual([
+      "nume_solicitant",
+      "orgName",
+      "responsabil_DPO",
+    ])
+    await cleanup(orgId)
+  })
 })

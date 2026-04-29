@@ -27,6 +27,7 @@ const VALID_TYPES = new Set<DocumentType>([
   "nda",
   "supplier-contract",
   "deletion-attestation",
+  "dsar-response",
   "pay-gap-report",
   "ropa",
 ])
